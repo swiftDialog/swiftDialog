@@ -13,6 +13,11 @@
 		4154C2E525F76BDC00A3D373 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4154C2E425F76BDC00A3D373 /* Preview Assets.xcassets */; };
 		4154C2F125F76BDC00A3D373 /* dialogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154C2F025F76BDC00A3D373 /* dialogTests.swift */; };
 		4154C2FC25F76BDC00A3D373 /* dialogUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154C2FB25F76BDC00A3D373 /* dialogUITests.swift */; };
+		41D81E5725F7929800D1F7E1 /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E5625F7929800D1F7E1 /* MessageView.swift */; };
+		41D81E5C25F817BF00D1F7E1 /* ButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E5B25F817BF00D1F7E1 /* ButtonView.swift */; };
+		41D81E6C25F8209F00D1F7E1 /* Options.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E6B25F8209F00D1F7E1 /* Options.swift */; };
+		41D81E7125F845D200D1F7E1 /* appVaribles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E7025F845D200D1F7E1 /* appVaribles.swift */; };
+		41D81E7925F870A500D1F7E1 /* Processing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E7825F870A500D1F7E1 /* Processing.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +51,11 @@
 		4154C2F725F76BDC00A3D373 /* dialogUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = dialogUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4154C2FB25F76BDC00A3D373 /* dialogUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dialogUITests.swift; sourceTree = "<group>"; };
 		4154C2FD25F76BDC00A3D373 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		41D81E5625F7929800D1F7E1 /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
+		41D81E5B25F817BF00D1F7E1 /* ButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonView.swift; sourceTree = "<group>"; };
+		41D81E6B25F8209F00D1F7E1 /* Options.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Options.swift; sourceTree = "<group>"; };
+		41D81E7025F845D200D1F7E1 /* appVaribles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = appVaribles.swift; sourceTree = "<group>"; };
+		41D81E7825F870A500D1F7E1 /* Processing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Processing.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,8 +106,12 @@
 		4154C2DC25F76BDB00A3D373 /* dialog */ = {
 			isa = PBXGroup;
 			children = (
+				4154C30C25F782E900A3D373 /* extras */,
 				4154C2DD25F76BDB00A3D373 /* dialogApp.swift */,
+				41D81E7025F845D200D1F7E1 /* appVaribles.swift */,
 				4154C2DF25F76BDB00A3D373 /* ContentView.swift */,
+				41D81E5625F7929800D1F7E1 /* MessageView.swift */,
+				41D81E5B25F817BF00D1F7E1 /* ButtonView.swift */,
 				4154C2E125F76BDC00A3D373 /* Assets.xcassets */,
 				4154C2E625F76BDC00A3D373 /* Info.plist */,
 				4154C2E725F76BDC00A3D373 /* dialog.entitlements */,
@@ -130,6 +144,15 @@
 				4154C2FD25F76BDC00A3D373 /* Info.plist */,
 			);
 			path = dialogUITests;
+			sourceTree = "<group>";
+		};
+		4154C30C25F782E900A3D373 /* extras */ = {
+			isa = PBXGroup;
+			children = (
+				41D81E6B25F8209F00D1F7E1 /* Options.swift */,
+				41D81E7825F870A500D1F7E1 /* Processing.swift */,
+			);
+			path = extras;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -261,8 +284,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				41D81E5725F7929800D1F7E1 /* MessageView.swift in Sources */,
 				4154C2E025F76BDB00A3D373 /* ContentView.swift in Sources */,
+				41D81E5C25F817BF00D1F7E1 /* ButtonView.swift in Sources */,
 				4154C2DE25F76BDB00A3D373 /* dialogApp.swift in Sources */,
+				41D81E6C25F8209F00D1F7E1 /* Options.swift in Sources */,
+				41D81E7125F845D200D1F7E1 /* appVaribles.swift in Sources */,
+				41D81E7925F870A500D1F7E1 /* Processing.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -349,7 +377,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 11.1;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -404,7 +432,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 11.1;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -419,9 +447,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = dialog/dialog.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"dialog/Preview Content\"";
+				DEVELOPMENT_TEAM = N8GJ2Y5Z9T;
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = dialog/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -441,9 +472,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = dialog/dialog.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"dialog/Preview Content\"";
+				DEVELOPMENT_TEAM = N8GJ2Y5Z9T;
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = dialog/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
