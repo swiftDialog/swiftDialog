@@ -1,6 +1,13 @@
-# Dialog
-app that displays dialogs
 
+# Dialog
+![Dialog Logo](/assets/dialog.png)
+
+Dialog is a simple app that displays a dialog with specified content passed in from the commandline
+
+![Dialog Logo](/assets/screen1.png)
+
+
+# Commandline Options
 it accepts the following options:
 Option                |Description
 ----------------------|-----------
@@ -16,4 +23,5 @@ Option                |Description
 --hideicon          |hides the dialog icon and expands the text to fill the fill width
 --version           |Prints the current version
 --help              |Prints help text (also printed if no options are present
---demo              |Run Dialog with default options
+--demo              |Run Dialog with default options (not very intersting though)
+
