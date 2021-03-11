@@ -35,7 +35,7 @@ struct ContentView: View {
         
         // Buttons
         HStack(alignment: .bottom) {
-            if CLOptionPresent(OptionName: AppConstants.buttonInfoTextOption) {
+            if (CLOptionPresent(OptionName: AppConstants.buttonInfoTextOption) || CLOptionPresent(OptionName: AppConstants.infoButtonOption)) {
                 MoreInfoButton()
                     .offset(x: 20)
             }
@@ -84,8 +84,7 @@ struct HostingWindowFinder: NSViewRepresentable {
             exit(0)
         }
         if CLOptionPresent(OptionName: AppConstants.buyCoffee) {
-            print("Thank you for your support. You didn't have to but you did :)")
-            openSpecifiedURL(urlToOpen: "https://www.buymeacoffee.com/bartreardon")
+            print("If you like this app and want to buy me a coffee https://www.buymeacoffee.com/bartreardon")
             exit(418)
         }
         

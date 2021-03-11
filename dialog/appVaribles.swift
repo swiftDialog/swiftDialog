@@ -11,34 +11,41 @@ var iconVisible: Bool = true
 
 var helpText = """
     Dialog version \(getVersionString()) ©2021 Bart Reardon
-    --title             Set the Dialog title - Over 40 characters gets truncated
+    --title             Set the Dialog title
+                        Text over 40 characters gets truncated
+                        Default Title is "\(AppVariables.titleDefault)"
     
     --message           Set the dialog message
+                        Message length is up to approximately 80 words
     
     --icon              Set the icon to display
-                        pass in file path to png or jpg         [/file/path/image.png]
-                        optionally pass in URL of file resource [https://someurl/file.png]
+                        pass in file path to png or jpg           -  "/file/path/image.[png|jpg]"
+                        optionally pass in URL of file resource   -  "https://someurl/file.[png.jpg]"
                         if not specified, default icon will be used
+                        Images from either file or URL are displayed as roundrect if no transparancy
     
     --hideicon          hides the icon from view
-                        Doing so increases the space available for message text
+                        Doing so increases the space available for message text to approximately 100 words
 
     --button1text       Set the label for Button1
-                        Default is "OK"
+                        Default label is "\(AppVariables.button1Default)"
                         Bound to <Enter> key
-                        Return code when actioned is 0
 
     --button1action     Set the action to take.
                         Accepts URL
                         Default action if not specified is no action
+                        Return code when actioned is 0
 
+    --button2           Displays button2 with default label of "\(AppVariables.button2Default)"
+        OR
     --button2text       Set the label for Button1
-                        Default is "Cancel"
                         Bound to <ESC> key
-                        Return code when actioned is 2
 
-    --button2action     -- Not Implemented at this time --
+    --button2action     Return code when actioned is 2
+                        -- Setting Custon Actions For Button 2 Is Not Implemented at this time --
 
+    --infobutton        Displays button2 with default label of "\(AppVariables.buttonInfoDefault)"
+        OR
     --infobuttontext    Set the label for Information Button
                         If not specified, Info button will not be displayed
                         Return code when actioned is 3
@@ -50,8 +57,8 @@ var helpText = """
     --version           Prints the app version
     --help              Prints this text
 
-    --buycoffee         Optionally buy the author a coffee if you would like to
     --showlicense       Display the Software License Agreement for Dialog
+    --coffee
     """
 
 struct AppVariables {
@@ -100,10 +107,12 @@ struct AppConstants {
     //static let messageTextAllignment = String("--textallignment")
     
     // command line options that take no additional parameters
+    static let button2Option = String("--button2")
+    static let infoButtonOption = String("--infobutton")
     static let getVersion = String("--version")
     static let hideIcon = String("--hideicon")
     static let helpOption = String("--help")
     static let demoOption = String("--demo")
-    static let buyCoffee = String("--buycoffee")
+    static let buyCoffee = String("--coffee")
     static let showLicense = String("--showlicense")
 }

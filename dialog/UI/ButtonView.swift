@@ -21,15 +21,22 @@ struct ButtonView: View {
     
     var body: some View {
         //secondary button
-        let button2Text: String = CLOptionText(OptionName: AppConstants.button2TextOption, DefaultValue: AppVariables.button2Default)
         HStack {
-            Button(action: {exit(2)}, label: {
-                Text(button2Text)
-                }
-            ).frame(minWidth: 36, alignment: .center)
-            .keyboardShortcut(.cancelAction)
+            if CLOptionPresent(OptionName: AppConstants.button2Option){
+                Button(action: {exit(2)}, label: {
+                    Text(AppVariables.button2Default)
+                    }
+                ).frame(minWidth: 36, alignment: .center)
+                .keyboardShortcut(.cancelAction)
+            } else if CLOptionPresent(OptionName: AppConstants.button2TextOption) {
+                let button2Text: String = CLOptionText(OptionName: AppConstants.button2TextOption, DefaultValue: AppVariables.button2Default)
+                Button(action: {exit(2)}, label: {
+                    Text(button2Text)
+                    }
+                ).frame(minWidth: 36, alignment: .center)
+                .keyboardShortcut(.cancelAction)
+            }
         }
-        
         // default button aka button 1
         let button1Text: String = CLOptionText(OptionName: AppConstants.button1TextOption, DefaultValue: AppVariables.button1Default)
         HStack {
@@ -43,16 +50,23 @@ struct ButtonView: View {
 }
 
 struct MoreInfoButton: View {
-    let buttonInfoText: String = CLOptionText(OptionName: AppConstants.buttonInfoTextOption, DefaultValue: AppVariables.buttonInfoDefault)
     let buttonInfoAction: String = CLOptionText(OptionName: AppConstants.buttonInfoActionOption, DefaultValue: AppVariables.buttonInfoActionDefault)
     
     var body: some View {
         VStack(alignment: .center) {
             Spacer()
-            Button(action: {openSpecifiedURL(urlToOpen: buttonInfoAction);exit(3)}, label: {
-                Text(buttonInfoText)
-                }
-            ).frame(minWidth: 36, alignment: .center)
+            if CLOptionPresent(OptionName: AppConstants.infoButtonOption) {
+                Button(action: {openSpecifiedURL(urlToOpen: buttonInfoAction);exit(3)}, label: {
+                    Text(AppVariables.buttonInfoDefault)
+                    }
+                ).frame(minWidth: 36, alignment: .center)
+            } else if CLOptionPresent(OptionName: AppConstants.buttonInfoTextOption) {
+                let buttonInfoText: String = CLOptionText(OptionName: AppConstants.buttonInfoTextOption, DefaultValue: AppVariables.buttonInfoDefault)
+                Button(action: {openSpecifiedURL(urlToOpen: buttonInfoAction);exit(3)}, label: {
+                    Text(buttonInfoText)
+                    }
+                ).frame(minWidth: 36, alignment: .center)
+            }
         }
     }
     
