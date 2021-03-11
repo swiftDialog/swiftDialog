@@ -92,16 +92,23 @@ struct MessageContent: View {
 
 struct LogoView: View {
     let messageUserImagePath: String = CLOptionText(OptionName: AppConstants.iconOption, DefaultValue: "")
+    var imgFromURL: Bool = false
     
     init() {
-    //    print("messageUserImagePath is \(messageUserImagePath)")
+        if messageUserImagePath.starts(with: "http") {
+            imgFromURL = true
+        }
     }
     
     var body: some View {
-        
-
         VStack {
-            if FileManager.default.fileExists(atPath: messageUserImagePath) {
+            if imgFromURL {
+                Image(nsImage: Utils().getImageFromHTTPURL(fileURLString: messageUserImagePath))
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
+                    .frame(width: AppVariables.imageWidth, height: AppVariables.imageHeight)
+            } else if FileManager.default.fileExists(atPath: messageUserImagePath) {
                 Image(nsImage: Utils().createImageData(fileImagePath: messageUserImagePath))
                     .resizable()
                     .aspectRatio(contentMode: .fit)

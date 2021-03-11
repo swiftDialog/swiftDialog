@@ -14,10 +14,29 @@ struct Utils {
 
     public func createImageData(fileImagePath: String) -> NSImage {
         let urlPath = NSURL(fileURLWithPath: fileImagePath)
-        let imageData:NSData = NSData(contentsOf: urlPath as URL)!
+        var imageData = NSData()
+        do {
+            imageData = try NSData(contentsOf: urlPath as URL)
+        } catch {
+            let filePath = Bundle.main.url(forResource: "broken", withExtension: "jpg")
+            imageData = NSData(contentsOfFile: filePath!.path)!
+        }
         return NSImage(data: imageData as Data)!
     }
     
+    public func getImageFromHTTPURL(fileURLString: String) -> NSImage {
+        let fileURL = URL(string: fileURLString)
+        var imageData = NSData()
+        
+        do {
+            imageData = try NSData(contentsOf: fileURL! as URL)
+        } catch {
+            //let image = Image(systemName: "message.circle.fill")
+            let filePath = Bundle.main.url(forResource: "broken", withExtension: "jpg")
+            imageData = NSData(contentsOfFile: filePath!.path)!
+        }
+        return NSImage(data: imageData as Data)!
+    }
 }
 
 func openSpecifiedURL(urlToOpen: String) {
@@ -37,3 +56,5 @@ func getVersionString() -> String {
     }
     return appVersion
 }
+
+

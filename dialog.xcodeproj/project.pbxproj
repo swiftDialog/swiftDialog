@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		410E877F25FA038400654CA0 /* broken.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 410E877E25FA038400654CA0 /* broken.jpg */; };
 		41110A2825F9E79E008171D2 /* License.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41110A2725F9E79E008171D2 /* License.swift */; };
 		4154C2DE25F76BDB00A3D373 /* dialogApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154C2DD25F76BDB00A3D373 /* dialogApp.swift */; };
 		4154C2E025F76BDB00A3D373 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154C2DF25F76BDB00A3D373 /* ContentView.swift */; };
@@ -39,6 +40,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		410E877E25FA038400654CA0 /* broken.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = broken.jpg; sourceTree = "<group>"; };
 		41110A2725F9E79E008171D2 /* License.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = License.swift; sourceTree = "<group>"; };
 		4154C2DA25F76BDB00A3D373 /* dialog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = dialog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4154C2DD25F76BDB00A3D373 /* dialogApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dialogApp.swift; sourceTree = "<group>"; };
@@ -85,6 +87,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		410E877D25FA037700654CA0 /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				410E877E25FA038400654CA0 /* broken.jpg */,
+			);
+			path = Images;
+			sourceTree = "<group>";
+		};
 		4154C2D125F76BDB00A3D373 = {
 			isa = PBXGroup;
 			children = (
@@ -108,6 +118,7 @@
 		4154C2DC25F76BDB00A3D373 /* dialog */ = {
 			isa = PBXGroup;
 			children = (
+				410E877D25FA037700654CA0 /* Images */,
 				41C8259825F99AF90042DC50 /* UI */,
 				4154C30C25F782E900A3D373 /* extras */,
 				4154C2DD25F76BDB00A3D373 /* dialogApp.swift */,
@@ -272,6 +283,7 @@
 			files = (
 				4154C2E525F76BDC00A3D373 /* Preview Assets.xcassets in Resources */,
 				4154C2E225F76BDC00A3D373 /* Assets.xcassets in Resources */,
+				410E877F25FA038400654CA0 /* broken.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -494,7 +506,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 0.2.2;
+				MARKETING_VERSION = 0.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -521,7 +533,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 0.2.2;
+				MARKETING_VERSION = 0.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;

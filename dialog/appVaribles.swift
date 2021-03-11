@@ -16,7 +16,8 @@ var helpText = """
     --message           Set the dialog message
     
     --icon              Set the icon to display
-                        pass in path to png or jpg
+                        pass in file path to png or jpg         [/file/path/image.png]
+                        optionally pass in URL of file resource [https://someurl/file.png]
                         if not specified, default icon will be used
     
     --hideicon          hides the icon from view
