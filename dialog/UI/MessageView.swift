@@ -126,7 +126,7 @@ struct LogoView: View {
                     //.mask(LinearGradient(gradient: Gradient(colors: [Color.clear, Color.black]), startPoint: .topLeading, endPoint: .bottomTrailing))
             }
         }
-        .offset(x: 20, y: -40)
+        .offset(x: 25, y: -30)
         //.border(Color.red)
         
     }

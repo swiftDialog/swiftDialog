@@ -55,11 +55,11 @@ var helpText = """
     """
 
 struct AppVariables {
-    static var windowWidth = CGFloat(750)
-    static var windowHeight = CGFloat(350)
+    static var windowWidth = CGFloat(820)
+    static var windowHeight = CGFloat(380)
  
-    static var imageWidth = CGFloat(150)
-    static var imageHeight = CGFloat(200)
+    static var imageWidth = CGFloat(170)
+    static var imageHeight = CGFloat(260)
     
     
     // message defaults
