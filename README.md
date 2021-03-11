@@ -12,3 +12,5 @@ Option                |Description
 --button2text       |text label of the 2nd button. Dialog will exit with status 2 . This button is also mapped to the Esc key.
 --infobuttontext    |you know where this is going right? This one exists Dialog with status 3
 --infobuttonaction  |same as button1action - Open the specified URL
+--version           |printsthe app version string
+--hideicon          |hides the dialog icon and expands the text to fill the fill width
