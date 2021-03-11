@@ -35,7 +35,7 @@ struct ContentView: View {
         
         // Buttons
         HStack(alignment: .bottom) {
-            if (AppVariables.displayMoreInfo == true) {
+            if CLOptionPresent(OptionName: AppConstants.buttonInfoTextOption) {
                 MoreInfoButton()
                     .offset(x: 20)
             }
@@ -75,6 +75,11 @@ struct HostingWindowFinder: NSViewRepresentable {
             printVersionString()
             exit(0)
         }
+        if (CLOptionPresent(OptionName: AppConstants.helpOption) || CommandLine.arguments.count == 1) {
+            print(helpText)
+            exit(0)
+        }
+        
         if CLOptionPresent(OptionName: AppConstants.hideIcon) {
             iconVisible = false
         } else {

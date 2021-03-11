@@ -27,7 +27,13 @@ func openSpecifiedURL(urlToOpen: String) {
 }
 
 func printVersionString() -> Void {
+       print(getVersionString())
+}
+
+func getVersionString() -> String {
+    var appVersion: String = "0.0"
     if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
-       print(version)
-   }
+        appVersion = version
+    }
+    return appVersion
 }

@@ -9,6 +9,47 @@ import Foundation
 
 var iconVisible: Bool = true
 
+var helpText = """
+    Dialog version \(getVersionString())
+    --title             Set the Dialog title - Over 40 characters gets truncated
+    
+    --message           Set the dialog message
+    
+    --icon              Set the icon to display
+                        pass in path to png or jpg
+                        if not specified, default icon will be used
+    
+    --hideicon          hides the icon from view
+                        Doing so increases the space available for message text
+
+    --button1text       Set the label for Button1
+                        Default is "OK"
+                        Bound to <Enter> key
+                        Return code when actioned is 0
+
+    --button1action     Set the action to take.
+                        Accepts URL
+                        Default action if not specified is no action
+
+    --button2text       Set the label for Button1
+                        Default is "Cancel"
+                        Bound to <ESC> key
+                        Return code when actioned is 2
+
+    --button2action     -- Not Implemented at this time --
+
+    --infobuttontext    Set the label for Information Button
+                        If not specified, Info button will not be displayed
+                        Return code when actioned is 3
+
+    --infobuttonaction  Set the action to take.
+                        Accepts URL
+                        Default action if not specified is no action
+
+    --version           Prints the app version
+    --help              Prints this text
+    """
+
 struct AppVariables {
     static var windowWidth = CGFloat(750)
     static var windowHeight = CGFloat(350)
@@ -28,21 +69,21 @@ struct AppVariables {
     static var buttonInfoActionDefault = String("")
     
     //static var iconVisible = true
-    static var displayMoreInfo = true // testing
+    //static var displayMoreInfo = true // testing
     //static var textAllignment = "centre" //testing
     //static var textAllignment = "top" //testing
-    static var textAllignment = "left" //testing
+    //static var textAllignment = "left" //testing
 }
 
 struct AppConstants {
     static let titleOption = String("--title")
-    static let titleOptionBrief = String("-t")
+    //static let titleOptionBrief = String("-t")
     
     static let messageOption = String("--message")
-    static let messageOptionBrief = String("-m")
+    //static let messageOptionBrief = String("-m")
     
     static let iconOption = String("--icon")
-    static let iconOptionBrief = String("-i")
+    //static let iconOptionBrief = String("-i")
     
     static let button1TextOption = String("--button1text")
     static let button1ActionOption = String("--button1action")
@@ -52,8 +93,11 @@ struct AppConstants {
     static let buttonInfoTextOption = String("--infobuttontext")
     static let buttonInfoActionOption = String("--infobuttonaction")
     
-    static let messageTextAllignment = String("--textallignment")
+    //static let messageTextAllignment = String("--textallignment")
     
+    // command line options that take no additional parameters
     static let getVersion = String("--version")
     static let hideIcon = String("--hideicon")
+    static let helpOption = String("--help")
+    static let demoOption = String("--demo")
 }

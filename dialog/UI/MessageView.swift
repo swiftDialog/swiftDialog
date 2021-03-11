@@ -62,11 +62,7 @@ struct MessageContent: View {
             viewHeight = AppVariables.windowHeight/1.6
             viewOffset = 0
         }
-        
-        if (AppVariables.textAllignment == "centre") {
-            self.theAllignment = .center
-        }
-                
+    
     }
     
     //var iconVisible = Bool()
