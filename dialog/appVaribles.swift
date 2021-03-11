@@ -10,7 +10,7 @@ import Foundation
 var iconVisible: Bool = true
 
 var helpText = """
-    Dialog version \(getVersionString())
+    Dialog version \(getVersionString()) ©2021 Bart Reardon
     --title             Set the Dialog title - Over 40 characters gets truncated
     
     --message           Set the dialog message
@@ -48,6 +48,8 @@ var helpText = """
 
     --version           Prints the app version
     --help              Prints this text
+
+    --buycoffee         Optionally buy the author a coffee if you would like to
     """
 
 struct AppVariables {
@@ -100,4 +102,5 @@ struct AppConstants {
     static let hideIcon = String("--hideicon")
     static let helpOption = String("--help")
     static let demoOption = String("--demo")
+    static let buyCoffee = String("--buycoffee")
 }
