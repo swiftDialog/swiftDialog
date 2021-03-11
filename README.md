@@ -7,7 +7,7 @@ Dialog is a simple app that displays a dialog with specified content passed in f
 
 
 # Commandline Options
- --title             Set the Dialog title
+    --title             Set the Dialog title
                         Text over 40 characters gets truncated
                         Default Title is "\(AppVariables.titleDefault)"
     
