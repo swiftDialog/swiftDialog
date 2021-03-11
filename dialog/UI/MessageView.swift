@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import AppKit
 
+
 struct MessageView: View {
     
     var body: some View {
@@ -16,7 +17,7 @@ struct MessageView: View {
             let iconFrameWidth: CGFloat = AppVariables.imageWidth
             let iconFrameHeight: CGFloat = AppVariables.imageHeight
             HStack {
-                if (AppVariables.iconVisible) {
+                if (!CLOptionPresent(OptionName: AppConstants.hideIcon)) {
                     VStack {
                             LogoView()
                     }.frame(width: iconFrameWidth, height: iconFrameHeight, alignment: .top)
@@ -51,7 +52,8 @@ struct MessageTitle: View {
 
 struct MessageContent: View {
     init () {
-        if (iconVisible) {
+                        
+        if (!CLOptionPresent(OptionName: AppConstants.hideIcon)) {
             viewWidth = AppVariables.windowWidth - (AppVariables.imageWidth*1.5)
             viewHeight = AppVariables.windowHeight/1.6
             viewOffset = 20
@@ -64,9 +66,12 @@ struct MessageContent: View {
         if (AppVariables.textAllignment == "centre") {
             self.theAllignment = .center
         }
+                
     }
     
-    let iconVisible: Bool = AppVariables.iconVisible
+    //var iconVisible = Bool()
+    //var iconVisible = AppVariables.iconVisible
+
     var viewWidth = CGFloat(0)
     var viewHeight = CGFloat(0)
     var viewOffset = CGFloat(0)

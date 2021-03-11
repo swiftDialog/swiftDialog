@@ -7,6 +7,8 @@
 
 import Foundation
 
+var iconVisible: Bool = true
+
 struct AppVariables {
     static var windowWidth = CGFloat(750)
     static var windowHeight = CGFloat(350)
@@ -25,7 +27,7 @@ struct AppVariables {
     static var buttonInfoDefault = String("More Information")
     static var buttonInfoActionDefault = String("")
     
-    static var iconVisible = true
+    //static var iconVisible = true
     static var displayMoreInfo = true // testing
     //static var textAllignment = "centre" //testing
     //static var textAllignment = "top" //testing
@@ -52,4 +54,6 @@ struct AppConstants {
     
     static let messageTextAllignment = String("--textallignment")
     
+    static let getVersion = String("--version")
+    static let hideIcon = String("--hideicon")
 }

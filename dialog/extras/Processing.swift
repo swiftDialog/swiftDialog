@@ -12,7 +12,7 @@ import SwiftUI
 
 struct Utils {
 
-    func createImageData(fileImagePath: String) -> NSImage {
+    public func createImageData(fileImagePath: String) -> NSImage {
         let urlPath = NSURL(fileURLWithPath: fileImagePath)
         let imageData:NSData = NSData(contentsOf: urlPath as URL)!
         return NSImage(data: imageData as Data)!
@@ -26,3 +26,8 @@ func openSpecifiedURL(urlToOpen: String) {
     }
 }
 
+func printVersionString() -> Void {
+    if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+       print(version)
+   }
+}

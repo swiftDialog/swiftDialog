@@ -7,6 +7,14 @@
 
 import SwiftUI
 
+class AppDelegate: NSObject, NSApplicationDelegate {
+
+    // check for a few command line options before loading
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        //print("applicationWillFinishLaunching")
+
+    }
+}
 
 @available(OSX 11.0, *)
 @main
@@ -20,10 +28,10 @@ struct dialogApp: App {
         // Hide Title Bar
         .windowStyle(HiddenTitleBarWindowStyle())
         //.windowStyle(TitleBarWindowStyle())
-        
     }
-
 }
+
+
 
 
 

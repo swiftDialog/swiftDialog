@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
+
     var body: some View {
         // Dialog title
         HStack(alignment: .top){
@@ -68,6 +69,18 @@ struct HostingWindowFinder: NSViewRepresentable {
 
     func makeNSView(context: Self.Context) -> NSView {
         let view = NSView()
+        
+        // process command line options to set variables
+        if CLOptionPresent(OptionName: AppConstants.getVersion) {
+            printVersionString()
+            exit(0)
+        }
+        if CLOptionPresent(OptionName: AppConstants.hideIcon) {
+            iconVisible = false
+        } else {
+            iconVisible = true
+        }
+        //----------
         
         DispatchQueue.main.async { [weak view] in
             self.callback(view?.window)
