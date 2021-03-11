@@ -14,3 +14,6 @@ Option                |Description
 --infobuttonaction  |same as button1action - Open the specified URL
 --version           |printsthe app version string
 --hideicon          |hides the dialog icon and expands the text to fill the fill width
+--version           |Prints the current version
+--help              |Prints help text (also printed if no options are present
+--demo              |Run Dialog with default options
