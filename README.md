@@ -1,6 +1,5 @@
 
 # Dialog
-![Dialog Logo](/assets/dialog.png)
 
 Dialog is a simple app that displays a dialog with specified content passed in from the commandline
 
