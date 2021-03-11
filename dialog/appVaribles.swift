@@ -50,6 +50,7 @@ var helpText = """
     --help              Prints this text
 
     --buycoffee         Optionally buy the author a coffee if you would like to
+    --showlicense       Display the Software License Agreement for Dialog
     """
 
 struct AppVariables {
@@ -103,4 +104,5 @@ struct AppConstants {
     static let helpOption = String("--help")
     static let demoOption = String("--demo")
     static let buyCoffee = String("--buycoffee")
+    static let showLicense = String("--showlicense")
 }

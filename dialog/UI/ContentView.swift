@@ -79,6 +79,10 @@ struct HostingWindowFinder: NSViewRepresentable {
             print(helpText)
             exit(0)
         }
+        if CLOptionPresent(OptionName: AppConstants.showLicense) {
+            print(licenseText)
+            exit(0)
+        }
         if CLOptionPresent(OptionName: AppConstants.buyCoffee) {
             print("Thank you for your support. You didn't have to but you did :)")
             openSpecifiedURL(urlToOpen: "https://www.buymeacoffee.com/bartreardon")
