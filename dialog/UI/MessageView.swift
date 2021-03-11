@@ -103,17 +103,23 @@ struct LogoView: View {
     var body: some View {
         VStack {
             if imgFromURL {
-                Image(nsImage: Utils().getImageFromHTTPURL(fileURLString: messageUserImagePath))
+                let webImage: NSImage = Utils().getImageFromHTTPURL(fileURLString: messageUserImagePath)
+                Image(nsImage: webImage)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .scaledToFit()
-                    .frame(width: AppVariables.imageWidth, height: AppVariables.imageHeight)
+                    .frame(width: AppVariables.imageWidth, height: webImage.size.height*(AppVariables.imageWidth/webImage.size.width))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .offset(x: 25)
             } else if FileManager.default.fileExists(atPath: messageUserImagePath) {
-                Image(nsImage: Utils().createImageData(fileImagePath: messageUserImagePath))
+                let diskImage: NSImage = Utils().createImageData(fileImagePath: messageUserImagePath)
+                Image(nsImage: diskImage)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .scaledToFit()
-                    .frame(width: AppVariables.imageWidth, height: AppVariables.imageHeight)
+                    .frame(width: AppVariables.imageWidth, height: diskImage.size.height*(AppVariables.imageWidth/diskImage.size.width))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .offset(x: 25, y: 8)
             } else {
                 Image(systemName: "message.circle.fill")
                     .resizable()
@@ -121,12 +127,9 @@ struct LogoView: View {
                     .scaledToFit()
                     .frame(width: AppVariables.imageWidth, height: AppVariables.imageHeight)
                     .foregroundColor(Color.black)
-                    //.background(Color.orange)
-                    //.clipShape(Circle())
-                    //.mask(LinearGradient(gradient: Gradient(colors: [Color.clear, Color.black]), startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .offset(x: 25, y: -30)
             }
         }
-        .offset(x: 25, y: -30)
         //.border(Color.red)
         
     }
