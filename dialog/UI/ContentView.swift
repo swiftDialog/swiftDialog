@@ -10,6 +10,7 @@ import SwiftUI
 struct ContentView: View {
 
     var body: some View {
+        
         // Dialog title
         HStack(alignment: .top){
             MessageTitle()
@@ -37,13 +38,14 @@ struct ContentView: View {
         HStack(alignment: .bottom) {
             if (CLOptionPresent(OptionName: AppConstants.buttonInfoTextOption) || CLOptionPresent(OptionName: AppConstants.infoButtonOption)) {
                 MoreInfoButton()
-                    .offset(x: 20)
             }
             Spacer()
             ButtonView()
-                .offset(x: -20)
         }
+        //.font(.system(size: 12))
         //.border(Color.blue)
+        .offset(y: 12)
+        .frame(width: AppVariables.windowWidth-30, alignment: .center)
         
         // Window Setings
         HostingWindowFinder {window in
@@ -53,8 +55,8 @@ struct ContentView: View {
             window?.center() // center
             window?.isMovable = false // not movable
             NSApp.activate(ignoringOtherApps: true) // bring to forefront upon launch
-            
         }
+        
     }
 }
 
