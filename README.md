@@ -46,7 +46,13 @@ Dialog is pretty boring by itself. Use the following commandline options to spru
                         optionally pass in URL of file resource   -  "https://someurl/file.[png.jpg]"
                         if not specified, default icon will be used
                         Images from either file or URL are displayed as roundrect if no transparency
+   
+    --infoicon          Displays information icon (person with question mark)
     
+    --cautionicon       Displays caution icon (yellow triangle with exclamation point
+    
+    --warningicon       Displays warning icon (red octagon with exclamation point 
+            
     --hideicon          hides the icon from view
                         Doing so increases the space available for message text to approximately 100 words
 
