@@ -44,7 +44,7 @@
 		410E877E25FA038400654CA0 /* broken.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = broken.jpg; sourceTree = "<group>"; };
 		41110A2725F9E79E008171D2 /* License.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = License.swift; sourceTree = "<group>"; };
 		4153781725FF72CD00AA0E76 /* VisualEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectView.swift; sourceTree = "<group>"; };
-		4154C2DA25F76BDB00A3D373 /* dialog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = dialog.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4154C2DA25F76BDB00A3D373 /* Dialog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dialog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4154C2DD25F76BDB00A3D373 /* dialogApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dialogApp.swift; sourceTree = "<group>"; };
 		4154C2DF25F76BDB00A3D373 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		4154C2E125F76BDC00A3D373 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -110,7 +110,7 @@
 		4154C2DB25F76BDB00A3D373 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4154C2DA25F76BDB00A3D373 /* dialog.app */,
+				4154C2DA25F76BDB00A3D373 /* Dialog.app */,
 				4154C2EC25F76BDC00A3D373 /* dialogTests.xctest */,
 				4154C2F725F76BDC00A3D373 /* dialogUITests.xctest */,
 			);
@@ -183,9 +183,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		4154C2D925F76BDB00A3D373 /* dialog */ = {
+		4154C2D925F76BDB00A3D373 /* Dialog */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4154C30025F76BDC00A3D373 /* Build configuration list for PBXNativeTarget "dialog" */;
+			buildConfigurationList = 4154C30025F76BDC00A3D373 /* Build configuration list for PBXNativeTarget "Dialog" */;
 			buildPhases = (
 				4154C2D625F76BDB00A3D373 /* Sources */,
 				4154C2D725F76BDB00A3D373 /* Frameworks */,
@@ -196,9 +196,9 @@
 			);
 			dependencies = (
 			);
-			name = dialog;
+			name = Dialog;
 			productName = dialog;
-			productReference = 4154C2DA25F76BDB00A3D373 /* dialog.app */;
+			productReference = 4154C2DA25F76BDB00A3D373 /* Dialog.app */;
 			productType = "com.apple.product-type.application";
 		};
 		4154C2EB25F76BDC00A3D373 /* dialogTests */ = {
@@ -272,7 +272,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				4154C2D925F76BDB00A3D373 /* dialog */,
+				4154C2D925F76BDB00A3D373 /* Dialog */,
 				4154C2EB25F76BDC00A3D373 /* dialogTests */,
 				4154C2F625F76BDC00A3D373 /* dialogUITests */,
 			);
@@ -364,12 +364,12 @@
 /* Begin PBXTargetDependency section */
 		4154C2EE25F76BDC00A3D373 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4154C2D925F76BDB00A3D373 /* dialog */;
+			target = 4154C2D925F76BDB00A3D373 /* Dialog */;
 			targetProxy = 4154C2ED25F76BDC00A3D373 /* PBXContainerItemProxy */;
 		};
 		4154C2F925F76BDC00A3D373 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4154C2D925F76BDB00A3D373 /* dialog */;
+			target = 4154C2D925F76BDB00A3D373 /* Dialog */;
 			targetProxy = 4154C2F825F76BDC00A3D373 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -636,7 +636,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4154C30025F76BDC00A3D373 /* Build configuration list for PBXNativeTarget "dialog" */ = {
+		4154C30025F76BDC00A3D373 /* Build configuration list for PBXNativeTarget "Dialog" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4154C30125F76BDC00A3D373 /* Debug */,
