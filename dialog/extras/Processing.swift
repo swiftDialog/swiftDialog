@@ -18,22 +18,22 @@ struct Utils {
         do {
             imageData = try NSData(contentsOf: urlPath as URL)
         } catch {
-            let filePath = Bundle.main.url(forResource: "broken", withExtension: "jpg")
-            imageData = NSData(contentsOfFile: filePath!.path)!
+            let errorImageConfig = NSImage.SymbolConfiguration(pointSize: 200, weight: .regular)
+            return NSImage(systemSymbolName: "questionmark.square.dashed", accessibilityDescription: nil)!.withSymbolConfiguration(errorImageConfig)!
         }
         return NSImage(data: imageData as Data)!
     }
     
+    // merge getImageFromHTTPURL and createImageData, they are practically the same
     public func getImageFromHTTPURL(fileURLString: String) -> NSImage {
         let fileURL = URL(string: fileURLString)
         var imageData = NSData()
-        
+
         do {
             imageData = try NSData(contentsOf: fileURL! as URL)
         } catch {
-            //let image = Image(systemName: "message.circle.fill")
-            let filePath = Bundle.main.url(forResource: "broken", withExtension: "jpg")
-            imageData = NSData(contentsOfFile: filePath!.path)!
+            let errorImageConfig = NSImage.SymbolConfiguration(pointSize: 200, weight: .regular)
+            return NSImage(systemSymbolName: "questionmark.square.dashed", accessibilityDescription: nil)!.withSymbolConfiguration(errorImageConfig)!
         }
         return NSImage(data: imageData as Data)!
     }

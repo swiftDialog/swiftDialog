@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		410E877F25FA038400654CA0 /* broken.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 410E877E25FA038400654CA0 /* broken.jpg */; };
 		41110A2825F9E79E008171D2 /* License.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41110A2725F9E79E008171D2 /* License.swift */; };
+		4153781825FF72CD00AA0E76 /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153781725FF72CD00AA0E76 /* VisualEffectView.swift */; };
 		4154C2DE25F76BDB00A3D373 /* dialogApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154C2DD25F76BDB00A3D373 /* dialogApp.swift */; };
 		4154C2E025F76BDB00A3D373 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154C2DF25F76BDB00A3D373 /* ContentView.swift */; };
 		4154C2E225F76BDC00A3D373 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4154C2E125F76BDC00A3D373 /* Assets.xcassets */; };
@@ -42,6 +43,7 @@
 /* Begin PBXFileReference section */
 		410E877E25FA038400654CA0 /* broken.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = broken.jpg; sourceTree = "<group>"; };
 		41110A2725F9E79E008171D2 /* License.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = License.swift; sourceTree = "<group>"; };
+		4153781725FF72CD00AA0E76 /* VisualEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectView.swift; sourceTree = "<group>"; };
 		4154C2DA25F76BDB00A3D373 /* dialog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = dialog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4154C2DD25F76BDB00A3D373 /* dialogApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dialogApp.swift; sourceTree = "<group>"; };
 		4154C2DF25F76BDB00A3D373 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -173,6 +175,7 @@
 				4154C2DF25F76BDB00A3D373 /* ContentView.swift */,
 				41D81E5625F7929800D1F7E1 /* MessageView.swift */,
 				41D81E5B25F817BF00D1F7E1 /* ButtonView.swift */,
+				4153781725FF72CD00AA0E76 /* VisualEffectView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -332,6 +335,7 @@
 				4154C2E025F76BDB00A3D373 /* ContentView.swift in Sources */,
 				41D81E5C25F817BF00D1F7E1 /* ButtonView.swift in Sources */,
 				41110A2825F9E79E008171D2 /* License.swift in Sources */,
+				4153781825FF72CD00AA0E76 /* VisualEffectView.swift in Sources */,
 				4154C2DE25F76BDB00A3D373 /* dialogApp.swift in Sources */,
 				41D81E6C25F8209F00D1F7E1 /* Options.swift in Sources */,
 				41D81E7125F845D200D1F7E1 /* appVaribles.swift in Sources */,
@@ -506,7 +510,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 0.3.3;
+				MARKETING_VERSION = 0.3.4;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -533,7 +537,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 0.3.3;
+				MARKETING_VERSION = 0.3.4;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;

@@ -58,7 +58,6 @@ var helpText = """
     --help              Prints this text
 
     --showlicense       Display the Software License Agreement for Dialog
-    --coffee
     """
 
 struct AppVariables {
@@ -115,4 +114,7 @@ struct AppConstants {
     static let demoOption = String("--demo")
     static let buyCoffee = String("--coffee")
     static let showLicense = String("--showlicense")
+    static let warningIcon = String("--warningicon")
+    static let infoIcon = String("--infoicon")
+    static let cautionIcon = String("--cautionicon")
 }

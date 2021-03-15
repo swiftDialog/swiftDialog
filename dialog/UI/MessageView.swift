@@ -102,32 +102,58 @@ struct LogoView: View {
     
     var body: some View {
         VStack {
-            if imgFromURL {
-                let webImage: NSImage = Utils().getImageFromHTTPURL(fileURLString: messageUserImagePath)
-                Image(nsImage: webImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .scaledToFit()
-                    .frame(width: AppVariables.imageWidth, height: webImage.size.height*(AppVariables.imageWidth/webImage.size.width))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .offset(x: 25)
-            } else if FileManager.default.fileExists(atPath: messageUserImagePath) {
-                let diskImage: NSImage = Utils().createImageData(fileImagePath: messageUserImagePath)
-                Image(nsImage: diskImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .scaledToFit()
-                    .frame(width: AppVariables.imageWidth, height: diskImage.size.height*(AppVariables.imageWidth/diskImage.size.width))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .offset(x: 25, y: 8)
-            } else {
-                Image(systemName: "message.circle.fill")
+            if CLOptionPresent(OptionName: AppConstants.infoIcon) {
+                Image(systemName: "person.fill.questionmark")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .scaledToFit()
                     .frame(width: AppVariables.imageWidth, height: AppVariables.imageHeight)
                     .foregroundColor(Color.black)
                     .offset(x: 25, y: -30)
+            } else if CLOptionPresent(OptionName: AppConstants.warningIcon) {
+                Image(systemName: "exclamationmark.octagon.fill")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
+                    .frame(width: AppVariables.imageWidth, height: AppVariables.imageHeight)
+                    .foregroundColor(Color.red)
+                    .offset(x: 25, y: -30)
+            } else if CLOptionPresent(OptionName: AppConstants.cautionIcon) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
+                    .frame(width: AppVariables.imageWidth, height: AppVariables.imageHeight)
+                    .foregroundColor(Color.yellow)
+                    .offset(x: 25, y: -30)
+            } else {
+                if imgFromURL {
+                    let webImage: NSImage = Utils().getImageFromHTTPURL(fileURLString: messageUserImagePath)
+                    Image(nsImage: webImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .scaledToFit()
+                        .frame(width: AppVariables.imageWidth, height: webImage.size.height*(AppVariables.imageWidth/webImage.size.width))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .offset(x: 25)
+                } else if FileManager.default.fileExists(atPath: messageUserImagePath) {
+                    let diskImage: NSImage = Utils().createImageData(fileImagePath: messageUserImagePath)
+                    Image(nsImage: diskImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .scaledToFit()
+                        .frame(width: AppVariables.imageWidth, height: diskImage.size.height*(AppVariables.imageWidth/diskImage.size.width))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .offset(x: 25, y: 8)
+                } else {
+                    Image(systemName: "message.circle.fill")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .scaledToFit()
+                        .frame(width: AppVariables.imageWidth, height: AppVariables.imageHeight)
+                        .foregroundColor(Color.black)
+                        .offset(x: 25, y: -30)
+                }
             }
         }
         //.border(Color.red)
