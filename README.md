@@ -100,3 +100,22 @@ The following return codes are sent after each action. These can be ignored or u
 | button1     | No       | Enter  | 0           |
 | button2     | Yes      | Esc    | 2           |
 | infobutton  | Yes      |        | 3           |
+
+# Displaying Images in the Icon area
+The icon area on the left hand portion of the dialog can be configured in a number of ways.
+
+The most simplest configuration is to simply pass in the path of a file resource for the dialog to display. The file resource can either be a local file path or from a URL.
+
+There are a number of built-in icons you can use:
+
+`--caution`
+![Caution Icon Example](/assets/caution.png)
+
+`--warning`
+![Warning Icon Example](/assets/warning.png)
+
+`--info`
+![Info Icon Example](/assets/info.png)
+
+Whether you are using a built in icon or a remote resource, you can optionslly display an icon overlay by specifying one with `--iconoverlay` and providing a path to an image, either as a local file or URL.
+![Icon Overlay Example](/assets/overlay.png)
