@@ -118,4 +118,4 @@ There are a number of built-in icons you can use:
 ![Info Icon Example](/assets/info.png)
 
 Whether you are using a built in icon or a remote resource, you can optionslly display an icon overlay by specifying one with `--iconoverlay` and providing a path to an image, either as a local file or URL.
-![Icon Overlay Example](/assets/overlay.png)
+![Icon Overlay Example](/assets/overlay2.png)
