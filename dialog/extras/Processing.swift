@@ -15,13 +15,22 @@ struct Utils {
     public func createImageData(fileImagePath: String) -> NSImage {
         let urlPath = NSURL(fileURLWithPath: fileImagePath)
         var imageData = NSData()
+        
         do {
             imageData = try NSData(contentsOf: urlPath as URL)
         } catch {
             let errorImageConfig = NSImage.SymbolConfiguration(pointSize: 200, weight: .regular)
             return NSImage(systemSymbolName: "questionmark.square.dashed", accessibilityDescription: nil)!.withSymbolConfiguration(errorImageConfig)!
         }
-        return NSImage(data: imageData as Data)!
+
+        let image : NSImage = NSImage(data: imageData as Data)!
+        if let rep = NSImage(data: imageData as Data)!
+            .bestRepresentation(for: NSRect(x: 0, y: 0, width: AppVariables.imageWidth, height: AppVariables.imageHeight), context: nil, hints: nil) {
+            image.size = rep.size
+            image.addRepresentation(rep)
+        }
+        
+        return image
     }
     
     // merge getImageFromHTTPURL and createImageData, they are practically the same
@@ -35,7 +44,15 @@ struct Utils {
             let errorImageConfig = NSImage.SymbolConfiguration(pointSize: 200, weight: .regular)
             return NSImage(systemSymbolName: "questionmark.square.dashed", accessibilityDescription: nil)!.withSymbolConfiguration(errorImageConfig)!
         }
-        return NSImage(data: imageData as Data)!
+        
+        let image : NSImage = NSImage(data: imageData as Data)!
+        if let rep = NSImage(data: imageData as Data)!
+            .bestRepresentation(for: NSRect(x: 0, y: 0, width: AppVariables.imageWidth, height: AppVariables.imageHeight), context: nil, hints: nil) {
+            image.size = rep.size
+            image.addRepresentation(rep)
+        }
+        
+        return image
     }
 }
 
@@ -57,4 +74,13 @@ func getVersionString() -> String {
     return appVersion
 }
 
-
+func getAppIcon(appPath : String, withSize : CGFloat) -> NSImage {
+    let image = NSImage()
+    
+    if let rep = NSWorkspace.shared.icon(forFile: appPath)
+        .bestRepresentation(for: NSRect(x: 0, y: 0, width: withSize, height: withSize), context: nil, hints: nil) {
+        image.size = rep.size
+        image.addRepresentation(rep)
+    }
+    return image
+}

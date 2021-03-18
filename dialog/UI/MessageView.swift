@@ -65,9 +65,6 @@ struct MessageContent: View {
     
     }
     
-    //var iconVisible = Bool()
-    //var iconVisible = AppVariables.iconVisible
-
     var viewWidth = CGFloat(0)
     var viewHeight = CGFloat(0)
     var viewOffset = CGFloat(0)
@@ -90,13 +87,77 @@ struct MessageContent: View {
     }
 }
 
+struct ImageOverlay: View {
+    let overlayWidth: CGFloat?
+    let overlayHeight: CGFloat?
+    
+    let overlayImagePath: String = CLOptionText(OptionName: AppConstants.overlayIconOption, DefaultValue: "")
+    var imgFromURL: Bool = false
+    var imgFromAPP: Bool = false
+    
+    init(overlayWidth: CGFloat? = nil, overlayHeight: CGFloat? = nil) {
+        self.overlayWidth = AppVariables.imageWidth/2
+        self.overlayHeight = AppVariables.imageHeight/2
+        if overlayImagePath.starts(with: "http") {
+            imgFromURL = true
+        }
+        if overlayImagePath.hasSuffix(".app") {
+            imgFromAPP = true
+        }
+    }
+    
+    var body: some View {
+        if CLOptionPresent(OptionName: AppConstants.overlayIconOption) {
+            ZStack {
+                if imgFromURL {
+                    let webImage: NSImage = Utils().getImageFromHTTPURL(fileURLString: overlayImagePath)
+                    Image(nsImage: webImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .scaledToFit()
+                        .clipShape(RoundedRectangle(cornerRadius: 5))
+                } else if imgFromAPP {
+                    Image(nsImage: getAppIcon(appPath: overlayImagePath, withSize: overlayWidth!))
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .scaledToFit()
+                } else if FileManager.default.fileExists(atPath: overlayImagePath) {
+                    let diskImage: NSImage = Utils().createImageData(fileImagePath: overlayImagePath)
+                    Image(nsImage: diskImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .scaledToFit()
+                        .clipShape(RoundedRectangle(cornerRadius: 5))
+                } else {
+                    Image(systemName: "questionmark.square.dashed")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .scaledToFit()
+                            .foregroundColor(Color.red)
+                }
+            }
+            .frame(width: overlayWidth, height: overlayHeight)
+            .offset(x: 40, y: 50)
+            .shadow(radius: 5)
+        }
+    }
+}
+
 struct LogoView: View {
     let messageUserImagePath: String = CLOptionText(OptionName: AppConstants.iconOption, DefaultValue: "")
+    let logoWidth: CGFloat?
+    let logoHeight: CGFloat?
     var imgFromURL: Bool = false
+    var imgFromAPP: Bool = false
     
     init() {
+        self.logoWidth = AppVariables.imageWidth
+        self.logoHeight = AppVariables.imageHeight
         if messageUserImagePath.starts(with: "http") {
             imgFromURL = true
+        }
+        if messageUserImagePath.hasSuffix(".app") {
+            imgFromAPP = true
         }
     }
     
@@ -107,25 +168,25 @@ struct LogoView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .scaledToFit()
-                    .frame(width: AppVariables.imageWidth, height: AppVariables.imageHeight)
                     .foregroundColor(Color.black)
-                    .offset(x: 25, y: -30)
+                    .offset(x: 25)
+                    .overlay(ImageOverlay(), alignment: .bottomTrailing)
             } else if CLOptionPresent(OptionName: AppConstants.warningIcon) {
                 Image(systemName: "exclamationmark.octagon.fill")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .scaledToFit()
-                    .frame(width: AppVariables.imageWidth, height: AppVariables.imageHeight)
                     .foregroundColor(Color.red)
-                    .offset(x: 25, y: -30)
+                    .offset(x: 25)
+                    .overlay(ImageOverlay(), alignment: .bottomTrailing)
             } else if CLOptionPresent(OptionName: AppConstants.cautionIcon) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .scaledToFit()
-                    .frame(width: AppVariables.imageWidth, height: AppVariables.imageHeight)
                     .foregroundColor(Color.yellow)
-                    .offset(x: 25, y: -30)
+                    .offset(x: 25)
+                    .overlay(ImageOverlay(), alignment: .bottomTrailing)
             } else {
                 if imgFromURL {
                     let webImage: NSImage = Utils().getImageFromHTTPURL(fileURLString: messageUserImagePath)
@@ -136,6 +197,15 @@ struct LogoView: View {
                         .frame(width: AppVariables.imageWidth, height: webImage.size.height*(AppVariables.imageWidth/webImage.size.width))
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                         .offset(x: 25)
+                        .overlay(ImageOverlay(overlayWidth: AppVariables.imageWidth, overlayHeight: webImage.size.height*(AppVariables.imageWidth/webImage.size.width)), alignment: .bottomTrailing)
+                } else if imgFromAPP {
+                    Image(nsImage: getAppIcon(appPath: messageUserImagePath, withSize: AppVariables.imageWidth))
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .scaledToFit()
+                            .foregroundColor(Color.yellow)
+                            .offset(x: 25)
+                            .overlay(ImageOverlay(), alignment: .bottomTrailing)
                 } else if FileManager.default.fileExists(atPath: messageUserImagePath) {
                     let diskImage: NSImage = Utils().createImageData(fileImagePath: messageUserImagePath)
                     Image(nsImage: diskImage)
@@ -145,17 +215,20 @@ struct LogoView: View {
                         .frame(width: AppVariables.imageWidth, height: diskImage.size.height*(AppVariables.imageWidth/diskImage.size.width))
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                         .offset(x: 25, y: 8)
+                        .overlay(ImageOverlay(overlayWidth: AppVariables.imageWidth/2, overlayHeight: diskImage.size.height*(AppVariables.imageWidth/diskImage.size.width)/2), alignment: .bottomTrailing)
                 } else {
                     Image(systemName: "message.circle.fill")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .scaledToFit()
-                        .frame(width: AppVariables.imageWidth, height: AppVariables.imageHeight)
+                        //.frame(width: AppVariables.imageWidth, height: AppVariables.imageHeight)
                         .foregroundColor(Color.black)
-                        .offset(x: 25, y: -30)
+                        .offset(x: 25)
+                        .overlay(ImageOverlay(), alignment: .bottomTrailing)
                 }
             }
         }
+        //.overlay(ImageOverlay(), alignment: .topTrailing)
         //.border(Color.red)
         
     }

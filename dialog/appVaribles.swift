@@ -19,10 +19,25 @@ var helpText = """
                         Message length is up to approximately 80 words
     
     --icon              Set the icon to display
-                        pass in file path to png or jpg           -  "/file/path/image.[png|jpg]"
-                        optionally pass in URL of file resource   -  "https://someurl/file.[png.jpg]"
+                        Acceptable Values:
+                        file path to png or jpg           -  "/file/path/image.[png|jpg]"
+                        file path to Application          -  "/Applications/Chess.app"
+                        URL of file resource              -  "https://someurl/file.[png.jpg]"
                         if not specified, default icon will be used
                         Images from either file or URL are displayed as roundrect if no transparancy
+
+    --overlayicon       Set an image to display as an overlay to --icon
+                        image is displayed at 1/2 resolution to the main image and positioned to the bottom right
+                        Acceptable Values:
+                        file path to png or jpg           -  "/file/path/image.[png|jpg]"
+                        file path to Application          -  "/Applications/Chess.app"
+                        URL of file resource              -  "https://someurl/file.[png.jpg]"
+
+    --infoicon          Built in. Displays person with questionmark as the icon
+
+    --cautionicon       Built in. Displays yellow triangle with exclamation point
+
+    --warningicon       Built in. Displays red octagon with exclamation point
     
     --hideicon          hides the icon from view
                         Doing so increases the space available for message text to approximately 100 words
@@ -69,7 +84,7 @@ struct AppVariables {
     
     
     // message defaults
-    static var titleDefault = String("Important Message Title")
+    static var titleDefault = String("Important *Message* Title")
     static var messageDefault = String("Important Message Content\n\nPlease read")
     
     // button defaults
@@ -94,6 +109,7 @@ struct AppConstants {
     
     static let iconOption = String("--icon")
     //static let iconOptionBrief = String("-i")
+    static let overlayIconOption = String("--overlayicon")
     
     static let button1TextOption = String("--button1text")
     static let button1ActionOption = String("--button1action")
@@ -102,6 +118,7 @@ struct AppConstants {
     
     static let buttonInfoTextOption = String("--infobuttontext")
     static let buttonInfoActionOption = String("--infobuttonaction")
+
     
     //static let messageTextAllignment = String("--textallignment")
     
