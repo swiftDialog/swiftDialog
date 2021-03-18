@@ -42,14 +42,20 @@ Dialog is pretty boring by itself. Use the following commandline options to spru
                         Message length is up to approximately 80 words
     
     --icon              Set the icon to display
-                        pass in file path to png or jpg           -  "/file/path/image.[png|jpg]"
-                        optionally pass in URL of file resource   -  "https://someurl/file.[png.jpg]"
+                        Acceptable Values:
+                        file path to png or jpg           -  "/file/path/image.[png|jpg]"
+                        file path to Application          -  "/Applications/Chess.app"
+                        URL of file resource              -  "https://someurl/file.[png.jpg]"
                         if not specified, default icon will be used
-                        Images from either file or URL are displayed as roundrect if no transparency
-   
+                        Images from either file or URL are displayed as roundrect if no transparancy
+
     --overlayicon       Set an image to display as an overlay to --icon
                         image is displayed at 1/2 resolution to the main image and positioned to the bottom right
-
+                        Acceptable Values:
+                        file path to png or jpg           -  "/file/path/image.[png|jpg]"
+                        file path to Application          -  "/Applications/Chess.app"
+                        URL of file resource              -  "https://someurl/file.[png.jpg]"
+                        
     --infoicon          Built in. Displays person with questionmark as the icon
 
     --cautionicon       Built in. Displays yellow triangle with exclamation point
