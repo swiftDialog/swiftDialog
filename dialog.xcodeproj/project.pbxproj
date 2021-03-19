@@ -121,6 +121,7 @@
 				41C8259825F99AF90042DC50 /* UI */,
 				4154C30C25F782E900A3D373 /* extras */,
 				4154C2DD25F76BDB00A3D373 /* dialogApp.swift */,
+				41D81E7025F845D200D1F7E1 /* appVaribles.swift */,
 				4154C2E125F76BDC00A3D373 /* Assets.xcassets */,
 				4154C2E625F76BDC00A3D373 /* Info.plist */,
 				4154C2E725F76BDC00A3D373 /* dialog.entitlements */,
@@ -158,7 +159,6 @@
 		4154C30C25F782E900A3D373 /* extras */ = {
 			isa = PBXGroup;
 			children = (
-				41D81E7025F845D200D1F7E1 /* appVaribles.swift */,
 				41D81E6B25F8209F00D1F7E1 /* Options.swift */,
 				41D81E7825F870A500D1F7E1 /* Processing.swift */,
 				41110A2725F9E79E008171D2 /* License.swift */,
