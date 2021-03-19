@@ -81,24 +81,25 @@ var helpText = """
     """
 
 struct AppVariables {
-    var windowWidth = CGFloat(820)
-    var windowHeight = CGFloat(380)
+    var windowWidth                     = CGFloat(820)      // set default dialog width
+    var windowHeight                    = CGFloat(380)      // set default dialog height
  
-    var imageWidth = CGFloat(170)
-    var imageHeight = CGFloat(260)
+    var imageWidth                      = CGFloat(170)      // set default image area width
+    var imageHeight                     = CGFloat(260)      // set default image area height
     
     
-    // message defaults
-    var titleDefault = String("An Important Message")
-    var messageDefault = String("\nThis is important message content\n\nPlease read")
+    // message default strings
+    var titleDefault                    = String("An Important Message")
+    var messageDefault                  = String("\nThis is important message content\n\nPlease read")
     
-    // button defaults
+    // button default strings
     // work out how to define a default width button that does what you tell it to. in the meantime, diry hack with spaces
-    var button1Default = String("    OK    ")
-    var button2Default = String("Cancel")
-    var buttonInfoDefault = String("More Information")
-    var buttonInfoActionDefault = String("")
+    var button1Default                  = String("    OK    ")
+    var button2Default                  = String("Cancel")
+    var buttonInfoDefault               = String("More Information")
+    var buttonInfoActionDefault         = String("")
     
+    // reserved for future experimentation
     //static var iconVisible = true
     //static var displayMoreInfo = true // testing
     //static var textAllignment = "centre" //testing
@@ -108,36 +109,27 @@ struct AppVariables {
 
 
 struct CLOptions {
-    static let titleOption = String("--title")
-    //static let titleOptionBrief = String("-t")
-    
-    static let messageOption = String("--message")
-    //static let messageOptionBrief = String("-m")
-    
-    static let iconOption = String("--icon")
-    //static let iconOptionBrief = String("-i")
-    static let overlayIconOption = String("--overlayicon")
-    
-    static let button1TextOption = String("--button1text")
-    static let button1ActionOption = String("--button1action")
-    static let button2TextOption = String("--button2text")
-    static let button2ActionOption = String("--button2action")
-    
-    static let buttonInfoTextOption = String("--infobuttontext")
-    static let buttonInfoActionOption = String("--infobuttonaction")
-
-    //static let messageTextAllignment = String("--textallignment")
-    
+    static let titleOption              = String("--title")
+    static let messageOption            = String("--message")
+    static let iconOption               = String("--icon")
+    static let overlayIconOption        = String("--overlayicon")
+    static let button1TextOption        = String("--button1text")
+    static let button1ActionOption      = String("--button1action")
+    static let button2TextOption        = String("--button2text")
+    static let button2ActionOption      = String("--button2action")
+    static let buttonInfoTextOption     = String("--infobuttontext")
+    static let buttonInfoActionOption   = String("--infobuttonaction")
+   
     // command line options that take no additional parameters
-    static let button2Option = String("--button2")
-    static let infoButtonOption = String("--infobutton")
-    static let getVersion = String("--version")
-    static let hideIcon = String("--hideicon")
-    static let helpOption = String("--help")
-    static let demoOption = String("--demo")
-    static let buyCoffee = String("--coffee")
-    static let showLicense = String("--showlicense")
-    static let warningIcon = String("--warningicon")
-    static let infoIcon = String("--infoicon")
-    static let cautionIcon = String("--cautionicon")
+    static let button2Option            = String("--button2")
+    static let infoButtonOption         = String("--infobutton")
+    static let getVersion               = String("--version")
+    static let hideIcon                 = String("--hideicon")
+    static let helpOption               = String("--help")
+    static let demoOption               = String("--demo")
+    static let buyCoffee                = String("--coffee")
+    static let showLicense              = String("--showlicense")
+    static let warningIcon              = String("--warningicon")
+    static let infoIcon                 = String("--infoicon")
+    static let cautionIcon              = String("--cautionicon")
 }

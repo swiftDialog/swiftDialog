@@ -97,7 +97,7 @@ struct IconView: View {
             }
         }
         //.overlay(IconOverlayView(), alignment: .topTrailing)
-        //.border(Color.red)
+        //.border(Color.red) //debuging
         
     }
 }

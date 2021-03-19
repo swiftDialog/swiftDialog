@@ -18,6 +18,6 @@ struct TitleView: View {
                 .bold()
                 .font(.system(size: 30))
         }
-        //.border(Color.purple)
+        //.border(Color.purple) //debuging
     }
 }
