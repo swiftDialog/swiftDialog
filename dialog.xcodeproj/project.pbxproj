@@ -7,17 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		410E877F25FA038400654CA0 /* broken.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 410E877E25FA038400654CA0 /* broken.jpg */; };
 		41110A2825F9E79E008171D2 /* License.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41110A2725F9E79E008171D2 /* License.swift */; };
-		4153781825FF72CD00AA0E76 /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153781725FF72CD00AA0E76 /* VisualEffectView.swift */; };
 		4153783226001A0900AA0E76 /* StringProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153783126001A0900AA0E76 /* StringProcessing.swift */; };
+		4153784E2604B71800AA0E76 /* TitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153784D2604B71800AA0E76 /* TitleView.swift */; };
+		415378532604B79F00AA0E76 /* IconOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415378522604B79E00AA0E76 /* IconOverlayView.swift */; };
+		4153785E2604B81300AA0E76 /* IconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153785D2604B81300AA0E76 /* IconView.swift */; };
+		4153786C2604BF1A00AA0E76 /* MessageContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153786B2604BF1A00AA0E76 /* MessageContentView.swift */; };
 		4154C2DE25F76BDB00A3D373 /* dialogApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154C2DD25F76BDB00A3D373 /* dialogApp.swift */; };
 		4154C2E025F76BDB00A3D373 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154C2DF25F76BDB00A3D373 /* ContentView.swift */; };
 		4154C2E225F76BDC00A3D373 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4154C2E125F76BDC00A3D373 /* Assets.xcassets */; };
 		4154C2E525F76BDC00A3D373 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4154C2E425F76BDC00A3D373 /* Preview Assets.xcassets */; };
 		4154C2F125F76BDC00A3D373 /* dialogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154C2F025F76BDC00A3D373 /* dialogTests.swift */; };
 		4154C2FC25F76BDC00A3D373 /* dialogUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154C2FB25F76BDC00A3D373 /* dialogUITests.swift */; };
-		41D81E5725F7929800D1F7E1 /* MessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E5625F7929800D1F7E1 /* MessageView.swift */; };
+		41D81E5725F7929800D1F7E1 /* DialogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E5625F7929800D1F7E1 /* DialogView.swift */; };
 		41D81E5C25F817BF00D1F7E1 /* ButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E5B25F817BF00D1F7E1 /* ButtonView.swift */; };
 		41D81E6C25F8209F00D1F7E1 /* Options.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E6B25F8209F00D1F7E1 /* Options.swift */; };
 		41D81E7125F845D200D1F7E1 /* appVaribles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E7025F845D200D1F7E1 /* appVaribles.swift */; };
@@ -42,10 +44,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		410E877E25FA038400654CA0 /* broken.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = broken.jpg; sourceTree = "<group>"; };
 		41110A2725F9E79E008171D2 /* License.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = License.swift; sourceTree = "<group>"; };
-		4153781725FF72CD00AA0E76 /* VisualEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectView.swift; sourceTree = "<group>"; };
 		4153783126001A0900AA0E76 /* StringProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringProcessing.swift; sourceTree = "<group>"; };
+		4153784D2604B71800AA0E76 /* TitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleView.swift; sourceTree = "<group>"; };
+		415378522604B79E00AA0E76 /* IconOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconOverlayView.swift; sourceTree = "<group>"; };
+		4153785D2604B81300AA0E76 /* IconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconView.swift; sourceTree = "<group>"; };
+		4153786B2604BF1A00AA0E76 /* MessageContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageContentView.swift; sourceTree = "<group>"; };
 		4154C2DA25F76BDB00A3D373 /* Dialog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dialog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4154C2DD25F76BDB00A3D373 /* dialogApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dialogApp.swift; sourceTree = "<group>"; };
 		4154C2DF25F76BDB00A3D373 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -59,7 +63,7 @@
 		4154C2F725F76BDC00A3D373 /* dialogUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = dialogUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4154C2FB25F76BDC00A3D373 /* dialogUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dialogUITests.swift; sourceTree = "<group>"; };
 		4154C2FD25F76BDC00A3D373 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		41D81E5625F7929800D1F7E1 /* MessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageView.swift; sourceTree = "<group>"; };
+		41D81E5625F7929800D1F7E1 /* DialogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogView.swift; sourceTree = "<group>"; };
 		41D81E5B25F817BF00D1F7E1 /* ButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonView.swift; sourceTree = "<group>"; };
 		41D81E6B25F8209F00D1F7E1 /* Options.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Options.swift; sourceTree = "<group>"; };
 		41D81E7025F845D200D1F7E1 /* appVaribles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = appVaribles.swift; sourceTree = "<group>"; };
@@ -91,14 +95,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		410E877D25FA037700654CA0 /* Images */ = {
-			isa = PBXGroup;
-			children = (
-				410E877E25FA038400654CA0 /* broken.jpg */,
-			);
-			path = Images;
-			sourceTree = "<group>";
-		};
 		4154C2D125F76BDB00A3D373 = {
 			isa = PBXGroup;
 			children = (
@@ -122,11 +118,9 @@
 		4154C2DC25F76BDB00A3D373 /* dialog */ = {
 			isa = PBXGroup;
 			children = (
-				410E877D25FA037700654CA0 /* Images */,
 				41C8259825F99AF90042DC50 /* UI */,
 				4154C30C25F782E900A3D373 /* extras */,
 				4154C2DD25F76BDB00A3D373 /* dialogApp.swift */,
-				41D81E7025F845D200D1F7E1 /* appVaribles.swift */,
 				4154C2E125F76BDC00A3D373 /* Assets.xcassets */,
 				4154C2E625F76BDC00A3D373 /* Info.plist */,
 				4154C2E725F76BDC00A3D373 /* dialog.entitlements */,
@@ -164,6 +158,7 @@
 		4154C30C25F782E900A3D373 /* extras */ = {
 			isa = PBXGroup;
 			children = (
+				41D81E7025F845D200D1F7E1 /* appVaribles.swift */,
 				41D81E6B25F8209F00D1F7E1 /* Options.swift */,
 				41D81E7825F870A500D1F7E1 /* Processing.swift */,
 				41110A2725F9E79E008171D2 /* License.swift */,
@@ -176,9 +171,12 @@
 			isa = PBXGroup;
 			children = (
 				4154C2DF25F76BDB00A3D373 /* ContentView.swift */,
-				41D81E5625F7929800D1F7E1 /* MessageView.swift */,
+				41D81E5625F7929800D1F7E1 /* DialogView.swift */,
+				4153786B2604BF1A00AA0E76 /* MessageContentView.swift */,
+				4153785D2604B81300AA0E76 /* IconView.swift */,
+				4153784D2604B71800AA0E76 /* TitleView.swift */,
 				41D81E5B25F817BF00D1F7E1 /* ButtonView.swift */,
-				4153781725FF72CD00AA0E76 /* VisualEffectView.swift */,
+				415378522604B79E00AA0E76 /* IconOverlayView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -289,7 +287,6 @@
 			files = (
 				4154C2E525F76BDC00A3D373 /* Preview Assets.xcassets in Resources */,
 				4154C2E225F76BDC00A3D373 /* Assets.xcassets in Resources */,
-				410E877F25FA038400654CA0 /* broken.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -334,12 +331,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				41D81E5725F7929800D1F7E1 /* MessageView.swift in Sources */,
+				4153784E2604B71800AA0E76 /* TitleView.swift in Sources */,
+				4153785E2604B81300AA0E76 /* IconView.swift in Sources */,
+				4153786C2604BF1A00AA0E76 /* MessageContentView.swift in Sources */,
+				41D81E5725F7929800D1F7E1 /* DialogView.swift in Sources */,
 				4154C2E025F76BDB00A3D373 /* ContentView.swift in Sources */,
 				41D81E5C25F817BF00D1F7E1 /* ButtonView.swift in Sources */,
 				4153783226001A0900AA0E76 /* StringProcessing.swift in Sources */,
+				415378532604B79F00AA0E76 /* IconOverlayView.swift in Sources */,
 				41110A2825F9E79E008171D2 /* License.swift in Sources */,
-				4153781825FF72CD00AA0E76 /* VisualEffectView.swift in Sources */,
 				4154C2DE25F76BDB00A3D373 /* dialogApp.swift in Sources */,
 				41D81E6C25F8209F00D1F7E1 /* Options.swift in Sources */,
 				41D81E7125F845D200D1F7E1 /* appVaribles.swift in Sources */,
@@ -514,7 +514,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 0.3.7;
+				MARKETING_VERSION = 0.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -541,7 +541,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 0.3.7;
+				MARKETING_VERSION = 0.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;

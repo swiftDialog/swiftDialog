@@ -13,9 +13,8 @@ struct ContentView: View {
         
         // Dialog title
         HStack(alignment: .top){
-            MessageTitle()
-                .frame(width: AppVariables.windowWidth , height: 50)
-                //.padding(20)
+            TitleView()
+                .frame(width: appvars.windowWidth , height: 50)
         }
         
         // Horozontal Line
@@ -24,30 +23,29 @@ struct ContentView: View {
                 .fill(Color.gray.opacity(0.5))
                 .frame(height: 1)
         }
-        .frame(width: (AppVariables.windowWidth*0.9))
+        .frame(width: (appvars.windowWidth*0.9))
         .offset(y: -20)
         
-        // Dialog content
+        // Dialog content including message and image if visible
         HStack(alignment: .top) {
-            MessageView()
-                .frame(width: (AppVariables.windowWidth-10), height: (AppVariables.windowHeight*0.65))
+            DialogView()
+                .frame(width: (appvars.windowWidth-10), height: (appvars.windowHeight*0.65))
         }.frame(alignment: .topLeading)
-        //.border(Color.green)
+        //.border(Color.green) //debuging
         
         // Buttons
         HStack(alignment: .bottom) {
-            if (CLOptionPresent(OptionName: AppConstants.buttonInfoTextOption) || CLOptionPresent(OptionName: AppConstants.infoButtonOption)) {
+            if (CLOptionPresent(OptionName: CLOptions.buttonInfoTextOption) || CLOptionPresent(OptionName: CLOptions.infoButtonOption)) {
                 MoreInfoButton()
             }
             Spacer()
             ButtonView()
         }
-        //.font(.system(size: 12))
-        //.border(Color.blue)
         .offset(y: 12)
-        .frame(width: AppVariables.windowWidth-30, alignment: .center)
+        .frame(width: appvars.windowWidth-30, alignment: .center)
+        //.border(Color.blue) //debuging
         
-        // Window Setings
+        // Window Setings (pinched from Nudge)
         HostingWindowFinder {window in
             window?.standardWindowButton(.closeButton)?.isHidden = true //hides the red close button
             window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
@@ -56,7 +54,6 @@ struct ContentView: View {
             window?.isMovable = false // not movable
             NSApp.activate(ignoringOtherApps: true) // bring to forefront upon launch
         }
-        
     }
 }
 
@@ -72,25 +69,26 @@ struct HostingWindowFinder: NSViewRepresentable {
     func makeNSView(context: Self.Context) -> NSView {
         let view = NSView()
         
-        // process command line options to set variables
-        if CLOptionPresent(OptionName: AppConstants.getVersion) {
+        // process command line options that just display info and exit before we show the main window
+        if CLOptionPresent(OptionName: CLOptions.getVersion) {
             printVersionString()
             exit(0)
         }
-        if (CLOptionPresent(OptionName: AppConstants.helpOption) || CommandLine.arguments.count == 1) {
+        if (CLOptionPresent(OptionName: CLOptions.helpOption) || CommandLine.arguments.count == 1) {
             print(helpText)
             exit(0)
         }
-        if CLOptionPresent(OptionName: AppConstants.showLicense) {
+        if CLOptionPresent(OptionName: CLOptions.showLicense) {
             print(licenseText)
             exit(0)
         }
-        if CLOptionPresent(OptionName: AppConstants.buyCoffee) {
+        if CLOptionPresent(OptionName: CLOptions.buyCoffee) {
+            //I'm a teapot
             print("If you like this app and want to buy me a coffee https://www.buymeacoffee.com/bartreardon")
             exit(418)
         }
         
-        if CLOptionPresent(OptionName: AppConstants.hideIcon) {
+        if CLOptionPresent(OptionName: CLOptions.hideIcon) {
             iconVisible = false
         } else {
             iconVisible = true
@@ -102,5 +100,6 @@ struct HostingWindowFinder: NSViewRepresentable {
         }
         return view
     }
+    
     func updateNSView(_ nsView: NSView, context: Context) {}
 }

@@ -4,7 +4,11 @@
 //
 //  Created by Reardon, Bart (IM&T, Yarralumla) on 16/3/21.
 //
+// *******************************************************
+// Reserved for future use
+// *******************************************************
 
+/*
 import Foundation
 import SwiftUI
 
@@ -36,15 +40,15 @@ struct RichText {
 
 extension String {
 
-    /// Parses the input text and returns a collection of rich text elements.
-    /// Currently supports asterisks only. E.g. "Save *everything* that *inspires* your ideas".
-    ///
-    /// - Returns: A collection of rich text elements.
+    // Parses the input text and returns a collection of rich text elements.
+    // Currently supports asterisks only. E.g. "Save *everything* that *inspires* your ideas".
+    //
+    // - Returns: A collection of rich text elements.
     func parseRichTextElements() -> [RichText.Element] {
         let regex = try! NSRegularExpression(pattern: "\\*{1}(.*?)\\*{1}")
         let range = NSRange(location: 0, length: count)
 
-        /// Find all the ranges that match the regex *CONTENT*.
+        // Find all the ranges that match the regex *CONTENT*.
         let matches: [NSTextCheckingResult] = regex.matches(in: self, options: [], range: range)
         let matchingRanges = matches.compactMap { Range<Int>($0.range) }
 
@@ -79,10 +83,11 @@ extension String {
         return elements
     }
 
-    /// - Returns: A string subscript based on the given range.
+    // - Returns: A string subscript based on the given range.
     subscript(range: Range<Int>) -> String {
         let startIndex = index(self.startIndex, offsetBy: range.lowerBound)
         let endIndex = index(self.startIndex, offsetBy: range.upperBound)
         return String(self[startIndex..<endIndex])
     }
 }
+*/

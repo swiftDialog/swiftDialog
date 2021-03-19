@@ -11,7 +11,7 @@ import SwiftUI
 struct ButtonView: View {
 
     private func button1Action() {
-        let action: String = CLOptionText(OptionName: AppConstants.button1ActionOption, DefaultValue: "")
+        let action: String = CLOptionText(OptionName: CLOptions.button1ActionOption, DefaultValue: "")
         
         if (action != "") {
             openSpecifiedURL(urlToOpen: action)
@@ -22,14 +22,14 @@ struct ButtonView: View {
     var body: some View {
         //secondary button
         HStack {
-            if CLOptionPresent(OptionName: AppConstants.button2Option){
+            if CLOptionPresent(OptionName: CLOptions.button2Option){
                 Button(action: {exit(2)}, label: {
-                    Text(AppVariables.button2Default)
+                    Text(appvars.button2Default)
                     }
                 ).frame(minWidth: 36, alignment: .center)
                 .keyboardShortcut(.cancelAction)
-            } else if CLOptionPresent(OptionName: AppConstants.button2TextOption) {
-                let button2Text: String = CLOptionText(OptionName: AppConstants.button2TextOption, DefaultValue: AppVariables.button2Default)
+            } else if CLOptionPresent(OptionName: CLOptions.button2TextOption) {
+                let button2Text: String = CLOptionText(OptionName: CLOptions.button2TextOption, DefaultValue: appvars.button2Default)
                 Button(action: {exit(2)}, label: {
                     Text(button2Text)
                     }
@@ -38,7 +38,7 @@ struct ButtonView: View {
             }
         }
         // default button aka button 1
-        let button1Text: String = CLOptionText(OptionName: AppConstants.button1TextOption, DefaultValue: AppVariables.button1Default)
+        let button1Text: String = CLOptionText(OptionName: CLOptions.button1TextOption, DefaultValue: appvars.button1Default)
         HStack {
             Button(action: {self.button1Action()}, label: {
                 Text(button1Text)
@@ -50,18 +50,18 @@ struct ButtonView: View {
 }
 
 struct MoreInfoButton: View {
-    let buttonInfoAction: String = CLOptionText(OptionName: AppConstants.buttonInfoActionOption, DefaultValue: AppVariables.buttonInfoActionDefault)
+    let buttonInfoAction: String = CLOptionText(OptionName: CLOptions.buttonInfoActionOption, DefaultValue: appvars.buttonInfoActionDefault)
     
     var body: some View {
         VStack(alignment: .center) {
             Spacer()
-            if CLOptionPresent(OptionName: AppConstants.infoButtonOption) {
+            if CLOptionPresent(OptionName: CLOptions.infoButtonOption) {
                 Button(action: {openSpecifiedURL(urlToOpen: buttonInfoAction);exit(3)}, label: {
-                    Text(AppVariables.buttonInfoDefault)
+                    Text(appvars.buttonInfoDefault)
                     }
                 ).frame(minWidth: 36, alignment: .center)
-            } else if CLOptionPresent(OptionName: AppConstants.buttonInfoTextOption) {
-                let buttonInfoText: String = CLOptionText(OptionName: AppConstants.buttonInfoTextOption, DefaultValue: AppVariables.buttonInfoDefault)
+            } else if CLOptionPresent(OptionName: CLOptions.buttonInfoTextOption) {
+                let buttonInfoText: String = CLOptionText(OptionName: CLOptions.buttonInfoTextOption, DefaultValue: appvars.buttonInfoDefault)
                 Button(action: {openSpecifiedURL(urlToOpen: buttonInfoAction);exit(3)}, label: {
                     Text(buttonInfoText)
                     }

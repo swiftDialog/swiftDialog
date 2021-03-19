@@ -9,11 +9,16 @@ import Foundation
 
 var iconVisible: Bool = true
 
+// Probably a way to work all this out as a nice dictionary. For now, long form.
+
+// declare our app var in case we want to update values - e.g. future use, multiple dialog sizes
+var appvars = AppVariables()
+
 var helpText = """
     Dialog version \(getVersionString()) ©2021 Bart Reardon
     --title             Set the Dialog title
                         Text over 40 characters gets truncated
-                        Default Title is "\(AppVariables.titleDefault)"
+                        Default Title is "\(appvars.titleDefault)"
     
     --message           Set the dialog message
                         Message length is up to approximately 80 words
@@ -43,7 +48,7 @@ var helpText = """
                         Doing so increases the space available for message text to approximately 100 words
 
     --button1text       Set the label for Button1
-                        Default label is "\(AppVariables.button1Default)"
+                        Default label is "\(appvars.button1Default)"
                         Bound to <Enter> key
 
     --button1action     Set the action to take.
@@ -51,7 +56,7 @@ var helpText = """
                         Default action if not specified is no action
                         Return code when actioned is 0
 
-    --button2           Displays button2 with default label of "\(AppVariables.button2Default)"
+    --button2           Displays button2 with default label of "\(appvars.button2Default)"
         OR
     --button2text       Set the label for Button1
                         Bound to <ESC> key
@@ -59,7 +64,7 @@ var helpText = """
     --button2action     Return code when actioned is 2
                         -- Setting Custon Actions For Button 2 Is Not Implemented at this time --
 
-    --infobutton        Displays button2 with default label of "\(AppVariables.buttonInfoDefault)"
+    --infobutton        Displays button2 with default label of "\(appvars.buttonInfoDefault)"
         OR
     --infobuttontext    Set the label for Information Button
                         If not specified, Info button will not be displayed
@@ -76,22 +81,23 @@ var helpText = """
     """
 
 struct AppVariables {
-    static var windowWidth = CGFloat(820)
-    static var windowHeight = CGFloat(380)
+    var windowWidth = CGFloat(820)
+    var windowHeight = CGFloat(380)
  
-    static var imageWidth = CGFloat(170)
-    static var imageHeight = CGFloat(260)
+    var imageWidth = CGFloat(170)
+    var imageHeight = CGFloat(260)
     
     
     // message defaults
-    static var titleDefault = String("Important *Message* Title")
-    static var messageDefault = String("Important Message Content\n\nPlease read")
+    var titleDefault = String("An Important Message")
+    var messageDefault = String("\nThis is important message content\n\nPlease read")
     
     // button defaults
-    static var button1Default = String("    OK    ")
-    static var button2Default = String("Cancel")
-    static var buttonInfoDefault = String("More Information")
-    static var buttonInfoActionDefault = String("")
+    // work out how to define a default width button that does what you tell it to. in the meantime, diry hack with spaces
+    var button1Default = String("    OK    ")
+    var button2Default = String("Cancel")
+    var buttonInfoDefault = String("More Information")
+    var buttonInfoActionDefault = String("")
     
     //static var iconVisible = true
     //static var displayMoreInfo = true // testing
@@ -100,7 +106,8 @@ struct AppVariables {
     //static var textAllignment = "left" //testing
 }
 
-struct AppConstants {
+
+struct CLOptions {
     static let titleOption = String("--title")
     //static let titleOptionBrief = String("-t")
     
@@ -119,7 +126,6 @@ struct AppConstants {
     static let buttonInfoTextOption = String("--infobuttontext")
     static let buttonInfoActionOption = String("--infobuttonaction")
 
-    
     //static let messageTextAllignment = String("--textallignment")
     
     // command line options that take no additional parameters
