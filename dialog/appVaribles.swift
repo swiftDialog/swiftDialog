@@ -27,7 +27,9 @@ var helpText = """
                         Acceptable Values:
                         file path to png or jpg           -  "/file/path/image.[png|jpg]"
                         file path to Application          -  "/Applications/Chess.app"
-                        URL of file resource              -  "https://someurl/file.[png.jpg]"
+                        URL of file resource              -  "https://someurl/file.[png|jpg]"
+                        builtin                           -  info | caution | warning
+
                         if not specified, default icon will be used
                         Images from either file or URL are displayed as roundrect if no transparancy
 
@@ -36,13 +38,14 @@ var helpText = """
                         Acceptable Values:
                         file path to png or jpg           -  "/file/path/image.[png|jpg]"
                         file path to Application          -  "/Applications/Chess.app"
-                        URL of file resource              -  "https://someurl/file.[png.jpg]"
+                        URL of file resource              -  "https://someurl/file.[png|jpg]"
+                        builtin                           -  info | caution | warning
 
-    --infoicon          Built in. Displays person with questionmark as the icon
+    --infoicon          (Deprecated - use "--icon info" instead) Built in. Displays person with questionmark as the icon
 
-    --cautionicon       Built in. Displays yellow triangle with exclamation point
+    --cautionicon       (Deprecated - use "--icon caution" instead) Built in. Displays yellow triangle with exclamation point
 
-    --warningicon       Built in. Displays red octagon with exclamation point
+    --warningicon       (Deprecated - use "--icon warning" instead) Built in. Displays red octagon with exclamation point
     
     --hideicon          hides the icon from view
                         Doing so increases the space available for message text to approximately 100 words

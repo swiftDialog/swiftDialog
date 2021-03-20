@@ -78,7 +78,6 @@ struct IconOverlayView: View {
                             .aspectRatio(contentMode: .fit)
                             .scaledToFit()
                             .clipShape(RoundedRectangle(cornerRadius: 5))
-                            .shadow(radius: 5)
                     } else if imgFromAPP {
                         Image(nsImage: getAppIcon(appPath: overlayImagePath, withSize: overlayWidth!))
                             .resizable()
@@ -91,7 +90,6 @@ struct IconOverlayView: View {
                             .aspectRatio(contentMode: .fit)
                             .scaledToFit()
                             .clipShape(RoundedRectangle(cornerRadius: 5))
-                            .shadow(radius: 5)
                     } else {
                         Image(systemName: "questionmark.square.dashed")
                                 .resizable()
@@ -103,6 +101,7 @@ struct IconOverlayView: View {
             }
             .frame(width: overlayWidth, height: overlayHeight)
             .offset(x: 40, y: 50)
+            .shadow(radius: 3)
         }
     }
 }
