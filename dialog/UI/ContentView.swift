@@ -45,7 +45,7 @@ struct ContentView: View {
         .frame(width: appvars.windowWidth-30, alignment: .center)
         //.border(Color.blue) //debuging
         
-        // Window Setings (pinched from Nudge)
+        // Window Setings (pinched from Nudge https://github.com/macadmins/nudge/blob/main/Nudge/UI/ContentView.swift#L19)
         HostingWindowFinder {window in
             window?.standardWindowButton(.closeButton)?.isHidden = true //hides the red close button
             window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button

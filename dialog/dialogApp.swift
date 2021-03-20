@@ -30,8 +30,3 @@ struct dialogApp: App {
         //.windowStyle(TitleBarWindowStyle())
     }
 }
-
-
-
-
-
