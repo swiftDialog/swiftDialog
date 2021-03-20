@@ -5,6 +5,8 @@ Dialog is a simple app that displays a dialog with specified content passed in f
 
 Latest version can be found on the [Releases](https://github.com/bartreardon/Dialog-public/releases) page
 
+More info in the [Wiki](https://github.com/bartreardon/Dialog-public/wiki)
+
 ![Dialog Logo](/assets/screen1.png)
 
 
