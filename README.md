@@ -7,9 +7,6 @@ Latest version can be found on the [Releases](https://github.com/bartreardon/Dia
 
 ![Dialog Logo](/assets/screen1.png)
 
-# Where is the source code?
-
-Releasing the source will need to be cleared with my employer. Initial beta releases are being made public though through this repo. Any issues or feature requests, please feel free to [raise an issue](https://github.com/bartreardon/Dialog-public/issues)
 
 # Features
 Universal binary
