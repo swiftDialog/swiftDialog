@@ -42,11 +42,26 @@ Dialog is pretty boring by itself. Use the following commandline options to spru
                         Message length is up to approximately 80 words
     
     --icon              Set the icon to display
-                        pass in file path to png or jpg           -  "/file/path/image.[png|jpg]"
-                        optionally pass in URL of file resource   -  "https://someurl/file.[png.jpg]"
+                        Acceptable Values:
+                        file path to png or jpg           -  "/file/path/image.[png|jpg]"
+                        file path to Application          -  "/Applications/Chess.app"
+                        URL of file resource              -  "https://someurl/file.[png.jpg]"
                         if not specified, default icon will be used
-                        Images from either file or URL are displayed as roundrect if no transparency
-    
+                        Images from either file or URL are displayed as roundrect if no transparancy
+
+    --overlayicon       Set an image to display as an overlay to --icon
+                        image is displayed at 1/2 resolution to the main image and positioned to the bottom right
+                        Acceptable Values:
+                        file path to png or jpg           -  "/file/path/image.[png|jpg]"
+                        file path to Application          -  "/Applications/Chess.app"
+                        URL of file resource              -  "https://someurl/file.[png.jpg]"
+                        
+    --infoicon          Built in. Displays person with questionmark as the icon
+
+    --cautionicon       Built in. Displays yellow triangle with exclamation point
+
+    --warningicon       Built in. Displays red octagon with exclamation point
+            
     --hideicon          hides the icon from view
                         Doing so increases the space available for message text to approximately 100 words
 
@@ -91,3 +106,22 @@ The following return codes are sent after each action. These can be ignored or u
 | button1     | No       | Enter  | 0           |
 | button2     | Yes      | Esc    | 2           |
 | infobutton  | Yes      |        | 3           |
+
+# Displaying Images in the Icon area
+The icon area on the left hand portion of the dialog can be configured in a number of ways.
+
+The most simplest configuration is to simply pass in the path of a file resource for the dialog to display. The file resource can either be a local file path or from a URL.
+
+There are a number of built-in icons you can use:
+
+`--caution`
+![Caution Icon Example](/assets/caution.png)
+
+`--warning`
+![Warning Icon Example](/assets/warning.png)
+
+`--info`
+![Info Icon Example](/assets/info.png)
+
+Whether you are using a built in icon or a remote resource, you can optionslly display an icon overlay by specifying one with `--iconoverlay` and providing a path to an image, either as a local file or URL.
+![Icon Overlay Example](/assets/overlay2.png)
