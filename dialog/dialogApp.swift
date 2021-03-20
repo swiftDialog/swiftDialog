@@ -20,18 +20,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 @main
 struct dialogApp: App {
     var body: some Scene {
-              
+                
         WindowGroup {
             ContentView()
-                .frame(width: AppVariables.windowWidth, height: AppVariables.windowHeight)
+                .frame(width: appvars.windowWidth, height: appvars.windowHeight)
         }
         // Hide Title Bar
         .windowStyle(HiddenTitleBarWindowStyle())
         //.windowStyle(TitleBarWindowStyle())
     }
 }
-
-
-
-
-

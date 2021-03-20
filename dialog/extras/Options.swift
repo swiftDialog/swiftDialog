@@ -40,6 +40,8 @@ func CLOptionText(OptionName: String, DefaultValue: String) -> String {
     return CLOptionTextValue
 }
 
+// returns true if the specified oprion is present.
+
 func CLOptionPresent(OptionName: String) -> Bool {
     // Determine if option is present.
     var optionPresent = false

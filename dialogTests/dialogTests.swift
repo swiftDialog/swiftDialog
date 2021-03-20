@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import dialog
+@testable import Dialog
 
 class dialogTests: XCTestCase {
 
