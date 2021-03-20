@@ -17,6 +17,11 @@ struct IconView: View {
     var imgFromAPP: Bool = false
     let imgXOffset: CGFloat = 25
     
+    var builtInIconName: String = ""
+    var builtInIconColour: Color = Color.black
+    var builtInIconFill: String = ""
+    var builtInIconPresent: Bool = false
+    
     init() {
         self.logoWidth = appvars.imageWidth
         self.logoHeight = appvars.imageHeight
@@ -26,34 +31,48 @@ struct IconView: View {
         if messageUserImagePath.hasSuffix(".app") {
             imgFromAPP = true
         }
+        
+        if CLOptionPresent(OptionName: CLOptions.warningIcon) || messageUserImagePath == "warning" {
+            builtInIconName = "exclamationmark.octagon.fill"
+            builtInIconFill = "octagon.fill"
+            builtInIconColour = Color.red
+            builtInIconPresent = true
+        } else if CLOptionPresent(OptionName: CLOptions.cautionIcon) || messageUserImagePath == "caution" {
+            builtInIconName = "exclamationmark.triangle.fill"
+            builtInIconFill = "triangle.fill"
+            builtInIconColour = Color.yellow
+            builtInIconPresent = true
+        } else if CLOptionPresent(OptionName: CLOptions.infoIcon) || messageUserImagePath == "info" {
+            builtInIconName = "person.fill.questionmark"
+            builtInIconPresent = true
+        }
     }
     
     var body: some View {
         VStack {
-            if CLOptionPresent(OptionName: CLOptions.infoIcon) {
-                Image(systemName: "person.fill.questionmark")
+            if builtInIconPresent {
+                ZStack {
+                    Image(systemName: builtInIconFill)
+                        .resizable()
+                        .foregroundColor(Color.white)
+                
+                    Image(systemName: builtInIconName)
+                        .resizable()
+                        .foregroundColor(builtInIconColour)
+                }
+                .aspectRatio(contentMode: .fit)
+                .scaledToFit()
+                .offset(x: imgXOffset)
+                .overlay(IconOverlayView(), alignment: .bottomTrailing)
+                /*
+                Image(systemName: builtInIconName)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .scaledToFit()
-                    .foregroundColor(Color.black)
+                    .foregroundColor(builtInIconColour)
                     .offset(x: imgXOffset)
                     .overlay(IconOverlayView(), alignment: .bottomTrailing)
-            } else if CLOptionPresent(OptionName: CLOptions.warningIcon) {
-                Image(systemName: "exclamationmark.octagon.fill")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .scaledToFit()
-                    .foregroundColor(Color.red)
-                    .offset(x: imgXOffset)
-                    .overlay(IconOverlayView(), alignment: .bottomTrailing)
-            } else if CLOptionPresent(OptionName: CLOptions.cautionIcon) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .scaledToFit()
-                    .foregroundColor(Color.yellow)
-                    .offset(x: imgXOffset)
-                    .overlay(IconOverlayView(), alignment: .bottomTrailing)
+ */
             } else {
                 if imgFromURL {
                     let webImage: NSImage = getImageFromPath(fileImagePath: messageUserImagePath, imgWidth: appvars.imageWidth, imgHeight: appvars.imageHeight)
