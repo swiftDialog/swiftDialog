@@ -51,10 +51,17 @@ struct ContentView: View {
             window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
             window?.standardWindowButton(.zoomButton)?.isHidden = true //this removes the green zoom button
             window?.center() // center
-            window?.isMovable = false // not movable
+            window?.isMovable = appvars.windowIsMoveable
+            if appvars.windowOnTop {
+                window?.level = .floating
+            } else {
+                window?.level = .normal
+            }
+            
             NSApp.activate(ignoringOtherApps: true) // bring to forefront upon launch
         }
     }
+
 }
 
 struct ContentView_Previews: PreviewProvider {
@@ -93,6 +100,16 @@ struct HostingWindowFinder: NSViewRepresentable {
         } else {
             iconVisible = true
         }
+        
+        if CLOptionPresent(OptionName: CLOptions.lockWindow) {
+            appvars.windowIsMoveable = true
+        }
+        
+        if CLOptionPresent(OptionName: CLOptions.forceOnTop) {
+            appvars.windowOnTop = true
+        }
+        
+        
         //----------
         
         DispatchQueue.main.async { [weak view] in

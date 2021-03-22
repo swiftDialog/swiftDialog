@@ -77,6 +77,10 @@ var helpText = """
                         Accepts URL
                         Default action if not specified is no action
 
+    --moveable          Let window me moved around the screen. Default is not moveable
+
+    --ontop             Make the window appear above all other windows even when not active
+
     --version           Prints the app version
     --help              Prints this text
 
@@ -101,6 +105,9 @@ struct AppVariables {
     var button2Default                  = String("Cancel")
     var buttonInfoDefault               = String("More Information")
     var buttonInfoActionDefault         = String("")
+    
+    var windowIsMoveable                = Bool(false)
+    var windowOnTop                     = Bool(false)
     
     // reserved for future experimentation
     //static var iconVisible = true
@@ -135,4 +142,7 @@ struct CLOptions {
     static let warningIcon              = String("--warningicon")
     static let infoIcon                 = String("--infoicon")
     static let cautionIcon              = String("--cautionicon")
+    
+    static let lockWindow              = String("--moveable")
+    static let forceOnTop              = String("--ontop")
 }
