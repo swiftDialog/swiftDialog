@@ -29,4 +29,7 @@ struct dialogApp: App {
         .windowStyle(HiddenTitleBarWindowStyle())
         //.windowStyle(TitleBarWindowStyle())
     }
+    
 }
+
+
