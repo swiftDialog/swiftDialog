@@ -11,6 +11,11 @@ import SwiftUI
 import AppKit
 
 struct DialogView: View {
+    init() {
+        if CLOptionPresent(OptionName: CLOptions.hideIcon) {
+            appvars.imageWidth = 0
+        }
+    }
     
     var body: some View {
         HStack(alignment: .top, spacing: /*@START_MENU_TOKEN@*/nil/*@END_MENU_TOKEN@*/) {
@@ -26,10 +31,12 @@ struct DialogView: View {
                 VStack(alignment: .center) {
                     //TitleView()
                     MessageContent()
-                        .padding(30)
+                        //.padding(0)
+                        //.border(Color.red)
+                        
                         
                 }.frame(width:(appvars.windowWidth - iconFrameWidth),
-                        height: appvars.windowHeight,
+                        height: appvars.windowHeight - appvars.titleHeight,
                         alignment: .center)
             }
             
