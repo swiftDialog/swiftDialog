@@ -81,10 +81,15 @@ var helpText = """
 
     --ontop             Make the window appear above all other windows even when not active
 
+    --big               Makes the dialog 25% bigger than normal. More room for message text
+
+    --small             Makes the dialog 25% smaller. Less room for message text.
+
     --version           Prints the app version
-    --help              Prints this text
 
     --showlicense       Display the Software License Agreement for Dialog
+
+    --help              Prints this text
     """
 
 struct AppVariables {
