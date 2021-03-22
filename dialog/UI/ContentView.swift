@@ -14,7 +14,7 @@ struct ContentView: View {
         // Dialog title
         HStack(alignment: .top){
             TitleView()
-                .frame(width: appvars.windowWidth , height: 50)
+                .frame(width: appvars.windowWidth , height: appvars.titleHeight)
         }
         
         // Horozontal Line
@@ -23,13 +23,13 @@ struct ContentView: View {
                 .fill(Color.gray.opacity(0.5))
                 .frame(height: 1)
         }
-        .frame(width: (appvars.windowWidth*0.9))
+        .frame(width: (appvars.windowWidth * appvars.horozontalLineScale))
         .offset(y: -20)
         
         // Dialog content including message and image if visible
         HStack(alignment: .top) {
             DialogView()
-                .frame(width: (appvars.windowWidth-10), height: (appvars.windowHeight*0.65))
+                .frame(width: (appvars.windowWidth-10), height: (appvars.windowHeight * appvars.dialogContentScale * appvars.scaleFactor))
         }.frame(alignment: .topLeading)
         //.border(Color.green) //debuging
         
@@ -108,8 +108,7 @@ struct HostingWindowFinder: NSViewRepresentable {
         if CLOptionPresent(OptionName: CLOptions.forceOnTop) {
             appvars.windowOnTop = true
         }
-        
-        
+                
         //----------
         
         DispatchQueue.main.async { [weak view] in

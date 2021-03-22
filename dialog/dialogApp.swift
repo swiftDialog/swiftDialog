@@ -19,8 +19,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 @available(OSX 11.0, *)
 @main
 struct dialogApp: App {
+    init () {
+        if CLOptionPresent(OptionName: CLOptions.smallWindow) {
+            // scale everything down a notch
+            
+            appvars.smallWindow = true
+            
+            appvars.scaleFactor = 0.75
+            appvars.dialogContentScale = 0.80
+            
+            appvars.overlayOffsetX = appvars.overlayOffsetX * (appvars.scaleFactor*appvars.scaleFactor)
+            appvars.overlayOffsetY = appvars.overlayOffsetY * (appvars.scaleFactor*appvars.scaleFactor)
+            appvars.overlayShadow = 1
+            
+            //appvars.titleFontSize
+            
+            appvars.titleHeight = appvars.titleHeight * appvars.scaleFactor
+            appvars.windowWidth = appvars.windowWidth * appvars.scaleFactor
+            appvars.windowHeight = appvars.windowHeight * appvars.scaleFactor
+            appvars.imageWidth = appvars.imageWidth * appvars.scaleFactor
+            appvars.imageHeight = appvars.imageHeight * appvars.scaleFactor
+            
+            appvars.overlayIconScale = appvars.overlayIconScale * appvars.scaleFactor
+
+        }
+    }
     var body: some Scene {
-                
+                        
         WindowGroup {
             ContentView()
                 .frame(width: appvars.windowWidth, height: appvars.windowHeight)

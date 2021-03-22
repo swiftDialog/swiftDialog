@@ -22,8 +22,8 @@ struct IconOverlayView: View {
     var builtInIconPresent: Bool = false
     
     init(overlayWidth: CGFloat? = nil, overlayHeight: CGFloat? = nil) {
-        self.overlayWidth = appvars.imageWidth/2
-        self.overlayHeight = appvars.imageHeight/2
+        self.overlayWidth = appvars.imageWidth * appvars.overlayIconScale
+        self.overlayHeight = appvars.imageHeight * appvars.overlayIconScale
         if overlayImagePath.starts(with: "http") {
             imgFromURL = true
         }
@@ -100,8 +100,8 @@ struct IconOverlayView: View {
                 }
             }
             .frame(width: overlayWidth, height: overlayHeight)
-            .offset(x: 40, y: 50)
-            .shadow(radius: 3)
+            .offset(x: appvars.overlayOffsetX, y: appvars.overlayOffsetY)
+            .shadow(radius: appvars.overlayShadow)
         }
     }
 }

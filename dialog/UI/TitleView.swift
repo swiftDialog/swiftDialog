@@ -16,7 +16,7 @@ struct TitleView: View {
         VStack {
             Text(TitleViewOption)
                 .bold()
-                .font(.system(size: 30))
+                .font(.system(size: appvars.titleFontSize))
         }
         //.border(Color.purple) //debuging
     }

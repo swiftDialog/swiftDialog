@@ -109,6 +109,19 @@ struct AppVariables {
     var windowIsMoveable                = Bool(false)
     var windowOnTop                     = Bool(false)
     
+    // Window Sizes
+    var smallWindow                     = Bool(false)
+    var scaleFactor                     = CGFloat(1)
+    var titleHeight                     = CGFloat(50)
+    var horozontalLineScale             = CGFloat(0.9)
+    var dialogContentScale              = CGFloat(0.65)
+    var titleFontSize                   = CGFloat(30)
+    var overlayIconScale                = CGFloat(0.5)
+    var overlayOffsetX                  = CGFloat(40)
+    var overlayOffsetY                  = CGFloat(50)
+    var overlayShadow                   = CGFloat(3)
+    
+    
     // reserved for future experimentation
     //static var iconVisible = true
     //static var displayMoreInfo = true // testing
@@ -145,4 +158,6 @@ struct CLOptions {
     
     static let lockWindow              = String("--moveable")
     static let forceOnTop              = String("--ontop")
+    static let smallWindow              = String("--small")
+
 }
