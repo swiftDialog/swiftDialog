@@ -30,6 +30,7 @@ struct ContentView: View {
         HStack(alignment: .top) {
             DialogView()
                 .frame(width: (appvars.windowWidth-10), height: (appvars.windowHeight * appvars.dialogContentScale * appvars.scaleFactor))
+                //.border(Color.green)
         }.frame(alignment: .topLeading)
         //.border(Color.green) //debuging
         

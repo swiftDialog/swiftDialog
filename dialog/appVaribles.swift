@@ -88,12 +88,7 @@ var helpText = """
     """
 
 struct AppVariables {
-    var windowWidth                     = CGFloat(820)      // set default dialog width
-    var windowHeight                    = CGFloat(380)      // set default dialog height
- 
-    var imageWidth                      = CGFloat(170)      // set default image area width
-    var imageHeight                     = CGFloat(260)      // set default image area height
-    
+
     
     // message default strings
     var titleDefault                    = String("An Important Message")
@@ -110,9 +105,17 @@ struct AppVariables {
     var windowOnTop                     = Bool(false)
     
     // Window Sizes
-    var smallWindow                     = Bool(false)
-    var scaleFactor                     = CGFloat(1)
+    var windowWidth                     = CGFloat(820)      // set default dialog width
+    var windowHeight                    = CGFloat(380)      // set default dialog height
+ 
+    var imageWidth                      = CGFloat(170)      // set default image area width
+    var imageHeight                     = CGFloat(260)      // set default image area height
     var titleHeight                     = CGFloat(50)
+    
+    var smallWindow                     = Bool(false)
+    var bigWindow                       = Bool(false)
+    var scaleFactor                     = CGFloat(1)
+
     var horozontalLineScale             = CGFloat(0.9)
     var dialogContentScale              = CGFloat(0.65)
     var titleFontSize                   = CGFloat(30)
@@ -156,8 +159,9 @@ struct CLOptions {
     static let infoIcon                 = String("--infoicon")
     static let cautionIcon              = String("--cautionicon")
     
-    static let lockWindow              = String("--moveable")
-    static let forceOnTop              = String("--ontop")
+    static let lockWindow               = String("--moveable")
+    static let forceOnTop               = String("--ontop")
     static let smallWindow              = String("--small")
+    static let bigWindow                = String("--big")
 
 }
