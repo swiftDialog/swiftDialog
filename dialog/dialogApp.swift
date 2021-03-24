@@ -24,7 +24,7 @@ struct dialogApp: App {
             // scale everything down a notch
             
             appvars.smallWindow = true
-            
+
             appvars.scaleFactor = 0.75
             appvars.dialogContentScale = 0.80
             
