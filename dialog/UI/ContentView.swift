@@ -78,12 +78,12 @@ struct HostingWindowFinder: NSViewRepresentable {
         let view = NSView()
         
         // process command line options that just display info and exit before we show the main window
-        if CLOptionPresent(OptionName: CLOptions.getVersion) {
-            printVersionString()
-            exit(0)
-        }
         if (CLOptionPresent(OptionName: CLOptions.helpOption) || CommandLine.arguments.count == 1) {
             print(helpText)
+            exit(0)
+        }
+        if CLOptionPresent(OptionName: CLOptions.getVersion) {
+            printVersionString()
             exit(0)
         }
         if CLOptionPresent(OptionName: CLOptions.showLicense) {
