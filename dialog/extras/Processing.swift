@@ -33,8 +33,9 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
     do {
         imageData = try NSData(contentsOf: urlPath as URL)
     } catch {
-        let errorImageConfig = NSImage.SymbolConfiguration(pointSize: 200, weight: .ultraLight)
-        return NSImage(systemSymbolName: "questionmark.square,dashed", accessibilityDescription: nil)!.withSymbolConfiguration(errorImageConfig)!
+        quitDialog(exitCode: appvars.exit201.code, exitMessage: "\(appvars.exit201.message) \(fileImagePath)")
+        //let errorImageConfig = NSImage.SymbolConfiguration(pointSize: 200, weight: .ultraLight)
+        //return NSImage(systemSymbolName: "questionmark.square.dashed", accessibilityDescription: nil)!.withSymbolConfiguration(errorImageConfig)!
     }
     
     let image : NSImage = NSImage(data: imageData as Data)!
@@ -79,4 +80,12 @@ func getVersionString() -> String {
         appVersion = version
     }
     return appVersion
+}
+
+func quitDialog(exitCode: Int32, exitMessage: String? = "") {
+    if exitMessage != "" {
+        print(exitCode)
+        print("\(exitMessage!)")
+    }
+    exit(exitCode)
 }
