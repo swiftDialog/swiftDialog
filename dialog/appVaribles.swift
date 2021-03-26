@@ -148,6 +148,17 @@ struct AppVariables {
     var overlayOffsetY                  = CGFloat(50)
     var overlayShadow                   = CGFloat(3)
     
+    // exit codes and error messages
+    var exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))
+    var exit202                         = (code: Int32(202), message: String("ERROR: File not found :"))
+    var exit203                         = (code: Int32(203), message: String(""))
+    var exit204                         = (code: Int32(204), message: String(""))
+    var exit205                         = (code: Int32(205), message: String(""))
+    var exit206                         = (code: Int32(206), message: String(""))
+    var exit207                         = (code: Int32(207), message: String(""))
+    var exit208                         = (code: Int32(208), message: String(""))
+    var exit209                         = (code: Int32(209), message: String(""))
+    var exit210                         = (code: Int32(210), message: String(""))
     
     // reserved for future experimentation
     //static var iconVisible = true

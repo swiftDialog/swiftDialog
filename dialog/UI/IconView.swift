@@ -25,6 +25,7 @@ struct IconView: View {
     init() {
         self.logoWidth = appvars.imageWidth
         self.logoHeight = appvars.imageHeight
+        
         if messageUserImagePath.starts(with: "http") {
             imgFromURL = true
         }
@@ -45,6 +46,10 @@ struct IconView: View {
         } else if CLOptionPresent(OptionName: CLOptions.infoIcon) || messageUserImagePath == "info" {
             builtInIconName = "person.fill.questionmark"
             builtInIconPresent = true
+        }
+        
+        if !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL && !imgFromAPP && !builtInIconPresent  {
+            quitDialog(exitCode: appvars.exit202.code, exitMessage: "\(appvars.exit202.message) \(messageUserImagePath)")
         }
     }
     

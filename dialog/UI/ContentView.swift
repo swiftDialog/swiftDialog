@@ -80,20 +80,24 @@ struct HostingWindowFinder: NSViewRepresentable {
         // process command line options that just display info and exit before we show the main window
         if (CLOptionPresent(OptionName: CLOptions.helpOption) || CommandLine.arguments.count == 1) {
             print(helpText)
-            exit(0)
+            quitDialog(exitCode: 0)
+            //exit(0)
         }
         if CLOptionPresent(OptionName: CLOptions.getVersion) {
             printVersionString()
-            exit(0)
+            quitDialog(exitCode: 0)
+            //exit(0)
         }
         if CLOptionPresent(OptionName: CLOptions.showLicense) {
             print(licenseText)
-            exit(0)
+            quitDialog(exitCode: 0)
+            //exit(0)
         }
         if CLOptionPresent(OptionName: CLOptions.buyCoffee) {
             //I'm a teapot
             print("If you like this app and want to buy me a coffee https://www.buymeacoffee.com/bartreardon")
-            exit(418)
+            quitDialog(exitCode: 418)
+            //exit(418)
         }
         
         if CLOptionPresent(OptionName: CLOptions.hideIcon) {

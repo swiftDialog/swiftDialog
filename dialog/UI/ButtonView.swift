@@ -16,21 +16,22 @@ struct ButtonView: View {
         if (action != "") {
             openSpecifiedURL(urlToOpen: action)
         }
-        exit(0)
+        quitDialog(exitCode: 0)
+        //exit(0)
     }
     
     var body: some View {
         //secondary button
         HStack {
             if CLOptionPresent(OptionName: CLOptions.button2Option){
-                Button(action: {exit(2)}, label: {
+                Button(action: {quitDialog(exitCode: 2)}, label: {
                     Text(appvars.button2Default)
                     }
                 ).frame(minWidth: 36, alignment: .center)
                 .keyboardShortcut(.cancelAction)
             } else if CLOptionPresent(OptionName: CLOptions.button2TextOption) {
                 let button2Text: String = CLOptionText(OptionName: CLOptions.button2TextOption, DefaultValue: appvars.button2Default)
-                Button(action: {exit(2)}, label: {
+                Button(action: {quitDialog(exitCode: 2)}, label: {
                     Text(button2Text)
                     }
                 ).frame(minWidth: 36, alignment: .center)
@@ -56,13 +57,13 @@ struct MoreInfoButton: View {
         VStack(alignment: .center) {
             Spacer()
             if CLOptionPresent(OptionName: CLOptions.infoButtonOption) {
-                Button(action: {openSpecifiedURL(urlToOpen: buttonInfoAction);exit(3)}, label: {
+                Button(action: {openSpecifiedURL(urlToOpen: buttonInfoAction);quitDialog(exitCode: 3)}, label: {
                     Text(appvars.buttonInfoDefault)
                     }
                 ).frame(minWidth: 36, alignment: .center)
             } else if CLOptionPresent(OptionName: CLOptions.buttonInfoTextOption) {
                 let buttonInfoText: String = CLOptionText(OptionName: CLOptions.buttonInfoTextOption, DefaultValue: appvars.buttonInfoDefault)
-                Button(action: {openSpecifiedURL(urlToOpen: buttonInfoAction);exit(3)}, label: {
+                Button(action: {openSpecifiedURL(urlToOpen: buttonInfoAction);quitDialog(exitCode: 3)}, label: {
                     Text(buttonInfoText)
                     }
                 ).frame(minWidth: 36, alignment: .center)
