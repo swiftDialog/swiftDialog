@@ -10,7 +10,7 @@ import SwiftUI
 
 
 struct IconView: View {
-    let messageUserImagePath: String = CLOptionText(OptionName: CLOptions.iconOption, DefaultValue: "")
+    let messageUserImagePath: String = CLOptionText(OptionName: CLOptions.iconOption, DefaultValue: "default")
     let logoWidth: CGFloat?
     let logoHeight: CGFloat?
     var imgFromURL: Bool = false
@@ -45,6 +45,9 @@ struct IconView: View {
             builtInIconPresent = true
         } else if CLOptionPresent(OptionName: CLOptions.infoIcon) || messageUserImagePath == "info" {
             builtInIconName = "person.fill.questionmark"
+            builtInIconPresent = true
+        } else if messageUserImagePath == "default" {
+            builtInIconName = "message.circle.fill"
             builtInIconPresent = true
         }
         
