@@ -18,6 +18,7 @@ struct TitleView: View {
                 .bold()
                 .font(.system(size: appvars.titleFontSize))
         }
+        .offset(y: -15) // shift the title up a notch
         //.border(Color.purple) //debuging
     }
 }

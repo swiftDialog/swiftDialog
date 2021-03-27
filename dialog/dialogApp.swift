@@ -65,6 +65,8 @@ struct dialogApp: App {
         // Hide Title Bar
         .windowStyle(HiddenTitleBarWindowStyle())
         //.windowStyle(TitleBarWindowStyle())
+        //.windowStyle(DefaultWindowStyle())
+        //.windowStyle(TitleBarWindowStyle())
     }
     
 }
