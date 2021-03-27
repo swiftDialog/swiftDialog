@@ -31,13 +31,8 @@ struct DialogView: View {
                 VStack(alignment: .center) {
                     //TitleView()
                     MessageContent()
-                        //.padding(0)
-                        //.border(Color.red)
                         
-                        
-                }.frame(width:(appvars.windowWidth - iconFrameWidth),
-                        height: appvars.windowHeight - appvars.titleHeight,
-                        alignment: .center)
+                }
             }
             
         }

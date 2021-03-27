@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 var iconVisible: Bool = true
 
@@ -135,6 +136,8 @@ struct AppVariables {
     var imageWidth                      = CGFloat(170)      // set default image area width
     var imageHeight                     = CGFloat(260)      // set default image area height
     var titleHeight                     = CGFloat(50)
+    var bannerHeight                    = CGFloat(-10)
+    var bannerOffset                    = CGFloat(0)
     
     var smallWindow                     = Bool(false)
     var bigWindow                       = Bool(false)
@@ -147,6 +150,8 @@ struct AppVariables {
     var overlayOffsetX                  = CGFloat(40)
     var overlayOffsetY                  = CGFloat(50)
     var overlayShadow                   = CGFloat(3)
+    
+    var debugBorderColour               = Color.clear
     
     // exit codes and error messages
     var exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))
@@ -181,6 +186,7 @@ struct CLOptions {
     static let button2ActionOption      = (long: String("button2action"),     short: String(""))
     static let buttonInfoTextOption     = (long: String("infobuttontext"),    short: String(""))
     static let buttonInfoActionOption   = (long: String("infobuttonaction"),  short: String(""))
+    static let bannerImage              = (long: String("bannerimage"),       short: String(""))
    
     // command line options that take no additional parameters
     static let button2Option            = (long: String("button2"),           short: String("2")) // -2

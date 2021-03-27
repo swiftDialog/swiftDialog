@@ -8,44 +8,79 @@
 import SwiftUI
 
 struct ContentView: View {
-
-    var body: some View {
-        
-        // Dialog title
-        HStack(alignment: .top){
-            TitleView()
-                .frame(width: appvars.windowWidth , height: appvars.titleHeight)
-        }
-        
-        // Horozontal Line
-        HStack{
-            Rectangle()
-                .fill(Color.gray.opacity(0.5))
-                .frame(height: 1)
-        }
-        .frame(width: (appvars.windowWidth * appvars.horozontalLineScale))
-        .offset(y: -20)
-        
-        // Dialog content including message and image if visible
-        HStack(alignment: .top) {
-            DialogView()
-                .frame(width: (appvars.windowWidth-10), height: (appvars.windowHeight * appvars.dialogContentScale * appvars.scaleFactor))
-                //.border(Color.green)
-        }.frame(alignment: .topLeading)
-        //.border(Color.green) //debuging
-        
-        // Buttons
-        HStack(alignment: .bottom) {
-            if (CLOptionPresent(OptionName: CLOptions.buttonInfoTextOption) || CLOptionPresent(OptionName: CLOptions.infoButtonOption)) {
-                MoreInfoButton()
+    init() {
+        //appvars.windowHeight = appvars.windowHeight + 200
+        if CLOptionPresent(OptionName: CLOptions.bannerImage) {
+            if CLOptionPresent(OptionName: CLOptions.smallWindow) {
+                appvars.bannerHeight = 100
+                bannerAdjustment = 10
+            } else {
+                appvars.bannerHeight = 150
             }
-            Spacer()
-            ButtonView()
+            appvars.bannerOffset = -30
+            bannerImagePresent = true
         }
-        .offset(y: 12)
-        .frame(width: appvars.windowWidth-30, alignment: .center)
-        //.border(Color.blue) //debuging
-        
+        appvars.debugBorderColour = Color.clear
+    }
+    
+    var bannerImagePresent = false
+    var bannerAdjustment       = CGFloat(5)
+    
+    var body: some View {
+        VStack {
+            if bannerImagePresent {
+            HStack {
+                BannerImageView()
+                    .frame(width: appvars.windowWidth, height: appvars.bannerHeight-bannerAdjustment, alignment: .topLeading)
+                    //.border(Color.green)
+                    .clipped()
+            }
+            .offset(y: appvars.bannerOffset)
+            }
+            // Dialog title
+            HStack(alignment: .top){
+                TitleView()
+                    .frame(width: appvars.windowWidth , height: appvars.titleHeight)
+            }
+            .border(appvars.debugBorderColour) //debuging
+            
+            // Horozontal Line
+            HStack{
+                Rectangle()
+                    .fill(Color.gray.opacity(0.5))
+                    .frame(height: 1)
+            }
+            .frame(width: (appvars.windowWidth * appvars.horozontalLineScale))
+            .offset(y: -20)
+            .border(appvars.debugBorderColour) //debuging
+            
+            // Dialog content including message and image if visible
+            HStack(alignment: .top) {
+                DialogView()
+                    .frame(width: (appvars.windowWidth-10), height: (appvars.windowHeight * appvars.dialogContentScale * appvars.scaleFactor))
+                    //.border(Color.green)
+            }.frame(alignment: .topLeading)
+            .border(appvars.debugBorderColour) //debuging
+            
+
+            
+            // Buttons
+            Spacer() // force button to the bottom
+            //Divider()
+            HStack() {
+                if (CLOptionPresent(OptionName: CLOptions.buttonInfoTextOption) || CLOptionPresent(OptionName: CLOptions.infoButtonOption)) {
+                    MoreInfoButton()
+                }
+                Spacer()
+                ButtonView()
+                    //.frame(alignment: .bottom)
+            }
+            .frame(width: appvars.windowWidth-30, alignment: .bottom)
+            .border(appvars.debugBorderColour) //debuging
+        }
+        //.frame(width: appvars.windowWidth, height: appvars.windowHeight-10)
+        //.border(Color.purple) //debuging
+            
         // Window Setings (pinched from Nudge https://github.com/macadmins/nudge/blob/main/Nudge/UI/ContentView.swift#L19)
         HostingWindowFinder {window in
             window?.standardWindowButton(.closeButton)?.isHidden = true //hides the red close button
@@ -62,6 +97,7 @@ struct ContentView: View {
             NSApp.activate(ignoringOtherApps: true) // bring to forefront upon launch
         }
     }
+    
 
 }
 
