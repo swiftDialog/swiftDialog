@@ -58,11 +58,11 @@ struct ContentView: View {
             // Dialog content including message and image if visible
             HStack(alignment: .top) {
                 DialogView()
-                    .frame(width: (appvars.windowWidth-10), height: (appvars.windowHeight * appvars.dialogContentScale * appvars.scaleFactor))
+                    .frame(width: (appvars.windowWidth-30), height: (appvars.windowHeight * appvars.dialogContentScale * appvars.scaleFactor))
                     //.border(Color.green)
             }.frame(alignment: .topLeading)
             .border(appvars.debugBorderColour) //debuging
-            
+            //.border(Color.red) //debuging
 
             
             // Buttons
@@ -138,9 +138,9 @@ struct HostingWindowFinder: NSViewRepresentable {
         }
         
         if CLOptionPresent(OptionName: CLOptions.hideIcon) {
-            iconVisible = false
-        } else {
-            iconVisible = true
+            appvars.iconIsHidden = true
+        //} else {
+        //    iconVisible = true
         }
         
         if CLOptionPresent(OptionName: CLOptions.lockWindow) {

@@ -12,7 +12,7 @@ import AppKit
 
 struct DialogView: View {
     init() {
-        if CLOptionPresent(OptionName: CLOptions.hideIcon) {
+        if appvars.iconIsHidden {
             appvars.imageWidth = 0
         }
     }
@@ -22,7 +22,7 @@ struct DialogView: View {
             let iconFrameWidth: CGFloat = appvars.imageWidth
             let iconFrameHeight: CGFloat = appvars.imageHeight
             HStack {
-                if (!CLOptionPresent(OptionName: CLOptions.hideIcon)) {
+                if (!appvars.iconIsHidden) {
                     VStack {
                             IconView()
                     }.frame(width: iconFrameWidth, height: iconFrameHeight, alignment: .top)

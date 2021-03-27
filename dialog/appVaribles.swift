@@ -135,6 +135,7 @@ struct AppVariables {
     
     var windowIsMoveable                = Bool(false)
     var windowOnTop                     = Bool(false)
+    var iconIsHidden                    = Bool(false)
     
     // Window Sizes
     var windowWidth                     = CGFloat(820)      // set default dialog width
