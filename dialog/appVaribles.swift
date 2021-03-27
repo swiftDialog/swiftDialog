@@ -52,6 +52,13 @@ var helpText = """
                     Hides the icon from view
                     Doing so increases the space available for message text to approximately 100 words
 
+        -\(CLOptions.bannerImage.short), --\(CLOptions.bannerImage.long) <file> | <url>
+                    Shows a banner image at the top of the dialog
+                    Banners images fill the entire top width of the window and are resized to fill, positioned from
+                    the top left corner of the image.
+                    Specifying this option will imply --\(CLOptions.hideIcon.long)
+                    Recommended Banner Image size is 850x150.
+
         --\(CLOptions.button1TextOption.long) <text>
                     Set the label for Button1
                     Default label is "\(appvars.button1Default)"
@@ -179,14 +186,15 @@ struct CLOptions {
     static let titleOption              = (long: String("title"),             short: String("t"))  // -t
     static let messageOption            = (long: String("message"),           short: String("m"))  // -m
     static let iconOption               = (long: String("icon"),              short: String("i"))  // -i
-    static let overlayIconOption        = (long: String("overlayicon"),       short: String("y"))
+    static let overlayIconOption        = (long: String("overlayicon"),       short: String("y"))  // -y
+    static let bannerImage              = (long: String("bannerimage"),       short: String("n"))  // -n
     static let button1TextOption        = (long: String("button1text"),       short: String(""))
     static let button1ActionOption      = (long: String("button1action"),     short: String(""))
     static let button2TextOption        = (long: String("button2text"),       short: String(""))
     static let button2ActionOption      = (long: String("button2action"),     short: String(""))
     static let buttonInfoTextOption     = (long: String("infobuttontext"),    short: String(""))
     static let buttonInfoActionOption   = (long: String("infobuttonaction"),  short: String(""))
-    static let bannerImage              = (long: String("bannerimage"),       short: String(""))
+
    
     // command line options that take no additional parameters
     static let button2Option            = (long: String("button2"),           short: String("2")) // -2
@@ -196,12 +204,12 @@ struct CLOptions {
     static let helpOption               = (long: String("help"),              short: String(""))
     static let demoOption               = (long: String("demo"),              short: String(""))
     static let buyCoffee                = (long: String("coffee"),            short: String("☕️"))
-    static let showLicense              = (long: String("showlicense"),       short: String("l"))
+    static let showLicense              = (long: String("showlicense"),       short: String("l")) // -l
     static let warningIcon              = (long: String("warningicon"),       short: String("")) // Deprecated
     static let infoIcon                 = (long: String("infoicon"),          short: String("")) // Deprecated
     static let cautionIcon              = (long: String("cautionicon"),       short: String("")) // Deprecated
     
-    static let lockWindow               = (long: String("moveable"),          short: String("o")) // -m
+    static let lockWindow               = (long: String("moveable"),          short: String("o")) // -o
     static let forceOnTop               = (long: String("ontop"),             short: String("p")) // -p
     static let smallWindow              = (long: String("small"),             short: String("s")) // -s
     static let bigWindow                = (long: String("big"),               short: String("b")) // -b

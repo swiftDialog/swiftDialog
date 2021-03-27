@@ -19,6 +19,7 @@ struct ContentView: View {
             }
             appvars.bannerOffset = -30
             bannerImagePresent = true
+            appvars.imageWidth = 0 // hides the side icon
         }
         appvars.debugBorderColour = Color.clear
     }
