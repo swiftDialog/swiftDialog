@@ -69,35 +69,20 @@ struct IconOverlayView: View {
                             .scaledToFit()
                             .foregroundColor(builtInIconColour)
                     }
-                } else {
-                    if imgFromURL {
-                        let webImage: NSImage = getImageFromPath(fileImagePath: overlayImagePath, imgWidth: appvars.imageWidth, imgHeight: appvars.imageHeight)
-                        //let webImage: NSImage = Utils().getImageFromHTTPURL(fileURLString: overlayImagePath)
-                        Image(nsImage: webImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .scaledToFit()
-                            .clipShape(RoundedRectangle(cornerRadius: 5))
-                    } else if imgFromAPP {
-                        Image(nsImage: getAppIcon(appPath: overlayImagePath, withSize: overlayWidth!))
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .scaledToFit()
-                    } else if FileManager.default.fileExists(atPath: overlayImagePath) {
-                        let diskImage: NSImage = getImageFromPath(fileImagePath: overlayImagePath, imgWidth: appvars.imageWidth, imgHeight: appvars.imageHeight)
-                        Image(nsImage: diskImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .scaledToFit()
-                            .clipShape(RoundedRectangle(cornerRadius: 5))
-                    } else {
-                        Image(systemName: "questionmark.square.dashed")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .scaledToFit()
-                                .foregroundColor(Color.black)
-                    }
+                } else if imgFromAPP {
+                    Image(nsImage: getAppIcon(appPath: overlayImagePath, withSize: overlayWidth!))
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .scaledToFit()
+                } else { //if FileManager.default.fileExists(atPath: overlayImagePath) {
+                    let diskImage: NSImage = getImageFromPath(fileImagePath: overlayImagePath, imgWidth: appvars.imageWidth, imgHeight: appvars.imageHeight, returnErrorImage: false)
+                    Image(nsImage: diskImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .scaledToFit()
+                        .clipShape(RoundedRectangle(cornerRadius: 5))
                 }
+                
             }
             .frame(width: overlayWidth, height: overlayHeight)
             .offset(x: appvars.overlayOffsetX, y: appvars.overlayOffsetY)

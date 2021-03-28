@@ -11,7 +11,7 @@ import SystemConfiguration
 import SwiftUI
 
 
-func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, imgHeight: CGFloat? = .infinity) -> NSImage {
+func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, imgHeight: CGFloat? = .infinity, returnErrorImage: Bool? = false) -> NSImage {
     // accept image as local file path or as URL and return NSImage
     // can pass in width and height as optional values otherwsie return the image as is.
     
@@ -20,6 +20,7 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
     
     // need to declare literal empty string first otherwsie the runtime whinges about an NSURL instance with an empty URL string. I know!
     var urlPath = NSURL(string: "")!
+    var imageData = NSData()
     
     // checking for anything starting with http - crude but it works (for now)
     if fileImagePath.hasPrefix("http") {
@@ -27,18 +28,24 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
     } else {
         urlPath = NSURL(fileURLWithPath: fileImagePath)
     }
-    var imageData = NSData()
-    
+      
     // wrap everything in a try block.IF the URL or filepath is unreadable then return a default wtf image
     do {
         imageData = try NSData(contentsOf: urlPath as URL)
     } catch {
-        quitDialog(exitCode: appvars.exit201.code, exitMessage: "\(appvars.exit201.message) \(fileImagePath)")
-        //let errorImageConfig = NSImage.SymbolConfiguration(pointSize: 200, weight: .ultraLight)
-        //return NSImage(systemSymbolName: "questionmark.square.dashed", accessibilityDescription: nil)!.withSymbolConfiguration(errorImageConfig)!
+        if returnErrorImage! {
+            let errorImageConfig = NSImage.SymbolConfiguration(pointSize: 200, weight: .thin)
+            let errorImage = NSImage(systemSymbolName: "questionmark.square.dashed", accessibilityDescription: nil)!
+                .withSymbolConfiguration(errorImageConfig)!
+            return errorImage
+        } else {
+        
+            quitDialog(exitCode: appvars.exit201.code, exitMessage: "\(appvars.exit201.message) \(fileImagePath)")
+        }
     }
-    
+  
     let image : NSImage = NSImage(data: imageData as Data)!
+    
     if let rep = NSImage(data: imageData as Data)!
         .bestRepresentation(for: NSRect(x: 0, y: 0, width: imgWidth!, height: imgHeight!), context: nil, hints: nil) {
         image.size = rep.size

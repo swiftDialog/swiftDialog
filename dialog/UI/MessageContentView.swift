@@ -13,7 +13,7 @@ struct MessageContent: View {
         // adjust the content dimentions based on whether we are showing the icon or not.
         // adjustment multiplyiers determined by careful process of trial and error
         
-        if (CLOptionPresent(OptionName: CLOptions.hideIcon)) {
+        if appvars.iconIsHidden {
             viewWidth = appvars.windowWidth*0.8
             viewHeight = appvars.windowHeight/1.6
             viewOffset = 0
@@ -35,11 +35,10 @@ struct MessageContent: View {
         VStack {
             Text(messageContentOption)
                 .font(.system(size: 20))
-                //.multilineTextAlignment(.leading)
         }
-        .frame(width: viewWidth, height: viewHeight, alignment: theAllignment)
-        .padding(20)
-        .offset(x: viewOffset)
+        .frame(width: viewWidth-50, height: viewHeight, alignment: theAllignment)
+        .padding(15)
+        //.offset(x: viewOffset)
         //.border(Color.orange) //debuging
     }
 }

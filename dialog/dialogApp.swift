@@ -42,6 +42,8 @@ struct dialogApp: App {
             //appvars.overlayOffsetY = appvars.overlayOffsetY * (appvars.scaleFactor)
             appvars.overlayIconScale = appvars.overlayIconScale / appvars.scaleFactor
         }
+        
+        
 
         appvars.overlayShadow = 1
         
@@ -52,18 +54,18 @@ struct dialogApp: App {
         appvars.windowHeight = appvars.windowHeight * appvars.scaleFactor
         appvars.imageWidth = appvars.imageWidth * appvars.scaleFactor
         appvars.imageHeight = appvars.imageHeight * appvars.scaleFactor
-        
-        
 
     }
     var body: some Scene {
                         
         WindowGroup {
             ContentView()
-                .frame(width: appvars.windowWidth, height: appvars.windowHeight)
+                .frame(width: appvars.windowWidth, height: appvars.windowHeight + appvars.bannerHeight)
         }
         // Hide Title Bar
         .windowStyle(HiddenTitleBarWindowStyle())
+        //.windowStyle(TitleBarWindowStyle())
+        //.windowStyle(DefaultWindowStyle())
         //.windowStyle(TitleBarWindowStyle())
     }
     

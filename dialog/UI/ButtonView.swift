@@ -54,8 +54,8 @@ struct MoreInfoButton: View {
     let buttonInfoAction: String = CLOptionText(OptionName: CLOptions.buttonInfoActionOption, DefaultValue: appvars.buttonInfoActionDefault)
     
     var body: some View {
-        VStack(alignment: .center) {
-            Spacer()
+        HStack() {
+            
             if CLOptionPresent(OptionName: CLOptions.infoButtonOption) {
                 Button(action: {openSpecifiedURL(urlToOpen: buttonInfoAction);quitDialog(exitCode: 3)}, label: {
                     Text(appvars.buttonInfoDefault)
@@ -68,6 +68,7 @@ struct MoreInfoButton: View {
                     }
                 ).frame(minWidth: 36, alignment: .center)
             }
+            Spacer()
         }
     }
     
