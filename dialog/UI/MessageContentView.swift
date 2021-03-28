@@ -36,9 +36,9 @@ struct MessageContent: View {
             Text(messageContentOption)
                 .font(.system(size: 20))
         }
-        .frame(width: viewWidth, height: viewHeight, alignment: theAllignment)
-        .padding(20)
-        .offset(x: viewOffset)
+        .frame(width: viewWidth-50, height: viewHeight, alignment: theAllignment)
+        .padding(15)
+        //.offset(x: viewOffset)
         //.border(Color.orange) //debuging
     }
 }

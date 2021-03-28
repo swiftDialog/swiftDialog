@@ -26,6 +26,7 @@ struct DialogView: View {
                     VStack {
                             IconView()
                     }.frame(width: iconFrameWidth, height: iconFrameHeight, alignment: .top)
+                    .offset(x: -40)
                 }
                 
                 VStack(alignment: .center) {
