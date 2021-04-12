@@ -90,6 +90,7 @@ struct IconView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .offset(x: imgXOffset, y: 8)
                     .overlay(IconOverlayView(overlayWidth: appvars.imageWidth/2, overlayHeight: diskImage.size.height*(appvars.imageWidth/diskImage.size.width)/2), alignment: .bottomTrailing)
+
             }
         }
         //.overlay(IconOverlayView(), alignment: .topTrailing)

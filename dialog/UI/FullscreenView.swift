@@ -8,6 +8,18 @@
 import Foundation
 import SwiftUI
 
+extension Color {
+    init(hex: UInt, alpha: Double = 1) {
+        self.init(
+            .sRGB,
+            red: Double((hex >> 16) & 0xff) / 255,
+            green: Double((hex >> 08) & 0xff) / 255,
+            blue: Double((hex >> 00) & 0xff) / 255,
+            opacity: alpha
+        )
+    }
+}
+
 struct FullscreenView: View {
         
     var TitleViewOption: String = CLOptionText(OptionName: CLOptions.titleOption, DefaultValue: appvars.titleDefault)
@@ -57,7 +69,7 @@ struct FullscreenView: View {
         }
         
     }
-        
+            
     public func showFullScreen() {
         
         var window: NSWindow!
@@ -141,7 +153,10 @@ struct FullscreenView: View {
             }//.border(Color.red)
             .padding(20) // total padding for the icon/message group
         }
-        .background(Color.black)
+        //.background(Color.black)
+        .background(
+                LinearGradient(gradient: Gradient(colors: [Color(hex: 0x363730), .black]), startPoint: .top, endPoint: .bottom)
+            )
         
     }
     
