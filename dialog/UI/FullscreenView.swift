@@ -38,6 +38,7 @@ struct FullscreenView: View {
     var maxBannerHeight:CGFloat = 120
     var maxBannerWidth:CGFloat = 0
     var minScreenHeightToDisplayBanner:CGFloat = 1000
+    var messageTextLineSpacing:CGFloat = 20
     
     var BannerImageOption: String = CLOptionText(OptionName: CLOptions.bannerImage, DefaultValue: "")
     
@@ -61,11 +62,13 @@ struct FullscreenView: View {
             iconImageScaleFactor = 0.8
             //maxBannerHeight = 90
             bannerPadding = 20
+            messageTextLineSpacing = 15
         } else if windowHeight > 1440 {
             messageContentFontSize = 80
             titleContentFontSize = appvars.titleFontSize*4
             iconImageScaleFactor = 1.8
             emptyStackPadding = 90
+            messageTextLineSpacing = 30
             //maxBannerHeight = 150
         }
         
@@ -83,7 +86,7 @@ struct FullscreenView: View {
            window.makeKeyAndOrderFront(self)
            window.isReleasedWhenClosed = false
            window.center()
-           window.setFrameAutosaveName("Main Window")
+           //window.setFrameAutosaveName("Main Window")
            window.contentView = NSHostingView(rootView: FullscreenView())
 
        // open fullScreen mode
@@ -102,19 +105,13 @@ struct FullscreenView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 15))
                         .scaledToFit()
                         .frame(maxWidth: maxBannerWidth, maxHeight: maxBannerHeight)
-                    /*
-                    BannerImageView()
-                        .frame(maxWidth: maxBannerWidth, maxHeight: maxBannerHeight)
-                        .clipShape(RoundedRectangle(cornerRadius: 15))
-                        .fixedSize()
-                    */
                     // Horozontal Line
                     VStack{
                         Rectangle()
                             .fill(Color.gray.opacity(0.5))
-                            .frame(height: 1)
+                            .frame(height: 2)
                     }
-                    .frame(width: (maxBannerWidth * appvars.horozontalLineScale))
+                    .frame(width: (maxBannerWidth))
                     .padding(.vertical,20)
                     .border(debugColour)
                 }
@@ -141,7 +138,6 @@ struct FullscreenView: View {
                 VStack {
                     if CLOptionPresent(OptionName: CLOptions.iconOption) {
                         IconView()
-                            //.colorInvert()
                             .frame(maxHeight: appvars.imageHeight*iconImageScaleFactor, alignment: .center)
                             //.background(Color.white)
                     } else {
@@ -157,12 +153,12 @@ struct FullscreenView: View {
                         .font(.system(size: messageContentFontSize))
                         .foregroundColor(.white)
                         .multilineTextAlignment(.center)
-                        .lineLimit(10)
+                        .lineLimit(12)
+                        .lineSpacing(messageTextLineSpacing)
                         
                 }.border(debugColour)
                 .padding(10)
-                .frame(maxHeight: .infinity, alignment: .top) // setting to .infinity should make the message content take up the remainder of the screen
-                .border(debugColour)
+                .frame(maxHeight: .infinity, alignment: .center) // setting to .infinity should make the message content take up the remainder of the screen
             }
             .padding(.horizontal, 20) // total padding for the icon/message group
             .padding(.vertical, 50)

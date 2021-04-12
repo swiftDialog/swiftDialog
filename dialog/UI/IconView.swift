@@ -26,15 +26,19 @@ struct IconView: View {
         self.logoWidth = appvars.imageWidth
         self.logoHeight = appvars.imageHeight
         
+        // fullscreen runs on a dark background so invert the default icon colour for info and default
+        // also set the icon offset to 0
+        if CLOptionPresent(OptionName: CLOptions.fullScreenWindow) {
+            builtInIconColour = Color.white
+            imgXOffset = 0
+        }
+        
         if messageUserImagePath.starts(with: "http") {
             imgFromURL = true
         }
+        
         if messageUserImagePath.hasSuffix(".app") {
             imgFromAPP = true
-        }
-        
-        if CLOptionPresent(OptionName: CLOptions.fullScreenWindow) {
-            imgXOffset = 0
         }
         
         if CLOptionPresent(OptionName: CLOptions.warningIcon) || messageUserImagePath == "warning" {
