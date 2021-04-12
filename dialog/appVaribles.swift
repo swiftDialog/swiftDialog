@@ -214,6 +214,6 @@ struct CLOptions {
     static let forceOnTop               = (long: String("ontop"),             short: String("p")) // -p
     static let smallWindow              = (long: String("small"),             short: String("s")) // -s
     static let bigWindow                = (long: String("big"),               short: String("b")) // -b
-
+    static let fullScreenWindow         = (long: String("fullscreen"),        short: String("f")) // -f
     // civhmtsb
 }

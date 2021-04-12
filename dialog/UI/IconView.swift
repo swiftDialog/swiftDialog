@@ -10,7 +10,7 @@ import SwiftUI
 
 
 struct IconView: View {
-    let messageUserImagePath: String = CLOptionText(OptionName: CLOptions.iconOption, DefaultValue: "default")
+    var messageUserImagePath: String = CLOptionText(OptionName: CLOptions.iconOption, DefaultValue: "default")
     let logoWidth: CGFloat?
     let logoHeight: CGFloat?
     var imgFromURL: Bool = false
@@ -22,7 +22,7 @@ struct IconView: View {
     var builtInIconFill: String = ""
     var builtInIconPresent: Bool = false
     
-    init() {
+    init() {        
         self.logoWidth = appvars.imageWidth
         self.logoHeight = appvars.imageHeight
         
