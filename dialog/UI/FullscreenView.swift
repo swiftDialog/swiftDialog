@@ -40,8 +40,9 @@ struct FullscreenView: View {
     var minScreenHeightToDisplayBanner:CGFloat = 1000
     
     var BannerImageOption: String = CLOptionText(OptionName: CLOptions.bannerImage, DefaultValue: "")
-     
     
+    var debugColour: Color = Color.clear
+     
     init () {
         windowHeight = displayDetails.size.height
         windowWidth = displayDetails.size.width
@@ -67,6 +68,8 @@ struct FullscreenView: View {
             emptyStackPadding = 90
             //maxBannerHeight = 150
         }
+        
+        //debugColour = Color.red
         
     }
             
@@ -105,9 +108,18 @@ struct FullscreenView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 15))
                         .fixedSize()
                     */
+                    // Horozontal Line
+                    VStack{
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.5))
+                            .frame(height: 1)
+                    }
+                    .frame(width: (maxBannerWidth * appvars.horozontalLineScale))
+                    .padding(.vertical,20)
+                    .border(debugColour)
                 }
             }.padding(bannerPadding) //padding for the top of the display
-            //.border(Color.green)
+            .border(debugColour)
             
             // title vstack
             VStack{
@@ -119,7 +131,7 @@ struct FullscreenView: View {
                         .font(.system(size: titleContentFontSize))
                     Spacer()
                 }
-                //.border(Color.red)
+                .border(debugColour)
             }
             //.border(Color.blue)
             
@@ -136,7 +148,8 @@ struct FullscreenView: View {
                         VStack{}.padding(emptyStackPadding)
                     }
                 }
-                //.border(Color.orange)
+                .padding(40)
+                .border(debugColour)
                 
                 // message vstack
                 VStack() {
@@ -146,16 +159,19 @@ struct FullscreenView: View {
                         .multilineTextAlignment(.center)
                         .lineLimit(10)
                         
-                }//.border(Color.red)
+                }.border(debugColour)
                 .padding(10)
                 .frame(maxHeight: .infinity, alignment: .top) // setting to .infinity should make the message content take up the remainder of the screen
-                //.border(Color.yellow)
-            }//.border(Color.red)
-            .padding(20) // total padding for the icon/message group
+                .border(debugColour)
+            }
+            .padding(.horizontal, 20) // total padding for the icon/message group
+            .padding(.vertical, 50)
+            .border(debugColour)
         }
         //.background(Color.black)
         .background(
-                LinearGradient(gradient: Gradient(colors: [Color(hex: 0x363730), .black]), startPoint: .top, endPoint: .bottom)
+                //LinearGradient(gradient: Gradient(colors: [Color(hex: 0x0e539a), .black]), startPoint: .top, endPoint: .bottom)
+                LinearGradient(gradient: Gradient(colors: [Color(hex: 0x252535), .black]), startPoint: .top, endPoint: .bottom)
             )
         
     }

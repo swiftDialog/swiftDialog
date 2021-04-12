@@ -39,6 +39,10 @@ var helpText = """
                     if not specified, default icon will be used
                     Images from either file or URL are displayed as roundrect if no transparancy
 
+        -\(CLOptions.fullScreenWindow.short), --\(CLOptions.fullScreenWindow.long)
+                    Uses full screen view.
+                    In this view, only banner, title, icon and message are visible.
+
         -\(CLOptions.overlayIconOption.short), --\(CLOptions.overlayIconOption.long) <file> | <url>
                     Set an image to display as an overlay to --icon
                     image is displayed at 1/2 resolution to the main image and positioned to the bottom right

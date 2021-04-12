@@ -15,7 +15,7 @@ struct IconView: View {
     let logoHeight: CGFloat?
     var imgFromURL: Bool = false
     var imgFromAPP: Bool = false
-    let imgXOffset: CGFloat = 25
+    var imgXOffset: CGFloat = 25
     
     var builtInIconName: String = ""
     var builtInIconColour: Color = Color.black
@@ -31,6 +31,10 @@ struct IconView: View {
         }
         if messageUserImagePath.hasSuffix(".app") {
             imgFromAPP = true
+        }
+        
+        if CLOptionPresent(OptionName: CLOptions.fullScreenWindow) {
+            imgXOffset = 0
         }
         
         if CLOptionPresent(OptionName: CLOptions.warningIcon) || messageUserImagePath == "warning" {
