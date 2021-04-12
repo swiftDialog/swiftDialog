@@ -101,11 +101,6 @@ struct dialogApp: App {
     var body: some Scene {
 
         WindowGroup {
-          
-          //  FullscreenView()
-          //      .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-          //      .edgesIgnoringSafeArea(.all)
-          
             ContentView()
                 .frame(width: appvars.windowWidth, height: appvars.windowHeight + appvars.bannerHeight)
                 //.edgesIgnoringSafeArea(.all)

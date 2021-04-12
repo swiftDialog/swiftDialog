@@ -22,10 +22,12 @@ struct FullscreenView: View {
     var messageContentFontSize:CGFloat = 70 //need to add to appvars
     var iconImageScaleFactor:CGFloat = 1.5
     var emptyStackPadding:CGFloat = 70
-    var bannerPadding:CGFloat = 40
+    var bannerPadding:CGFloat = 25
     var maxBannerHeight:CGFloat = 120
     var maxBannerWidth:CGFloat = 0
     var minScreenHeightToDisplayBanner:CGFloat = 1000
+    
+    var BannerImageOption: String = CLOptionText(OptionName: CLOptions.bannerImage, DefaultValue: "")
      
     
     init () {
@@ -36,21 +38,22 @@ struct FullscreenView: View {
         // bigger displays we scale up
         // smaller display we scale down
         
-        maxBannerWidth = windowWidth * 0.75
+        maxBannerWidth = windowWidth * 0.95
+        maxBannerHeight = windowHeight * 0.10
         
         if windowHeight < 1440 {
             messageContentFontSize = 40
             emptyStackPadding = 50
             titleContentFontSize = appvars.titleFontSize*2
             iconImageScaleFactor = 0.8
-            maxBannerHeight = 90
+            //maxBannerHeight = 90
             bannerPadding = 20
         } else if windowHeight > 1440 {
             messageContentFontSize = 80
             titleContentFontSize = appvars.titleFontSize*4
             iconImageScaleFactor = 1.8
             emptyStackPadding = 90
-            maxBannerHeight = 150
+            //maxBannerHeight = 150
         }
         
     }
@@ -78,10 +81,18 @@ struct FullscreenView: View {
         VStack{
             // banner image vstack
             VStack{
-                if CLOptionPresent(OptionName: CLOptions.bannerImage) && windowHeight > minScreenHeightToDisplayBanner {
+                if CLOptionPresent(OptionName: CLOptions.bannerImage) {
+                    Image(nsImage: getImageFromPath(fileImagePath: BannerImageOption))
+                        .resizable()
+                        .clipShape(RoundedRectangle(cornerRadius: 15))
+                        .scaledToFit()
+                        .frame(maxWidth: maxBannerWidth, maxHeight: maxBannerHeight)
+                    /*
                     BannerImageView()
+                        .frame(maxWidth: maxBannerWidth, maxHeight: maxBannerHeight)
                         .clipShape(RoundedRectangle(cornerRadius: 15))
                         .fixedSize()
+                    */
                 }
             }.padding(bannerPadding) //padding for the top of the display
             //.border(Color.green)
