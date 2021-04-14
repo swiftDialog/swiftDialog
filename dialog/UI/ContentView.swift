@@ -94,6 +94,7 @@ struct ContentView: View {
             } else {
                 window?.level = .normal
             }
+            //window?.toggleFullScreen(self)
             
             NSApp.activate(ignoringOtherApps: true) // bring to forefront upon launch
         }
@@ -113,46 +114,7 @@ struct HostingWindowFinder: NSViewRepresentable {
 
     func makeNSView(context: Self.Context) -> NSView {
         let view = NSView()
-        
-        // process command line options that just display info and exit before we show the main window
-        if (CLOptionPresent(OptionName: CLOptions.helpOption) || CommandLine.arguments.count == 1) {
-            print(helpText)
-            quitDialog(exitCode: 0)
-            //exit(0)
-        }
-        if CLOptionPresent(OptionName: CLOptions.getVersion) {
-            printVersionString()
-            quitDialog(exitCode: 0)
-            //exit(0)
-        }
-        if CLOptionPresent(OptionName: CLOptions.showLicense) {
-            print(licenseText)
-            quitDialog(exitCode: 0)
-            //exit(0)
-        }
-        if CLOptionPresent(OptionName: CLOptions.buyCoffee) {
-            //I'm a teapot
-            print("If you like this app and want to buy me a coffee https://www.buymeacoffee.com/bartreardon")
-            quitDialog(exitCode: 418)
-            //exit(418)
-        }
-        
-        if CLOptionPresent(OptionName: CLOptions.hideIcon) {
-            appvars.iconIsHidden = true
-        //} else {
-        //    iconVisible = true
-        }
-        
-        if CLOptionPresent(OptionName: CLOptions.lockWindow) {
-            appvars.windowIsMoveable = true
-        }
-        
-        if CLOptionPresent(OptionName: CLOptions.forceOnTop) {
-            appvars.windowOnTop = true
-        }
                 
-        //----------
-        
         DispatchQueue.main.async { [weak view] in
             self.callback(view?.window)
         }

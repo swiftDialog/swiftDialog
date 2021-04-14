@@ -19,7 +19,47 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 @available(OSX 11.0, *)
 @main
 struct dialogApp: App {
+
+    
     init () {
+        
+        // process command line options that just display info and exit before we show the main window
+        if (CLOptionPresent(OptionName: CLOptions.helpOption) || CommandLine.arguments.count == 1) {
+            print(helpText)
+            quitDialog(exitCode: 0)
+            //exit(0)
+        }
+        if CLOptionPresent(OptionName: CLOptions.getVersion) {
+            printVersionString()
+            quitDialog(exitCode: 0)
+            //exit(0)
+        }
+        if CLOptionPresent(OptionName: CLOptions.showLicense) {
+            print(licenseText)
+            quitDialog(exitCode: 0)
+            //exit(0)
+        }
+        if CLOptionPresent(OptionName: CLOptions.buyCoffee) {
+            //I'm a teapot
+            print("If you like this app and want to buy me a coffee https://www.buymeacoffee.com/bartreardon")
+            quitDialog(exitCode: 418)
+            //exit(418)
+        }
+        
+        if CLOptionPresent(OptionName: CLOptions.hideIcon) {
+            appvars.iconIsHidden = true
+        //} else {
+        //    iconVisible = true
+        }
+        
+        if CLOptionPresent(OptionName: CLOptions.lockWindow) {
+            appvars.windowIsMoveable = true
+        }
+        
+        if CLOptionPresent(OptionName: CLOptions.forceOnTop) {
+            appvars.windowOnTop = true
+        }
+                
         if CLOptionPresent(OptionName: CLOptions.smallWindow) {
             // scale everything down a notch
             
@@ -43,8 +83,6 @@ struct dialogApp: App {
             appvars.overlayIconScale = appvars.overlayIconScale / appvars.scaleFactor
         }
         
-        
-
         appvars.overlayShadow = 1
         
         //appvars.titleFontSize
@@ -54,13 +92,18 @@ struct dialogApp: App {
         appvars.windowHeight = appvars.windowHeight * appvars.scaleFactor
         appvars.imageWidth = appvars.imageWidth * appvars.scaleFactor
         appvars.imageHeight = appvars.imageHeight * appvars.scaleFactor
+        
+        if CLOptionPresent(OptionName: CLOptions.fullScreenWindow) {
+            FullscreenView().showFullScreen()
+        }
 
     }
     var body: some Scene {
-                        
+
         WindowGroup {
             ContentView()
                 .frame(width: appvars.windowWidth, height: appvars.windowHeight + appvars.bannerHeight)
+                //.edgesIgnoringSafeArea(.all)
         }
         // Hide Title Bar
         .windowStyle(HiddenTitleBarWindowStyle())

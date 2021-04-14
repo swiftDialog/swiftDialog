@@ -10,25 +10,36 @@ import SwiftUI
 
 
 struct IconView: View {
-    let messageUserImagePath: String = CLOptionText(OptionName: CLOptions.iconOption, DefaultValue: "default")
+    @Environment(\.colorScheme) var colorScheme
+    
+    var messageUserImagePath: String = CLOptionText(OptionName: CLOptions.iconOption, DefaultValue: "default")
     let logoWidth: CGFloat?
     let logoHeight: CGFloat?
     var imgFromURL: Bool = false
     var imgFromAPP: Bool = false
-    let imgXOffset: CGFloat = 25
+    var imgXOffset: CGFloat = 25
     
     var builtInIconName: String = ""
-    var builtInIconColour: Color = Color.black
+    var builtInIconColour: Color = Color.black 
     var builtInIconFill: String = ""
     var builtInIconPresent: Bool = false
     
-    init() {
+    init() {        
         self.logoWidth = appvars.imageWidth
         self.logoHeight = appvars.imageHeight
+        
+        
+        // fullscreen runs on a dark background so invert the default icon colour for info and default
+        // also set the icon offset to 0
+        if CLOptionPresent(OptionName: CLOptions.fullScreenWindow) {
+            builtInIconColour = Color.white
+            imgXOffset = 0
+        }
         
         if messageUserImagePath.starts(with: "http") {
             imgFromURL = true
         }
+        
         if messageUserImagePath.hasSuffix(".app") {
             imgFromAPP = true
         }
@@ -90,6 +101,7 @@ struct IconView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .offset(x: imgXOffset, y: 8)
                     .overlay(IconOverlayView(overlayWidth: appvars.imageWidth/2, overlayHeight: diskImage.size.height*(appvars.imageWidth/diskImage.size.width)/2), alignment: .bottomTrailing)
+
             }
         }
         //.overlay(IconOverlayView(), alignment: .topTrailing)
