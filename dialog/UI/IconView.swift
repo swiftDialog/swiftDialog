@@ -40,7 +40,7 @@ struct IconView: View {
             imgFromURL = true
         }
         
-        if messageUserImagePath.hasSuffix(".app") {
+        if messageUserImagePath.hasSuffix(".app") || messageUserImagePath.hasSuffix("prefPane") {
             imgFromAPP = true
         }
         

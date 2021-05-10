@@ -73,6 +73,12 @@ var helpText = """
                     Accepts URL
                     Default action if not specified is no action
                     Return code when actioned is 0
+    
+        --\(CLOptions.button1ShellActionOption.long) <command>
+                    << EXPERIMENTAL >>
+                    Runs the specified shell command using zsh
+                    Command input and output is not sanitised or checked.
+                    If your command fails, Dialog still exits 0
 
         -\(CLOptions.button2Option.short), --\(CLOptions.button2Option.long)
                     Displays button2 with default label of "\(appvars.button2Default)"
@@ -195,6 +201,7 @@ struct CLOptions {
     static let bannerImage              = (long: String("bannerimage"),       short: String("n"))  // -n
     static let button1TextOption        = (long: String("button1text"),       short: String(""))
     static let button1ActionOption      = (long: String("button1action"),     short: String(""))
+    static let button1ShellActionOption = (long: String("button1shellaction"),short: String(""))
     static let button2TextOption        = (long: String("button2text"),       short: String(""))
     static let button2ActionOption      = (long: String("button2action"),     short: String(""))
     static let buttonInfoTextOption     = (long: String("infobuttontext"),    short: String(""))

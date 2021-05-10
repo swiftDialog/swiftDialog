@@ -62,6 +62,36 @@ func openSpecifiedURL(urlToOpen: String) {
     }
 }
 
+func shell(_ command: String) -> String {
+    let task = Process()
+    let pipe = Pipe()
+    
+    task.standardOutput = pipe
+    task.standardError = pipe
+    task.arguments = ["-c", command]
+    task.launchPath = "/bin/zsh"
+    task.launch()
+    
+    let data = pipe.fileHandleForReading.readDataToEndOfFile()
+    let output = String(data: data, encoding: .utf8)!
+    
+    return output
+}
+
+func buttonAction(action: String, exitCode: Int32, executeShell: Bool) {
+    //let action: String = CLOptionText(OptionName: CLOptions.button1ActionOption, DefaultValue: "")
+    
+    if (action != "") {
+        if executeShell {
+            print(shell(action))
+        } else {
+            openSpecifiedURL(urlToOpen: action)
+        }
+    }
+    quitDialog(exitCode: exitCode)
+    //exit(0)
+}
+
 func getAppIcon(appPath : String, withSize : CGFloat) -> NSImage {
     // take application path and extracts the application icon and returns is as NSImage
     // Swift implimentation of the ObjC code used in SAP's nice "Icons" utility for extracting application icons

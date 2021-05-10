@@ -27,7 +27,7 @@ struct IconOverlayView: View {
         if overlayImagePath.starts(with: "http") {
             imgFromURL = true
         }
-        if overlayImagePath.hasSuffix(".app") {
+        if overlayImagePath.hasSuffix(".app") || overlayImagePath.hasSuffix("prefPane") {
             imgFromAPP = true
         }
         
