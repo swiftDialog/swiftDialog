@@ -10,14 +10,16 @@ import SwiftUI
 
 struct ButtonView: View {
 
-    private func button1Action() {
-        let action: String = CLOptionText(OptionName: CLOptions.button1ActionOption, DefaultValue: "")
-        
-        if (action != "") {
-            openSpecifiedURL(urlToOpen: action)
+    var button1action: String = ""
+    var buttonShellAction: Bool = false
+    
+    init() {
+        if CLOptionPresent(OptionName: CLOptions.button1ShellActionOption) {
+            button1action = CLOptionText(OptionName: CLOptions.button1ShellActionOption , DefaultValue: "")
+            buttonShellAction = true
+        } else if CLOptionPresent(OptionName: CLOptions.button1ActionOption) {
+            button1action = CLOptionText(OptionName: CLOptions.button1ActionOption, DefaultValue: "")
         }
-        quitDialog(exitCode: 0)
-        //exit(0)
     }
     
     var body: some View {
@@ -41,7 +43,7 @@ struct ButtonView: View {
         // default button aka button 1
         let button1Text: String = CLOptionText(OptionName: CLOptions.button1TextOption, DefaultValue: appvars.button1Default)
         HStack {
-            Button(action: {self.button1Action()}, label: {
+            Button(action: {buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction)}, label: {
                 Text(button1Text)
                 }
             ).frame(minWidth: 36, alignment: .center)
@@ -53,17 +55,19 @@ struct ButtonView: View {
 struct MoreInfoButton: View {
     let buttonInfoAction: String = CLOptionText(OptionName: CLOptions.buttonInfoActionOption, DefaultValue: appvars.buttonInfoActionDefault)
     
+    
+    
     var body: some View {
         HStack() {
             
             if CLOptionPresent(OptionName: CLOptions.infoButtonOption) {
-                Button(action: {openSpecifiedURL(urlToOpen: buttonInfoAction);quitDialog(exitCode: 3)}, label: {
+                Button(action: {buttonAction(action: buttonInfoAction, exitCode: 3, executeShell: false)}, label: {
                     Text(appvars.buttonInfoDefault)
                     }
                 ).frame(minWidth: 36, alignment: .center)
             } else if CLOptionPresent(OptionName: CLOptions.buttonInfoTextOption) {
                 let buttonInfoText: String = CLOptionText(OptionName: CLOptions.buttonInfoTextOption, DefaultValue: appvars.buttonInfoDefault)
-                Button(action: {openSpecifiedURL(urlToOpen: buttonInfoAction);quitDialog(exitCode: 3)}, label: {
+                Button(action: {buttonAction(action: buttonInfoAction, exitCode: 3, executeShell: false)}, label: {
                     Text(buttonInfoText)
                     }
                 ).frame(minWidth: 36, alignment: .center)
