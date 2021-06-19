@@ -111,10 +111,22 @@ var helpText = """
                     Title for dropdown selection
     
         --\(CLOptions.dropdownValues.long) <text><csv>
-                    List of values to be displayed in the dropdown
+                    List of values to be displayed in the dropdown, specivied in CSV format
+                    e.g. "Option 1,Option 2,Option 3"
     
         --\(CLOptions.dropdownDefault.long) <text>
-                    Defult option to be selected (must match one of the items in the list)
+                    Default option to be selected (must match one of the items in the list)
+    
+                    If specified, the selected option will be sent to stdout in two forms:
+                      SelectedOption - Outputs the text of the option seelcted
+                      SelectedIndex  - Outputs the index of the option selected, starting at 0
+    
+                      example output b:
+                        SelectedOption: Option 1
+                        SelectedIndex: 0
+    
+                    Output of select items is only shown if Dialog's exit code is 0
+
 
         -\(CLOptions.lockWindow.short), --\(CLOptions.lockWindow.long)
                     Let window me moved around the screen. Default is not moveable
@@ -181,7 +193,7 @@ struct AppVariables {
     var debugBorderColour               = Color.clear
     
     var selectedOption                  = ""
-    var selectedIndex                   = Int32(0)
+    var selectedIndex                   = 0
     
     // exit codes and error messages
     var exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))
