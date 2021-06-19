@@ -26,14 +26,12 @@ struct DropdownView: View {
             showDropdown = true
             dropdownCLValues = CLOptionText(OptionName: CLOptions.dropdownValues)
             dropdownValues = dropdownCLValues.components(separatedBy: ",")
-            dropdownValues = dropdownValues.map { $0.trimmingCharacters(in: .whitespaces) }
+            dropdownValues = dropdownValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
             dropdownTitle = CLOptionText(OptionName: CLOptions.dropdownTitle)
         }
         if CLOptionPresent(OptionName: CLOptions.dropdownDefault) && CLOptionText(OptionName: CLOptions.dropdownValues).contains(CLOptionText(OptionName: CLOptions.dropdownDefault)) {
             appvars.selectedOption = selectedOption
         }
-        
-        //.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
     func updateSelectedOption() {
@@ -43,16 +41,18 @@ struct DropdownView: View {
     var body: some View {
         if showDropdown {
             HStack {
+                // we could print the title as part of the picker control but then we don't get easy access to swiftui text formatting
+                // so we print it seperatly and use a blank value in the picker
                 Text(dropdownTitle).bold()
                 Picker("", selection: $selectedOption)
                 {
                     ForEach(dropdownValues, id: \.self) {
                         Text($0)
                     }
-                }.frame(width: 200)
+                }
                 .pickerStyle(DefaultPickerStyle())
                 .onChange(of: selectedOption) { _ in
-                            //print(selectedOption)
+                            //update appvars with the option that was selected. this will be printed to stdout on exit
                             appvars.selectedOption = selectedOption
                         }
                 
