@@ -10,6 +10,9 @@ import AppKit
 import SystemConfiguration
 import SwiftUI
 
+class stdOutput: ObservableObject {
+    @Published var selectedOption: String = ""
+}
 
 func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, imgHeight: CGFloat? = .infinity, returnErrorImage: Bool? = false) -> NSImage {
     // accept image as local file path or as URL and return NSImage
@@ -123,6 +126,9 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "") {
     if exitMessage != "" {
         print(exitCode)
         print("\(exitMessage!)")
+    }
+    if appvars.selectedOption != "" {
+        print("SelectedOption: \(appvars.selectedOption)")
     }
     exit(exitCode)
 }

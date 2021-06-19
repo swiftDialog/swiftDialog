@@ -10,7 +10,7 @@ import Foundation
 
 // Returns the option text for a given command line option
 
-func CLOptionText(OptionName: (long: String, short: String), DefaultValue: String) -> String {
+func CLOptionText(OptionName: (long: String, short: String), DefaultValue: String? = "") -> String {
     // Determine if argument is present.
     var CLOptionTextValue = ""
         
@@ -24,13 +24,13 @@ func CLOptionText(OptionName: (long: String, short: String), DefaultValue: Strin
             CLOptionTextValue = CommandLine.arguments[valueIndex]
             if (CLOptionTextValue.starts(with: "-")) {
                 print("Argument \(CommandLine.arguments[commandIndex]) was not passed a value.")
-                CLOptionTextValue = DefaultValue
+                CLOptionTextValue = DefaultValue ?? ""
             } else {
                 CLOptionTextValue = CLOptionTextValue.replacingOccurrences(of:"\\n", with:"\n")
             }
         }
     } else {
-        CLOptionTextValue = DefaultValue
+        CLOptionTextValue = DefaultValue ?? ""
     }
     //print("\(OptionName) - \(CLOptionTextValue)")
     return CLOptionTextValue

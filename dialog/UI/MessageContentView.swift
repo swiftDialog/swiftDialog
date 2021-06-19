@@ -35,6 +35,8 @@ struct MessageContent: View {
         VStack {
             Text(messageContentOption)
                 .font(.system(size: 20))
+                DropdownView()
+                    .frame(width: viewWidth-50, alignment: .leading)
         }
         .frame(width: viewWidth-50, height: viewHeight, alignment: theAllignment)
         .padding(15)

@@ -106,6 +106,15 @@ var helpText = """
                     Set the action to take.
                     Accepts URL
                     Default action if not specified is no action
+    
+        --\(CLOptions.dropdownTitle.long) <text>
+                    Title for dropdown selection
+    
+        --\(CLOptions.dropdownValues.long) <text><csv>
+                    List of values to be displayed in the dropdown
+    
+        --\(CLOptions.dropdownDefault.long) <text>
+                    Defult option to be selected (must match one of the items in the list)
 
         -\(CLOptions.lockWindow.short), --\(CLOptions.lockWindow.long)
                     Let window me moved around the screen. Default is not moveable
@@ -171,6 +180,9 @@ struct AppVariables {
     
     var debugBorderColour               = Color.clear
     
+    var selectedOption                  = ""
+    var selectedIndex                   = Int32(0)
+    
     // exit codes and error messages
     var exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))
     var exit202                         = (code: Int32(202), message: String("ERROR: File not found :"))
@@ -206,6 +218,9 @@ struct CLOptions {
     static let button2ActionOption      = (long: String("button2action"),     short: String(""))
     static let buttonInfoTextOption     = (long: String("infobuttontext"),    short: String(""))
     static let buttonInfoActionOption   = (long: String("infobuttonaction"),  short: String(""))
+    static let dropdownTitle            = (long: String("selecttitle"),       short: String(""))
+    static let dropdownValues           = (long: String("selectvalues"),      short: String(""))
+    static let dropdownDefault          = (long: String("selectdefault"),     short: String(""))
 
    
     // command line options that take no additional parameters
