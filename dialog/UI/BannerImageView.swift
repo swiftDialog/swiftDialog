@@ -10,7 +10,7 @@ import SwiftUI
 
 struct BannerImageView: View {
     
-    var BannerImageOption: String = CLOptionText(OptionName: CLOptions.bannerImage, DefaultValue: "")
+    var BannerImageOption: String = CLOptionText(OptionName: CLOptions.bannerImage)
 
     var body: some View {
         VStack {

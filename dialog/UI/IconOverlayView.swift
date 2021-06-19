@@ -12,7 +12,7 @@ struct IconOverlayView: View {
     let overlayWidth: CGFloat?
     let overlayHeight: CGFloat?
     
-    let overlayImagePath: String = CLOptionText(OptionName: CLOptions.overlayIconOption, DefaultValue: "")
+    let overlayImagePath: String = CLOptionText(OptionName: CLOptions.overlayIconOption)
     var imgFromURL: Bool = false
     var imgFromAPP: Bool = false
     

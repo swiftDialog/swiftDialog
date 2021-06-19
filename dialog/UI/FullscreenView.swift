@@ -40,7 +40,7 @@ struct FullscreenView: View {
     var minScreenHeightToDisplayBanner:CGFloat = 1000
     var messageTextLineSpacing:CGFloat = 20
     
-    var BannerImageOption: String = CLOptionText(OptionName: CLOptions.bannerImage, DefaultValue: "")
+    var BannerImageOption: String = CLOptionText(OptionName: CLOptions.bannerImage)
     
     var debugColour: Color = Color.clear
      
