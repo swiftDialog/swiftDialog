@@ -31,8 +31,12 @@ struct MessageContent: View {
     let messageContentOption: String = CLOptionText(OptionName: CLOptions.messageOption, DefaultValue: appvars.messageDefault)
     let theAllignment: Alignment = .topLeading
     
+    
+    //@State var thing: String = "" //testing
+    
     var body: some View {
         VStack {
+            //TextField("Enter thing...", text: $thing)
             Text(messageContentOption)
                 .font(.system(size: 20))
                 Spacer()

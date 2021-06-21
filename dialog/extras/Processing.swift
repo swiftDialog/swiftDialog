@@ -131,10 +131,11 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "") {
     if exitCode == 0 {
         if appvars.selectedOption != "" {
             print("SelectedOption: \(appvars.selectedOption)")
-        }
-        if CLOptionPresent(OptionName: CLOptions.dropdownDefault) && appvars.selectedIndex >= 0 {
             print("SelectedIndex: \(appvars.selectedIndex)")
         }
+        //if CLOptionPresent(OptionName: CLOptions.dropdownDefault) || appvars.selectedIndex >= 0 {
+        //    print("SelectedIndex: \(appvars.selectedIndex)")
+        //}
     }
     exit(exitCode)
 }

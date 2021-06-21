@@ -23,6 +23,12 @@ struct dialogApp: App {
     
     init () {
         
+        // Correct feng shui so the app accepts keyboard input
+        // from https://stackoverflow.com/questions/58872398/what-is-the-minimally-viable-gui-for-command-line-swift-scripts
+        let app = NSApplication.shared
+        app.setActivationPolicy(.regular)
+        
+        
         // process command line options that just display info and exit before we show the main window
         if (CLOptionPresent(OptionName: CLOptions.helpOption) || CommandLine.arguments.count == 1) {
             print(helpText)
