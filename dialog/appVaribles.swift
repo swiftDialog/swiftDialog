@@ -152,7 +152,7 @@ var helpText = """
 
 struct AppVariables {
 
-    var cliversion                      = String("1.3.0b1")
+    var cliversion                      = String("1.3.0")
     
     // message default strings
     var titleDefault                    = String("An Important Message")

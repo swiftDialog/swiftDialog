@@ -41,7 +41,7 @@ struct MessageContent: View {
                 .font(.system(size: 20))
                 Spacer()
                 DropdownView()
-                    .frame(width: viewWidth-50, alignment: .bottomLeading)
+                    //.frame(width: viewWidth-50, alignment: .bottomLeading)
         }
         .frame(width: viewWidth-50, height: viewHeight, alignment: theAllignment)
         .padding(15)

@@ -63,7 +63,7 @@ struct DropdownView: View {
                             //appvars.selectedIndex += 1  // removed by popular opinion
                         }
                 
-            }
+            }.padding(.horizontal)
         }
     }
     
