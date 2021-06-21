@@ -10,6 +10,9 @@ import AppKit
 import SystemConfiguration
 import SwiftUI
 
+class stdOutput: ObservableObject {
+    @Published var selectedOption: String = ""
+}
 
 func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, imgHeight: CGFloat? = .infinity, returnErrorImage: Bool? = false) -> NSImage {
     // accept image as local file path or as URL and return NSImage
@@ -112,7 +115,7 @@ func printVersionString() -> Void {
 }
 
 func getVersionString() -> String {
-    var appVersion: String = "0.0"
+    var appVersion: String = appvars.cliversion
     if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
         appVersion = version
     }
@@ -123,6 +126,16 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "") {
     if exitMessage != "" {
         print(exitCode)
         print("\(exitMessage!)")
+    }
+    // only print if exit code os 0
+    if exitCode == 0 {
+        if appvars.selectedOption != "" {
+            print("SelectedOption: \(appvars.selectedOption)")
+            print("SelectedIndex: \(appvars.selectedIndex)")
+        }
+        //if CLOptionPresent(OptionName: CLOptions.dropdownDefault) || appvars.selectedIndex >= 0 {
+        //    print("SelectedIndex: \(appvars.selectedIndex)")
+        //}
     }
     exit(exitCode)
 }

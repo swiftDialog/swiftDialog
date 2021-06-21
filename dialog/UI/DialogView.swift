@@ -32,7 +32,6 @@ struct DialogView: View {
                 VStack(alignment: .center) {
                     //TitleView()
                     MessageContent()
-                        
                 }
             }
             

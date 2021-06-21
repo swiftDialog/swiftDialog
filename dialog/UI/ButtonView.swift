@@ -15,10 +15,10 @@ struct ButtonView: View {
     
     init() {
         if CLOptionPresent(OptionName: CLOptions.button1ShellActionOption) {
-            button1action = CLOptionText(OptionName: CLOptions.button1ShellActionOption , DefaultValue: "")
+            button1action = CLOptionText(OptionName: CLOptions.button1ShellActionOption)
             buttonShellAction = true
         } else if CLOptionPresent(OptionName: CLOptions.button1ActionOption) {
-            button1action = CLOptionText(OptionName: CLOptions.button1ActionOption, DefaultValue: "")
+            button1action = CLOptionText(OptionName: CLOptions.button1ActionOption)
         }
     }
     

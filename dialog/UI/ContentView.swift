@@ -26,17 +26,17 @@ struct ContentView: View {
     
     var bannerImagePresent = false
     var bannerAdjustment       = CGFloat(5)
-    
+        
     var body: some View {
         VStack {
             if bannerImagePresent {
-            HStack {
-                BannerImageView()
-                    .frame(width: appvars.windowWidth, height: appvars.bannerHeight-bannerAdjustment, alignment: .topLeading)
-                    //.border(Color.green)
-                    .clipped()
-            }
-            .offset(y: appvars.bannerOffset)
+                HStack {
+                    BannerImageView()
+                        .frame(width: appvars.windowWidth, height: appvars.bannerHeight-bannerAdjustment, alignment: .topLeading)
+                        //.border(Color.green)
+                        .clipped()
+                }
+                .offset(y: appvars.bannerOffset)
             }
             // Dialog title
             HStack(alignment: .top){
@@ -57,13 +57,15 @@ struct ContentView: View {
             
             // Dialog content including message and image if visible
             HStack(alignment: .top) {
-                DialogView()
-                    .frame(width: (appvars.windowWidth-30), height: (appvars.windowHeight * appvars.dialogContentScale * appvars.scaleFactor))
-                    //.border(Color.green)
+                VStack {
+                    DialogView()
+                        .frame(width: (appvars.windowWidth-30), height: (appvars.windowHeight * appvars.dialogContentScale * appvars.scaleFactor))
+                        //.border(Color.green)
+                }
             }.frame(alignment: .topLeading)
             .border(appvars.debugBorderColour) //debuging
             //.border(Color.red) //debuging
-
+            
             
             // Buttons
             Spacer() // force button to the bottom
@@ -73,6 +75,7 @@ struct ContentView: View {
                     MoreInfoButton()
                 }
                 Spacer()
+                //DropdownView().padding(20)
                 ButtonView()
                     //.frame(alignment: .bottom)
             }
