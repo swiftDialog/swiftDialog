@@ -65,6 +65,10 @@ struct dialogApp: App {
         if CLOptionPresent(OptionName: CLOptions.forceOnTop) {
             appvars.windowOnTop = true
         }
+        
+        if CLOptionPresent(OptionName: CLOptions.jsonOutPut) {
+            appvars.jsonOut = true
+        }
                 
         if CLOptionPresent(OptionName: CLOptions.smallWindow) {
             // scale everything down a notch

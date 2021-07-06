@@ -139,6 +139,10 @@ var helpText = """
 
         -\(CLOptions.smallWindow.short), --\(CLOptions.smallWindow.long)
                     Makes the dialog 25% smaller. Less room for message text.
+    
+        -\(CLOptions.jsonOutPut.short), --\(CLOptions.jsonOutPut.long)
+                    Outputs any results in json format for easier processing
+                    (currently limited to dropdown item selections)
 
         -\(CLOptions.getVersion.short), --\(CLOptions.getVersion.long)
                     Prints the app version
@@ -195,6 +199,8 @@ struct AppVariables {
     
     var selectedOption                  = ""
     var selectedIndex                   = 0
+    
+    var jsonOut                         = Bool(false)
     
     // exit codes and error messages
     var exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))
@@ -254,5 +260,7 @@ struct CLOptions {
     static let smallWindow              = (long: String("small"),             short: String("s")) // -s
     static let bigWindow                = (long: String("big"),               short: String("b")) // -b
     static let fullScreenWindow         = (long: String("fullscreen"),        short: String("f")) // -f
+    
+    static let jsonOutPut               = (long: String("json"),              short: String("j")) // -j
     // civhmtsb
 }
