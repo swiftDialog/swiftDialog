@@ -128,8 +128,14 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "") {
         print("\(exitMessage!)")
     }
     // only print if exit code os 0
-    if exitCode == 0 {
-        if appvars.selectedOption != "" {
+    if exitCode == 0 && appvars.selectedOption != "" {
+        
+        if appvars.jsonOut {
+            print("{")
+            print("\"SelectedOption\" : \"\(appvars.selectedOption)\",")
+            print("\"SelectedIndex\" : \(appvars.selectedIndex)")
+            print("}")
+        } else  {
             print("SelectedOption: \(appvars.selectedOption)")
             print("SelectedIndex: \(appvars.selectedIndex)")
         }
