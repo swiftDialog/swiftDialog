@@ -39,12 +39,17 @@ struct MessageContent: View {
             //TextField("Enter thing...", text: $thing)
             Text(messageContentOption)
                 .font(.system(size: 20))
-                Spacer()
-                DropdownView()
-                    //.frame(width: viewWidth-50, alignment: .bottomLeading)
+                //.padding(.horizontal)
+                .frame(width: viewWidth-50, alignment: .topLeading)
+                //.border(Color.red)
+            Spacer()
+            DropdownView()
+                //.border(Color.blue)
+                .frame(width: viewWidth-50, alignment: .bottomLeading)
         }
-        .frame(width: viewWidth-50, height: viewHeight, alignment: theAllignment)
-        .padding(15)
+        //.frame(width: viewWidth-50, height: viewHeight, alignment: theAllignment)
+        .frame(alignment: theAllignment)
+        //.padding(15)
         //.offset(x: viewOffset)
         //.border(Color.orange) //debuging
     }

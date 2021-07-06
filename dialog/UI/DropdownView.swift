@@ -62,8 +62,7 @@ struct DropdownView: View {
                             appvars.selectedIndex = dropdownValues.firstIndex {$0 == selectedOption} ?? -1
                             //appvars.selectedIndex += 1  // removed by popular opinion
                         }
-                
-            }.padding(.horizontal)
+            }
         }
     }
     
