@@ -7,6 +7,12 @@
 
 import SwiftUI
 
+extension StringProtocol {
+    subscript(offset: Int) -> Character {
+        self[index(startIndex, offsetBy: offset)]
+    }
+}
+
 class AppDelegate: NSObject, NSApplicationDelegate {
 
     // check for a few command line options before loading
@@ -20,6 +26,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 @main
 struct dialogApp: App {
 
+    func isValidColourHex(_ hexvalue: String) -> Bool {
+        let hexRegEx = "^#([a-fA-F0-9]{6})$"
+        let hexPred = NSPredicate(format:"SELF MATCHES %@", hexRegEx)
+        return hexPred.evaluate(with: hexvalue)
+    }
     
     init () {
         
@@ -52,6 +63,65 @@ struct dialogApp: App {
             //exit(418)
         }
         
+        if CLOptionPresent(OptionName: CLOptions.titleFont) {
+            let fontCLValues = CLOptionText(OptionName: CLOptions.titleFont)
+            var fontValues = [""]
+            //split by ,
+            fontValues = fontCLValues.components(separatedBy: ",")
+            fontValues = fontValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
+            for value in fontValues {
+                // split by =
+                let item = value.components(separatedBy: "=")
+                if item[0] == "size" {
+                    appvars.titleFontSize = CGFloat(truncating: NumberFormatter().number(from: item[1]) ?? 20)
+                }
+                if item[0] == "weight" {
+                    switch item[1] {
+                    case "bold":
+                        appvars.titleFontWeight = Font.Weight.bold
+                    case "heavy":
+                        appvars.titleFontWeight = Font.Weight.heavy
+                    case "light":
+                        appvars.titleFontWeight = Font.Weight.light
+                    case "medium":
+                        appvars.titleFontWeight = Font.Weight.medium
+                    case "regular":
+                        appvars.titleFontWeight = Font.Weight.regular
+                    case "thin":
+                        appvars.titleFontWeight = Font.Weight.thin
+                    default:
+                        appvars.titleFontWeight = Font.Weight.bold
+                    }
+                }
+                if item[0] == "colour" || item[0] == "color" {
+                    if isValidColourHex(item[1]) {
+                        //check to see if it's in the right length and only contains the right characters
+                        
+                        let colourHash = String(item[1])
+                        
+                        let colourRedValue = "\(colourHash[1])\(colourHash[2])"
+                        let colourRed = Double(Int(colourRedValue, radix: 16)!)/255
+                        
+                        let colourGreenValue = "\(colourHash[3])\(colourHash[4])"
+                        let colourGreen = Double(Int(colourGreenValue, radix: 16)!)/255
+                        
+                        let colourBlueValue = "\(colourHash[5])\(colourHash[6])"
+                        let colourBlue = Double(Int(colourBlueValue, radix: 16)!)/255
+                        
+                        //print("red: \(colourRedValue) green: \(colourGreenValue) blue:\(colourBlueValue)")
+                        //print("red: \(colourRed) green: \(colourGreen) blue:\(colourBlue)")
+                        appvars.titleFontColour = Color(red: colourRed, green: colourGreen, blue: colourBlue)
+                    } else {
+                        quitDialog(exitCode: 14, exitMessage: "Hex value for colour is not valid: \(item[1])")
+                        //print("Hex value for colour is not valid: \(item[1])")
+                    }
+
+                }
+                
+            }
+            
+        }
+                
         if CLOptionPresent(OptionName: CLOptions.hideIcon) {
             appvars.iconIsHidden = true
         //} else {
@@ -106,7 +176,7 @@ struct dialogApp: App {
         if CLOptionPresent(OptionName: CLOptions.fullScreenWindow) {
             FullscreenView().showFullScreen()
         }
-
+    
     }
     var body: some Scene {
 

@@ -190,6 +190,9 @@ struct AppVariables {
     var horozontalLineScale             = CGFloat(0.9)
     var dialogContentScale              = CGFloat(0.65)
     var titleFontSize                   = CGFloat(30)
+    var titleFontColour                 = Color.black
+    var titleFontWeight                 = Font.Weight.bold
+    //var titleFontFont                   = Font.TextStyle
     var overlayIconScale                = CGFloat(0.5)
     var overlayOffsetX                  = CGFloat(40)
     var overlayOffsetY                  = CGFloat(50)
@@ -205,7 +208,7 @@ struct AppVariables {
     // exit codes and error messages
     var exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))
     var exit202                         = (code: Int32(202), message: String("ERROR: File not found :"))
-    var exit203                         = (code: Int32(203), message: String(""))
+    var exit203                         = (code: Int32(203), message: String("ERROR: Invalid Colour Value Specified. Use format #000000 :"))
     var exit204                         = (code: Int32(204), message: String(""))
     var exit205                         = (code: Int32(205), message: String(""))
     var exit206                         = (code: Int32(206), message: String(""))
@@ -240,6 +243,7 @@ struct CLOptions {
     static let dropdownTitle            = (long: String("selecttitle"),       short: String(""))
     static let dropdownValues           = (long: String("selectvalues"),      short: String(""))
     static let dropdownDefault          = (long: String("selectdefault"),     short: String(""))
+    static let titleFont                = (long: String("titlefont"),         short: String(""))
 
    
     // command line options that take no additional parameters

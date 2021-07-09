@@ -13,12 +13,14 @@ struct TitleView: View {
     var TitleViewOption: String = CLOptionText(OptionName: CLOptions.titleOption, DefaultValue: appvars.titleDefault)
 
     var body: some View {
-        VStack {
+        //VStack {
             Text(TitleViewOption)
-                .bold()
-                .font(.system(size: appvars.titleFontSize))
-        }
-        .offset(y: -15) // shift the title up a notch
+                .font(.system(size: appvars.titleFontSize, weight: appvars.titleFontWeight))
+                .foregroundColor(appvars.titleFontColour)
+                
+        //}
+        //.frame(maxHeight: appvars.titleHeight)
+        //.offset(y: -15) // shift the title up a notch
         //.border(Color.purple) //debuging
     }
 }
