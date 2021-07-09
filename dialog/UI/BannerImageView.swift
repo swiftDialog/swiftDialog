@@ -13,13 +13,10 @@ struct BannerImageView: View {
     var BannerImageOption: String = CLOptionText(OptionName: CLOptions.bannerImage)
 
     var body: some View {
-        VStack {
-            Image(nsImage: getImageFromPath(fileImagePath: BannerImageOption))
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .scaledToFill()
-                .clipped()
-        }
-
+        Image(nsImage: getImageFromPath(fileImagePath: BannerImageOption))
+            .resizable()
+            .aspectRatio(contentMode: .fill)
+            .scaledToFill()
+            .clipped()
     }
 }

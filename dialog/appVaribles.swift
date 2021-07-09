@@ -126,6 +126,25 @@ var helpText = """
                         SelectedIndex: 0
     
                     Output of select items is only shown if Dialog's exit code is 0
+    
+        --\(CLOptions.titleFont.long) <text>
+                    Lets you modify the title text of the dialog.
+    
+                    Can accept up to three parameters, in a comma seperated list, to modify font properties. 
+                    
+                        colour=<hex_value> - specified in hex format, e.g. #00A4C7
+    
+                        size=<float>       - accepts any float value.
+
+                        weight=<text>      - accepts any of the following values:
+                            thin
+                            light
+                            regular
+                            medium
+                            heavy
+                            bold (default)
+    
+                    Example: \"colour=#00A4C7,weight=light,size=60\"
 
 
         -\(CLOptions.lockWindow.short), --\(CLOptions.lockWindow.long)
@@ -156,7 +175,7 @@ var helpText = """
 
 struct AppVariables {
 
-    var cliversion                      = String("1.3.2")
+    var cliversion                      = String("1.3.3")
     
     // message default strings
     var titleDefault                    = String("An Important Message")

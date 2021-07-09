@@ -36,6 +36,7 @@ struct ContentView: View {
         
     var body: some View {
         ZStack() {
+        // this stack controls the main view. Consists of a VStack containing all the content, and a HStack positioned at the bottom of the display area
             VStack {
                 if bannerImagePresent {
                     BannerImageView()
@@ -45,9 +46,8 @@ struct ContentView: View {
 
                 // Dialog title
                 TitleView()
-                    .frame(width: appvars.windowWidth , height: appvars.titleHeight)
-                    .offset(y: 10) // shift the title up a notch
-                    .frame(maxHeight: appvars.titleHeight)
+                    .frame(width: appvars.windowWidth , height: appvars.titleHeight, alignment: .center)
+                    .offset(y: 15) // shift the title up a notch
                 
                 // Horozontal Line
                 Rectangle()
