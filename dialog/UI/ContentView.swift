@@ -20,70 +20,57 @@ struct ContentView: View {
             appvars.bannerOffset = -30
             bannerImagePresent = true
             appvars.imageWidth = 0 // hides the side icon
+            
+            //adjust the position of the button bar by adding the banner height and ofsetting the default banner height of -10
+            buttonYPos = (buttonYPos +  appvars.bannerHeight + 10)
         }
         appvars.debugBorderColour = Color.clear
+        
+        //print("Window Height = \(appvars.windowHeight): Window Width = \(appvars.windowWidth)")
     }
+    // puts the button bar jsut above the bottom row - 35 came from trial and error
+    var buttonYPos = (appvars.windowHeight)
     
     var bannerImagePresent = false
     var bannerAdjustment       = CGFloat(5)
         
     var body: some View {
-        VStack {
-            if bannerImagePresent {
-                HStack {
+        ZStack() {
+        // this stack controls the main view. Consists of a VStack containing all the content, and a HStack positioned at the bottom of the display area
+            VStack {
+                if bannerImagePresent {
                     BannerImageView()
                         .frame(width: appvars.windowWidth, height: appvars.bannerHeight-bannerAdjustment, alignment: .topLeading)
-                        //.border(Color.green)
                         .clipped()
                 }
-                .offset(y: appvars.bannerOffset)
-            }
-            // Dialog title
-            HStack(alignment: .top){
+
+                // Dialog title
                 TitleView()
-                    .frame(width: appvars.windowWidth , height: appvars.titleHeight)
-            }
-            .border(appvars.debugBorderColour) //debuging
-            
-            // Horozontal Line
-            HStack{
+                    .frame(width: appvars.windowWidth , height: appvars.titleHeight, alignment: .center)
+                    .offset(y: 15) // shift the title up a notch
+                
+                // Horozontal Line
                 Rectangle()
                     .fill(Color.gray.opacity(0.5))
                     .frame(height: 1)
+                    .frame(width: (appvars.windowWidth * appvars.horozontalLineScale), height: 2)
+                    .offset(y: -5) //shift the line down a notch
+            
+                // Dialog content including message and image if visible
+                DialogView()
+                    .frame(alignment: .topLeading)
             }
-            .frame(width: (appvars.windowWidth * appvars.horozontalLineScale))
-            .offset(y: -20)
-            .border(appvars.debugBorderColour) //debuging
-            
-            // Dialog content including message and image if visible
-            HStack(alignment: .top) {
-                VStack {
-                    DialogView()
-                        .frame(width: (appvars.windowWidth-30), height: (appvars.windowHeight * appvars.dialogContentScale * appvars.scaleFactor))
-                        //.border(Color.green)
-                }
-            }.frame(alignment: .topLeading)
-            .border(appvars.debugBorderColour) //debuging
-            //.border(Color.red) //debuging
-            
-            
+                
             // Buttons
-            Spacer() // force button to the bottom
-            //Divider()
             HStack() {
-                if (CLOptionPresent(OptionName: CLOptions.buttonInfoTextOption) || CLOptionPresent(OptionName: CLOptions.infoButtonOption)) {
-                    MoreInfoButton()
-                }
+                MoreInfoButton()
                 Spacer()
-                //DropdownView().padding(20)
-                ButtonView()
-                    //.frame(alignment: .bottom)
+                ButtonView() // contains both button 1 and button 2
             }
             .frame(width: appvars.windowWidth-30, alignment: .bottom)
-            .border(appvars.debugBorderColour) //debuging
+            .position(x: appvars.windowWidth/2, y: buttonYPos-5)
+            
         }
-        //.frame(width: appvars.windowWidth, height: appvars.windowHeight-10)
-        //.border(Color.purple) //debuging
             
         // Window Setings (pinched from Nudge https://github.com/macadmins/nudge/blob/main/Nudge/UI/ContentView.swift#L19)
         HostingWindowFinder {window in

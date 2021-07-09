@@ -55,8 +55,6 @@ struct ButtonView: View {
 struct MoreInfoButton: View {
     let buttonInfoAction: String = CLOptionText(OptionName: CLOptions.buttonInfoActionOption, DefaultValue: appvars.buttonInfoActionDefault)
     
-    
-    
     var body: some View {
         HStack() {
             

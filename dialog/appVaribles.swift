@@ -126,6 +126,25 @@ var helpText = """
                         SelectedIndex: 0
     
                     Output of select items is only shown if Dialog's exit code is 0
+    
+        --\(CLOptions.titleFont.long) <text>
+                    Lets you modify the title text of the dialog.
+    
+                    Can accept up to three parameters, in a comma seperated list, to modify font properties. 
+                    
+                        color,colour=<hex_value>  - specified in hex format, e.g. #00A4C7
+    
+                        size=<float>              - accepts any float value.
+
+                        weight=<text>             - accepts any of the following values:
+                            thin
+                            light
+                            regular
+                            medium
+                            heavy
+                            bold (default)
+    
+                    Example: \"colour=#00A4C7,weight=light,size=60\"
 
 
         -\(CLOptions.lockWindow.short), --\(CLOptions.lockWindow.long)
@@ -156,7 +175,7 @@ var helpText = """
 
 struct AppVariables {
 
-    var cliversion                      = String("1.3.2")
+    var cliversion                      = String("1.3.3")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
@@ -190,6 +209,9 @@ struct AppVariables {
     var horozontalLineScale             = CGFloat(0.9)
     var dialogContentScale              = CGFloat(0.65)
     var titleFontSize                   = CGFloat(30)
+    var titleFontColour                 = Color.black
+    var titleFontWeight                 = Font.Weight.bold
+    //var titleFontFont                   = Font.TextStyle
     var overlayIconScale                = CGFloat(0.5)
     var overlayOffsetX                  = CGFloat(40)
     var overlayOffsetY                  = CGFloat(50)
@@ -205,7 +227,7 @@ struct AppVariables {
     // exit codes and error messages
     var exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))
     var exit202                         = (code: Int32(202), message: String("ERROR: File not found :"))
-    var exit203                         = (code: Int32(203), message: String(""))
+    var exit203                         = (code: Int32(203), message: String("ERROR: Invalid Colour Value Specified. Use format #000000 :"))
     var exit204                         = (code: Int32(204), message: String(""))
     var exit205                         = (code: Int32(205), message: String(""))
     var exit206                         = (code: Int32(206), message: String(""))
@@ -240,6 +262,7 @@ struct CLOptions {
     static let dropdownTitle            = (long: String("selecttitle"),       short: String(""))
     static let dropdownValues           = (long: String("selectvalues"),      short: String(""))
     static let dropdownDefault          = (long: String("selectdefault"),     short: String(""))
+    static let titleFont                = (long: String("titlefont"),         short: String(""))
 
    
     // command line options that take no additional parameters
