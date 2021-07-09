@@ -132,11 +132,11 @@ var helpText = """
     
                     Can accept up to three parameters, in a comma seperated list, to modify font properties. 
                     
-                        colour=<hex_value> - specified in hex format, e.g. #00A4C7
+                        color,colour=<hex_value>  - specified in hex format, e.g. #00A4C7
     
-                        size=<float>       - accepts any float value.
+                        size=<float>              - accepts any float value.
 
-                        weight=<text>      - accepts any of the following values:
+                        weight=<text>             - accepts any of the following values:
                             thin
                             light
                             regular
