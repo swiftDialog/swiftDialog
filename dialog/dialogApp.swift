@@ -183,7 +183,7 @@ struct dialogApp: App {
         WindowGroup {
             ContentView()
                 .frame(width: appvars.windowWidth, height: appvars.windowHeight + appvars.bannerHeight)
-                //.edgesIgnoringSafeArea(.all)
+                .edgesIgnoringSafeArea(.all)
         }
         // Hide Title Bar
         .windowStyle(HiddenTitleBarWindowStyle())

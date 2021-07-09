@@ -26,12 +26,10 @@ struct ContentView: View {
         }
         appvars.debugBorderColour = Color.clear
         
-        
-        
-        print("Window Height = \(appvars.windowHeight): Window Width = \(appvars.windowWidth)")
+        //print("Window Height = \(appvars.windowHeight): Window Width = \(appvars.windowWidth)")
     }
     // puts the button bar jsut above the bottom row - 35 came from trial and error
-    var buttonYPos = (appvars.windowHeight - 35)
+    var buttonYPos = (appvars.windowHeight)
     
     var bannerImagePresent = false
     var bannerAdjustment       = CGFloat(5)
@@ -40,67 +38,39 @@ struct ContentView: View {
         ZStack() {
             VStack {
                 if bannerImagePresent {
-                    HStack {
-                        BannerImageView()
-                            .frame(width: appvars.windowWidth, height: appvars.bannerHeight-bannerAdjustment, alignment: .topLeading)
-                            //.border(Color.green)
-                            .clipped()
-                    }
-                    .offset(y: appvars.bannerOffset)
+                    BannerImageView()
+                        .frame(width: appvars.windowWidth, height: appvars.bannerHeight-bannerAdjustment, alignment: .topLeading)
+                        .clipped()
                 }
+
                 // Dialog title
-                HStack(alignment: .top){
-                    TitleView()
-                        .frame(width: appvars.windowWidth , height: appvars.titleHeight)
-                        .offset(y: -15) // shift the title up a notch
-                }
-                .border(appvars.debugBorderColour) //debuging
-                .frame(maxHeight: appvars.titleHeight)
+                TitleView()
+                    .frame(width: appvars.windowWidth , height: appvars.titleHeight)
+                    .offset(y: 10) // shift the title up a notch
+                    .frame(maxHeight: appvars.titleHeight)
                 
                 // Horozontal Line
-                HStack{
-                    Rectangle()
-                        .fill(Color.gray.opacity(0.5))
-                        .frame(height: 1)
-                }
-                .frame(width: (appvars.windowWidth * appvars.horozontalLineScale))
-                .offset(y: -20)
-                .border(appvars.debugBorderColour) //debuging
-                
-                // Dialog content including message and image if visible
-                HStack(alignment: .top) {
-                    //VStack {
-                        DialogView()
-                            //.frame(width: (appvars.windowWidth-30), height: (appvars.windowHeight * appvars.dialogContentScale * appvars.scaleFactor))
-                            //.border(Color.green)
-                    //}
-                }.frame(alignment: .topLeading)
-                .border(appvars.debugBorderColour) //debuging
-                //.border(Color.red) //debuging
-                
-                
-                // Buttons
-                Spacer() // force button to the bottom
-                //Divider()
-                
-            }
+                Rectangle()
+                    .fill(Color.gray.opacity(0.5))
+                    .frame(height: 1)
+                    .frame(width: (appvars.windowWidth * appvars.horozontalLineScale), height: 2)
+                    .offset(y: -5) //shift the line down a notch
             
+                // Dialog content including message and image if visible
+                DialogView()
+                    .frame(alignment: .topLeading)
+            }
+                
+            // Buttons
             HStack() {
-                if (CLOptionPresent(OptionName: CLOptions.buttonInfoTextOption) || CLOptionPresent(OptionName: CLOptions.infoButtonOption)) {
-                    MoreInfoButton()
-                }
+                MoreInfoButton()
                 Spacer()
-                //DropdownView().padding(20)
-                ButtonView()
-                    //.frame(alignment: .bottom)
+                ButtonView() // contains both button 1 and button 2
             }
             .frame(width: appvars.windowWidth-30, alignment: .bottom)
-            .border(Color.purple) //debuging
-            .position(x: appvars.windowWidth/2, y: buttonYPos)
+            .position(x: appvars.windowWidth/2, y: buttonYPos-5)
             
         }
-        //.frame(width: appvars.windowWidth, height: appvars.windowHeight-10)
-        //.border(Color.green) //debuging
             
         // Window Setings (pinched from Nudge https://github.com/macadmins/nudge/blob/main/Nudge/UI/ContentView.swift#L19)
         HostingWindowFinder {window in
