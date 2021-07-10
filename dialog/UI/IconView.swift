@@ -13,8 +13,8 @@ struct IconView: View {
     @Environment(\.colorScheme) var colorScheme
     
     var messageUserImagePath: String = CLOptionText(OptionName: CLOptions.iconOption, DefaultValue: "default")
-    let logoWidth: CGFloat?
-    let logoHeight: CGFloat?
+    var logoWidth: CGFloat = appvars.imageWidth
+    var logoHeight: CGFloat  = appvars.imageHeight
     var imgFromURL: Bool = false
     var imgFromAPP: Bool = false
     var imgXOffset: CGFloat = 25
@@ -25,8 +25,8 @@ struct IconView: View {
     var builtInIconPresent: Bool = false
     
     init() {        
-        self.logoWidth = appvars.imageWidth
-        self.logoHeight = appvars.imageHeight
+        logoWidth = appvars.imageWidth
+        logoHeight = appvars.imageHeight
         
         
         // fullscreen runs on a dark background so invert the default icon colour for info and default
@@ -34,6 +34,9 @@ struct IconView: View {
         if CLOptionPresent(OptionName: CLOptions.fullScreenWindow) {
             builtInIconColour = Color.white
             imgXOffset = 0
+            
+            logoWidth = logoWidth * 5
+            logoHeight = logoHeight * 5
         }
         
         if messageUserImagePath.starts(with: "http") {
@@ -84,7 +87,7 @@ struct IconView: View {
                 .offset(x: imgXOffset)
                 .overlay(IconOverlayView(), alignment: .bottomTrailing)
             } else if imgFromAPP {
-                Image(nsImage: getAppIcon(appPath: messageUserImagePath, withSize: appvars.imageWidth))
+                Image(nsImage: getAppIcon(appPath: messageUserImagePath, withSize: self.logoWidth))
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .scaledToFit()
@@ -92,15 +95,15 @@ struct IconView: View {
                         .offset(x: imgXOffset)
                         .overlay(IconOverlayView(), alignment: .bottomTrailing)
             } else {
-                let diskImage: NSImage = getImageFromPath(fileImagePath: messageUserImagePath, imgWidth: appvars.imageWidth, imgHeight: appvars.imageHeight)
+                let diskImage: NSImage = getImageFromPath(fileImagePath: messageUserImagePath, imgWidth: logoWidth, imgHeight: logoHeight)
                 Image(nsImage: diskImage)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .scaledToFit()
-                    .frame(width: appvars.imageWidth, height: diskImage.size.height*(appvars.imageWidth/diskImage.size.width))
+                    .frame(width: self.logoWidth, height: diskImage.size.height*(logoWidth/diskImage.size.width))
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .offset(x: imgXOffset, y: 8)
-                    .overlay(IconOverlayView(overlayWidth: appvars.imageWidth/2, overlayHeight: diskImage.size.height*(appvars.imageWidth/diskImage.size.width)/2), alignment: .bottomTrailing)
+                    .overlay(IconOverlayView(overlayWidth: logoWidth/2, overlayHeight: diskImage.size.height*(logoWidth/diskImage.size.width)/2), alignment: .bottomTrailing)
 
             }
         }
