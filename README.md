@@ -1,3 +1,4 @@
+[![swiftui-version](https://img.shields.io/badge/swiftui-2.0-brightgreen)](https://developer.apple.com/documentation/swiftui) ![macos-version](https://img.shields.io/badge/macOS-11+-blue) [![xcode-version](https://img.shields.io/badge/xcode-12.5.1-red)](https://developer.apple.com/xcode/)
 
 # Dialog
 
