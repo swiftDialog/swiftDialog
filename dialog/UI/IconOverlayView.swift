@@ -18,7 +18,7 @@ struct IconOverlayView: View {
     
     var builtInIconName: String = ""
     var builtInIconFill: String = ""
-    var builtInIconColour: Color = Color.black
+    var builtInIconColour: Color = Color.primary
     var builtInIconPresent: Bool = false
     
     init(overlayWidth: CGFloat? = nil, overlayHeight: CGFloat? = nil) {

@@ -20,7 +20,7 @@ struct IconView: View {
     var imgXOffset: CGFloat = 25
     
     var builtInIconName: String = ""
-    var builtInIconColour: Color = Color.black 
+    var builtInIconColour: Color = Color.primary
     var builtInIconFill: String = ""
     var builtInIconPresent: Bool = false
     
