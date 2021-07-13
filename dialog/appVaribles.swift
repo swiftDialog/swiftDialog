@@ -175,7 +175,7 @@ var helpText = """
 
 struct AppVariables {
 
-    var cliversion                      = String("1.3.3")
+    var cliversion                      = String("1.3.4")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
@@ -209,7 +209,7 @@ struct AppVariables {
     var horozontalLineScale             = CGFloat(0.9)
     var dialogContentScale              = CGFloat(0.65)
     var titleFontSize                   = CGFloat(30)
-    var titleFontColour                 = Color.black
+    var titleFontColour                 = Color.primary
     var titleFontWeight                 = Font.Weight.bold
     //var titleFontFont                   = Font.TextStyle
     var overlayIconScale                = CGFloat(0.5)

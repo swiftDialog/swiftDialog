@@ -150,7 +150,7 @@ struct dialogApp: App {
             
             appvars.overlayOffsetX = appvars.overlayOffsetX * (appvars.scaleFactor)
             appvars.overlayOffsetY = appvars.overlayOffsetY * (appvars.scaleFactor*appvars.scaleFactor)
-            appvars.overlayIconScale = appvars.overlayIconScale * appvars.scaleFactor
+            //appvars.overlayIconScale = appvars.overlayIconScale * appvars.scaleFactor
         } else if CLOptionPresent(OptionName: CLOptions.bigWindow) {
             // scale everything up a notch
             
@@ -160,7 +160,7 @@ struct dialogApp: App {
             
             //appvars.overlayOffsetX = appvars.overlayOffsetX * (appvars.scaleFactor)
             //appvars.overlayOffsetY = appvars.overlayOffsetY * (appvars.scaleFactor)
-            appvars.overlayIconScale = appvars.overlayIconScale / appvars.scaleFactor
+            //appvars.overlayIconScale = appvars.overlayIconScale * appvars.scaleFactor
         }
         
         appvars.overlayShadow = 1
