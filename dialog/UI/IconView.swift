@@ -21,8 +21,24 @@ struct IconView: View {
     
     var builtInIconName: String = ""
     var builtInIconColour: Color = Color.primary
+    var builtInIconSecondaryColour: Color = Color.secondary
     var builtInIconFill: String = ""
     var builtInIconPresent: Bool = false
+    var builtInIconWeight = Font.Weight.thin
+    
+    var iconRenderingMode = Image.TemplateRenderingMode.original
+    
+    var sfSymbolName: String = ""
+    var sfSymbolWeight = Font.Weight.thin
+    var sfSymbolColour1: Color = Color.primary
+    var sfSymbolColour2: Color = Color.secondary
+    var sfSymbolPresent: Bool = false
+    
+    func isValidColourHex(_ hexvalue: String) -> Bool {
+        let hexRegEx = "^#([a-fA-F0-9]{6})$"
+        let hexPred = NSPredicate(format:"SELF MATCHES %@", hexRegEx)
+        return hexPred.evaluate(with: hexvalue)
+    }
     
     init() {        
         logoWidth = appvars.imageWidth
@@ -47,6 +63,69 @@ struct IconView: View {
             imgFromAPP = true
         }
         
+        if messageUserImagePath.hasPrefix("SF=") {
+            //print("sf present")
+            sfSymbolPresent = true
+            builtInIconPresent = true
+            
+            var SFValues = messageUserImagePath.components(separatedBy: ",")
+            SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
+            
+            for value in SFValues {
+                // split by =
+                //print(value)
+                let item = value.components(separatedBy: "=")
+                //print(item[0])
+                if item[0] == "SF" {
+                    builtInIconName = item[1]
+                    //print(item[1])
+                }
+                if item[0] == "weight" {
+                    switch item[1] {
+                    case "bold":
+                        builtInIconWeight = Font.Weight.bold
+                    case "heavy":
+                        builtInIconWeight = Font.Weight.heavy
+                    case "light":
+                        builtInIconWeight = Font.Weight.light
+                    case "medium":
+                        builtInIconWeight = Font.Weight.medium
+                    case "regular":
+                        builtInIconWeight = Font.Weight.regular
+                    case "thin":
+                        builtInIconWeight = Font.Weight.thin
+                    default:
+                        builtInIconWeight = Font.Weight.thin
+                    }
+                }
+                if item[0] == "colour" || item[0] == "color" {
+                    if isValidColourHex(item[1]) {
+                        //check to see if it's in the right length and only contains the right characters
+                        
+                        iconRenderingMode = Image.TemplateRenderingMode.template
+                        
+                        let colourHash = String(item[1])
+                        
+                        let colourRedValue = "\(colourHash[1])\(colourHash[2])"
+                        let colourRed = Double(Int(colourRedValue, radix: 16)!)/255
+                        
+                        let colourGreenValue = "\(colourHash[3])\(colourHash[4])"
+                        let colourGreen = Double(Int(colourGreenValue, radix: 16)!)/255
+                        
+                        let colourBlueValue = "\(colourHash[5])\(colourHash[6])"
+                        let colourBlue = Double(Int(colourBlueValue, radix: 16)!)/255
+                        
+                        //print("red: \(colourRedValue) green: \(colourGreenValue) blue:\(colourBlueValue)")
+                        //print("red: \(colourRed) green: \(colourGreen) blue:\(colourBlue)")
+                        builtInIconColour = Color(red: colourRed, green: colourGreen, blue: colourBlue)
+                    } else {
+                        quitDialog(exitCode: 14, exitMessage: "Hex value for colour is not valid: \(item[1])")
+                        //print("Hex value for colour is not valid: \(item[1])")
+                    }
+                }
+            }
+        }
+        
         if CLOptionPresent(OptionName: CLOptions.warningIcon) || messageUserImagePath == "warning" {
             builtInIconName = "exclamationmark.octagon.fill"
             builtInIconFill = "octagon.fill"
@@ -63,11 +142,15 @@ struct IconView: View {
         } else if messageUserImagePath == "default" {
             builtInIconName = "message.circle.fill"
             builtInIconPresent = true
+            //builtInIconColour = sfSymbolColour1
+            //builtInIconWeight = sfSymbolWeight
         }
         
+                
         if !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL && !imgFromAPP && !builtInIconPresent  {
             quitDialog(exitCode: appvars.exit202.code, exitMessage: "\(appvars.exit202.message) \(messageUserImagePath)")
         }
+        
     }
     
     var body: some View {
@@ -79,8 +162,10 @@ struct IconView: View {
                         .foregroundColor(Color.white)
                 
                     Image(systemName: builtInIconName)
+                        .renderingMode(iconRenderingMode)
                         .resizable()
                         .foregroundColor(builtInIconColour)
+                        .font(Font.title.weight(builtInIconWeight))
                 }
                 .aspectRatio(contentMode: .fit)
                 .scaledToFit()
