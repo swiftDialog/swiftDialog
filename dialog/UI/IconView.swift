@@ -147,15 +147,27 @@ struct IconView: View {
             if builtInIconPresent {
                 ZStack {
                     if sfGradientPresent {
-                        LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottom)
+                        // we need to add this twice - once as a clear version to force the right aspect ratio
+                        // and again with the gradien colour we want
+                        // the reason for this is gradient by itself is greedy and will consume the entire height and witch of the display area
+                        // this causes some SF Symbols like applelogo and applescript to look distorted
+                        Image(systemName: builtInIconName)
+                            .renderingMode(iconRenderingMode)
+                            .resizable()
+                            .foregroundColor(.clear)
+                            .font(Font.title.weight(builtInIconWeight))
+                            
+                        LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottomTrailing)
                         //LinearGradient(gradient: Gradient(colors: [.clear, .clear]), startPoint: .top, endPoint: .bottom)
                             .mask(
                             Image(systemName: builtInIconName)
                                 .renderingMode(iconRenderingMode)
                                 .resizable()
                                 .foregroundColor(builtInIconColour)
-                                //.font(Font.title.weight(builtInIconWeight))
-                        )
+                                .font(Font.title.weight(builtInIconWeight))
+                                .frame(maxWidth: appvars.imageWidth, maxHeight: appvars.imageHeight)
+                            )
+                        
                     } else {
                         Image(systemName: builtInIconFill)
                             .resizable()
