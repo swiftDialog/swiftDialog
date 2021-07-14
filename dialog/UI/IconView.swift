@@ -34,6 +34,8 @@ struct IconView: View {
     var sfSymbolColour2: Color = Color.secondary
     var sfSymbolPresent: Bool = false
     
+    var sfGradientPresent: Bool = false
+    
     func isValidColourHex(_ hexvalue: String) -> Bool {
         let hexRegEx = "^#([a-fA-F0-9]{6})$"
         let hexPred = NSPredicate(format:"SELF MATCHES %@", hexRegEx)
@@ -98,11 +100,16 @@ struct IconView: View {
                         builtInIconWeight = Font.Weight.thin
                     }
                 }
-                if item[0] == "colour" || item[0] == "color" {
-                    if isValidColourHex(item[1]) {
+                if item[0].hasPrefix("colour") || item[0].hasPrefix("color") {
+                    if item[1] == "auto" {
+                        // detecting sf symbol properties seems to be annoying, at least in swiftui 2
+                        // this is a bit of a workaround in that we let the user determine if they want the multicolour SF symbol
+                        // or a standard template style. sefault is template. "auto" will use the built in SF Symbol colours
+                        iconRenderingMode = Image.TemplateRenderingMode.original
+                    } else if isValidColourHex(item[1]) {
                         //check to see if it's in the right length and only contains the right characters
                         
-                        iconRenderingMode = Image.TemplateRenderingMode.template
+                        iconRenderingMode = Image.TemplateRenderingMode.template // switches to monochrome which allows us to tint the sf symbol
                         
                         let colourHash = String(item[1])
                         
@@ -115,32 +122,39 @@ struct IconView: View {
                         let colourBlueValue = "\(colourHash[5])\(colourHash[6])"
                         let colourBlue = Double(Int(colourBlueValue, radix: 16)!)/255
                         
-                        //print("red: \(colourRedValue) green: \(colourGreenValue) blue:\(colourBlueValue)")
-                        //print("red: \(colourRed) green: \(colourGreen) blue:\(colourBlue)")
-                        builtInIconColour = Color(red: colourRed, green: colourGreen, blue: colourBlue)
+                        if item[0].hasSuffix("2") {
+                            sfGradientPresent = true
+                            builtInIconSecondaryColour = Color(red: colourRed, green: colourGreen, blue: colourBlue)
+                        } else {
+                            builtInIconColour = Color(red: colourRed, green: colourGreen, blue: colourBlue)
+                        }
                     } else {
                         quitDialog(exitCode: 14, exitMessage: "Hex value for colour is not valid: \(item[1])")
                         //print("Hex value for colour is not valid: \(item[1])")
                     }
-                }
+                } else {
+                   iconRenderingMode = Image.TemplateRenderingMode.template
+               }
             }
         }
         
         if CLOptionPresent(OptionName: CLOptions.warningIcon) || messageUserImagePath == "warning" {
             builtInIconName = "exclamationmark.octagon.fill"
-            builtInIconFill = "octagon.fill"
+            builtInIconFill = "octagon.fill" //does not have multicolour sf symbol so we have to make out own using a fill layer
             builtInIconColour = Color.red
+            iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
             builtInIconPresent = true
         } else if CLOptionPresent(OptionName: CLOptions.cautionIcon) || messageUserImagePath == "caution" {
-            builtInIconName = "exclamationmark.triangle.fill"
-            builtInIconFill = "triangle.fill"
-            builtInIconColour = Color.yellow
+            builtInIconName = "exclamationmark.triangle.fill"  // yay multicolour sf symbol
+            //builtInIconFill = "triangle.fill"
+            //builtInIconColour = Color.yellow
             builtInIconPresent = true
         } else if CLOptionPresent(OptionName: CLOptions.infoIcon) || messageUserImagePath == "info" {
             builtInIconName = "person.fill.questionmark"
             builtInIconPresent = true
         } else if messageUserImagePath == "default" {
             builtInIconName = "message.circle.fill"
+            iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
             builtInIconPresent = true
             //builtInIconColour = sfSymbolColour1
             //builtInIconWeight = sfSymbolWeight
@@ -151,21 +165,34 @@ struct IconView: View {
             quitDialog(exitCode: appvars.exit202.code, exitMessage: "\(appvars.exit202.message) \(messageUserImagePath)")
         }
         
+        //print("colour is \(builtInIconColour)")
+        
     }
     
     var body: some View {
         VStack {
             if builtInIconPresent {
                 ZStack {
-                    Image(systemName: builtInIconFill)
-                        .resizable()
-                        .foregroundColor(Color.white)
-                
-                    Image(systemName: builtInIconName)
-                        .renderingMode(iconRenderingMode)
-                        .resizable()
-                        .foregroundColor(builtInIconColour)
-                        .font(Font.title.weight(builtInIconWeight))
+                    if sfGradientPresent {
+                        LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottom)
+                        //LinearGradient(gradient: Gradient(colors: [.clear, .clear]), startPoint: .top, endPoint: .bottom)
+                            .mask(
+                            Image(systemName: builtInIconName)
+                                .renderingMode(iconRenderingMode)
+                                .resizable()
+                                .foregroundColor(builtInIconColour)
+                                //.font(Font.title.weight(builtInIconWeight))
+                        )
+                    } else {
+                        Image(systemName: builtInIconFill)
+                            .resizable()
+                            .foregroundColor(Color.white)
+                        Image(systemName: builtInIconName)
+                            .resizable()
+                            .renderingMode(iconRenderingMode)
+                            .font(Font.title.weight(builtInIconWeight))
+                            .foregroundColor(builtInIconColour)
+                    }
                 }
                 .aspectRatio(contentMode: .fit)
                 .scaledToFit()
@@ -176,7 +203,6 @@ struct IconView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .scaledToFit()
-                        .foregroundColor(Color.yellow)
                         .offset(x: imgXOffset)
                         .overlay(IconOverlayView(), alignment: .bottomTrailing)
             } else {
