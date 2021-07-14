@@ -36,11 +36,13 @@ struct IconView: View {
     
     var sfGradientPresent: Bool = false
     
+    /*
     func isValidColourHex(_ hexvalue: String) -> Bool {
         let hexRegEx = "^#([a-fA-F0-9]{6})$"
         let hexPred = NSPredicate(format:"SELF MATCHES %@", hexRegEx)
         return hexPred.evaluate(with: hexvalue)
     }
+    */
     
     init() {        
         logoWidth = appvars.imageWidth
@@ -75,30 +77,13 @@ struct IconView: View {
             
             for value in SFValues {
                 // split by =
-                //print(value)
                 let item = value.components(separatedBy: "=")
-                //print(item[0])
+
                 if item[0] == "SF" {
                     builtInIconName = item[1]
-                    //print(item[1])
                 }
                 if item[0] == "weight" {
-                    switch item[1] {
-                    case "bold":
-                        builtInIconWeight = Font.Weight.bold
-                    case "heavy":
-                        builtInIconWeight = Font.Weight.heavy
-                    case "light":
-                        builtInIconWeight = Font.Weight.light
-                    case "medium":
-                        builtInIconWeight = Font.Weight.medium
-                    case "regular":
-                        builtInIconWeight = Font.Weight.regular
-                    case "thin":
-                        builtInIconWeight = Font.Weight.thin
-                    default:
-                        builtInIconWeight = Font.Weight.thin
-                    }
+                    builtInIconWeight = textToFontWeight(item[1])
                 }
                 if item[0].hasPrefix("colour") || item[0].hasPrefix("color") {
                     if item[1] == "auto" {
@@ -106,30 +91,18 @@ struct IconView: View {
                         // this is a bit of a workaround in that we let the user determine if they want the multicolour SF symbol
                         // or a standard template style. sefault is template. "auto" will use the built in SF Symbol colours
                         iconRenderingMode = Image.TemplateRenderingMode.original
-                    } else if isValidColourHex(item[1]) {
-                        //check to see if it's in the right length and only contains the right characters
+                    } else { //check to see if it's in the right length and only contains the right characters
                         
                         iconRenderingMode = Image.TemplateRenderingMode.template // switches to monochrome which allows us to tint the sf symbol
-                        
-                        let colourHash = String(item[1])
-                        
-                        let colourRedValue = "\(colourHash[1])\(colourHash[2])"
-                        let colourRed = Double(Int(colourRedValue, radix: 16)!)/255
-                        
-                        let colourGreenValue = "\(colourHash[3])\(colourHash[4])"
-                        let colourGreen = Double(Int(colourGreenValue, radix: 16)!)/255
-                        
-                        let colourBlueValue = "\(colourHash[5])\(colourHash[6])"
-                        let colourBlue = Double(Int(colourBlueValue, radix: 16)!)/255
-                        
+                                                
                         if item[0].hasSuffix("2") {
                             sfGradientPresent = true
-                            builtInIconSecondaryColour = Color(red: colourRed, green: colourGreen, blue: colourBlue)
+                            builtInIconSecondaryColour = stringToColour(item[1])
                         } else {
-                            builtInIconColour = Color(red: colourRed, green: colourGreen, blue: colourBlue)
+                            builtInIconColour = stringToColour(item[1])
                         }
-                    } else {
-                        quitDialog(exitCode: 14, exitMessage: "Hex value for colour is not valid: \(item[1])")
+                    //} else {
+                        //quitDialog(exitCode: 14, exitMessage: "Hex value for colour is not valid: \(item[1])")
                         //print("Hex value for colour is not valid: \(item[1])")
                     }
                 } else {
