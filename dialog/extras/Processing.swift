@@ -193,6 +193,8 @@ func stringToColour(_ colourValue: String) -> Color {
         
     } else {
         switch colourValue {
+            case "black":
+                returnColor = Color.black
             case "blue":
                 returnColor = Color.blue
             case "gray":
@@ -212,7 +214,7 @@ func stringToColour(_ colourValue: String) -> Color {
             case "yellow":
                 returnColor = Color.yellow
             default:
-                returnColor = Color.black
+                returnColor = Color.primary
         }
     }
     
