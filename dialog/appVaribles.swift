@@ -193,6 +193,9 @@ var helpText = """
                     Outputs any results in json format for easier processing
                     (currently limited to dropdown item selections)
 
+        -\(CLOptions.ignoreDND.short), --\(CLOptions.ignoreDND.long)
+                    Will ignore user Do Not Disturb setting
+    
         -\(CLOptions.getVersion.short), --\(CLOptions.getVersion.long)
                     Prints the app version
 
@@ -205,7 +208,7 @@ var helpText = """
 
 struct AppVariables {
 
-    var cliversion                      = String("1.4.1")
+    var cliversion                      = String("1.4.2")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
@@ -253,6 +256,8 @@ struct AppVariables {
     var selectedIndex                   = 0
     
     var jsonOut                         = Bool(false)
+    
+    var willDisturb                     = Bool(false)
     
     // exit codes and error messages
     var exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))
@@ -315,5 +320,6 @@ struct CLOptions {
     static let fullScreenWindow         = (long: String("fullscreen"),        short: String("f")) // -f
     
     static let jsonOutPut               = (long: String("json"),              short: String("j")) // -j
+    static let ignoreDND                = (long: String("ignorednd"),         short: String("d")) // -j
     // civhmtsb
 }
