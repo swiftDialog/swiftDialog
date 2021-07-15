@@ -34,18 +34,6 @@ struct dialogApp: App {
     
     init () {
         
-        //check for DND and exit if it's on
-        let dndResult = shell("plutil -extract dnd_prefs xml1 -o - ~/Library/Preferences/com.apple.ncprefs.plist | xpath -q -e 'string(//data)' | base64 -D | plutil -convert xml1 - -o - | xpath -q -e 'boolean(//key[text()=\"userPref\"]/following-sibling::dict/key[text()=\"enabled\"])'")
-        if (dndResult.hasPrefix("1")){
-            quitDialog(exitCode: 20, exitMessage: "Do Not Disturb is enabled. Exiting")
-        }
-        
-        // Correct feng shui so the app accepts keyboard input
-        // from https://stackoverflow.com/questions/58872398/what-is-the-minimally-viable-gui-for-command-line-swift-scripts
-        let app = NSApplication.shared
-        //app.setActivationPolicy(.regular)
-        app.setActivationPolicy(.accessory)
-        
         // process command line options that just display info and exit before we show the main window
         if (CLOptionPresent(OptionName: CLOptions.helpOption) || CommandLine.arguments.count == 1) {
             print(helpText)
@@ -69,6 +57,20 @@ struct dialogApp: App {
             //exit(418)
         }
         
+        //check for DND and exit if it's on
+        let consoleUser = shell(" who | grep console | awk '{print$1}'").trimmingCharacters(in: .whitespacesAndNewlines)
+        let consoleUserHomeDir = shell("dscl . read /Users/\(consoleUser) NFSHomeDirectory | awk '{print $NF}'").trimmingCharacters(in: .whitespacesAndNewlines)
+        let dndResult = shell("plutil -extract dnd_prefs xml1 -o - \(consoleUserHomeDir)/Library/Preferences/com.apple.ncprefs.plist | xpath -q -e 'string(//data)' | base64 -D | plutil -convert xml1 - -o - | xpath -q -e 'boolean(//key[text()=\"userPref\"]/following-sibling::dict/key[text()=\"enabled\"])'").trimmingCharacters(in: .whitespacesAndNewlines)
+        if (dndResult == "1") {
+            quitDialog(exitCode: 20, exitMessage: "Do Not Disturb is enabled. Exiting")
+        }
+        
+        // Correct feng shui so the app accepts keyboard input
+        // from https://stackoverflow.com/questions/58872398/what-is-the-minimally-viable-gui-for-command-line-swift-scripts
+        let app = NSApplication.shared
+        //app.setActivationPolicy(.regular)
+        app.setActivationPolicy(.accessory)
+                
         if CLOptionPresent(OptionName: CLOptions.titleFont) {
             let fontCLValues = CLOptionText(OptionName: CLOptions.titleFont)
             var fontValues = [""]
