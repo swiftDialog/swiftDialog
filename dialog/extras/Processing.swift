@@ -14,6 +14,13 @@ class stdOutput: ObservableObject {
     @Published var selectedOption: String = ""
 }
 
+public extension Color {
+
+    static let background = Color(NSColor.windowBackgroundColor)
+    static let secondaryBackground = Color(NSColor.underPageBackgroundColor)
+    static let tertiaryBackground = Color(NSColor.controlBackgroundColor)
+}
+
 func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, imgHeight: CGFloat? = .infinity, returnErrorImage: Bool? = false) -> NSImage {
     // accept image as local file path or as URL and return NSImage
     // can pass in width and height as optional values otherwsie return the image as is.
@@ -124,7 +131,7 @@ func getVersionString() -> String {
 
 func quitDialog(exitCode: Int32, exitMessage: String? = "") {
     if exitMessage != "" {
-        print(exitCode)
+        //print(exitCode)
         print("\(exitMessage!)")
     }
     // only print if exit code os 0

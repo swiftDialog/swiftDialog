@@ -242,7 +242,7 @@ struct AppVariables {
     var titleFontColour                 = Color.primary
     var titleFontWeight                 = Font.Weight.bold
     //var titleFontFont                   = Font.TextStyle
-    var overlayIconScale                = CGFloat(0.5)
+    var overlayIconScale                = CGFloat(0.40)
     var overlayOffsetX                  = CGFloat(40)
     var overlayOffsetY                  = CGFloat(50)
     var overlayShadow                   = CGFloat(3)

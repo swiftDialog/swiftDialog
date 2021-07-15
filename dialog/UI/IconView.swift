@@ -204,7 +204,7 @@ struct IconView: View {
             }
         }
         //.overlay(IconOverlayView(), alignment: .topTrailing)
-        //.border(Color.red) //debuging
+        //.border(Color.green) //debuging
         
     }
 }

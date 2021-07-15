@@ -9,8 +9,8 @@ import Foundation
 import SwiftUI
 
 struct IconOverlayView: View {
-    let overlayWidth: CGFloat?
-    let overlayHeight: CGFloat?
+    let overlayWidth: CGFloat = appvars.imageWidth * appvars.overlayIconScale
+    let overlayHeight: CGFloat = appvars.imageHeight * appvars.overlayIconScale
     
     let overlayImagePath: String = CLOptionText(OptionName: CLOptions.overlayIconOption)
     var imgFromURL: Bool = false
@@ -32,10 +32,10 @@ struct IconOverlayView: View {
     var sfSymbolPresent: Bool = false
     
     var sfGradientPresent: Bool = false
-    
+        
     init(overlayWidth: CGFloat? = nil, overlayHeight: CGFloat? = nil) {
-        self.overlayWidth = appvars.imageWidth * appvars.overlayIconScale
-        self.overlayHeight = appvars.imageHeight * appvars.overlayIconScale
+        //self.overlayWidth = appvars.imageWidth * appvars.overlayIconScale
+        //self.overlayHeight = appvars.imageHeight * appvars.overlayIconScale
         if overlayImagePath.starts(with: "http") {
             imgFromURL = true
         }
@@ -109,37 +109,51 @@ struct IconOverlayView: View {
         if CLOptionPresent(OptionName: CLOptions.overlayIconOption) {
             ZStack {
                 if builtInIconPresent {
-                    if sfGradientPresent {
-                        LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottom)
-                        //LinearGradient(gradient: Gradient(colors: [.clear, .clear]), startPoint: .top, endPoint: .bottom)
-                            .mask(
-                            Image(systemName: builtInIconName)
-                                .renderingMode(iconRenderingMode)
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .foregroundColor(builtInIconColour)
-                                //.font(Font.title.weight(builtInIconWeight))
-                        )
-                    } else {
-                        // background colour
-                        ZStack {
-                            Image(systemName: builtInIconFill)
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .scaledToFit()
-                                .foregroundColor(Color.white)
+                    ZStack {
+                        //background square so the SF Symbol "pops"
+                        Image(systemName: "square.fill")
+                            .resizable()
+                            .foregroundColor(.background)
+                            .frame(width: overlayWidth, height: overlayWidth)
+                        ZStack() {
+                            if sfGradientPresent {
+                                LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottomTrailing)
+                                //LinearGradient(gradient: Gradient(colors: [.clear, .clear]), startPoint: .top, endPoint: .bottom)
+                                    .mask(
+                                    Image(systemName: builtInIconName)
+                                        .renderingMode(iconRenderingMode)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .foregroundColor(builtInIconColour)
+                                        .font(Font.title.weight(builtInIconWeight))
+                                )
+                            } else {
+                                // background colour
+                                ZStack {
+                                    
+                                    Image(systemName: builtInIconFill)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .scaledToFit()
+                                        .foregroundColor(Color.white)
+                                        .font(Font.title.weight(builtInIconWeight))
+                                //}
+                                //forground image
+                                //ZStack {
+                                    Image(systemName: builtInIconName)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .scaledToFit()
+                                        .foregroundColor(builtInIconColour)
+                                        .font(Font.title.weight(builtInIconWeight))
+                                }
+                            }
                         }
-                        //forground image
-                        ZStack {
-                            Image(systemName: builtInIconName)
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .scaledToFit()
-                                .foregroundColor(builtInIconColour)
-                        }
+                        .frame(width: overlayWidth*0.8, height: overlayWidth*0.8)
+                        //.shadow(color: stringToColour("#FFEEFF"), radius: 6, x: 1, y: 1)
                     }
                 } else if imgFromAPP {
-                    Image(nsImage: getAppIcon(appPath: overlayImagePath, withSize: overlayWidth!))
+                    Image(nsImage: getAppIcon(appPath: overlayImagePath, withSize: overlayWidth))
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .scaledToFit()
@@ -156,6 +170,7 @@ struct IconOverlayView: View {
             .frame(width: overlayWidth, height: overlayHeight)
             .offset(x: appvars.overlayOffsetX, y: appvars.overlayOffsetY)
             .shadow(radius: appvars.overlayShadow)
+            //.border(Color.red)
         }
     }
 }
