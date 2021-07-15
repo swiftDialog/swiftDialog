@@ -9,26 +9,82 @@ import Foundation
 import SwiftUI
 
 struct IconOverlayView: View {
-    let overlayWidth: CGFloat?
-    let overlayHeight: CGFloat?
+    let overlayWidth: CGFloat = appvars.imageWidth * appvars.overlayIconScale
+    let overlayHeight: CGFloat = appvars.imageHeight * appvars.overlayIconScale
     
     let overlayImagePath: String = CLOptionText(OptionName: CLOptions.overlayIconOption)
     var imgFromURL: Bool = false
     var imgFromAPP: Bool = false
     
     var builtInIconName: String = ""
-    var builtInIconFill: String = ""
     var builtInIconColour: Color = Color.primary
+    var builtInIconSecondaryColour: Color = Color.secondary
+    var builtInIconFill: String = ""
     var builtInIconPresent: Bool = false
+    var builtInIconWeight = Font.Weight.thin
     
+    var iconRenderingMode = Image.TemplateRenderingMode.original
+    
+    var sfSymbolName: String = ""
+    var sfSymbolWeight = Font.Weight.thin
+    var sfSymbolColour1: Color = Color.primary
+    var sfSymbolColour2: Color = Color.secondary
+    var sfSymbolPresent: Bool = false
+    
+    var sfGradientPresent: Bool = false
+        
     init(overlayWidth: CGFloat? = nil, overlayHeight: CGFloat? = nil) {
-        self.overlayWidth = appvars.imageWidth * appvars.overlayIconScale
-        self.overlayHeight = appvars.imageHeight * appvars.overlayIconScale
+        //self.overlayWidth = appvars.imageWidth * appvars.overlayIconScale
+        //self.overlayHeight = appvars.imageHeight * appvars.overlayIconScale
         if overlayImagePath.starts(with: "http") {
             imgFromURL = true
         }
         if overlayImagePath.hasSuffix(".app") || overlayImagePath.hasSuffix("prefPane") {
             imgFromAPP = true
+        }
+        
+        if overlayImagePath.hasPrefix("SF=") {
+            //print("sf present")
+            sfSymbolPresent = true
+            builtInIconPresent = true
+            
+            var SFValues = overlayImagePath.components(separatedBy: ",")
+            SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
+            
+            for value in SFValues {
+                // split by =
+                let item = value.components(separatedBy: "=")
+
+                if item[0] == "SF" {
+                    builtInIconName = item[1]
+                }
+                if item[0] == "weight" {
+                    builtInIconWeight = textToFontWeight(item[1])
+                }
+                if item[0].hasPrefix("colour") || item[0].hasPrefix("color") {
+                    if item[1] == "auto" {
+                        // detecting sf symbol properties seems to be annoying, at least in swiftui 2
+                        // this is a bit of a workaround in that we let the user determine if they want the multicolour SF symbol
+                        // or a standard template style. sefault is template. "auto" will use the built in SF Symbol colours
+                        iconRenderingMode = Image.TemplateRenderingMode.original
+                    } else { //check to see if it's in the right length and only contains the right characters
+                        
+                        iconRenderingMode = Image.TemplateRenderingMode.template // switches to monochrome which allows us to tint the sf symbol
+                                                
+                        if item[0].hasSuffix("2") {
+                            sfGradientPresent = true
+                            builtInIconSecondaryColour = stringToColour(item[1])
+                        } else {
+                            builtInIconColour = stringToColour(item[1])
+                        }
+                    //} else {
+                        //quitDialog(exitCode: 14, exitMessage: "Hex value for colour is not valid: \(item[1])")
+                        //print("Hex value for colour is not valid: \(item[1])")
+                    }
+                } else {
+                   iconRenderingMode = Image.TemplateRenderingMode.template
+               }
+            }
         }
         
         if overlayImagePath == "warning" {
@@ -53,24 +109,51 @@ struct IconOverlayView: View {
         if CLOptionPresent(OptionName: CLOptions.overlayIconOption) {
             ZStack {
                 if builtInIconPresent {
-                    // background colour
                     ZStack {
-                        Image(systemName: builtInIconFill)
+                        //background square so the SF Symbol "pops"
+                        Image(systemName: "square.fill")
                             .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .scaledToFit()
-                            .foregroundColor(Color.white)
-                    }
-                    //forground image
-                    ZStack {
-                        Image(systemName: builtInIconName)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .scaledToFit()
-                            .foregroundColor(builtInIconColour)
+                            .foregroundColor(.background)
+                            .frame(width: overlayWidth, height: overlayWidth)
+                        ZStack() {
+                            if sfGradientPresent {
+                                LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottomTrailing)
+                                //LinearGradient(gradient: Gradient(colors: [.clear, .clear]), startPoint: .top, endPoint: .bottom)
+                                    .mask(
+                                    Image(systemName: builtInIconName)
+                                        .renderingMode(iconRenderingMode)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .foregroundColor(builtInIconColour)
+                                        .font(Font.title.weight(builtInIconWeight))
+                                )
+                            } else {
+                                // background colour
+                                ZStack {
+                                    
+                                    Image(systemName: builtInIconFill)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .scaledToFit()
+                                        .foregroundColor(Color.white)
+                                        .font(Font.title.weight(builtInIconWeight))
+                                //}
+                                //forground image
+                                //ZStack {
+                                    Image(systemName: builtInIconName)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .scaledToFit()
+                                        .foregroundColor(builtInIconColour)
+                                        .font(Font.title.weight(builtInIconWeight))
+                                }
+                            }
+                        }
+                        .frame(width: overlayWidth*0.8, height: overlayWidth*0.8)
+                        //.shadow(color: stringToColour("#FFEEFF"), radius: 6, x: 1, y: 1)
                     }
                 } else if imgFromAPP {
-                    Image(nsImage: getAppIcon(appPath: overlayImagePath, withSize: overlayWidth!))
+                    Image(nsImage: getAppIcon(appPath: overlayImagePath, withSize: overlayWidth))
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .scaledToFit()
@@ -87,6 +170,7 @@ struct IconOverlayView: View {
             .frame(width: overlayWidth, height: overlayHeight)
             .offset(x: appvars.overlayOffsetX, y: appvars.overlayOffsetY)
             .shadow(radius: appvars.overlayShadow)
+            //.border(Color.red)
         }
     }
 }

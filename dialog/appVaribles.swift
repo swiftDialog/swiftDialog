@@ -34,15 +34,12 @@ var helpText = """
                     file path to png or jpg           -  "/file/path/image.[png|jpg]"
                     file path to Application          -  "/Applications/Chess.app"
                     URL of file resource              -  "https://someurl/file.[png|jpg]"
+                    SF Symbol                         -  "SF=sf.symbol.name"
                     builtin                           -  info | caution | warning
 
                     if not specified, default icon will be used
                     Images from either file or URL are displayed as roundrect if no transparancy
-
-        -\(CLOptions.fullScreenWindow.short), --\(CLOptions.fullScreenWindow.long)
-                    Uses full screen view.
-                    In this view, only banner, title, icon and message are visible.
-
+        
         -\(CLOptions.overlayIconOption.short), --\(CLOptions.overlayIconOption.long) <file> | <url>
                     Set an image to display as an overlay to --icon
                     image is displayed at 1/2 resolution to the main image and positioned to the bottom right
@@ -50,8 +47,38 @@ var helpText = """
                     file path to png or jpg           -  "/file/path/image.[png|jpg]"
                     file path to Application          -  "/Applications/Chess.app"
                     URL of file resource              -  "https://someurl/file.[png|jpg]"
+                    SF Symbol                         -  "SF=sf.symbol.name"
                     builtin                           -  info | caution | warning
+    
+                When Specifying SF Symbols for icon or overlay icon, additional parameters for colour and weight are available:
+                additionl parameters are seperated by comma
+
+                    "SF=sf.symbol.name,colour=<text><hex>,weight=<text>"
+    
+                    SF Symbols - visit https://developer.apple.com/sf-symbols/ for details on over 3,100 symbols
+
+                    color,colour=<text><hex>  - specified in hex format, e.g. #00A4C7
+                                                Also accepts any of the standard Apple colours
+                                                black, blue, gray, green, orange, pink, purple, red, white, yellow
+                                                default if option is invalid is system primary colour
+    
+                                              - Special colour "auto".
+                                                When used with a multicolor SF Symbol, the symbols default colour scheem will be used
+                                                ** If used with a monochrome SF Symbol **
+                                                ** it will default to black and will not respect dark mode **
+
+                    weight=<text>             - accepts any of the following values:
+                                                    thin (default)
+                                                    light
+                                                    regular
+                                                    medium
+                                                    heavy
+                                                    bold
         
+        -\(CLOptions.fullScreenWindow.short), --\(CLOptions.fullScreenWindow.long)
+                    Uses full screen view.
+                    In this view, only banner, title, icon and message are visible.
+
         -\(CLOptions.hideIcon.short), --\(CLOptions.hideIcon.long)
                     Hides the icon from view
                     Doing so increases the space available for message text to approximately 100 words
@@ -132,7 +159,10 @@ var helpText = """
     
                     Can accept up to three parameters, in a comma seperated list, to modify font properties. 
                     
-                        color,colour=<hex_value>  - specified in hex format, e.g. #00A4C7
+                        color,colour=<text><hex>  - specified in hex format, e.g. #00A4C7
+                                                    Also accepts any of the standard Apple colours
+                                                    black, blue, gray, green, orange, pink, purple, red, white, yellow
+                                                    default if option is invalid is system primary colour
     
                         size=<float>              - accepts any float value.
 
@@ -175,7 +205,7 @@ var helpText = """
 
 struct AppVariables {
 
-    var cliversion                      = String("1.3.4")
+    var cliversion                      = String("1.4.0")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
@@ -212,7 +242,7 @@ struct AppVariables {
     var titleFontColour                 = Color.primary
     var titleFontWeight                 = Font.Weight.bold
     //var titleFontFont                   = Font.TextStyle
-    var overlayIconScale                = CGFloat(0.5)
+    var overlayIconScale                = CGFloat(0.40)
     var overlayOffsetX                  = CGFloat(40)
     var overlayOffsetY                  = CGFloat(50)
     var overlayShadow                   = CGFloat(3)

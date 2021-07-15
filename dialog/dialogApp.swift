@@ -34,6 +34,12 @@ struct dialogApp: App {
     
     init () {
         
+        //check for DND and exit if it's on
+        let dndResult = shell("plutil -extract dnd_prefs xml1 -o - ~/Library/Preferences/com.apple.ncprefs.plist | xpath -q -e 'string(//data)' | base64 -D | plutil -convert xml1 - -o - | xpath -q -e 'boolean(//key[text()=\"userPref\"]/following-sibling::dict/key[text()=\"enabled\"])'")
+        if (dndResult.hasPrefix("1")){
+            quitDialog(exitCode: 20, exitMessage: "Do Not Disturb is enabled. Exiting")
+        }
+        
         // Correct feng shui so the app accepts keyboard input
         // from https://stackoverflow.com/questions/58872398/what-is-the-minimally-viable-gui-for-command-line-swift-scripts
         let app = NSApplication.shared
@@ -76,46 +82,10 @@ struct dialogApp: App {
                     appvars.titleFontSize = CGFloat(truncating: NumberFormatter().number(from: item[1]) ?? 20)
                 }
                 if item[0] == "weight" {
-                    switch item[1] {
-                    case "bold":
-                        appvars.titleFontWeight = Font.Weight.bold
-                    case "heavy":
-                        appvars.titleFontWeight = Font.Weight.heavy
-                    case "light":
-                        appvars.titleFontWeight = Font.Weight.light
-                    case "medium":
-                        appvars.titleFontWeight = Font.Weight.medium
-                    case "regular":
-                        appvars.titleFontWeight = Font.Weight.regular
-                    case "thin":
-                        appvars.titleFontWeight = Font.Weight.thin
-                    default:
-                        appvars.titleFontWeight = Font.Weight.bold
-                    }
+                    appvars.titleFontWeight = textToFontWeight(item[1])
                 }
                 if item[0] == "colour" || item[0] == "color" {
-                    if isValidColourHex(item[1]) {
-                        //check to see if it's in the right length and only contains the right characters
-                        
-                        let colourHash = String(item[1])
-                        
-                        let colourRedValue = "\(colourHash[1])\(colourHash[2])"
-                        let colourRed = Double(Int(colourRedValue, radix: 16)!)/255
-                        
-                        let colourGreenValue = "\(colourHash[3])\(colourHash[4])"
-                        let colourGreen = Double(Int(colourGreenValue, radix: 16)!)/255
-                        
-                        let colourBlueValue = "\(colourHash[5])\(colourHash[6])"
-                        let colourBlue = Double(Int(colourBlueValue, radix: 16)!)/255
-                        
-                        //print("red: \(colourRedValue) green: \(colourGreenValue) blue:\(colourBlueValue)")
-                        //print("red: \(colourRed) green: \(colourGreen) blue:\(colourBlue)")
-                        appvars.titleFontColour = Color(red: colourRed, green: colourGreen, blue: colourBlue)
-                    } else {
-                        quitDialog(exitCode: 14, exitMessage: "Hex value for colour is not valid: \(item[1])")
-                        //print("Hex value for colour is not valid: \(item[1])")
-                    }
-
+                    appvars.titleFontColour = stringToColour(item[1])
                 }
                 
             }
