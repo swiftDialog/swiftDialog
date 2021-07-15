@@ -47,7 +47,7 @@ struct ContentView: View {
                 // Dialog title
                 TitleView()
                     .frame(width: appvars.windowWidth , height: appvars.titleHeight, alignment: .center)
-                    .offset(y: 15) // shift the title up a notch
+                    .offset(y: 10) // shift the title down a notch
                 
                 // Horozontal Line
                 Rectangle()
