@@ -165,7 +165,7 @@ struct IconView: View {
                                 .resizable()
                                 .foregroundColor(builtInIconColour)
                                 .font(Font.title.weight(builtInIconWeight))
-                                .frame(maxWidth: appvars.imageWidth, maxHeight: appvars.imageHeight)
+                                //.frame(maxWidth: appvars.imageWidth, maxHeight: appvars.imageHeight)
                             )
                         
                     } else {
