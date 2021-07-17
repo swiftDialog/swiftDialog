@@ -17,7 +17,7 @@ struct IconView: View {
     var logoHeight: CGFloat  = appvars.imageHeight
     var imgFromURL: Bool = false
     var imgFromAPP: Bool = false
-    var imgXOffset: CGFloat = 25
+    var imgXOffset: CGFloat = 0//25
     
     var builtInIconName: String = ""
     var builtInIconColour: Color = Color.primary
@@ -55,8 +55,8 @@ struct IconView: View {
             builtInIconColour = Color.white
             imgXOffset = 0
             
-            logoWidth = logoWidth * 5
-            logoHeight = logoHeight * 5
+            //logoWidth = logoWidth * 5
+            //logoHeight = logoHeight * 5
         }
         
         if messageUserImagePath.starts(with: "http") {
@@ -143,65 +143,81 @@ struct IconView: View {
     }
     
     var body: some View {
-        VStack {
-            if builtInIconPresent {
-                ZStack {
-                    if sfGradientPresent {
-                        // we need to add this twice - once as a clear version to force the right aspect ratio
-                        // and again with the gradien colour we want
-                        // the reason for this is gradient by itself is greedy and will consume the entire height and witch of the display area
-                        // this causes some SF Symbols like applelogo and applescript to look distorted
-                        Image(systemName: builtInIconName)
-                            .renderingMode(iconRenderingMode)
-                            .resizable()
-                            .foregroundColor(.clear)
-                            .font(Font.title.weight(builtInIconWeight))
-                            
-                        LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottomTrailing)
-                        //LinearGradient(gradient: Gradient(colors: [.clear, .clear]), startPoint: .top, endPoint: .bottom)
-                            .mask(
+        ZStack {
+            //GeometryReader { icon in
+            //HStack {
+                if builtInIconPresent {
+                    ZStack {
+                        if sfGradientPresent {
+                            // we need to add this twice - once as a clear version to force the right aspect ratio
+                            // and again with the gradien colour we want
+                            // the reason for this is gradient by itself is greedy and will consume the entire height and witch of the display area
+                            // this causes some SF Symbols like applelogo and applescript to look distorted
                             Image(systemName: builtInIconName)
                                 .renderingMode(iconRenderingMode)
                                 .resizable()
-                                .foregroundColor(builtInIconColour)
+                                .foregroundColor(.clear)
                                 .font(Font.title.weight(builtInIconWeight))
-                                //.frame(maxWidth: appvars.imageWidth, maxHeight: appvars.imageHeight)
-                            )
-                        
-                    } else {
-                        Image(systemName: builtInIconFill)
-                            .resizable()
-                            .foregroundColor(Color.white)
-                        Image(systemName: builtInIconName)
-                            .resizable()
-                            .renderingMode(iconRenderingMode)
-                            .font(Font.title.weight(builtInIconWeight))
-                            .foregroundColor(builtInIconColour)
+                                
+                            LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottomTrailing)
+                            //LinearGradient(gradient: Gradient(colors: [.clear, .clear]), startPoint: .top, endPoint: .bottom)
+                                .mask(
+                                Image(systemName: builtInIconName)
+                                    .renderingMode(iconRenderingMode)
+                                    .resizable()
+                                    .foregroundColor(builtInIconColour)
+                                    .font(Font.title.weight(builtInIconWeight))
+                                    //.frame(maxWidth: appvars.imageWidth, maxHeight: appvars.imageHeight)
+                                )
+                            
+                        } else {
+                            Image(systemName: builtInIconFill)
+                                .resizable()
+                                .foregroundColor(Color.white)
+                            Image(systemName: builtInIconName)
+                                .resizable()
+                                .renderingMode(iconRenderingMode)
+                                .font(Font.title.weight(builtInIconWeight))
+                                .foregroundColor(builtInIconColour)
+                        }
                     }
-                }
-                .aspectRatio(contentMode: .fit)
-                .scaledToFit()
-                .offset(x: imgXOffset)
-                .overlay(IconOverlayView(), alignment: .bottomTrailing)
-            } else if imgFromAPP {
-                Image(nsImage: getAppIcon(appPath: messageUserImagePath, withSize: self.logoWidth))
+                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
+                    .offset(x: imgXOffset)
+                    .scaleEffect(0.8)
+                    //.overlay(IconOverlayView(), alignment: .bottomTrailing)
+                    //.border(Color.green)
+                } else if imgFromAPP {
+                    Image(nsImage: getAppIcon(appPath: messageUserImagePath))
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .scaledToFit()
+                            .scaleEffect(0.8)
+                            //.offset(x: imgXOffset)
+                            //.overlay(IconOverlayView(), alignment: .bottomTrailing)
+                            //.border(Color.green)
+                } else {
+                    let diskImage: NSImage = getImageFromPath(fileImagePath: messageUserImagePath)
+                    Image(nsImage: diskImage)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .scaledToFit()
-                        .offset(x: imgXOffset)
-                        .overlay(IconOverlayView(), alignment: .bottomTrailing)
-            } else {
-                let diskImage: NSImage = getImageFromPath(fileImagePath: messageUserImagePath, imgWidth: logoWidth, imgHeight: logoHeight)
-                Image(nsImage: diskImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .scaledToFit()
-                    .frame(width: self.logoWidth, height: diskImage.size.height*(logoWidth/diskImage.size.width))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .offset(x: imgXOffset, y: 8)
-                    .overlay(IconOverlayView(overlayWidth: logoWidth/2, overlayHeight: diskImage.size.height*(logoWidth/diskImage.size.width)/2), alignment: .bottomTrailing)
+                        //.frame(width: self.logoWidth, height: diskImage.size.height*(logoWidth/diskImage.size.width))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        //.offset(x: imgXOffset, y: 8)
+                        .scaleEffect(0.8)
+                        //.overlay(IconOverlayView(overlayIconWidth: logoWidth/2, overlayIconHeight: diskImage.size.height*(logoWidth/diskImage.size.width)/2), alignment: .bottomTrailing)
+                        //.border(Color.green)
 
-            }
+                }
+            //}
+            //}
+            IconOverlayView()
+                .scaleEffect(0.4, anchor:.bottomTrailing)
+                //.offset(x: 10, y: 10)
+                //.frame(width: logoWidth/2, height: logoHeight/2)
+                //.frame(alignment: .bottomTrailing)
+                //.border(Color.green)
         }
         //.overlay(IconOverlayView(), alignment: .topTrailing)
         //.border(Color.green) //debuging

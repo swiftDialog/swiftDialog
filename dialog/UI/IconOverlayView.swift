@@ -9,8 +9,8 @@ import Foundation
 import SwiftUI
 
 struct IconOverlayView: View {
-    let overlayWidth: CGFloat = appvars.imageWidth * appvars.overlayIconScale
-    let overlayHeight: CGFloat = appvars.imageHeight * appvars.overlayIconScale
+    //var overlayWidth: CGFloat = .infinity//= appvars.imageWidth * appvars.overlayIconScale
+    //var overlayHeight: CGFloat = .infinity //= appvars.imageHeight * appvars.overlayIconScale
     
     let overlayImagePath: String = CLOptionText(OptionName: CLOptions.overlayIconOption)
     var imgFromURL: Bool = false
@@ -33,9 +33,11 @@ struct IconOverlayView: View {
     
     var sfGradientPresent: Bool = false
         
-    init(overlayWidth: CGFloat? = nil, overlayHeight: CGFloat? = nil) {
-        //self.overlayWidth = appvars.imageWidth * appvars.overlayIconScale
-        //self.overlayHeight = appvars.imageHeight * appvars.overlayIconScale
+    //init(overlayIconWidth: CGFloat? = nil, overlayIconHeight: CGFloat? = nil) {
+    init() {
+        //self.overlayWidth = overlayIconWidth ?? appvars.imageWidth * appvars.overlayIconScale
+        //self.overlayHeight = overlayIconHeight ?? appvars.imageHeight * appvars.overlayIconScale
+        
         if overlayImagePath.starts(with: "http") {
             imgFromURL = true
         }
@@ -114,9 +116,10 @@ struct IconOverlayView: View {
                         Image(systemName: "square.fill")
                             .resizable()
                             .foregroundColor(.background)
-                            .frame(width: overlayWidth, height: overlayWidth)
+                            //.frame(width: overlayWidth, height: overlayWidth)
                             .font(Font.title.weight(Font.Weight.thin))
                             .opacity(0.90)
+                            .shadow(color: .primary, radius: 1, x: 1, y: 1)
 
                         ZStack() {
                             if sfGradientPresent {
@@ -153,11 +156,14 @@ struct IconOverlayView: View {
                                 }
                             }
                         }
-                        .frame(width: overlayWidth*0.8, height: overlayWidth*0.8)
+                        .scaleEffect(0.8)
+                        //.frame(width: overlayWidth*0.8, height: overlayWidth*0.8)
                         //.shadow(color: stringToColour("#FFEEFF"), radius: 6, x: 1, y: 1)
                     }
+                    .aspectRatio(1, contentMode: .fit)
                 } else if imgFromAPP {
-                    Image(nsImage: getAppIcon(appPath: overlayImagePath, withSize: overlayWidth))
+                    //Image(nsImage: getAppIcon(appPath: overlayImagePath, withSize: overlayWidth))
+                    Image(nsImage: getAppIcon(appPath: overlayImagePath))
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .scaledToFit()
@@ -171,8 +177,8 @@ struct IconOverlayView: View {
                 }
                 
             }
-            .frame(width: overlayWidth, height: overlayHeight)
-            .offset(x: appvars.overlayOffsetX, y: appvars.overlayOffsetY)
+            //.frame(width: overlayWidth, height: overlayHeight)
+            //.offset(x: appvars.overlayOffsetX, y: appvars.overlayOffsetY)
             .shadow(color: Color.primary.opacity(0.70), radius: appvars.overlayShadow)
             //.border(Color.red)
         }

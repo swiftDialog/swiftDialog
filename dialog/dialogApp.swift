@@ -150,7 +150,7 @@ struct dialogApp: App {
         appvars.imageHeight = appvars.imageHeight * appvars.scaleFactor
         
         if CLOptionPresent(OptionName: CLOptions.fullScreenWindow) {
-            appvars.overlayIconScale = appvars.overlayIconScale * 3
+            //appvars.overlayIconScale = appvars.overlayIconScale * 2
             FullscreenView().showFullScreen()
         }
     

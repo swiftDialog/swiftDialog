@@ -102,14 +102,14 @@ func buttonAction(action: String, exitCode: Int32, executeShell: Bool) {
     //exit(0)
 }
 
-func getAppIcon(appPath : String, withSize : CGFloat) -> NSImage {
+func getAppIcon(appPath: String, withSize: CGFloat? = 300) -> NSImage {
     // take application path and extracts the application icon and returns is as NSImage
     // Swift implimentation of the ObjC code used in SAP's nice "Icons" utility for extracting application icons
     // https://github.com/SAP/macOS-icon-generator/blob/master/source/Icons/MTDragDropView.m#L66
     
     let image = NSImage()
     if let rep = NSWorkspace.shared.icon(forFile: appPath)
-        .bestRepresentation(for: NSRect(x: 0, y: 0, width: withSize, height: withSize), context: nil, hints: nil) {
+        .bestRepresentation(for: NSRect(x: 0, y: 0, width: withSize!, height: withSize!), context: nil, hints: nil) {
         image.size = rep.size
         image.addRepresentation(rep)
     }
