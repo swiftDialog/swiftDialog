@@ -237,7 +237,8 @@ func plistFromData(_ data: Data) throws -> [String:Any] {
 }
 
 func isDNDEnabled() -> Bool {
-    //check for DND and return true if it is on
+    // check for DND and return true if it is on
+    // ** This function will not work under macOS 12 as at July 2021
     let consoleUser = SCDynamicStoreCopyConsoleUser(nil, nil , nil)
     let consoleUserHomeDir = FileManager.default.homeDirectory(forUser: consoleUser! as String)?.path ?? ""
     
@@ -245,18 +246,13 @@ func isDNDEnabled() -> Bool {
         fileURLWithPath: String("\(consoleUserHomeDir)/Library/Preferences/com.apple.ncprefs.plist")
     )
     
-    let prefsList: [String : Any]
-    let dndPrefsData: Data
-    let dndPrefsList: [String : Any]
     do {
-        prefsList = try plistFromData(try Data(contentsOf: ncprefsUrl))
-        dndPrefsData = prefsList["dnd_prefs"] as! Data
-        dndPrefsList = try plistFromData(dndPrefsData)
+        let prefsList = try plistFromData(try Data(contentsOf: ncprefsUrl))
+        let dndPrefsData = prefsList["dnd_prefs"] as! Data
+        let dndPrefsList = try plistFromData(dndPrefsData)
         
         if let userPref = dndPrefsList["userPref"] as? [String:Any] {
-            if userPref["enabled"] as! Int > 0 {
-                return true
-            }
+            return userPref["enabled"] as! Bool
         }
     } catch {
         quitDialog(exitCode: 21, exitMessage: "DND Prefs unavailable")
