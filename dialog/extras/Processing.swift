@@ -228,3 +228,34 @@ func stringToColour(_ colourValue: String) -> Color {
     return returnColor
     
 }
+
+func plistFromData(_ data: Data) throws -> [String:Any] {
+    try PropertyListSerialization.propertyList(
+        from: data,
+        format: nil
+    ) as! [String:Any]
+}
+
+func isDNDEnabled() -> Bool {
+    // check for DND and return true if it is on
+    // ** This function will not work under macOS 12 as at July 2021
+    let consoleUser = SCDynamicStoreCopyConsoleUser(nil, nil , nil)
+    let consoleUserHomeDir = FileManager.default.homeDirectory(forUser: consoleUser! as String)?.path ?? ""
+    
+    let ncprefsUrl = URL(
+        fileURLWithPath: String("\(consoleUserHomeDir)/Library/Preferences/com.apple.ncprefs.plist")
+    )
+    
+    do {
+        let prefsList = try plistFromData(try Data(contentsOf: ncprefsUrl))
+        let dndPrefsData = prefsList["dnd_prefs"] as! Data
+        let dndPrefsList = try plistFromData(dndPrefsData)
+        
+        if let userPref = dndPrefsList["userPref"] as? [String:Any] {
+            return userPref["enabled"] as! Bool
+        }
+    } catch {
+        quitDialog(exitCode: 21, exitMessage: "DND Prefs unavailable")
+    }
+    return false
+}
