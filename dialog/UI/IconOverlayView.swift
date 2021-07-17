@@ -115,6 +115,9 @@ struct IconOverlayView: View {
                             .resizable()
                             .foregroundColor(.background)
                             .frame(width: overlayWidth, height: overlayWidth)
+                            .font(Font.title.weight(Font.Weight.thin))
+                            .opacity(0.90)
+
                         ZStack() {
                             if sfGradientPresent {
                                 LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottomTrailing)
@@ -141,6 +144,7 @@ struct IconOverlayView: View {
                                 //forground image
                                 //ZStack {
                                     Image(systemName: builtInIconName)
+                                        .renderingMode(iconRenderingMode)
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
                                         .scaledToFit()
@@ -169,7 +173,7 @@ struct IconOverlayView: View {
             }
             .frame(width: overlayWidth, height: overlayHeight)
             .offset(x: appvars.overlayOffsetX, y: appvars.overlayOffsetY)
-            .shadow(radius: appvars.overlayShadow)
+            .shadow(color: Color.primary.opacity(0.70), radius: appvars.overlayShadow)
             //.border(Color.red)
         }
     }
