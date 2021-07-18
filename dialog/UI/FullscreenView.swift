@@ -72,8 +72,13 @@ struct FullscreenView: View {
             //maxBannerHeight = 150
         }
         
-        //debugColour = Color.red
+        debugColour = Color.red
         
+        if appvars.titleFontColour == Color.primary {
+            appvars.titleFontColour = Color.white
+            
+        }
+                
     }
             
     public func showFullScreen() {
@@ -98,39 +103,35 @@ struct FullscreenView: View {
         
         VStack{
             // banner image vstack
-            VStack{
-                if CLOptionPresent(OptionName: CLOptions.bannerImage) {
-                    Image(nsImage: getImageFromPath(fileImagePath: BannerImageOption))
-                        .resizable()
-                        .clipShape(RoundedRectangle(cornerRadius: 15))
-                        .scaledToFit()
-                        .frame(maxWidth: maxBannerWidth, maxHeight: maxBannerHeight)
-                    // Horozontal Line
-                    VStack{
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.5))
-                            .frame(height: 2)
-                    }
-                    .frame(width: (maxBannerWidth))
-                    .padding(.vertical,20)
-                    .border(debugColour)
+            if CLOptionPresent(OptionName: CLOptions.bannerImage) {
+                Image(nsImage: getImageFromPath(fileImagePath: BannerImageOption))
+                    .resizable()
+                    .clipShape(RoundedRectangle(cornerRadius: 15))
+                    .scaledToFit()
+                    .frame(maxWidth: maxBannerWidth, maxHeight: maxBannerHeight)
+                // Horozontal Line
+                VStack{
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.5))
+                        .frame(height: 2)
                 }
-            }.padding(bannerPadding) //padding for the top of the display
-            .border(debugColour)
+                .frame(width: (maxBannerWidth))
+                .padding(.vertical,20)
+                //.border(debugColour)
+            }
             
             // title vstack
-            VStack{
-                HStack {
-                    Spacer()
-                    Text(TitleViewOption)
-                        .foregroundColor(.white)
-                        .bold()
-                        .font(.system(size: titleContentFontSize))
-                    Spacer()
-                }
-                .border(debugColour)
+            HStack {
+                // the spacers in this section push the title and thus the full screen area across the width of the display
+                Spacer()
+                Text(TitleViewOption)
+                    .foregroundColor(appvars.titleFontColour)
+                    .bold()
+                    .font(.system(size: titleContentFontSize, weight: appvars.titleFontWeight))
+                    .multilineTextAlignment(.center)
+                Spacer()
             }
-            //.border(Color.blue)
+            //.border(Color.green)
             
             // icon and message vstack group
             VStack {
@@ -138,14 +139,14 @@ struct FullscreenView: View {
                 VStack {
                     if CLOptionPresent(OptionName: CLOptions.iconOption) {
                         IconView()
-                            .frame(maxHeight: appvars.imageHeight*iconImageScaleFactor, alignment: .center)
+                            //.frame(maxHeight: appvars.imageHeight*iconImageScaleFactor, alignment: .center)
                             //.background(Color.white)
                     } else {
                         VStack{}.padding(emptyStackPadding)
                     }
                 }
                 .padding(40)
-                .border(debugColour)
+                //.border(Color.orange)
                 
                 // message vstack
                 VStack() {
@@ -156,13 +157,14 @@ struct FullscreenView: View {
                         .lineLimit(12)
                         .lineSpacing(messageTextLineSpacing)
                         
-                }.border(debugColour)
+                }
+                //.border(debugColour)
                 .padding(10)
                 .frame(maxHeight: .infinity, alignment: .center) // setting to .infinity should make the message content take up the remainder of the screen
             }
             .padding(.horizontal, 20) // total padding for the icon/message group
             .padding(.vertical, 50)
-            .border(debugColour)
+            //.border(debugColour)
         }
         //.background(Color.black)
         .background(

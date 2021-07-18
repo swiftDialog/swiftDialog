@@ -28,27 +28,30 @@ struct ButtonView: View {
             if CLOptionPresent(OptionName: CLOptions.button2Option){
                 Button(action: {quitDialog(exitCode: 2)}, label: {
                     Text(appvars.button2Default)
+                        .frame(minWidth: 40, alignment: .center)
                     }
-                ).frame(minWidth: 36, alignment: .center)
+                )
                 .keyboardShortcut(.cancelAction)
             } else if CLOptionPresent(OptionName: CLOptions.button2TextOption) {
                 let button2Text: String = CLOptionText(OptionName: CLOptions.button2TextOption, DefaultValue: appvars.button2Default)
                 Button(action: {quitDialog(exitCode: 2)}, label: {
                     Text(button2Text)
+                        .frame(minWidth: 40, alignment: .center)
                     }
-                ).frame(minWidth: 36, alignment: .center)
+                )
                 .keyboardShortcut(.cancelAction)
             }
         }
         // default button aka button 1
         let button1Text: String = CLOptionText(OptionName: CLOptions.button1TextOption, DefaultValue: appvars.button1Default)
-        HStack {
+        //HStack {
             Button(action: {buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction)}, label: {
                 Text(button1Text)
+                    .frame(minWidth: 40, alignment: .center)
                 }
-            ).frame(minWidth: 36, alignment: .center)
+            )//.frame(minWidth: 36, alignment: .center)
             .keyboardShortcut(.defaultAction)
-        }
+        //}
     }
 }
 
@@ -61,14 +64,16 @@ struct MoreInfoButton: View {
             if CLOptionPresent(OptionName: CLOptions.infoButtonOption) {
                 Button(action: {buttonAction(action: buttonInfoAction, exitCode: 3, executeShell: false)}, label: {
                     Text(appvars.buttonInfoDefault)
+                        .frame(minWidth: 40, alignment: .center)
                     }
-                ).frame(minWidth: 36, alignment: .center)
+                )
             } else if CLOptionPresent(OptionName: CLOptions.buttonInfoTextOption) {
                 let buttonInfoText: String = CLOptionText(OptionName: CLOptions.buttonInfoTextOption, DefaultValue: appvars.buttonInfoDefault)
                 Button(action: {buttonAction(action: buttonInfoAction, exitCode: 3, executeShell: false)}, label: {
                     Text(buttonInfoText)
+                        .frame(minWidth: 40, alignment: .center)
                     }
-                ).frame(minWidth: 36, alignment: .center)
+                )
             }
             Spacer()
         }
