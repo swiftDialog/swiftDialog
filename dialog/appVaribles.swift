@@ -216,7 +216,7 @@ struct AppVariables {
     
     // button default strings
     // work out how to define a default width button that does what you tell it to. in the meantime, diry hack with spaces
-    var button1Default                  = String("    OK    ")
+    var button1Default                  = String("OK")
     var button2Default                  = String("Cancel")
     var buttonInfoDefault               = String("More Information")
     var buttonInfoActionDefault         = String("")
