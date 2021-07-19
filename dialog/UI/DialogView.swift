@@ -11,6 +11,10 @@ import SwiftUI
 import AppKit
 
 struct DialogView: View {
+    
+    var imageOffsetX: CGFloat = -35
+    var imageOffsetY: CGFloat = 10
+    
     init() {
         if appvars.iconIsHidden {
             appvars.imageWidth = 0
@@ -27,7 +31,7 @@ struct DialogView: View {
                             IconView()
                             
                     }.frame(width: iconFrameWidth, height: iconFrameHeight, alignment: .top)
-                    .offset(x: -45, y: 10) //position the icon area
+                    .offset(x: imageOffsetX, y: imageOffsetY) //position the icon area
                 }
                 
                 VStack(alignment: .center) {
