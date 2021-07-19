@@ -57,23 +57,23 @@ var helpText = """
     
                     SF Symbols - visit https://developer.apple.com/sf-symbols/ for details on over 3,100 symbols
 
-                    color,colour=<text><hex>  - specified in hex format, e.g. #00A4C7
-                                                Also accepts any of the standard Apple colours
-                                                black, blue, gray, green, orange, pink, purple, red, white, yellow
-                                                default if option is invalid is system primary colour
+                    color,colour=<text><hex>          - specified in hex format, e.g. #00A4C7
+                    bgcolor,bgcolour=<text><hex>
+                                                      Also accepts any of the standard Apple colours
+                                                      black, blue, gray, green, orange, pink, purple, red, white, yellow
+                                                      default if option is invalid is system primary colour
     
-                                              - Special colour "auto".
-                                                When used with a multicolor SF Symbol, the symbols default colour scheem will be used
-                                                ** If used with a monochrome SF Symbol **
-                                                ** it will default to black and will not respect dark mode **
+                                                      bgcolour, bgcolor will set the background colour of the icon overlay
+                                                        when SF Symbols are used
+    
+                                                      - Special colour "auto".
+                                                      When used with a multicolor SF Symbol, the symbols
+                                                        default colour scheem will be used
+                                                      ** If used with a monochrome SF Symbol **
+                                                      ** it will default to black and will not respect dark mode **
 
-                    weight=<text>             - accepts any of the following values:
-                                                    thin (default)
-                                                    light
-                                                    regular
-                                                    medium
-                                                    heavy
-                                                    bold
+                    weight=<text>                     - accepts any of the following values:
+                                                       thin (default), light, regular, medium, heavy, bold
         
         -\(CLOptions.fullScreenWindow.short), --\(CLOptions.fullScreenWindow.long)
                     Uses full screen view.

@@ -35,11 +35,18 @@ struct IconView: View {
     
     var sfGradientPresent: Bool = false
     
+    var mainImageScale: CGFloat = 1
+    let mainImageWithOverlayScale: CGFloat = 0.88
+    let overlayImageScale: CGFloat = 0.4
+    
   
     init() {        
         logoWidth = appvars.imageWidth
         logoHeight = appvars.imageHeight
         
+        if CLOptionPresent(OptionName: CLOptions.overlayIconOption) {
+            mainImageScale = mainImageWithOverlayScale
+        }
         
         // fullscreen runs on a dark background so invert the default icon colour for info and default
         // also set the icon offset to 0
@@ -133,7 +140,7 @@ struct IconView: View {
                 ZStack {
                     if sfGradientPresent {
                         // we need to add this twice - once as a clear version to force the right aspect ratio
-                        // and again with the gradien colour we want
+                        // and again with the gradiet colour we want
                         // the reason for this is gradient by itself is greedy and will consume the entire height and witch of the display area
                         // this causes some SF Symbols like applelogo and applescript to look distorted
                         Image(systemName: builtInIconName)
@@ -164,13 +171,13 @@ struct IconView: View {
                 }
                 .aspectRatio(contentMode: .fit)
                 .scaledToFit()
-                .scaleEffect(0.8)
+                .scaleEffect(mainImageScale)
             } else if imgFromAPP {
                 Image(nsImage: getAppIcon(appPath: messageUserImagePath))
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .scaledToFit()
-                        .scaleEffect(0.8)
+                        .scaleEffect(mainImageScale)
             } else {
                 let diskImage: NSImage = getImageFromPath(fileImagePath: messageUserImagePath)
                 Image(nsImage: diskImage)
@@ -178,11 +185,11 @@ struct IconView: View {
                     .aspectRatio(contentMode: .fit)
                     .scaledToFit()
                     .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .scaleEffect(0.8)
+                    .scaleEffect(mainImageScale)
             }
 
             IconOverlayView()
-                .scaleEffect(0.4, anchor:.bottomTrailing)
+                .scaleEffect(overlayImageScale, anchor:.bottomTrailing)
 
         }
         
