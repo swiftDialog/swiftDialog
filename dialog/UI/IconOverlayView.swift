@@ -86,6 +86,7 @@ struct IconOverlayView: View {
             builtInIconName = "exclamationmark.octagon.fill"
             builtInIconFill = "octagon.fill"
             builtInIconColour = Color.red
+            iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
             builtInIconPresent = true
         }
         if overlayImagePath == "caution" {
