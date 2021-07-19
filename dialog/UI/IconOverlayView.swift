@@ -106,7 +106,7 @@ struct IconOverlayView: View {
             ZStack {
                 if builtInIconPresent {
                     ZStack {
-                        if sfSymbolPresent {
+                        if sfSymbolPresent || overlayImagePath == "info" {
                             //background square so the SF Symbol has something to render against
                             Image(systemName: "square.fill")
                                 .resizable()

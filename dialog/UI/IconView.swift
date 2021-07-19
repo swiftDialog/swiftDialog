@@ -36,6 +36,7 @@ struct IconView: View {
     var sfGradientPresent: Bool = false
     
     var mainImageScale: CGFloat = 1
+    let mainImageWithOverlayScale: CGFloat = 0.88
     let overlayImageScale: CGFloat = 0.4
     
   
@@ -44,7 +45,7 @@ struct IconView: View {
         logoHeight = appvars.imageHeight
         
         if CLOptionPresent(OptionName: CLOptions.overlayIconOption) {
-            mainImageScale = 0.8
+            mainImageScale = mainImageWithOverlayScale
         }
         
         // fullscreen runs on a dark background so invert the default icon colour for info and default
