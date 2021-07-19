@@ -30,6 +30,7 @@ struct IconOverlayView: View {
     var sfSymbolPresent: Bool = false
     
     var sfGradientPresent: Bool = false
+    var sfBackgroundIconColour: Color = Color.background
         
     init() {
         
@@ -58,6 +59,9 @@ struct IconOverlayView: View {
                 }
                 if itemName == "weight" {
                     builtInIconWeight = textToFontWeight(item[1])
+                }
+                if itemName.hasPrefix("bgcolour") || itemName.hasPrefix("bgcolor") {
+                    sfBackgroundIconColour = stringToColour(itemValue)
                 }
                 if itemName.hasPrefix("colour") || itemName.hasPrefix("color") {
                     if itemValue == "auto" {
@@ -110,7 +114,7 @@ struct IconOverlayView: View {
                             //background square so the SF Symbol has something to render against
                             Image(systemName: "square.fill")
                                 .resizable()
-                                .foregroundColor(.background)
+                                .foregroundColor(sfBackgroundIconColour)
                                 .font(Font.title.weight(Font.Weight.thin))
                                 .opacity(0.90)
                                 .shadow(color: .secondaryBackground.opacity(0.50), radius: 4, x:2, y:2) // gives the sf background some pop especially in dark mode
