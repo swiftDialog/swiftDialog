@@ -254,10 +254,14 @@ struct AppVariables {
     
     var selectedOption                  = ""
     var selectedIndex                   = 0
-    
+
     var jsonOut                         = Bool(false)
     
     var willDisturb                     = Bool(false)
+    
+    var textOptionsArray                = [String]()
+    var textFieldText                   = Array(repeating: "", count: 8)
+    //var textOptionsText                 = [String]()
     
     // exit codes and error messages
     var exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))
@@ -298,6 +302,7 @@ struct CLOptions {
     static let dropdownValues           = (long: String("selectvalues"),      short: String(""))
     static let dropdownDefault          = (long: String("selectdefault"),     short: String(""))
     static let titleFont                = (long: String("titlefont"),         short: String(""))
+    static let textField                = (long: String("textfield"),         short: String(""))
 
    
     // command line options that take no additional parameters

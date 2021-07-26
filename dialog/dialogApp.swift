@@ -29,13 +29,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 @main
 struct dialogApp: App {
 
-    func isValidColourHex(_ hexvalue: String) -> Bool {
-        let hexRegEx = "^#([a-fA-F0-9]{6})$"
-        let hexPred = NSPredicate(format:"SELF MATCHES %@", hexRegEx)
-        return hexPred.evaluate(with: hexvalue)
-    }
     
     init () {
+        
+        if (CLOptionPresent(OptionName: CLOptions.textField)) {
+            appvars.textOptionsArray = CLOptionTextField()
+        }
         
         // process command line options that just display info and exit before we show the main window
         if (CLOptionPresent(OptionName: CLOptions.helpOption) || CommandLine.arguments.count == 1) {
