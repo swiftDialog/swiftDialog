@@ -60,6 +60,8 @@ struct MessageContent: View {
                     //.frame(width: viewWidth-50, alignment: .center)
                     //.border(Color.red)
             }
+            .frame(width: viewWidth, alignment: .topLeading)
+            .padding(.top, 10)
             //.border(Color.red)
             //.frame(width: viewWidth, height: viewHeight, alignment: .topLeading)
             
@@ -70,7 +72,7 @@ struct MessageContent: View {
             
             DropdownView()
                 //.border(Color.blue)
-                .frame(alignment: .bottomLeading)
+                .frame(width: viewWidth-50, alignment: .bottomLeading)
         }
         .frame(width: viewWidth, height: viewHeight)
         //.frame(alignment: theAllignment)

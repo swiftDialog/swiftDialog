@@ -32,7 +32,7 @@ struct DialogView: View {
                             
                     }.frame(width: iconFrameWidth, height: iconFrameHeight, alignment: .top)
                     .offset(x: imageOffsetX, y: imageOffsetY) //position the icon area
-                    .padding(10)
+                    //.padding(10)
                     //.border(Color.purple)
                 }
                 
