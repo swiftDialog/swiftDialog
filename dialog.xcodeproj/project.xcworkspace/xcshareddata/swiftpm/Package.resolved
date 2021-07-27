@@ -1,0 +1,70 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "AttributedText",
+        "repositoryURL": "https://github.com/gonzalezreal/AttributedText",
+        "state": {
+          "branch": null,
+          "revision": "bf076de48dbb2172525486936d512e1bba062642",
+          "version": "0.3.0"
+        }
+      },
+      {
+        "package": "combine-schedulers",
+        "repositoryURL": "https://github.com/pointfreeco/combine-schedulers",
+        "state": {
+          "branch": null,
+          "revision": "c37e5ae8012fb654af776cc556ff8ae64398c841",
+          "version": "0.5.0"
+        }
+      },
+      {
+        "package": "MarkdownUI",
+        "repositoryURL": "https://github.com/gonzalezreal/MarkdownUI",
+        "state": {
+          "branch": null,
+          "revision": "e8931e37dcf777b4c03ca76aa09c10cf246a2ced",
+          "version": "0.5.1"
+        }
+      },
+      {
+        "package": "NetworkImage",
+        "repositoryURL": "https://github.com/gonzalezreal/NetworkImage",
+        "state": {
+          "branch": null,
+          "revision": "15582b821cb097012b41b83d6219717926ec4ed6",
+          "version": "2.1.0"
+        }
+      },
+      {
+        "package": "cmark",
+        "repositoryURL": "https://github.com/SwiftDocOrg/swift-cmark.git",
+        "state": {
+          "branch": null,
+          "revision": "9c8096a23f44794bde297452d87c455fc4f76d42",
+          "version": "0.29.0+20210102.9c8096a"
+        }
+      },
+      {
+        "package": "SwiftCommonMark",
+        "repositoryURL": "https://github.com/gonzalezreal/SwiftCommonMark",
+        "state": {
+          "branch": null,
+          "revision": "ed60da54305c244d0f77bc8d08495e04161e96a4",
+          "version": "0.1.2"
+        }
+      },
+      {
+        "package": "xctest-dynamic-overlay",
+        "repositoryURL": "https://github.com/pointfreeco/xctest-dynamic-overlay",
+        "state": {
+          "branch": null,
+          "revision": "152390e9e78ebbf0d767ee52971d41e7f44f39bc",
+          "version": "0.1.1"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -64,6 +64,9 @@ struct MessageContent: View {
             //.frame(width: viewWidth, height: viewHeight, alignment: .topLeading)
             
             Spacer()
+            TextEntryView()
+                .frame(width: viewWidth-50, alignment: .bottomLeading)
+                //.padding(10)
             
             DropdownView()
                 //.border(Color.blue)
