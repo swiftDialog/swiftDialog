@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import MarkdownUI
 
 extension Color {
     init(hex: UInt, alpha: Double = 1) {
@@ -43,6 +44,13 @@ struct FullscreenView: View {
     var BannerImageOption: String = CLOptionText(OptionName: CLOptions.bannerImage)
     
     var debugColour: Color = Color.clear
+    
+    var useDefaultStyle = true
+    var style: MarkdownStyle {
+        useDefaultStyle
+            ? DefaultMarkdownStyle(font: .system(size: 20))
+            : DefaultMarkdownStyle(font: .system(size: 20))
+    }
      
     init () {
         windowHeight = displayDetails.size.height
@@ -150,12 +158,14 @@ struct FullscreenView: View {
                 
                 // message vstack
                 VStack() {
+
                     Text(messageContentOption)
                         .font(.system(size: messageContentFontSize))
                         .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                         .lineLimit(12)
                         .lineSpacing(messageTextLineSpacing)
+                    
                         
                 }
                 //.border(debugColour)

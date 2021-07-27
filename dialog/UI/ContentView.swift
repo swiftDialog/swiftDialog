@@ -59,6 +59,7 @@ struct ContentView: View {
                 // Dialog content including message and image if visible
                 DialogView()
                     .frame(alignment: .topLeading)
+                    //.border(Color.red)
             }
                 
             // Buttons

@@ -12,7 +12,7 @@ import AppKit
 
 struct DialogView: View {
     
-    var imageOffsetX: CGFloat = -35
+    var imageOffsetX: CGFloat = -25
     var imageOffsetY: CGFloat = 10
     
     init() {
@@ -32,6 +32,8 @@ struct DialogView: View {
                             
                     }.frame(width: iconFrameWidth, height: iconFrameHeight, alignment: .top)
                     .offset(x: imageOffsetX, y: imageOffsetY) //position the icon area
+                    .padding(10)
+                    //.border(Color.purple)
                 }
                 
                 VStack(alignment: .center) {
@@ -39,6 +41,7 @@ struct DialogView: View {
                     MessageContent()
                 }
             }
+            //.border(Color.green)
             
         }
     }

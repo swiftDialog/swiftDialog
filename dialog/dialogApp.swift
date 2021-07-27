@@ -115,28 +115,21 @@ struct dialogApp: App {
         if CLOptionPresent(OptionName: CLOptions.jsonOutPut) {
             appvars.jsonOut = true
         }
-                
+        
+        // we define this stuff here as we will use the info to draw the window.
         if CLOptionPresent(OptionName: CLOptions.smallWindow) {
             // scale everything down a notch
             
             appvars.smallWindow = true
-
             appvars.scaleFactor = 0.75
-            appvars.dialogContentScale = 0.80
             
-            appvars.overlayOffsetX = appvars.overlayOffsetX * (appvars.scaleFactor)
-            appvars.overlayOffsetY = appvars.overlayOffsetY * (appvars.scaleFactor*appvars.scaleFactor)
-            //appvars.overlayIconScale = appvars.overlayIconScale * appvars.scaleFactor
+            //appvars.overlayOffsetX = appvars.overlayOffsetX * (appvars.scaleFactor)
+            //appvars.overlayOffsetY = appvars.overlayOffsetY * (appvars.scaleFactor*appvars.scaleFactor)
         } else if CLOptionPresent(OptionName: CLOptions.bigWindow) {
             // scale everything up a notch
             
             appvars.bigWindow = true
             appvars.scaleFactor = 1.25
-            appvars.dialogContentScale = 0.55
-            
-            //appvars.overlayOffsetX = appvars.overlayOffsetX * (appvars.scaleFactor)
-            //appvars.overlayOffsetY = appvars.overlayOffsetY * (appvars.scaleFactor)
-            //appvars.overlayIconScale = appvars.overlayIconScale * appvars.scaleFactor
         }
         
         appvars.overlayShadow = 1
