@@ -113,8 +113,6 @@ struct IconView: View {
             builtInIconPresent = true
         } else if CLOptionPresent(OptionName: CLOptions.cautionIcon) || messageUserImagePath == "caution" {
             builtInIconName = "exclamationmark.triangle.fill"  // yay multicolour sf symbol
-            //builtInIconFill = "triangle.fill"
-            //builtInIconColour = Color.yellow
             builtInIconPresent = true
         } else if CLOptionPresent(OptionName: CLOptions.infoIcon) || messageUserImagePath == "info" {
             builtInIconName = "person.fill.questionmark"
@@ -123,8 +121,6 @@ struct IconView: View {
             builtInIconName = "message.circle.fill"
             iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
             builtInIconPresent = true
-            //builtInIconColour = sfSymbolColour1
-            //builtInIconWeight = sfSymbolWeight
         }
         
                 

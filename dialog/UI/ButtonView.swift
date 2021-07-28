@@ -80,5 +80,3 @@ struct MoreInfoButton: View {
     }
     
 }
-
-// Utils.openSpecifiedURL(urlToOpen: "https://google.com")

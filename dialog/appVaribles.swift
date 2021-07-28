@@ -260,8 +260,6 @@ struct AppVariables {
     var overlayOffsetY                  = CGFloat(50)
     var overlayShadow                   = CGFloat(3)
     
-    var debugBorderColour               = Color.clear
-    
     var selectedOption                  = ""
     var selectedIndex                   = 0
 
@@ -291,6 +289,10 @@ struct AppVariables {
     //static var textAllignment = "centre" //testing
     //static var textAllignment = "top" //testing
     //static var textAllignment = "left" //testing
+    
+    // debug flag
+    var debugMode                       = Bool(false)
+    var debugBorderColour               = Color.clear
 }
 
 
@@ -313,6 +315,7 @@ struct CLOptions {
     static let dropdownDefault          = (long: String("selectdefault"),     short: String(""))
     static let titleFont                = (long: String("titlefont"),         short: String(""))
     static let textField                = (long: String("textfield"),         short: String(""))
+    static let debug                    = (long: String("debug"),             short: String(""))
 
    
     // command line options that take no additional parameters

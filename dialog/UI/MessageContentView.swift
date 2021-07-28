@@ -13,13 +13,7 @@ struct MessageContent: View {
     init () {
         
         viewHeight = appvars.windowHeight - 110
-        
-        if CLOptionPresent(OptionName: CLOptions.smallWindow) {
-            viewHeight = appvars.windowHeight - 90
-        } else if CLOptionPresent(OptionName: CLOptions.bigWindow) {
-            viewHeight = appvars.windowHeight - 120
-        }
-        
+                
         // adjust the content dimentions based on whether we are showing the icon or not.
         // adjustment multiplyiers determined by careful process of trial and error
         if appvars.iconIsHidden {
@@ -32,7 +26,12 @@ struct MessageContent: View {
             viewOffset = 20
         }
         
-        
+        if CLOptionPresent(OptionName: CLOptions.smallWindow) {
+            viewHeight = appvars.windowHeight - 90
+        } else if CLOptionPresent(OptionName: CLOptions.bigWindow) {
+            viewHeight = appvars.windowHeight - 120
+            viewWidth = viewWidth - 50
+        }
     }
     
     var useDefaultStyle = true
@@ -49,36 +48,26 @@ struct MessageContent: View {
     let messageContentOption: String = CLOptionText(OptionName: CLOptions.messageOption, DefaultValue: appvars.messageDefault)
     let theAllignment: Alignment = .topLeading
     
-    
-    //@State var thing: String = "" //testing
-    
+        
     var body: some View {
         VStack {
             ScrollView() {
                 Markdown(Document(messageContentOption))
                     .markdownStyle(style)
-                    //.frame(width: viewWidth-50, alignment: .center)
-                    //.border(Color.red)
             }
             .frame(width: viewWidth, alignment: .topLeading)
             .padding(.top, 10)
-            //.border(Color.red)
-            //.frame(width: viewWidth, height: viewHeight, alignment: .topLeading)
             
             Spacer()
             TextEntryView()
                 .frame(width: viewWidth-50, alignment: .bottomLeading)
-                //.padding(10)
+                .border(appvars.debugBorderColour, width: 2)
             
             DropdownView()
-                //.border(Color.blue)
                 .frame(width: viewWidth-50, alignment: .bottomLeading)
+                .border(appvars.debugBorderColour, width: 2)
         }
         .frame(width: viewWidth, height: viewHeight)
-        //.frame(alignment: theAllignment)
-        //.padding(15)
-        //.offset(x: viewOffset)
-        //.border(Color.orange) //debuging
     }
 }
 

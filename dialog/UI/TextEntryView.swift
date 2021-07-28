@@ -37,7 +37,7 @@ struct TextEntryView: View {
                             .frame(alignment: .leading)
                         Spacer()
                         TextField("", text: $textFieldValue[i])
-                            .frame(width: appvars.windowWidth*0.45, alignment: .trailing)
+                            .frame(width: appvars.windowWidth*0.40, alignment: .trailing)
                             .onChange(of: textFieldValue[i], perform: { value in
                                 //update appvars with the text that was entered. this will be printed to stdout on exit
                                 appvars.textFieldText[i] = textFieldValue[i]

@@ -32,6 +32,12 @@ struct dialogApp: App {
     
     init () {
         
+        //check debug mode
+        if (CLOptionPresent(OptionName: CLOptions.debug)) {
+            appvars.debugMode = true
+            appvars.debugBorderColour = Color.green
+        }
+        
         if (CLOptionPresent(OptionName: CLOptions.textField)) {
             appvars.textOptionsArray = CLOptionTextField()
         }

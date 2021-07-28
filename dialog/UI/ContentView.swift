@@ -24,8 +24,6 @@ struct ContentView: View {
             //adjust the position of the button bar by adding the banner height and ofsetting the default banner height of -10
             buttonYPos = (buttonYPos +  appvars.bannerHeight + 10)
         }
-        appvars.debugBorderColour = Color.clear
-        
         //print("Window Height = \(appvars.windowHeight): Window Width = \(appvars.windowWidth)")
     }
     // puts the button bar jsut above the bottom row - 35 came from trial and error
@@ -42,11 +40,13 @@ struct ContentView: View {
                     BannerImageView()
                         .frame(width: appvars.windowWidth, height: appvars.bannerHeight-bannerAdjustment, alignment: .topLeading)
                         .clipped()
+                        .border(appvars.debugBorderColour, width: 2)
                 }
 
                 // Dialog title
                 TitleView()
                     .frame(width: appvars.windowWidth , height: appvars.titleHeight, alignment: .center)
+                    .border(appvars.debugBorderColour, width: 2)
                     .offset(y: 10) // shift the title down a notch
                 
                 // Horozontal Line
@@ -59,7 +59,6 @@ struct ContentView: View {
                 // Dialog content including message and image if visible
                 DialogView()
                     .frame(alignment: .topLeading)
-                    //.border(Color.red)
             }
                 
             // Buttons
@@ -69,7 +68,9 @@ struct ContentView: View {
                 ButtonView() // contains both button 1 and button 2
             }
             .frame(width: appvars.windowWidth-30, alignment: .bottom)
+            .border(appvars.debugBorderColour, width: 2)
             .position(x: appvars.windowWidth/2, y: buttonYPos-5)
+            
             
         }
             

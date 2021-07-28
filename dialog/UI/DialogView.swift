@@ -22,7 +22,7 @@ struct DialogView: View {
     }
     
     var body: some View {
-        HStack(alignment: .top, spacing: /*@START_MENU_TOKEN@*/nil/*@END_MENU_TOKEN@*/) {
+        HStack(alignment: .top, spacing: nil) {
             let iconFrameWidth: CGFloat = appvars.imageWidth
             let iconFrameHeight: CGFloat = appvars.imageHeight
             HStack {
@@ -31,6 +31,7 @@ struct DialogView: View {
                             IconView()
                             
                     }.frame(width: iconFrameWidth, height: iconFrameHeight, alignment: .top)
+                    .border(appvars.debugBorderColour, width: 2)
                     .offset(x: imageOffsetX, y: imageOffsetY) //position the icon area
                     //.padding(10)
                     //.border(Color.purple)
@@ -39,6 +40,7 @@ struct DialogView: View {
                 VStack(alignment: .center) {
                     //TitleView()
                     MessageContent()
+                        .border(appvars.debugBorderColour, width: 2)
                 }
             }
             //.border(Color.green)
