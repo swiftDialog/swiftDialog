@@ -26,7 +26,10 @@ var helpText = """
         
         -\(CLOptions.messageOption.short), --\(CLOptions.messageOption.long) <text>
                     Set the dialog message
-                    Message length is up to approximately 80 words
+                    Messages can be plain text or can include Markdown
+                    Markdown follows the CommonMark Spec https://spec.commonmark.org/current/
+                    The message can be of any length. If it is larger than the viewable area
+                    The message contents will be presented in  scrolable area.
         
         -\(CLOptions.iconOption.short), --\(CLOptions.iconOption.long) <file> | <url>
                     Set the icon to display
@@ -154,6 +157,13 @@ var helpText = """
     
                     Output of select items is only shown if Dialog's exit code is 0
     
+        --\(CLOptions.textField.long) <text>
+                    Present a textfield with the specified label
+                    When Dialog exits the contents of the textfield will be presented as <text> : <user_input>
+                    in plain or as json using [-\(CLOptions.jsonOutPut.short), --\(CLOptions.jsonOutPut.long)] option
+                    Multiple textfields can be specified (up to 8).
+    
+    
         --\(CLOptions.titleFont.long) <text>
                     Lets you modify the title text of the dialog.
     
@@ -208,7 +218,7 @@ var helpText = """
 
 struct AppVariables {
 
-    var cliversion                      = String("1.4.2")
+    var cliversion                      = String("1.5.0")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
@@ -250,14 +260,16 @@ struct AppVariables {
     var overlayOffsetY                  = CGFloat(50)
     var overlayShadow                   = CGFloat(3)
     
-    var debugBorderColour               = Color.clear
-    
     var selectedOption                  = ""
     var selectedIndex                   = 0
-    
+
     var jsonOut                         = Bool(false)
     
     var willDisturb                     = Bool(false)
+    
+    var textOptionsArray                = [String]()
+    var textFieldText                   = Array(repeating: "", count: 8)
+    //var textOptionsText                 = [String]()
     
     // exit codes and error messages
     var exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))
@@ -277,6 +289,10 @@ struct AppVariables {
     //static var textAllignment = "centre" //testing
     //static var textAllignment = "top" //testing
     //static var textAllignment = "left" //testing
+    
+    // debug flag
+    var debugMode                       = Bool(false)
+    var debugBorderColour               = Color.clear
 }
 
 
@@ -298,6 +314,8 @@ struct CLOptions {
     static let dropdownValues           = (long: String("selectvalues"),      short: String(""))
     static let dropdownDefault          = (long: String("selectdefault"),     short: String(""))
     static let titleFont                = (long: String("titlefont"),         short: String(""))
+    static let textField                = (long: String("textfield"),         short: String(""))
+    static let debug                    = (long: String("debug"),             short: String(""))
 
    
     // command line options that take no additional parameters

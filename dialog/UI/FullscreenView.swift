@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import MarkdownUI
 
 extension Color {
     init(hex: UInt, alpha: Double = 1) {
@@ -42,7 +43,12 @@ struct FullscreenView: View {
     
     var BannerImageOption: String = CLOptionText(OptionName: CLOptions.bannerImage)
     
-    var debugColour: Color = Color.clear
+    var useDefaultStyle = true
+    var style: MarkdownStyle {
+        useDefaultStyle
+            ? DefaultMarkdownStyle(font: .system(size: 20))
+            : DefaultMarkdownStyle(font: .system(size: 20))
+    }
      
     init () {
         windowHeight = displayDetails.size.height
@@ -60,7 +66,6 @@ struct FullscreenView: View {
             emptyStackPadding = 50
             titleContentFontSize = appvars.titleFontSize*2
             iconImageScaleFactor = 0.8
-            //maxBannerHeight = 90
             bannerPadding = 20
             messageTextLineSpacing = 15
         } else if windowHeight > 1440 {
@@ -69,11 +74,8 @@ struct FullscreenView: View {
             iconImageScaleFactor = 1.8
             emptyStackPadding = 90
             messageTextLineSpacing = 30
-            //maxBannerHeight = 150
         }
-        
-        debugColour = Color.red
-        
+                
         if appvars.titleFontColour == Color.primary {
             appvars.titleFontColour = Color.white
             
@@ -91,7 +93,6 @@ struct FullscreenView: View {
            window.makeKeyAndOrderFront(self)
            window.isReleasedWhenClosed = false
            window.center()
-           //window.setFrameAutosaveName("Main Window")
            window.contentView = NSHostingView(rootView: FullscreenView())
 
        // open fullScreen mode
@@ -109,6 +110,7 @@ struct FullscreenView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 15))
                     .scaledToFit()
                     .frame(maxWidth: maxBannerWidth, maxHeight: maxBannerHeight)
+                    .border(appvars.debugBorderColour, width: 2)
                 // Horozontal Line
                 VStack{
                     Rectangle()
@@ -117,7 +119,6 @@ struct FullscreenView: View {
                 }
                 .frame(width: (maxBannerWidth))
                 .padding(.vertical,20)
-                //.border(debugColour)
             }
             
             // title vstack
@@ -129,9 +130,9 @@ struct FullscreenView: View {
                     .bold()
                     .font(.system(size: titleContentFontSize, weight: appvars.titleFontWeight))
                     .multilineTextAlignment(.center)
+                    .border(appvars.debugBorderColour, width: 2)
                 Spacer()
             }
-            //.border(Color.green)
             
             // icon and message vstack group
             VStack {
@@ -139,34 +140,33 @@ struct FullscreenView: View {
                 VStack {
                     if CLOptionPresent(OptionName: CLOptions.iconOption) {
                         IconView()
-                            //.frame(maxHeight: appvars.imageHeight*iconImageScaleFactor, alignment: .center)
-                            //.background(Color.white)
                     } else {
                         VStack{}.padding(emptyStackPadding)
                     }
                 }
                 .padding(40)
-                //.border(Color.orange)
+                .border(appvars.debugBorderColour, width: 2)
+
                 
                 // message vstack
                 VStack() {
+
                     Text(messageContentOption)
                         .font(.system(size: messageContentFontSize))
                         .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                         .lineLimit(12)
                         .lineSpacing(messageTextLineSpacing)
+                        .border(appvars.debugBorderColour, width: 2)
+                    
                         
                 }
-                //.border(debugColour)
                 .padding(10)
                 .frame(maxHeight: .infinity, alignment: .center) // setting to .infinity should make the message content take up the remainder of the screen
             }
             .padding(.horizontal, 20) // total padding for the icon/message group
             .padding(.vertical, 50)
-            //.border(debugColour)
         }
-        //.background(Color.black)
         .background(
                 //LinearGradient(gradient: Gradient(colors: [Color(hex: 0x0e539a), .black]), startPoint: .top, endPoint: .bottom)
                 LinearGradient(gradient: Gradient(colors: [Color(hex: 0x252535), .black]), startPoint: .top, endPoint: .bottom)

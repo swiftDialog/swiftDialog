@@ -29,13 +29,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 @main
 struct dialogApp: App {
 
-    func isValidColourHex(_ hexvalue: String) -> Bool {
-        let hexRegEx = "^#([a-fA-F0-9]{6})$"
-        let hexPred = NSPredicate(format:"SELF MATCHES %@", hexRegEx)
-        return hexPred.evaluate(with: hexvalue)
-    }
     
     init () {
+        
+        //check debug mode
+        if (CLOptionPresent(OptionName: CLOptions.debug)) {
+            appvars.debugMode = true
+            appvars.debugBorderColour = Color.green
+        }
+        
+        if (CLOptionPresent(OptionName: CLOptions.textField)) {
+            appvars.textOptionsArray = CLOptionTextField()
+        }
         
         // process command line options that just display info and exit before we show the main window
         if (CLOptionPresent(OptionName: CLOptions.helpOption) || CommandLine.arguments.count == 1) {
@@ -115,28 +120,21 @@ struct dialogApp: App {
         if CLOptionPresent(OptionName: CLOptions.jsonOutPut) {
             appvars.jsonOut = true
         }
-                
+        
+        // we define this stuff here as we will use the info to draw the window.
         if CLOptionPresent(OptionName: CLOptions.smallWindow) {
             // scale everything down a notch
             
             appvars.smallWindow = true
-
             appvars.scaleFactor = 0.75
-            appvars.dialogContentScale = 0.80
             
-            appvars.overlayOffsetX = appvars.overlayOffsetX * (appvars.scaleFactor)
-            appvars.overlayOffsetY = appvars.overlayOffsetY * (appvars.scaleFactor*appvars.scaleFactor)
-            //appvars.overlayIconScale = appvars.overlayIconScale * appvars.scaleFactor
+            //appvars.overlayOffsetX = appvars.overlayOffsetX * (appvars.scaleFactor)
+            //appvars.overlayOffsetY = appvars.overlayOffsetY * (appvars.scaleFactor*appvars.scaleFactor)
         } else if CLOptionPresent(OptionName: CLOptions.bigWindow) {
             // scale everything up a notch
             
             appvars.bigWindow = true
             appvars.scaleFactor = 1.25
-            appvars.dialogContentScale = 0.55
-            
-            //appvars.overlayOffsetX = appvars.overlayOffsetX * (appvars.scaleFactor)
-            //appvars.overlayOffsetY = appvars.overlayOffsetY * (appvars.scaleFactor)
-            //appvars.overlayIconScale = appvars.overlayIconScale * appvars.scaleFactor
         }
         
         appvars.overlayShadow = 1
