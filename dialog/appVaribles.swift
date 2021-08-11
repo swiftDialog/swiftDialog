@@ -248,6 +248,8 @@ struct AppVariables {
     var smallWindow                     = Bool(false)
     var bigWindow                       = Bool(false)
     var scaleFactor                     = CGFloat(1)
+    
+    var timerDefaultSeconds             = CGFloat(10)
 
     var horozontalLineScale             = CGFloat(0.9)
     var dialogContentScale              = CGFloat(0.65)
@@ -315,6 +317,7 @@ struct CLOptions {
     static let dropdownDefault          = (long: String("selectdefault"),     short: String(""))
     static let titleFont                = (long: String("titlefont"),         short: String(""))
     static let textField                = (long: String("textfield"),         short: String(""))
+    static let timerBar                 = (long: String("timer"),             short: String(""))
     static let debug                    = (long: String("debug"),             short: String(""))
 
    

@@ -63,14 +63,18 @@ struct ContentView: View {
                 
             // Buttons
             HStack() {
-                MoreInfoButton()
-                Spacer()
-                ButtonView() // contains both button 1 and button 2
+                if CLOptionPresent(OptionName: CLOptions.timerBar) {
+                    progressBarView()
+                        .frame(alignment: .bottom)
+                } else {
+                    MoreInfoButton()
+                    Spacer()
+                    ButtonView() // contains both button 1 and button 2
+                }
             }
             .frame(width: appvars.windowWidth-30, alignment: .bottom)
             .border(appvars.debugBorderColour, width: 2)
             .position(x: appvars.windowWidth/2, y: buttonYPos-5)
-            
             
         }
             

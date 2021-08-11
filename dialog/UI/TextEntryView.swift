@@ -2,7 +2,7 @@
 //  TextEntryView.swift
 //  dialog
 //
-//  Created by Reardon, Bart (IM&T, Yarralumla) on 23/7/21.
+//  Created by Reardon, Bart  on 23/7/21.
 //
 
 import SwiftUI

@@ -2,7 +2,7 @@
 //  StringProcessing.swift
 //  Dialog
 //
-//  Created by Reardon, Bart (IM&T, Yarralumla) on 16/3/21.
+//  Created by Reardon, Bart  on 16/3/21.
 //
 // *******************************************************
 // Reserved for future use

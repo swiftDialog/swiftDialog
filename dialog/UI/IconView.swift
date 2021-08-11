@@ -2,7 +2,7 @@
 //  IconView.swift
 //  Dialog
 //
-//  Created by Reardon, Bart (IM&T, Yarralumla) on 19/3/21.
+//  Created by Reardon, Bart  on 19/3/21.
 //
 
 import Foundation

@@ -2,7 +2,7 @@
 //  FullscreenView.swift
 //  Dialog
 //
-//  Created by Reardon, Bart (IM&T, Yarralumla) on 6/4/21.
+//  Created by Reardon, Bart  on 6/4/21.
 //
 
 import Foundation
