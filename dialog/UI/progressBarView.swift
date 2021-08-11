@@ -12,7 +12,7 @@ struct progressBarView: View {
     
     @State var progress: CGFloat = 0
     
-    let barheight: CGFloat = 15
+    let barheight: CGFloat = 20
     var barRadius: CGFloat
     
     var steps: CGFloat = 10 // how many steps are there in the width of the progress bar
@@ -30,12 +30,12 @@ struct progressBarView: View {
         VStack {
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
-                    Rectangle()
+                    Rectangle() // background of the progress bar
                         .fill(Color.gray.opacity(0.5))
                         .frame(width: geometry.size.width, height: barheight)
                         .clipShape(RoundedRectangle(cornerRadius: barRadius))
                     
-                    Rectangle()
+                    Rectangle() // forground, aka "progress" of the progress bar
                         .fill(barColour)
                         .frame(width: progress*(geometry.size.width/steps), height: barheight)
                         .clipShape(RoundedRectangle(cornerRadius: barRadius))
@@ -53,12 +53,14 @@ struct progressBarView: View {
                         .animation(.easeOut)
 
                         Text("\(Int(steps-progress))")
+                            .fontWeight(.bold)
                             .foregroundColor(.white) // works fine for every accent colour except yellow
                             .frame(width: geometry.size.width, height: barheight, alignment: .center)
                 }
             }
-        }.padding(10)
-        .frame(height: barheight, alignment: .bottom)
+        }
+        .frame(height: barheight, alignment: .bottom) //needed to force limit the entire progress bar frame height
+        .padding(10)
     }
 }
 

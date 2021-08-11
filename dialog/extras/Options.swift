@@ -11,6 +11,7 @@ import Foundation
 // Returns the option text for a given command line option
 
 func CLOptionTextField () -> Array<String> {
+    // return an array that contains of all the --textfield options that are passed in
     var textOptionsArray: Array = [String]()
     var argIndex = 0
     for argument in CommandLine.arguments {
@@ -27,9 +28,15 @@ func CLOptionTextField () -> Array<String> {
 func CLOptionText(OptionName: (long: String, short: String), DefaultValue: String? = "") -> String {
     // Determine if argument is present.
     var CLOptionTextValue = ""
-        
+    
     if let commandIndex = [CommandLine.arguments.firstIndex(of: "--\(OptionName.long)"), CommandLine.arguments.firstIndex(of: "-\(OptionName.short)")].compactMap({$0}).first {
         // Get next index and ensure it's not out of bounds.
+        
+        if (commandIndex == CommandLine.arguments.count-1) {
+            // the command being passed in is the last item so just return the default value
+            CLOptionTextValue = DefaultValue ?? ""
+        }
+ 
         let valueIndex = CommandLine.arguments.index(after: commandIndex)
         if valueIndex >= CommandLine.arguments.startIndex
             && valueIndex < CommandLine.arguments.endIndex
