@@ -69,6 +69,8 @@ struct ContentView: View {
                 } else {
                     MoreInfoButton()
                     Spacer()
+                }
+                if (CLOptionPresent(OptionName: CLOptions.timerBar) && CLOptionPresent(OptionName: CLOptions.button1TextOption)) || (!CLOptionPresent(OptionName: CLOptions.timerBar)) {
                     ButtonView() // contains both button 1 and button 2
                 }
             }

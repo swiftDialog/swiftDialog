@@ -13,12 +13,20 @@ struct ButtonView: View {
     var button1action: String = ""
     var buttonShellAction: Bool = false
     
+    @State private var button1disabled = false
+    
+    let timer = Timer.publish(every: 3.0, on: .main, in: .common).autoconnect() //trigger after 4 seconds
+    
     init() {
         if CLOptionPresent(OptionName: CLOptions.button1ShellActionOption) {
             button1action = CLOptionText(OptionName: CLOptions.button1ShellActionOption)
             buttonShellAction = true
         } else if CLOptionPresent(OptionName: CLOptions.button1ActionOption) {
             button1action = CLOptionText(OptionName: CLOptions.button1ActionOption)
+        }
+        
+        if CLOptionPresent(OptionName: CLOptions.timerBar) {
+            self._button1disabled = State(initialValue: true)
         }
     }
     
@@ -51,6 +59,10 @@ struct ButtonView: View {
                 }
             )//.frame(minWidth: 36, alignment: .center)
             .keyboardShortcut(.defaultAction)
+            .disabled(button1disabled)
+            .onReceive(timer) { _ in
+                button1disabled = false
+            }
         //}
     }
 }

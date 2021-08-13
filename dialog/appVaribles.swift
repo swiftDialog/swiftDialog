@@ -218,7 +218,7 @@ var helpText = """
 
 struct AppVariables {
 
-    var cliversion                      = String("1.5.0")
+    var cliversion                      = String("1.6.0")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
@@ -272,6 +272,8 @@ struct AppVariables {
     var textOptionsArray                = [String]()
     var textFieldText                   = Array(repeating: "", count: 8)
     //var textOptionsText                 = [String]()
+    
+    var annimationSmoothing             = Double(20)
     
     // exit codes and error messages
     var exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))

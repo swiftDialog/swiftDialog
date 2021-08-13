@@ -16,14 +16,17 @@ struct progressBarView: View {
     var barRadius: CGFloat
     
     var steps: CGFloat = 10 // how many steps are there in the width of the progress bar
+    // appvars.annimationSmoothing // defined in appVariables.swift - ugly. work out to self contain
+    //let annimationSmoothing: Double = 20
     
     var barColour = Color.accentColor//.opacity(0.8)
     
-    let timer = Timer.publish(every: 1.0, on: .main, in: .common).autoconnect() //tick every 1 second
+    var timer = Timer.publish(every: 1.0/appvars.annimationSmoothing, on: .main, in: .common).autoconnect() //tick every 1 second
     
     init() {
-        barRadius = barheight/2
+        barRadius = barheight/2 // adjusting this affects "roundness"
         steps = NumberFormatter().number(from: CLOptionText(OptionName: CLOptions.timerBar, DefaultValue: "10")) as! CGFloat
+        steps = steps*CGFloat(appvars.annimationSmoothing)
     }
         
     var body: some View {
@@ -31,32 +34,38 @@ struct progressBarView: View {
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
                     Rectangle() // background of the progress bar
-                        .fill(Color.gray.opacity(0.5))
-                        .frame(width: geometry.size.width, height: barheight)
-                        .clipShape(RoundedRectangle(cornerRadius: barRadius))
+                        .fill(Color.secondary.opacity(0.5))
                     
                     Rectangle() // forground, aka "progress" of the progress bar
                         .fill(barColour)
-                        .frame(width: progress*(geometry.size.width/steps), height: barheight)
-                        .clipShape(RoundedRectangle(cornerRadius: barRadius))
-                        //.frame(alignment: .leading)
-                        .onReceive(timer) { input in
-                            
+                        .onReceive(timer) { _ in
                             if progress <= steps {
                                 progress += 1
                                 if progress > steps {
                                     quitDialog(exitCode: 4)
                                 }
                             }
-                                
                         }
-                        .animation(.easeOut)
+                        .frame(width: progress*(geometry.size.width/steps), height: barheight)
+                        .clipShape(RoundedRectangle(cornerRadius: barRadius))
+                        .animation(.easeInOut)
 
-                        Text("\(Int(steps-progress))")
+                        // Countdown timer area
+                        // White text with black "outline"
+                        // frame set to the same width as the progress bar and centered.
+                        // add 0.8 wto the final steps count which will round to an int but briefly show 0 before the progress quits.
+                    Text("\(Int((steps-progress)/CGFloat(appvars.annimationSmoothing)+0.8))")
                             .fontWeight(.bold)
-                            .foregroundColor(.white) // works fine for every accent colour except yellow
+                            .foregroundColor(.white)
+                            .shadow(color: .black, radius: 0.5) // create outline
                             .frame(width: geometry.size.width, height: barheight, alignment: .center)
                 }
+                // add layer mask to define the roundness of the progress bar
+                .mask(Rectangle() // background of the progress bar
+                        .frame(width: geometry.size.width, height: barheight)
+                        .clipShape(RoundedRectangle(cornerRadius: barRadius))
+                        .opacity(1)
+                )
             }
         }
         .frame(height: barheight, alignment: .bottom) //needed to force limit the entire progress bar frame height
