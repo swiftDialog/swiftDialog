@@ -19,7 +19,6 @@ struct ImageView: View {
     }
     
     var body: some View {
-        //let mainImage: NSImage = getImageFromPath(fileImagePath: imagePath)
         VStack {
             Image(nsImage: mainImage)
                 .resizable()
@@ -27,16 +26,9 @@ struct ImageView: View {
                 .scaledToFit()
                 .clipShape(RoundedRectangle(cornerRadius: 5))
                 .shadow(radius: 3)
-                //.border(Color.gray.opacity(0.5) , width: 2)
             Text(imageCaption)
                 .font(.system(size: 20))
                 .italic()
         }
-    }
-}
-
-struct ImageView_Previews: PreviewProvider {
-    static var previews: some View {
-        ImageView()
     }
 }
