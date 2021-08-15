@@ -72,8 +72,16 @@ struct dialogApp: App {
         if isDNDEnabled() && !appvars.willDisturb {
             quitDialog(exitCode: 20, exitMessage: "Do Not Disturb is enabled. Exiting")
         }
-
-                
+            
+        if CLOptionPresent(OptionName: CLOptions.windowWidth) {
+            //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: CLOptions.windowWidth)
+            appvars.windowWidth = NumberFormatter().number(from: CLOptionText(OptionName: CLOptions.windowWidth)) as! CGFloat
+        }
+        if CLOptionPresent(OptionName: CLOptions.windowHeight) {
+            //appvars.windowHeight = CGFloat() //CLOptionText(OptionName: CLOptions.windowHeight)
+            appvars.windowHeight = NumberFormatter().number(from: CLOptionText(OptionName: CLOptions.windowHeight)) as! CGFloat
+        }
+        
         // Correct feng shui so the app accepts keyboard input
         // from https://stackoverflow.com/questions/58872398/what-is-the-minimally-viable-gui-for-command-line-swift-scripts
         let app = NSApplication.shared
