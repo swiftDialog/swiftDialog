@@ -51,21 +51,25 @@ struct MessageContent: View {
         
     var body: some View {
         VStack {
-            ScrollView() {
-                Markdown(Document(messageContentOption))
-                    .markdownStyle(style)
+            if CLOptionPresent(OptionName: CLOptions.mainImage) {
+                ImageView(imagePath: CLOptionText(OptionName: CLOptions.mainImage), caption: CLOptionText(OptionName: CLOptions.mainImageCaption, DefaultValue: ""))
+            } else {
+                ScrollView() {
+                    Markdown(Document(messageContentOption))
+                        .markdownStyle(style)
+                }
+                .frame(width: viewWidth, alignment: .topLeading)
+                .padding(.top, 10)
+                
+                Spacer()
+                TextEntryView()
+                    .frame(width: viewWidth-50, alignment: .bottomLeading)
+                    .border(appvars.debugBorderColour, width: 2)
+                
+                DropdownView()
+                    .frame(width: viewWidth-50, alignment: .bottomLeading)
+                    .border(appvars.debugBorderColour, width: 2)
             }
-            .frame(width: viewWidth, alignment: .topLeading)
-            .padding(.top, 10)
-            
-            Spacer()
-            TextEntryView()
-                .frame(width: viewWidth-50, alignment: .bottomLeading)
-                .border(appvars.debugBorderColour, width: 2)
-            
-            DropdownView()
-                .frame(width: viewWidth-50, alignment: .bottomLeading)
-                .border(appvars.debugBorderColour, width: 2)
         }
         .frame(width: viewWidth, height: viewHeight)
     }

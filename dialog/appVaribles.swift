@@ -320,6 +320,8 @@ struct CLOptions {
     static let titleFont                = (long: String("titlefont"),         short: String(""))
     static let textField                = (long: String("textfield"),         short: String(""))
     static let timerBar                 = (long: String("timer"),             short: String(""))
+    static let mainImage                = (long: String("image"),             short: String("g"))
+    static let mainImageCaption         = (long: String("imagecaption"),      short: String(""))
     static let debug                    = (long: String("debug"),             short: String(""))
 
    
