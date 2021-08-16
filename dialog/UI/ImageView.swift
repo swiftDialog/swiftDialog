@@ -13,7 +13,7 @@ struct ImageView: View {
     var mainImage: NSImage
     var imageCaption: String = ""
     
-    init(imagePath: String? = "", caption: String? = "") {
+    init(imagePath: String?, caption: String?) {
         mainImage = getImageFromPath(fileImagePath: imagePath ?? "")
         imageCaption = caption ?? ""
     }
