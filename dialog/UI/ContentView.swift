@@ -64,7 +64,7 @@ struct ContentView: View {
             // Buttons
             HStack() {
                 if CLOptionPresent(OptionName: CLOptions.timerBar) {
-                    progressBarView()
+                    progressBarView(progressSteps: NumberFormatter().number(from: CLOptionText(OptionName: CLOptions.timerBar)) as? CGFloat)
                         .frame(alignment: .bottom)
                 } else {
                     MoreInfoButton()
