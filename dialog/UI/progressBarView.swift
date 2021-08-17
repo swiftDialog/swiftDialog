@@ -13,7 +13,7 @@ struct progressBarView: View {
     @State var progress: CGFloat = 0
     @State var progressWidth : CGFloat
     
-    let barheight: CGFloat = 15
+    let barheight: CGFloat = 16
     var barRadius: CGFloat
     var barColour = Color.accentColor//.opacity(0.8)
     
@@ -54,6 +54,7 @@ struct progressBarView: View {
                                         progressWidth = geometry.size.width
                                     }
                                     if progress > timerSteps {
+                                        // we've reched the end of the countdown
                                         // stop the timer
                                         timer.upstream.connect().cancel()
                                         // add a slight delay so the 0 countdown is displayed for a fraction of a second before dialog quits
