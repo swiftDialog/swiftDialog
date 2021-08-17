@@ -11,20 +11,26 @@ import Foundation
 struct progressBarView: View {
     
     @State var progress: CGFloat = 0
+    @State var progressWidth : CGFloat
     
-    let barheight: CGFloat = 20
+    let barheight: CGFloat = 15
     var barRadius: CGFloat
     var barColour = Color.accentColor//.opacity(0.8)
     
     var steps: CGFloat// = 10 // how many steps are there in the width of the progress bar
+    var timerSteps: CGFloat
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect() // tick every 1 second
+    
+    
     
     var barVisible: Bool
     
     init(progressSteps : CGFloat?, visible : Bool?) {
         barRadius = barheight/2 // adjusting this affects "roundness"
         steps = progressSteps ?? 10
+        timerSteps = steps - 1
         barVisible = visible ?? true
+        progressWidth = 0
     }
         
     var body: some View {
@@ -40,16 +46,27 @@ struct progressBarView: View {
                         Rectangle() // forground, aka "progress" of the progress bar
                             .fill(barColour)
                             .onReceive(timer) { _ in
-                                if progress <= steps {
+                                if progress <= timerSteps {
                                     progress += 1
-                                    if progress > steps {
-                                        quitDialog(exitCode: 4)
+                                    progressWidth = progress*(geometry.size.width/timerSteps)
+                                    if progressWidth > geometry.size.width {
+                                        // make sure the progress bar never exceeds the width of the display area else weird things happen
+                                        progressWidth = geometry.size.width
+                                    }
+                                    if progress > timerSteps {
+                                        // stop the timer
+                                        timer.upstream.connect().cancel()
+                                        // add a slight delay so the 0 countdown is displayed for a fraction of a second before dialog quits
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                            quitDialog(exitCode: 4)
+                                        }
+                                        //perform(quitDialog(exitCode: 4), with: nil, afterDelay: 4.0)
                                     }
                                 }
                             }
                             // the size of this overlay is the same as the number of steps in the progress bar
                             // this gives the impression of a continiously moving progress
-                            .frame(width: progress*(geometry.size.width/steps), height: barheight)
+                            .frame(width: progressWidth, height: barheight)
                             .clipShape(RoundedRectangle(cornerRadius: barRadius))
                             // linear animation with duration set to the same as timer tick of 1 sec makes a continuious bar animation
                             .animation(.linear(duration: 1))
