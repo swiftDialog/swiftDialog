@@ -2,7 +2,7 @@
 //  License.swift
 //  dialog
 //
-//  Created by Reardon, Bart (IM&T, Yarralumla) on 11/3/21.
+//  Created by Reardon, Bart  on 11/3/21.
 //
 
 import Foundation

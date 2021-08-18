@@ -45,6 +45,8 @@
 		41FB64942680855300A54C3E /* StringProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153783126001A0900AA0E76 /* StringProcessing.swift */; };
 		41FB64952680855300A54C3E /* dialogApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154C2DD25F76BDB00A3D373 /* dialogApp.swift */; };
 		41FB64962680855300A54C3E /* appVaribles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E7025F845D200D1F7E1 /* appVaribles.swift */; };
+		41FD45FE26C40366006976FC /* progressBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FD45FD26C40366006976FC /* progressBarView.swift */; };
+		41FD460026C8DC5D006976FC /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FD45FF26C8DC5D006976FC /* ImageView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -106,6 +108,8 @@
 		41D81E7025F845D200D1F7E1 /* appVaribles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = appVaribles.swift; sourceTree = "<group>"; };
 		41D81E7825F870A500D1F7E1 /* Processing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Processing.swift; sourceTree = "<group>"; };
 		41FB6480268070CF00A54C3E /* dialog */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = dialog; sourceTree = BUILT_PRODUCTS_DIR; };
+		41FD45FD26C40366006976FC /* progressBarView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = progressBarView.swift; sourceTree = "<group>"; };
+		41FD45FF26C8DC5D006976FC /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -229,6 +233,8 @@
 				415378522604B79E00AA0E76 /* IconOverlayView.swift */,
 				416DED41261C5FE00049B6B5 /* FullscreenView.swift */,
 				41AD75B526AA81760023EBD8 /* TextEntryView.swift */,
+				41FD45FD26C40366006976FC /* progressBarView.swift */,
+				41FD45FF26C8DC5D006976FC /* ImageView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -457,6 +463,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				41FB64872680855300A54C3E /* ContentView.swift in Sources */,
+				41FD460026C8DC5D006976FC /* ImageView.swift in Sources */,
+				41FD45FE26C40366006976FC /* progressBarView.swift in Sources */,
 				41FB64882680855300A54C3E /* DialogView.swift in Sources */,
 				41FB64892680855300A54C3E /* MessageContentView.swift in Sources */,
 				41FB648A2680855300A54C3E /* IconView.swift in Sources */,
@@ -627,7 +635,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.5.0;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -654,7 +662,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.5.0;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -750,7 +758,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/dialog/Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.5.0;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialogcli;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -767,7 +775,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/dialog/Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.5.0;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialogcli;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

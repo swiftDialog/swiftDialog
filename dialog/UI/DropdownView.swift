@@ -2,7 +2,7 @@
 //  DropdownView.swift
 //  Dialog
 //
-//  Created by Reardon, Bart (IM&T, Yarralumla) on 2/6/21.
+//  Created by Reardon, Bart  on 2/6/21.
 //
 
 import Foundation
