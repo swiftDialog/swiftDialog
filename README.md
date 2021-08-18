@@ -36,19 +36,3 @@ Dialog's interface is fully customised from a set of command line options.
 
 For more details, please read the [Command Line Options](https://github.com/bartreardon/Dialog-public/wiki/Command-Line-Options) page on the wiki.
 
-
-# Return Codes
-When displaying a dialog the user can take one of up to three actions, depending on what's available
-
-The following return codes are sent after each action. These can be ignored or used in a calling script for further action
-| Button Name | Optional | Hotkey | Return Code |
-| ----------- | -------- | ------ | ----------- |
-| button1     | No       | Enter  | 0           |
-| button2     | Yes      | Esc    | 2           |
-| infobutton  | Yes      |        | 3           |
-
-# Displaying Images in the Icon area
-The icon display area on the left hand portion of the dialog can be configured in a number of ways.
-
-Details can be found on the [Customising the Icon](https://github.com/bartreardon/Dialog-public/wiki/Customising-the-Icon) page on the wiki.
-
