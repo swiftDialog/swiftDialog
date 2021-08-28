@@ -24,7 +24,7 @@ extension Color {
 struct FullscreenView: View {
         
     var TitleViewOption: String = CLOptionText(OptionName: CLOptions.titleOption, DefaultValue: appvars.titleDefault)
-    let messageContentOption: String = CLOptionText(OptionName: CLOptions.messageOption, DefaultValue: appvars.messageDefault)
+    var messageContentOption: String = CLOptionText(OptionName: CLOptions.messageOption, DefaultValue: appvars.messageDefault)
     
     let displayDetails:CGRect = NSScreen.main!.frame
     var windowHeight:CGFloat = 0
@@ -78,9 +78,8 @@ struct FullscreenView: View {
                 
         if appvars.titleFontColour == Color.primary {
             appvars.titleFontColour = Color.white
-            
         }
-                
+        
     }
             
     public func showFullScreen() {
@@ -136,33 +135,42 @@ struct FullscreenView: View {
             
             // icon and message vstack group
             VStack {
-                // icon vstack
-                VStack {
-                    if CLOptionPresent(OptionName: CLOptions.iconOption) {
-                        IconView()
-                    } else {
-                        VStack{}.padding(emptyStackPadding)
+                if CLOptionPresent(OptionName: CLOptions.mainImage) {
+                    // print image and caption
+                    ImageView(imagePath: CLOptionText(OptionName: CLOptions.mainImage), caption: "")
+                        .frame(maxHeight: windowHeight/1.3)
+                    if CLOptionPresent(OptionName: CLOptions.mainImageCaption) {
+                        Text(CLOptionText(OptionName: CLOptions.mainImageCaption))
+                            .font(.system(size: messageContentFontSize))
+                            .foregroundColor(.white)
                     }
-                }
-                .padding(40)
-                .border(appvars.debugBorderColour, width: 2)
-
+                } else {
+                    // icon vstack
+                    VStack {
+                        if CLOptionPresent(OptionName: CLOptions.iconOption) {
+                            IconView()
+                        } else {
+                            VStack{}.padding(emptyStackPadding)
+                        }
+                    }
+                    .padding(40)
+                    .border(appvars.debugBorderColour, width: 2)
                 
-                // message vstack
-                VStack() {
-
-                    Text(messageContentOption)
-                        .font(.system(size: messageContentFontSize))
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(12)
-                        .lineSpacing(messageTextLineSpacing)
-                        .border(appvars.debugBorderColour, width: 2)
                     
-                        
+                    // message vstack
+                    VStack() {
+                        Text(messageContentOption)
+                            .font(.system(size: messageContentFontSize))
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(12)
+                            .lineSpacing(messageTextLineSpacing)
+                            .border(appvars.debugBorderColour, width: 2)
+                    }
+                    .padding(10)
+                    .frame(maxHeight: .infinity, alignment: .center) // setting to .infinity should make the message content take up the remainder of the screen
                 }
-                .padding(10)
-                .frame(maxHeight: .infinity, alignment: .center) // setting to .infinity should make the message content take up the remainder of the screen
+                
             }
             .padding(.horizontal, 20) // total padding for the icon/message group
             .padding(.vertical, 50)
