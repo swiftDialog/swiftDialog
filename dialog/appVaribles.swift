@@ -15,6 +15,8 @@ var iconVisible: Bool = true
 // declare our app var in case we want to update values - e.g. future use, multiple dialog sizes
 var appvars = AppVariables()
 
+var optionvalue = CLOptionValues()
+
 var helpText = """
     Dialog version \(getVersionString()) ©2021 Bart Reardon
 
@@ -319,6 +321,31 @@ struct AppVariables {
     // debug flag
     var debugMode                       = Bool(false)
     var debugBorderColour               = Color.clear
+}
+
+struct CLOptionValues {
+    var titleOption                     = (value : String(""), present : Bool(false))
+    var messageOption                   = (value : String(""), present : Bool(false))
+    var iconOption                      = (value : String(""), present : Bool(false))
+    var overlayIconOption               = (value : String(""), present : Bool(false))
+    var bannerImage                     = (value : String(""), present : Bool(false))
+    var button1TextOption               = (value : String(""), present : Bool(false))
+    var button1ActionOption             = (value : String(""), present : Bool(false))
+    var button1ShellActionOption        = (value : String(""), present : Bool(false))
+    var button2TextOption               = (value : String(""), present : Bool(false))
+    var button2ActionOption             = (value : String(""), present : Bool(false))
+    var buttonInfoTextOption            = (value : String(""), present : Bool(false))
+    var buttonInfoActionOption          = (value : String(""), present : Bool(false))
+    var dropdownTitle                   = (value : String(""), present : Bool(false))
+    var dropdownValues                  = (value : String(""), present : Bool(false))
+    var dropdownDefault                 = (value : String(""), present : Bool(false))
+    var titleFont                       = (value : String(""), present : Bool(false))
+    var textField                       = (value : String(""), present : Bool(false))
+    var timerBar                        = (value : String(""), present : Bool(false))
+    var mainImage                       = (value : String(""), present : Bool(false))
+    var mainImageCaption                = (value : String(""), present : Bool(false))
+    var windowWidth                     = (value : String(""), present : Bool(false))
+    var windowHeight                    = (value : String(""), present : Bool(false))
 }
 
 

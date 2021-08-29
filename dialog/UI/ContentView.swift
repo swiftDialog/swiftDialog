@@ -10,7 +10,7 @@ import SwiftUI
 struct ContentView: View {
     init() {
         //appvars.windowHeight = appvars.windowHeight + 200
-        if CLOptionPresent(OptionName: CLOptions.bannerImage) {
+        if optionvalue.bannerImage.present {
             if CLOptionPresent(OptionName: CLOptions.smallWindow) {
                 appvars.bannerHeight = 100
                 bannerAdjustment = 10
@@ -18,7 +18,7 @@ struct ContentView: View {
                 appvars.bannerHeight = 150
             }
             appvars.bannerOffset = -30
-            bannerImagePresent = true
+            //bannerImagePresent = true
             appvars.imageWidth = 0 // hides the side icon
             
             //adjust the position of the button bar by adding the banner height and ofsetting the default banner height of -10
@@ -29,15 +29,15 @@ struct ContentView: View {
     // puts the button bar jsut above the bottom row - 35 came from trial and error
     var buttonYPos = (appvars.windowHeight)
     
-    var bannerImagePresent = false
+    //var bannerImagePresent = false
     var bannerAdjustment       = CGFloat(5)
         
     var body: some View {
         ZStack() {
         // this stack controls the main view. Consists of a VStack containing all the content, and a HStack positioned at the bottom of the display area
             VStack {
-                if bannerImagePresent {
-                    BannerImageView()
+                if optionvalue.bannerImage.present {
+                    BannerImageView(imagePath: optionvalue.bannerImage.value)
                         .frame(width: appvars.windowWidth, height: appvars.bannerHeight-bannerAdjustment, alignment: .topLeading)
                         .clipped()
                         .border(appvars.debugBorderColour, width: 2)
@@ -63,14 +63,14 @@ struct ContentView: View {
                 
             // Buttons
             HStack() {
-                if CLOptionPresent(OptionName: CLOptions.timerBar) {
-                    progressBarView(progressSteps: NumberFormatter().number(from: CLOptionText(OptionName: CLOptions.timerBar)) as? CGFloat, visible: true)
+                if optionvalue.timerBar.present {
+                    progressBarView(progressSteps: NumberFormatter().number(from: optionvalue.timerBar.value) as? CGFloat, visible: true)
                         .frame(alignment: .bottom)
                 } else {
                     MoreInfoButton()
                     Spacer()
                 }
-                if (CLOptionPresent(OptionName: CLOptions.timerBar) && CLOptionPresent(OptionName: CLOptions.button1TextOption)) || (!CLOptionPresent(OptionName: CLOptions.timerBar)) {
+                if (optionvalue.timerBar.present && optionvalue.button1TextOption.present) || (!optionvalue.timerBar.present) {
                     ButtonView() // contains both button 1 and button 2
                 }
             }

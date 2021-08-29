@@ -19,10 +19,12 @@
 		4154C2E525F76BDC00A3D373 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4154C2E425F76BDC00A3D373 /* Preview Assets.xcassets */; };
 		4154C2F125F76BDC00A3D373 /* dialogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154C2F025F76BDC00A3D373 /* dialogTests.swift */; };
 		4154C2FC25F76BDC00A3D373 /* dialogUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154C2FB25F76BDC00A3D373 /* dialogUITests.swift */; };
+		415934D826DB1B44009C9C3A /* ProcessCLOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415934D726DB1B44009C9C3A /* ProcessCLOptions.swift */; };
 		416DED42261C5FE00049B6B5 /* FullscreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416DED41261C5FE00049B6B5 /* FullscreenView.swift */; };
 		417BF0BB260F1726009AD252 /* BannerImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BF0BA260F1726009AD252 /* BannerImageView.swift */; };
 		418AE4232667A17A001E3423 /* DropdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418AE4222667A17A001E3423 /* DropdownView.swift */; };
 		41AD75B626AA81760023EBD8 /* TextEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AD75B526AA81760023EBD8 /* TextEntryView.swift */; };
+		41D6FE8526DB11BA0083BE61 /* jamfHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D6FE8426DB11BA0083BE61 /* jamfHelper.swift */; };
 		41D81E5725F7929800D1F7E1 /* DialogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E5625F7929800D1F7E1 /* DialogView.swift */; };
 		41D81E5C25F817BF00D1F7E1 /* ButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E5B25F817BF00D1F7E1 /* ButtonView.swift */; };
 		41D81E6C25F8209F00D1F7E1 /* Options.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E6B25F8209F00D1F7E1 /* Options.swift */; };
@@ -98,10 +100,12 @@
 		4154C2F725F76BDC00A3D373 /* dialogUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = dialogUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4154C2FB25F76BDC00A3D373 /* dialogUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dialogUITests.swift; sourceTree = "<group>"; };
 		4154C2FD25F76BDC00A3D373 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		415934D726DB1B44009C9C3A /* ProcessCLOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessCLOptions.swift; sourceTree = "<group>"; };
 		416DED41261C5FE00049B6B5 /* FullscreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullscreenView.swift; sourceTree = "<group>"; };
 		417BF0BA260F1726009AD252 /* BannerImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerImageView.swift; sourceTree = "<group>"; };
 		418AE4222667A17A001E3423 /* DropdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropdownView.swift; sourceTree = "<group>"; };
 		41AD75B526AA81760023EBD8 /* TextEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEntryView.swift; sourceTree = "<group>"; };
+		41D6FE8426DB11BA0083BE61 /* jamfHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = jamfHelper.swift; sourceTree = "<group>"; };
 		41D81E5625F7929800D1F7E1 /* DialogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogView.swift; sourceTree = "<group>"; };
 		41D81E5B25F817BF00D1F7E1 /* ButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonView.swift; sourceTree = "<group>"; };
 		41D81E6B25F8209F00D1F7E1 /* Options.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Options.swift; sourceTree = "<group>"; };
@@ -215,6 +219,8 @@
 				41D81E7825F870A500D1F7E1 /* Processing.swift */,
 				41110A2725F9E79E008171D2 /* License.swift */,
 				4153783126001A0900AA0E76 /* StringProcessing.swift */,
+				41D6FE8426DB11BA0083BE61 /* jamfHelper.swift */,
+				415934D726DB1B44009C9C3A /* ProcessCLOptions.swift */,
 			);
 			path = extras;
 			sourceTree = "<group>";
@@ -467,6 +473,7 @@
 				41FD45FE26C40366006976FC /* progressBarView.swift in Sources */,
 				41FB64882680855300A54C3E /* DialogView.swift in Sources */,
 				41FB64892680855300A54C3E /* MessageContentView.swift in Sources */,
+				415934D826DB1B44009C9C3A /* ProcessCLOptions.swift in Sources */,
 				41FB648A2680855300A54C3E /* IconView.swift in Sources */,
 				41FB648B2680855300A54C3E /* TitleView.swift in Sources */,
 				41FB648C2680855300A54C3E /* BannerImageView.swift in Sources */,
@@ -476,6 +483,7 @@
 				41FB64902680855300A54C3E /* FullscreenView.swift in Sources */,
 				41FB64912680855300A54C3E /* Options.swift in Sources */,
 				41FB64922680855300A54C3E /* Processing.swift in Sources */,
+				41D6FE8526DB11BA0083BE61 /* jamfHelper.swift in Sources */,
 				41FB64932680855300A54C3E /* License.swift in Sources */,
 				41FB64942680855300A54C3E /* StringProcessing.swift in Sources */,
 				41FB64952680855300A54C3E /* dialogApp.swift in Sources */,

@@ -51,8 +51,8 @@ struct MessageContent: View {
         
     var body: some View {
         VStack {
-            if CLOptionPresent(OptionName: CLOptions.mainImage) {
-                ImageView(imagePath: CLOptionText(OptionName: CLOptions.mainImage), caption: CLOptionText(OptionName: CLOptions.mainImageCaption, DefaultValue: ""))
+            if optionvalue.mainImage.present {
+                ImageView(imagePath: optionvalue.mainImage.value, caption: optionvalue.mainImageCaption.value)
             } else {
                 ScrollView() {
                     Markdown(Document(messageContentOption))
