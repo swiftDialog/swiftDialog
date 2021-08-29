@@ -31,7 +31,6 @@ struct dialogApp: App {
 
     
     init () {
-        
         // get all the command line option values
         processCLOptionValues()
         
@@ -71,8 +70,8 @@ struct dialogApp: App {
         //.windowStyle(TitleBarWindowStyle())
         //.windowStyle(DefaultWindowStyle())
         //.windowStyle(TitleBarWindowStyle())
-        
     }
+
     
 }
 

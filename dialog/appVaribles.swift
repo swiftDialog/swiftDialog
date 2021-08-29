@@ -230,6 +230,18 @@ var helpText = """
                     Will ignore user Do Not Disturb setting
                         (only works in macOS 11)
     
+        -\(cloptions.jamfHelperMode.short), --\(cloptions.jamfHelperMode.long)
+                    Switches all command line options to accept jamfHelper style options
+                    Useful for using as a drop in replacement for jamfHelper in existing scripts
+                        replace "/path/to/jamfHelper" with \"/path/to/dialog -\(cloptions.jamfHelperMode.short)\"
+                    Does not (yet) support the following:
+                        -windowType hud
+                        -showDelayOptions
+                        -alignDescription, -alignHeading, -alignCountdown
+                        -iconSize
+                    Dialog will do its best to display jamfHelper content in a dialog-esque way.
+                    Any unsupported display options will be ignored.
+                        
         -\(cloptions.getVersion.short), --\(cloptions.getVersion.long)
                     Prints the app version
 
@@ -242,7 +254,7 @@ var helpText = """
 
 struct AppVariables {
 
-    var cliversion                      = String("1.6.1")
+    var cliversion                      = String("1.7.0 alpha preview")
     
     // message default strings
     var titleDefault                    = String("An Important Message")

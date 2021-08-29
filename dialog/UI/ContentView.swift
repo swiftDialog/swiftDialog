@@ -83,6 +83,7 @@ struct ContentView: View {
 
         // Window Setings (pinched from Nudge https://github.com/macadmins/nudge/blob/main/Nudge/UI/ContentView.swift#L19)
         HostingWindowFinder {window in
+            
             window?.standardWindowButton(.closeButton)?.isHidden = true //hides the red close button
             window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
             window?.standardWindowButton(.zoomButton)?.isHidden = true //this removes the green zoom button
@@ -93,9 +94,8 @@ struct ContentView: View {
             } else {
                 window?.level = .normal
             }
-            //window?.toggleFullScreen(self)
-            
             NSApp.activate(ignoringOtherApps: true) // bring to forefront upon launch
+            //window?.alphaValue = 1
         }
         
     }
