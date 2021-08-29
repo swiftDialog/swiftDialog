@@ -16,7 +16,7 @@ func CLOptionTextField () -> Array<String> {
     var argIndex = 0
     for argument in CommandLine.arguments {
         
-        if argument == "--\(CLOptions.textField.long)" {
+        if argument == "--\(cloptions.textField.long)" {
             textOptionsArray.append(CommandLine.arguments[argIndex+1])
         }
         argIndex+=1
@@ -25,7 +25,7 @@ func CLOptionTextField () -> Array<String> {
     return textOptionsArray
 }
 
-func CLOptionText(OptionName: (long: String, short: String), DefaultValue: String? = "") -> String {
+func CLOptionText(OptionName: (long: String, short: String, value: String, present: Bool), DefaultValue: String? = "") -> String {
     // Determine if argument is present.
     var CLOptionTextValue = ""
     
@@ -41,7 +41,7 @@ func CLOptionText(OptionName: (long: String, short: String), DefaultValue: Strin
         if valueIndex >= CommandLine.arguments.startIndex
             && valueIndex < CommandLine.arguments.endIndex
         {
-            //if CommandLine.arguments[commandIndex] != "--\(CLOptions.timerBar.long)" {
+            //if CommandLine.arguments[commandIndex] != "--\(cloptions.timerBar.long)" {
                 CLOptionTextValue = CommandLine.arguments[valueIndex]
                 if (CLOptionTextValue.starts(with: "-")) {
                     //print("Argument \(CommandLine.arguments[commandIndex]) was not passed a value.")
@@ -60,7 +60,7 @@ func CLOptionText(OptionName: (long: String, short: String), DefaultValue: Strin
 
 // returns true if the specified oprion is present.
 
-func CLOptionPresent(OptionName: (long: String, short: String)) -> Bool {
+func CLOptionPresent(OptionName: (long: String, short: String, value: String, present: Bool)) -> Bool {
     // Determine if option is present.
     var optionPresent = false
     if let commandIndex = [CommandLine.arguments.firstIndex(of: "--\(OptionName.long)"), CommandLine.arguments.firstIndex(of: "-\(OptionName.short)")].compactMap({$0}).first {

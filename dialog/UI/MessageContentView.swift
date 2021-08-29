@@ -26,9 +26,9 @@ struct MessageContent: View {
             viewOffset = 20
         }
         
-        if CLOptionPresent(OptionName: CLOptions.smallWindow) {
+        if cloptions.smallWindow.present {
             viewHeight = appvars.windowHeight - 90
-        } else if CLOptionPresent(OptionName: CLOptions.bigWindow) {
+        } else if cloptions.bigWindow.present {
             viewHeight = appvars.windowHeight - 120
             viewWidth = viewWidth - 50
         }
@@ -45,14 +45,14 @@ struct MessageContent: View {
     var viewHeight = CGFloat(0)
     var viewOffset = CGFloat(0)
     
-    let messageContentOption: String = CLOptionText(OptionName: CLOptions.messageOption, DefaultValue: appvars.messageDefault)
+    let messageContentOption: String = cloptions.messageOption.value
     let theAllignment: Alignment = .topLeading
     
         
     var body: some View {
         VStack {
-            if optionvalue.mainImage.present {
-                ImageView(imagePath: optionvalue.mainImage.value, caption: optionvalue.mainImageCaption.value)
+            if cloptions.mainImage.present {
+                ImageView(imagePath: cloptions.mainImage.value, caption: cloptions.mainImageCaption.value)
             } else {
                 ScrollView() {
                     Markdown(Document(messageContentOption))

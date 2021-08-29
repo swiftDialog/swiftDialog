@@ -8,49 +8,44 @@
 import Foundation
 import SwiftUI
 
-private func checkCLPresent(CLName: (long: String, short: String)) {
-    if CLOptionPresent(OptionName: CLName) {
-        print(CLName)
-    }
-}
 
 func processCLOptions() {
     
     // check all options that don't take a text value
     
     //check debug mode
-    if (CLOptionPresent(OptionName: CLOptions.debug)) {
+    if cloptions.debug.present {
         appvars.debugMode = true
         appvars.debugBorderColour = Color.green
     }
     
-    if (CLOptionPresent(OptionName: CLOptions.textField)) {
+    if cloptions.textField.present {
         appvars.textOptionsArray = CLOptionTextField()
     }
     
     // process command line options that just display info and exit before we show the main window
-    if (CLOptionPresent(OptionName: CLOptions.helpOption) || CommandLine.arguments.count == 1) {
+    if (cloptions.helpOption.present || CommandLine.arguments.count == 1) {
         print(helpText)
         quitDialog(exitCode: 0)
         //exit(0)
     }
-    if CLOptionPresent(OptionName: CLOptions.getVersion) {
+    if cloptions.getVersion.present {
         printVersionString()
         quitDialog(exitCode: 0)
         //exit(0)
     }
-    if CLOptionPresent(OptionName: CLOptions.showLicense) {
+    if cloptions.showLicense.present {
         print(licenseText)
         quitDialog(exitCode: 0)
         //exit(0)
     }
-    if CLOptionPresent(OptionName: CLOptions.buyCoffee) {
+    if cloptions.buyCoffee.present {
         //I'm a teapot
         print("If you like this app and want to buy me a coffee https://www.buymeacoffee.com/bartreardon")
         quitDialog(exitCode: 418)
         //exit(418)
     }
-    if CLOptionPresent(OptionName: CLOptions.ignoreDND) {
+    if cloptions.ignoreDND.present {
         appvars.willDisturb = true
     }
     
@@ -59,13 +54,13 @@ func processCLOptions() {
         quitDialog(exitCode: 20, exitMessage: "Do Not Disturb is enabled. Exiting")
     }
         
-    if CLOptionPresent(OptionName: CLOptions.windowWidth) {
-        //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: CLOptions.windowWidth)
-        appvars.windowWidth = NumberFormatter().number(from: CLOptionText(OptionName: CLOptions.windowWidth)) as! CGFloat
+    if cloptions.windowWidth.present {
+        //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: cloptions.windowWidth)
+        appvars.windowWidth = NumberFormatter().number(from: cloptions.windowWidth.value) as! CGFloat
     }
-    if CLOptionPresent(OptionName: CLOptions.windowHeight) {
-        //appvars.windowHeight = CGFloat() //CLOptionText(OptionName: CLOptions.windowHeight)
-        appvars.windowHeight = NumberFormatter().number(from: CLOptionText(OptionName: CLOptions.windowHeight)) as! CGFloat
+    if cloptions.windowHeight.present {
+        //appvars.windowHeight = CGFloat() //CLOptionText(OptionName: cloptions.windowHeight)
+        appvars.windowHeight = NumberFormatter().number(from: cloptions.windowHeight.value) as! CGFloat
     }
     
     // Correct feng shui so the app accepts keyboard input
@@ -74,8 +69,8 @@ func processCLOptions() {
     //app.setActivationPolicy(.regular)
     app.setActivationPolicy(.accessory)
             
-    if CLOptionPresent(OptionName: CLOptions.titleFont) {
-        let fontCLValues = CLOptionText(OptionName: CLOptions.titleFont)
+    if cloptions.titleFont.present {
+        let fontCLValues = cloptions.titleFont.value
         var fontValues = [""]
         //split by ,
         fontValues = fontCLValues.components(separatedBy: ",")
@@ -97,130 +92,125 @@ func processCLOptions() {
         
     }
             
-    if CLOptionPresent(OptionName: CLOptions.hideIcon) {
+    if cloptions.hideIcon.present {
         appvars.iconIsHidden = true
     //} else {
     //    iconVisible = true
     }
     
-    if CLOptionPresent(OptionName: CLOptions.lockWindow) {
+    if cloptions.lockWindow.present {
         appvars.windowIsMoveable = true
     }
     
-    if CLOptionPresent(OptionName: CLOptions.forceOnTop) {
+    if cloptions.forceOnTop.present {
         appvars.windowOnTop = true
     }
     
-    if CLOptionPresent(OptionName: CLOptions.jsonOutPut) {
+    if cloptions.jsonOutPut.present {
         appvars.jsonOut = true
     }
     
     // we define this stuff here as we will use the info to draw the window.
-    if CLOptionPresent(OptionName: CLOptions.smallWindow) {
+    if cloptions.smallWindow.present {
         // scale everything down a notch
-        
         appvars.smallWindow = true
         appvars.scaleFactor = 0.75
-        
-        //appvars.overlayOffsetX = appvars.overlayOffsetX * (appvars.scaleFactor)
-        //appvars.overlayOffsetY = appvars.overlayOffsetY * (appvars.scaleFactor*appvars.scaleFactor)
-    } else if CLOptionPresent(OptionName: CLOptions.bigWindow) {
+    } else if cloptions.bigWindow.present {
         // scale everything up a notch
-        
         appvars.bigWindow = true
         appvars.scaleFactor = 1.25
     }
 }
 
 func processCLOptionValues() {
+        
+    cloptions.titleOption.value             = CLOptionText(OptionName: cloptions.titleOption, DefaultValue: appvars.titleDefault)
+    cloptions.titleOption.present           = CLOptionPresent(OptionName: cloptions.titleOption)
+
+    cloptions.messageOption.value           = CLOptionText(OptionName: cloptions.messageOption, DefaultValue: appvars.messageDefault)
+    cloptions.messageOption.present         = CLOptionPresent(OptionName: cloptions.messageOption)
+
+    cloptions.iconOption.value              = CLOptionText(OptionName: cloptions.iconOption, DefaultValue: "default")
+    cloptions.iconOption.present            = CLOptionPresent(OptionName: cloptions.iconOption)
+
+    cloptions.overlayIconOption.value       = CLOptionText(OptionName: cloptions.overlayIconOption)
+    cloptions.overlayIconOption.present     = CLOptionPresent(OptionName: cloptions.overlayIconOption)
+
+    cloptions.bannerImage.value             = CLOptionText(OptionName: cloptions.bannerImage)
+    cloptions.bannerImage.present           = CLOptionPresent(OptionName: cloptions.bannerImage)
+
+    cloptions.button1TextOption.value       = CLOptionText(OptionName: cloptions.button1TextOption, DefaultValue: appvars.button1Default)
+    cloptions.button1TextOption.present     = CLOptionPresent(OptionName: cloptions.button1TextOption)
+
+    cloptions.button1ActionOption.value     = CLOptionText(OptionName: cloptions.button1ActionOption)
+    cloptions.button1ActionOption.present   = CLOptionPresent(OptionName: cloptions.button1ActionOption)
+
+    cloptions.button1ShellActionOption.value = CLOptionText(OptionName: cloptions.button1ShellActionOption)
+    cloptions.button1ShellActionOption.present = CLOptionPresent(OptionName: cloptions.button1ShellActionOption)
+
+    cloptions.button2TextOption.value       = CLOptionText(OptionName: cloptions.button2TextOption, DefaultValue: appvars.button2Default)
+    cloptions.button2TextOption.present     = CLOptionPresent(OptionName: cloptions.button2TextOption)
+
+    cloptions.button2ActionOption.value     = CLOptionText(OptionName: cloptions.button2ActionOption)
+    cloptions.button2ActionOption.present   = CLOptionPresent(OptionName: cloptions.button2ActionOption)
+
+    cloptions.buttonInfoTextOption.value    = CLOptionText(OptionName: cloptions.buttonInfoTextOption, DefaultValue: appvars.buttonInfoDefault)
+    cloptions.buttonInfoTextOption.present  = CLOptionPresent(OptionName: cloptions.buttonInfoTextOption)
+
+    cloptions.buttonInfoActionOption.value  = CLOptionText(OptionName: cloptions.buttonInfoActionOption)
+    cloptions.buttonInfoActionOption.present = CLOptionPresent(OptionName: cloptions.buttonInfoActionOption)
+
+    cloptions.dropdownTitle.value           = CLOptionText(OptionName: cloptions.dropdownTitle)
+    cloptions.dropdownTitle.present         = CLOptionPresent(OptionName: cloptions.dropdownTitle)
+
+    cloptions.dropdownValues.value          = CLOptionText(OptionName: cloptions.dropdownValues)
+    cloptions.dropdownValues.present        = CLOptionPresent(OptionName: cloptions.dropdownValues)
+
+    cloptions.dropdownDefault.value         = CLOptionText(OptionName: cloptions.dropdownDefault)
+    cloptions.dropdownDefault.present       = CLOptionPresent(OptionName: cloptions.dropdownDefault)
+
+    cloptions.titleFont.value               = CLOptionText(OptionName: cloptions.titleFont)
+    cloptions.titleFont.present             = CLOptionPresent(OptionName: cloptions.titleFont)
+
+    cloptions.textField.value               = CLOptionText(OptionName: cloptions.textField)
+    cloptions.textField.present             = CLOptionPresent(OptionName: cloptions.textField)
+
+    cloptions.timerBar.value                = CLOptionText(OptionName: cloptions.timerBar, DefaultValue: "\(appvars.timerDefaultSeconds)")
+    cloptions.timerBar.present              = CLOptionPresent(OptionName: cloptions.timerBar)
+
+    cloptions.mainImage.value               = CLOptionText(OptionName: cloptions.mainImage)
+    cloptions.mainImage.present             = CLOptionPresent(OptionName: cloptions.mainImage)
+
+    cloptions.mainImageCaption.value        = CLOptionText(OptionName: cloptions.mainImageCaption)
+    cloptions.mainImageCaption.present      = CLOptionPresent(OptionName: cloptions.mainImageCaption)
+
+    cloptions.windowWidth.value             = CLOptionText(OptionName: cloptions.windowWidth)
+    cloptions.windowWidth.present           = CLOptionPresent(OptionName: cloptions.windowWidth)
+
+    cloptions.windowHeight.value            = CLOptionText(OptionName: cloptions.windowHeight)
+    cloptions.windowHeight.present          = CLOptionPresent(OptionName: cloptions.windowHeight)
+
     
-    if CLOptionPresent(OptionName: CLOptions.titleOption) {
-        optionvalue.titleOption.value = CLOptionText(OptionName: CLOptions.titleOption)
-        optionvalue.titleOption.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.messageOption) {
-        optionvalue.messageOption.value = CLOptionText(OptionName: CLOptions.messageOption)
-        optionvalue.messageOption.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.iconOption) {
-        optionvalue.iconOption.value = CLOptionText(OptionName: CLOptions.iconOption)
-        optionvalue.iconOption.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.overlayIconOption) {
-        optionvalue.overlayIconOption.value = CLOptionText(OptionName: CLOptions.overlayIconOption)
-        optionvalue.overlayIconOption.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.bannerImage) {
-        optionvalue.bannerImage.value = CLOptionText(OptionName: CLOptions.bannerImage)
-        optionvalue.bannerImage.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.button1TextOption) {
-        optionvalue.button1TextOption.value = CLOptionText(OptionName: CLOptions.button1TextOption)
-        optionvalue.button1TextOption.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.button1ActionOption) {
-        optionvalue.button1ActionOption.value = CLOptionText(OptionName: CLOptions.button1ActionOption)
-        optionvalue.button1ActionOption.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.button1ShellActionOption) {
-        optionvalue.button1ShellActionOption.value = CLOptionText(OptionName: CLOptions.button1ShellActionOption)
-        optionvalue.button1ShellActionOption.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.button2TextOption) {
-        optionvalue.button2TextOption.value = CLOptionText(OptionName: CLOptions.button2TextOption)
-        optionvalue.button2TextOption.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.button2ActionOption) {
-        optionvalue.button2ActionOption.value = CLOptionText(OptionName: CLOptions.button2ActionOption)
-        optionvalue.button2ActionOption.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.buttonInfoTextOption) {
-        optionvalue.buttonInfoTextOption.value = CLOptionText(OptionName: CLOptions.buttonInfoTextOption)
-        optionvalue.buttonInfoTextOption.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.buttonInfoActionOption) {
-        optionvalue.buttonInfoActionOption.value = CLOptionText(OptionName: CLOptions.buttonInfoActionOption)
-        optionvalue.buttonInfoActionOption.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.dropdownTitle) {
-        optionvalue.dropdownTitle.value = CLOptionText(OptionName: CLOptions.dropdownTitle)
-        optionvalue.dropdownTitle.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.dropdownValues) {
-        optionvalue.dropdownValues.value = CLOptionText(OptionName: CLOptions.dropdownValues)
-        optionvalue.dropdownValues.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.dropdownDefault) {
-        optionvalue.dropdownDefault.value = CLOptionText(OptionName: CLOptions.dropdownDefault)
-        optionvalue.dropdownDefault.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.titleFont) {
-        optionvalue.titleFont.value = CLOptionText(OptionName: CLOptions.titleFont)
-        optionvalue.titleFont.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.textField) {
-        optionvalue.textField.value = CLOptionText(OptionName: CLOptions.textField)
-        optionvalue.textField.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.timerBar) {
-        optionvalue.timerBar.value = CLOptionText(OptionName: CLOptions.timerBar)
-        optionvalue.timerBar.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.mainImage) {
-        optionvalue.mainImage.value = CLOptionText(OptionName: CLOptions.mainImage)
-        optionvalue.mainImage.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.mainImageCaption) {
-        optionvalue.mainImageCaption.value = CLOptionText(OptionName: CLOptions.mainImageCaption)
-        optionvalue.mainImageCaption.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.windowWidth) {
-        optionvalue.windowWidth.value = CLOptionText(OptionName: CLOptions.windowWidth)
-        optionvalue.windowWidth.present = true
-    }
-    if CLOptionPresent(OptionName: CLOptions.windowHeight) {
-        optionvalue.windowHeight.value = CLOptionText(OptionName: CLOptions.windowHeight)
-        optionvalue.windowHeight.present = true
-    }
+    // anthing that is an option only with no value
+    cloptions.button2Option.present         = CLOptionPresent(OptionName: cloptions.button2Option)
+    cloptions.infoButtonOption.present      = CLOptionPresent(OptionName: cloptions.infoButtonOption)
+    cloptions.getVersion.present            = CLOptionPresent(OptionName: cloptions.getVersion)
+    cloptions.hideIcon.present              = CLOptionPresent(OptionName: cloptions.hideIcon)
+    cloptions.helpOption.present            = CLOptionPresent(OptionName: cloptions.helpOption)
+    cloptions.demoOption.present            = CLOptionPresent(OptionName: cloptions.demoOption)
+    cloptions.buyCoffee.present             = CLOptionPresent(OptionName: cloptions.buyCoffee)
+    cloptions.showLicense.present           = CLOptionPresent(OptionName: cloptions.showLicense)
+    cloptions.warningIcon.present           = CLOptionPresent(OptionName: cloptions.warningIcon)
+    cloptions.infoIcon.present              = CLOptionPresent(OptionName: cloptions.infoIcon)
+    cloptions.cautionIcon.present           = CLOptionPresent(OptionName: cloptions.cautionIcon)
+    cloptions.lockWindow.present            = CLOptionPresent(OptionName: cloptions.lockWindow)
+    cloptions.forceOnTop.present            = CLOptionPresent(OptionName: cloptions.forceOnTop)
+    cloptions.smallWindow.present           = CLOptionPresent(OptionName: cloptions.smallWindow)
+    cloptions.bigWindow.present             = CLOptionPresent(OptionName: cloptions.bigWindow)
+    cloptions.fullScreenWindow.present      = CLOptionPresent(OptionName: cloptions.fullScreenWindow)
+    cloptions.jsonOutPut.present            = CLOptionPresent(OptionName: cloptions.jsonOutPut)
+    cloptions.ignoreDND.present             = CLOptionPresent(OptionName: cloptions.ignoreDND)
+    cloptions.jamfHelperMode.present        = CLOptionPresent(OptionName: cloptions.jamfHelperMode)
+    cloptions.debug.present                 = CLOptionPresent(OptionName: cloptions.debug)
 
 }

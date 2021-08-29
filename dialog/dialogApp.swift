@@ -32,9 +32,18 @@ struct dialogApp: App {
     
     init () {
         
-        processCLOptions()
+        // get all the command line option values
         processCLOptionValues()
-                
+        
+        // check for jamfhelper mode
+        if cloptions.jamfHelperMode.present {
+            print("converting jh to dialog")
+            convertFromJamfHelperSyntax()
+        }
+        
+        // process remaining command line options
+        processCLOptions()
+                        
         appvars.overlayShadow = 1
                 
         appvars.titleHeight = appvars.titleHeight * appvars.scaleFactor
@@ -43,7 +52,7 @@ struct dialogApp: App {
         appvars.imageWidth = appvars.imageWidth * appvars.scaleFactor
         appvars.imageHeight = appvars.imageHeight * appvars.scaleFactor
         
-        if CLOptionPresent(OptionName: CLOptions.fullScreenWindow) {
+        if cloptions.fullScreenWindow.present {
             //appvars.overlayIconScale = appvars.overlayIconScale * 2
             FullscreenView().showFullScreen()
         }

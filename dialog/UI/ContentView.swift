@@ -10,8 +10,8 @@ import SwiftUI
 struct ContentView: View {
     init() {
         //appvars.windowHeight = appvars.windowHeight + 200
-        if optionvalue.bannerImage.present {
-            if CLOptionPresent(OptionName: CLOptions.smallWindow) {
+        if cloptions.bannerImage.present {
+            if cloptions.smallWindow.present {
                 appvars.bannerHeight = 100
                 bannerAdjustment = 10
             } else {
@@ -36,8 +36,8 @@ struct ContentView: View {
         ZStack() {
         // this stack controls the main view. Consists of a VStack containing all the content, and a HStack positioned at the bottom of the display area
             VStack {
-                if optionvalue.bannerImage.present {
-                    BannerImageView(imagePath: optionvalue.bannerImage.value)
+                if cloptions.bannerImage.present {
+                    BannerImageView(imagePath: cloptions.bannerImage.value)
                         .frame(width: appvars.windowWidth, height: appvars.bannerHeight-bannerAdjustment, alignment: .topLeading)
                         .clipped()
                         .border(appvars.debugBorderColour, width: 2)
@@ -63,14 +63,14 @@ struct ContentView: View {
                 
             // Buttons
             HStack() {
-                if optionvalue.timerBar.present {
-                    progressBarView(progressSteps: NumberFormatter().number(from: optionvalue.timerBar.value) as? CGFloat, visible: true)
+                if cloptions.timerBar.present {
+                    progressBarView(progressSteps: NumberFormatter().number(from: cloptions.timerBar.value) as? CGFloat, visible: true)
                         .frame(alignment: .bottom)
                 } else {
                     MoreInfoButton()
                     Spacer()
                 }
-                if (optionvalue.timerBar.present && optionvalue.button1TextOption.present) || (!optionvalue.timerBar.present) {
+                if (cloptions.timerBar.present && cloptions.button1TextOption.present) || (!cloptions.timerBar.present) {
                     ButtonView() // contains both button 1 and button 2
                 }
             }
