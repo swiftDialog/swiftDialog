@@ -64,12 +64,14 @@ struct dialogApp: App {
             ContentView()
                 .frame(width: appvars.windowWidth, height: appvars.windowHeight + appvars.bannerHeight)
                 .edgesIgnoringSafeArea(.all)
+                //.hostingWindowPosition(vertical: appvars.windowPositionVertical, horizontal: appvars.windowPositionHorozontal)
         }
         // Hide Title Bar
         .windowStyle(HiddenTitleBarWindowStyle())
         //.windowStyle(TitleBarWindowStyle())
         //.windowStyle(DefaultWindowStyle())
         //.windowStyle(TitleBarWindowStyle())
+        
     }
     
 }

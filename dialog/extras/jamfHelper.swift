@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 struct JHOptions {
     static let windowType         = (long: String("windowType"),       short: String("windowType"),         value : String(""), present : Bool(false)) // -windowType [hud | utility | fs]
@@ -70,7 +71,27 @@ public func convertFromJamfHelperSyntax() {
     //countdown or timer
     cloptions.timerBar.present = CLOptionPresent(OptionName: JHOptions.timeout)
     cloptions.timerBar.value = CLOptionText(OptionName: JHOptions.timeout)
-        
+    
+    if CLOptionPresent(OptionName: JHOptions.windowPosition) {
+        switch CLOptionText(OptionName: JHOptions.windowPosition) {
+        case "ul":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.top
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.left
+        case "ur":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.top
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.right
+        case "ll":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.left
+        case "lr":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.right
+        default:
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.center
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
+        }
+    }
+    
     if cloptions.debug.present {
         print(cloptions)
     }

@@ -262,6 +262,9 @@ struct AppVariables {
     // Window Sizes
     var windowWidth                     = CGFloat(820)      // set default dialog width
     var windowHeight                    = CGFloat(380)      // set default dialog height
+    
+    var windowPositionVertical          = NSWindow.Position.Vertical.center
+    var windowPositionHorozontal        = NSWindow.Position.Horizontal.center
  
     var imageWidth                      = CGFloat(170)      // set default image area width
     var imageHeight                     = CGFloat(260)      // set default image area height

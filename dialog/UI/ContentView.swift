@@ -79,13 +79,14 @@ struct ContentView: View {
             .position(x: appvars.windowWidth/2, y: buttonYPos-5)
             
         }
-            
+        .hostingWindowPosition(vertical: appvars.windowPositionVertical, horizontal: appvars.windowPositionHorozontal)
+
         // Window Setings (pinched from Nudge https://github.com/macadmins/nudge/blob/main/Nudge/UI/ContentView.swift#L19)
         HostingWindowFinder {window in
             window?.standardWindowButton(.closeButton)?.isHidden = true //hides the red close button
             window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
             window?.standardWindowButton(.zoomButton)?.isHidden = true //this removes the green zoom button
-            window?.center() // center
+            //window?.center() // center
             window?.isMovable = appvars.windowIsMoveable
             if appvars.windowOnTop {
                 window?.level = .floating
@@ -96,28 +97,9 @@ struct ContentView: View {
             
             NSApp.activate(ignoringOtherApps: true) // bring to forefront upon launch
         }
+        
     }
     
 
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
-}
-
-struct HostingWindowFinder: NSViewRepresentable {
-    var callback: (NSWindow?) -> ()
-
-    func makeNSView(context: Self.Context) -> NSView {
-        let view = NSView()
-                
-        DispatchQueue.main.async { [weak view] in
-            self.callback(view?.window)
-        }
-        return view
-    }
-    
-    func updateNSView(_ nsView: NSView, context: Context) {}
-}
