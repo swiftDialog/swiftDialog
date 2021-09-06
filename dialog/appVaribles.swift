@@ -259,6 +259,8 @@ struct AppVariables {
     // message default strings
     var titleDefault                    = String("An Important Message")
     var messageDefault                  = String("\nThis is important message content\n\nPlease read")
+    var messageAlignment : TextAlignment = .leading
+    var messageAlignmentTextRepresentation = String("left")
     
     // button default strings
     // work out how to define a default width button that does what you tell it to. in the meantime, diry hack with spaces
@@ -342,6 +344,7 @@ struct CLOptions {
     // command line options that take string parameters
     var titleOption              = (long: String("title"),             short: String("t"),   value : String(""), present : Bool(false))  // -t
     var messageOption            = (long: String("message"),           short: String("m"),   value : String(""), present : Bool(false))  // -m
+    var messageAlignment         = (long: String("alignment"),         short: String(""),    value : String(""), present : Bool(false))
     var iconOption               = (long: String("icon"),              short: String("i"),   value : String(""), present : Bool(false))  // -i
     var overlayIconOption        = (long: String("overlayicon"),       short: String("y"),   value : String(""), present : Bool(false))  // -y
     var bannerImage              = (long: String("bannerimage"),       short: String("n"),   value : String(""), present : Bool(false))  // -n

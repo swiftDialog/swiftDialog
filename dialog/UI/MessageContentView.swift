@@ -56,6 +56,7 @@ struct MessageContent: View {
             } else {
                 ScrollView() {
                     Markdown(Document(messageContentOption))
+                        .multilineTextAlignment(appvars.messageAlignment)
                         .markdownStyle(style)
                 }
                 .frame(width: viewWidth, alignment: .topLeading)

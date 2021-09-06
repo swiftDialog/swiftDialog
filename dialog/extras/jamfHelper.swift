@@ -37,7 +37,7 @@ struct JHOptions {
 
 public func convertFromJamfHelperSyntax() {
     // read the jamfhelper syntax from the command line and populate the appropriate dialog values
-    cloptions.smallWindow.present = true
+    //cloptions.smallWindow.present = true
     
     //fullscreen
     if CLOptionPresent(OptionName: JHOptions.windowType) && CLOptionText(OptionName: JHOptions.windowType) == "fs" {
@@ -51,9 +51,27 @@ public func convertFromJamfHelperSyntax() {
     // message
     cloptions.messageOption.present = CLOptionPresent(OptionName: JHOptions.description)
     if !cloptions.fullScreenWindow.present {
-        cloptions.messageOption.value = "### \(CLOptionText(OptionName: JHOptions.heading))\n\n\(CLOptionText(OptionName: JHOptions.description))"
+        cloptions.messageOption.value = "#### \(CLOptionText(OptionName: JHOptions.heading))\n\n\(CLOptionText(OptionName: JHOptions.description))"
     } else {
         cloptions.messageOption.value = "\(CLOptionText(OptionName: JHOptions.heading))\n\n\(CLOptionText(OptionName: JHOptions.description))"
+    }
+    
+    // message alignment
+    cloptions.messageAlignment.present = CLOptionPresent(OptionName: JHOptions.alignDescription)
+    cloptions.messageAlignment.value = CLOptionText(OptionName: JHOptions.alignDescription)
+    if cloptions.messageAlignment.present {
+        switch cloptions.messageAlignment.value {
+        case "left":
+            appvars.messageAlignment = .leading
+        case "centre":
+            appvars.messageAlignment = .center
+        case "center":
+            appvars.messageAlignment = .center
+        case "right":
+            appvars.messageAlignment = .trailing
+        default:
+            appvars.messageAlignment = .leading
+        }
     }
     
     //icon

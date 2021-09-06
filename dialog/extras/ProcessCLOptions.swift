@@ -129,6 +129,24 @@ func processCLOptionValues() {
 
     cloptions.messageOption.value           = CLOptionText(OptionName: cloptions.messageOption, DefaultValue: appvars.messageDefault)
     cloptions.messageOption.present         = CLOptionPresent(OptionName: cloptions.messageOption)
+    
+    cloptions.messageAlignment.value        = CLOptionText(OptionName: cloptions.messageAlignment, DefaultValue: appvars.messageAlignmentTextRepresentation)
+    cloptions.messageAlignment.present      = CLOptionPresent(OptionName: cloptions.messageAlignment)
+    
+    if cloptions.messageAlignment.present {
+        switch cloptions.messageAlignment.value {
+        case "left":
+            appvars.messageAlignment = .leading
+        case "centre":
+            appvars.messageAlignment = .center
+        case "center":
+            appvars.messageAlignment = .center
+        case "right":
+            appvars.messageAlignment = .trailing
+        default:
+            appvars.messageAlignment = .leading
+        }
+    }
 
     cloptions.iconOption.value              = CLOptionText(OptionName: cloptions.iconOption, DefaultValue: "default")
     cloptions.iconOption.present            = CLOptionPresent(OptionName: cloptions.iconOption)
