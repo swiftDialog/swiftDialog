@@ -63,9 +63,7 @@ public func convertFromJamfHelperSyntax() {
         switch cloptions.messageAlignment.value {
         case "left":
             appvars.messageAlignment = .leading
-        case "centre":
-            appvars.messageAlignment = .center
-        case "center":
+        case "centre", "center":
             appvars.messageAlignment = .center
         case "right":
             appvars.messageAlignment = .trailing
@@ -90,6 +88,7 @@ public func convertFromJamfHelperSyntax() {
     cloptions.timerBar.present = CLOptionPresent(OptionName: JHOptions.timeout)
     cloptions.timerBar.value = CLOptionText(OptionName: JHOptions.timeout)
     
+    // window location on screen
     if CLOptionPresent(OptionName: JHOptions.windowPosition) {
         switch CLOptionText(OptionName: JHOptions.windowPosition) {
         case "ul":
