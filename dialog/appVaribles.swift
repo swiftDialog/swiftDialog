@@ -33,6 +33,14 @@ var helpText = """
                     The message can be of any length. If it is larger than the viewable area
                     The message contents will be presented in  scrolable area.
     
+        --\(cloptions.messageAlignment.long) <text>
+                    Set the message alignment.
+                    Supported options are:
+                        left
+                        centre|center
+                        right
+                    Default is 'left'
+        
         -\(cloptions.mainImage.short), --\(cloptions.mainImage.long)  <file> | <url>
                     Display an image instead of a message.
                     Images will be resized to fit the available display area
