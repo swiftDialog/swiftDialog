@@ -10,15 +10,15 @@ import SwiftUI
 struct ContentView: View {
     init() {
         //appvars.windowHeight = appvars.windowHeight + 200
-        if CLOptionPresent(OptionName: CLOptions.bannerImage) {
-            if CLOptionPresent(OptionName: CLOptions.smallWindow) {
+        if cloptions.bannerImage.present {
+            if cloptions.smallWindow.present {
                 appvars.bannerHeight = 100
                 bannerAdjustment = 10
             } else {
                 appvars.bannerHeight = 150
             }
             appvars.bannerOffset = -30
-            bannerImagePresent = true
+            //bannerImagePresent = true
             appvars.imageWidth = 0 // hides the side icon
             
             //adjust the position of the button bar by adding the banner height and ofsetting the default banner height of -10
@@ -29,15 +29,15 @@ struct ContentView: View {
     // puts the button bar jsut above the bottom row - 35 came from trial and error
     var buttonYPos = (appvars.windowHeight)
     
-    var bannerImagePresent = false
+    //var bannerImagePresent = false
     var bannerAdjustment       = CGFloat(5)
         
     var body: some View {
         ZStack() {
         // this stack controls the main view. Consists of a VStack containing all the content, and a HStack positioned at the bottom of the display area
             VStack {
-                if bannerImagePresent {
-                    BannerImageView()
+                if cloptions.bannerImage.present {
+                    BannerImageView(imagePath: cloptions.bannerImage.value)
                         .frame(width: appvars.windowWidth, height: appvars.bannerHeight-bannerAdjustment, alignment: .topLeading)
                         .clipped()
                         .border(appvars.debugBorderColour, width: 2)
@@ -63,14 +63,14 @@ struct ContentView: View {
                 
             // Buttons
             HStack() {
-                if CLOptionPresent(OptionName: CLOptions.timerBar) {
-                    progressBarView(progressSteps: NumberFormatter().number(from: CLOptionText(OptionName: CLOptions.timerBar)) as? CGFloat, visible: true)
+                if cloptions.timerBar.present {
+                    progressBarView(progressSteps: NumberFormatter().number(from: cloptions.timerBar.value) as? CGFloat, visible: true)
                         .frame(alignment: .bottom)
                 } else {
                     MoreInfoButton()
                     Spacer()
                 }
-                if (CLOptionPresent(OptionName: CLOptions.timerBar) && CLOptionPresent(OptionName: CLOptions.button1TextOption)) || (!CLOptionPresent(OptionName: CLOptions.timerBar)) {
+                if (cloptions.timerBar.present && cloptions.button1TextOption.present) || (!cloptions.timerBar.present) {
                     ButtonView() // contains both button 1 and button 2
                 }
             }
@@ -79,45 +79,27 @@ struct ContentView: View {
             .position(x: appvars.windowWidth/2, y: buttonYPos-5)
             
         }
-            
+        .hostingWindowPosition(vertical: appvars.windowPositionVertical, horizontal: appvars.windowPositionHorozontal)
+
         // Window Setings (pinched from Nudge https://github.com/macadmins/nudge/blob/main/Nudge/UI/ContentView.swift#L19)
         HostingWindowFinder {window in
+            
             window?.standardWindowButton(.closeButton)?.isHidden = true //hides the red close button
             window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
             window?.standardWindowButton(.zoomButton)?.isHidden = true //this removes the green zoom button
-            window?.center() // center
+            //window?.center() // center
             window?.isMovable = appvars.windowIsMoveable
             if appvars.windowOnTop {
                 window?.level = .floating
             } else {
                 window?.level = .normal
             }
-            //window?.toggleFullScreen(self)
-            
             NSApp.activate(ignoringOtherApps: true) // bring to forefront upon launch
+            //window?.alphaValue = 1
         }
+        
     }
     
 
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
-}
-
-struct HostingWindowFinder: NSViewRepresentable {
-    var callback: (NSWindow?) -> ()
-
-    func makeNSView(context: Self.Context) -> NSView {
-        let view = NSView()
-                
-        DispatchQueue.main.async { [weak view] in
-            self.callback(view?.window)
-        }
-        return view
-    }
-    
-    func updateNSView(_ nsView: NSView, context: Context) {}
-}

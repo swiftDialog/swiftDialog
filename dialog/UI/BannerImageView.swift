@@ -10,7 +10,13 @@ import SwiftUI
 
 struct BannerImageView: View {
     
-    var BannerImageOption: String = CLOptionText(OptionName: CLOptions.bannerImage)
+    var BannerImageOption : String = ""
+    
+    init(imagePath: String) {
+        BannerImageOption = imagePath
+    }
+    
+    //var BannerImageOption: String = CLOptionText(OptionName: CLOptions.bannerImage)
 
     var body: some View {
         Image(nsImage: getImageFromPath(fileImagePath: BannerImageOption))

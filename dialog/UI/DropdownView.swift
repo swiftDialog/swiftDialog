@@ -12,8 +12,8 @@ import Combine
 
 struct DropdownView: View {
     
-    @State var selectedOption = CLOptionText(OptionName: CLOptions.dropdownDefault)
-    //@Binding var selectedOption: String = CLOptionText(OptionName: CLOptions.dropdownDefault, DefaultValue: "")
+    @State var selectedOption = cloptions.dropdownDefault.value // CLOptionText(OptionName: cloptions.dropdownDefault)
+    //@Binding var selectedOption: String = CLOptionText(OptionName: cloptions.dropdownDefault, DefaultValue: "")
     var selectedIndex = -1
     var dropdownValues = [""]
     var dropdownCLValues: String = ""
@@ -23,14 +23,14 @@ struct DropdownView: View {
     var defaultValue: String = ""
     
     init() {
-        if CLOptionPresent(OptionName: CLOptions.dropdownValues) {
+        if cloptions.dropdownValues.present {
             showDropdown = true
-            dropdownCLValues = CLOptionText(OptionName: CLOptions.dropdownValues)
+            dropdownCLValues = cloptions.dropdownValues.value
             dropdownValues = dropdownCLValues.components(separatedBy: ",")
             dropdownValues = dropdownValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
-            dropdownTitle = CLOptionText(OptionName: CLOptions.dropdownTitle)
+            dropdownTitle = cloptions.dropdownTitle.value
         }
-        if CLOptionPresent(OptionName: CLOptions.dropdownDefault) && CLOptionText(OptionName: CLOptions.dropdownValues).contains(CLOptionText(OptionName: CLOptions.dropdownDefault)) {
+        if cloptions.dropdownDefault.present && cloptions.dropdownValues.value.contains(cloptions.dropdownDefault.value) {
             appvars.selectedOption = selectedOption
             appvars.selectedIndex = dropdownValues.firstIndex {$0 == selectedOption} ?? -1
             //appvars.selectedIndex += 1

@@ -10,7 +10,7 @@ import SwiftUI
 
 struct TitleView: View {
     
-    var TitleViewOption: String = CLOptionText(OptionName: CLOptions.titleOption, DefaultValue: appvars.titleDefault)
+    var TitleViewOption: String = cloptions.titleOption.value// CLOptionText(OptionName: cloptions.titleOption, DefaultValue: appvars.titleDefault)
 
     var body: some View {
         Text(TitleViewOption)

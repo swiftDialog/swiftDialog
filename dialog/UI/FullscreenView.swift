@@ -23,8 +23,8 @@ extension Color {
 
 struct FullscreenView: View {
         
-    var TitleViewOption: String = CLOptionText(OptionName: CLOptions.titleOption, DefaultValue: appvars.titleDefault)
-    var messageContentOption: String = CLOptionText(OptionName: CLOptions.messageOption, DefaultValue: appvars.messageDefault)
+    var TitleViewOption: String = cloptions.titleOption.value // CLOptionText(OptionName: cloptions.titleOption, DefaultValue: appvars.titleDefault)
+    var messageContentOption: String = cloptions.messageOption.value // CLOptionText(OptionName: cloptions.messageOption, DefaultValue: appvars.messageDefault)
     
     let displayDetails:CGRect = NSScreen.main!.frame
     var windowHeight:CGFloat = 0
@@ -41,7 +41,7 @@ struct FullscreenView: View {
     var minScreenHeightToDisplayBanner:CGFloat = 1000
     var messageTextLineSpacing:CGFloat = 20
     
-    var BannerImageOption: String = CLOptionText(OptionName: CLOptions.bannerImage)
+    var BannerImageOption: String = cloptions.bannerImage.value // CLOptionText(OptionName: cloptions.bannerImage)
     
     var useDefaultStyle = true
     var style: MarkdownStyle {
@@ -103,7 +103,7 @@ struct FullscreenView: View {
         
         VStack{
             // banner image vstack
-            if CLOptionPresent(OptionName: CLOptions.bannerImage) {
+            if cloptions.bannerImage.present {
                 Image(nsImage: getImageFromPath(fileImagePath: BannerImageOption))
                     .resizable()
                     .clipShape(RoundedRectangle(cornerRadius: 15))
@@ -135,19 +135,19 @@ struct FullscreenView: View {
             
             // icon and message vstack group
             VStack {
-                if CLOptionPresent(OptionName: CLOptions.mainImage) {
+                if cloptions.mainImage.present {
                     // print image and caption
-                    ImageView(imagePath: CLOptionText(OptionName: CLOptions.mainImage), caption: "")
+                    ImageView(imagePath: cloptions.mainImage.value, caption: "")
                         .frame(maxHeight: windowHeight/1.3)
-                    if CLOptionPresent(OptionName: CLOptions.mainImageCaption) {
-                        Text(CLOptionText(OptionName: CLOptions.mainImageCaption))
+                    if cloptions.mainImageCaption.present {
+                        Text(cloptions.mainImageCaption.value)
                             .font(.system(size: messageContentFontSize))
                             .foregroundColor(.white)
                     }
                 } else {
                     // icon vstack
                     VStack {
-                        if CLOptionPresent(OptionName: CLOptions.iconOption) {
+                        if cloptions.iconOption.present {
                             IconView()
                         } else {
                             VStack{}.padding(emptyStackPadding)
