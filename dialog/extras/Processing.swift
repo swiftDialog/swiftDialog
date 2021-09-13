@@ -89,7 +89,7 @@ func shell(_ command: String) -> String {
 }
 
 func buttonAction(action: String, exitCode: Int32, executeShell: Bool) {
-    //let action: String = CLOptionText(OptionName: CLOptions.button1ActionOption, DefaultValue: "")
+    //let action: String = CLOptionText(OptionName: cloptions.button1ActionOption, DefaultValue: "")
     
     if (action != "") {
         if executeShell {
@@ -148,7 +148,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "") {
         if appvars.selectedIndex > 0 {
             outputArray.append("\"SelectedIndex\" : \(appvars.selectedIndex)")
         }
-        if CLOptionPresent(OptionName: CLOptions.textField) {
+        if cloptions.textField.present {
             for i in 0..<appvars.textOptionsArray.count {
                 outputArray.append("\"\(appvars.textOptionsArray[i])\" : \"\(appvars.textFieldText[i])\"")
             }

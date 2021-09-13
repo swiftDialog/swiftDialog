@@ -15,30 +15,40 @@ var iconVisible: Bool = true
 // declare our app var in case we want to update values - e.g. future use, multiple dialog sizes
 var appvars = AppVariables()
 
+var cloptions = CLOptions()
+
 var helpText = """
     Dialog version \(getVersionString()) ©2021 Bart Reardon
 
     OPTIONS:
-        -\(CLOptions.titleOption.short), --\(CLOptions.titleOption.long) <text>
+        -\(cloptions.titleOption.short), --\(cloptions.titleOption.long) <text>
                     Set the Dialog title
                     Text over 40 characters gets truncated
                     Default Title is "\(appvars.titleDefault)"
         
-        -\(CLOptions.messageOption.short), --\(CLOptions.messageOption.long) <text>
+        -\(cloptions.messageOption.short), --\(cloptions.messageOption.long) <text>
                     Set the dialog message
                     Messages can be plain text or can include Markdown
                     Markdown follows the CommonMark Spec https://spec.commonmark.org/current/
                     The message can be of any length. If it is larger than the viewable area
                     The message contents will be presented in  scrolable area.
     
-        -\(CLOptions.mainImage.short), --\(CLOptions.mainImage.long)  <file> | <url>
+        --\(cloptions.messageAlignment.long) <text>
+                    Set the message alignment.
+                    Supported options are:
+                        left
+                        centre|center
+                        right
+                    Default is 'left'
+        
+        -\(cloptions.mainImage.short), --\(cloptions.mainImage.long)  <file> | <url>
                     Display an image instead of a message.
                     Images will be resized to fit the available display area
     
-                    --\(CLOptions.mainImageCaption.long) <text>
+                    --\(cloptions.mainImageCaption.long) <text>
                         Text that will appear underneath the displayed image.
         
-        -\(CLOptions.iconOption.short), --\(CLOptions.iconOption.long) <file> | <url>
+        -\(cloptions.iconOption.short), --\(cloptions.iconOption.long) <file> | <url>
                     Set the icon to display
                     Acceptable Values:
                     file path to png or jpg           -  "/file/path/image.[png|jpg]"
@@ -50,7 +60,7 @@ var helpText = """
                     if not specified, default icon will be used
                     Images from either file or URL are displayed as roundrect if no transparancy
         
-        -\(CLOptions.overlayIconOption.short), --\(CLOptions.overlayIconOption.long) <file> | <url>
+        -\(cloptions.overlayIconOption.short), --\(cloptions.overlayIconOption.long) <file> | <url>
                     Set an image to display as an overlay to --icon
                     image is displayed at 1/2 resolution to the main image and positioned to the bottom right
                     Acceptable Values:
@@ -85,73 +95,73 @@ var helpText = """
                     weight=<text>                     - accepts any of the following values:
                                                        thin (default), light, regular, medium, heavy, bold
         
-        -\(CLOptions.fullScreenWindow.short), --\(CLOptions.fullScreenWindow.long)
+        -\(cloptions.fullScreenWindow.short), --\(cloptions.fullScreenWindow.long)
                     Uses full screen view.
                     In this view, only banner, title, icon and message are visible.
 
-        -\(CLOptions.hideIcon.short), --\(CLOptions.hideIcon.long)
+        -\(cloptions.hideIcon.short), --\(cloptions.hideIcon.long)
                     Hides the icon from view
                     Doing so increases the space available for message text to approximately 100 words
 
-        -\(CLOptions.bannerImage.short), --\(CLOptions.bannerImage.long) <file> | <url>
+        -\(cloptions.bannerImage.short), --\(cloptions.bannerImage.long) <file> | <url>
                     Shows a banner image at the top of the dialog
                     Banners images fill the entire top width of the window and are resized to fill, positioned from
                     the top left corner of the image.
-                    Specifying this option will imply --\(CLOptions.hideIcon.long)
+                    Specifying this option will imply --\(cloptions.hideIcon.long)
                     Recommended Banner Image size is 850x150.
 
-        --\(CLOptions.button1TextOption.long) <text>
+        --\(cloptions.button1TextOption.long) <text>
                     Set the label for Button1
                     Default label is "\(appvars.button1Default)"
                     Bound to <Enter> key
 
-        --\(CLOptions.button1ActionOption.long) <url>
+        --\(cloptions.button1ActionOption.long) <url>
                     Set the action to take.
                     Accepts URL
                     Default action if not specified is no action
                     Return code when actioned is 0
     
-        --\(CLOptions.button1ShellActionOption.long) <command>
+        --\(cloptions.button1ShellActionOption.long) <command>
                     << EXPERIMENTAL >>
                     Runs the specified shell command using zsh
                     Command input and output is not sanitised or checked.
                     If your command fails, Dialog still exits 0
 
-        -\(CLOptions.button2Option.short), --\(CLOptions.button2Option.long)
+        -\(cloptions.button2Option.short), --\(cloptions.button2Option.long)
                     Displays button2 with default label of "\(appvars.button2Default)"
             OR
 
-        --\(CLOptions.button2TextOption.long) <text>
+        --\(cloptions.button2TextOption.long) <text>
                     Set the label for Button1
                     Bound to <ESC> key
 
-        --\(CLOptions.button2ActionOption.long) <url>
+        --\(cloptions.button2ActionOption.long) <url>
                     Return code when actioned is 2
                     -- Setting Custon Actions For Button 2 Is Not Implemented at this time --
 
-        -\(CLOptions.infoButtonOption.short), --\(CLOptions.infoButtonOption.long)
+        -\(cloptions.infoButtonOption.short), --\(cloptions.infoButtonOption.long)
                     Displays info button with default label of "\(appvars.buttonInfoDefault)"
             
             OR
 
-        --\(CLOptions.buttonInfoTextOption.long) <text>
+        --\(cloptions.buttonInfoTextOption.long) <text>
                     Set the label for Information Button
                     If not specified, Info button will not be displayed
                     Return code when actioned is 3
 
-        --\(CLOptions.buttonInfoActionOption.long)  <url>
+        --\(cloptions.buttonInfoActionOption.long)  <url>
                     Set the action to take.
                     Accepts URL
                     Default action if not specified is no action
     
-        --\(CLOptions.dropdownTitle.long) <text>
+        --\(cloptions.dropdownTitle.long) <text>
                     Title for dropdown selection
     
-        --\(CLOptions.dropdownValues.long) <text><csv>
+        --\(cloptions.dropdownValues.long) <text><csv>
                     List of values to be displayed in the dropdown, specivied in CSV format
                     e.g. "Option 1,Option 2,Option 3"
     
-        --\(CLOptions.dropdownDefault.long) <text>
+        --\(cloptions.dropdownDefault.long) <text>
                     Default option to be selected (must match one of the items in the list)
     
                     If specified, the selected option will be sent to stdout in two forms:
@@ -164,14 +174,14 @@ var helpText = """
     
                     Output of select items is only shown if Dialog's exit code is 0
     
-        --\(CLOptions.textField.long) <text>
+        --\(cloptions.textField.long) <text>
                     Present a textfield with the specified label
                     When Dialog exits the contents of the textfield will be presented as <text> : <user_input>
-                    in plain or as json using [-\(CLOptions.jsonOutPut.short), --\(CLOptions.jsonOutPut.long)] option
+                    in plain or as json using [-\(cloptions.jsonOutPut.short), --\(cloptions.jsonOutPut.long)] option
                     Multiple textfields can be specified (up to 8).
     
     
-        --\(CLOptions.titleFont.long) <text>
+        --\(cloptions.titleFont.long) <text>
                     Lets you modify the title text of the dialog.
     
                     Can accept up to three parameters, in a comma seperated list, to modify font properties. 
@@ -193,58 +203,72 @@ var helpText = """
     
                     Example: \"colour=#00A4C7,weight=light,size=60\"
     
-        --\(CLOptions.windowWidth.long) <number>
+        --\(cloptions.windowWidth.long) <number>
                     Sets the width of the dialog window to the specified width in points
     
-        --\(CLOptions.windowHeight.long) <number>
+        --\(cloptions.windowHeight.long) <number>
                     Sets the height of the dialog window to the specified height in points
     
-        --\(CLOptions.timerBar.long) (<seconds>)
+        --\(cloptions.timerBar.long) (<seconds>)
                     Replaces default button with a timer countdown after which dialog will close with exit code 4
                     Default timer value is 10 seconds
                     Optional value <seconds> can be specified to the desired value
     
-                    If used in conjuction with --\(CLOptions.button1TextOption.long) the default button
+                    If used in conjuction with --\(cloptions.button1TextOption.long) the default button
                     will be displayed but will be disabled for the first 3 seconds of the timer, after which it
                     becomes active and can be used to dismiss dialog with the standard button 1 exit code of 0
     
-        -\(CLOptions.lockWindow.short), --\(CLOptions.lockWindow.long)
+        -\(cloptions.lockWindow.short), --\(cloptions.lockWindow.long)
                     Let window me moved around the screen. Default is not moveable
 
-        -\(CLOptions.forceOnTop.short), --\(CLOptions.forceOnTop.long)
+        -\(cloptions.forceOnTop.short), --\(cloptions.forceOnTop.long)
                     Make the window appear above all other windows even when not active
 
-        -\(CLOptions.bigWindow.short), --\(CLOptions.bigWindow.long)
+        -\(cloptions.bigWindow.short), --\(cloptions.bigWindow.long)
                     Makes the dialog 25% bigger than normal. More room for message text
 
-        -\(CLOptions.smallWindow.short), --\(CLOptions.smallWindow.long)
+        -\(cloptions.smallWindow.short), --\(cloptions.smallWindow.long)
                     Makes the dialog 25% smaller. Less room for message text.
     
-        -\(CLOptions.jsonOutPut.short), --\(CLOptions.jsonOutPut.long)
+        -\(cloptions.jsonOutPut.short), --\(cloptions.jsonOutPut.long)
                     Outputs any results in json format for easier processing
                     (for dropdown item selections and textfield responses)
 
-        -\(CLOptions.ignoreDND.short), --\(CLOptions.ignoreDND.long)
+        -\(cloptions.ignoreDND.short), --\(cloptions.ignoreDND.long)
                     Will ignore user Do Not Disturb setting
                         (only works in macOS 11)
     
-        -\(CLOptions.getVersion.short), --\(CLOptions.getVersion.long)
+        -\(cloptions.jamfHelperMode.short), --\(cloptions.jamfHelperMode.long)
+                    Switches all command line options to accept jamfHelper style options
+                    Useful for using as a drop in replacement for jamfHelper in existing scripts
+                        replace "/path/to/jamfHelper" with \"/path/to/dialog -\(cloptions.jamfHelperMode.short)\"
+                    Does not (yet) support the following:
+                        -windowType hud
+                        -showDelayOptions
+                        -alignDescription, -alignHeading, -alignCountdown
+                        -iconSize
+                    Dialog will do its best to display jamfHelper content in a dialog-esque way.
+                    Any unsupported display options will be ignored.
+                        
+        -\(cloptions.getVersion.short), --\(cloptions.getVersion.long)
                     Prints the app version
 
-        -\(CLOptions.showLicense.short), --\(CLOptions.showLicense.long)
+        -\(cloptions.showLicense.short), --\(cloptions.showLicense.long)
                     Display the Software License Agreement for Dialog
 
-        --\(CLOptions.helpOption.long)
+        --\(cloptions.helpOption.long)
                     Prints this text
     """
 
 struct AppVariables {
 
-    var cliversion                      = String("1.6.0")
+    var cliversion                      = String("1.7.0")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
     var messageDefault                  = String("\nThis is important message content\n\nPlease read")
+    var messageAlignment : TextAlignment = .leading
+    var messageAlignmentTextRepresentation = String("left")
     
     // button default strings
     // work out how to define a default width button that does what you tell it to. in the meantime, diry hack with spaces
@@ -260,6 +284,9 @@ struct AppVariables {
     // Window Sizes
     var windowWidth                     = CGFloat(820)      // set default dialog width
     var windowHeight                    = CGFloat(380)      // set default dialog height
+    
+    var windowPositionVertical          = NSWindow.Position.Vertical.center
+    var windowPositionHorozontal        = NSWindow.Position.Horizontal.center
  
     var imageWidth                      = CGFloat(170)      // set default image area width
     var imageHeight                     = CGFloat(260)      // set default image area height
@@ -321,54 +348,56 @@ struct AppVariables {
     var debugBorderColour               = Color.clear
 }
 
-
 struct CLOptions {
     // command line options that take string parameters
-    static let titleOption              = (long: String("title"),             short: String("t"))  // -t
-    static let messageOption            = (long: String("message"),           short: String("m"))  // -m
-    static let iconOption               = (long: String("icon"),              short: String("i"))  // -i
-    static let overlayIconOption        = (long: String("overlayicon"),       short: String("y"))  // -y
-    static let bannerImage              = (long: String("bannerimage"),       short: String("n"))  // -n
-    static let button1TextOption        = (long: String("button1text"),       short: String(""))
-    static let button1ActionOption      = (long: String("button1action"),     short: String(""))
-    static let button1ShellActionOption = (long: String("button1shellaction"),short: String(""))
-    static let button2TextOption        = (long: String("button2text"),       short: String(""))
-    static let button2ActionOption      = (long: String("button2action"),     short: String(""))
-    static let buttonInfoTextOption     = (long: String("infobuttontext"),    short: String(""))
-    static let buttonInfoActionOption   = (long: String("infobuttonaction"),  short: String(""))
-    static let dropdownTitle            = (long: String("selecttitle"),       short: String(""))
-    static let dropdownValues           = (long: String("selectvalues"),      short: String(""))
-    static let dropdownDefault          = (long: String("selectdefault"),     short: String(""))
-    static let titleFont                = (long: String("titlefont"),         short: String(""))
-    static let textField                = (long: String("textfield"),         short: String(""))
-    static let timerBar                 = (long: String("timer"),             short: String(""))
-    static let mainImage                = (long: String("image"),             short: String("g"))
-    static let mainImageCaption         = (long: String("imagecaption"),      short: String(""))
-    static let windowWidth              = (long: String("width"),             short: String(""))
-    static let windowHeight             = (long: String("height"),            short: String(""))
-    static let debug                    = (long: String("debug"),             short: String(""))
+    var titleOption              = (long: String("title"),             short: String("t"),   value : String(""), present : Bool(false))  // -t
+    var messageOption            = (long: String("message"),           short: String("m"),   value : String(""), present : Bool(false))  // -m
+    var messageAlignment         = (long: String("alignment"),         short: String(""),    value : String(""), present : Bool(false))
+    var iconOption               = (long: String("icon"),              short: String("i"),   value : String(""), present : Bool(false))  // -i
+    var overlayIconOption        = (long: String("overlayicon"),       short: String("y"),   value : String(""), present : Bool(false))  // -y
+    var bannerImage              = (long: String("bannerimage"),       short: String("n"),   value : String(""), present : Bool(false))  // -n
+    var button1TextOption        = (long: String("button1text"),       short: String(""),    value : String(""), present : Bool(false))
+    var button1ActionOption      = (long: String("button1action"),     short: String(""),    value : String(""), present : Bool(false))
+    var button1ShellActionOption = (long: String("button1shellaction"),short: String(""),    value : String(""), present : Bool(false))
+    var button2TextOption        = (long: String("button2text"),       short: String(""),    value : String(""), present : Bool(false))
+    var button2ActionOption      = (long: String("button2action"),     short: String(""),    value : String(""), present : Bool(false))
+    var buttonInfoTextOption     = (long: String("infobuttontext"),    short: String(""),    value : String(""), present : Bool(false))
+    var buttonInfoActionOption   = (long: String("infobuttonaction"),  short: String(""),    value : String(""), present : Bool(false))
+    var dropdownTitle            = (long: String("selecttitle"),       short: String(""),    value : String(""), present : Bool(false))
+    var dropdownValues           = (long: String("selectvalues"),      short: String(""),    value : String(""), present : Bool(false))
+    var dropdownDefault          = (long: String("selectdefault"),     short: String(""),    value : String(""), present : Bool(false))
+    var titleFont                = (long: String("titlefont"),         short: String(""),    value : String(""), present : Bool(false))
+    var textField                = (long: String("textfield"),         short: String(""),    value : String(""), present : Bool(false))
+    var timerBar                 = (long: String("timer"),             short: String(""),    value : String(""), present : Bool(false))
+    var mainImage                = (long: String("image"),             short: String("g"),   value : String(""), present : Bool(false))
+    var mainImageCaption         = (long: String("imagecaption"),      short: String(""),    value : String(""), present : Bool(false))
+    var windowWidth              = (long: String("width"),             short: String(""),    value : String(""), present : Bool(false))
+    var windowHeight             = (long: String("height"),            short: String(""),    value : String(""), present : Bool(false))
+    var debug                    = (long: String("debug"),             short: String(""),    value : String(""), present : Bool(false))
 
    
     // command line options that take no additional parameters
-    static let button2Option            = (long: String("button2"),           short: String("2")) // -2
-    static let infoButtonOption         = (long: String("infobutton"),        short: String("3")) // -3
-    static let getVersion               = (long: String("version"),           short: String("v")) // -v
-    static let hideIcon                 = (long: String("hideicon"),          short: String("h")) // -h
-    static let helpOption               = (long: String("help"),              short: String(""))
-    static let demoOption               = (long: String("demo"),              short: String(""))
-    static let buyCoffee                = (long: String("coffee"),            short: String("☕️"))
-    static let showLicense              = (long: String("showlicense"),       short: String("l")) // -l
-    static let warningIcon              = (long: String("warningicon"),       short: String("")) // Deprecated
-    static let infoIcon                 = (long: String("infoicon"),          short: String("")) // Deprecated
-    static let cautionIcon              = (long: String("cautionicon"),       short: String("")) // Deprecated
+    var button2Option            = (long: String("button2"),           short: String("2"),   value : String(""), present : Bool(false)) // -2
+    var infoButtonOption         = (long: String("infobutton"),        short: String("3"),   value : String(""), present : Bool(false)) // -3
+    var getVersion               = (long: String("version"),           short: String("v"),   value : String(""), present : Bool(false)) // -v
+    var hideIcon                 = (long: String("hideicon"),          short: String("h"),   value : String(""), present : Bool(false)) // -h
+    var helpOption               = (long: String("help"),              short: String(""),    value : String(""), present : Bool(false))
+    var demoOption               = (long: String("demo"),              short: String(""),    value : String(""), present : Bool(false))
+    var buyCoffee                = (long: String("coffee"),            short: String("☕️"),  value : String(""), present : Bool(false))
+    var showLicense              = (long: String("showlicense"),       short: String("l"),   value : String(""), present : Bool(false)) // -l
+    var warningIcon              = (long: String("warningicon"),       short: String(""),    value : String(""), present : Bool(false)) // Deprecated
+    var infoIcon                 = (long: String("infoicon"),          short: String(""),    value : String(""), present : Bool(false)) // Deprecated
+    var cautionIcon              = (long: String("cautionicon"),       short: String(""),    value : String(""), present : Bool(false)) // Deprecated
     
-    static let lockWindow               = (long: String("moveable"),          short: String("o")) // -o
-    static let forceOnTop               = (long: String("ontop"),             short: String("p")) // -p
-    static let smallWindow              = (long: String("small"),             short: String("s")) // -s
-    static let bigWindow                = (long: String("big"),               short: String("b")) // -b
-    static let fullScreenWindow         = (long: String("fullscreen"),        short: String("f")) // -f
+    var lockWindow               = (long: String("moveable"),          short: String("o"),   value : String(""), present : Bool(false)) // -o
+    var forceOnTop               = (long: String("ontop"),             short: String("p"),   value : String(""), present : Bool(false)) // -p
+    var smallWindow              = (long: String("small"),             short: String("s"),   value : String(""), present : Bool(false)) // -s
+    var bigWindow                = (long: String("big"),               short: String("b"),   value : String(""), present : Bool(false)) // -b
+    var fullScreenWindow         = (long: String("fullscreen"),        short: String("f"),   value : String(""), present : Bool(false)) // -f
     
-    static let jsonOutPut               = (long: String("json"),              short: String("j")) // -j
-    static let ignoreDND                = (long: String("ignorednd"),         short: String("d")) // -j
+    var jsonOutPut               = (long: String("json"),              short: String("j"),   value : String(""), present : Bool(false)) // -j
+    var ignoreDND                = (long: String("ignorednd"),         short: String("d"),   value : String(""), present : Bool(false)) // -j
     // civhmtsb
+    
+    var jamfHelperMode           = (long: String("jh"),                short: String("jh"),  value : String(""), present : Bool(false))
 }

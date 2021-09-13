@@ -23,8 +23,8 @@ extension Color {
 
 struct FullscreenView: View {
         
-    var TitleViewOption: String = CLOptionText(OptionName: CLOptions.titleOption, DefaultValue: appvars.titleDefault)
-    let messageContentOption: String = CLOptionText(OptionName: CLOptions.messageOption, DefaultValue: appvars.messageDefault)
+    var TitleViewOption: String = cloptions.titleOption.value // CLOptionText(OptionName: cloptions.titleOption, DefaultValue: appvars.titleDefault)
+    var messageContentOption: String = cloptions.messageOption.value // CLOptionText(OptionName: cloptions.messageOption, DefaultValue: appvars.messageDefault)
     
     let displayDetails:CGRect = NSScreen.main!.frame
     var windowHeight:CGFloat = 0
@@ -41,7 +41,7 @@ struct FullscreenView: View {
     var minScreenHeightToDisplayBanner:CGFloat = 1000
     var messageTextLineSpacing:CGFloat = 20
     
-    var BannerImageOption: String = CLOptionText(OptionName: CLOptions.bannerImage)
+    var BannerImageOption: String = cloptions.bannerImage.value // CLOptionText(OptionName: cloptions.bannerImage)
     
     var useDefaultStyle = true
     var style: MarkdownStyle {
@@ -78,9 +78,8 @@ struct FullscreenView: View {
                 
         if appvars.titleFontColour == Color.primary {
             appvars.titleFontColour = Color.white
-            
         }
-                
+        
     }
             
     public func showFullScreen() {
@@ -104,7 +103,7 @@ struct FullscreenView: View {
         
         VStack{
             // banner image vstack
-            if CLOptionPresent(OptionName: CLOptions.bannerImage) {
+            if cloptions.bannerImage.present {
                 Image(nsImage: getImageFromPath(fileImagePath: BannerImageOption))
                     .resizable()
                     .clipShape(RoundedRectangle(cornerRadius: 15))
@@ -136,33 +135,42 @@ struct FullscreenView: View {
             
             // icon and message vstack group
             VStack {
-                // icon vstack
-                VStack {
-                    if CLOptionPresent(OptionName: CLOptions.iconOption) {
-                        IconView()
-                    } else {
-                        VStack{}.padding(emptyStackPadding)
+                if cloptions.mainImage.present {
+                    // print image and caption
+                    ImageView(imagePath: cloptions.mainImage.value, caption: "")
+                        .frame(maxHeight: windowHeight/1.3)
+                    if cloptions.mainImageCaption.present {
+                        Text(cloptions.mainImageCaption.value)
+                            .font(.system(size: messageContentFontSize))
+                            .foregroundColor(.white)
                     }
-                }
-                .padding(40)
-                .border(appvars.debugBorderColour, width: 2)
-
+                } else {
+                    // icon vstack
+                    VStack {
+                        if cloptions.iconOption.present {
+                            IconView()
+                        } else {
+                            VStack{}.padding(emptyStackPadding)
+                        }
+                    }
+                    .padding(40)
+                    .border(appvars.debugBorderColour, width: 2)
                 
-                // message vstack
-                VStack() {
-
-                    Text(messageContentOption)
-                        .font(.system(size: messageContentFontSize))
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(12)
-                        .lineSpacing(messageTextLineSpacing)
-                        .border(appvars.debugBorderColour, width: 2)
                     
-                        
+                    // message vstack
+                    VStack() {
+                        Text(messageContentOption)
+                            .font(.system(size: messageContentFontSize))
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                            .lineLimit(12)
+                            .lineSpacing(messageTextLineSpacing)
+                            .border(appvars.debugBorderColour, width: 2)
+                    }
+                    .padding(10)
+                    .frame(maxHeight: .infinity, alignment: .center) // setting to .infinity should make the message content take up the remainder of the screen
                 }
-                .padding(10)
-                .frame(maxHeight: .infinity, alignment: .center) // setting to .infinity should make the message content take up the remainder of the screen
+                
             }
             .padding(.horizontal, 20) // total padding for the icon/message group
             .padding(.vertical, 50)

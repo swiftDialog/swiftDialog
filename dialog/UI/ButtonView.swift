@@ -18,14 +18,14 @@ struct ButtonView: View {
     let timer = Timer.publish(every: 3.0, on: .main, in: .common).autoconnect() //trigger after 4 seconds
     
     init() {
-        if CLOptionPresent(OptionName: CLOptions.button1ShellActionOption) {
-            button1action = CLOptionText(OptionName: CLOptions.button1ShellActionOption)
+        if cloptions.button1ShellActionOption.present {
+            button1action = cloptions.button1ShellActionOption.value
             buttonShellAction = true
-        } else if CLOptionPresent(OptionName: CLOptions.button1ActionOption) {
-            button1action = CLOptionText(OptionName: CLOptions.button1ActionOption)
+        } else if cloptions.button1ActionOption.present {
+            button1action = cloptions.button1ActionOption.value
         }
         
-        if CLOptionPresent(OptionName: CLOptions.timerBar) {
+        if cloptions.timerBar.present {
             self._button1disabled = State(initialValue: true)
         }
     }
@@ -33,15 +33,15 @@ struct ButtonView: View {
     var body: some View {
         //secondary button
         HStack {
-            if CLOptionPresent(OptionName: CLOptions.button2Option){
+            if cloptions.button2Option.present {
                 Button(action: {quitDialog(exitCode: 2)}, label: {
                     Text(appvars.button2Default)
                         .frame(minWidth: 40, alignment: .center)
                     }
                 )
                 .keyboardShortcut(.cancelAction)
-            } else if CLOptionPresent(OptionName: CLOptions.button2TextOption) {
-                let button2Text: String = CLOptionText(OptionName: CLOptions.button2TextOption, DefaultValue: appvars.button2Default)
+            } else if cloptions.button2TextOption.present {
+                let button2Text: String = cloptions.button2TextOption.value
                 Button(action: {quitDialog(exitCode: 2)}, label: {
                     Text(button2Text)
                         .frame(minWidth: 40, alignment: .center)
@@ -51,7 +51,7 @@ struct ButtonView: View {
             }
         }
         // default button aka button 1
-        let button1Text: String = CLOptionText(OptionName: CLOptions.button1TextOption, DefaultValue: appvars.button1Default)
+        let button1Text: String = cloptions.button1TextOption.value // CLOptionText(OptionName: cloptions.button1TextOption, DefaultValue: appvars.button1Default)
         //HStack {
             Button(action: {buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction)}, label: {
                 Text(button1Text)
@@ -68,21 +68,20 @@ struct ButtonView: View {
 }
 
 struct MoreInfoButton: View {
-    let buttonInfoAction: String = CLOptionText(OptionName: CLOptions.buttonInfoActionOption, DefaultValue: appvars.buttonInfoActionDefault)
+    let buttonInfoAction: String = cloptions.buttonInfoActionOption.value // CLOptionText(OptionName: cloptions.buttonInfoActionOption, DefaultValue: appvars.buttonInfoActionDefault)
     
     var body: some View {
         HStack() {
             
-            if CLOptionPresent(OptionName: CLOptions.infoButtonOption) {
+            if cloptions.infoButtonOption.present {
                 Button(action: {buttonAction(action: buttonInfoAction, exitCode: 3, executeShell: false)}, label: {
-                    Text(appvars.buttonInfoDefault)
+                    Text(cloptions.infoButtonOption.value)
                         .frame(minWidth: 40, alignment: .center)
                     }
                 )
-            } else if CLOptionPresent(OptionName: CLOptions.buttonInfoTextOption) {
-                let buttonInfoText: String = CLOptionText(OptionName: CLOptions.buttonInfoTextOption, DefaultValue: appvars.buttonInfoDefault)
+            } else if cloptions.buttonInfoTextOption.present {
                 Button(action: {buttonAction(action: buttonInfoAction, exitCode: 3, executeShell: false)}, label: {
-                    Text(buttonInfoText)
+                    Text(cloptions.buttonInfoTextOption.value)
                         .frame(minWidth: 40, alignment: .center)
                     }
                 )

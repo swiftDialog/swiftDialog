@@ -11,13 +11,13 @@ struct TextEntryView: View {
     
     @State var textFieldValue = Array(repeating: "", count: 8)
     //@State var textFieldValue = ""
-    //var textFieldLabel = CLOptionText(OptionName: CLOptions.textField)
+    //var textFieldLabel = CLOptionText(OptionName: cloptions.textField)
     let textFieldLabels = appvars.textOptionsArray
     var textFieldPresent: Bool = false
     
     
     init() {
-        if CLOptionPresent(OptionName: CLOptions.textField) {
+        if cloptions.textField.present {
             textFieldPresent = true
             for _ in textFieldLabels {
                 textFieldValue.append(" ")

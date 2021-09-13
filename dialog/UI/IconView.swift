@@ -12,7 +12,7 @@ import SwiftUI
 struct IconView: View {
     @Environment(\.colorScheme) var colorScheme
     
-    var messageUserImagePath: String = CLOptionText(OptionName: CLOptions.iconOption, DefaultValue: "default")
+    var messageUserImagePath: String = cloptions.iconOption.value // CLOptionText(OptionName: cloptions.iconOption, DefaultValue: "default")
     var logoWidth: CGFloat = appvars.imageWidth
     var logoHeight: CGFloat  = appvars.imageHeight
     var imgFromURL: Bool = false
@@ -44,13 +44,13 @@ struct IconView: View {
         logoWidth = appvars.imageWidth
         logoHeight = appvars.imageHeight
         
-        if CLOptionPresent(OptionName: CLOptions.overlayIconOption) {
+        if cloptions.overlayIconOption.present {
             mainImageScale = mainImageWithOverlayScale
         }
         
         // fullscreen runs on a dark background so invert the default icon colour for info and default
         // also set the icon offset to 0
-        if CLOptionPresent(OptionName: CLOptions.fullScreenWindow) {
+        if cloptions.fullScreenWindow.present {
             // fullscreen background is dark, so we want to use white as the default colour
             builtInIconColour = Color.white
         }
@@ -105,16 +105,16 @@ struct IconView: View {
             }
         }
         
-        if CLOptionPresent(OptionName: CLOptions.warningIcon) || messageUserImagePath == "warning" {
+        if cloptions.warningIcon.present || messageUserImagePath == "warning" {
             builtInIconName = "exclamationmark.octagon.fill"
             builtInIconFill = "octagon.fill" //does not have multicolour sf symbol so we have to make out own using a fill layer
             builtInIconColour = Color.red
             iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
             builtInIconPresent = true
-        } else if CLOptionPresent(OptionName: CLOptions.cautionIcon) || messageUserImagePath == "caution" {
+        } else if cloptions.cautionIcon.present || messageUserImagePath == "caution" {
             builtInIconName = "exclamationmark.triangle.fill"  // yay multicolour sf symbol
             builtInIconPresent = true
-        } else if CLOptionPresent(OptionName: CLOptions.infoIcon) || messageUserImagePath == "info" {
+        } else if cloptions.infoIcon.present || messageUserImagePath == "info" {
             builtInIconName = "person.fill.questionmark"
             builtInIconPresent = true
         } else if messageUserImagePath == "default" {
