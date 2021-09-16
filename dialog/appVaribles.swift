@@ -262,7 +262,7 @@ var helpText = """
 
 struct AppVariables {
 
-    var cliversion                      = String("1.7.1")
+    var cliversion                      = String("1.7.2")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
@@ -373,6 +373,10 @@ struct CLOptions {
     var mainImageCaption         = (long: String("imagecaption"),      short: String(""),    value : String(""), present : Bool(false))
     var windowWidth              = (long: String("width"),             short: String(""),    value : String(""), present : Bool(false))
     var windowHeight             = (long: String("height"),            short: String(""),    value : String(""), present : Bool(false))
+    var watermarkImage           = (long: String("background"),        short: String("bg"),  value : String(""), present : Bool(false)) // -bg
+    var watermarkAlpha           = (long: String("bgalpha"),           short: String("ba"),  value : String(""), present : Bool(false)) // -ba
+    var watermarkPosition        = (long: String("bgposition"),        short: String("bp"),  value : String(""), present : Bool(false)) // -bp
+    var watermarkFill            = (long: String("fill"),              short: String(""),    value : String(""), present : Bool(false))
     var debug                    = (long: String("debug"),             short: String(""),    value : String(""), present : Bool(false))
 
    

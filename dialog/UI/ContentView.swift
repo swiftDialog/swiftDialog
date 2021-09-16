@@ -24,16 +24,26 @@ struct ContentView: View {
             //adjust the position of the button bar by adding the banner height and ofsetting the default banner height of -10
             buttonYPos = (buttonYPos +  appvars.bannerHeight + 10)
         }
-        //print("Window Height = \(appvars.windowHeight): Window Width = \(appvars.windowWidth)")
+        if cloptions.watermarkFill.present {
+            waterMarkFill = "fill"
+        }
+        print("Window Height = \(appvars.windowHeight): Window Width = \(appvars.windowWidth)")
     }
     // puts the button bar jsut above the bottom row - 35 came from trial and error
     var buttonYPos = (appvars.windowHeight)
     
     //var bannerImagePresent = false
     var bannerAdjustment       = CGFloat(5)
+    var waterMarkFill          = String("fit")
         
     var body: some View {
         ZStack() {
+            if cloptions.watermarkImage.present {
+                VStack {
+                    watermarkView(imagePath: cloptions.watermarkImage.value, opacity: Double(cloptions.watermarkAlpha.value), position: cloptions.watermarkPosition.value, scale: waterMarkFill)
+                        
+                }
+            }
         // this stack controls the main view. Consists of a VStack containing all the content, and a HStack positioned at the bottom of the display area
             VStack {
                 if cloptions.bannerImage.present {
