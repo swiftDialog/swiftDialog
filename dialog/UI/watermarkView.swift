@@ -47,7 +47,7 @@ struct watermarkView: View {
     
     var body: some View {
         GeometryReader { geometry in
-            VStack {
+            ZStack {
                 if imageScaleFill == "fill" {
                     Image(nsImage: mainImage)
                         .resizable()

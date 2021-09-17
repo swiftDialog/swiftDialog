@@ -44,9 +44,6 @@ struct dialogApp: App {
         if cloptions.fullScreenWindow.present {
             FullscreenView().showFullScreen()
         }
-        
-        print("Width: \(appvars.windowWidth) Height \(appvars.windowHeight)")
-    
     }
     var body: some Scene {
 
