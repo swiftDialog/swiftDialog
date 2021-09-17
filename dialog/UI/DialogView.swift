@@ -12,9 +12,6 @@ import AppKit
 
 struct DialogView: View {
     
-    var imageOffsetX: CGFloat = -25
-    var imageOffsetY: CGFloat = 10
-    
     init() {
         if appvars.iconIsHidden {
             appvars.imageWidth = 0
@@ -22,19 +19,19 @@ struct DialogView: View {
     }
     
     var body: some View {
-        HStack(alignment: .top, spacing: nil) {
+        HStack { //}(alignment: .top, spacing: nil) {
             let iconFrameWidth: CGFloat = appvars.imageWidth
-            let iconFrameHeight: CGFloat = appvars.imageHeight
             HStack {
+                
                 if (!appvars.iconIsHidden) {
                     VStack {
-                            IconView()
-                            
-                    }.frame(width: iconFrameWidth, height: iconFrameHeight, alignment: .top)
-                    .border(appvars.debugBorderColour, width: 2)
-                    .offset(x: imageOffsetX, y: imageOffsetY) //position the icon area
-                    //.padding(10)
-                    //.border(Color.purple)
+                        IconView()
+                            .frame(width: iconFrameWidth, alignment: .top)
+                            .border(appvars.debugBorderColour, width: 2)
+                            .padding(.top, 20)
+                            .padding(.leading, 30)
+                        Spacer()
+                    }
                 }
                 
                 VStack(alignment: .center) {
@@ -43,8 +40,6 @@ struct DialogView: View {
                         .border(appvars.debugBorderColour, width: 2)
                 }
             }
-            //.border(Color.green)
-            
         }
     }
 }

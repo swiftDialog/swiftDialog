@@ -33,12 +33,8 @@ var helpText = """
                     The message can be of any length. If it is larger than the viewable area
                     The message contents will be presented in  scrolable area.
     
-        --\(cloptions.messageAlignment.long) <text>
+        --\(cloptions.messageAlignment.long) [left | centre | center | right]
                     Set the message alignment.
-                    Supported options are:
-                        left
-                        centre|center
-                        right
                     Default is 'left'
         
         -\(cloptions.mainImage.short), --\(cloptions.mainImage.long)  <file> | <url>
@@ -59,6 +55,8 @@ var helpText = """
 
                     if not specified, default icon will be used
                     Images from either file or URL are displayed as roundrect if no transparancy
+    
+                    "none" can also be specified to not display an icon but maintain layout (see also --\(cloptions.hideIcon.long))
         
         -\(cloptions.overlayIconOption.short), --\(cloptions.overlayIconOption.long) <file> | <url>
                     Set an image to display as an overlay to --icon
@@ -193,15 +191,28 @@ var helpText = """
     
                         size=<float>              - accepts any float value.
 
-                        weight=<text>             - accepts any of the following values:
-                            thin
-                            light
-                            regular
-                            medium
-                            heavy
-                            bold (default)
+                        weight=[thin | light | regular | medium | heavy | bold]
+                            default is bold
     
                     Example: \"colour=#00A4C7,weight=light,size=60\"
+        
+        -\(cloptions.watermarkImage.short), --\(cloptions.watermarkImage.long) <file>
+                    Displays the selected file as a background image.
+    
+        -\(cloptions.watermarkAlpha.short), --\(cloptions.watermarkAlpha.long) <number>
+                    Number between 0 and 1
+                    0 is fully transparant
+                    1 is fully opaque
+                    Default is 0.5
+                    
+        -\(cloptions.watermarkPosition.short), --\(cloptions.watermarkPosition.long) [topleft | left | bottomleft | top | center | bottom | topright | right | bottomright]
+                    Positions the background image in the window.
+                    Default is center
+    
+        -\(cloptions.watermarkFill.short), --\(cloptions.watermarkFill.long) [fill | fit]
+                    fill - resizes the image to fill the entire window. Image will be truncated if necessary
+                    fit  - resizes the image to fit the window but will not truncate
+                    Default is none which will display the image at its native resolution
     
         --\(cloptions.windowWidth.long) <number>
                     Sets the width of the dialog window to the specified width in points
@@ -262,7 +273,7 @@ var helpText = """
 
 struct AppVariables {
 
-    var cliversion                      = String("1.7.1")
+    var cliversion                      = String("1.7.2")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
@@ -292,7 +303,6 @@ struct AppVariables {
     var imageHeight                     = CGFloat(260)      // set default image area height
     var titleHeight                     = CGFloat(50)
     var bannerHeight                    = CGFloat(-10)
-    var bannerOffset                    = CGFloat(0)
     
     var smallWindow                     = Bool(false)
     var bigWindow                       = Bool(false)
@@ -305,7 +315,6 @@ struct AppVariables {
     var titleFontSize                   = CGFloat(30)
     var titleFontColour                 = Color.primary
     var titleFontWeight                 = Font.Weight.bold
-    //var titleFontFont                   = Font.TextStyle
     var overlayIconScale                = CGFloat(0.40)
     var overlayOffsetX                  = CGFloat(40)
     var overlayOffsetY                  = CGFloat(50)
@@ -320,7 +329,6 @@ struct AppVariables {
     
     var textOptionsArray                = [String]()
     var textFieldText                   = Array(repeating: "", count: 8)
-    //var textOptionsText                 = [String]()
     
     var annimationSmoothing             = Double(20)
     
@@ -335,14 +343,7 @@ struct AppVariables {
     var exit208                         = (code: Int32(208), message: String(""))
     var exit209                         = (code: Int32(209), message: String(""))
     var exit210                         = (code: Int32(210), message: String(""))
-    
-    // reserved for future experimentation
-    //static var iconVisible = true
-    //static var displayMoreInfo = true // testing
-    //static var textAllignment = "centre" //testing
-    //static var textAllignment = "top" //testing
-    //static var textAllignment = "left" //testing
-    
+        
     // debug flag
     var debugMode                       = Bool(false)
     var debugBorderColour               = Color.clear
@@ -373,9 +374,12 @@ struct CLOptions {
     var mainImageCaption         = (long: String("imagecaption"),      short: String(""),    value : String(""), present : Bool(false))
     var windowWidth              = (long: String("width"),             short: String(""),    value : String(""), present : Bool(false))
     var windowHeight             = (long: String("height"),            short: String(""),    value : String(""), present : Bool(false))
+    var watermarkImage           = (long: String("background"),        short: String("bg"),  value : String(""), present : Bool(false)) // -bg
+    var watermarkAlpha           = (long: String("bgalpha"),           short: String("ba"),  value : String(""), present : Bool(false)) // -ba
+    var watermarkPosition        = (long: String("bgposition"),        short: String("bp"),  value : String(""), present : Bool(false)) // -bp
+    var watermarkFill            = (long: String("bgfill"),            short: String("bf"),  value : String(""), present : Bool(false)) // -bf
     var debug                    = (long: String("debug"),             short: String(""),    value : String(""), present : Bool(false))
 
-   
     // command line options that take no additional parameters
     var button2Option            = (long: String("button2"),           short: String("2"),   value : String(""), present : Bool(false)) // -2
     var infoButtonOption         = (long: String("infobutton"),        short: String("3"),   value : String(""), present : Bool(false)) // -3

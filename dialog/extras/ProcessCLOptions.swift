@@ -92,10 +92,8 @@ func processCLOptions() {
         
     }
             
-    if cloptions.hideIcon.present {
+    if cloptions.hideIcon.present || cloptions.bannerImage.present {
         appvars.iconIsHidden = true
-    //} else {
-    //    iconVisible = true
     }
     
     if cloptions.lockWindow.present {
@@ -207,8 +205,19 @@ func processCLOptionValues() {
 
     cloptions.windowHeight.value            = CLOptionText(OptionName: cloptions.windowHeight)
     cloptions.windowHeight.present          = CLOptionPresent(OptionName: cloptions.windowHeight)
-
     
+    cloptions.watermarkImage.value          = CLOptionText(OptionName: cloptions.watermarkImage)
+    cloptions.watermarkImage.present        = CLOptionPresent(OptionName: cloptions.watermarkImage)
+    
+    cloptions.watermarkAlpha.value          = CLOptionText(OptionName: cloptions.watermarkAlpha)
+    cloptions.watermarkAlpha.present        = CLOptionPresent(OptionName: cloptions.watermarkAlpha)
+    
+    cloptions.watermarkPosition.value       = CLOptionText(OptionName: cloptions.watermarkPosition)
+    cloptions.watermarkPosition.present     = CLOptionPresent(OptionName: cloptions.watermarkPosition)
+    
+    cloptions.watermarkFill.value           = CLOptionText(OptionName: cloptions.watermarkFill)
+    cloptions.watermarkFill.present         = CLOptionPresent(OptionName: cloptions.watermarkFill)
+
     // anthing that is an option only with no value
     cloptions.button2Option.present         = CLOptionPresent(OptionName: cloptions.button2Option)
     cloptions.infoButtonOption.present      = CLOptionPresent(OptionName: cloptions.infoButtonOption)

@@ -16,5 +16,6 @@ struct TitleView: View {
         Text(TitleViewOption)
             .font(.system(size: appvars.titleFontSize, weight: appvars.titleFontWeight))
             .foregroundColor(appvars.titleFontColour)
+            .frame(width: appvars.windowWidth , height: appvars.titleHeight, alignment: .center)
     }
 }

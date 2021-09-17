@@ -51,31 +51,31 @@ struct ButtonView: View {
             }
         }
         // default button aka button 1
-        let button1Text: String = cloptions.button1TextOption.value // CLOptionText(OptionName: cloptions.button1TextOption, DefaultValue: appvars.button1Default)
-        //HStack {
-            Button(action: {buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction)}, label: {
-                Text(button1Text)
-                    .frame(minWidth: 40, alignment: .center)
-                }
-            )//.frame(minWidth: 36, alignment: .center)
-            .keyboardShortcut(.defaultAction)
-            .disabled(button1disabled)
-            .onReceive(timer) { _ in
-                button1disabled = false
+        let button1Text: String = cloptions.button1TextOption.value
+
+        Button(action: {buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction)}, label: {
+            Text(button1Text)
+                .frame(minWidth: 40, alignment: .center)
             }
-        //}
+        )
+        .keyboardShortcut(.defaultAction)
+        .disabled(button1disabled)
+        .onReceive(timer) { _ in
+            button1disabled = false
+        }
+
     }
 }
 
 struct MoreInfoButton: View {
-    let buttonInfoAction: String = cloptions.buttonInfoActionOption.value // CLOptionText(OptionName: cloptions.buttonInfoActionOption, DefaultValue: appvars.buttonInfoActionDefault)
+    let buttonInfoAction: String = cloptions.buttonInfoActionOption.value
     
     var body: some View {
         HStack() {
             
             if cloptions.infoButtonOption.present {
                 Button(action: {buttonAction(action: buttonInfoAction, exitCode: 3, executeShell: false)}, label: {
-                    Text(cloptions.infoButtonOption.value)
+                    Text(appvars.buttonInfoDefault)
                         .frame(minWidth: 40, alignment: .center)
                     }
                 )
