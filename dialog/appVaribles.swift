@@ -33,12 +33,8 @@ var helpText = """
                     The message can be of any length. If it is larger than the viewable area
                     The message contents will be presented in  scrolable area.
     
-        --\(cloptions.messageAlignment.long) <text>
+        --\(cloptions.messageAlignment.long) [left | centre | center | right]
                     Set the message alignment.
-                    Supported options are:
-                        left
-                        centre|center
-                        right
                     Default is 'left'
         
         -\(cloptions.mainImage.short), --\(cloptions.mainImage.long)  <file> | <url>
@@ -59,6 +55,8 @@ var helpText = """
 
                     if not specified, default icon will be used
                     Images from either file or URL are displayed as roundrect if no transparancy
+    
+                    "none" can also be specified to not display an icon but maintain layout (see also --\(cloptions.hideIcon.long))
         
         -\(cloptions.overlayIconOption.short), --\(cloptions.overlayIconOption.long) <file> | <url>
                     Set an image to display as an overlay to --icon
@@ -193,15 +191,28 @@ var helpText = """
     
                         size=<float>              - accepts any float value.
 
-                        weight=<text>             - accepts any of the following values:
-                            thin
-                            light
-                            regular
-                            medium
-                            heavy
-                            bold (default)
+                        weight=[thin | light | regular | medium | heavy | bold]
+                            default is bold
     
                     Example: \"colour=#00A4C7,weight=light,size=60\"
+        
+        -\(cloptions.watermarkImage.short), --\(cloptions.watermarkImage.long) <file>
+                    Displays the selected file as a background image.
+    
+        -\(cloptions.watermarkAlpha.short), --\(cloptions.watermarkAlpha.long) <number>
+                    Number between 0 and 1
+                    0 is fully transparant
+                    1 is fully opaque
+                    Default is 0.5
+                    
+        -\(cloptions.watermarkPosition.short), --\(cloptions.watermarkPosition.long) [topleft | left | bottomleft | top | center | bottom | topright | right | bottomright]
+                    Positions the background image in the window.
+                    Default is center
+    
+        -\(cloptions.watermarkFill.short), --\(cloptions.watermarkFill.long) [fill | fit]
+                    fill - resizes the image to fill the entire window. Image will be truncated if necessary
+                    fit  - resizes the image to fit the window but will not truncate
+                    Default is none which will display the image at its native resolution
     
         --\(cloptions.windowWidth.long) <number>
                     Sets the width of the dialog window to the specified width in points
