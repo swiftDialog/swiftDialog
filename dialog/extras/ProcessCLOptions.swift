@@ -2,7 +2,7 @@
 //  ProcessCLOptions.swift
 //  dialog
 //
-//  Created by Reardon, Bart (IM&T, Yarralumla) on 29/8/21.
+//  Created by Bart Reardon on 29/8/21.
 //
 
 import Foundation
@@ -135,14 +135,48 @@ func processCLOptionValues() {
         switch cloptions.messageAlignment.value {
         case "left":
             appvars.messageAlignment = .leading
-        case "centre":
-            appvars.messageAlignment = .center
-        case "center":
+        case "centre","center":
             appvars.messageAlignment = .center
         case "right":
             appvars.messageAlignment = .trailing
         default:
             appvars.messageAlignment = .leading
+        }
+    }
+    
+    // window location on screen
+    if CLOptionPresent(OptionName: cloptions.position) {
+        switch CLOptionText(OptionName: cloptions.position) {
+        case "topleft":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.top
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.left
+        case "topright":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.top
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.right
+        case "bottomleft":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.left
+        case "bottomright":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.right
+        case "left":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.center
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.left
+        case "right":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.center
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.right
+        case "top":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.top
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
+        case "bottom":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
+        case "centre","center":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.center
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
+        default:
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.center
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
         }
     }
 

@@ -2,7 +2,7 @@
 //  watermarkView.swift
 //  dialog
 //
-//  Created by Reardon, Bart (IM&T, Yarralumla) on 16/9/21.
+//  Created by Bart Reardon on 16/9/21.
 //
 
 import SwiftUI
