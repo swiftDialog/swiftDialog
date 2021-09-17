@@ -2,7 +2,7 @@
 //  helpText.swift
 //  dialog
 //
-//  Created by Reardon, Bart (IM&T, Yarralumla) on 17/9/21.
+//  Created by Bart Reardon on 17/9/21.
 //
 
 //import Foundation

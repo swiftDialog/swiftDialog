@@ -2,7 +2,7 @@
 //  jamfHelper_syntax.swift
 //  dialog
 //
-//  Created by Reardon, Bart (IM&T, Yarralumla) on 29/8/21.
+//  Created by Bart Reardon on 29/8/21.
 //
 
 import Foundation
