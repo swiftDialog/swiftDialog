@@ -378,6 +378,7 @@ struct CLOptions {
     var watermarkAlpha           = (long: String("bgalpha"),           short: String("ba"),  value : String(""), present : Bool(false)) // -ba
     var watermarkPosition        = (long: String("bgposition"),        short: String("bp"),  value : String(""), present : Bool(false)) // -bp
     var watermarkFill            = (long: String("bgfill"),            short: String("bf"),  value : String(""), present : Bool(false)) // -bf
+    var position                 = (long: String("position"),          short: String(""),    value : String(""), present : Bool(false)) // -bf
     var debug                    = (long: String("debug"),             short: String(""),    value : String(""), present : Bool(false))
 
     // command line options that take no additional parameters

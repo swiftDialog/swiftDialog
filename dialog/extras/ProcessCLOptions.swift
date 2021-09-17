@@ -145,6 +145,42 @@ func processCLOptionValues() {
             appvars.messageAlignment = .leading
         }
     }
+    
+    // window location on screen
+    if cloptions.position.present {
+        switch cloptions.position.value {
+        case "topleft":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.top
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.left
+        case "topright":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.top
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.right
+        case "bottomleft":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.left
+        case "bottomright":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.right
+        case "left":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.right
+        case "right":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.center
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.right
+        case "top":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.top
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
+        case "bottom":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
+        case "centre":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.center
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
+        default:
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.center
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
+        }
+    }
 
     cloptions.iconOption.value              = CLOptionText(OptionName: cloptions.iconOption, DefaultValue: "default")
     cloptions.iconOption.present            = CLOptionPresent(OptionName: cloptions.iconOption)
