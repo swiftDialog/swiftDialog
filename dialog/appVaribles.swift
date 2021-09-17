@@ -292,7 +292,6 @@ struct AppVariables {
     var imageHeight                     = CGFloat(260)      // set default image area height
     var titleHeight                     = CGFloat(50)
     var bannerHeight                    = CGFloat(-10)
-    var bannerOffset                    = CGFloat(0)
     
     var smallWindow                     = Bool(false)
     var bigWindow                       = Bool(false)
@@ -305,7 +304,6 @@ struct AppVariables {
     var titleFontSize                   = CGFloat(30)
     var titleFontColour                 = Color.primary
     var titleFontWeight                 = Font.Weight.bold
-    //var titleFontFont                   = Font.TextStyle
     var overlayIconScale                = CGFloat(0.40)
     var overlayOffsetX                  = CGFloat(40)
     var overlayOffsetY                  = CGFloat(50)
@@ -320,7 +318,6 @@ struct AppVariables {
     
     var textOptionsArray                = [String]()
     var textFieldText                   = Array(repeating: "", count: 8)
-    //var textOptionsText                 = [String]()
     
     var annimationSmoothing             = Double(20)
     
@@ -335,14 +332,7 @@ struct AppVariables {
     var exit208                         = (code: Int32(208), message: String(""))
     var exit209                         = (code: Int32(209), message: String(""))
     var exit210                         = (code: Int32(210), message: String(""))
-    
-    // reserved for future experimentation
-    //static var iconVisible = true
-    //static var displayMoreInfo = true // testing
-    //static var textAllignment = "centre" //testing
-    //static var textAllignment = "top" //testing
-    //static var textAllignment = "left" //testing
-    
+        
     // debug flag
     var debugMode                       = Bool(false)
     var debugBorderColour               = Color.clear
@@ -376,10 +366,9 @@ struct CLOptions {
     var watermarkImage           = (long: String("background"),        short: String("bg"),  value : String(""), present : Bool(false)) // -bg
     var watermarkAlpha           = (long: String("bgalpha"),           short: String("ba"),  value : String(""), present : Bool(false)) // -ba
     var watermarkPosition        = (long: String("bgposition"),        short: String("bp"),  value : String(""), present : Bool(false)) // -bp
-    var watermarkFill            = (long: String("fill"),              short: String(""),    value : String(""), present : Bool(false))
+    var watermarkFill            = (long: String("bgfill"),            short: String("bf"),  value : String(""), present : Bool(false)) // -bf
     var debug                    = (long: String("debug"),             short: String(""),    value : String(""), present : Bool(false))
 
-   
     // command line options that take no additional parameters
     var button2Option            = (long: String("button2"),           short: String("2"),   value : String(""), present : Bool(false)) // -2
     var infoButtonOption         = (long: String("infobutton"),        short: String("3"),   value : String(""), present : Bool(false)) // -3

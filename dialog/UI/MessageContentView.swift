@@ -10,29 +10,6 @@ import SwiftUI
 import MarkdownUI
 
 struct MessageContent: View {
-    init () {
-        
-        viewHeight = appvars.windowHeight - 110
-                
-        // adjust the content dimentions based on whether we are showing the icon or not.
-        // adjustment multiplyiers determined by careful process of trial and error
-        if appvars.iconIsHidden {
-            viewWidth = appvars.windowWidth*0.9
-            //viewHeight = appvars.windowHeight
-            viewOffset = 0
-        } else {
-            viewWidth = (appvars.windowWidth - appvars.imageWidth - 50)*0.9//(appvars.imageWidth*1.5) - 50
-            //viewHeight = appvars.windowHeight
-            viewOffset = 20
-        }
-        
-        if cloptions.smallWindow.present {
-            viewHeight = appvars.windowHeight - 90
-        } else if cloptions.bigWindow.present {
-            viewHeight = appvars.windowHeight - 120
-            viewWidth = viewWidth - 50
-        }
-    }
     
     var useDefaultStyle = true
     var style: MarkdownStyle {
@@ -41,14 +18,9 @@ struct MessageContent: View {
             : DefaultMarkdownStyle(font: .system(size: 20))
     }
     
-    var viewWidth = CGFloat(0)
-    var viewHeight = CGFloat(0)
-    var viewOffset = CGFloat(0)
-    
     let messageContentOption: String = cloptions.messageOption.value
     let theAllignment: Alignment = .topLeading
     
-        
     var body: some View {
         VStack {
             if cloptions.mainImage.present {
@@ -59,20 +31,23 @@ struct MessageContent: View {
                         .multilineTextAlignment(appvars.messageAlignment)
                         .markdownStyle(style)
                 }
-                .frame(width: viewWidth, alignment: .topLeading)
                 .padding(.top, 10)
                 
                 Spacer()
+                
                 TextEntryView()
-                    .frame(width: viewWidth-50, alignment: .bottomLeading)
+                    .padding(.leading, 50)
+                    .padding(.trailing, 50)
                     .border(appvars.debugBorderColour, width: 2)
                 
                 DropdownView()
-                    .frame(width: viewWidth-50, alignment: .bottomLeading)
+                    .padding(.leading, 50)
+                    .padding(.trailing, 50)
                     .border(appvars.debugBorderColour, width: 2)
             }
         }
-        .frame(width: viewWidth, height: viewHeight)
+        .padding(.leading, 40)
+        .padding(.trailing, 40)
     }
 }
 

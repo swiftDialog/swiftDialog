@@ -16,19 +16,9 @@ extension StringProtocol {
     }
 }
 
-class AppDelegate: NSObject, NSApplicationDelegate {
-
-    // check for a few command line options before loading
-    func applicationWillFinishLaunching(_ notification: Notification) {
-        //print("applicationWillFinishLaunching")
-
-    }
-}
-
 @available(OSX 11.0, *)
 @main
 struct dialogApp: App {
-
     
     init () {
         // get all the command line option values
@@ -52,24 +42,20 @@ struct dialogApp: App {
         appvars.imageHeight = appvars.imageHeight * appvars.scaleFactor
         
         if cloptions.fullScreenWindow.present {
-            //appvars.overlayIconScale = appvars.overlayIconScale * 2
             FullscreenView().showFullScreen()
         }
+        
+        print("Width: \(appvars.windowWidth) Height \(appvars.windowHeight)")
     
     }
     var body: some Scene {
 
         WindowGroup {
             ContentView()
-                .frame(width: appvars.windowWidth, height: appvars.windowHeight + appvars.bannerHeight)
-                .edgesIgnoringSafeArea(.all)
-                //.hostingWindowPosition(vertical: appvars.windowPositionVertical, horizontal: appvars.windowPositionHorozontal)
+                .frame(width: appvars.windowWidth, height: appvars.windowHeight) // + appvars.bannerHeight)
         }
         // Hide Title Bar
         .windowStyle(HiddenTitleBarWindowStyle())
-        //.windowStyle(TitleBarWindowStyle())
-        //.windowStyle(DefaultWindowStyle())
-        //.windowStyle(TitleBarWindowStyle())
     }
 
     

@@ -12,16 +12,14 @@ struct watermarkView: View {
     var mainImage: NSImage
     var imageOpacity: Double
     var imagePosition : Alignment = .leading
-    var imageScaleFill : Bool = false
+    var imageScaleFill : String
     
-    init(imagePath: String?, opacity: Double?, position: String? = "center", scale: String? = "fit") {
+    init(imagePath: String?, opacity: Double?, position: String? = "center", scale: String? = "") {
         mainImage = getImageFromPath(fileImagePath: imagePath ?? "")
         imageOpacity = opacity ??  0.5
-        if scale == "fill" {
-            imageScaleFill = true
-        }
+        imageScaleFill = scale ?? ""
         
-        print("scale = \(String(describing: scale))")
+        print("scale = \(imageScaleFill)")
         
         switch position {
         case "left":
@@ -45,31 +43,29 @@ struct watermarkView: View {
         default:
             imagePosition = .center
         }
-        
     }
     
     var body: some View {
-        VStack {
-            if imageScaleFill {
-                Image(nsImage: mainImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .scaledToFill()
-                    .opacity(imageOpacity)
-                    .frame(width: appvars.windowWidth, height: appvars.windowHeight, alignment: imagePosition)
-            } else {
-                Image(nsImage: mainImage)
-                    //.resizable()
-                    //.aspectRatio(contentMode: .fit)
-                    .scaledToFit()
-                    .opacity(imageOpacity)
-                    .frame(width: appvars.windowWidth, height: appvars.windowHeight, alignment: imagePosition)
+        GeometryReader { geometry in
+            VStack {
+                if imageScaleFill == "fill" {
+                    Image(nsImage: mainImage)
+                        .resizable()
+                        .scaledToFill()
+                        .opacity(imageOpacity)
+                } else if imageScaleFill == "fit" {
+                    Image(nsImage: mainImage)
+                        .resizable()
+                        .scaledToFit()
+                        .opacity(imageOpacity)
+                } else {
+                    Image(nsImage: mainImage)
+                        .opacity(imageOpacity)
+                }
+                
             }
-            
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: imagePosition)
         }
-        .frame(alignment: .bottom)
-        //.border(Color.red)
-        .offset(y: 27)
     }
 }
 

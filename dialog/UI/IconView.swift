@@ -63,6 +63,11 @@ struct IconView: View {
             imgFromAPP = true
         }
         
+        if messageUserImagePath == "none" {
+            builtInIconName = "" 
+            builtInIconPresent = true
+        }
+        
         if messageUserImagePath.hasPrefix("SF=") {
             sfSymbolPresent = true
             builtInIconPresent = true

@@ -92,10 +92,8 @@ func processCLOptions() {
         
     }
             
-    if cloptions.hideIcon.present {
+    if cloptions.hideIcon.present || cloptions.bannerImage.present {
         appvars.iconIsHidden = true
-    //} else {
-    //    iconVisible = true
     }
     
     if cloptions.lockWindow.present {
@@ -217,6 +215,7 @@ func processCLOptionValues() {
     cloptions.watermarkPosition.value       = CLOptionText(OptionName: cloptions.watermarkPosition)
     cloptions.watermarkPosition.present     = CLOptionPresent(OptionName: cloptions.watermarkPosition)
     
+    cloptions.watermarkFill.value           = CLOptionText(OptionName: cloptions.watermarkFill)
     cloptions.watermarkFill.present         = CLOptionPresent(OptionName: cloptions.watermarkFill)
 
     // anthing that is an option only with no value
