@@ -135,9 +135,7 @@ func processCLOptionValues() {
         switch cloptions.messageAlignment.value {
         case "left":
             appvars.messageAlignment = .leading
-        case "centre":
-            appvars.messageAlignment = .center
-        case "center":
+        case "centre","center":
             appvars.messageAlignment = .center
         case "right":
             appvars.messageAlignment = .trailing
@@ -147,8 +145,8 @@ func processCLOptionValues() {
     }
     
     // window location on screen
-    if cloptions.position.present {
-        switch cloptions.position.value {
+    if CLOptionPresent(OptionName: cloptions.position) {
+        switch CLOptionText(OptionName: cloptions.position) {
         case "topleft":
             appvars.windowPositionVertical = NSWindow.Position.Vertical.top
             appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.left
@@ -162,8 +160,8 @@ func processCLOptionValues() {
             appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
             appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.right
         case "left":
-            appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
-            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.right
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.center
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.left
         case "right":
             appvars.windowPositionVertical = NSWindow.Position.Vertical.center
             appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.right
@@ -173,7 +171,7 @@ func processCLOptionValues() {
         case "bottom":
             appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
             appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
-        case "centre":
+        case "centre","center":
             appvars.windowPositionVertical = NSWindow.Position.Vertical.center
             appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
         default:
