@@ -255,15 +255,16 @@ func processCLOptionValues() {
     if cloptions.watermarkImage.present {
         // return the image resolution and re-size the window to match
         let bgImage = getImageFromPath(fileImagePath: cloptions.watermarkImage.value)
-        if bgImage.size.width > appvars.windowWidth && bgImage.size.height > appvars.windowHeight && !cloptions.windowHeight.present {
+        if bgImage.size.width > appvars.windowWidth && bgImage.size.height > appvars.windowHeight && !cloptions.windowHeight.present && !cloptions.watermarkFill.present {
             // keep the same width ratio but change the height
             var wWidth = appvars.windowWidth
             if cloptions.windowWidth.present {
                 wWidth = NumberFormatter().number(from: cloptions.windowWidth.value) as! CGFloat
             }
-            let widthRatio = wWidth / bgImage.size.width
-            let newHeight = bgImage.size.height * widthRatio
-            appvars.windowHeight = floor(newHeight)
+            let widthRatio = wWidth / bgImage.size.width  // get the ration of the image height to the current display width
+            let newHeight = (bgImage.size.height * widthRatio) - 28 //28 needs to be removed to account for the phantom title bar height
+            appvars.windowHeight = floor(newHeight) // floor() will strip any fractional values as a result of the above multiplication
+                                                    // we need to do this as window heights can't be fractional and weird things happen
                         
             if !cloptions.watermarkFill.present {
                 cloptions.watermarkFill.present = true
