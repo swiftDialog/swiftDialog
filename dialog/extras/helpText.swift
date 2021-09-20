@@ -11,10 +11,30 @@ var helpText = """
     Dialog version \(getVersionString()) ©2021 Bart Reardon
 
     OPTIONS:
+    
+    ** Basic Options - - - - - - - - - - - - - - - -
+    
         -\(cloptions.titleOption.short), --\(cloptions.titleOption.long) <text>
                     Set the Dialog title
                     Text over 40 characters gets truncated
                     Default Title is "\(appvars.titleDefault)"
+
+        --\(cloptions.titleFont.long) <text>
+                    Lets you modify the title text of the dialog.
+    
+                    Can accept up to three parameters, in a comma seperated list, to modify font properties.
+                    
+                        color,colour=<text><hex>  - specified in hex format, e.g. #00A4C7
+                                                    Also accepts any of the standard Apple colours
+                                                    black, blue, gray, green, orange, pink, purple, red, white, yellow
+                                                    default if option is invalid is system primary colour
+    
+                        size=<float>              - accepts any float value.
+
+                        weight=[thin | light | regular | medium | heavy | bold]
+                            default is bold
+    
+                    Example: \"colour=#00A4C7,weight=light,size=60\"
         
         -\(cloptions.messageOption.short), --\(cloptions.messageOption.long) <text>
                     Set the dialog message
@@ -47,7 +67,7 @@ var helpText = """
                     Images from either file or URL are displayed as roundrect if no transparancy
     
                     "none" can also be specified to not display an icon but maintain layout (see also --\(cloptions.hideIcon.long))
-        
+    
         -\(cloptions.overlayIconOption.short), --\(cloptions.overlayIconOption.long) <file> | <url>
                     Set an image to display as an overlay to --icon
                     image is displayed at 1/2 resolution to the main image and positioned to the bottom right
@@ -82,22 +102,11 @@ var helpText = """
 
                     weight=<text>                     - accepts any of the following values:
                                                        thin (default), light, regular, medium, heavy, bold
-        
-        -\(cloptions.fullScreenWindow.short), --\(cloptions.fullScreenWindow.long)
-                    Uses full screen view.
-                    In this view, only banner, title, icon and message are visible.
-
+    
         -\(cloptions.hideIcon.short), --\(cloptions.hideIcon.long)
                     Hides the icon from view
-                    Doing so increases the space available for message text to approximately 100 words
-
-        -\(cloptions.bannerImage.short), --\(cloptions.bannerImage.long) <file> | <url>
-                    Shows a banner image at the top of the dialog
-                    Banners images fill the entire top width of the window and are resized to fill, positioned from
-                    the top left corner of the image.
-                    Specifying this option will imply --\(cloptions.hideIcon.long)
-                    Recommended Banner Image size is 850x150.
-
+                    Doing so increases the space available for message text
+        
         --\(cloptions.button1TextOption.long) <text>
                     Set the label for Button1
                     Default label is "\(appvars.button1Default)"
@@ -142,6 +151,19 @@ var helpText = """
                     Accepts URL
                     Default action if not specified is no action
     
+    ** Advanced Options - - - - - - - - - - - - - - - -
+    
+        -\(cloptions.fullScreenWindow.short), --\(cloptions.fullScreenWindow.long)
+                    Uses full screen view.
+                    In this view, only banner, title, icon and message are visible.
+
+        -\(cloptions.bannerImage.short), --\(cloptions.bannerImage.long) <file> | <url>
+                    Shows a banner image at the top of the dialog
+                    Banners images fill the entire top width of the window and are resized to fill, positioned from
+                    the top left corner of the image.
+                    Specifying this option will imply --\(cloptions.hideIcon.long)
+                    Recommended Banner Image size is 850x150.
+    
         --\(cloptions.dropdownTitle.long) <text>
                     Title for dropdown selection
     
@@ -169,23 +191,6 @@ var helpText = """
                     Multiple textfields can be specified (up to 8).
     
     
-        --\(cloptions.titleFont.long) <text>
-                    Lets you modify the title text of the dialog.
-    
-                    Can accept up to three parameters, in a comma seperated list, to modify font properties.
-                    
-                        color,colour=<text><hex>  - specified in hex format, e.g. #00A4C7
-                                                    Also accepts any of the standard Apple colours
-                                                    black, blue, gray, green, orange, pink, purple, red, white, yellow
-                                                    default if option is invalid is system primary colour
-    
-                        size=<float>              - accepts any float value.
-
-                        weight=[thin | light | regular | medium | heavy | bold]
-                            default is bold
-    
-                    Example: \"colour=#00A4C7,weight=light,size=60\"
-        
         -\(cloptions.watermarkImage.short), --\(cloptions.watermarkImage.long) <file>
                     Displays the selected file as a background image.
     
@@ -203,6 +208,7 @@ var helpText = """
                     fill - resizes the image to fill the entire window. Image will be truncated if necessary
                     fit  - resizes the image to fit the window but will not truncate
                     Default is none which will display the image at its native resolution
+    
     
         --\(cloptions.windowWidth.long) <number>
                     Sets the width of the dialog window to the specified width in points
@@ -222,6 +228,7 @@ var helpText = """
                     will be displayed but will be disabled for the first 3 seconds of the timer, after which it
                     becomes active and can be used to dismiss dialog with the standard button 1 exit code of 0
     
+    
         -\(cloptions.lockWindow.short), --\(cloptions.lockWindow.long)
                     Let window me moved around the screen. Default is not moveable
 
@@ -234,13 +241,15 @@ var helpText = """
         -\(cloptions.smallWindow.short), --\(cloptions.smallWindow.long)
                     Makes the dialog 25% smaller. Less room for message text.
     
+    
         -\(cloptions.jsonOutPut.short), --\(cloptions.jsonOutPut.long)
                     Outputs any results in json format for easier processing
                     (for dropdown item selections and textfield responses)
 
         -\(cloptions.ignoreDND.short), --\(cloptions.ignoreDND.long)
                     Will ignore user Do Not Disturb setting
-                        (only works in macOS 11)
+                        (Do Not Disturb detection only works in macOS 11)
+    
     
         -\(cloptions.jamfHelperMode.short), --\(cloptions.jamfHelperMode.long)
                     Switches all command line options to accept jamfHelper style options
