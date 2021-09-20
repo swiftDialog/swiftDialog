@@ -230,7 +230,7 @@ func processCLOptionValues() {
 
     cloptions.mainImage.value               = CLOptionText(OptionName: cloptions.mainImage)
     cloptions.mainImage.present             = CLOptionPresent(OptionName: cloptions.mainImage)
-
+    
     cloptions.mainImageCaption.value        = CLOptionText(OptionName: cloptions.mainImageCaption)
     cloptions.mainImageCaption.present      = CLOptionPresent(OptionName: cloptions.mainImageCaption)
 
@@ -242,7 +242,7 @@ func processCLOptionValues() {
     
     cloptions.watermarkImage.value          = CLOptionText(OptionName: cloptions.watermarkImage)
     cloptions.watermarkImage.present        = CLOptionPresent(OptionName: cloptions.watermarkImage)
-    
+        
     cloptions.watermarkAlpha.value          = CLOptionText(OptionName: cloptions.watermarkAlpha)
     cloptions.watermarkAlpha.present        = CLOptionPresent(OptionName: cloptions.watermarkAlpha)
     
@@ -252,6 +252,26 @@ func processCLOptionValues() {
     cloptions.watermarkFill.value           = CLOptionText(OptionName: cloptions.watermarkFill)
     cloptions.watermarkFill.present         = CLOptionPresent(OptionName: cloptions.watermarkFill)
 
+    if cloptions.watermarkImage.present {
+        // return the image resolution and re-size the window to match
+        let bgImage = getImageFromPath(fileImagePath: cloptions.watermarkImage.value)
+        if bgImage.size.width > appvars.windowWidth && bgImage.size.height > appvars.windowHeight && !cloptions.windowHeight.present {
+            // keep the same width ratio but change the height
+            var wWidth = appvars.windowWidth
+            if cloptions.windowWidth.present {
+                wWidth = NumberFormatter().number(from: cloptions.windowWidth.value) as! CGFloat
+            }
+            let widthRatio = wWidth / bgImage.size.width
+            let newHeight = bgImage.size.height * widthRatio
+            appvars.windowHeight = floor(newHeight)
+                        
+            if !cloptions.watermarkFill.present {
+                cloptions.watermarkFill.present = true
+                cloptions.watermarkFill.value = "fill"
+            }
+        }
+    }
+    
     // anthing that is an option only with no value
     cloptions.button2Option.present         = CLOptionPresent(OptionName: cloptions.button2Option)
     cloptions.infoButtonOption.present      = CLOptionPresent(OptionName: cloptions.infoButtonOption)

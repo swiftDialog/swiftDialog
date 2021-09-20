@@ -193,6 +193,8 @@ var helpText = """
     
         -\(cloptions.watermarkImage.short), --\(cloptions.watermarkImage.long) <file>
                     Displays the selected file as a background image.
+                    If the image is larger than the default dialog size (820x380) and no window size options are given (specifically window height),
+                    the dialog window height will be adjusted so the image fills the entire window.
     
         -\(cloptions.watermarkAlpha.short), --\(cloptions.watermarkAlpha.long) <number>
                     Number between 0 and 1
