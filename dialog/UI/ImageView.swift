@@ -2,7 +2,7 @@
 //  ImageView.swift
 //  dialog
 //
-//  Created by Reardon, Bart (IM&T, Yarralumla) on 15/8/21.
+//  Created by Bart Reardon on 15/8/21.
 //
 
 import SwiftUI

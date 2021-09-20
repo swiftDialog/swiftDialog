@@ -7,97 +7,84 @@
 
 import SwiftUI
 
+
+
 struct ContentView: View {
     init() {
-        //appvars.windowHeight = appvars.windowHeight + 200
-        if cloptions.bannerImage.present {
-            if cloptions.smallWindow.present {
-                appvars.bannerHeight = 100
-                bannerAdjustment = 10
-            } else {
-                appvars.bannerHeight = 150
-            }
-            appvars.bannerOffset = -30
-            //bannerImagePresent = true
-            appvars.imageWidth = 0 // hides the side icon
-            
-            //adjust the position of the button bar by adding the banner height and ofsetting the default banner height of -10
-            buttonYPos = (buttonYPos +  appvars.bannerHeight + 10)
+        if cloptions.debug.present {
+            print("Window Height = \(appvars.windowHeight): Window Width = \(appvars.windowWidth)")
         }
-        //print("Window Height = \(appvars.windowHeight): Window Width = \(appvars.windowWidth)")
     }
-    // puts the button bar jsut above the bottom row - 35 came from trial and error
-    var buttonYPos = (appvars.windowHeight)
-    
-    //var bannerImagePresent = false
+
     var bannerAdjustment       = CGFloat(5)
+    var waterMarkFill          = String("")
         
     var body: some View {
-        ZStack() {
-        // this stack controls the main view. Consists of a VStack containing all the content, and a HStack positioned at the bottom of the display area
+                
+        ZStack {
+            if cloptions.watermarkImage.present {
+                    watermarkView(imagePath: cloptions.watermarkImage.value, opacity: Double(cloptions.watermarkAlpha.value), position: cloptions.watermarkPosition.value, scale: cloptions.watermarkFill.value)
+            }
+        
+            // this stack controls the main view. Consists of a VStack containing all the content, and a HStack positioned at the bottom of the display area
             VStack {
                 if cloptions.bannerImage.present {
                     BannerImageView(imagePath: cloptions.bannerImage.value)
-                        .frame(width: appvars.windowWidth, height: appvars.bannerHeight-bannerAdjustment, alignment: .topLeading)
-                        .clipped()
                         .border(appvars.debugBorderColour, width: 2)
                 }
 
                 // Dialog title
                 TitleView()
-                    .frame(width: appvars.windowWidth , height: appvars.titleHeight, alignment: .center)
                     .border(appvars.debugBorderColour, width: 2)
                     .offset(y: 10) // shift the title down a notch
                 
                 // Horozontal Line
-                Rectangle()
-                    .fill(Color.gray.opacity(0.5))
-                    .frame(height: 1)
-                    .frame(width: (appvars.windowWidth * appvars.horozontalLineScale), height: 2)
-                    .offset(y: -5) //shift the line down a notch
-            
+                Divider()
+                    .frame(width: appvars.windowWidth*appvars.horozontalLineScale, height: 2)
+                            
                 // Dialog content including message and image if visible
                 DialogView()
-                    .frame(alignment: .topLeading)
+                
+                Spacer()
+                
+                // Buttons
+                HStack() {
+                    if cloptions.timerBar.present {
+                        progressBarView(progressSteps: NumberFormatter().number(from: cloptions.timerBar.value) as? CGFloat, visible: true)
+                            .frame(alignment: .bottom)
+                    } else {
+                        MoreInfoButton()
+                        Spacer()
+                    }
+                    if (cloptions.timerBar.present && cloptions.button1TextOption.present) || (!cloptions.timerBar.present) {
+                        ButtonView() // contains both button 1 and button 2
+                    }
+                }
+                //.frame(alignment: .bottom)
+                .padding(.leading, 15)
+                .padding(.trailing, 15)
+                .padding(.bottom, 15)
+                .border(appvars.debugBorderColour, width: 2)
+ 
+            }
+            
+            // Window Setings (pinched from Nudge https://github.com/macadmins/nudge/blob/main/Nudge/UI/ContentView.swift#L19)
+            HostingWindowFinder {window in
+                window?.standardWindowButton(.closeButton)?.isHidden = true //hides the red close button
+                window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
+                window?.standardWindowButton(.zoomButton)?.isHidden = true //this removes the green zoom button
+                window?.isMovable = appvars.windowIsMoveable
+                if appvars.windowOnTop {
+                    window?.level = .floating
+                } else {
+                    window?.level = .normal
+                }
+                NSApp.activate(ignoringOtherApps: true) // bring to forefront upon launch
             }
                 
-            // Buttons
-            HStack() {
-                if cloptions.timerBar.present {
-                    progressBarView(progressSteps: NumberFormatter().number(from: cloptions.timerBar.value) as? CGFloat, visible: true)
-                        .frame(alignment: .bottom)
-                } else {
-                    MoreInfoButton()
-                    Spacer()
-                }
-                if (cloptions.timerBar.present && cloptions.button1TextOption.present) || (!cloptions.timerBar.present) {
-                    ButtonView() // contains both button 1 and button 2
-                }
-            }
-            .frame(width: appvars.windowWidth-30, alignment: .bottom)
-            .border(appvars.debugBorderColour, width: 2)
-            .position(x: appvars.windowWidth/2, y: buttonYPos-5)
-            
         }
-        .hostingWindowPosition(vertical: appvars.windowPositionVertical, horizontal: appvars.windowPositionHorozontal)
-
-        // Window Setings (pinched from Nudge https://github.com/macadmins/nudge/blob/main/Nudge/UI/ContentView.swift#L19)
-        HostingWindowFinder {window in
-            
-            window?.standardWindowButton(.closeButton)?.isHidden = true //hides the red close button
-            window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
-            window?.standardWindowButton(.zoomButton)?.isHidden = true //this removes the green zoom button
-            //window?.center() // center
-            window?.isMovable = appvars.windowIsMoveable
-            if appvars.windowOnTop {
-                window?.level = .floating
-            } else {
-                window?.level = .normal
-            }
-            NSApp.activate(ignoringOtherApps: true) // bring to forefront upon launch
-            //window?.alphaValue = 1
-        }
-        
+        .edgesIgnoringSafeArea(.all)
+        .hostingWindowPosition(vertical: appvars.windowPositionVertical, horizontal: appvars.windowPositionHorozontal)  
     }
     
 

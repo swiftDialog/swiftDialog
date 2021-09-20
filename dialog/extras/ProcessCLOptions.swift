@@ -2,7 +2,7 @@
 //  ProcessCLOptions.swift
 //  dialog
 //
-//  Created by Reardon, Bart (IM&T, Yarralumla) on 29/8/21.
+//  Created by Bart Reardon on 29/8/21.
 //
 
 import Foundation
@@ -92,10 +92,8 @@ func processCLOptions() {
         
     }
             
-    if cloptions.hideIcon.present {
+    if cloptions.hideIcon.present || cloptions.bannerImage.present {
         appvars.iconIsHidden = true
-    //} else {
-    //    iconVisible = true
     }
     
     if cloptions.lockWindow.present {
@@ -137,14 +135,48 @@ func processCLOptionValues() {
         switch cloptions.messageAlignment.value {
         case "left":
             appvars.messageAlignment = .leading
-        case "centre":
-            appvars.messageAlignment = .center
-        case "center":
+        case "centre","center":
             appvars.messageAlignment = .center
         case "right":
             appvars.messageAlignment = .trailing
         default:
             appvars.messageAlignment = .leading
+        }
+    }
+    
+    // window location on screen
+    if CLOptionPresent(OptionName: cloptions.position) {
+        switch CLOptionText(OptionName: cloptions.position) {
+        case "topleft":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.top
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.left
+        case "topright":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.top
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.right
+        case "bottomleft":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.left
+        case "bottomright":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.right
+        case "left":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.center
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.left
+        case "right":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.center
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.right
+        case "top":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.top
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
+        case "bottom":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
+        case "centre","center":
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.center
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
+        default:
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.center
+            appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
         }
     }
 
@@ -198,7 +230,7 @@ func processCLOptionValues() {
 
     cloptions.mainImage.value               = CLOptionText(OptionName: cloptions.mainImage)
     cloptions.mainImage.present             = CLOptionPresent(OptionName: cloptions.mainImage)
-
+    
     cloptions.mainImageCaption.value        = CLOptionText(OptionName: cloptions.mainImageCaption)
     cloptions.mainImageCaption.present      = CLOptionPresent(OptionName: cloptions.mainImageCaption)
 
@@ -207,7 +239,39 @@ func processCLOptionValues() {
 
     cloptions.windowHeight.value            = CLOptionText(OptionName: cloptions.windowHeight)
     cloptions.windowHeight.present          = CLOptionPresent(OptionName: cloptions.windowHeight)
+    
+    cloptions.watermarkImage.value          = CLOptionText(OptionName: cloptions.watermarkImage)
+    cloptions.watermarkImage.present        = CLOptionPresent(OptionName: cloptions.watermarkImage)
+        
+    cloptions.watermarkAlpha.value          = CLOptionText(OptionName: cloptions.watermarkAlpha)
+    cloptions.watermarkAlpha.present        = CLOptionPresent(OptionName: cloptions.watermarkAlpha)
+    
+    cloptions.watermarkPosition.value       = CLOptionText(OptionName: cloptions.watermarkPosition)
+    cloptions.watermarkPosition.present     = CLOptionPresent(OptionName: cloptions.watermarkPosition)
+    
+    cloptions.watermarkFill.value           = CLOptionText(OptionName: cloptions.watermarkFill)
+    cloptions.watermarkFill.present         = CLOptionPresent(OptionName: cloptions.watermarkFill)
 
+    if cloptions.watermarkImage.present {
+        // return the image resolution and re-size the window to match
+        let bgImage = getImageFromPath(fileImagePath: cloptions.watermarkImage.value)
+        if bgImage.size.width > appvars.windowWidth && bgImage.size.height > appvars.windowHeight && !cloptions.windowHeight.present && !cloptions.watermarkFill.present {
+            // keep the same width ratio but change the height
+            var wWidth = appvars.windowWidth
+            if cloptions.windowWidth.present {
+                wWidth = NumberFormatter().number(from: cloptions.windowWidth.value) as! CGFloat
+            }
+            let widthRatio = wWidth / bgImage.size.width  // get the ration of the image height to the current display width
+            let newHeight = (bgImage.size.height * widthRatio) - 28 //28 needs to be removed to account for the phantom title bar height
+            appvars.windowHeight = floor(newHeight) // floor() will strip any fractional values as a result of the above multiplication
+                                                    // we need to do this as window heights can't be fractional and weird things happen
+                        
+            if !cloptions.watermarkFill.present {
+                cloptions.watermarkFill.present = true
+                cloptions.watermarkFill.value = "fill"
+            }
+        }
+    }
     
     // anthing that is an option only with no value
     cloptions.button2Option.present         = CLOptionPresent(OptionName: cloptions.button2Option)
