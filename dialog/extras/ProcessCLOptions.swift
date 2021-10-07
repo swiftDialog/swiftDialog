@@ -63,6 +63,16 @@ func processCLOptions() {
         appvars.windowHeight = NumberFormatter().number(from: cloptions.windowHeight.value) as! CGFloat
     }
     
+    if cloptions.iconSize.present {
+        //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: cloptions.windowWidth)
+        appvars.imageWidth = NumberFormatter().number(from: cloptions.iconSize.value) as! CGFloat
+    }
+    /*
+    if cloptions.iconHeight.present {
+        //appvars.windowHeight = CGFloat() //CLOptionText(OptionName: cloptions.windowHeight)
+        appvars.imageHeight = NumberFormatter().number(from: cloptions.iconHeight.value) as! CGFloat
+    }
+    */
     // Correct feng shui so the app accepts keyboard input
     // from https://stackoverflow.com/questions/58872398/what-is-the-minimally-viable-gui-for-command-line-swift-scripts
     let app = NSApplication.shared
@@ -182,6 +192,12 @@ func processCLOptionValues() {
 
     cloptions.iconOption.value              = CLOptionText(OptionName: cloptions.iconOption, DefaultValue: "default")
     cloptions.iconOption.present            = CLOptionPresent(OptionName: cloptions.iconOption)
+    
+    cloptions.iconSize.value                = CLOptionText(OptionName: cloptions.iconSize)
+    cloptions.iconSize.present              = CLOptionPresent(OptionName: cloptions.iconSize)
+    
+    //cloptions.iconHeight.value              = CLOptionText(OptionName: cloptions.iconHeight)
+    //cloptions.iconHeight.present            = CLOptionPresent(OptionName: cloptions.iconHeight)
 
     cloptions.overlayIconOption.value       = CLOptionText(OptionName: cloptions.overlayIconOption)
     cloptions.overlayIconOption.present     = CLOptionPresent(OptionName: cloptions.overlayIconOption)
