@@ -19,7 +19,7 @@ var cloptions = CLOptions()
 
 struct AppVariables {
 
-    var cliversion                      = String("1.7.2")
+    var cliversion                      = String("1.8.0")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
@@ -101,6 +101,8 @@ struct CLOptions {
     var messageOption            = (long: String("message"),           short: String("m"),   value : String(""), present : Bool(false))  // -m
     var messageAlignment         = (long: String("alignment"),         short: String(""),    value : String(""), present : Bool(false))
     var iconOption               = (long: String("icon"),              short: String("i"),   value : String(""), present : Bool(false))  // -i
+    var iconSize                 = (long: String("iconsize"),          short: String(""),    value : String(""), present : Bool(false))
+  //var iconHeight               = (long: String("iconheight"),        short: String(""),    value : String(""), present : Bool(false))
     var overlayIconOption        = (long: String("overlayicon"),       short: String("y"),   value : String(""), present : Bool(false))  // -y
     var bannerImage              = (long: String("bannerimage"),       short: String("n"),   value : String(""), present : Bool(false))  // -n
     var button1TextOption        = (long: String("button1text"),       short: String(""),    value : String(""), present : Bool(false))
