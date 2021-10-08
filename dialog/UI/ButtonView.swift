@@ -25,13 +25,14 @@ struct ButtonView: View {
             button1action = cloptions.button1ActionOption.value
         }
         
-        if cloptions.timerBar.present {
+        if cloptions.timerBar.present && !cloptions.hideTimerBar.present {
             self._button1disabled = State(initialValue: true)
         }
     }
     
     var body: some View {
         //secondary button
+        Spacer()
         HStack {
             if cloptions.button2Option.present {
                 Button(action: {quitDialog(exitCode: 2)}, label: {
@@ -86,7 +87,7 @@ struct MoreInfoButton: View {
                     }
                 )
             }
-            Spacer()
+            //Spacer()
         }
     }
     

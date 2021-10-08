@@ -49,12 +49,15 @@ struct ContentView: View {
                 
                 // Buttons
                 HStack() {
-                    if cloptions.timerBar.present {
-                        progressBarView(progressSteps: NumberFormatter().number(from: cloptions.timerBar.value) as? CGFloat, visible: true)
-                            .frame(alignment: .bottom)
-                    } else {
+                    if cloptions.infoButtonOption.present {
                         MoreInfoButton()
-                        Spacer()
+                        if !cloptions.timerBar.present {
+                            Spacer()
+                        }
+                    }
+                    if cloptions.timerBar.present {
+                        progressBarView(progressSteps: NumberFormatter().number(from: cloptions.timerBar.value) as? CGFloat, visible: !cloptions.hideTimerBar.present)
+                            .frame(alignment: .bottom)
                     }
                     if (cloptions.timerBar.present && cloptions.button1TextOption.present) || (!cloptions.timerBar.present) {
                         ButtonView() // contains both button 1 and button 2
