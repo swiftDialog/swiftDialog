@@ -148,6 +148,7 @@ struct CLOptions {
     var smallWindow              = (long: String("small"),             short: String("s"),   value : String(""), present : Bool(false)) // -s
     var bigWindow                = (long: String("big"),               short: String("b"),   value : String(""), present : Bool(false)) // -b
     var fullScreenWindow         = (long: String("fullscreen"),        short: String("f"),   value : String(""), present : Bool(false)) // -f
+    var quitOnInfo               = (long: String("quitoninfo"),        short: String(""),    value : String(""), present : Bool(false))
     
     var jsonOutPut               = (long: String("json"),              short: String("j"),   value : String(""), present : Bool(false)) // -j
     var ignoreDND                = (long: String("ignorednd"),         short: String("d"),   value : String(""), present : Bool(false)) // -j
