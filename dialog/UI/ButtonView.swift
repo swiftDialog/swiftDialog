@@ -70,24 +70,15 @@ struct ButtonView: View {
 
 struct MoreInfoButton: View {
     let buttonInfoAction: String = cloptions.buttonInfoActionOption.value
-    
+    var buttonInfoText : String = cloptions.buttonInfoTextOption.value
+       
     var body: some View {
         HStack() {
-            
-            if cloptions.infoButtonOption.present {
-                Button(action: {buttonAction(action: buttonInfoAction, exitCode: 3, executeShell: false, shouldQuit: cloptions.quitOnInfo.present)}, label: {
-                    Text(appvars.buttonInfoDefault)
-                        .frame(minWidth: 40, alignment: .center)
-                    }
-                )
-            } else if cloptions.buttonInfoTextOption.present {
-                Button(action: {buttonAction(action: buttonInfoAction, exitCode: 3, executeShell: false, shouldQuit: cloptions.quitOnInfo.present)}, label: {
-                    Text(cloptions.buttonInfoTextOption.value)
-                        .frame(minWidth: 40, alignment: .center)
-                    }
-                )
-            }
-            //Spacer()
+            Button(action: {buttonAction(action: buttonInfoAction, exitCode: 3, executeShell: false, shouldQuit: cloptions.quitOnInfo.present)}, label: {
+                Text(buttonInfoText)
+                    .frame(minWidth: 40, alignment: .center)
+                }
+            )
         }
     }
     
