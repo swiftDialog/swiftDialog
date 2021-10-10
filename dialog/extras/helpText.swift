@@ -236,7 +236,8 @@ var helpText = """
                     becomes active and can be used to dismiss dialog with the standard button 1 exit code of 0
     
         --\(cloptions.hideTimerBar.long)
-                    Will hide the timer bar
+                    Will hide the timer bar. Dialog will close after time specified by --\(cloptions.timerBar.long)
+                    Default OK button is displayed. This is to prevent persistant or unclosable dialogs of unknown duration.
     
         -\(cloptions.lockWindow.short), --\(cloptions.lockWindow.long)
                     Let window me moved around the screen. Default is not moveable

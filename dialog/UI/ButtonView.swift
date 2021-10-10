@@ -79,6 +79,13 @@ struct MoreInfoButton: View {
                     .frame(minWidth: 40, alignment: .center)
                 }
             )
+            .onHover { inside in
+                if inside {
+                    NSCursor.pointingHand.push()
+                } else {
+                    NSCursor.pop()
+                }
+            }
         }
     }
     
