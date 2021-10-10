@@ -141,12 +141,14 @@ struct CLOptions {
     var warningIcon              = (long: String("warningicon"),       short: String(""),    value : String(""), present : Bool(false)) // Deprecated
     var infoIcon                 = (long: String("infoicon"),          short: String(""),    value : String(""), present : Bool(false)) // Deprecated
     var cautionIcon              = (long: String("cautionicon"),       short: String(""),    value : String(""), present : Bool(false)) // Deprecated
+    var hideTimerBar             = (long: String("hidetimerbar"),      short: String(""),    value : String(""), present : Bool(false))
     
     var lockWindow               = (long: String("moveable"),          short: String("o"),   value : String(""), present : Bool(false)) // -o
     var forceOnTop               = (long: String("ontop"),             short: String("p"),   value : String(""), present : Bool(false)) // -p
     var smallWindow              = (long: String("small"),             short: String("s"),   value : String(""), present : Bool(false)) // -s
     var bigWindow                = (long: String("big"),               short: String("b"),   value : String(""), present : Bool(false)) // -b
     var fullScreenWindow         = (long: String("fullscreen"),        short: String("f"),   value : String(""), present : Bool(false)) // -f
+    var quitOnInfo               = (long: String("quitoninfo"),        short: String(""),    value : String(""), present : Bool(false))
     
     var jsonOutPut               = (long: String("json"),              short: String("j"),   value : String(""), present : Bool(false)) // -j
     var ignoreDND                = (long: String("ignorednd"),         short: String("d"),   value : String(""), present : Bool(false)) // -j

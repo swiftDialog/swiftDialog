@@ -25,13 +25,14 @@ struct ButtonView: View {
             button1action = cloptions.button1ActionOption.value
         }
         
-        if cloptions.timerBar.present {
+        if cloptions.timerBar.present && !cloptions.hideTimerBar.present {
             self._button1disabled = State(initialValue: true)
         }
     }
     
     var body: some View {
         //secondary button
+        Spacer()
         HStack {
             if cloptions.button2Option.present {
                 Button(action: {quitDialog(exitCode: 2)}, label: {
@@ -69,24 +70,22 @@ struct ButtonView: View {
 
 struct MoreInfoButton: View {
     let buttonInfoAction: String = cloptions.buttonInfoActionOption.value
-    
+    var buttonInfoText : String = cloptions.buttonInfoTextOption.value
+       
     var body: some View {
         HStack() {
-            
-            if cloptions.infoButtonOption.present {
-                Button(action: {buttonAction(action: buttonInfoAction, exitCode: 3, executeShell: false)}, label: {
-                    Text(appvars.buttonInfoDefault)
-                        .frame(minWidth: 40, alignment: .center)
-                    }
-                )
-            } else if cloptions.buttonInfoTextOption.present {
-                Button(action: {buttonAction(action: buttonInfoAction, exitCode: 3, executeShell: false)}, label: {
-                    Text(cloptions.buttonInfoTextOption.value)
-                        .frame(minWidth: 40, alignment: .center)
-                    }
-                )
+            Button(action: {buttonAction(action: buttonInfoAction, exitCode: 3, executeShell: false, shouldQuit: cloptions.quitOnInfo.present)}, label: {
+                Text(buttonInfoText)
+                    .frame(minWidth: 40, alignment: .center)
+                }
+            )
+            .onHover { inside in
+                if inside {
+                    NSCursor.pointingHand.push()
+                } else {
+                    NSCursor.pop()
+                }
             }
-            Spacer()
         }
     }
     

@@ -88,7 +88,7 @@ func shell(_ command: String) -> String {
     return output
 }
 
-func buttonAction(action: String, exitCode: Int32, executeShell: Bool) {
+func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQuit: Bool = true) {
     //let action: String = CLOptionText(OptionName: cloptions.button1ActionOption, DefaultValue: "")
     
     if (action != "") {
@@ -98,7 +98,9 @@ func buttonAction(action: String, exitCode: Int32, executeShell: Bool) {
             openSpecifiedURL(urlToOpen: action)
         }
     }
-    quitDialog(exitCode: exitCode)
+    if shouldQuit {
+        quitDialog(exitCode: exitCode)
+    }
     //exit(0)
 }
 

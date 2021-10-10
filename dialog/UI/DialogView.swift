@@ -16,7 +16,7 @@ struct DialogView: View {
         if appvars.iconIsHidden {
             appvars.imageWidth = 0
         }
-        print("icon width: \(appvars.imageWidth) icon height: \(appvars.imageHeight)")
+        //print("icon width: \(appvars.imageWidth) icon height: \(appvars.imageHeight)")
     }
     
     var body: some View {

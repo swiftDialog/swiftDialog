@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TextEntryView: View {
     
-    @State var textFieldValue = Array(repeating: "", count: 8)
+    @State var textFieldValue = Array(repeating: "", count: 64)
     //@State var textFieldValue = ""
     //var textFieldLabel = CLOptionText(OptionName: cloptions.textField)
     let textFieldLabels = appvars.textOptionsArray

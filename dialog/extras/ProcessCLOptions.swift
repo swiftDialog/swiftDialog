@@ -289,5 +289,7 @@ func processCLOptionValues() {
     cloptions.ignoreDND.present             = CLOptionPresent(OptionName: cloptions.ignoreDND)
     cloptions.jamfHelperMode.present        = CLOptionPresent(OptionName: cloptions.jamfHelperMode)
     cloptions.debug.present                 = CLOptionPresent(OptionName: cloptions.debug)
+    cloptions.hideTimerBar.present          = CLOptionPresent(OptionName: cloptions.hideTimerBar)
+    cloptions.quitOnInfo.present            = CLOptionPresent(OptionName: cloptions.quitOnInfo)
 
 }
