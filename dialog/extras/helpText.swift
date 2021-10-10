@@ -68,6 +68,10 @@ var helpText = """
     
                     "none" can also be specified to not display an icon but maintain layout (see also --\(cloptions.hideIcon.long))
     
+        --\(cloptions.iconSize.long)
+                    Will render the icon with the specified size.
+                    Default size is 170
+    
         -\(cloptions.overlayIconOption.short), --\(cloptions.overlayIconOption.long) <file> | <url>
                     Set an image to display as an overlay to --icon
                     image is displayed at 1/2 resolution to the main image and positioned to the bottom right
@@ -144,12 +148,15 @@ var helpText = """
         --\(cloptions.buttonInfoTextOption.long) <text>
                     Set the label for Information Button
                     If not specified, Info button will not be displayed
-                    Return code when actioned is 3
-
+    
         --\(cloptions.buttonInfoActionOption.long)  <url>
                     Set the action to take.
                     Accepts URL
                     Default action if not specified is no action
+    
+        --\(cloptions.quitOnInfo.long)
+                    Will tell Dialog to quit when the info button is selected
+                    Return code when actioned is 3
     
     ** Advanced Options - - - - - - - - - - - - - - - -
     
@@ -228,6 +235,8 @@ var helpText = """
                     will be displayed but will be disabled for the first 3 seconds of the timer, after which it
                     becomes active and can be used to dismiss dialog with the standard button 1 exit code of 0
     
+        --\(cloptions.hideTimerBar.long)
+                    Will hide the timer bar
     
         -\(cloptions.lockWindow.short), --\(cloptions.lockWindow.long)
                     Let window me moved around the screen. Default is not moveable
