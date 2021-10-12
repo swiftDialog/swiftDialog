@@ -53,6 +53,17 @@ var helpText = """
     
                     --\(cloptions.mainImageCaption.long) <text>
                         Text that will appear underneath the displayed image.
+    
+        --\(cloptions.video.long)  <file> | <url>
+                    Display a video instead of a message.
+                    Videos will be resized to fit the available display area without clipping the video
+                    
+    
+                    --\(cloptions.videoCaption.long) <text>
+                        Text that will appear underneath the displayed video.
+    
+                    --\(cloptions.videoAutoPlay.long)
+                        Will force the video to start playing automatically.
         
         -\(cloptions.iconOption.short), --\(cloptions.iconOption.long) <file> | <url>
                     Set the icon to display
