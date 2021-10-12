@@ -41,9 +41,12 @@ struct ContentView: View {
                 // Horozontal Line
                 Divider()
                     .frame(width: appvars.windowWidth*appvars.horozontalLineScale, height: 2)
-                            
-                // Dialog content including message and image if visible
-                DialogView()
+                
+                if cloptions.video.present {
+                    VideoView(videourl: cloptions.video.value, autoplay: cloptions.videoAutoPlay.present, caption: cloptions.videoCaption.value)
+                } else {
+                    DialogView()
+                }
                 
                 Spacer()
                 

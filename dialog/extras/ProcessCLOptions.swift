@@ -267,6 +267,17 @@ func processCLOptionValues() {
     
     cloptions.watermarkFill.value           = CLOptionText(OptionName: cloptions.watermarkFill)
     cloptions.watermarkFill.present         = CLOptionPresent(OptionName: cloptions.watermarkFill)
+    
+    cloptions.video.value                   = CLOptionText(OptionName: cloptions.video)
+    cloptions.video.present                 = CLOptionPresent(OptionName: cloptions.video)
+    if cloptions.video.present {
+        // set a larger window size. 900x600 will fit a standard 16:9 video
+        appvars.windowWidth = appvars.videoWindowWidth
+        appvars.windowHeight = appvars.videoWindowHeight
+    }
+    
+    cloptions.videoCaption.value            = CLOptionText(OptionName: cloptions.videoCaption)
+    cloptions.videoCaption.present          = CLOptionPresent(OptionName: cloptions.videoCaption)
 
     // anthing that is an option only with no value
     cloptions.button2Option.present         = CLOptionPresent(OptionName: cloptions.button2Option)
@@ -291,5 +302,6 @@ func processCLOptionValues() {
     cloptions.debug.present                 = CLOptionPresent(OptionName: cloptions.debug)
     cloptions.hideTimerBar.present          = CLOptionPresent(OptionName: cloptions.hideTimerBar)
     cloptions.quitOnInfo.present            = CLOptionPresent(OptionName: cloptions.quitOnInfo)
+    cloptions.videoAutoPlay.present         = CLOptionPresent(OptionName: cloptions.videoAutoPlay)
 
 }

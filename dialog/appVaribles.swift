@@ -42,6 +42,9 @@ struct AppVariables {
     var windowWidth                     = CGFloat(820)      // set default dialog width
     var windowHeight                    = CGFloat(380)      // set default dialog height
     
+    var videoWindowWidth                = CGFloat(900)
+    var videoWindowHeight               = CGFloat(600)
+    
     var windowPositionVertical          = NSWindow.Position.Vertical.center
     var windowPositionHorozontal        = NSWindow.Position.Horizontal.center
  
@@ -127,6 +130,8 @@ struct CLOptions {
     var watermarkPosition        = (long: String("bgposition"),        short: String("bp"),  value : String(""), present : Bool(false)) // -bp
     var watermarkFill            = (long: String("bgfill"),            short: String("bf"),  value : String(""), present : Bool(false)) // -bf
     var position                 = (long: String("position"),          short: String(""),    value : String(""), present : Bool(false)) // -bf
+    var video                    = (long: String("video"),             short: String(""),    value : String(""), present : Bool(false))
+    var videoCaption             = (long: String("videocaption"),      short: String(""),    value : String(""), present : Bool(false))// -bf
     var debug                    = (long: String("debug"),             short: String(""),    value : String(""), present : Bool(false))
 
     // command line options that take no additional parameters
@@ -142,6 +147,7 @@ struct CLOptions {
     var infoIcon                 = (long: String("infoicon"),          short: String(""),    value : String(""), present : Bool(false)) // Deprecated
     var cautionIcon              = (long: String("cautionicon"),       short: String(""),    value : String(""), present : Bool(false)) // Deprecated
     var hideTimerBar             = (long: String("hidetimerbar"),      short: String(""),    value : String(""), present : Bool(false))
+    var videoAutoPlay            = (long: String("autoplay"),          short: String(""),    value : String(""), present : Bool(false))
     
     var lockWindow               = (long: String("moveable"),          short: String("o"),   value : String(""), present : Bool(false)) // -o
     var forceOnTop               = (long: String("ontop"),             short: String("p"),   value : String(""), present : Bool(false)) // -p
