@@ -270,6 +270,11 @@ func processCLOptionValues() {
     
     cloptions.video.value                   = CLOptionText(OptionName: cloptions.video)
     cloptions.video.present                 = CLOptionPresent(OptionName: cloptions.video)
+    if cloptions.video.present {
+        // set a larger window size. 900x600 will fit a standard 16:9 video
+        appvars.windowWidth = appvars.videoWindowWidth
+        appvars.windowHeight = appvars.videoWindowHeight
+    }
     
     cloptions.videoCaption.value            = CLOptionText(OptionName: cloptions.videoCaption)
     cloptions.videoCaption.present          = CLOptionPresent(OptionName: cloptions.videoCaption)

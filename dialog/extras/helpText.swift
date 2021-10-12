@@ -57,6 +57,7 @@ var helpText = """
         --\(cloptions.video.long)  <file> | <url>
                     Display a video instead of a message.
                     Videos will be resized to fit the available display area without clipping the video
+                    Default dialog window size is changed to \(appvars.videoWindowWidth) x \(appvars.videoWindowHeight)
                     
     
                     --\(cloptions.videoCaption.long) <text>

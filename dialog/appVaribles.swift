@@ -42,6 +42,9 @@ struct AppVariables {
     var windowWidth                     = CGFloat(820)      // set default dialog width
     var windowHeight                    = CGFloat(380)      // set default dialog height
     
+    var videoWindowWidth                = CGFloat(900)
+    var videoWindowHeight               = CGFloat(600)
+    
     var windowPositionVertical          = NSWindow.Position.Vertical.center
     var windowPositionHorozontal        = NSWindow.Position.Horizontal.center
  
