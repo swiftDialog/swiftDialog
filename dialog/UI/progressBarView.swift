@@ -87,7 +87,7 @@ struct progressBarView: View {
                                         timer.upstream.connect().cancel()
                                         // add a slight delay so the 0 countdown is displayed for a fraction of a second before dialog quits
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                            quitDialog(exitCode: 4)
+                                            quitDialog(exitCode: appvars.exit4.code)
                                         }
                                         //perform(quitDialog(exitCode: 4), with: nil, afterDelay: 4.0)
                                     }
@@ -125,7 +125,7 @@ struct progressBarView: View {
                         progress += 1
                     }
                     if progress > timerSteps {
-                        quitDialog(exitCode: 4)
+                        quitDialog(exitCode: appvars.exit4.code)
                     }
                 }
         }

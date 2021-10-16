@@ -28,15 +28,17 @@ struct VideoView: View {
         
     var body: some View {
         VStack {
-            VideoPlayer(player: player)
-                .onAppear {
-                    player.replaceCurrentItem(with: AVPlayerItem(url: playerURL))
-                    //player.replaceCurrentItem(with: AVPlayerItem(url: URL(fileURLWithPath: "/Users/rea094/Documents/screenshots/dep.mov")))
-                    if autoPlay {
-                        player.play()
+            //GeometryReader() { geometry in
+                VideoPlayer(player: player)
+                    .onAppear {
+                        player.replaceCurrentItem(with: AVPlayerItem(url: playerURL))
+                        if autoPlay {
+                            player.play()
+                        }
                     }
-                }
-                //.frame(width: 600, height: 400)
+                    //.aspectRatio(contentMode: .fit)
+                    //.frame(maxWidth : appvars.windowWidth)
+            //}
             if videoCaption != "" {
                 Text(videoCaption)
                     .font(.system(size: 20))
