@@ -30,11 +30,15 @@ var helpText = """
                                                     default if option is invalid is system primary colour
     
                         size=<float>              - accepts any float value.
+    
+                        font=<fontname>           - accepts a font name or family
+                                                    list of available names can be determined with --\(cloptions.listFonts.long)
 
                         weight=[thin | light | regular | medium | heavy | bold]
                             default is bold
     
-                    Example: \"colour=#00A4C7,weight=light,size=60\"
+                    Example1: \"colour=#00A4C7,weight=light,size=60\"
+                    Example2: \"name=Chalkboard,colour=#FFD012,size=40\"
         
         -\(cloptions.messageOption.short), --\(cloptions.messageOption.long) <text>
                     Set the dialog message
@@ -46,6 +50,29 @@ var helpText = """
         --\(cloptions.messageAlignment.long) [left | centre | center | right]
                     Set the message alignment.
                     Default is 'left'
+    
+        --\(cloptions.messageFont.long) <text>
+                    Lets you modify the message text of the dialog.
+    
+                    Can accept up to three parameters, in a comma seperated list, to modify font properties.
+                    
+                        color,colour=<text><hex>  - specified in hex format, e.g. #00A4C7
+                                                    Also accepts any of the standard Apple colours
+                                                    black, blue, gray, green, orange, pink, purple, red, white, yellow
+                                                    default if option is invalid is system primary colour
+    
+                        size=<float>              - accepts any float value.
+    
+                        font=<fontname>           - accepts a font name or family
+                                                    list of available names can be determined with --\(cloptions.listFonts.long)
+
+                        weight=[thin | light | regular | medium | heavy | bold]
+                            default is regular
+    
+                    Example1: \"colour=#00A4C7,weight=light,size=60\"
+                    Example2: \"name=Chalkboard,colour=#FFD012,size=40\"
+    
+                    ## CAUTION : Results may be unexpected when mixing font names and weights with markdown
         
         -\(cloptions.mainImage.short), --\(cloptions.mainImage.long)  <file> | <url>
                     Display an image instead of a message.

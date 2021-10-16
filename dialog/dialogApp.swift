@@ -19,8 +19,9 @@ extension StringProtocol {
 @available(OSX 11.0, *)
 @main
 struct dialogApp: App {
-    
+        
     init () {
+        
         // get all the command line option values
         processCLOptionValues()
         
@@ -43,6 +44,14 @@ struct dialogApp: App {
         
         if cloptions.fullScreenWindow.present {
             FullscreenView().showFullScreen()
+        }
+        
+        // print appvariables and options if debug mode is on
+        if cloptions.debug.present {
+            print("CLOPTIONS")
+            print(cloptions)
+            print("APPVARS")
+            print(appvars)
         }
     }
     var body: some Scene {

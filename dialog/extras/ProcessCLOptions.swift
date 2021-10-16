@@ -8,7 +8,6 @@
 import Foundation
 import SwiftUI
 
-
 func processCLOptions() {
     
     // check all options that don't take a text value
@@ -26,17 +25,17 @@ func processCLOptions() {
     // process command line options that just display info and exit before we show the main window
     if (cloptions.helpOption.present || CommandLine.arguments.count == 1) {
         print(helpText)
-        quitDialog(exitCode: 0)
+        quitDialog(exitCode: appvars.exit0.code)
         //exit(0)
     }
     if cloptions.getVersion.present {
         printVersionString()
-        quitDialog(exitCode: 0)
+        quitDialog(exitCode: appvars.exit0.code)
         //exit(0)
     }
     if cloptions.showLicense.present {
         print(licenseText)
-        quitDialog(exitCode: 0)
+        quitDialog(exitCode: appvars.exit0.code)
         //exit(0)
     }
     if cloptions.buyCoffee.present {
@@ -47,6 +46,23 @@ func processCLOptions() {
     }
     if cloptions.ignoreDND.present {
         appvars.willDisturb = true
+    }
+    
+    if cloptions.listFonts.present {
+        //All font Families
+        let fontfamilies = NSFontManager.shared.availableFontFamilies
+        print("Available font families:")
+        for familyname in fontfamilies.enumerated() {
+            print("  \(familyname.element)")
+        }
+        
+        // All font names
+        let fonts = NSFontManager.shared.availableFonts
+        print("Available font names:")
+        for fontname in fonts.enumerated() {
+            print("  \(fontname.element)")
+        }
+        quitDialog(exitCode: appvars.exit0.code)
     }
     
     //check for DND and exit if it's on
@@ -97,9 +113,36 @@ func processCLOptions() {
             if item[0] == "colour" || item[0] == "color" {
                 appvars.titleFontColour = stringToColour(item[1])
             }
+            if item[0] == "name" {
+                appvars.titleFontName = item[1]
+            }
             
         }
         
+    }
+    
+    if cloptions.messageFont.present {
+        let fontCLValues = cloptions.messageFont.value
+        var fontValues = [""]
+        //split by ,
+        fontValues = fontCLValues.components(separatedBy: ",")
+        fontValues = fontValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
+        for value in fontValues {
+            // split by =
+            let item = value.components(separatedBy: "=")
+            if item[0] == "size" {
+                appvars.messageFontSize = CGFloat(truncating: NumberFormatter().number(from: item[1]) ?? 20)
+            }
+            if item[0] == "weight" {
+                appvars.messageFontWeight = textToFontWeight(item[1])
+            }
+            if item[0] == "colour" || item[0] == "color" {
+                appvars.messageFontColour = stringToColour(item[1])
+            }
+            if item[0] == "name" {
+                appvars.messageFontName = item[1]
+            }
+        }
     }
             
     if cloptions.hideIcon.present || cloptions.bannerImage.present {
@@ -237,6 +280,9 @@ func processCLOptionValues() {
 
     cloptions.titleFont.value               = CLOptionText(OptionName: cloptions.titleFont)
     cloptions.titleFont.present             = CLOptionPresent(OptionName: cloptions.titleFont)
+    
+    cloptions.messageFont.value             = CLOptionText(OptionName: cloptions.messageFont)
+    cloptions.messageFont.present           = CLOptionPresent(OptionName: cloptions.messageFont)
 
     cloptions.textField.value               = CLOptionText(OptionName: cloptions.textField)
     cloptions.textField.present             = CLOptionPresent(OptionName: cloptions.textField)
@@ -303,5 +349,6 @@ func processCLOptionValues() {
     cloptions.hideTimerBar.present          = CLOptionPresent(OptionName: cloptions.hideTimerBar)
     cloptions.quitOnInfo.present            = CLOptionPresent(OptionName: cloptions.quitOnInfo)
     cloptions.videoAutoPlay.present         = CLOptionPresent(OptionName: cloptions.videoAutoPlay)
+    cloptions.listFonts.present             = CLOptionPresent(OptionName: cloptions.listFonts)
 
 }
