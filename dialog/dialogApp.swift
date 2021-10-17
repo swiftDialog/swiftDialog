@@ -46,13 +46,35 @@ struct dialogApp: App {
             FullscreenView().showFullScreen()
         }
         
-        // print appvariables and options if debug mode is on
+        //check debug mode and print info
         if cloptions.debug.present {
-            print("CLOPTIONS")
-            print(cloptions)
-            print("APPVARS")
-            print(appvars)
+            appvars.debugMode = true
+            appvars.debugBorderColour = Color.green
+            
+            print("Window Height = \(appvars.windowHeight): Window Width = \(appvars.windowWidth)")
+            
+            print("\nApplication State Variables")
+            let mirrored_appvars = Mirror(reflecting: appvars)
+            for (_, attr) in mirrored_appvars.children.enumerated() {
+                if let propertyName = attr.label as String? {
+                print("  \(propertyName) = \(attr.value)")
+              }
+            }
+            print("\nApplication Command Line Options")
+            let mirrored_cloptions = Mirror(reflecting: cloptions)
+            for (_, attr) in mirrored_cloptions.children.enumerated() {
+                if let propertyName = attr.label as String? {
+                print("  \(propertyName) = \(attr.value)")
+              }
+            }
+            
+            // print appvariables and options if debug mode is on
+            //print("CLOPTIONS")
+            //print(cloptions)
+            //print("APPVARS")
+            //print(appvars)
         }
+        
     }
     var body: some Scene {
 

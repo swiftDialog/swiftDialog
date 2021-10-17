@@ -11,13 +11,7 @@ import SwiftUI
 func processCLOptions() {
     
     // check all options that don't take a text value
-    
-    //check debug mode
-    if cloptions.debug.present {
-        appvars.debugMode = true
-        appvars.debugBorderColour = Color.green
-    }
-    
+        
     if cloptions.textField.present {
         appvars.textOptionsArray = CLOptionTextField()
     }

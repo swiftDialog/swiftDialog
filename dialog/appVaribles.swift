@@ -18,7 +18,7 @@ var appvars = AppVariables()
 var cloptions = CLOptions()
 
 struct AppVariables {
-
+    
     var cliversion                      = String("1.8.0")
     
     // message default strings

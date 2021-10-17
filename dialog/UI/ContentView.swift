@@ -10,11 +10,6 @@ import SwiftUI
 
 
 struct ContentView: View {
-    init() {
-        if cloptions.debug.present {
-            print("Window Height = \(appvars.windowHeight): Window Width = \(appvars.windowWidth)")
-        }
-    }
 
     var bannerAdjustment       = CGFloat(5)
     var waterMarkFill          = String("")
