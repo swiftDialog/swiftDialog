@@ -38,7 +38,7 @@ For details on all the available options, please read the [Command Line Options]
 ## Getting Feedback
 Feedback on how someone interacts with dialog can passed back into the calling script. At a basic level dialog's exit codes will represent what button was pressed. For user input, dialog will output any data to `sdtout` in either plain text or optionally json format for easy parsing.
 
-<<<<<<< HEAD
+
 # Giving Feedback
 If there are bugs or ideas, please create an [issue](https://github.com/bartreardon/Dialog-public/issues/new/choose) so your idea doesn't go missing.
 
@@ -52,6 +52,3 @@ Please read the [CONTRIBUTING.md](https://github.com/bartreardon/Dialog-public/b
 Author: Bart Reardon
 Keywords: swift swiftui swift-dialog utility macadmins apple macos
 -->
-
-=======
->>>>>>> main
