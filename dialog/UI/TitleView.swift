@@ -13,9 +13,16 @@ struct TitleView: View {
     var TitleViewOption: String = cloptions.titleOption.value// CLOptionText(OptionName: cloptions.titleOption, DefaultValue: appvars.titleDefault)
 
     var body: some View {
-        Text(TitleViewOption)
-            .font(.system(size: appvars.titleFontSize, weight: appvars.titleFontWeight))
-            .foregroundColor(appvars.titleFontColour)
-            .frame(width: appvars.windowWidth , height: appvars.titleHeight, alignment: .center)
+        if appvars.titleFontName == "" {
+            Text(TitleViewOption)
+                .font(.system(size: appvars.titleFontSize, weight: appvars.titleFontWeight))
+                .foregroundColor(appvars.titleFontColour)
+                .frame(width: appvars.windowWidth , height: appvars.titleHeight, alignment: .center)
+        } else {
+            Text(TitleViewOption)
+                .font(.custom(appvars.titleFontName, size: appvars.titleFontSize))
+                .foregroundColor(appvars.titleFontColour)
+                .frame(width: appvars.windowWidth , height: appvars.titleHeight, alignment: .center)
+        }
     }
 }

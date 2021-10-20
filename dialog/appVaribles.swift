@@ -18,8 +18,8 @@ var appvars = AppVariables()
 var cloptions = CLOptions()
 
 struct AppVariables {
-
-    var cliversion                      = String("1.7.2")
+    
+    var cliversion                      = String("1.8.0")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
@@ -42,11 +42,14 @@ struct AppVariables {
     var windowWidth                     = CGFloat(820)      // set default dialog width
     var windowHeight                    = CGFloat(380)      // set default dialog height
     
+    var videoWindowWidth                = CGFloat(900)
+    var videoWindowHeight               = CGFloat(600)
+    
     var windowPositionVertical          = NSWindow.Position.Vertical.center
     var windowPositionHorozontal        = NSWindow.Position.Horizontal.center
  
-    var imageWidth                      = CGFloat(170)      // set default image area width
-    var imageHeight                     = CGFloat(260)      // set default image area height
+    var iconWidth                      = CGFloat(170)      // set default image area width
+    var iconHeight                     = CGFloat(260)      // set default image area height
     var titleHeight                     = CGFloat(50)
     var bannerHeight                    = CGFloat(-10)
     
@@ -61,6 +64,11 @@ struct AppVariables {
     var titleFontSize                   = CGFloat(30)
     var titleFontColour                 = Color.primary
     var titleFontWeight                 = Font.Weight.bold
+    var titleFontName                   = ""
+    var messageFontSize                 = CGFloat(20)
+    var messageFontColour               = Color.primary
+    var messageFontWeight               = Font.Weight.regular
+    var messageFontName                 = ""
     var overlayIconScale                = CGFloat(0.40)
     var overlayOffsetX                  = CGFloat(40)
     var overlayOffsetY                  = CGFloat(50)
@@ -74,11 +82,17 @@ struct AppVariables {
     var willDisturb                     = Bool(false)
     
     var textOptionsArray                = [String]()
-    var textFieldText                   = Array(repeating: "", count: 8)
+    var textFieldText                   = Array(repeating: "", count: 64)
     
     var annimationSmoothing             = Double(20)
     
     // exit codes and error messages
+    var exit0                           = (code: Int32(0),   message: String(""))
+    var exit1                           = (code: Int32(0),   message: String(""))
+    var exit2                           = (code: Int32(0),   message: String(""))
+    var exit3                           = (code: Int32(0),   message: String(""))
+    var exit4                           = (code: Int32(0),   message: String(""))
+    var exit20                          = (code: Int32(20),  message: String("Timeout Exceeded"))
     var exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))
     var exit202                         = (code: Int32(202), message: String("ERROR: File not found :"))
     var exit203                         = (code: Int32(203), message: String("ERROR: Invalid Colour Value Specified. Use format #000000 :"))
@@ -101,6 +115,8 @@ struct CLOptions {
     var messageOption            = (long: String("message"),           short: String("m"),   value : String(""), present : Bool(false))  // -m
     var messageAlignment         = (long: String("alignment"),         short: String(""),    value : String(""), present : Bool(false))
     var iconOption               = (long: String("icon"),              short: String("i"),   value : String(""), present : Bool(false))  // -i
+    var iconSize                 = (long: String("iconsize"),          short: String(""),    value : String(""), present : Bool(false))
+  //var iconHeight               = (long: String("iconheight"),        short: String(""),    value : String(""), present : Bool(false))
     var overlayIconOption        = (long: String("overlayicon"),       short: String("y"),   value : String(""), present : Bool(false))  // -y
     var bannerImage              = (long: String("bannerimage"),       short: String("n"),   value : String(""), present : Bool(false))  // -n
     var button1TextOption        = (long: String("button1text"),       short: String(""),    value : String(""), present : Bool(false))
@@ -114,6 +130,7 @@ struct CLOptions {
     var dropdownValues           = (long: String("selectvalues"),      short: String(""),    value : String(""), present : Bool(false))
     var dropdownDefault          = (long: String("selectdefault"),     short: String(""),    value : String(""), present : Bool(false))
     var titleFont                = (long: String("titlefont"),         short: String(""),    value : String(""), present : Bool(false))
+    var messageFont              = (long: String("messagefont"),       short: String(""),    value : String(""), present : Bool(false))
     var textField                = (long: String("textfield"),         short: String(""),    value : String(""), present : Bool(false))
     var timerBar                 = (long: String("timer"),             short: String(""),    value : String(""), present : Bool(false))
     var mainImage                = (long: String("image"),             short: String("g"),   value : String(""), present : Bool(false))
@@ -125,6 +142,8 @@ struct CLOptions {
     var watermarkPosition        = (long: String("bgposition"),        short: String("bp"),  value : String(""), present : Bool(false)) // -bp
     var watermarkFill            = (long: String("bgfill"),            short: String("bf"),  value : String(""), present : Bool(false)) // -bf
     var position                 = (long: String("position"),          short: String(""),    value : String(""), present : Bool(false)) // -bf
+    var video                    = (long: String("video"),             short: String(""),    value : String(""), present : Bool(false))
+    var videoCaption             = (long: String("videocaption"),      short: String(""),    value : String(""), present : Bool(false))// -bf
     var debug                    = (long: String("debug"),             short: String(""),    value : String(""), present : Bool(false))
 
     // command line options that take no additional parameters
@@ -139,12 +158,16 @@ struct CLOptions {
     var warningIcon              = (long: String("warningicon"),       short: String(""),    value : String(""), present : Bool(false)) // Deprecated
     var infoIcon                 = (long: String("infoicon"),          short: String(""),    value : String(""), present : Bool(false)) // Deprecated
     var cautionIcon              = (long: String("cautionicon"),       short: String(""),    value : String(""), present : Bool(false)) // Deprecated
+    var hideTimerBar             = (long: String("hidetimerbar"),      short: String(""),    value : String(""), present : Bool(false))
+    var videoAutoPlay            = (long: String("autoplay"),          short: String(""),    value : String(""), present : Bool(false))
     
     var lockWindow               = (long: String("moveable"),          short: String("o"),   value : String(""), present : Bool(false)) // -o
     var forceOnTop               = (long: String("ontop"),             short: String("p"),   value : String(""), present : Bool(false)) // -p
     var smallWindow              = (long: String("small"),             short: String("s"),   value : String(""), present : Bool(false)) // -s
     var bigWindow                = (long: String("big"),               short: String("b"),   value : String(""), present : Bool(false)) // -b
     var fullScreenWindow         = (long: String("fullscreen"),        short: String("f"),   value : String(""), present : Bool(false)) // -f
+    var quitOnInfo               = (long: String("quitoninfo"),        short: String(""),    value : String(""), present : Bool(false))
+    var listFonts                = (long: String("listfonts"),         short: String(""),    value : String(""), present : Bool(false))
     
     var jsonOutPut               = (long: String("json"),              short: String("j"),   value : String(""), present : Bool(false)) // -j
     var ignoreDND                = (long: String("ignorednd"),         short: String("d"),   value : String(""), present : Bool(false)) // -j

@@ -13,8 +13,8 @@ struct IconView: View {
     @Environment(\.colorScheme) var colorScheme
     
     var messageUserImagePath: String = cloptions.iconOption.value // CLOptionText(OptionName: cloptions.iconOption, DefaultValue: "default")
-    var logoWidth: CGFloat = appvars.imageWidth
-    var logoHeight: CGFloat  = appvars.imageHeight
+    var logoWidth: CGFloat = appvars.iconWidth
+    var logoHeight: CGFloat  = appvars.iconHeight
     var imgFromURL: Bool = false
     var imgFromAPP: Bool = false
     
@@ -41,8 +41,8 @@ struct IconView: View {
     
   
     init() {        
-        logoWidth = appvars.imageWidth
-        logoHeight = appvars.imageHeight
+        logoWidth = appvars.iconWidth
+        logoHeight = appvars.iconHeight
         
         if cloptions.overlayIconOption.present {
             mainImageScale = mainImageWithOverlayScale
