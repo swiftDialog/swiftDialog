@@ -160,7 +160,7 @@ struct IconOverlayView: View {
                         .aspectRatio(contentMode: .fit)
                         .scaledToFit()
                 } else {
-                    let diskImage: NSImage = getImageFromPath(fileImagePath: overlayImagePath, imgWidth: appvars.imageWidth, imgHeight: appvars.imageHeight, returnErrorImage: false)
+                    let diskImage: NSImage = getImageFromPath(fileImagePath: overlayImagePath, imgWidth: appvars.iconWidth, imgHeight: appvars.iconHeight, returnErrorImage: false)
                     Image(nsImage: diskImage)
                         .resizable()
                         .aspectRatio(contentMode: .fit)

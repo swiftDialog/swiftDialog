@@ -21,7 +21,35 @@ struct progressBarView: View {
     var timerSteps: CGFloat
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect() // tick every 1 second
     
-    
+    func numToHHMMSS(seconds: Int) -> String {
+        var returnTime : String = "0"
+        
+        if seconds != 0 {
+            let hours = (seconds / 3600) % 3600
+            let minutes = (seconds / 60) % 60
+            let seconds = seconds % 60
+            if minutes < 1 && hours < 1 {
+                returnTime = "\(seconds)"
+            } else if hours < 1 {
+                if minutes < 10 {
+                    returnTime = String(format: "%d:%02d", minutes, seconds)
+                } else {
+                    returnTime = String(format: "%02d:%02d", minutes, seconds)
+                }
+            } else {
+                if hours < 10 {
+                    returnTime = String(format: "%d:%02d:%02d", hours, minutes, seconds)
+                } else {
+                    returnTime = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+                }
+                
+            }
+            //return String(format:"%d:%02d", minutes, seconds)
+        }
+        
+        return returnTime
+        
+    }
     
     var barVisible: Bool
     
@@ -59,7 +87,7 @@ struct progressBarView: View {
                                         timer.upstream.connect().cancel()
                                         // add a slight delay so the 0 countdown is displayed for a fraction of a second before dialog quits
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                            quitDialog(exitCode: 4)
+                                            quitDialog(exitCode: appvars.exit4.code)
                                         }
                                         //perform(quitDialog(exitCode: 4), with: nil, afterDelay: 4.0)
                                     }
@@ -75,7 +103,7 @@ struct progressBarView: View {
                             // Countdown timer area
                             // White text with black "outline"
                             // frame set to the same width as the progress bar and centered.
-                        Text("\(Int(steps-progress))") // count down to 0
+                        Text("\(numToHHMMSS(seconds: Int( steps-progress)))") // count down to 0 //Int(steps-progress)
                                 .fontWeight(.bold)
                                 .foregroundColor(.white)
                                 .shadow(color: .black, radius: 0.5) // create outline
@@ -90,7 +118,18 @@ struct progressBarView: View {
                 }
             }.frame(height: barheight, alignment: .bottom) //needed to force limit the entire progress bar frame height
             .padding(10)
+        } else {
+            Spacer()
+                .onReceive(timer) { _ in
+                    if progress <= timerSteps {
+                        progress += 1
+                    }
+                    if progress > timerSteps {
+                        quitDialog(exitCode: appvars.exit4.code)
+                    }
+                }
         }
+        
         
     }
 }

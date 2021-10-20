@@ -114,10 +114,6 @@ public func convertFromJamfHelperSyntax() {
             appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
         }
     }
-    
-    if cloptions.debug.present {
-        print(cloptions)
-    }
 }
 
 /*

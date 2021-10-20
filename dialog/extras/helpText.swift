@@ -30,11 +30,15 @@ var helpText = """
                                                     default if option is invalid is system primary colour
     
                         size=<float>              - accepts any float value.
+    
+                        font=<fontname>           - accepts a font name or family
+                                                    list of available names can be determined with --\(cloptions.listFonts.long)
 
                         weight=[thin | light | regular | medium | heavy | bold]
                             default is bold
     
-                    Example: \"colour=#00A4C7,weight=light,size=60\"
+                    Example1: \"colour=#00A4C7,weight=light,size=60\"
+                    Example2: \"name=Chalkboard,colour=#FFD012,size=40\"
         
         -\(cloptions.messageOption.short), --\(cloptions.messageOption.long) <text>
                     Set the dialog message
@@ -46,6 +50,29 @@ var helpText = """
         --\(cloptions.messageAlignment.long) [left | centre | center | right]
                     Set the message alignment.
                     Default is 'left'
+    
+        --\(cloptions.messageFont.long) <text>
+                    Lets you modify the message text of the dialog.
+    
+                    Can accept up to three parameters, in a comma seperated list, to modify font properties.
+                    
+                        color,colour=<text><hex>  - specified in hex format, e.g. #00A4C7
+                                                    Also accepts any of the standard Apple colours
+                                                    black, blue, gray, green, orange, pink, purple, red, white, yellow
+                                                    default if option is invalid is system primary colour
+    
+                        size=<float>              - accepts any float value.
+    
+                        font=<fontname>           - accepts a font name or family
+                                                    list of available names can be determined with --\(cloptions.listFonts.long)
+
+                        weight=[thin | light | regular | medium | heavy | bold]
+                            default is regular
+    
+                    Example1: \"colour=#00A4C7,weight=light,size=60\"
+                    Example2: \"name=Chalkboard,colour=#FFD012,size=40\"
+    
+                    ## CAUTION : Results may be unexpected when mixing font names and weights with markdown
         
         -\(cloptions.mainImage.short), --\(cloptions.mainImage.long)  <file> | <url>
                     Display an image instead of a message.
@@ -53,6 +80,18 @@ var helpText = """
     
                     --\(cloptions.mainImageCaption.long) <text>
                         Text that will appear underneath the displayed image.
+    
+        --\(cloptions.video.long)  <file> | <url>
+                    Display a video instead of a message.
+                    Videos will be resized to fit the available display area without clipping the video
+                    Default dialog window size is changed to \(appvars.videoWindowWidth) x \(appvars.videoWindowHeight)
+                    
+    
+                    --\(cloptions.videoCaption.long) <text>
+                        Text that will appear underneath the displayed video.
+    
+                    --\(cloptions.videoAutoPlay.long)
+                        Will force the video to start playing automatically.
         
         -\(cloptions.iconOption.short), --\(cloptions.iconOption.long) <file> | <url>
                     Set the icon to display
@@ -67,6 +106,10 @@ var helpText = """
                     Images from either file or URL are displayed as roundrect if no transparancy
     
                     "none" can also be specified to not display an icon but maintain layout (see also --\(cloptions.hideIcon.long))
+    
+        --\(cloptions.iconSize.long)
+                    Will render the icon with the specified size.
+                    Default size is 170
     
         -\(cloptions.overlayIconOption.short), --\(cloptions.overlayIconOption.long) <file> | <url>
                     Set an image to display as an overlay to --icon
@@ -144,12 +187,15 @@ var helpText = """
         --\(cloptions.buttonInfoTextOption.long) <text>
                     Set the label for Information Button
                     If not specified, Info button will not be displayed
-                    Return code when actioned is 3
-
+    
         --\(cloptions.buttonInfoActionOption.long)  <url>
                     Set the action to take.
                     Accepts URL
                     Default action if not specified is no action
+    
+        --\(cloptions.quitOnInfo.long)
+                    Will tell Dialog to quit when the info button is selected
+                    Return code when actioned is 3
     
     ** Advanced Options - - - - - - - - - - - - - - - -
     
@@ -230,6 +276,9 @@ var helpText = """
                     will be displayed but will be disabled for the first 3 seconds of the timer, after which it
                     becomes active and can be used to dismiss dialog with the standard button 1 exit code of 0
     
+        --\(cloptions.hideTimerBar.long)
+                    Will hide the timer bar. Dialog will close after time specified by --\(cloptions.timerBar.long)
+                    Default OK button is displayed. This is to prevent persistant or unclosable dialogs of unknown duration.
     
         -\(cloptions.lockWindow.short), --\(cloptions.lockWindow.long)
                     Let window me moved around the screen. Default is not moveable
