@@ -14,14 +14,13 @@ struct DialogView: View {
     
     init() {
         if appvars.iconIsHidden {
-            appvars.imageWidth = 0
+            appvars.iconWidth = 0
         }
-        //print("icon width: \(appvars.imageWidth) icon height: \(appvars.imageHeight)")
     }
     
     var body: some View {
         HStack { //}(alignment: .top, spacing: nil) {
-            let iconFrameWidth: CGFloat = appvars.imageWidth
+            let iconFrameWidth: CGFloat = appvars.iconWidth
             HStack {
                 
                 if (!appvars.iconIsHidden) {

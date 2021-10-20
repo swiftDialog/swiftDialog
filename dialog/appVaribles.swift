@@ -48,8 +48,8 @@ struct AppVariables {
     var windowPositionVertical          = NSWindow.Position.Vertical.center
     var windowPositionHorozontal        = NSWindow.Position.Horizontal.center
  
-    var imageWidth                      = CGFloat(170)      // set default image area width
-    var imageHeight                     = CGFloat(260)      // set default image area height
+    var iconWidth                      = CGFloat(170)      // set default image area width
+    var iconHeight                     = CGFloat(260)      // set default image area height
     var titleHeight                     = CGFloat(50)
     var bannerHeight                    = CGFloat(-10)
     

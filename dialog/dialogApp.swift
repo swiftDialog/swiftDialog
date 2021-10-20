@@ -39,8 +39,8 @@ struct dialogApp: App {
         appvars.titleHeight = appvars.titleHeight * appvars.scaleFactor
         appvars.windowWidth = appvars.windowWidth * appvars.scaleFactor
         appvars.windowHeight = appvars.windowHeight * appvars.scaleFactor
-        appvars.imageWidth = appvars.imageWidth * appvars.scaleFactor
-        appvars.imageHeight = appvars.imageHeight * appvars.scaleFactor
+        appvars.iconWidth = appvars.iconWidth * appvars.scaleFactor
+        appvars.iconHeight = appvars.iconHeight * appvars.scaleFactor
         
         if cloptions.fullScreenWindow.present {
             FullscreenView().showFullScreen()

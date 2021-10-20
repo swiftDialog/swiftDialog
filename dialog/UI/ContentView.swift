@@ -13,6 +13,13 @@ struct ContentView: View {
 
     var bannerAdjustment       = CGFloat(5)
     var waterMarkFill          = String("")
+    var progressSteps : CGFloat = appvars.timerDefaultSeconds
+    
+    init () {
+        if cloptions.timerBar.present {
+            progressSteps = NumberFormatter().number(from: cloptions.timerBar.value) as! CGFloat
+        }
+    }
         
     var body: some View {
                 
@@ -54,7 +61,8 @@ struct ContentView: View {
                         }
                     }
                     if cloptions.timerBar.present {
-                        progressBarView(progressSteps: NumberFormatter().number(from: cloptions.timerBar.value) as? CGFloat, visible: !cloptions.hideTimerBar.present)
+                        //progressBarView(progressSteps: (NumberFormatter().number(from: cloptions.timerBar.value) as! CGFloat), visible: !cloptions.hideTimerBar.present)
+                        progressBarView(progressSteps: progressSteps, visible: !cloptions.hideTimerBar.present)
                             .frame(alignment: .bottom)
                     }
                     if (cloptions.timerBar.present && cloptions.button1TextOption.present) || !cloptions.timerBar.present || cloptions.hideTimerBar.present  {

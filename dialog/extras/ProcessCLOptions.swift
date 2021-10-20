@@ -75,12 +75,12 @@ func processCLOptions() {
     
     if cloptions.iconSize.present {
         //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: cloptions.windowWidth)
-        appvars.imageWidth = NumberFormatter().number(from: cloptions.iconSize.value) as! CGFloat
+        appvars.iconWidth = NumberFormatter().number(from: cloptions.iconSize.value) as! CGFloat
     }
     /*
     if cloptions.iconHeight.present {
         //appvars.windowHeight = CGFloat() //CLOptionText(OptionName: cloptions.windowHeight)
-        appvars.imageHeight = NumberFormatter().number(from: cloptions.iconHeight.value) as! CGFloat
+        appvars.iconHeight = NumberFormatter().number(from: cloptions.iconHeight.value) as! CGFloat
     }
     */
     // Correct feng shui so the app accepts keyboard input
