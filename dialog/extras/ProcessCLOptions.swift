@@ -286,7 +286,7 @@ func processCLOptionValues() {
 
     cloptions.mainImage.value               = CLOptionText(OptionName: cloptions.mainImage)
     cloptions.mainImage.present             = CLOptionPresent(OptionName: cloptions.mainImage)
-
+    
     cloptions.mainImageCaption.value        = CLOptionText(OptionName: cloptions.mainImageCaption)
     cloptions.mainImageCaption.present      = CLOptionPresent(OptionName: cloptions.mainImageCaption)
 
@@ -298,7 +298,7 @@ func processCLOptionValues() {
     
     cloptions.watermarkImage.value          = CLOptionText(OptionName: cloptions.watermarkImage)
     cloptions.watermarkImage.present        = CLOptionPresent(OptionName: cloptions.watermarkImage)
-    
+        
     cloptions.watermarkAlpha.value          = CLOptionText(OptionName: cloptions.watermarkAlpha)
     cloptions.watermarkAlpha.present        = CLOptionPresent(OptionName: cloptions.watermarkAlpha)
     
@@ -319,6 +319,27 @@ func processCLOptionValues() {
     cloptions.videoCaption.value            = CLOptionText(OptionName: cloptions.videoCaption)
     cloptions.videoCaption.present          = CLOptionPresent(OptionName: cloptions.videoCaption)
 
+    if cloptions.watermarkImage.present {
+        // return the image resolution and re-size the window to match
+        let bgImage = getImageFromPath(fileImagePath: cloptions.watermarkImage.value)
+        if bgImage.size.width > appvars.windowWidth && bgImage.size.height > appvars.windowHeight && !cloptions.windowHeight.present && !cloptions.watermarkFill.present {
+            // keep the same width ratio but change the height
+            var wWidth = appvars.windowWidth
+            if cloptions.windowWidth.present {
+                wWidth = NumberFormatter().number(from: cloptions.windowWidth.value) as! CGFloat
+            }
+            let widthRatio = wWidth / bgImage.size.width  // get the ration of the image height to the current display width
+            let newHeight = (bgImage.size.height * widthRatio) - 28 //28 needs to be removed to account for the phantom title bar height
+            appvars.windowHeight = floor(newHeight) // floor() will strip any fractional values as a result of the above multiplication
+                                                    // we need to do this as window heights can't be fractional and weird things happen
+                        
+            if !cloptions.watermarkFill.present {
+                cloptions.watermarkFill.present = true
+                cloptions.watermarkFill.value = "fill"
+            }
+        }
+    }
+    
     // anthing that is an option only with no value
     cloptions.button2Option.present         = CLOptionPresent(OptionName: cloptions.button2Option)
     cloptions.infoButtonOption.present      = CLOptionPresent(OptionName: cloptions.infoButtonOption)
