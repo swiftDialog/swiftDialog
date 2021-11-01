@@ -19,7 +19,7 @@ var cloptions = CLOptions()
 
 struct AppVariables {
     
-    var cliversion                      = String("1.8.0")
+    var cliversion                      = String("1.8.1")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
@@ -88,10 +88,10 @@ struct AppVariables {
     
     // exit codes and error messages
     var exit0                           = (code: Int32(0),   message: String(""))
-    var exit1                           = (code: Int32(0),   message: String(""))
-    var exit2                           = (code: Int32(0),   message: String(""))
-    var exit3                           = (code: Int32(0),   message: String(""))
-    var exit4                           = (code: Int32(0),   message: String(""))
+    var exit1                           = (code: Int32(1),   message: String(""))
+    var exit2                           = (code: Int32(2),   message: String(""))
+    var exit3                           = (code: Int32(3),   message: String(""))
+    var exit4                           = (code: Int32(4),   message: String(""))
     var exit20                          = (code: Int32(20),  message: String("Timeout Exceeded"))
     var exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))
     var exit202                         = (code: Int32(202), message: String("ERROR: File not found :"))
