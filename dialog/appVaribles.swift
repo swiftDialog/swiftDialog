@@ -19,7 +19,7 @@ var cloptions = CLOptions()
 
 struct AppVariables {
     
-    var cliversion                      = String("1.8.1")
+    var cliversion                      = String("1.9.0")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
@@ -62,6 +62,8 @@ struct AppVariables {
     var scaleFactor                     = CGFloat(1)
     
     var timerDefaultSeconds             = CGFloat(10)
+    
+    var autoPlayDefaultSeconds          = CGFloat(10)
 
     var horozontalLineScale             = CGFloat(0.9)
     var dialogContentScale              = CGFloat(0.65)
@@ -87,6 +89,9 @@ struct AppVariables {
     
     var textOptionsArray                = [String]()
     var textFieldText                   = Array(repeating: "", count: 64)
+    
+    var imageArray                      = [String]()
+    var imageCaptionArray               = [String]()
     
     var annimationSmoothing             = Double(20)
     
@@ -163,7 +168,7 @@ struct CLOptions {
     var infoIcon                 = (long: String("infoicon"),          short: String(""),    value : String(""), present : Bool(false)) // Deprecated
     var cautionIcon              = (long: String("cautionicon"),       short: String(""),    value : String(""), present : Bool(false)) // Deprecated
     var hideTimerBar             = (long: String("hidetimerbar"),      short: String(""),    value : String(""), present : Bool(false))
-    var videoAutoPlay            = (long: String("autoplay"),          short: String(""),    value : String(""), present : Bool(false))
+    var autoPlay                 = (long: String("autoplay"),          short: String(""),    value : String(""), present : Bool(false))
     
     var lockWindow               = (long: String("moveable"),          short: String("o"),   value : String(""), present : Bool(false)) // -o
     var forceOnTop               = (long: String("ontop"),             short: String("p"),   value : String(""), present : Bool(false)) // -p

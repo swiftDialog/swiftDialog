@@ -11,31 +11,32 @@ import Combine
 
 struct ImageView: View {
     
-    var imagePath: String = ""
-    var mainImage: NSImage
-    var imageCaption: String = ""
+    //var imageArray : Array
+    //var mainImage: NSImage
+    //var imageCaption: String = ""
     
     @State var index = 0
     
     var images : Array = [NSImage]()
     var captions : Array = [String]()
+    var autoPlaySeconds : CGFloat
     
     
-    init(imagePath: String?, caption: String?) {
-        mainImage = getImageFromPath(fileImagePath: imagePath ?? "")
-        imageCaption = caption ?? ""
+    init(imageArray: Array<String>, captionArray: Array<String>, autoPlaySeconds : CGFloat) {
+        //mainImage = getImageFromPath(fileImagePath: imagePath ?? "")
+        //imageCaption = caption ?? ""
+        for imagePath in imageArray {
+            images.append(getImageFromPath(fileImagePath: imagePath))
+        }
+        for imageCaption in captionArray {
+            captions.append(imageCaption)
+        }
         
-        images.append(getImageFromPath(fileImagePath: imagePath ?? ""))
-        captions.append(caption ?? "")
-        images.append(getImageFromPath(fileImagePath: imagePath ?? ""))
-        captions.append(caption ?? "")
-        images.append(getImageFromPath(fileImagePath: imagePath ?? ""))
-        captions.append(caption ?? "")
-        images.append(getImageFromPath(fileImagePath: imagePath ?? ""))
-        captions.append(caption ?? "")
-        images.append(getImageFromPath(fileImagePath: imagePath ?? ""))
-        captions.append(caption ?? "")
+        while captions.count < images.count {
+            captions.append("")
+        }
         
+        self.autoPlaySeconds = autoPlaySeconds
     }
     
     var body: some View {
@@ -54,7 +55,7 @@ struct ImageView: View {
          */
         VStack(spacing: 20) {
             //HStack() {
-                ImageSlider(index: $index.animation(), maxIndex: images.count - 1, autoPlaySeconds: 10) {
+                ImageSlider(index: $index.animation(), maxIndex: images.count - 1, autoPlaySeconds: autoPlaySeconds) {
                     ForEach(Array(self.images.enumerated()), id: \.offset) { imageIndex, imageName in
                         VStack() {
                             Image(nsImage: imageName)
@@ -70,6 +71,5 @@ struct ImageView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10))
         }
         .padding()
-        .zIndex(1)
-    }
+    }        
 }

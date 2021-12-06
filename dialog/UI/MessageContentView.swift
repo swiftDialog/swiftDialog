@@ -33,7 +33,7 @@ struct MessageContent: View {
     
     var body: some View {
         if cloptions.mainImage.present {
-            ImageView(imagePath: cloptions.mainImage.value, caption: cloptions.mainImageCaption.value)
+            ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: NumberFormatter().number(from: cloptions.autoPlay.value) as! CGFloat)
         } else {
             VStack {
 

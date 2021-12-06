@@ -13,7 +13,19 @@ func processCLOptions() {
     // check all options that don't take a text value
         
     if cloptions.textField.present {
-        appvars.textOptionsArray = CLOptionTextField()
+        appvars.textOptionsArray = CLOptionMultiOptions(optionName: cloptions.textField.long)
+    }
+    
+    if cloptions.mainImageCaption.present {
+        appvars.imageArray = CLOptionMultiOptions(optionName: cloptions.mainImage.long)
+    }
+    
+    if cloptions.mainImageCaption.present {
+        appvars.imageCaptionArray = CLOptionMultiOptions(optionName: cloptions.mainImageCaption.long)
+    }
+    
+    if !cloptions.autoPlay.present {
+        cloptions.autoPlay.value = "0"
     }
     
     // process command line options that just display info and exit before we show the main window
@@ -286,7 +298,7 @@ func processCLOptionValues() {
     cloptions.messageFont.value             = CLOptionText(OptionName: cloptions.messageFont)
     cloptions.messageFont.present           = CLOptionPresent(OptionName: cloptions.messageFont)
 
-    cloptions.textField.value               = CLOptionText(OptionName: cloptions.textField)
+    //cloptions.textField.value               = CLOptionText(OptionName: cloptions.textField)
     cloptions.textField.present             = CLOptionPresent(OptionName: cloptions.textField)
 
     cloptions.timerBar.value                = CLOptionText(OptionName: cloptions.timerBar, DefaultValue: "\(appvars.timerDefaultSeconds)")
@@ -315,6 +327,9 @@ func processCLOptionValues() {
     
     cloptions.watermarkFill.value           = CLOptionText(OptionName: cloptions.watermarkFill)
     cloptions.watermarkFill.present         = CLOptionPresent(OptionName: cloptions.watermarkFill)
+    
+    cloptions.autoPlay.value                = CLOptionText(OptionName: cloptions.autoPlay, DefaultValue: "\(appvars.timerDefaultSeconds)")
+    cloptions.autoPlay.present              = CLOptionPresent(OptionName: cloptions.autoPlay)
     
     cloptions.video.value                   = CLOptionText(OptionName: cloptions.video)
     cloptions.video.present                 = CLOptionPresent(OptionName: cloptions.video)
@@ -371,7 +386,6 @@ func processCLOptionValues() {
     cloptions.debug.present                 = CLOptionPresent(OptionName: cloptions.debug)
     cloptions.hideTimerBar.present          = CLOptionPresent(OptionName: cloptions.hideTimerBar)
     cloptions.quitOnInfo.present            = CLOptionPresent(OptionName: cloptions.quitOnInfo)
-    cloptions.videoAutoPlay.present         = CLOptionPresent(OptionName: cloptions.videoAutoPlay)
     cloptions.listFonts.present             = CLOptionPresent(OptionName: cloptions.listFonts)
 
 }

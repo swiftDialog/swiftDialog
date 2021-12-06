@@ -137,7 +137,7 @@ struct FullscreenView: View {
             VStack {
                 if cloptions.mainImage.present {
                     // print image and caption
-                    ImageView(imagePath: cloptions.mainImage.value, caption: "")
+                    ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: NumberFormatter().number(from: cloptions.autoPlay.value) as! CGFloat)
                         .frame(maxHeight: windowHeight/1.3)
                     if cloptions.mainImageCaption.present {
                         Text(cloptions.mainImageCaption.value)
