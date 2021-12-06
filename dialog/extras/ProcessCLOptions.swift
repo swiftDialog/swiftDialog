@@ -66,11 +66,19 @@ func processCLOptions() {
         
     if cloptions.windowWidth.present {
         //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: cloptions.windowWidth)
-        appvars.windowWidth = NumberFormatter().number(from: cloptions.windowWidth.value) as! CGFloat
+        if cloptions.windowWidth.value.last == "%" {
+            appvars.windowWidth = appvars.screenWidth * (NumberFormatter().number(from: String(cloptions.windowWidth.value.dropLast())) as! CGFloat)/100
+        } else {
+            appvars.windowWidth = NumberFormatter().number(from: cloptions.windowWidth.value) as! CGFloat
+        }
     }
     if cloptions.windowHeight.present {
         //appvars.windowHeight = CGFloat() //CLOptionText(OptionName: cloptions.windowHeight)
-        appvars.windowHeight = NumberFormatter().number(from: cloptions.windowHeight.value) as! CGFloat
+        if cloptions.windowHeight.value.last == "%" {
+            appvars.windowHeight = appvars.screenHeight * (NumberFormatter().number(from: String(cloptions.windowHeight.value.dropLast())) as! CGFloat)/100
+        } else {
+            appvars.windowHeight = NumberFormatter().number(from: cloptions.windowHeight.value) as! CGFloat
+        }
     }
     
     if cloptions.iconSize.present {

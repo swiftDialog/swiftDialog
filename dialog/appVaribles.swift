@@ -42,6 +42,10 @@ struct AppVariables {
     var windowWidth                     = CGFloat(820)      // set default dialog width
     var windowHeight                    = CGFloat(380)      // set default dialog height
     
+    // Screen Size
+    var screenWidth                     = CGFloat(0)
+    var screenHeight                    = CGFloat(0)
+    
     var videoWindowWidth                = CGFloat(900)
     var videoWindowHeight               = CGFloat(600)
     

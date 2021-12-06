@@ -22,6 +22,12 @@ struct dialogApp: App {
         
     init () {
         
+        if let screen = NSScreen.main {
+            let rect = screen.frame
+            appvars.screenHeight = rect.size.height
+            appvars.screenWidth = rect.size.width
+        }
+        
         // get all the command line option values
         processCLOptionValues()
         
