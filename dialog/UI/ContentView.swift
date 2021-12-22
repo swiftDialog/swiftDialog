@@ -20,7 +20,10 @@ struct ContentView: View {
             progressSteps = NumberFormatter().number(from: cloptions.timerBar.value) as! CGFloat
         }
     }
-        
+//
+//    // set up timer to read data from temp file
+//    let updateTimer = Timer.publish(every: 5, on: .main, in: .common).autoconnect() // tick every 1 second
+//
     var body: some View {
                         
         ZStack {
@@ -94,6 +97,9 @@ struct ContentView: View {
         }
         .edgesIgnoringSafeArea(.all)
         .hostingWindowPosition(vertical: appvars.windowPositionVertical, horizontal: appvars.windowPositionHorozontal)
+//        .onReceive(updateTimer, perform: { _ in
+//            processDialogState()
+//        })
          
     }
     

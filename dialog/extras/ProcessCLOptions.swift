@@ -14,18 +14,22 @@ func processCLOptions() {
         
     if cloptions.textField.present {
         appvars.textOptionsArray = CLOptionMultiOptions(optionName: cloptions.textField.long)
+        logger(logMessage: "textOptionsArray : \(appvars.textOptionsArray)")
     }
     
     if cloptions.mainImageCaption.present {
         appvars.imageArray = CLOptionMultiOptions(optionName: cloptions.mainImage.long)
+        logger(logMessage: "imageArray : \(appvars.imageArray)")
     }
     
     if cloptions.mainImageCaption.present {
         appvars.imageCaptionArray = CLOptionMultiOptions(optionName: cloptions.mainImageCaption.long)
+        logger(logMessage: "imageCaptionArray : \(appvars.imageCaptionArray)")
     }
     
     if !cloptions.autoPlay.present {
         cloptions.autoPlay.value = "0"
+        logger(logMessage: "autoPlay.value : \(cloptions.autoPlay.value)")
     }
     
     // process command line options that just display info and exit before we show the main window
@@ -83,6 +87,7 @@ func processCLOptions() {
         } else {
             appvars.windowWidth = NumberFormatter().number(from: cloptions.windowWidth.value) as! CGFloat
         }
+        logger(logMessage: "windowWidth : \(appvars.windowWidth)")
     }
     if cloptions.windowHeight.present {
         //appvars.windowHeight = CGFloat() //CLOptionText(OptionName: cloptions.windowHeight)
@@ -91,11 +96,13 @@ func processCLOptions() {
         } else {
             appvars.windowHeight = NumberFormatter().number(from: cloptions.windowHeight.value) as! CGFloat
         }
+        logger(logMessage: "windowHeight : \(appvars.windowHeight)")
     }
     
     if cloptions.iconSize.present {
         //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: cloptions.windowWidth)
         appvars.iconWidth = NumberFormatter().number(from: cloptions.iconSize.value) as! CGFloat
+        logger(logMessage: "iconWidth : \(appvars.iconWidth)")
     }
     /*
     if cloptions.iconHeight.present {
@@ -110,6 +117,7 @@ func processCLOptions() {
     app.setActivationPolicy(.accessory)
             
     if cloptions.titleFont.present {
+        logger(logMessage: "titleFont.value : \(cloptions.titleFont.value)")
         let fontCLValues = cloptions.titleFont.value
         var fontValues = [""]
         //split by ,
@@ -120,22 +128,26 @@ func processCLOptions() {
             let item = value.components(separatedBy: "=")
             if item[0] == "size" {
                 appvars.titleFontSize = CGFloat(truncating: NumberFormatter().number(from: item[1]) ?? 20)
+                logger(logMessage: "titleFontSize : \(appvars.titleFontSize)")
             }
             if item[0] == "weight" {
                 appvars.titleFontWeight = textToFontWeight(item[1])
+                logger(logMessage: "titleFontWeight : \(appvars.titleFontWeight)")
             }
             if item[0] == "colour" || item[0] == "color" {
                 appvars.titleFontColour = stringToColour(item[1])
+                logger(logMessage: "titleFontColour : \(appvars.titleFontColour)")
             }
             if item[0] == "name" {
                 appvars.titleFontName = item[1]
+                logger(logMessage: "titleFontName : \(appvars.titleFontName)")
             }
             
         }
-        
     }
     
     if cloptions.messageFont.present {
+        logger(logMessage: "messageFont.value : \(cloptions.messageFont.value)")
         let fontCLValues = cloptions.messageFont.value
         var fontValues = [""]
         //split by ,
@@ -146,33 +158,41 @@ func processCLOptions() {
             let item = value.components(separatedBy: "=")
             if item[0] == "size" {
                 appvars.messageFontSize = CGFloat(truncating: NumberFormatter().number(from: item[1]) ?? 20)
+                logger(logMessage: "messageFontSize : \(appvars.messageFontSize)")
             }
             if item[0] == "weight" {
                 appvars.messageFontWeight = textToFontWeight(item[1])
+                logger(logMessage: "messageFontWeight : \(appvars.messageFontWeight)")
             }
             if item[0] == "colour" || item[0] == "color" {
                 appvars.messageFontColour = stringToColour(item[1])
+                logger(logMessage: "messageFontColour : \(appvars.messageFontColour)")
             }
             if item[0] == "name" {
                 appvars.messageFontName = item[1]
+                logger(logMessage: "messageFontName : \(appvars.messageFontName)")
             }
         }
     }
             
     if cloptions.hideIcon.present || cloptions.bannerImage.present {
         appvars.iconIsHidden = true
+        logger(logMessage: "iconIsHidden = true")
     }
     
     if cloptions.lockWindow.present {
         appvars.windowIsMoveable = true
+        logger(logMessage: "windowIsMoveable = true")
     }
     
     if cloptions.forceOnTop.present {
         appvars.windowOnTop = true
+        logger(logMessage: "windowOnTop = true")
     }
     
     if cloptions.jsonOutPut.present {
         appvars.jsonOut = true
+        logger(logMessage: "jsonOut = true")
     }
     
     // we define this stuff here as we will use the info to draw the window.
@@ -180,10 +200,12 @@ func processCLOptions() {
         // scale everything down a notch
         appvars.smallWindow = true
         appvars.scaleFactor = 0.75
+        logger(logMessage: "smallWindow.present")
     } else if cloptions.bigWindow.present {
         // scale everything up a notch
         appvars.bigWindow = true
         appvars.scaleFactor = 1.25
+        logger(logMessage: "bigWindow.present")
     }
 }
 

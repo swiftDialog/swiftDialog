@@ -22,6 +22,8 @@ struct dialogApp: App {
         
     init () {
         
+        logger(logMessage: "Dialog Launched")
+        
         if let screen = NSScreen.main {
             let rect = screen.frame
             appvars.screenHeight = rect.size.height
@@ -54,6 +56,7 @@ struct dialogApp: App {
         
         //check debug mode and print info
         if cloptions.debug.present {
+            logger(logMessage: "debug options presented. dialog state sent to stdout and ")
             appvars.debugMode = true
             appvars.debugBorderColour = Color.green
             
@@ -80,6 +83,7 @@ struct dialogApp: App {
             //print("APPVARS")
             //print(appvars)
         }
+        logger(logMessage: "width: \(appvars.windowWidth), height: \(appvars.windowHeight)")
         
     }
     var body: some Scene {

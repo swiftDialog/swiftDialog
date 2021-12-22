@@ -9,16 +9,66 @@ import Foundation
 import AppKit
 import SystemConfiguration
 import SwiftUI
+import OSLog
 
 class stdOutput: ObservableObject {
     @Published var selectedOption: String = ""
 }
+
 
 public extension Color {
 
     static let background = Color(NSColor.windowBackgroundColor)
     static let secondaryBackground = Color(NSColor.underPageBackgroundColor)
     static let tertiaryBackground = Color(NSColor.controlBackgroundColor)
+}
+
+func logger(logType: String = "", logMessage: String) {
+    let defaultLog = Logger(subsystem: "au.bartreardon.dialog", category: "main")
+    switch logType {
+    case "info":
+        defaultLog.info("\(logMessage, privacy: .public)")
+    case "debug":
+        defaultLog.debug("\(logMessage, privacy: .public)")
+    case "error":
+        defaultLog.error("\(logMessage, privacy: .public)")
+    case "fault":
+        defaultLog.fault("\(logMessage, privacy: .public)")
+    default:
+        defaultLog.log("\(logMessage, privacy: .public)")
+    }
+}
+
+func readDilaogStateFromFile() -> String {
+    //let progressFile = FileManager //"/private/tmp/dialogprogress.log"
+    // Determine the file name
+    let filename = "/private/tmp/dialogprogress.log"
+
+    // Read the contents of the specified file
+    let contents = try! String(contentsOfFile: filename)
+
+    // Split the file into separate lines
+    let lines = contents.split(separator:"\n")
+    
+    let lastline = lines[0]
+    
+    return String(describing: lastline)
+}
+
+func processDialogState() {
+    //Get the line
+    let command = readDilaogStateFromFile()
+    let action = command.split(separator: ":")
+    print("first part is - \(action[0])")
+    print("second part is - \(action[1])")
+    print("cloptions.titleOption.value = \(cloptions.titleOption.value)")
+    switch action[0] {
+    case "test":
+        print("found test")
+        cloptions.titleOption.value = "Testing 1 - 2 - 3"
+    default:
+        print("doing nothing")
+    }
 }
 
 func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, imgHeight: CGFloat? = .infinity, returnErrorImage: Bool? = false) -> NSImage {
