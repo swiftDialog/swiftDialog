@@ -49,16 +49,25 @@ func processCLOptions() {
     
     if cloptions.mainImage.present {
         if json[cloptions.mainImage.long].exists() {
-            appvars.imageArray = json[cloptions.mainImage.long].arrayValue.map {$0["image"].stringValue}
-            appvars.imageCaptionArray = json[cloptions.mainImage.long].arrayValue.map {$0["caption"].stringValue}
+            if json[cloptions.mainImage.long].array == nil {
+                // not an array so pull the single value
+                appvars.imageArray.append(json[cloptions.mainImage.long].stringValue)
+            } else {
+                appvars.imageArray = json[cloptions.mainImage.long].arrayValue.map {$0["imagename"].stringValue}
+                appvars.imageCaptionArray = json[cloptions.mainImage.long].arrayValue.map {$0["caption"].stringValue}
+            }
         } else {
             appvars.imageArray = CLOptionMultiOptions(optionName: cloptions.mainImage.long)
         }
         logger(logMessage: "imageArray : \(appvars.imageArray)")
     }
     
-    if cloptions.mainImageCaption.present {
-        appvars.imageCaptionArray = CLOptionMultiOptions(optionName: cloptions.mainImageCaption.long)
+    if json[cloptions.mainImageCaption.long].exists() || cloptions.mainImageCaption.present {
+        if json[cloptions.mainImageCaption.long].exists() {
+            appvars.imageCaptionArray.append(json[cloptions.mainImageCaption.long].stringValue)
+        } else {
+            appvars.imageCaptionArray = CLOptionMultiOptions(optionName: cloptions.mainImageCaption.long)
+        }
         logger(logMessage: "imageCaptionArray : \(appvars.imageCaptionArray)")
     }
     
