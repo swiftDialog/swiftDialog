@@ -10,6 +10,7 @@
 		41110A2825F9E79E008171D2 /* License.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41110A2725F9E79E008171D2 /* License.swift */; };
 		4114E1E927153FEE00388274 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4114E1E827153FEE00388274 /* AVKit.framework */; };
 		4114E1EB27154B2200388274 /* VideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4114E1EA27154B2200388274 /* VideoView.swift */; };
+		414CBAEB278913BA00A1A980 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 414CBAEA278913BA00A1A980 /* SwiftyJSON */; };
 		4153783226001A0900AA0E76 /* StringProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153783126001A0900AA0E76 /* StringProcessing.swift */; };
 		4153784E2604B71800AA0E76 /* TitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153784D2604B71800AA0E76 /* TitleView.swift */; };
 		415378532604B79F00AA0E76 /* IconOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415378522604B79E00AA0E76 /* IconOverlayView.swift */; };
@@ -147,6 +148,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				414CBAEB278913BA00A1A980 /* SwiftyJSON in Frameworks */,
 				418A7B5D275994BB00E4D6F1 /* MarkdownUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -315,6 +317,7 @@
 			name = Dialog;
 			packageProductDependencies = (
 				418A7B5C275994BB00E4D6F1 /* MarkdownUI */,
+				414CBAEA278913BA00A1A980 /* SwiftyJSON */,
 			);
 			productName = dialog;
 			productReference = 4154C2DA25F76BDB00A3D373 /* Dialog.app */;
@@ -413,6 +416,7 @@
 			mainGroup = 4154C2D125F76BDB00A3D373;
 			packageReferences = (
 				41E4BC9526AEDB130042A0A3 /* XCRemoteSwiftPackageReference "MarkdownUI" */,
+				414CBAE9278913BA00A1A980 /* XCRemoteSwiftPackageReference "SwiftyJSON" */,
 			);
 			productRefGroup = 4154C2DB25F76BDB00A3D373 /* Products */;
 			projectDirPath = "";
@@ -915,6 +919,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		414CBAE9278913BA00A1A980 /* XCRemoteSwiftPackageReference "SwiftyJSON" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SwiftyJSON/SwiftyJSON.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
 		41E4BC9526AEDB130042A0A3 /* XCRemoteSwiftPackageReference "MarkdownUI" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/gonzalezreal/MarkdownUI";
@@ -926,6 +938,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		414CBAEA278913BA00A1A980 /* SwiftyJSON */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 414CBAE9278913BA00A1A980 /* XCRemoteSwiftPackageReference "SwiftyJSON" */;
+			productName = SwiftyJSON;
+		};
 		418A7B5A275994AD00E4D6F1 /* MarkdownUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 41E4BC9526AEDB130042A0A3 /* XCRemoteSwiftPackageReference "MarkdownUI" */;

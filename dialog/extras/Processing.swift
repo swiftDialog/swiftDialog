@@ -10,6 +10,7 @@ import AppKit
 import SystemConfiguration
 import SwiftUI
 import OSLog
+import SwiftyJSON
 
 class stdOutput: ObservableObject {
     @Published var selectedOption: String = ""
@@ -192,31 +193,29 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "") {
     // only print if exit code os 0
     if exitCode == 0 {
         
+        // build json using SwiftyJSON
+        var json = JSON()
+        
         //build output array
         var outputArray : Array = [String]()
         if appvars.selectedOption != "" {
             outputArray.append("\"SelectedOption\" : \"\(appvars.selectedOption)\"")
+            json["SelectedOption"].string = appvars.selectedOption
         }
         if appvars.selectedIndex > 0 {
             outputArray.append("\"SelectedIndex\" : \(appvars.selectedIndex)")
+            json["SelectedIndex"].int = appvars.selectedIndex
         }
         if cloptions.textField.present {
             for i in 0..<appvars.textOptionsArray.count {
                 outputArray.append("\"\(appvars.textOptionsArray[i])\" : \"\(appvars.textFieldText[i])\"")
+                json[appvars.textOptionsArray[i]].string = appvars.textFieldText[i]
             }
         }
-        
+                 
         // print the output
         if appvars.jsonOut {
-            var newElementChar = ","
-            print("{")
-            for i in 0..<outputArray.count {
-                if i == (outputArray.count - 1) {
-                    newElementChar = ""
-                }
-                print(outputArray[i]+newElementChar)
-            }
-            print("}")
+            print(json)
         } else  {
             for i in 0..<outputArray.count {
                 print(outputArray[i].replacingOccurrences(of: "\"", with: ""))

@@ -17,7 +17,7 @@ func processCLOptions() {
         logger(logMessage: "textOptionsArray : \(appvars.textOptionsArray)")
     }
     
-    if cloptions.mainImageCaption.present {
+    if cloptions.mainImage.present {
         appvars.imageArray = CLOptionMultiOptions(optionName: cloptions.mainImage.long)
         logger(logMessage: "imageArray : \(appvars.imageArray)")
     }
