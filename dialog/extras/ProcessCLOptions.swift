@@ -31,14 +31,29 @@ func processJSON(jsonFilePath: String) -> JSON {
 }
 
 func processCLOptions() {
+    
+    var json = JSON ()
+    if CLOptionPresent(OptionName: cloptions.jsonFile) {
+        // read in from file
+        json = processJSON(jsonFilePath: CLOptionText(OptionName: cloptions.jsonFile))
+    }
         
     if cloptions.textField.present {
-        appvars.textOptionsArray = CLOptionMultiOptions(optionName: cloptions.textField.long)
+        if json[cloptions.textField.long].exists() {
+            appvars.textOptionsArray = json[cloptions.textField.long].arrayValue.map {$0.stringValue}
+        } else {
+            appvars.textOptionsArray =  CLOptionMultiOptions(optionName: cloptions.textField.long)
+        }
         logger(logMessage: "textOptionsArray : \(appvars.textOptionsArray)")
     }
     
     if cloptions.mainImage.present {
-        appvars.imageArray = CLOptionMultiOptions(optionName: cloptions.mainImage.long)
+        if json[cloptions.mainImage.long].exists() {
+            appvars.imageArray = json[cloptions.mainImage.long].arrayValue.map {$0["image"].stringValue}
+            appvars.imageCaptionArray = json[cloptions.mainImage.long].arrayValue.map {$0["caption"].stringValue}
+        } else {
+            appvars.imageArray = CLOptionMultiOptions(optionName: cloptions.mainImage.long)
+        }
         logger(logMessage: "imageArray : \(appvars.imageArray)")
     }
     
@@ -47,7 +62,7 @@ func processCLOptions() {
         logger(logMessage: "imageCaptionArray : \(appvars.imageCaptionArray)")
     }
     
-    if !cloptions.autoPlay.present {
+    if !json[cloptions.autoPlay.long].exists() && !cloptions.autoPlay.present {
         cloptions.autoPlay.value = "0"
         logger(logMessage: "autoPlay.value : \(cloptions.autoPlay.value)")
     }
@@ -351,16 +366,16 @@ func processCLOptionValues() {
     cloptions.messageFont.present           = json[cloptions.messageFont.long].exists() || CLOptionPresent(OptionName: cloptions.messageFont)
 
     //cloptions.textField.value               = CLOptionText(OptionName: cloptions.textField)
-    cloptions.textField.present             = CLOptionPresent(OptionName: cloptions.textField)
+    cloptions.textField.present             = json[cloptions.textField.long].exists() || CLOptionPresent(OptionName: cloptions.textField)
 
     cloptions.timerBar.value                = json[cloptions.timerBar.long].string ?? CLOptionText(OptionName: cloptions.timerBar, DefaultValue: "\(appvars.timerDefaultSeconds)")
     cloptions.timerBar.present              = json[cloptions.timerBar.long].exists() || CLOptionPresent(OptionName: cloptions.timerBar)
 
-    cloptions.mainImage.value               = CLOptionText(OptionName: cloptions.mainImage)
-    cloptions.mainImage.present             = CLOptionPresent(OptionName: cloptions.mainImage)
+    //cloptions.mainImage.value               = CLOptionText(OptionName: cloptions.mainImage)
+    cloptions.mainImage.present             = json[cloptions.mainImage.long].exists() || CLOptionPresent(OptionName: cloptions.mainImage)
     
-    cloptions.mainImageCaption.value        = CLOptionText(OptionName: cloptions.mainImageCaption)
-    cloptions.mainImageCaption.present      = CLOptionPresent(OptionName: cloptions.mainImageCaption)
+    //cloptions.mainImageCaption.value        = CLOptionText(OptionName: cloptions.mainImageCaption)
+    cloptions.mainImageCaption.present      = json[cloptions.mainImageCaption.long].exists() || CLOptionPresent(OptionName: cloptions.mainImageCaption)
 
     cloptions.windowWidth.value             = json[cloptions.windowWidth.long].string ?? CLOptionText(OptionName: cloptions.windowWidth)
     cloptions.windowWidth.present           = json[cloptions.windowWidth.long].exists() || CLOptionPresent(OptionName: cloptions.windowWidth)

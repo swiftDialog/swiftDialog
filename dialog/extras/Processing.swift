@@ -40,38 +40,6 @@ func logger(logType: String = "", logMessage: String) {
     }
 }
 
-func readDilaogStateFromFile() -> String {
-    //let progressFile = FileManager //"/private/tmp/dialogprogress.log"
-    // Determine the file name
-    let filename = "/private/tmp/dialogprogress.log"
-
-    // Read the contents of the specified file
-    let contents = try! String(contentsOfFile: filename)
-
-    // Split the file into separate lines
-    let lines = contents.split(separator:"\n")
-    
-    let lastline = lines[0]
-    
-    return String(describing: lastline)
-}
-
-func processDialogState() {
-    //Get the line
-    let command = readDilaogStateFromFile()
-    let action = command.split(separator: ":")
-    print("first part is - \(action[0])")
-    print("second part is - \(action[1])")
-    print("cloptions.titleOption.value = \(cloptions.titleOption.value)")
-    switch action[0] {
-    case "test":
-        print("found test")
-        cloptions.titleOption.value = "Testing 1 - 2 - 3"
-    default:
-        print("doing nothing")
-    }
-}
-
 func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, imgHeight: CGFloat? = .infinity, returnErrorImage: Bool? = false) -> NSImage {
     // accept image as local file path or as URL and return NSImage
     // can pass in width and height as optional values otherwsie return the image as is.
@@ -116,7 +84,7 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
 }
 
 func openSpecifiedURL(urlToOpen: String) {
-    // Open the selected URL (no checking is perfoemrd)
+    // Open the selected URL (no checking is performed)
     
     if let url = URL(string: urlToOpen) {
         NSWorkspace.shared.open(url)
