@@ -10,7 +10,7 @@ import SwiftUI
 
 struct TitleView: View {
     
-    var TitleViewOption: String = cloptions.titleOption.value// CLOptionText(OptionName: cloptions.titleOption, DefaultValue: appvars.titleDefault)
+    @State public var TitleViewOption: String = cloptions.titleOption.value// CLOptionText(OptionName: cloptions.titleOption, DefaultValue: appvars.titleDefault)
 
     var body: some View {
         if appvars.titleFontName == "" {

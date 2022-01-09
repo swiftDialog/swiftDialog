@@ -34,11 +34,11 @@ struct DialogView: View {
                     }
                 }
                 
-                VStack(alignment: .center) {
+                //VStack(alignment: .center) {
                     //TitleView()
                     MessageContent()
                         .border(appvars.debugBorderColour, width: 2)
-                }
+                //}
             }
         }
     }

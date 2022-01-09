@@ -32,10 +32,11 @@ struct MessageContent: View {
     
     
     var body: some View {
-        VStack {
-            if cloptions.mainImage.present {
-                ImageView(imagePath: cloptions.mainImage.value, caption: cloptions.mainImageCaption.value)
-            } else {
+        if cloptions.mainImage.present {
+            ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: NumberFormatter().number(from: cloptions.autoPlay.value) as! CGFloat)
+        } else {
+            VStack {
+
                 ScrollView() {
                     if appvars.messageFontName == "" {
                         Markdown(Document(messageContentOption))
@@ -61,9 +62,10 @@ struct MessageContent: View {
                     .padding(.trailing, 50)
                     .border(appvars.debugBorderColour, width: 2)
             }
+            .padding(.leading, 40)
+            .padding(.trailing, 40)
         }
-        .padding(.leading, 40)
-        .padding(.trailing, 40)
+
     }
 }
 

@@ -90,7 +90,7 @@ var helpText = """
                     --\(cloptions.videoCaption.long) <text>
                         Text that will appear underneath the displayed video.
     
-                    --\(cloptions.videoAutoPlay.long)
+                    --\(cloptions.autoPlay.long)
                         Will force the video to start playing automatically.
         
         -\(cloptions.iconOption.short), --\(cloptions.iconOption.long) <file> | <url>

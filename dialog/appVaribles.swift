@@ -19,7 +19,7 @@ var cloptions = CLOptions()
 
 struct AppVariables {
     
-    var cliversion                      = String("1.8.0")
+    var cliversion                      = String("1.9.0")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
@@ -42,6 +42,10 @@ struct AppVariables {
     var windowWidth                     = CGFloat(820)      // set default dialog width
     var windowHeight                    = CGFloat(380)      // set default dialog height
     
+    // Screen Size
+    var screenWidth                     = CGFloat(0)
+    var screenHeight                    = CGFloat(0)
+    
     var videoWindowWidth                = CGFloat(900)
     var videoWindowHeight               = CGFloat(600)
     
@@ -58,6 +62,8 @@ struct AppVariables {
     var scaleFactor                     = CGFloat(1)
     
     var timerDefaultSeconds             = CGFloat(10)
+    
+    var autoPlayDefaultSeconds          = CGFloat(10)
 
     var horozontalLineScale             = CGFloat(0.9)
     var dialogContentScale              = CGFloat(0.65)
@@ -84,14 +90,17 @@ struct AppVariables {
     var textOptionsArray                = [String]()
     var textFieldText                   = Array(repeating: "", count: 64)
     
+    var imageArray                      = [String]()
+    var imageCaptionArray               = [String]()
+    
     var annimationSmoothing             = Double(20)
     
     // exit codes and error messages
     var exit0                           = (code: Int32(0),   message: String(""))
-    var exit1                           = (code: Int32(0),   message: String(""))
-    var exit2                           = (code: Int32(0),   message: String(""))
-    var exit3                           = (code: Int32(0),   message: String(""))
-    var exit4                           = (code: Int32(0),   message: String(""))
+    var exit1                           = (code: Int32(1),   message: String(""))
+    var exit2                           = (code: Int32(2),   message: String(""))
+    var exit3                           = (code: Int32(3),   message: String(""))
+    var exit4                           = (code: Int32(4),   message: String(""))
     var exit20                          = (code: Int32(20),  message: String("Timeout Exceeded"))
     var exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))
     var exit202                         = (code: Int32(202), message: String("ERROR: File not found :"))
@@ -145,6 +154,8 @@ struct CLOptions {
     var video                    = (long: String("video"),             short: String(""),    value : String(""), present : Bool(false))
     var videoCaption             = (long: String("videocaption"),      short: String(""),    value : String(""), present : Bool(false))// -bf
     var debug                    = (long: String("debug"),             short: String(""),    value : String(""), present : Bool(false))
+    var jsonFile                 = (long: String("jsonfile"),          short: String(""),    value : String(""), present : Bool(false))
+    var jsonString               = (long: String("jsonstring"),        short: String(""),    value : String(""), present : Bool(false))
 
     // command line options that take no additional parameters
     var button2Option            = (long: String("button2"),           short: String("2"),   value : String(""), present : Bool(false)) // -2
@@ -159,7 +170,7 @@ struct CLOptions {
     var infoIcon                 = (long: String("infoicon"),          short: String(""),    value : String(""), present : Bool(false)) // Deprecated
     var cautionIcon              = (long: String("cautionicon"),       short: String(""),    value : String(""), present : Bool(false)) // Deprecated
     var hideTimerBar             = (long: String("hidetimerbar"),      short: String(""),    value : String(""), present : Bool(false))
-    var videoAutoPlay            = (long: String("autoplay"),          short: String(""),    value : String(""), present : Bool(false))
+    var autoPlay                 = (long: String("autoplay"),          short: String(""),    value : String(""), present : Bool(false))
     
     var lockWindow               = (long: String("moveable"),          short: String("o"),   value : String(""), present : Bool(false)) // -o
     var forceOnTop               = (long: String("ontop"),             short: String("p"),   value : String(""), present : Bool(false)) // -p
