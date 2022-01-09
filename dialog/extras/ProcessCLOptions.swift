@@ -30,13 +30,34 @@ func processJSON(jsonFilePath: String) -> JSON {
     return json
 }
 
-func processCLOptions() {
-    
-    var json = JSON ()
+func processJSONString(jsonString: String) -> JSON {
+    var json = JSON()
+    let dataFromString = jsonString.replacingOccurrences(of: "\n", with: "\\n").data(using: .utf8)
+    do {
+        json = try JSON(data: dataFromString!)
+    } catch {
+        quitDialog(exitCode: appvars.exit202.code, exitMessage: "JSON import failed")
+    }
+    return json
+}
+
+func getJSON() -> JSON {
+    var json = JSON()
     if CLOptionPresent(OptionName: cloptions.jsonFile) {
-        // read in from file
+        // read json in from file
         json = processJSON(jsonFilePath: CLOptionText(OptionName: cloptions.jsonFile))
     }
+    
+    if CLOptionPresent(OptionName: cloptions.jsonString) {
+        // read json in from text string
+        json = processJSONString(jsonString: CLOptionText(OptionName: cloptions.jsonString))
+    }
+    return json
+}
+
+func processCLOptions() {
+    
+    let json : JSON = getJSON()
         
     if cloptions.textField.present {
         if json[cloptions.textField.long].exists() {
@@ -254,17 +275,9 @@ func processCLOptions() {
 }
 
 func processCLOptionValues() {
-    var json = JSON ()
-
-    // check all options that don't take a text value
-    if CLOptionPresent(OptionName: cloptions.jsonFile) {
-        // read in from file
-        print("reading json in from \(CLOptionText(OptionName: cloptions.jsonFile))")
-        json = processJSON(jsonFilePath: CLOptionText(OptionName: cloptions.jsonFile))
-    }
     
-    print(json)
-        
+    let json : JSON = getJSON()
+    
     cloptions.titleOption.value             = json[cloptions.titleOption.long].string ?? CLOptionText(OptionName: cloptions.titleOption, DefaultValue: appvars.titleDefault)
     cloptions.titleOption.present           = json[cloptions.titleOption.long].exists() || CLOptionPresent(OptionName: cloptions.titleOption)
 
