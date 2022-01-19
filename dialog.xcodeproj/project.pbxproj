@@ -25,6 +25,9 @@
 		415934D826DB1B44009C9C3A /* ProcessCLOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415934D726DB1B44009C9C3A /* ProcessCLOptions.swift */; };
 		415934DA26DB7604009C9C3A /* WindowPositioning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415934D926DB7604009C9C3A /* WindowPositioning.swift */; };
 		416DED42261C5FE00049B6B5 /* FullscreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416DED41261C5FE00049B6B5 /* FullscreenView.swift */; };
+		417BD42E27982759009AE34A /* BG.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 417BD42D27982759009AE34A /* BG.storyboard */; };
+		417BD4302798277D009AE34A /* BackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD42F2798277D009AE34A /* BackgroundView.swift */; };
+		417BD4312798281D009AE34A /* BackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD42F2798277D009AE34A /* BackgroundView.swift */; };
 		417BF0BB260F1726009AD252 /* BannerImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BF0BA260F1726009AD252 /* BannerImageView.swift */; };
 		41876683275D87C70023A6A1 /* ImageSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41876682275D87C70023A6A1 /* ImageSlider.swift */; };
 		41876684275D88D60023A6A1 /* ImageSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41876682275D87C70023A6A1 /* ImageSlider.swift */; };
@@ -125,6 +128,8 @@
 		415934D726DB1B44009C9C3A /* ProcessCLOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessCLOptions.swift; sourceTree = "<group>"; };
 		415934D926DB7604009C9C3A /* WindowPositioning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowPositioning.swift; sourceTree = "<group>"; };
 		416DED41261C5FE00049B6B5 /* FullscreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullscreenView.swift; sourceTree = "<group>"; };
+		417BD42D27982759009AE34A /* BG.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = BG.storyboard; sourceTree = "<group>"; };
+		417BD42F2798277D009AE34A /* BackgroundView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundView.swift; sourceTree = "<group>"; };
 		417BF0BA260F1726009AD252 /* BannerImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerImageView.swift; sourceTree = "<group>"; };
 		41876682275D87C70023A6A1 /* ImageSlider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageSlider.swift; sourceTree = "<group>"; };
 		41876689275DEFC40023A6A1 /* JSONImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONImport.swift; sourceTree = "<group>"; };
@@ -213,6 +218,7 @@
 		4154C2DC25F76BDB00A3D373 /* dialog */ = {
 			isa = PBXGroup;
 			children = (
+				417BD42C27982740009AE34A /* Storyboards */,
 				41C8259825F99AF90042DC50 /* UI */,
 				4154C30C25F782E900A3D373 /* extras */,
 				4154C2DD25F76BDB00A3D373 /* dialogApp.swift */,
@@ -267,9 +273,18 @@
 			path = extras;
 			sourceTree = "<group>";
 		};
+		417BD42C27982740009AE34A /* Storyboards */ = {
+			isa = PBXGroup;
+			children = (
+				417BD42D27982759009AE34A /* BG.storyboard */,
+			);
+			path = Storyboards;
+			sourceTree = "<group>";
+		};
 		41C8259825F99AF90042DC50 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				417BD42F2798277D009AE34A /* BackgroundView.swift */,
 				4154C2DF25F76BDB00A3D373 /* ContentView.swift */,
 				4114E1EA27154B2200388274 /* VideoView.swift */,
 				41A44EAF26F2F25200FEE1AC /* watermarkView.swift */,
@@ -435,6 +450,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				417BD42E27982759009AE34A /* BG.storyboard in Resources */,
 				4154C2E525F76BDC00A3D373 /* Preview Assets.xcassets in Resources */,
 				4154C2E225F76BDC00A3D373 /* Assets.xcassets in Resources */,
 			);
@@ -481,6 +497,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				417BD4312798281D009AE34A /* BackgroundView.swift in Sources */,
 				41876684275D88D60023A6A1 /* ImageSlider.swift in Sources */,
 				418A7B512759949A00E4D6F1 /* VideoView.swift in Sources */,
 				418A7B522759949A00E4D6F1 /* watermarkView.swift in Sources */,
@@ -558,6 +575,7 @@
 				41FB64952680855300A54C3E /* dialogApp.swift in Sources */,
 				41FB64962680855300A54C3E /* appVaribles.swift in Sources */,
 				41AD75B626AA81760023EBD8 /* TextEntryView.swift in Sources */,
+				417BD4302798277D009AE34A /* BackgroundView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -711,7 +729,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"dialog/Preview Content\"";
-				DEVELOPMENT_TEAM = N8GJ2Y5Z9T;
+				DEVELOPMENT_TEAM = PWA5E9TQ59;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = dialog/Info.plist;
@@ -738,7 +756,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"dialog/Preview Content\"";
-				DEVELOPMENT_TEAM = N8GJ2Y5Z9T;
+				DEVELOPMENT_TEAM = PWA5E9TQ59;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = dialog/Info.plist;

@@ -6,8 +6,7 @@
 //
 
 import SwiftUI
-
-
+import Cocoa
 
 struct ContentView: View {
 
@@ -26,22 +25,7 @@ struct ContentView: View {
 //
     var body: some View {
                         
-        ZStack {
-            // Window Setings (pinched from Nudge https://github.com/macadmins/nudge/blob/main/Nudge/UI/ContentView.swift#L19)
-            HostingWindowFinder {window in
-                window?.standardWindowButton(.closeButton)?.isHidden = true //hides the red close button
-                window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
-                window?.standardWindowButton(.zoomButton)?.isHidden = true //this removes the green zoom button
-                window?.isMovable = appvars.windowIsMoveable
-                if appvars.windowOnTop {
-                    window?.level = .floating
-                } else {
-                    window?.level = .normal
-                }
-                NSApp.activate(ignoringOtherApps: true) // bring to forefront upon launch
-            }
-            
-            
+        ZStack {            
             if cloptions.watermarkImage.present {
                     watermarkView(imagePath: cloptions.watermarkImage.value, opacity: Double(cloptions.watermarkAlpha.value), position: cloptions.watermarkPosition.value, scale: cloptions.watermarkFill.value)
             }
