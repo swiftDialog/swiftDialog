@@ -106,15 +106,18 @@ struct dialogApp: App {
                     }
 
                     if cloptions.blurScreen.present { //blur background
+                        /// This code is taken from depNotify
+                        /// Particularly https://gitlab.com/Mactroll/DEPNotify/-/blob/master/DEPNotify/ViewController.swift
+                        /// class WindowController: NSWindowController
                         background = storyBoard.instantiateController(withIdentifier: "Background") as? Background
                         background?.showWindow(self)
                         background?.sendBack()
                         NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow)))
                     }
-                    NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow)))
+                    
                     NSApp.activate(ignoringOtherApps: true)
                 }
-                .frame(width: 1, height: 1) //ensures hostingwindowfinder isn't taking up any real estate
+                .frame(width: 0, height: 0) //ensures hostingwindowfinder isn't taking up any real estate
                 
                 ContentView()
                     .frame(width: appvars.windowWidth, height: appvars.windowHeight) // + appvars.bannerHeight)
