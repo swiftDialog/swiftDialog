@@ -70,7 +70,7 @@ struct ContentView: View {
                             .frame(alignment: .bottom)
                     }
                     if (cloptions.timerBar.present && cloptions.button1TextOption.present) || !cloptions.timerBar.present || cloptions.hideTimerBar.present  {
-                        ButtonView() // contains both button 1 and button 2
+                        ButtonView(observedDialogContent: observedDialogContent) // contains both button 1 and button 2
                     }
                 }
                 //.frame(alignment: .bottom)

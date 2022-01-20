@@ -14,7 +14,7 @@ struct DialogView: View {
     
     @ObservedObject var observedDialogContent : DialogUpdatableContent
     
-    init(observedDialogContent : DialogUpdatableContent = DialogUpdatableContent()) {
+    init(observedDialogContent : DialogUpdatableContent) {
         if appvars.iconIsHidden {
             appvars.iconWidth = 0
         }
@@ -29,7 +29,7 @@ struct DialogView: View {
                 
                 if (!appvars.iconIsHidden) {
                     VStack {
-                        IconView()
+                        IconView(observedDialogContent: observedDialogContent)
                             .frame(width: iconFrameWidth, alignment: .top)
                             .border(appvars.debugBorderColour, width: 2)
                             .padding(.top, 20)

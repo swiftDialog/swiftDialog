@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TaskProgressView: View {
     
-    @ObservedObject var observedDialogContent = DialogUpdatableContent()
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
     
     var body: some View {
         if cloptions.progressBar.present {
@@ -24,8 +24,4 @@ struct TaskProgressView: View {
     }
 }
 
-struct TaskProgressView_Previews: PreviewProvider {
-    static var previews: some View {
-        TaskProgressView()
-    }
-}
+

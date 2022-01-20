@@ -9,6 +9,8 @@ import Foundation
 import SwiftUI
 
 struct ButtonView: View {
+    
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
 
     var button1action: String = ""
     var buttonShellAction: Bool = false
@@ -21,7 +23,7 @@ struct ButtonView: View {
     
     let timer = Timer.publish(every: 3.0, on: .main, in: .common).autoconnect() //trigger after 4 seconds
     
-    init() {
+    init(observedDialogContent : DialogUpdatableContent) {
         if cloptions.button1ShellActionOption.present {
             button1action = cloptions.button1ShellActionOption.value
             buttonShellAction = true
@@ -32,6 +34,8 @@ struct ButtonView: View {
         if cloptions.timerBar.present && !cloptions.hideTimerBar.present {
             self._button1disabled = State(initialValue: true)
         }
+        
+        self.observedDialogContent = observedDialogContent
     }
     
     var body: some View {
@@ -46,7 +50,7 @@ struct ButtonView: View {
                 )
                 .keyboardShortcut(.cancelAction)
             } else if cloptions.button2TextOption.present {
-                let button2Text: String = cloptions.button2TextOption.value
+                let button2Text: String = observedDialogContent.button2Value
                 Button(action: {quitDialog(exitCode: appvars.exit2.code)}, label: {
                     Text(button2Text)
                         .frame(minWidth: 40, alignment: .center)
@@ -56,7 +60,7 @@ struct ButtonView: View {
             }
         }
         // default button aka button 1
-        let button1Text: String = cloptions.button1TextOption.value
+        let button1Text: String = observedDialogContent.button1Value
 
         Button(action: {buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction)}, label: {
             Text(button1Text)

@@ -21,8 +21,6 @@ struct AppVariables {
     
     var cliversion                      = String("1.9.0")
     
-    @ObservedObject var observedDialogContent = DialogUpdatableContent()
-    
     // message default strings
     var titleDefault                    = String("An Important Message")
     var messageDefault                  = String("\nThis is important message content\n\nPlease read")

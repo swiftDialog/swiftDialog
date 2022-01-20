@@ -22,6 +22,10 @@ class DialogUpdatableContent : ObservableObject {
     @Published var messageText: String
     @Published var statusText: String
     @Published var progressValue: Double
+    @Published var button1Value: String
+    @Published var button2Value: String
+    @Published var infoButtonValue: String
+    @Published var iconImage: String
     
     var status: StatusState
     
@@ -44,6 +48,11 @@ class DialogUpdatableContent : ObservableObject {
         messageText = cloptions.messageOption.value
         statusText = ""
         progressValue = 0
+        button1Value = cloptions.button1TextOption.value
+        button2Value = cloptions.button2TextOption.value
+        infoButtonValue = cloptions.infoButtonOption.value
+        
+        iconImage = cloptions.iconOption.value
         
         status = .start
         task.launchPath = "/usr/bin/tail"
@@ -105,16 +114,35 @@ class DialogUpdatableContent : ObservableObject {
         for line in allCommands {
             //print(line)
             switch line.components(separatedBy: " ").first! {
+            // Title
             case "\(cloptions.titleOption.long):" :
                 titleText = line.replacingOccurrences(of: "\(cloptions.titleOption.long): ", with: "")
+            
+            // Message
             case "\(cloptions.messageOption.long):" :
                 messageText = line.replacingOccurrences(of: "\(cloptions.messageOption.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n")
+            
+            //Progress Bar
             case "\(cloptions.progressBar.long):" :
                 progressValue = Double(line.replacingOccurrences(of: "\(cloptions.progressBar.long): ", with: "")) ?? 0
+            
+            //Progress Bar Label
             case "\(cloptions.progressBar.long)Text:" :
                 statusText = line.replacingOccurrences(of: "\(cloptions.progressBar.long)Text: ", with: "")
-            //case "\(cloptions.titleOption.long):" :
-            //    progressText = line.replacingOccurrences(of: "\(cloptions.titleOption.long): ", with: "")
+                
+            case "\(cloptions.button1TextOption.long):" :
+                button1Value = line.replacingOccurrences(of: "\(cloptions.button1TextOption.long): ", with: "")
+                
+            case "\(cloptions.button2TextOption.long):" :
+                button2Value = line.replacingOccurrences(of: "\(cloptions.button2TextOption.long): ", with: "")
+                
+            case "\(cloptions.infoButtonOption.long):" :
+                infoButtonValue = line.replacingOccurrences(of: "\(cloptions.infoButtonOption.long): ", with: "")
+                
+            // icon
+            case "\(cloptions.iconOption.long):" :
+                iconImage = line.replacingOccurrences(of: "\(cloptions.iconOption.long): ", with: "")
+
             default:
 
                 break
