@@ -19,23 +19,24 @@ struct ButtonView: View {
     var cancelExit  : Int32 = 2
     var infoExit    : Int32 = 3
     
-    @State private var button1disabled = false
+    //@State private var button1disabled = false
     
     let timer = Timer.publish(every: 3.0, on: .main, in: .common).autoconnect() //trigger after 4 seconds
     
     init(observedDialogContent : DialogUpdatableContent) {
+        self.observedDialogContent = observedDialogContent
+        
         if cloptions.button1ShellActionOption.present {
             button1action = cloptions.button1ShellActionOption.value
             buttonShellAction = true
         } else if cloptions.button1ActionOption.present {
             button1action = cloptions.button1ActionOption.value
         }
-        
+                
         if cloptions.timerBar.present && !cloptions.hideTimerBar.present {
-            self._button1disabled = State(initialValue: true)
+            //self._button1disabled = State(initialValue: true)
+            observedDialogContent.button1Disabled = true
         }
-        
-        self.observedDialogContent = observedDialogContent
     }
     
     var body: some View {
@@ -68,9 +69,12 @@ struct ButtonView: View {
             }
         )
         .keyboardShortcut(.defaultAction)
-        .disabled(button1disabled)
+        .disabled(observedDialogContent.button1Disabled)
         .onReceive(timer) { _ in
-            button1disabled = false
+            if cloptions.timerBar.present && !cloptions.hideTimerBar.present {
+                observedDialogContent.button1Disabled = false
+            }
+            //button1disabled = false
         }
 
     }

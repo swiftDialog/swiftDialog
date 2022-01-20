@@ -23,6 +23,7 @@ class DialogUpdatableContent : ObservableObject {
     @Published var statusText: String
     @Published var progressValue: Double
     @Published var button1Value: String
+    @Published var button1Disabled: Bool
     @Published var button2Value: String
     @Published var infoButtonValue: String
     @Published var iconImage: String
@@ -49,6 +50,7 @@ class DialogUpdatableContent : ObservableObject {
         statusText = ""
         progressValue = 0
         button1Value = cloptions.button1TextOption.value
+        button1Disabled = false
         button2Value = cloptions.button2TextOption.value
         infoButtonValue = cloptions.infoButtonOption.value
         
@@ -132,6 +134,14 @@ class DialogUpdatableContent : ObservableObject {
                 
             case "\(cloptions.button1TextOption.long):" :
                 button1Value = line.replacingOccurrences(of: "\(cloptions.button1TextOption.long): ", with: "")
+                
+            case "button1:" :
+                let buttonCMD = line.replacingOccurrences(of: "button1: ", with: "")
+                if buttonCMD == "disable" {
+                    button1Disabled = true
+                } else if buttonCMD == "enable" {
+                    button1Disabled = false
+                }
                 
             case "\(cloptions.button2TextOption.long):" :
                 button2Value = line.replacingOccurrences(of: "\(cloptions.button2TextOption.long): ", with: "")
