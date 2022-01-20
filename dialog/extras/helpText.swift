@@ -201,7 +201,10 @@ var helpText = """
     
         -\(cloptions.fullScreenWindow.short), --\(cloptions.fullScreenWindow.long)
                     Uses full screen view.
-                    In this view, only banner, title, icon and message are visible.
+                    In this view, only banner, title, icon and the message area are visible.
+    
+        --\(cloptions.blurScreen.long)
+                    Will blur the background of the display while dialog is showing
 
         -\(cloptions.bannerImage.short), --\(cloptions.bannerImage.long) <file> | <url>
                     Shows a banner image at the top of the dialog
@@ -291,7 +294,6 @@ var helpText = """
 
         -\(cloptions.smallWindow.short), --\(cloptions.smallWindow.long)
                     Makes the dialog 25% smaller. Less room for message text.
-    
     
         -\(cloptions.jsonOutPut.short), --\(cloptions.jsonOutPut.long)
                     Outputs any results in json format for easier processing
