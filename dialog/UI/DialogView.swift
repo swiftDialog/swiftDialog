@@ -12,11 +12,15 @@ import AppKit
 
 struct DialogView: View {
     
-    init() {
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    
+    init(observedDialogContent : DialogUpdatableContent = DialogUpdatableContent()) {
         if appvars.iconIsHidden {
             appvars.iconWidth = 0
         }
+        self.observedDialogContent = observedDialogContent
     }
+    
     
     var body: some View {
         HStack { //}(alignment: .top, spacing: nil) {
@@ -36,7 +40,7 @@ struct DialogView: View {
                 
                 //VStack(alignment: .center) {
                     //TitleView()
-                    MessageContent()
+                    MessageContent(observedDialogContent: observedDialogContent)
                         .border(appvars.debugBorderColour, width: 2)
                 //}
             }

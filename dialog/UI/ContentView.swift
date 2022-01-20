@@ -14,6 +14,8 @@ struct ContentView: View {
     var waterMarkFill          = String("")
     var progressSteps : CGFloat = appvars.timerDefaultSeconds
     
+    @ObservedObject var observedDialogContent = DialogUpdatableContent()
+
     init () {
         if cloptions.timerBar.present {
             progressSteps = NumberFormatter().number(from: cloptions.timerBar.value) as! CGFloat
@@ -38,7 +40,7 @@ struct ContentView: View {
                 }
 
                 // Dialog title
-                TitleView()
+                TitleView(observedDialogContent: observedDialogContent)
                     .border(appvars.debugBorderColour, width: 2)
                     .offset(y: 10) // shift the title down a notch
                 
@@ -49,7 +51,7 @@ struct ContentView: View {
                 if cloptions.video.present {
                     VideoView(videourl: cloptions.video.value, autoplay: cloptions.autoPlay.present, caption: cloptions.videoCaption.value)
                 } else {
-                    DialogView()
+                    DialogView(observedDialogContent: observedDialogContent)
                 }
                 
                 Spacer()
@@ -64,7 +66,7 @@ struct ContentView: View {
                     }
                     if cloptions.timerBar.present {
                         //progressBarView(progressSteps: (NumberFormatter().number(from: cloptions.timerBar.value) as! CGFloat), visible: !cloptions.hideTimerBar.present)
-                        progressBarView(progressSteps: progressSteps, visible: !cloptions.hideTimerBar.present)
+                        timerBarView(progressSteps: progressSteps, visible: !cloptions.hideTimerBar.present)
                             .frame(alignment: .bottom)
                     }
                     if (cloptions.timerBar.present && cloptions.button1TextOption.present) || !cloptions.timerBar.present || cloptions.hideTimerBar.present  {

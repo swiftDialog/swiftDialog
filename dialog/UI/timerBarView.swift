@@ -1,5 +1,5 @@
 //
-//  progressBarView.swift
+//  timerBarView.swift
 //  cltest
 //
 //  Created by Reardon, Bart on 11/8/21.
@@ -8,7 +8,7 @@
 import SwiftUI
 import Foundation
 
-struct progressBarView: View {
+struct timerBarView: View {
     
     @State var progress: CGFloat = 0
     @State var progressWidth : CGFloat

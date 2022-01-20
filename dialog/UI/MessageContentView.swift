@@ -11,6 +11,8 @@ import MarkdownUI
 
 struct MessageContent: View {
     
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    
     var messageColour : NSColor = NSColor(appvars.messageFontColour)
     
     var useDefaultStyle = true
@@ -39,11 +41,11 @@ struct MessageContent: View {
 
                 ScrollView() {
                     if appvars.messageFontName == "" {
-                        Markdown(Document(messageContentOption))
+                        Markdown(Document(observedDialogContent.messageText))
                             .multilineTextAlignment(appvars.messageAlignment)
                             .markdownStyle(defaultStyle)
                     } else {
-                        Markdown(Document(messageContentOption))
+                        Markdown(Document(observedDialogContent.messageText))
                             .multilineTextAlignment(appvars.messageAlignment)
                             .markdownStyle(customStyle)
                     }
@@ -61,6 +63,8 @@ struct MessageContent: View {
                     .padding(.leading, 50)
                     .padding(.trailing, 50)
                     .border(appvars.debugBorderColour, width: 2)
+                
+                TaskProgressView(observedDialogContent: observedDialogContent)
             }
             .padding(.leading, 40)
             .padding(.trailing, 40)

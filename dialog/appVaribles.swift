@@ -21,6 +21,8 @@ struct AppVariables {
     
     var cliversion                      = String("1.9.0")
     
+    @ObservedObject var observedDialogContent = DialogUpdatableContent()
+    
     // message default strings
     var titleDefault                    = String("An Important Message")
     var messageDefault                  = String("\nThis is important message content\n\nPlease read")
@@ -95,6 +97,8 @@ struct AppVariables {
     
     var annimationSmoothing             = Double(20)
     
+    var defaultStatusLogFile            = String("/var/tmp/dialog.log")
+    
     // exit codes and error messages
     var exit0                           = (code: Int32(0),   message: String(""))
     var exit1                           = (code: Int32(1),   message: String(""))
@@ -142,6 +146,7 @@ struct CLOptions {
     var messageFont              = (long: String("messagefont"),       short: String(""),    value : String(""), present : Bool(false))
     var textField                = (long: String("textfield"),         short: String(""),    value : String(""), present : Bool(false))
     var timerBar                 = (long: String("timer"),             short: String(""),    value : String(""), present : Bool(false))
+    var progressBar              = (long: String("progress"),          short: String(""),    value : String(""), present : Bool(false))
     var mainImage                = (long: String("image"),             short: String("g"),   value : String(""), present : Bool(false))
     var mainImageCaption         = (long: String("imagecaption"),      short: String(""),    value : String(""), present : Bool(false))
     var windowWidth              = (long: String("width"),             short: String(""),    value : String(""), present : Bool(false))
@@ -156,6 +161,7 @@ struct CLOptions {
     var debug                    = (long: String("debug"),             short: String(""),    value : String(""), present : Bool(false))
     var jsonFile                 = (long: String("jsonfile"),          short: String(""),    value : String(""), present : Bool(false))
     var jsonString               = (long: String("jsonstring"),        short: String(""),    value : String(""), present : Bool(false))
+    var statusLogFile            = (long: String("statuslogfile"),     short: String(""),    value : String(""), present : Bool(false))
 
     // command line options that take no additional parameters
     var button2Option            = (long: String("button2"),           short: String("2"),   value : String(""), present : Bool(false)) // -2

@@ -392,7 +392,10 @@ func processCLOptionValues() {
 
     cloptions.timerBar.value                = json[cloptions.timerBar.long].string ?? CLOptionText(OptionName: cloptions.timerBar, DefaultValue: "\(appvars.timerDefaultSeconds)")
     cloptions.timerBar.present              = json[cloptions.timerBar.long].exists() || CLOptionPresent(OptionName: cloptions.timerBar)
-
+    
+    cloptions.progressBar.value             = json[cloptions.progressBar.long].string ?? CLOptionText(OptionName: cloptions.progressBar)
+    cloptions.progressBar.present           = json[cloptions.progressBar.long].exists() || CLOptionPresent(OptionName: cloptions.progressBar)
+                                                                                                        
     //cloptions.mainImage.value               = CLOptionText(OptionName: cloptions.mainImage)
     cloptions.mainImage.present             = json[cloptions.mainImage.long].exists() || CLOptionPresent(OptionName: cloptions.mainImage)
     
@@ -419,6 +422,13 @@ func processCLOptionValues() {
     
     cloptions.autoPlay.value                = json[cloptions.autoPlay.long].string ?? CLOptionText(OptionName: cloptions.autoPlay, DefaultValue: "\(appvars.timerDefaultSeconds)")
     cloptions.autoPlay.present              = json[cloptions.autoPlay.long].exists() || CLOptionPresent(OptionName: cloptions.autoPlay)
+    
+    cloptions.statusLogFile.value           = json[cloptions.statusLogFile.long].string ?? CLOptionText(OptionName: cloptions.statusLogFile)
+    cloptions.statusLogFile.present         = json[cloptions.statusLogFile.long].exists() || CLOptionPresent(OptionName: cloptions.statusLogFile)
+    
+    if !cloptions.statusLogFile.present {
+        cloptions.statusLogFile.value = appvars.defaultStatusLogFile
+    }
     
     cloptions.video.value                   = json[cloptions.video.long].string ?? CLOptionText(OptionName: cloptions.video)
     cloptions.video.present                 = json[cloptions.video.long].exists() || CLOptionPresent(OptionName: cloptions.video)
