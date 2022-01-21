@@ -159,7 +159,7 @@ struct CLOptions {
     var debug                    = (long: String("debug"),             short: String(""),    value : String(""), present : Bool(false))
     var jsonFile                 = (long: String("jsonfile"),          short: String(""),    value : String(""), present : Bool(false))
     var jsonString               = (long: String("jsonstring"),        short: String(""),    value : String(""), present : Bool(false))
-    var statusLogFile            = (long: String("statuslogfile"),     short: String(""),    value : String(""), present : Bool(false))
+    var statusLogFile            = (long: String("commandfile"),       short: String(""),    value : String(""), present : Bool(false))
 
     // command line options that take no additional parameters
     var button2Option            = (long: String("button2"),           short: String("2"),   value : String(""), present : Bool(false)) // -2

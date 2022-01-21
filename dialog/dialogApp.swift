@@ -122,6 +122,7 @@ struct dialogApp: App {
                 ContentView()
                     .frame(width: appvars.windowWidth, height: appvars.windowHeight) // + appvars.bannerHeight)
                 //.frame(idealWidth: appvars.windowWidth, idealHeight: appvars.windowHeight)
+
             }
         }
         // Hide Title Bar

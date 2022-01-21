@@ -22,6 +22,7 @@ class DialogUpdatableContent : ObservableObject {
     @Published var messageText: String
     @Published var statusText: String
     @Published var progressValue: Double
+    @Published var progressTotal: Double
     @Published var button1Value: String
     @Published var button1Disabled: Bool
     @Published var button2Value: String
@@ -49,6 +50,7 @@ class DialogUpdatableContent : ObservableObject {
         messageText = cloptions.messageOption.value
         statusText = ""
         progressValue = 0
+        progressTotal = 0
         button1Value = cloptions.button1TextOption.value
         button1Disabled = false
         button2Value = cloptions.button2TextOption.value
@@ -109,6 +111,11 @@ class DialogUpdatableContent : ObservableObject {
         
     }
     
+    func end() {
+        print("cleaning up task \(task.processIdentifier)")
+        task.terminate()
+    }
+    
     func processCommands(commands: String) {
         
         let allCommands = commands.components(separatedBy: "\n")
@@ -126,7 +133,29 @@ class DialogUpdatableContent : ObservableObject {
             
             //Progress Bar
             case "\(cloptions.progressBar.long):" :
-                progressValue = Double(line.replacingOccurrences(of: "\(cloptions.progressBar.long): ", with: "")) ?? 0
+                let incrementValue = line.replacingOccurrences(of: "\(cloptions.progressBar.long): ", with: "")
+                switch incrementValue {
+                case "increment" :
+                    if progressTotal == 0 {
+                        progressTotal = 100
+                    }
+                    progressValue = progressValue + 1
+                case "reset" :
+                    progressValue = 0
+                case "complete" :
+                    progressValue = Double(cloptions.progressBar.value) ?? 1000
+                //case "indeterminate" :
+                //    progressTotal = 0
+                //    progressValue = 0
+                //case "determinate" :
+                //    progressValue = 0
+                default :
+                    if progressTotal == 0 {
+                        progressTotal = 100
+                    }
+                    progressValue = Double(incrementValue) ?? 0
+                }
+                
             
             //Progress Bar Label
             case "\(cloptions.progressBar.long)Text:" :
@@ -137,11 +166,15 @@ class DialogUpdatableContent : ObservableObject {
                 
             case "button1:" :
                 let buttonCMD = line.replacingOccurrences(of: "button1: ", with: "")
-                if buttonCMD == "disable" {
+                switch buttonCMD {
+                case "disable" :
                     button1Disabled = true
-                } else if buttonCMD == "enable" {
+                case "enable" :
                     button1Disabled = false
+                default :
+                    button1Disabled = button1Disabled
                 }
+
                 
             case "\(cloptions.button2TextOption.long):" :
                 button2Value = line.replacingOccurrences(of: "\(cloptions.button2TextOption.long): ", with: "")

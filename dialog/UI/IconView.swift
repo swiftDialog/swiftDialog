@@ -136,6 +136,7 @@ struct IconView: View {
         
                 
         if !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL && !imgFromAPP && !builtInIconPresent  {
+            observedDialogContent.end()
             quitDialog(exitCode: appvars.exit202.code, exitMessage: "\(appvars.exit202.message) \(messageUserImagePath)")
         }
                 

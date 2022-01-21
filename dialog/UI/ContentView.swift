@@ -66,7 +66,7 @@ struct ContentView: View {
                     }
                     if cloptions.timerBar.present {
                         //progressBarView(progressSteps: (NumberFormatter().number(from: cloptions.timerBar.value) as! CGFloat), visible: !cloptions.hideTimerBar.present)
-                        timerBarView(progressSteps: progressSteps, visible: !cloptions.hideTimerBar.present)
+                        timerBarView(progressSteps: progressSteps, visible: !cloptions.hideTimerBar.present, observedDialogContent : observedDialogContent)
                             .frame(alignment: .bottom)
                     }
                     if (cloptions.timerBar.present && cloptions.button1TextOption.present) || !cloptions.timerBar.present || cloptions.hideTimerBar.present  {

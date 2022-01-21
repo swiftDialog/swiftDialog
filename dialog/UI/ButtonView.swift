@@ -44,7 +44,10 @@ struct ButtonView: View {
         Spacer()
         HStack {
             if cloptions.button2Option.present {
-                Button(action: {quitDialog(exitCode: appvars.exit2.code)}, label: {
+                Button(action: {
+                    observedDialogContent.end()
+                    quitDialog(exitCode: appvars.exit2.code)
+                }, label: {
                     Text(appvars.button2Default)
                         .frame(minWidth: 40, alignment: .center)
                     }
@@ -52,7 +55,10 @@ struct ButtonView: View {
                 .keyboardShortcut(.cancelAction)
             } else if cloptions.button2TextOption.present {
                 let button2Text: String = observedDialogContent.button2Value
-                Button(action: {quitDialog(exitCode: appvars.exit2.code)}, label: {
+                Button(action: {
+                    observedDialogContent.end()
+                    quitDialog(exitCode: appvars.exit2.code)
+                }, label: {
                     Text(button2Text)
                         .frame(minWidth: 40, alignment: .center)
                     }
@@ -63,7 +69,11 @@ struct ButtonView: View {
         // default button aka button 1
         let button1Text: String = observedDialogContent.button1Value
 
-        Button(action: {buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction)}, label: {
+        Button(action: {
+            observedDialogContent.end()
+            buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction)
+            
+        }, label: {
             Text(button1Text)
                 .frame(minWidth: 40, alignment: .center)
             }
