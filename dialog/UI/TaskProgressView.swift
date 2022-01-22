@@ -15,8 +15,8 @@ struct TaskProgressView: View {
         if cloptions.progressBar.present {
             VStack {
                 ProgressView(value: observedDialogContent.progressValue, total: observedDialogContent.progressTotal)
-                    .padding(.leading,10)
-                    .padding(.trailing,10)
+                    .padding(.leading,20)
+                    .padding(.trailing,20)
                 Text(observedDialogContent.statusText)
 
             }

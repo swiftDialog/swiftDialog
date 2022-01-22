@@ -23,7 +23,7 @@ struct DialogView: View {
     
     
     var body: some View {
-        HStack { //}(alignment: .top, spacing: nil) {
+        VStack { //}(alignment: .top, spacing: nil) {
             let iconFrameWidth: CGFloat = appvars.iconWidth
             HStack {
                 
@@ -44,6 +44,7 @@ struct DialogView: View {
                         .border(appvars.debugBorderColour, width: 2)
                 //}
             }
+            TaskProgressView(observedDialogContent: observedDialogContent)
         }
     }
 }

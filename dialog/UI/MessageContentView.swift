@@ -34,6 +34,7 @@ struct MessageContent: View {
     
     
     var body: some View {
+        
         if observedDialogContent.imagePresent || (observedDialogContent.imagePresent && observedDialogContent.imageCaptionPresent) {
             ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: NumberFormatter().number(from: cloptions.autoPlay.value) as! CGFloat)
         } else {
@@ -51,7 +52,6 @@ struct MessageContent: View {
                     }
                 }
                 .padding(.top, 10)
-                .animation(.easeInOut(duration: 0.15))
                 
                 Spacer()
                 
@@ -64,13 +64,10 @@ struct MessageContent: View {
                     .padding(.leading, 50)
                     .padding(.trailing, 50)
                     .border(appvars.debugBorderColour, width: 2)
-                
-                TaskProgressView(observedDialogContent: observedDialogContent)
             }
             .padding(.leading, 40)
             .padding(.trailing, 40)
         }
-
     }
 }
 
