@@ -152,7 +152,6 @@ func getVersionString() -> String {
 
 func quitDialog(exitCode: Int32, exitMessage: String? = "") {
     //var userOutput: Bool = false
-    
     if exitMessage != "" {
         //print(exitCode)
         print("\(exitMessage!)")

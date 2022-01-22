@@ -9,6 +9,8 @@ import Foundation
 import SwiftUI
 
 struct ButtonView: View {
+    
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
 
     var button1action: String = ""
     var buttonShellAction: Bool = false
@@ -17,20 +19,23 @@ struct ButtonView: View {
     var cancelExit  : Int32 = 2
     var infoExit    : Int32 = 3
     
-    @State private var button1disabled = false
+    //@State private var button1disabled = false
     
     let timer = Timer.publish(every: 3.0, on: .main, in: .common).autoconnect() //trigger after 4 seconds
     
-    init() {
+    init(observedDialogContent : DialogUpdatableContent) {
+        self.observedDialogContent = observedDialogContent
+        
         if cloptions.button1ShellActionOption.present {
             button1action = cloptions.button1ShellActionOption.value
             buttonShellAction = true
         } else if cloptions.button1ActionOption.present {
             button1action = cloptions.button1ActionOption.value
         }
-        
+                
         if cloptions.timerBar.present && !cloptions.hideTimerBar.present {
-            self._button1disabled = State(initialValue: true)
+            //self._button1disabled = State(initialValue: true)
+            observedDialogContent.button1Disabled = true
         }
     }
     
@@ -39,15 +44,21 @@ struct ButtonView: View {
         Spacer()
         HStack {
             if cloptions.button2Option.present {
-                Button(action: {quitDialog(exitCode: appvars.exit2.code)}, label: {
+                Button(action: {
+                    observedDialogContent.end()
+                    quitDialog(exitCode: appvars.exit2.code)
+                }, label: {
                     Text(appvars.button2Default)
                         .frame(minWidth: 40, alignment: .center)
                     }
                 )
                 .keyboardShortcut(.cancelAction)
             } else if cloptions.button2TextOption.present {
-                let button2Text: String = cloptions.button2TextOption.value
-                Button(action: {quitDialog(exitCode: appvars.exit2.code)}, label: {
+                let button2Text: String = observedDialogContent.button2Value
+                Button(action: {
+                    observedDialogContent.end()
+                    quitDialog(exitCode: appvars.exit2.code)
+                }, label: {
                     Text(button2Text)
                         .frame(minWidth: 40, alignment: .center)
                     }
@@ -56,17 +67,24 @@ struct ButtonView: View {
             }
         }
         // default button aka button 1
-        let button1Text: String = cloptions.button1TextOption.value
+        let button1Text: String = observedDialogContent.button1Value
 
-        Button(action: {buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction)}, label: {
+        Button(action: {
+            observedDialogContent.end()
+            buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction)
+            
+        }, label: {
             Text(button1Text)
                 .frame(minWidth: 40, alignment: .center)
             }
         )
         .keyboardShortcut(.defaultAction)
-        .disabled(button1disabled)
+        .disabled(observedDialogContent.button1Disabled)
         .onReceive(timer) { _ in
-            button1disabled = false
+            if cloptions.timerBar.present && !cloptions.hideTimerBar.present {
+                observedDialogContent.button1Disabled = false
+            }
+            //button1disabled = false
         }
 
     }

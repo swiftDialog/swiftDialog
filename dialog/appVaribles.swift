@@ -95,12 +95,15 @@ struct AppVariables {
     
     var annimationSmoothing             = Double(20)
     
+    var defaultStatusLogFile            = String("/var/tmp/dialog.log")
+    
     // exit codes and error messages
-    var exit0                           = (code: Int32(0),   message: String(""))
-    var exit1                           = (code: Int32(1),   message: String(""))
-    var exit2                           = (code: Int32(2),   message: String(""))
-    var exit3                           = (code: Int32(3),   message: String(""))
+    var exit0                           = (code: Int32(0),   message: String("")) // normal exit
+    var exit1                           = (code: Int32(1),   message: String("")) // pressed
+    var exit2                           = (code: Int32(2),   message: String("")) // pressed button 2
+    var exit3                           = (code: Int32(3),   message: String("")) // pressed button 3 (info button)
     var exit4                           = (code: Int32(4),   message: String(""))
+    var exit5                           = (code: Int32(4),   message: String("")) // quit via command file
     var exit20                          = (code: Int32(20),  message: String("Timeout Exceeded"))
     var exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))
     var exit202                         = (code: Int32(202), message: String("ERROR: File not found :"))
@@ -142,6 +145,7 @@ struct CLOptions {
     var messageFont              = (long: String("messagefont"),       short: String(""),    value : String(""), present : Bool(false))
     var textField                = (long: String("textfield"),         short: String(""),    value : String(""), present : Bool(false))
     var timerBar                 = (long: String("timer"),             short: String(""),    value : String(""), present : Bool(false))
+    var progressBar              = (long: String("progress"),          short: String(""),    value : String(""), present : Bool(false))
     var mainImage                = (long: String("image"),             short: String("g"),   value : String(""), present : Bool(false))
     var mainImageCaption         = (long: String("imagecaption"),      short: String(""),    value : String(""), present : Bool(false))
     var windowWidth              = (long: String("width"),             short: String(""),    value : String(""), present : Bool(false))
@@ -156,6 +160,7 @@ struct CLOptions {
     var debug                    = (long: String("debug"),             short: String(""),    value : String(""), present : Bool(false))
     var jsonFile                 = (long: String("jsonfile"),          short: String(""),    value : String(""), present : Bool(false))
     var jsonString               = (long: String("jsonstring"),        short: String(""),    value : String(""), present : Bool(false))
+    var statusLogFile            = (long: String("commandfile"),       short: String(""),    value : String(""), present : Bool(false))
 
     // command line options that take no additional parameters
     var button2Option            = (long: String("button2"),           short: String("2"),   value : String(""), present : Bool(false)) // -2

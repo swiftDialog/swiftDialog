@@ -11,6 +11,8 @@ import MarkdownUI
 
 struct MessageContent: View {
     
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    
     var messageColour : NSColor = NSColor(appvars.messageFontColour)
     
     var useDefaultStyle = true
@@ -32,18 +34,19 @@ struct MessageContent: View {
     
     
     var body: some View {
-        if cloptions.mainImage.present {
+        
+        if observedDialogContent.imagePresent || (observedDialogContent.imagePresent && observedDialogContent.imageCaptionPresent) {
             ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: NumberFormatter().number(from: cloptions.autoPlay.value) as! CGFloat)
         } else {
             VStack {
 
                 ScrollView() {
                     if appvars.messageFontName == "" {
-                        Markdown(Document(messageContentOption))
+                        Markdown(Document(observedDialogContent.messageText))
                             .multilineTextAlignment(appvars.messageAlignment)
                             .markdownStyle(defaultStyle)
                     } else {
-                        Markdown(Document(messageContentOption))
+                        Markdown(Document(observedDialogContent.messageText))
                             .multilineTextAlignment(appvars.messageAlignment)
                             .markdownStyle(customStyle)
                     }
@@ -65,7 +68,6 @@ struct MessageContent: View {
             .padding(.leading, 40)
             .padding(.trailing, 40)
         }
-
     }
 }
 

@@ -49,7 +49,7 @@ class Background: NSWindowController {
 
     func sendBack() {
         self.window?.orderBack(self)
-        print("going back")
+        //print("going back")
     }
     
 }

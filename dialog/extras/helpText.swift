@@ -8,7 +8,7 @@
 //import Foundation
 
 var helpText = """
-    Dialog version \(getVersionString()) ©2021 Bart Reardon
+    Dialog version \(getVersionString()) ©2022 Bart Reardon
 
     OPTIONS:
     
@@ -205,6 +205,14 @@ var helpText = """
     
         --\(cloptions.blurScreen.long)
                     Will blur the background of the display while dialog is showing
+    
+        --\(cloptions.progressBar.long) <int>
+                    Makes an interactive progress bar visible with <int> steps.
+                    To increment the progress bar send "progress: <int>" command to the dialog command file
+    
+        --\(cloptions.statusLogFile.long) <file>
+                    Sets the path to the command file Dialog will read from to receive updates
+                    Default file is /var/log/dialog.log
 
         -\(cloptions.bannerImage.short), --\(cloptions.bannerImage.long) <file> | <url>
                     Shows a banner image at the top of the dialog

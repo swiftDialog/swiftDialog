@@ -12,20 +12,24 @@ import AppKit
 
 struct DialogView: View {
     
-    init() {
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    
+    init(observedDialogContent : DialogUpdatableContent) {
         if appvars.iconIsHidden {
             appvars.iconWidth = 0
         }
+        self.observedDialogContent = observedDialogContent
     }
     
+    
     var body: some View {
-        HStack { //}(alignment: .top, spacing: nil) {
+        VStack { //}(alignment: .top, spacing: nil) {
             let iconFrameWidth: CGFloat = appvars.iconWidth
             HStack {
                 
                 if (!appvars.iconIsHidden) {
                     VStack {
-                        IconView()
+                        IconView(observedDialogContent: observedDialogContent)
                             .frame(width: iconFrameWidth, alignment: .top)
                             .border(appvars.debugBorderColour, width: 2)
                             .padding(.top, 20)
@@ -36,10 +40,11 @@ struct DialogView: View {
                 
                 //VStack(alignment: .center) {
                     //TitleView()
-                    MessageContent()
+                    MessageContent(observedDialogContent: observedDialogContent)
                         .border(appvars.debugBorderColour, width: 2)
                 //}
             }
+            TaskProgressView(observedDialogContent: observedDialogContent)
         }
     }
 }
