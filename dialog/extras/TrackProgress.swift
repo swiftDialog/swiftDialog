@@ -28,6 +28,9 @@ class DialogUpdatableContent : ObservableObject {
     @Published var button2Value: String
     @Published var infoButtonValue: String
     @Published var iconImage: String
+    //@Published var image: String
+    @Published var imagePresent: Bool
+    @Published var imageCaptionPresent: Bool
     
     var status: StatusState
     
@@ -57,6 +60,12 @@ class DialogUpdatableContent : ObservableObject {
         infoButtonValue = cloptions.infoButtonOption.value
         
         iconImage = cloptions.iconOption.value
+        
+        //image = cloptions.mainImage.value
+        appvars.imageArray = CLOptionMultiOptions(optionName: cloptions.mainImage.long)
+        appvars.imageCaptionArray = CLOptionMultiOptions(optionName: cloptions.mainImageCaption.long)
+        imagePresent = cloptions.mainImage.present
+        imageCaptionPresent = cloptions.mainImageCaption.present
         
         status = .start
         task.launchPath = "/usr/bin/tail"
@@ -112,7 +121,6 @@ class DialogUpdatableContent : ObservableObject {
     }
     
     func end() {
-        print("cleaning up task \(task.processIdentifier)")
         task.terminate()
     }
     
@@ -130,7 +138,9 @@ class DialogUpdatableContent : ObservableObject {
             // Message
             case "\(cloptions.messageOption.long):" :
                 messageText = line.replacingOccurrences(of: "\(cloptions.messageOption.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n")
-            
+                imagePresent = false
+                imageCaptionPresent = false
+                
             //Progress Bar
             case "\(cloptions.progressBar.long):" :
                 let incrementValue = line.replacingOccurrences(of: "\(cloptions.progressBar.long): ", with: "")
@@ -160,10 +170,12 @@ class DialogUpdatableContent : ObservableObject {
             //Progress Bar Label
             case "\(cloptions.progressBar.long)Text:" :
                 statusText = line.replacingOccurrences(of: "\(cloptions.progressBar.long)Text: ", with: "")
-                
+            
+            // Button 1 label
             case "\(cloptions.button1TextOption.long):" :
                 button1Value = line.replacingOccurrences(of: "\(cloptions.button1TextOption.long): ", with: "")
                 
+            // Button 1 status
             case "button1:" :
                 let buttonCMD = line.replacingOccurrences(of: "button1: ", with: "")
                 switch buttonCMD {
@@ -175,16 +187,31 @@ class DialogUpdatableContent : ObservableObject {
                     button1Disabled = button1Disabled
                 }
 
-                
+            // Button 2 label
             case "\(cloptions.button2TextOption.long):" :
                 button2Value = line.replacingOccurrences(of: "\(cloptions.button2TextOption.long): ", with: "")
-                
+            
+            // Info Button label
             case "\(cloptions.infoButtonOption.long):" :
                 infoButtonValue = line.replacingOccurrences(of: "\(cloptions.infoButtonOption.long): ", with: "")
                 
-            // icon
+            // icon image
             case "\(cloptions.iconOption.long):" :
                 iconImage = line.replacingOccurrences(of: "\(cloptions.iconOption.long): ", with: "")
+                
+            // image
+            case "\(cloptions.mainImage.long):" :
+                appvars.imageArray = [line.replacingOccurrences(of: "\(cloptions.mainImage.long): ", with: "")]
+                imagePresent = true
+                
+            // image Caption
+            case "\(cloptions.mainImageCaption.long):" :
+                appvars.imageCaptionArray = [line.replacingOccurrences(of: "\(cloptions.mainImageCaption.long): ", with: "")]
+                imageCaptionPresent = true
+                
+            // quit
+            case "quit:" :
+                quitDialog(exitCode: appvars.exit5.code)
 
             default:
 
@@ -201,7 +228,7 @@ class DialogUpdatableContent : ObservableObject {
         if fs.isDeletableFile(atPath: path) {
             do {
                 try fs.removeItem(atPath: path)
-                NSLog("Deleted Dialog command file")
+                //NSLog("Deleted Dialog command file")
             } catch {
                 NSLog("Unable to delete command file")
             }

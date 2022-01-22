@@ -34,7 +34,7 @@ struct MessageContent: View {
     
     
     var body: some View {
-        if cloptions.mainImage.present {
+        if observedDialogContent.imagePresent || (observedDialogContent.imagePresent && observedDialogContent.imageCaptionPresent) {
             ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: NumberFormatter().number(from: cloptions.autoPlay.value) as! CGFloat)
         } else {
             VStack {
@@ -51,6 +51,7 @@ struct MessageContent: View {
                     }
                 }
                 .padding(.top, 10)
+                .animation(.easeInOut(duration: 0.15))
                 
                 Spacer()
                 

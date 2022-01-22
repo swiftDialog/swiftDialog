@@ -98,11 +98,12 @@ struct AppVariables {
     var defaultStatusLogFile            = String("/var/tmp/dialog.log")
     
     // exit codes and error messages
-    var exit0                           = (code: Int32(0),   message: String(""))
-    var exit1                           = (code: Int32(1),   message: String(""))
-    var exit2                           = (code: Int32(2),   message: String(""))
-    var exit3                           = (code: Int32(3),   message: String(""))
+    var exit0                           = (code: Int32(0),   message: String("")) // normal exit
+    var exit1                           = (code: Int32(1),   message: String("")) // pressed
+    var exit2                           = (code: Int32(2),   message: String("")) // pressed button 2
+    var exit3                           = (code: Int32(3),   message: String("")) // pressed button 3 (info button)
     var exit4                           = (code: Int32(4),   message: String(""))
+    var exit5                           = (code: Int32(4),   message: String("")) // quit via command file
     var exit20                          = (code: Int32(20),  message: String("Timeout Exceeded"))
     var exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))
     var exit202                         = (code: Int32(202), message: String("ERROR: File not found :"))
