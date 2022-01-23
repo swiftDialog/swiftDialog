@@ -370,6 +370,8 @@ func processCLOptionValues() {
 
     cloptions.button1ShellActionOption.value = json[cloptions.button1ShellActionOption.long].string ?? CLOptionText(OptionName: cloptions.button1ShellActionOption)
     cloptions.button1ShellActionOption.present = json[cloptions.button1ShellActionOption.long].exists() || CLOptionPresent(OptionName: cloptions.button1ShellActionOption)
+    
+    cloptions.button1Disabled.present       = json[cloptions.button1Disabled.long].exists() || CLOptionPresent(OptionName: cloptions.button1Disabled)
 
     cloptions.button2TextOption.value       = json[cloptions.button2TextOption.long].string ?? CLOptionText(OptionName: cloptions.button2TextOption, DefaultValue: appvars.button2Default)
     cloptions.button2TextOption.present     = json[cloptions.button2TextOption.long].exists() || CLOptionPresent(OptionName: cloptions.button2TextOption)

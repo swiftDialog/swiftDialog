@@ -55,7 +55,7 @@ class DialogUpdatableContent : ObservableObject {
         progressValue = 0
         progressTotal = 0
         button1Value = cloptions.button1TextOption.value
-        button1Disabled = false
+        button1Disabled = cloptions.button1Disabled.present
         button2Value = cloptions.button2TextOption.value
         infoButtonValue = cloptions.infoButtonOption.value
         

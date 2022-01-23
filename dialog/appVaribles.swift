@@ -169,6 +169,7 @@ struct CLOptions {
     var statusLogFile            = (long: String("commandfile"),       short: String(""),    value : String(""), present : Bool(false))
 
     // command line options that take no additional parameters
+    var button1Disabled          = (long: String("button1disabled"),   short: String(""),    value : String(""), present : Bool(false))
     var button2Option            = (long: String("button2"),           short: String("2"),   value : String(""), present : Bool(false)) // -2
     var infoButtonOption         = (long: String("infobutton"),        short: String("3"),   value : String(""), present : Bool(false)) // -3
     var getVersion               = (long: String("version"),           short: String("v"),   value : String(""), present : Bool(false)) // -v

@@ -166,6 +166,10 @@ var helpText = """
                     Runs the specified shell command using zsh
                     Command input and output is not sanitised or checked.
                     If your command fails, Dialog still exits 0
+    
+        --\(cloptions.button1Disabled.long)
+                    Launches dialig with button1 disabled
+                    To re-enable, send `buton1: enable` to the dialog command file.
 
         -\(cloptions.button2Option.short), --\(cloptions.button2Option.long)
                     Displays button2 with default label of "\(appvars.button2Default)"
