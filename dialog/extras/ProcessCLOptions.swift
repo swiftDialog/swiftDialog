@@ -68,6 +68,17 @@ func processCLOptions() {
         logger(logMessage: "textOptionsArray : \(appvars.textOptionsArray)")
     }
     
+    if cloptions.checkbox.present {
+        if json[cloptions.checkbox.long].exists() {
+            appvars.checkboxOptionsArray = json[cloptions.checkbox.long].arrayValue.map {$0["label"].stringValue}
+            appvars.checkboxValue = json[cloptions.checkbox.long].arrayValue.map {$0["checked"].boolValue}
+            appvars.checkboxDisabled = json[cloptions.checkbox.long].arrayValue.map {$0["disabled"].boolValue}
+        } else {
+            appvars.checkboxOptionsArray =  CLOptionMultiOptions(optionName: cloptions.checkbox.long)
+        }
+        logger(logMessage: "checkboxOptionsArray : \(appvars.checkboxOptionsArray)")
+    }
+    
     if cloptions.mainImage.present {
         if json[cloptions.mainImage.long].exists() {
             if json[cloptions.mainImage.long].array == nil {
@@ -389,6 +400,8 @@ func processCLOptionValues() {
 
     //cloptions.textField.value               = CLOptionText(OptionName: cloptions.textField)
     cloptions.textField.present             = json[cloptions.textField.long].exists() || CLOptionPresent(OptionName: cloptions.textField)
+    
+    cloptions.checkbox.present             = json[cloptions.checkbox.long].exists() || CLOptionPresent(OptionName: cloptions.checkbox)
 
     cloptions.timerBar.value                = json[cloptions.timerBar.long].string ?? CLOptionText(OptionName: cloptions.timerBar, DefaultValue: "\(appvars.timerDefaultSeconds)")
     cloptions.timerBar.present              = json[cloptions.timerBar.long].exists() || CLOptionPresent(OptionName: cloptions.timerBar)

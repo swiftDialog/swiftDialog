@@ -32,11 +32,11 @@
 		417BD4362798FE48009AE34A /* TrackProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD4342798FE38009AE34A /* TrackProgress.swift */; };
 		417BD43827992EDB009AE34A /* TaskProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD43727992EDB009AE34A /* TaskProgressView.swift */; };
 		417BD43927992EDB009AE34A /* TaskProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD43727992EDB009AE34A /* TaskProgressView.swift */; };
+		417BD471279CB658009AE34A /* CheckboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD470279CB658009AE34A /* CheckboxView.swift */; };
+		417BD472279CB658009AE34A /* CheckboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD470279CB658009AE34A /* CheckboxView.swift */; };
 		417BF0BB260F1726009AD252 /* BannerImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BF0BA260F1726009AD252 /* BannerImageView.swift */; };
 		41876683275D87C70023A6A1 /* ImageSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41876682275D87C70023A6A1 /* ImageSlider.swift */; };
 		41876684275D88D60023A6A1 /* ImageSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41876682275D87C70023A6A1 /* ImageSlider.swift */; };
-		4187668A275DEFC40023A6A1 /* JSONImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41876689275DEFC40023A6A1 /* JSONImport.swift */; };
-		4187668B275DEFC40023A6A1 /* JSONImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41876689275DEFC40023A6A1 /* JSONImport.swift */; };
 		418A7B512759949A00E4D6F1 /* VideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4114E1EA27154B2200388274 /* VideoView.swift */; };
 		418A7B522759949A00E4D6F1 /* watermarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A44EAF26F2F25200FEE1AC /* watermarkView.swift */; };
 		418A7B532759949A00E4D6F1 /* TextEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AD75B526AA81760023EBD8 /* TextEntryView.swift */; };
@@ -136,9 +136,9 @@
 		417BD42F2798277D009AE34A /* BackgroundView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundView.swift; sourceTree = "<group>"; };
 		417BD4342798FE38009AE34A /* TrackProgress.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackProgress.swift; sourceTree = "<group>"; };
 		417BD43727992EDB009AE34A /* TaskProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskProgressView.swift; sourceTree = "<group>"; };
+		417BD470279CB658009AE34A /* CheckboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckboxView.swift; sourceTree = "<group>"; };
 		417BF0BA260F1726009AD252 /* BannerImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerImageView.swift; sourceTree = "<group>"; };
 		41876682275D87C70023A6A1 /* ImageSlider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageSlider.swift; sourceTree = "<group>"; };
-		41876689275DEFC40023A6A1 /* JSONImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONImport.swift; sourceTree = "<group>"; };
 		418AE4222667A17A001E3423 /* DropdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropdownView.swift; sourceTree = "<group>"; };
 		41A44EAF26F2F25200FEE1AC /* watermarkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = watermarkView.swift; sourceTree = "<group>"; };
 		41A44EB126F4C43A00FEE1AC /* helpText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = helpText.swift; sourceTree = "<group>"; };
@@ -275,7 +275,6 @@
 				415934D726DB1B44009C9C3A /* ProcessCLOptions.swift */,
 				415934D926DB7604009C9C3A /* WindowPositioning.swift */,
 				41A44EB126F4C43A00FEE1AC /* helpText.swift */,
-				41876689275DEFC40023A6A1 /* JSONImport.swift */,
 			);
 			path = extras;
 			sourceTree = "<group>";
@@ -309,6 +308,7 @@
 				41FD45FF26C8DC5D006976FC /* ImageView.swift */,
 				41876682275D87C70023A6A1 /* ImageSlider.swift */,
 				417BD43727992EDB009AE34A /* TaskProgressView.swift */,
+				417BD470279CB658009AE34A /* CheckboxView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -517,6 +517,7 @@
 				418A7B572759949B00E4D6F1 /* ProcessCLOptions.swift in Sources */,
 				418A7B582759949B00E4D6F1 /* WindowPositioning.swift in Sources */,
 				418A7B592759949B00E4D6F1 /* helpText.swift in Sources */,
+				417BD471279CB658009AE34A /* CheckboxView.swift in Sources */,
 				4153784E2604B71800AA0E76 /* TitleView.swift in Sources */,
 				4153785E2604B81300AA0E76 /* IconView.swift in Sources */,
 				417BF0BB260F1726009AD252 /* BannerImageView.swift in Sources */,
@@ -524,7 +525,6 @@
 				416DED42261C5FE00049B6B5 /* FullscreenView.swift in Sources */,
 				418AE4232667A17A001E3423 /* DropdownView.swift in Sources */,
 				417BD43827992EDB009AE34A /* TaskProgressView.swift in Sources */,
-				4187668A275DEFC40023A6A1 /* JSONImport.swift in Sources */,
 				41D81E5725F7929800D1F7E1 /* DialogView.swift in Sources */,
 				4154C2E025F76BDB00A3D373 /* ContentView.swift in Sources */,
 				41D81E5C25F817BF00D1F7E1 /* ButtonView.swift in Sources */,
@@ -570,12 +570,12 @@
 				41FB648B2680855300A54C3E /* TitleView.swift in Sources */,
 				41FB648C2680855300A54C3E /* BannerImageView.swift in Sources */,
 				41FB648D2680855300A54C3E /* ButtonView.swift in Sources */,
+				417BD472279CB658009AE34A /* CheckboxView.swift in Sources */,
 				41876683275D87C70023A6A1 /* ImageSlider.swift in Sources */,
 				41FB648E2680855300A54C3E /* DropdownView.swift in Sources */,
 				41FB648F2680855300A54C3E /* IconOverlayView.swift in Sources */,
 				41FB64902680855300A54C3E /* FullscreenView.swift in Sources */,
 				417BD4352798FE39009AE34A /* TrackProgress.swift in Sources */,
-				4187668B275DEFC40023A6A1 /* JSONImport.swift in Sources */,
 				417BD43927992EDB009AE34A /* TaskProgressView.swift in Sources */,
 				41FB64912680855300A54C3E /* Options.swift in Sources */,
 				41A44EB026F2F25200FEE1AC /* watermarkView.swift in Sources */,
