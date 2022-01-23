@@ -50,16 +50,22 @@ struct MessageContent: View {
                             .multilineTextAlignment(appvars.messageAlignment)
                             .markdownStyle(customStyle)
                     }
+                    
+                    CheckboxView()
+                        .border(appvars.debugBorderColour, width: 2)
+                        .padding(.top, 10)
+
                 }
                 .padding(.top, 10)
-                
+                .border(appvars.debugBorderColour, width: 2)
+                                
                 Spacer()
-                
+            
                 TextEntryView()
                     .padding(.leading, 50)
                     .padding(.trailing, 50)
                     .border(appvars.debugBorderColour, width: 2)
-                
+                                
                 DropdownView()
                     .padding(.leading, 50)
                     .padding(.trailing, 50)

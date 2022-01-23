@@ -90,6 +90,11 @@ struct AppVariables {
     var textOptionsArray                = [String]()
     var textFieldText                   = Array(repeating: "", count: 64)
     
+    var checkboxOptionsArray            = [String]()
+    var checkboxText                    = Array(repeating: "", count: 64)
+    var checkboxValue                   = Array(repeating: false, count: 64)
+    var checkboxDisabled                = Array(repeating: false, count: 64)
+    
     var imageArray                      = [String]()
     var imageCaptionArray               = [String]()
     
@@ -144,6 +149,7 @@ struct CLOptions {
     var titleFont                = (long: String("titlefont"),         short: String(""),    value : String(""), present : Bool(false))
     var messageFont              = (long: String("messagefont"),       short: String(""),    value : String(""), present : Bool(false))
     var textField                = (long: String("textfield"),         short: String(""),    value : String(""), present : Bool(false))
+    var checkbox                 = (long: String("checkbox"),          short: String(""),    value : String(""), present : Bool(false))
     var timerBar                 = (long: String("timer"),             short: String(""),    value : String(""), present : Bool(false))
     var progressBar              = (long: String("progress"),          short: String(""),    value : String(""), present : Bool(false))
     var mainImage                = (long: String("image"),             short: String("g"),   value : String(""), present : Bool(false))

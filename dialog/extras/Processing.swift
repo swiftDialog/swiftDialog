@@ -179,6 +179,12 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "") {
                 json[appvars.textOptionsArray[i]].string = appvars.textFieldText[i]
             }
         }
+        if cloptions.checkbox.present {
+            for i in 0..<appvars.checkboxOptionsArray.count {
+                outputArray.append("\"\(appvars.checkboxOptionsArray[i])\" : \"\(appvars.checkboxValue[i])\"")
+                json[appvars.checkboxOptionsArray[i]].boolValue = appvars.checkboxValue[i]
+            }
+        }
                  
         // print the output
         if appvars.jsonOut {
