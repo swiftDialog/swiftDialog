@@ -245,7 +245,13 @@ var helpText = """
                     Present a textfield with the specified label
                     When Dialog exits the contents of the textfield will be presented as <text> : <user_input>
                     in plain or as json using [-\(cloptions.jsonOutPut.short), --\(cloptions.jsonOutPut.long)] option
-                    Multiple textfields can be specified (up to 8).
+                    Multiple textfields can be specified as required.
+    
+        --\(cloptions.checkbox.long) <text>
+                    Present a checkbox with the specified label
+                    When Dialog exits the status of the checkbox will be presented as <text> : [true|false]
+                    in plain or as json using [-\(cloptions.jsonOutPut.short), --\(cloptions.jsonOutPut.long)] option
+                    Multiple checkboxes can be specified as required.
     
     
         -\(cloptions.watermarkImage.short), --\(cloptions.watermarkImage.long) <file>
@@ -306,6 +312,43 @@ var helpText = """
         -\(cloptions.jsonOutPut.short), --\(cloptions.jsonOutPut.long)
                     Outputs any results in json format for easier processing
                     (for dropdown item selections and textfield responses)
+    
+        --\(cloptions.jsonFile.long) <file>
+                    Use JSON formatted data file as input instead of command line paramaters
+    
+                    Uses the same naming convention as the long form command line options
+                    e.g.
+                    {
+                        "\(cloptions.titleOption.long)" : "Title here",
+                        "\(cloptions.messageOption.long)" : "Message here"
+                    }
+    
+                    "\(cloptions.mainImage.long)" and "\(cloptions.checkbox.long)" can accept an array of multiple values
+                    e.g.
+                    {
+                        "checkbox" : [{
+                            "label" : "Option 1",
+                            "checked" : true,
+                            "disabled" : true
+                        },
+                        ...]
+                        "image": [{
+                            "imagename": "<image>",
+                            "caption": "<caption>"
+                        },
+                        ...]
+                    }
+    
+                    "\(cloptions.textField.long)" can specify multiple valuse as a simple array:
+                    e.g.
+                    {
+                        "textfield": ["Text Entry 1", "Text Entry 2", "Text Entry 3"]
+                    }
+    
+        --\(cloptions.jsonString.long) <text>
+                    Same data format as --\(cloptions.jsonFile.long) but passed in as a string on the command line without
+                    requiring an intermediate file.
+                    
 
         -\(cloptions.ignoreDND.short), --\(cloptions.ignoreDND.long)
                     Will ignore user Do Not Disturb setting
