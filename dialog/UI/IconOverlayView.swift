@@ -61,7 +61,11 @@ struct IconOverlayView: View {
                     builtInIconWeight = textToFontWeight(item[1])
                 }
                 if itemName.hasPrefix("bgcolour") || itemName.hasPrefix("bgcolor") {
-                    sfBackgroundIconColour = stringToColour(itemValue)
+                    if itemValue == "none" {
+                        sfBackgroundIconColour = .clear
+                    } else {
+                        sfBackgroundIconColour = stringToColour(itemValue)
+                    }
                 }
                 if itemName.hasPrefix("colour") || itemName.hasPrefix("color") {
                     if itemValue == "auto" {
