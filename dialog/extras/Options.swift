@@ -7,24 +7,22 @@
 
 import Foundation
 
-
-// Returns the option text for a given command line option
-
-func CLOptionTextField () -> Array<String> {
+// returns array of multiple option values
+func CLOptionMultiOptions (optionName : String) -> Array<String> {
     // return an array that contains of all the --textfield options that are passed in
-    var textOptionsArray: Array = [String]()
+    var optionsArray: Array = [String]()
     var argIndex = 0
     for argument in CommandLine.arguments {
         
-        if argument == "--\(cloptions.textField.long)" {
-            textOptionsArray.append(CommandLine.arguments[argIndex+1])
+        if argument == "--\(optionName)" {
+            optionsArray.append(CommandLine.arguments[argIndex+1])
         }
         argIndex+=1
     }
-    
-    return textOptionsArray
+    return optionsArray
 }
 
+// Returns the option text for a given command line option
 func CLOptionText(OptionName: (long: String, short: String, value: String, present: Bool), DefaultValue: String? = "") -> String {
     // Determine if argument is present.
     var CLOptionTextValue = ""

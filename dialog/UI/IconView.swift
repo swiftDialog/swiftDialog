@@ -12,7 +12,9 @@ import SwiftUI
 struct IconView: View {
     @Environment(\.colorScheme) var colorScheme
     
-    var messageUserImagePath: String = cloptions.iconOption.value // CLOptionText(OptionName: cloptions.iconOption, DefaultValue: "default")
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    
+    var messageUserImagePath: String //= cloptions.iconOption.value // CLOptionText(OptionName: cloptions.iconOption, DefaultValue: "default")
     var logoWidth: CGFloat = appvars.iconWidth
     var logoHeight: CGFloat  = appvars.iconHeight
     var imgFromURL: Bool = false
@@ -40,7 +42,11 @@ struct IconView: View {
     let overlayImageScale: CGFloat = 0.4
     
   
-    init() {        
+    init(observedDialogContent : DialogUpdatableContent) {
+        self.observedDialogContent = observedDialogContent
+        
+        messageUserImagePath = observedDialogContent.iconImage
+        
         logoWidth = appvars.iconWidth
         logoHeight = appvars.iconHeight
         
@@ -130,6 +136,7 @@ struct IconView: View {
         
                 
         if !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL && !imgFromAPP && !builtInIconPresent  {
+            observedDialogContent.end()
             quitDialog(exitCode: appvars.exit202.code, exitMessage: "\(appvars.exit202.message) \(messageUserImagePath)")
         }
                 

@@ -23,6 +23,8 @@ extension Color {
 
 struct FullscreenView: View {
         
+    var observedDialogContent = DialogUpdatableContent()
+    
     var TitleViewOption: String = cloptions.titleOption.value // CLOptionText(OptionName: cloptions.titleOption, DefaultValue: appvars.titleDefault)
     var messageContentOption: String = cloptions.messageOption.value // CLOptionText(OptionName: cloptions.messageOption, DefaultValue: appvars.messageDefault)
     
@@ -137,7 +139,7 @@ struct FullscreenView: View {
             VStack {
                 if cloptions.mainImage.present {
                     // print image and caption
-                    ImageView(imagePath: cloptions.mainImage.value, caption: "")
+                    ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: NumberFormatter().number(from: cloptions.autoPlay.value) as! CGFloat)
                         .frame(maxHeight: windowHeight/1.3)
                     if cloptions.mainImageCaption.present {
                         Text(cloptions.mainImageCaption.value)
@@ -148,7 +150,7 @@ struct FullscreenView: View {
                     // icon vstack
                     VStack {
                         if cloptions.iconOption.present {
-                            IconView()
+                            IconView(observedDialogContent: observedDialogContent)
                         } else {
                             VStack{}.padding(emptyStackPadding)
                         }

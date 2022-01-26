@@ -11,6 +11,8 @@ import MarkdownUI
 
 struct MessageContent: View {
     
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    
     var messageColour : NSColor = NSColor(appvars.messageFontColour)
     
     var useDefaultStyle = true
@@ -32,38 +34,50 @@ struct MessageContent: View {
     
     
     var body: some View {
-        VStack {
-            if cloptions.mainImage.present {
-                ImageView(imagePath: cloptions.mainImage.value, caption: cloptions.mainImageCaption.value)
-            } else {
+        
+        if observedDialogContent.imagePresent || (observedDialogContent.imagePresent && observedDialogContent.imageCaptionPresent) {
+            ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: NumberFormatter().number(from: cloptions.autoPlay.value) as! CGFloat)
+        } else {
+            VStack {
+
                 ScrollView() {
                     if appvars.messageFontName == "" {
-                        Markdown(Document(messageContentOption))
+                        Markdown(Document(observedDialogContent.messageText))
                             .multilineTextAlignment(appvars.messageAlignment)
                             .markdownStyle(defaultStyle)
                     } else {
-                        Markdown(Document(messageContentOption))
+                        Markdown(Document(observedDialogContent.messageText))
                             .multilineTextAlignment(appvars.messageAlignment)
                             .markdownStyle(customStyle)
                     }
+                    
+                    CheckboxView()
+                        .border(appvars.debugBorderColour, width: 2)
+                        .padding(.top, 10)
+
                 }
                 .padding(.top, 10)
-                
+                .border(appvars.debugBorderColour, width: 2)
+                                
                 Spacer()
-                
-                TextEntryView()
-                    .padding(.leading, 50)
-                    .padding(.trailing, 50)
-                    .border(appvars.debugBorderColour, width: 2)
-                
-                DropdownView()
-                    .padding(.leading, 50)
-                    .padding(.trailing, 50)
-                    .border(appvars.debugBorderColour, width: 2)
+                HStack() {
+                    Spacer()
+                    VStack {
+                        TextEntryView()
+                            .padding(.leading, 50)
+                            .padding(.trailing, 50)
+                            .border(appvars.debugBorderColour, width: 2)
+
+                        DropdownView()
+                            .padding(.leading, 50)
+                            .padding(.trailing, 50)
+                            .border(appvars.debugBorderColour, width: 2)
+                    }
+                }
             }
+            .padding(.leading, 40)
+            .padding(.trailing, 40)
         }
-        .padding(.leading, 40)
-        .padding(.trailing, 40)
     }
 }
 

@@ -9,16 +9,35 @@ import Foundation
 import AppKit
 import SystemConfiguration
 import SwiftUI
+import OSLog
+import SwiftyJSON
 
 class stdOutput: ObservableObject {
     @Published var selectedOption: String = ""
 }
+
 
 public extension Color {
 
     static let background = Color(NSColor.windowBackgroundColor)
     static let secondaryBackground = Color(NSColor.underPageBackgroundColor)
     static let tertiaryBackground = Color(NSColor.controlBackgroundColor)
+}
+
+func logger(logType: String = "", logMessage: String) {
+    let defaultLog = Logger(subsystem: "au.bartreardon.dialog", category: "main")
+    switch logType {
+    case "info":
+        defaultLog.info("\(logMessage, privacy: .public)")
+    case "debug":
+        defaultLog.debug("\(logMessage, privacy: .public)")
+    case "error":
+        defaultLog.error("\(logMessage, privacy: .public)")
+    case "fault":
+        defaultLog.fault("\(logMessage, privacy: .public)")
+    default:
+        defaultLog.log("\(logMessage, privacy: .public)")
+    }
 }
 
 func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, imgHeight: CGFloat? = .infinity, returnErrorImage: Bool? = false) -> NSImage {
@@ -65,7 +84,7 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
 }
 
 func openSpecifiedURL(urlToOpen: String) {
-    // Open the selected URL (no checking is perfoemrd)
+    // Open the selected URL (no checking is performed)
     
     if let url = URL(string: urlToOpen) {
         NSWorkspace.shared.open(url)
@@ -133,7 +152,6 @@ func getVersionString() -> String {
 
 func quitDialog(exitCode: Int32, exitMessage: String? = "") {
     //var userOutput: Bool = false
-    
     if exitMessage != "" {
         //print(exitCode)
         print("\(exitMessage!)")
@@ -142,31 +160,35 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "") {
     // only print if exit code os 0
     if exitCode == 0 {
         
+        // build json using SwiftyJSON
+        var json = JSON()
+        
         //build output array
         var outputArray : Array = [String]()
         if appvars.selectedOption != "" {
             outputArray.append("\"SelectedOption\" : \"\(appvars.selectedOption)\"")
+            json["SelectedOption"].string = appvars.selectedOption
         }
         if appvars.selectedIndex > 0 {
             outputArray.append("\"SelectedIndex\" : \(appvars.selectedIndex)")
+            json["SelectedIndex"].int = appvars.selectedIndex
         }
         if cloptions.textField.present {
             for i in 0..<appvars.textOptionsArray.count {
                 outputArray.append("\"\(appvars.textOptionsArray[i])\" : \"\(appvars.textFieldText[i])\"")
+                json[appvars.textOptionsArray[i]].string = appvars.textFieldText[i]
             }
         }
-        
+        if cloptions.checkbox.present {
+            for i in 0..<appvars.checkboxOptionsArray.count {
+                outputArray.append("\"\(appvars.checkboxOptionsArray[i])\" : \"\(appvars.checkboxValue[i])\"")
+                json[appvars.checkboxOptionsArray[i]].boolValue = appvars.checkboxValue[i]
+            }
+        }
+                 
         // print the output
         if appvars.jsonOut {
-            var newElementChar = ","
-            print("{")
-            for i in 0..<outputArray.count {
-                if i == (outputArray.count - 1) {
-                    newElementChar = ""
-                }
-                print(outputArray[i]+newElementChar)
-            }
-            print("}")
+            print(json)
         } else  {
             for i in 0..<outputArray.count {
                 print(outputArray[i].replacingOccurrences(of: "\"", with: ""))

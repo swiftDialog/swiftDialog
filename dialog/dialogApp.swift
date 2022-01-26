@@ -16,11 +16,22 @@ extension StringProtocol {
     }
 }
 
+var background: Background?
+let storyBoard = NSStoryboard(name: "BG", bundle: nil)  as NSStoryboard
+
 @available(OSX 11.0, *)
 @main
 struct dialogApp: App {
         
     init () {
+        
+        logger(logMessage: "Dialog Launched")
+        
+        if let screen = NSScreen.main {
+            let rect = screen.frame
+            appvars.screenHeight = rect.size.height
+            appvars.screenWidth = rect.size.width
+        }
         
         // get all the command line option values
         processCLOptionValues()
@@ -48,6 +59,7 @@ struct dialogApp: App {
         
         //check debug mode and print info
         if cloptions.debug.present {
+            logger(logMessage: "debug options presented. dialog state sent to stdout and ")
             appvars.debugMode = true
             appvars.debugBorderColour = Color.green
             
@@ -74,14 +86,44 @@ struct dialogApp: App {
             //print("APPVARS")
             //print(appvars)
         }
+        logger(logMessage: "width: \(appvars.windowWidth), height: \(appvars.windowHeight)")
         
     }
     var body: some Scene {
 
         WindowGroup {
-            ContentView()
-                .frame(width: appvars.windowWidth, height: appvars.windowHeight) // + appvars.bannerHeight)
+            ZStack {
+                HostingWindowFinder {window in
+                    window?.standardWindowButton(.closeButton)?.isHidden = true //hides the red close button
+                    window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
+                    window?.standardWindowButton(.zoomButton)?.isHidden = true //this removes the green zoom button
+                    window?.isMovable = appvars.windowIsMoveable
+
+                    if appvars.windowOnTop {
+                        window?.level = .floating
+                    } else {
+                        window?.level = .normal
+                    }
+
+                    if cloptions.blurScreen.present { //blur background
+                        /// This code is taken from depNotify
+                        /// Particularly https://gitlab.com/Mactroll/DEPNotify/-/blob/master/DEPNotify/ViewController.swift
+                        /// class WindowController: NSWindowController
+                        background = storyBoard.instantiateController(withIdentifier: "Background") as? Background
+                        background?.showWindow(self)
+                        background?.sendBack()
+                        NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow)))
+                    }
+                    
+                    NSApp.activate(ignoringOtherApps: true)
+                }
+                .frame(width: 0, height: 0) //ensures hostingwindowfinder isn't taking up any real estate
+                
+                ContentView()
+                    .frame(width: appvars.windowWidth, height: appvars.windowHeight) // + appvars.bannerHeight)
                 //.frame(idealWidth: appvars.windowWidth, idealHeight: appvars.windowHeight)
+
+            }
         }
         // Hide Title Bar
         .windowStyle(HiddenTitleBarWindowStyle())
