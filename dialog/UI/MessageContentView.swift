@@ -60,16 +60,20 @@ struct MessageContent: View {
                 .border(appvars.debugBorderColour, width: 2)
                                 
                 Spacer()
-            
-                TextEntryView()
-                    .padding(.leading, 50)
-                    .padding(.trailing, 50)
-                    .border(appvars.debugBorderColour, width: 2)
-                                
-                DropdownView()
-                    .padding(.leading, 50)
-                    .padding(.trailing, 50)
-                    .border(appvars.debugBorderColour, width: 2)
+                HStack() {
+                    Spacer()
+                    VStack {
+                        TextEntryView()
+                            .padding(.leading, 50)
+                            .padding(.trailing, 50)
+                            .border(appvars.debugBorderColour, width: 2)
+
+                        DropdownView()
+                            .padding(.leading, 50)
+                            .padding(.trailing, 50)
+                            .border(appvars.debugBorderColour, width: 2)
+                    }
+                }
             }
             .padding(.leading, 40)
             .padding(.trailing, 40)
