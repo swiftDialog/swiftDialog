@@ -31,6 +31,9 @@ class DialogUpdatableContent : ObservableObject {
     //@Published var image: String
     @Published var imagePresent: Bool
     @Published var imageCaptionPresent: Bool
+    @Published var listItemArray: [String]
+    @Published var listItemStatus: [String]
+    @Published var listItemUpdateRow: Int
     
     var status: StatusState
     
@@ -58,6 +61,7 @@ class DialogUpdatableContent : ObservableObject {
         button1Disabled = cloptions.button1Disabled.present
         button2Value = cloptions.button2TextOption.value
         infoButtonValue = cloptions.infoButtonOption.value
+        listItemUpdateRow = 0
         
         iconImage = cloptions.iconOption.value
         
@@ -66,13 +70,17 @@ class DialogUpdatableContent : ObservableObject {
         appvars.imageCaptionArray = CLOptionMultiOptions(optionName: cloptions.mainImageCaption.long)
         imagePresent = cloptions.mainImage.present
         imageCaptionPresent = cloptions.mainImageCaption.present
-        
+                
+        listItemArray = appvars.listItemArray
+        listItemStatus = appvars.listItemStatus
+
         status = .start
         task.launchPath = "/usr/bin/tail"
         task.arguments = ["-f", path]
         
         self.killCommandFile()
         self.run()
+        
     }
     
     // watch for updates and post them
@@ -208,6 +216,20 @@ class DialogUpdatableContent : ObservableObject {
             case "\(cloptions.mainImageCaption.long):" :
                 appvars.imageCaptionArray = [line.replacingOccurrences(of: "\(cloptions.mainImageCaption.long): ", with: "")]
                 imageCaptionPresent = true
+                
+            // list items
+            case "\(cloptions.listItem.long):" :
+                let listItem = line.replacingOccurrences(of: "\(cloptions.listItem.long): ", with: "")
+                
+                let ItemValue = listItem.components(separatedBy: ": ").first!
+                let ItemStatus = listItem.components(separatedBy: ": ").last!
+                
+                print(ItemValue + " " + ItemStatus)
+                
+                listItemStatus[listItemArray.firstIndex {$0 == ItemValue} ?? 63] = ItemStatus
+                listItemUpdateRow = listItemArray.firstIndex {$0 == ItemValue} ?? 63
+                
+                // update the listutem array named listItemValue with listItemStatus
                 
             // quit
             case "quit:" :
