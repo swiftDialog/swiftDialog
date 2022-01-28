@@ -53,6 +53,9 @@ class DialogUpdatableContent : ObservableObject {
             path = "/var/tmp/dialog.log"
         }
         
+        // initialise all our observed variables
+        // for the most part we pull from whatever was passed in save for some tracking variables
+        
         titleText = cloptions.titleOption.value
         messageText = cloptions.messageOption.value
         statusText = ""
@@ -76,10 +79,12 @@ class DialogUpdatableContent : ObservableObject {
         listItemStatus = appvars.listItemStatus
         listItemPresent = cloptions.listItem.present
 
+        // start the background process to monotor the command file
         status = .start
         task.launchPath = "/usr/bin/tail"
         task.arguments = ["-f", path]
         
+        // delete if it already exists
         self.killCommandFile()
         self.run()
         
@@ -125,9 +130,6 @@ class DialogUpdatableContent : ObservableObject {
         }
         
         task.launch()
-        
-        //titleText = cloptions.titleOption.value
-        
     }
     
     func end() {
@@ -139,11 +141,8 @@ class DialogUpdatableContent : ObservableObject {
         let allCommands = commands.components(separatedBy: "\n")
         
         for line in allCommands {
-            print(line)
             
             let command = line.components(separatedBy: " ").first!.lowercased()
-            
-            print(command)
                         
             switch command {
             // Title
@@ -230,11 +229,18 @@ class DialogUpdatableContent : ObservableObject {
                 
             // list items
             case "list:" :
-                var listItems = line.replacingOccurrences(of: "list: ", with: "").components(separatedBy: ",")
-                listItems = listItems.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
-                listItemArray = listItems
-                listItemStatus = appvars.listItemStatus
-                listItemPresent = true
+                if line.replacingOccurrences(of: "list: ", with: "") == "clear" {
+                    // clean everything out and remove the listview from display
+                    listItemArray = Array(repeating: "", count: 64)
+                    listItemStatus = appvars.listItemStatus
+                    listItemPresent = false
+                } else {
+                    var listItems = line.replacingOccurrences(of: "list: ", with: "").components(separatedBy: ",")
+                    listItems = listItems.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
+                    listItemArray = listItems
+                    listItemStatus = appvars.listItemStatus
+                    listItemPresent = true
+                }
                 
             // list item status
             case "\(cloptions.listItem.long):" :

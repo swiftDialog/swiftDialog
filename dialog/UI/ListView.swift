@@ -27,9 +27,14 @@ struct ListView: View {
                                     .font(.system(size: appvars.messageFontSize))
                                     .id(i)
                                 Spacer()
-                                Text(observedDialogContent.listItemStatus[i])
+                                if observedDialogContent.listItemStatus[i] == "wait" {
+                                    ProgressView()
+                                        .frame(height: 20)
+                                } else {
+                                    Text(observedDialogContent.listItemStatus[i])
                                     .font(.system(size: appvars.messageFontSize))
                                     .animation(.easeInOut(duration: 0.1))
+                                }
                             }
                         }
                     }
@@ -40,6 +45,7 @@ struct ListView: View {
                             }
                         }
                     })
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
                 //}
             }
         }
