@@ -45,7 +45,7 @@ struct ListView: View {
                             }
                         }
                     })
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
                 //}
             }
         }
