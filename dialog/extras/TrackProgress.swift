@@ -31,6 +31,10 @@ class DialogUpdatableContent : ObservableObject {
     //@Published var image: String
     @Published var imagePresent: Bool
     @Published var imageCaptionPresent: Bool
+    @Published var listItemArray: [String]
+    @Published var listItemStatus: [String]
+    @Published var listItemUpdateRow: Int
+    @Published var listItemPresent: Bool
     
     var status: StatusState
     
@@ -49,6 +53,9 @@ class DialogUpdatableContent : ObservableObject {
             path = "/var/tmp/dialog.log"
         }
         
+        // initialise all our observed variables
+        // for the most part we pull from whatever was passed in save for some tracking variables
+        
         titleText = cloptions.titleOption.value
         messageText = cloptions.messageOption.value
         statusText = ""
@@ -58,6 +65,7 @@ class DialogUpdatableContent : ObservableObject {
         button1Disabled = cloptions.button1Disabled.present
         button2Value = cloptions.button2TextOption.value
         infoButtonValue = cloptions.infoButtonOption.value
+        listItemUpdateRow = 0
         
         iconImage = cloptions.iconOption.value
         
@@ -66,13 +74,20 @@ class DialogUpdatableContent : ObservableObject {
         appvars.imageCaptionArray = CLOptionMultiOptions(optionName: cloptions.mainImageCaption.long)
         imagePresent = cloptions.mainImage.present
         imageCaptionPresent = cloptions.mainImageCaption.present
-        
+                
+        listItemArray = appvars.listItemArray
+        listItemStatus = appvars.listItemStatus
+        listItemPresent = cloptions.listItem.present
+
+        // start the background process to monotor the command file
         status = .start
         task.launchPath = "/usr/bin/tail"
         task.arguments = ["-f", path]
         
+        // delete if it already exists
         self.killCommandFile()
         self.run()
+        
     }
     
     // watch for updates and post them
@@ -115,9 +130,6 @@ class DialogUpdatableContent : ObservableObject {
         }
         
         task.launch()
-        
-        //titleText = cloptions.titleOption.value
-        
     }
     
     func end() {
@@ -129,8 +141,10 @@ class DialogUpdatableContent : ObservableObject {
         let allCommands = commands.components(separatedBy: "\n")
         
         for line in allCommands {
-            //print(line)
-            switch line.components(separatedBy: " ").first! {
+            
+            let command = line.components(separatedBy: " ").first!.lowercased()
+                        
+            switch command {
             // Title
             case "\(cloptions.titleOption.long):" :
                 titleText = line.replacingOccurrences(of: "\(cloptions.titleOption.long): ", with: "")
@@ -140,6 +154,7 @@ class DialogUpdatableContent : ObservableObject {
                 messageText = line.replacingOccurrences(of: "\(cloptions.messageOption.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n")
                 imagePresent = false
                 imageCaptionPresent = false
+                //listItemPresent = false
                 
             //Progress Bar
             case "\(cloptions.progressBar.long):" :
@@ -166,8 +181,11 @@ class DialogUpdatableContent : ObservableObject {
                     progressValue = Double(incrementValue) ?? 0
                 }
                 
-            
             //Progress Bar Label
+            case "\(cloptions.progressBar.long)text:" :
+                statusText = line.replacingOccurrences(of: "\(cloptions.progressBar.long)text: ", with: "")
+                
+            //Progress Bar Label (typo version with capital T)
             case "\(cloptions.progressBar.long)Text:" :
                 statusText = line.replacingOccurrences(of: "\(cloptions.progressBar.long)Text: ", with: "")
             
@@ -208,6 +226,33 @@ class DialogUpdatableContent : ObservableObject {
             case "\(cloptions.mainImageCaption.long):" :
                 appvars.imageCaptionArray = [line.replacingOccurrences(of: "\(cloptions.mainImageCaption.long): ", with: "")]
                 imageCaptionPresent = true
+                
+            // list items
+            case "list:" :
+                if line.replacingOccurrences(of: "list: ", with: "") == "clear" {
+                    // clean everything out and remove the listview from display
+                    listItemArray = Array(repeating: "", count: 64)
+                    listItemStatus = appvars.listItemStatus
+                    listItemPresent = false
+                } else {
+                    var listItems = line.replacingOccurrences(of: "list: ", with: "").components(separatedBy: ",")
+                    listItems = listItems.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
+                    listItemArray = listItems
+                    listItemStatus = appvars.listItemStatus
+                    listItemPresent = true
+                }
+                
+            // list item status
+            case "\(cloptions.listItem.long):" :
+                let listItem = line.replacingOccurrences(of: "\(cloptions.listItem.long): ", with: "")
+                
+                let ItemValue = listItem.components(separatedBy: ": ").first!
+                let ItemStatus = listItem.components(separatedBy: ": ").last!
+                                
+                listItemStatus[listItemArray.firstIndex {$0 == ItemValue} ?? 63] = ItemStatus
+                listItemUpdateRow = listItemArray.firstIndex {$0 == ItemValue} ?? 63
+                
+                // update the listutem array named listItemValue with listItemStatus
                 
             // quit
             case "quit:" :

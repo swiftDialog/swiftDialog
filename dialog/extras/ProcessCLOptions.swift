@@ -94,6 +94,15 @@ func processCLOptions() {
         logger(logMessage: "imageArray : \(appvars.imageArray)")
     }
     
+    if cloptions.listItem.present {
+        if json[cloptions.listItem.long].exists() {
+            appvars.listItemArray = json[cloptions.listItem.long].arrayValue.map {$0.stringValue}
+        } else {
+            appvars.listItemArray =  CLOptionMultiOptions(optionName: cloptions.listItem.long)
+        }
+    }
+    
+    
     if json[cloptions.mainImageCaption.long].exists() || cloptions.mainImageCaption.present {
         if json[cloptions.mainImageCaption.long].exists() {
             appvars.imageCaptionArray.append(json[cloptions.mainImageCaption.long].stringValue)
@@ -416,6 +425,8 @@ func processCLOptionValues() {
     
     //cloptions.mainImageCaption.value        = CLOptionText(OptionName: cloptions.mainImageCaption)
     cloptions.mainImageCaption.present      = json[cloptions.mainImageCaption.long].exists() || CLOptionPresent(OptionName: cloptions.mainImageCaption)
+    
+    cloptions.listItem.present              = json[cloptions.listItem.long].exists() || CLOptionPresent(OptionName: cloptions.listItem)
 
     cloptions.windowWidth.value             = json[cloptions.windowWidth.long].string ?? CLOptionText(OptionName: cloptions.windowWidth)
     cloptions.windowWidth.present           = json[cloptions.windowWidth.long].exists() || CLOptionPresent(OptionName: cloptions.windowWidth)

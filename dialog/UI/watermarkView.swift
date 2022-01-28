@@ -19,7 +19,7 @@ struct watermarkView: View {
         imageOpacity = opacity ??  0.5
         imageScaleFill = scale ?? ""
         
-        print("scale = \(imageScaleFill)")
+        //print("scale = \(imageScaleFill)")
         
         switch position {
         case "left":
