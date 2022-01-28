@@ -40,11 +40,12 @@ struct MessageContent: View {
             ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: NumberFormatter().number(from: cloptions.autoPlay.value) as! CGFloat)
         } else {
             VStack {
-                if cloptions.listItem.present {
+                if observedDialogContent.listItemPresent {
                     Markdown(Document(observedDialogContent.messageText))
                         .multilineTextAlignment(appvars.messageAlignment)
                         .markdownStyle(defaultStyle)
                     ListView(observedDialogContent: observedDialogContent)
+                        .padding(.top, 10)
                 } else {
                     ScrollView() {
                         if appvars.messageFontName == "" {

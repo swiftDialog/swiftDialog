@@ -34,6 +34,7 @@ class DialogUpdatableContent : ObservableObject {
     @Published var listItemArray: [String]
     @Published var listItemStatus: [String]
     @Published var listItemUpdateRow: Int
+    @Published var listItemPresent: Bool
     
     var status: StatusState
     
@@ -73,6 +74,7 @@ class DialogUpdatableContent : ObservableObject {
                 
         listItemArray = appvars.listItemArray
         listItemStatus = appvars.listItemStatus
+        listItemPresent = cloptions.listItem.present
 
         status = .start
         task.launchPath = "/usr/bin/tail"
@@ -137,8 +139,13 @@ class DialogUpdatableContent : ObservableObject {
         let allCommands = commands.components(separatedBy: "\n")
         
         for line in allCommands {
-            //print(line)
-            switch line.components(separatedBy: " ").first! {
+            print(line)
+            
+            let command = line.components(separatedBy: " ").first!.lowercased()
+            
+            print(command)
+                        
+            switch command {
             // Title
             case "\(cloptions.titleOption.long):" :
                 titleText = line.replacingOccurrences(of: "\(cloptions.titleOption.long): ", with: "")
@@ -148,6 +155,7 @@ class DialogUpdatableContent : ObservableObject {
                 messageText = line.replacingOccurrences(of: "\(cloptions.messageOption.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n")
                 imagePresent = false
                 imageCaptionPresent = false
+                //listItemPresent = false
                 
             //Progress Bar
             case "\(cloptions.progressBar.long):" :
@@ -174,8 +182,11 @@ class DialogUpdatableContent : ObservableObject {
                     progressValue = Double(incrementValue) ?? 0
                 }
                 
-            
             //Progress Bar Label
+            case "\(cloptions.progressBar.long)text:" :
+                statusText = line.replacingOccurrences(of: "\(cloptions.progressBar.long)text: ", with: "")
+                
+            //Progress Bar Label (typo version with capital T)
             case "\(cloptions.progressBar.long)Text:" :
                 statusText = line.replacingOccurrences(of: "\(cloptions.progressBar.long)Text: ", with: "")
             
@@ -218,14 +229,20 @@ class DialogUpdatableContent : ObservableObject {
                 imageCaptionPresent = true
                 
             // list items
+            case "list:" :
+                var listItems = line.replacingOccurrences(of: "list: ", with: "").components(separatedBy: ",")
+                listItems = listItems.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
+                listItemArray = listItems
+                listItemStatus = appvars.listItemStatus
+                listItemPresent = true
+                
+            // list item status
             case "\(cloptions.listItem.long):" :
                 let listItem = line.replacingOccurrences(of: "\(cloptions.listItem.long): ", with: "")
                 
                 let ItemValue = listItem.components(separatedBy: ": ").first!
                 let ItemStatus = listItem.components(separatedBy: ": ").last!
-                
-                print(ItemValue + " " + ItemStatus)
-                
+                                
                 listItemStatus[listItemArray.firstIndex {$0 == ItemValue} ?? 63] = ItemStatus
                 listItemUpdateRow = listItemArray.firstIndex {$0 == ItemValue} ?? 63
                 
