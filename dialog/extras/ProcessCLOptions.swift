@@ -57,8 +57,27 @@ func getJSON() -> JSON {
 
 func processCLOptions() {
     
+    //this method goes through the arguments that are present and performs any processing required before use
+    
     let json : JSON = getJSON()
-        
+    
+    if cloptions.dropdownValues.present {
+        if json[cloptions.dropdownValues.long].exists() {
+            appvars.dropdownValuesArray = json[cloptions.dropdownValues.long].arrayValue.map {$0.stringValue}
+        } else {
+    
+            let dropdownValues = cloptions.dropdownValues.value.components(separatedBy: ",")
+            appvars.dropdownValuesArray = dropdownValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
+        }
+    
+        if json[cloptions.dropdownDefault.long].exists() || cloptions.dropdownDefault.present {
+            appvars.selectedOption = cloptions.dropdownDefault.value
+            appvars.selectedIndex = appvars.dropdownValuesArray.firstIndex {$0 == cloptions.dropdownDefault.value} ?? -1
+        }
+    
+    }
+    
+    
     if cloptions.textField.present {
         if json[cloptions.textField.long].exists() {
             appvars.textOptionsArray = json[cloptions.textField.long].arrayValue.map {$0.stringValue}
@@ -295,6 +314,9 @@ func processCLOptions() {
 }
 
 func processCLOptionValues() {
+    
+    // this method reads in arguments from either json file or from the command line and loads them into the cloptions object
+    // also records whether an argument is present or not
     
     let json : JSON = getJSON()
     

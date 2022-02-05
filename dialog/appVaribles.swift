@@ -82,6 +82,7 @@ struct AppVariables {
     
     var selectedOption                  = ""
     var selectedIndex                   = 0
+    var dropdownValuesArray             = [String]()
 
     var jsonOut                         = Bool(false)
     
