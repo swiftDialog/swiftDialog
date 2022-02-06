@@ -162,7 +162,7 @@ class DialogUpdatableContent : ObservableObject {
                 switch incrementValue {
                 case "increment" :
                     if progressTotal == 0 {
-                        progressTotal = 100
+                        progressTotal = Double(cloptions.progressBar.value) ?? 100
                     }
                     progressValue = progressValue + 1
                 case "reset" :
@@ -176,7 +176,7 @@ class DialogUpdatableContent : ObservableObject {
                 //    progressValue = 0
                 default :
                     if progressTotal == 0 {
-                        progressTotal = 100
+                        progressTotal = Double(cloptions.progressBar.value) ?? 100
                     }
                     progressValue = Double(incrementValue) ?? 0
                 }
