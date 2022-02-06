@@ -24,6 +24,8 @@
 		4154C2FC25F76BDC00A3D373 /* dialogUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154C2FB25F76BDC00A3D373 /* dialogUITests.swift */; };
 		415934D826DB1B44009C9C3A /* ProcessCLOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415934D726DB1B44009C9C3A /* ProcessCLOptions.swift */; };
 		415934DA26DB7604009C9C3A /* WindowPositioning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415934D926DB7604009C9C3A /* WindowPositioning.swift */; };
+		415E1FCA27A2694B00DE971B /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415E1FC927A2694B00DE971B /* ListView.swift */; };
+		415E1FCB27A2B0A000DE971B /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415E1FC927A2694B00DE971B /* ListView.swift */; };
 		416DED42261C5FE00049B6B5 /* FullscreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416DED41261C5FE00049B6B5 /* FullscreenView.swift */; };
 		417BD42E27982759009AE34A /* BG.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 417BD42D27982759009AE34A /* BG.storyboard */; };
 		417BD4302798277D009AE34A /* BackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD42F2798277D009AE34A /* BackgroundView.swift */; };
@@ -131,6 +133,7 @@
 		4154C2FD25F76BDC00A3D373 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		415934D726DB1B44009C9C3A /* ProcessCLOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessCLOptions.swift; sourceTree = "<group>"; };
 		415934D926DB7604009C9C3A /* WindowPositioning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowPositioning.swift; sourceTree = "<group>"; };
+		415E1FC927A2694B00DE971B /* ListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
 		416DED41261C5FE00049B6B5 /* FullscreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullscreenView.swift; sourceTree = "<group>"; };
 		417BD42D27982759009AE34A /* BG.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = BG.storyboard; sourceTree = "<group>"; };
 		417BD42F2798277D009AE34A /* BackgroundView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundView.swift; sourceTree = "<group>"; };
@@ -309,6 +312,7 @@
 				41876682275D87C70023A6A1 /* ImageSlider.swift */,
 				417BD43727992EDB009AE34A /* TaskProgressView.swift */,
 				417BD470279CB658009AE34A /* CheckboxView.swift */,
+				415E1FC927A2694B00DE971B /* ListView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -505,6 +509,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				415E1FCB27A2B0A000DE971B /* ListView.swift in Sources */,
 				417BD4362798FE48009AE34A /* TrackProgress.swift in Sources */,
 				417BD4312798281D009AE34A /* BackgroundView.swift in Sources */,
 				41876684275D88D60023A6A1 /* ImageSlider.swift in Sources */,
@@ -575,6 +580,7 @@
 				41FB648E2680855300A54C3E /* DropdownView.swift in Sources */,
 				41FB648F2680855300A54C3E /* IconOverlayView.swift in Sources */,
 				41FB64902680855300A54C3E /* FullscreenView.swift in Sources */,
+				415E1FCA27A2694B00DE971B /* ListView.swift in Sources */,
 				417BD4352798FE39009AE34A /* TrackProgress.swift in Sources */,
 				417BD43927992EDB009AE34A /* TaskProgressView.swift in Sources */,
 				41FB64912680855300A54C3E /* Options.swift in Sources */,
@@ -750,7 +756,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.9.1;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -777,7 +783,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.9.0;
+				MARKETING_VERSION = 1.9.1;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;

@@ -19,7 +19,7 @@ var cloptions = CLOptions()
 
 struct AppVariables {
     
-    var cliversion                      = String("1.9.0")
+    var cliversion                      = String("1.9.1")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
@@ -82,6 +82,7 @@ struct AppVariables {
     
     var selectedOption                  = ""
     var selectedIndex                   = 0
+    var dropdownValuesArray             = [String]()
 
     var jsonOut                         = Bool(false)
     
@@ -97,6 +98,9 @@ struct AppVariables {
     
     var imageArray                      = [String]()
     var imageCaptionArray               = [String]()
+    
+    var listItemArray                   = Array(repeating: "", count: 64)
+    var listItemStatus                  = Array(repeating: "", count: 64)
     
     var annimationSmoothing             = Double(20)
     
@@ -167,6 +171,7 @@ struct CLOptions {
     var jsonFile                 = (long: String("jsonfile"),          short: String(""),    value : String(""), present : Bool(false))
     var jsonString               = (long: String("jsonstring"),        short: String(""),    value : String(""), present : Bool(false))
     var statusLogFile            = (long: String("commandfile"),       short: String(""),    value : String(""), present : Bool(false))
+    var listItem                 = (long: String("listitem"),          short: String(""),    value : String(""), present : Bool(false))
 
     // command line options that take no additional parameters
     var button1Disabled          = (long: String("button1disabled"),   short: String(""),    value : String(""), present : Bool(false))

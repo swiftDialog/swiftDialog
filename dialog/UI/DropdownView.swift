@@ -12,35 +12,14 @@ import Combine
 
 struct DropdownView: View {
     
-    @State var selectedOption = cloptions.dropdownDefault.value // CLOptionText(OptionName: cloptions.dropdownDefault)
-    //@Binding var selectedOption: String = CLOptionText(OptionName: cloptions.dropdownDefault, DefaultValue: "")
-    var selectedIndex = -1
-    var dropdownValues = [""]
-    var dropdownCLValues: String = ""
-    var dropdownTitle: String = ""
-    
-    var showDropdown: Bool = false
+    @State var selectedOption = cloptions.dropdownDefault.value
+
+    var dropdownValues = appvars.dropdownValuesArray
+    var dropdownTitle: String = cloptions.dropdownTitle.value
+    var showDropdown: Bool = cloptions.dropdownValues.present
     var defaultValue: String = ""
     
-    init() {
-        if cloptions.dropdownValues.present {
-            showDropdown = true
-            dropdownCLValues = cloptions.dropdownValues.value
-            dropdownValues = dropdownCLValues.components(separatedBy: ",")
-            dropdownValues = dropdownValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
-            dropdownTitle = cloptions.dropdownTitle.value
-        }
-        if cloptions.dropdownDefault.present && cloptions.dropdownValues.value.contains(cloptions.dropdownDefault.value) {
-            appvars.selectedOption = selectedOption
-            appvars.selectedIndex = dropdownValues.firstIndex {$0 == selectedOption} ?? -1
-            //appvars.selectedIndex += 1
-        }
-    }
-    
-    func updateSelectedOption() {
-        appvars.selectedOption = self.selectedOption
-    }
-    
+        
     var body: some View {
         if showDropdown {
             HStack {
@@ -61,15 +40,12 @@ struct DropdownView: View {
                 .pickerStyle(DefaultPickerStyle())
                 .frame(maxWidth: 450, alignment: .trailing)
                 .onChange(of: selectedOption) { _ in
-                            //update appvars with the option that was selected. this will be printed to stdout on exit
-                            appvars.selectedOption = selectedOption
-                            appvars.selectedIndex = dropdownValues.firstIndex {$0 == selectedOption} ?? -1
-                            //appvars.selectedIndex += 1  // removed by popular opinion
-                        }
+                    //update appvars with the option that was selected. this will be printed to stdout on exit
+                    appvars.selectedOption = selectedOption
+                    appvars.selectedIndex = dropdownValues.firstIndex {$0 == selectedOption} ?? -1
+                }
             }
             .frame(maxWidth: 500)
         }
     }
-    
-    
 }

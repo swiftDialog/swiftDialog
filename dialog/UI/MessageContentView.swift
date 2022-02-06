@@ -12,6 +12,7 @@ import MarkdownUI
 struct MessageContent: View {
     
     @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @State private var contentHeight: CGFloat = 40
     
     var messageColour : NSColor = NSColor(appvars.messageFontColour)
     
@@ -39,26 +40,33 @@ struct MessageContent: View {
             ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: NumberFormatter().number(from: cloptions.autoPlay.value) as! CGFloat)
         } else {
             VStack {
-
-                ScrollView() {
-                    if appvars.messageFontName == "" {
-                        Markdown(Document(observedDialogContent.messageText))
-                            .multilineTextAlignment(appvars.messageAlignment)
-                            .markdownStyle(defaultStyle)
-                    } else {
-                        Markdown(Document(observedDialogContent.messageText))
-                            .multilineTextAlignment(appvars.messageAlignment)
-                            .markdownStyle(customStyle)
-                    }
-                    
-                    CheckboxView()
-                        .border(appvars.debugBorderColour, width: 2)
+                if observedDialogContent.listItemPresent {
+                    Markdown(Document(observedDialogContent.messageText))
+                        .multilineTextAlignment(appvars.messageAlignment)
+                        .markdownStyle(defaultStyle)
+                    ListView(observedDialogContent: observedDialogContent)
                         .padding(.top, 10)
-
+                } else {
+                    ScrollView() {
+                        if appvars.messageFontName == "" {
+                            Markdown(Document(observedDialogContent.messageText))
+                                .multilineTextAlignment(appvars.messageAlignment)
+                                .markdownStyle(defaultStyle)
+                        } else {
+                            Markdown(Document(observedDialogContent.messageText))
+                                .multilineTextAlignment(appvars.messageAlignment)
+                                .markdownStyle(customStyle)
+                        }
+                        
+                        CheckboxView()
+                            .border(appvars.debugBorderColour, width: 2)
+                            .padding(.top, 10)
+                    
+                    }
+                    .padding(.top, 10)
+                    .border(appvars.debugBorderColour, width: 2)
                 }
-                .padding(.top, 10)
-                .border(appvars.debugBorderColour, width: 2)
-                                
+                
                 Spacer()
                 HStack() {
                     Spacer()
