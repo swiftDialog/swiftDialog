@@ -78,7 +78,9 @@ extension NSWindow.Position.Vertical {
     -> CGFloat {
         switch self {
         case .top: return screenRange.upperBound - height - padding
-        case .center: return (screenRange.upperBound + screenRange.lowerBound - height) / 1.4
+        case .center:
+            let screenheight = screenRange.upperBound - screenRange.lowerBound
+            return ((screenRange.upperBound + screenRange.lowerBound - height) / 2) + (screenheight*0.15)
         case .bottom: return screenRange.lowerBound + padding
         }
     }
