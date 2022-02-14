@@ -11,10 +11,6 @@ import Combine
 
 struct ImageView: View {
     
-    //var imageArray : Array
-    //var mainImage: NSImage
-    //var imageCaption: String = ""
-    
     @State var index = 0
     
     var images : Array = [NSImage]()
@@ -23,8 +19,6 @@ struct ImageView: View {
     
     
     init(imageArray: Array<String>, captionArray: Array<String>, autoPlaySeconds : CGFloat) {
-        //mainImage = getImageFromPath(fileImagePath: imagePath ?? "")
-        //imageCaption = caption ?? ""
         for imagePath in imageArray {
             images.append(getImageFromPath(fileImagePath: imagePath))
         }
@@ -40,36 +34,32 @@ struct ImageView: View {
     }
     
     var body: some View {
-        /*
-        VStack {
-            Image(nsImage: mainImage)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .scaledToFit()
-                .clipShape(RoundedRectangle(cornerRadius: 5))
-                .shadow(radius: 3)
-            Text(imageCaption)
-                .font(.system(size: 20))
-                .italic()
-        }
-         */
+
         VStack(spacing: 20) {
-            //HStack() {
-                ImageSlider(index: $index.animation(), maxIndex: images.count - 1, autoPlaySeconds: autoPlaySeconds) {
-                    ForEach(Array(self.images.enumerated()), id: \.offset) { imageIndex, imageName in
-                        VStack() {
-                            Image(nsImage: imageName)
-                                .resizable()
-                                .scaledToFit()
-                                .cornerRadius(10)
-                            Text(captions[imageIndex])
-                                .font(.system(size: 20))
-                                .italic()
+            ImageSlider(index: $index.animation(), maxIndex: images.count - 1, autoPlaySeconds: autoPlaySeconds) {
+                ForEach(Array(self.images.enumerated()), id: \.offset) { imageIndex, imageName in
+                    VStack() {
+                        Image(nsImage: imageName)
+                            .resizable()
+                            .scaledToFit()
+                            .cornerRadius(10)
+                        if captions.count > 0 {
+                            if cloptions.fullScreenWindow.present {
+                                Text(captions[imageIndex])
+                                    .font(.system(size: 60))
+                                    .foregroundColor(.white)
+                            } else {
+                                Text(captions[imageIndex])
+                                    .font(.system(size: 20))
+                                    .italic()
+                            }
                         }
                     }
                 }
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 10))
         }
-        .padding()
+        //.padding()
+        .border(appvars.debugBorderColour, width: 2)
     }        
 }
