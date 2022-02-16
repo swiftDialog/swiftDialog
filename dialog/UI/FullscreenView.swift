@@ -22,7 +22,7 @@ extension Color {
 }
 
 struct FullscreenView: View {
-        
+            
     var observedDialogContent = DialogUpdatableContent()
     
     var TitleViewOption: String = cloptions.titleOption.value // CLOptionText(OptionName: cloptions.titleOption, DefaultValue: appvars.titleDefault)
@@ -53,6 +53,10 @@ struct FullscreenView: View {
     }
      
     init () {
+        // Ensure the singleton NSApplication exists.
+        // required for correct determination of screen dimentions for the screen in use in multi screen scenarios
+        _ = NSApplication.shared
+        
         windowHeight = displayDetails.size.height
         windowWidth = displayDetails.size.width
         
@@ -91,14 +95,14 @@ struct FullscreenView: View {
                contentRect: NSRect(x: 0, y: 0, width: 480, height: 300),
                styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
                backing: .buffered, defer: false)
-           window.makeKeyAndOrderFront(self)
-           window.isReleasedWhenClosed = false
-           window.center()
-           window.contentView = NSHostingView(rootView: FullscreenView())
+        window.makeKeyAndOrderFront(self)
+        window.isReleasedWhenClosed = false
+        window.center()
+        window.contentView = NSHostingView(rootView: FullscreenView())
 
-       // open fullScreen mode
-           let mainScreen: NSScreen = NSScreen.screens[0]
-           window.contentView?.enterFullScreenMode(mainScreen)
+        // open fullScreen mode
+        let mainScreen: NSScreen = NSScreen.main!
+        window.contentView?.enterFullScreenMode(mainScreen)
     }
     
     var body: some View {
@@ -139,12 +143,9 @@ struct FullscreenView: View {
             VStack {
                 if cloptions.mainImage.present {
                     // print image and caption
-                    ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: NumberFormatter().number(from: cloptions.autoPlay.value) as! CGFloat)
-                        .frame(maxHeight: windowHeight/1.3)
-                    if cloptions.mainImageCaption.present {
-                        Text(cloptions.mainImageCaption.value)
-                            .font(.system(size: messageContentFontSize))
-                            .foregroundColor(.white)
+                    VStack {
+                        ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: NumberFormatter().number(from: cloptions.autoPlay.value) as! CGFloat)
+                            .border(appvars.debugBorderColour, width: 2)
                     }
                 } else {
                     // icon vstack
@@ -175,7 +176,7 @@ struct FullscreenView: View {
                 
             }
             .padding(.horizontal, 20) // total padding for the icon/message group
-            .padding(.vertical, 50)
+            //.padding(.vertical, 50)
         }
         .background(
                 //LinearGradient(gradient: Gradient(colors: [Color(hex: 0x0e539a), .black]), startPoint: .top, endPoint: .bottom)

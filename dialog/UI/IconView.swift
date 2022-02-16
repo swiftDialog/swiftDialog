@@ -187,7 +187,7 @@ struct IconView: View {
                         .scaledToFit()
                         .scaleEffect(mainImageScale)
             } else {
-                let diskImage: NSImage = getImageFromPath(fileImagePath: messageUserImagePath)
+                let diskImage: NSImage = getImageFromPath(fileImagePath: messageUserImagePath, returnErrorImage: true)
                 Image(nsImage: diskImage)
                     .resizable()
                     .aspectRatio(contentMode: .fit)

@@ -38,6 +38,10 @@ class Background: NSWindowController {
     override func windowDidLoad() {
         super.windowDidLoad()
 
+        // Ensure the singleton NSApplication exists.
+        // required for correct determination of screen dimentions for the screen in use in multi screen scenarios
+        _ = NSApplication.shared
+        
         if let backgroundWindow = self.window {
             let mainDisplayRect = NSScreen.main?.frame
             backgroundWindow.contentRect(forFrameRect: mainDisplayRect!)

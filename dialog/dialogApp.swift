@@ -9,7 +9,6 @@ import SwiftUI
 
 import SystemConfiguration
 
-
 extension StringProtocol {
     subscript(offset: Int) -> Character {
         self[index(startIndex, offsetBy: offset)]
@@ -26,6 +25,10 @@ struct dialogApp: App {
     init () {
         
         logger(logMessage: "Dialog Launched")
+        
+        // Ensure the singleton NSApplication exists.
+        // required for correct determination of screen dimentions for the screen in use in multi screen scenarios
+        _ = NSApplication.shared
         
         if let screen = NSScreen.main {
             let rect = screen.frame

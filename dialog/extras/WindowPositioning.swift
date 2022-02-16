@@ -9,6 +9,7 @@ import AppKit
 import SwiftUI
 #endif
 
+
 // MARK: Model
 extension NSWindow {
 
@@ -77,7 +78,9 @@ extension NSWindow.Position.Vertical {
     -> CGFloat {
         switch self {
         case .top: return screenRange.upperBound - height - padding
-        case .center: return (screenRange.upperBound + screenRange.lowerBound - height) / 1.4
+        case .center:
+            let screenheight = screenRange.upperBound - screenRange.lowerBound
+            return ((screenRange.upperBound + screenRange.lowerBound - height) / 2) + (screenheight*0.15)
         case .bottom: return screenRange.lowerBound + padding
         }
     }
@@ -85,7 +88,7 @@ extension NSWindow.Position.Vertical {
 
 // MARK: - AppKit extension
 extension NSWindow {
-
+    
     func setPosition(_ position: Position, in screen: NSScreen?) {
         guard let visibleFrame = (screen ?? self.screen)?.visibleFrame else { return }
         let origin = position.value(forWindow: frame, inScreen: visibleFrame)
