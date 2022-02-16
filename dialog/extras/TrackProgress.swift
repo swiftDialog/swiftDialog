@@ -56,13 +56,18 @@ class DialogUpdatableContent : ObservableObject {
         // initialise all our observed variables
         // for the most part we pull from whatever was passed in save for some tracking variables
         
+        button1Disabled = cloptions.button1Disabled.present
+        if cloptions.timerBar.present && !cloptions.hideTimerBar.present {
+            //self._button1disabled = State(initialValue: true)
+            button1Disabled = true
+        }
+                
         titleText = cloptions.titleOption.value
         messageText = cloptions.messageOption.value
         statusText = ""
         progressValue = 0
         progressTotal = 0
         button1Value = cloptions.button1TextOption.value
-        button1Disabled = cloptions.button1Disabled.present
         button2Value = cloptions.button2TextOption.value
         infoButtonValue = cloptions.infoButtonOption.value
         listItemUpdateRow = 0
