@@ -32,11 +32,6 @@ struct ButtonView: View {
         } else if cloptions.button1ActionOption.present {
             button1action = cloptions.button1ActionOption.value
         }
-                
-        if cloptions.timerBar.present && !cloptions.hideTimerBar.present {
-            //self._button1disabled = State(initialValue: true)
-            observedDialogContent.button1Disabled = true
-        }
     }
     
     var body: some View {
