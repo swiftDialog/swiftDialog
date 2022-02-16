@@ -19,7 +19,7 @@ var cloptions = CLOptions()
 
 struct AppVariables {
     
-    var cliversion                      = String("1.9.1")
+    var cliversion                      = String("1.9.2")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
