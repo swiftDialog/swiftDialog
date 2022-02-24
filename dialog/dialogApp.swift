@@ -15,8 +15,7 @@ extension StringProtocol {
     }
 }
 
-var background: Background?
-let storyBoard = NSStoryboard(name: "BG", bundle: nil)  as NSStoryboard
+var background = BlurWindowController()
 
 @available(OSX 11.0, *)
 @main
@@ -82,12 +81,6 @@ struct dialogApp: App {
                 print("  \(propertyName) = \(attr.value)")
               }
             }
-            
-            // print appvariables and options if debug mode is on
-            //print("CLOPTIONS")
-            //print(cloptions)
-            //print("APPVARS")
-            //print(appvars)
         }
         logger(logMessage: "width: \(appvars.windowWidth), height: \(appvars.windowHeight)")
         
@@ -109,12 +102,7 @@ struct dialogApp: App {
                     }
 
                     if cloptions.blurScreen.present { //blur background
-                        /// This code is taken from depNotify
-                        /// Particularly https://gitlab.com/Mactroll/DEPNotify/-/blob/master/DEPNotify/ViewController.swift
-                        /// class WindowController: NSWindowController
-                        background = storyBoard.instantiateController(withIdentifier: "Background") as? Background
-                        background?.showWindow(self)
-                        background?.sendBack()
+                        background.showWindow(self)
                         NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow)))
                     }
                     
