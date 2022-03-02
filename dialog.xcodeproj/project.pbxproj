@@ -3,19 +3,18 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		41005AA427CEEC4E0065F323 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4114E1E827153FEE00388274 /* AVKit.framework */; platformFilters = (maccatalyst, macos, ); };
+		41005AA927CEF81A0065F323 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 41005AA827CEF81A0065F323 /* SwiftyJSON */; };
+		41005AAA27CEF8250065F323 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4114E1E827153FEE00388274 /* AVKit.framework */; };
 		41110A2825F9E79E008171D2 /* License.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41110A2725F9E79E008171D2 /* License.swift */; };
 		4114E1E927153FEE00388274 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4114E1E827153FEE00388274 /* AVKit.framework */; };
 		4114E1EB27154B2200388274 /* VideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4114E1EA27154B2200388274 /* VideoView.swift */; };
 		414550AA27C799D000D756E3 /* BackgroundBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414550A927C799D000D756E3 /* BackgroundBlur.swift */; };
 		414550AB27C799D000D756E3 /* BackgroundBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414550A927C799D000D756E3 /* BackgroundBlur.swift */; };
 		414550AD27C79BAB00D756E3 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 414550AC27C79BAB00D756E3 /* SwiftyJSON */; };
-		414550AF27C79C3E00D756E3 /* dialogcli in Resources */ = {isa = PBXBuildFile; fileRef = 41FB6480268070CF00A54C3E /* dialogcli */; };
-		414CBAEB278913BA00A1A980 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 414CBAEA278913BA00A1A980 /* SwiftyJSON */; };
 		4153783226001A0900AA0E76 /* StringProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153783126001A0900AA0E76 /* StringProcessing.swift */; };
 		4153784E2604B71800AA0E76 /* TitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153784D2604B71800AA0E76 /* TitleView.swift */; };
 		415378532604B79F00AA0E76 /* IconOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415378522604B79E00AA0E76 /* IconOverlayView.swift */; };
@@ -163,9 +162,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				414CBAEB278913BA00A1A980 /* SwiftyJSON in Frameworks */,
+				41005AAA27CEF8250065F323 /* AVKit.framework in Frameworks */,
+				41005AA927CEF81A0065F323 /* SwiftyJSON in Frameworks */,
 				418A7B5D275994BB00E4D6F1 /* MarkdownUI in Frameworks */,
-				41005AA427CEEC4E0065F323 /* AVKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -338,7 +337,7 @@
 			name = Dialog;
 			packageProductDependencies = (
 				418A7B5C275994BB00E4D6F1 /* MarkdownUI */,
-				414CBAEA278913BA00A1A980 /* SwiftyJSON */,
+				41005AA827CEF81A0065F323 /* SwiftyJSON */,
 			);
 			productName = dialog;
 			productReference = 4154C2DA25F76BDB00A3D373 /* Dialog.app */;
@@ -457,7 +456,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				414550AF27C79C3E00D756E3 /* dialogcli in Resources */,
 				4154C2E525F76BDC00A3D373 /* Preview Assets.xcassets in Resources */,
 				4154C2E225F76BDC00A3D373 /* Assets.xcassets in Resources */,
 			);
@@ -969,12 +967,12 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		414550AC27C79BAB00D756E3 /* SwiftyJSON */ = {
+		41005AA827CEF81A0065F323 /* SwiftyJSON */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 414CBAE9278913BA00A1A980 /* XCRemoteSwiftPackageReference "SwiftyJSON" */;
 			productName = SwiftyJSON;
 		};
-		414CBAEA278913BA00A1A980 /* SwiftyJSON */ = {
+		414550AC27C79BAB00D756E3 /* SwiftyJSON */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 414CBAE9278913BA00A1A980 /* XCRemoteSwiftPackageReference "SwiftyJSON" */;
 			productName = SwiftyJSON;
