@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "41FB647F268070CF00A54C3E"
-               BuildableName = "dialog"
+               BuildableName = "dialogcli"
                BlueprintName = "dialogcli"
                ReferencedContainer = "container:dialog.xcodeproj">
             </BuildableReference>
@@ -45,7 +45,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "41FB647F268070CF00A54C3E"
-            BuildableName = "dialog"
+            BuildableName = "dialogcli"
             BlueprintName = "dialogcli"
             ReferencedContainer = "container:dialog.xcodeproj">
          </BuildableReference>
@@ -62,7 +62,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "41FB647F268070CF00A54C3E"
-            BuildableName = "dialog"
+            BuildableName = "dialogcli"
             BlueprintName = "dialogcli"
             ReferencedContainer = "container:dialog.xcodeproj">
          </BuildableReference>

@@ -23,8 +23,8 @@ extension Color {
 
 struct FullscreenView: View {
             
-    var observedDialogContent = DialogUpdatableContent()
-    
+    @ObservedObject var observedDialogContent = DialogUpdatableContent()
+        
     var TitleViewOption: String = cloptions.titleOption.value // CLOptionText(OptionName: cloptions.titleOption, DefaultValue: appvars.titleDefault)
     var messageContentOption: String = cloptions.messageOption.value // CLOptionText(OptionName: cloptions.messageOption, DefaultValue: appvars.messageDefault)
     
@@ -46,10 +46,10 @@ struct FullscreenView: View {
     var BannerImageOption: String = cloptions.bannerImage.value // CLOptionText(OptionName: cloptions.bannerImage)
     
     var useDefaultStyle = true
-    var style: MarkdownStyle {
+    var defaultStyle: MarkdownStyle {
         useDefaultStyle
-            ? DefaultMarkdownStyle(font: .system(size: 20))
-            : DefaultMarkdownStyle(font: .system(size: 20))
+        ? DefaultMarkdownStyle(font: .system(size: messageContentFontSize), foregroundColor: NSColor.white)
+        : DefaultMarkdownStyle(font: .system(size: messageContentFontSize), foregroundColor: NSColor.white)
     }
      
     init () {
@@ -130,7 +130,7 @@ struct FullscreenView: View {
             HStack {
                 // the spacers in this section push the title and thus the full screen area across the width of the display
                 Spacer()
-                Text(TitleViewOption)
+                Text(observedDialogContent.titleText)
                     .foregroundColor(appvars.titleFontColour)
                     .bold()
                     .font(.system(size: titleContentFontSize, weight: appvars.titleFontWeight))
@@ -157,11 +157,28 @@ struct FullscreenView: View {
                         }
                     }
                     .padding(40)
+                    .frame(maxHeight: (NSScreen.main?.frame.height)!/3)
                     .border(appvars.debugBorderColour, width: 2)
                 
                     
                     // message vstack
                     VStack() {
+                        //ScrollView(showsIndicators: true) {
+                            Markdown(Document(observedDialogContent.messageText))
+                                //.multilineTextAlignment(appvars.messageAlignment)
+                                .markdownStyle(defaultStyle)
+                                .multilineTextAlignment(.center)
+                        //}
+                        //.preferredColorScheme(.dark)
+                        
+                        //Spacer()
+                        
+                        //TaskProgressView(observedDialogContent: observedDialogContent)
+                        
+                        if cloptions.timerBar.present {
+                            timerBarView(progressSteps: NumberFormatter().number(from: cloptions.timerBar.value) as? CGFloat, visible: cloptions.timerBar.present, observedDialogContent: observedDialogContent)
+                        }
+                        /*
                         Text(messageContentOption)
                             .font(.system(size: messageContentFontSize))
                             .foregroundColor(.white)
@@ -169,9 +186,10 @@ struct FullscreenView: View {
                             .lineLimit(12)
                             .lineSpacing(messageTextLineSpacing)
                             .border(appvars.debugBorderColour, width: 2)
+                         */
                     }
                     .padding(10)
-                    .frame(maxHeight: .infinity, alignment: .center) // setting to .infinity should make the message content take up the remainder of the screen
+                    .frame(maxHeight: (NSScreen.main?.frame.width)!/2, alignment: .center) // setting to .infinity should make the message content take up the remainder of the screen
                 }
                 
             }
