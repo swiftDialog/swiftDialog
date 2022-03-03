@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/gonzalezreal/AttributedText",
         "state": {
           "branch": null,
-          "revision": "bf076de48dbb2172525486936d512e1bba062642",
-          "version": "0.3.0"
+          "revision": "2dc2d7864e0fee4b524a5850d7d7cf9a7eeda0fc",
+          "version": "1.0.0"
         }
       },
       {
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/pointfreeco/combine-schedulers",
         "state": {
           "branch": null,
-          "revision": "c37e5ae8012fb654af776cc556ff8ae64398c841",
-          "version": "0.5.0"
+          "revision": "4cf088c29a20f52be0f2ca54992b492c54e0076b",
+          "version": "0.5.3"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/gonzalezreal/MarkdownUI",
         "state": {
           "branch": null,
-          "revision": "e8931e37dcf777b4c03ca76aa09c10cf246a2ced",
-          "version": "0.5.1"
+          "revision": "4c164300337a35d002188a83a878346819b203c0",
+          "version": "1.1.0"
         }
       },
       {
@@ -33,17 +33,8 @@
         "repositoryURL": "https://github.com/gonzalezreal/NetworkImage",
         "state": {
           "branch": null,
-          "revision": "15582b821cb097012b41b83d6219717926ec4ed6",
-          "version": "2.1.0"
-        }
-      },
-      {
-        "package": "cmark",
-        "repositoryURL": "https://github.com/SwiftDocOrg/swift-cmark.git",
-        "state": {
-          "branch": null,
-          "revision": "9c8096a23f44794bde297452d87c455fc4f76d42",
-          "version": "0.29.0+20210102.9c8096a"
+          "revision": "f8b8ed0be39d2f4aa00a6e8d3b18a62a94eff8d8",
+          "version": "4.0.0"
         }
       },
       {
@@ -51,8 +42,8 @@
         "repositoryURL": "https://github.com/gonzalezreal/SwiftCommonMark",
         "state": {
           "branch": null,
-          "revision": "ed60da54305c244d0f77bc8d08495e04161e96a4",
-          "version": "0.1.2"
+          "revision": "ed252beaddecce28ea6363f800c773d6169011b8",
+          "version": "1.0.0"
         }
       },
       {
@@ -69,8 +60,8 @@
         "repositoryURL": "https://github.com/pointfreeco/xctest-dynamic-overlay",
         "state": {
           "branch": null,
-          "revision": "152390e9e78ebbf0d767ee52971d41e7f44f39bc",
-          "version": "0.1.1"
+          "revision": "50a70a9d3583fe228ce672e8923010c8df2deddd",
+          "version": "0.2.1"
         }
       }
     ]

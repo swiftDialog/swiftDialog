@@ -23,8 +23,8 @@ extension Color {
 
 struct FullscreenView: View {
             
-    var observedDialogContent = DialogUpdatableContent()
-    
+    @ObservedObject var observedDialogContent = DialogUpdatableContent()
+        
     var TitleViewOption: String = cloptions.titleOption.value // CLOptionText(OptionName: cloptions.titleOption, DefaultValue: appvars.titleDefault)
     var messageContentOption: String = cloptions.messageOption.value // CLOptionText(OptionName: cloptions.messageOption, DefaultValue: appvars.messageDefault)
     
@@ -46,10 +46,12 @@ struct FullscreenView: View {
     var BannerImageOption: String = cloptions.bannerImage.value // CLOptionText(OptionName: cloptions.bannerImage)
     
     var useDefaultStyle = true
-    var style: MarkdownStyle {
+    var defaultStyle: MarkdownStyle {
         useDefaultStyle
-            ? DefaultMarkdownStyle(font: .system(size: 20))
-            : DefaultMarkdownStyle(font: .system(size: 20))
+        ? MarkdownStyle(font: .system(size: messageContentFontSize),
+                               foregroundColor: .white)
+        : MarkdownStyle(font: .system(size: messageContentFontSize),
+                               foregroundColor: .white)
     }
      
     init () {
@@ -67,7 +69,7 @@ struct FullscreenView: View {
         maxBannerWidth = windowWidth * 0.95
         maxBannerHeight = windowHeight * 0.10
         
-        if windowHeight < 1440 {
+        if windowHeight <= 1440 {
             messageContentFontSize = 40
             emptyStackPadding = 50
             titleContentFontSize = appvars.titleFontSize*2
@@ -75,7 +77,7 @@ struct FullscreenView: View {
             bannerPadding = 20
             messageTextLineSpacing = 15
         } else if windowHeight > 1440 {
-            messageContentFontSize = 80
+            messageContentFontSize = 60
             titleContentFontSize = appvars.titleFontSize*4
             iconImageScaleFactor = 1.8
             emptyStackPadding = 90
@@ -130,7 +132,7 @@ struct FullscreenView: View {
             HStack {
                 // the spacers in this section push the title and thus the full screen area across the width of the display
                 Spacer()
-                Text(TitleViewOption)
+                Text(observedDialogContent.titleText)
                     .foregroundColor(appvars.titleFontColour)
                     .bold()
                     .font(.system(size: titleContentFontSize, weight: appvars.titleFontWeight))
@@ -157,23 +159,26 @@ struct FullscreenView: View {
                         }
                     }
                     .padding(40)
+                    .frame(minHeight: 200, maxHeight: (NSScreen.main?.frame.height)!/3)
                     .border(appvars.debugBorderColour, width: 2)
                 
-                    
                     // message vstack
                     VStack() {
-                        Text(messageContentOption)
-                            .font(.system(size: messageContentFontSize))
-                            .foregroundColor(.white)
+                        Markdown(observedDialogContent.messageText)
+                            //.multilineTextAlignment(appvars.messageAlignment)
+                            .markdownStyle(defaultStyle)
                             .multilineTextAlignment(.center)
-                            .lineLimit(12)
-                            .lineSpacing(messageTextLineSpacing)
-                            .border(appvars.debugBorderColour, width: 2)
+                        
+                        Spacer()
+                        
+                        //TaskProgressView(observedDialogContent: observedDialogContent)  // future feature
+                        
+                        if cloptions.timerBar.present {
+                            timerBarView(progressSteps: NumberFormatter().number(from: cloptions.timerBar.value) as? CGFloat, visible: cloptions.timerBar.present, observedDialogContent: observedDialogContent)
+                        }
                     }
                     .padding(10)
-                    .frame(maxHeight: .infinity, alignment: .center) // setting to .infinity should make the message content take up the remainder of the screen
                 }
-                
             }
             .padding(.horizontal, 20) // total padding for the icon/message group
             //.padding(.vertical, 50)
