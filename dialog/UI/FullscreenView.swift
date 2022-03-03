@@ -48,10 +48,10 @@ struct FullscreenView: View {
     var useDefaultStyle = true
     var defaultStyle: MarkdownStyle {
         useDefaultStyle
-        ? DefaultMarkdownStyle(font: .system(size: messageContentFontSize),
-                               foregroundColor: NSColor.white)
-        : DefaultMarkdownStyle(font: .system(size: messageContentFontSize),
-                               foregroundColor: NSColor.white)
+        ? MarkdownStyle(font: .system(size: messageContentFontSize),
+                               foregroundColor: .white)
+        : MarkdownStyle(font: .system(size: messageContentFontSize),
+                               foregroundColor: .white)
     }
      
     init () {
@@ -164,7 +164,7 @@ struct FullscreenView: View {
                 
                     // message vstack
                     VStack() {
-                        Markdown(Document(observedDialogContent.messageText))
+                        Markdown(observedDialogContent.messageText)
                             //.multilineTextAlignment(appvars.messageAlignment)
                             .markdownStyle(defaultStyle)
                             .multilineTextAlignment(.center)
