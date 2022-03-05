@@ -2,7 +2,7 @@
 
 # swiftDialog
 
-swiftDialog is an [open source](https://github.com/bartreardon/Dialog/blob/main/LICENSE.md) admin utility app for macOS 11+ written in SwiftUI that displays a popup swiftDialog, displaying the content to your users that you want to display.
+swiftDialog is an [open source](https://github.com/bartreardon/Dialog/blob/main/LICENSE.md) admin utility app for macOS 11+ written in SwiftUI that displays a popup dialog, displaying the content to your users that you want to display.
 
 swiftDialog's purpose is as a tool for Mac Admins to show informative messages via scripts, and relay back the users actions.
 
@@ -21,7 +21,7 @@ Every aspect of swiftDialog's appearance can be modified.
 At the most simple level you need only give swiftDialog a [Title](https://github.com/bartreardon/Dialog/wiki/Customising-the-Title) and a [Message](https://github.com/bartreardon/Dialog/wiki/Customising-the-Message-area) to display but there is more utility in modifying other aspects of the appearance:
  * [Pass in an image resource](https://github.com/bartreardon/Dialog/wiki/Customising-the-Icon) to display as the swiftDialog icon, or use an app path or system preference bundle path and swiftDialog will extract the icon for display.
  * [Add extra buttons](https://github.com/bartreardon/Dialog/wiki/Buttons-and-button-behaviour). Change the text to say what you want. Wait for user input or autimatically time out.
- * [Use markdown](https://github.com/bartreardon/Dialog/wiki/Customising-the-Message-area#markdown-support-new-from-v150) in the message swiftDialog to add **bold** or _italics_ or include URL links
+ * [Use markdown](https://github.com/bartreardon/Dialog/wiki/Customising-the-Message-area#markdown-support-new-from-v150) in the message to add **bold** or _italics_ or include URL links
  * Change the [colour, size or even the font](https://github.com/bartreardon/Dialog/wiki/Customising-the-Title#customising-title-font-properties) used in the Title and Message areas
  * [Change the size](https://github.com/bartreardon/Dialog/wiki/Window-Size-and-Behaviour) of the swiftDialog window
  * Display [Videos](https://github.com/bartreardon/Dialog/wiki/Customising-the-Message-area#displaying-videos-new-from-v180) or [Images](https://github.com/bartreardon/Dialog/wiki/Customising-the-Message-area#displaying-images-new-from-v160) either locally or pass in a URL
@@ -50,5 +50,5 @@ Please read the [CONTRIBUTING.md](https://github.com/bartreardon/Dialog/blob/mai
 
 <!--
 Author: Bart Reardon
-Keywords: swift swiftui swift-swiftDialog utility macadmins apple macos
+Keywords: swift swiftui swiftDialog Dialog utility macadmins apple macos
 -->
