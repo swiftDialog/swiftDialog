@@ -12,6 +12,11 @@ Detailed documentation and information can be found in the [Wiki](https://github
 
 ![swiftDialog Logo](https://user-images.githubusercontent.com/3598965/125153263-d1baf780-e195-11eb-92ee-9321aa848ffc.png)
 
+## What happened to Dialog?
+
+swiftDialog and Dialog are the same. There are a number of other utilities called `dialog` though and being a very generic word, becomes difficult to find in web searches. The decision was made to perform a front facing name change from Dialog to swiftDialog to help differentiate it from other utilities of the same name or type. 
+
+The core binary and app bundle will remain as `dialog` and `Dialog.app` respectively to maintain compatability with existing scripts and workflows and when mentioning the app in the wiki the terms `Dialog` and `swiftDialog` may be used interchangibly. 
 
 # Main Features
 
