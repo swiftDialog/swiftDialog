@@ -31,20 +31,28 @@ struct TextEntryView: View {
                 ForEach(0..<textFieldLabels.count, id: \.self) {i in
                     HStack {
                         Spacer()
-                        Text(textFieldLabels[i])
+                        Text(String(textFieldLabels[i]).components(separatedBy: ",")[0])
                             .bold()
                             .font(.system(size: 15))
-                            .frame(alignment: .leading)
+                            .frame(width: appvars.windowWidth/5, alignment: .leading)
                         Spacer()
-                        TextField("", text: $textFieldValue[i])
-                            .frame(maxWidth: 450, alignment: .trailing)
-                            .onChange(of: textFieldValue[i], perform: { value in
-                                //update appvars with the text that was entered. this will be printed to stdout on exit
-                                appvars.textFieldText[i] = textFieldValue[i]
-                            })
+                            .frame(width: 20)
+                        HStack {
+                            if textFieldLabels[i].lowercased().contains("password") {
+                                SecureField("", text: $textFieldValue[i])
+                            } else {
+                                TextField("", text: $textFieldValue[i])
+                            }
+                        }
+                        .frame(width: appvars.windowWidth/3, alignment: .trailing)
+                        .onChange(of: textFieldValue[i], perform: { value in
+                            //update appvars with the text that was entered. this will be printed to stdout on exit
+                            appvars.textFieldText[i] = textFieldValue[i]
+                        })
+                        Spacer()
                     }
                 }
-            }.frame(maxWidth: 500)
+            }//.frame(maxWidth: 500)
         }
     }
 }

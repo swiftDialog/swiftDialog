@@ -72,13 +72,15 @@ struct MessageContent: View {
                     Spacer()
                     VStack {
                         TextEntryView()
-                            .padding(.leading, 50)
-                            .padding(.trailing, 50)
+                            //.padding(.leading, 50)
+                            //.padding(.trailing, 50)
+                            .padding(.bottom, 10)
                             .border(appvars.debugBorderColour, width: 2)
 
                         DropdownView()
-                            .padding(.leading, 50)
-                            .padding(.trailing, 50)
+                            //.padding(.leading, 50)
+                            //.padding(.trailing, 50)
+                            .padding(.bottom, 10)
                             .border(appvars.debugBorderColour, width: 2)
                     }
                 }

@@ -29,8 +29,10 @@ struct DropdownView: View {
                 Text(dropdownTitle)
                     .bold()
                     .font(.system(size: 15))
-                    .frame(alignment: .leading)
+                    //.frame(alignment: .leading)
+                    .frame(width: appvars.windowWidth/5, alignment: .leading)
                 Spacer()
+                    .frame(width: 20)
                 Picker("", selection: $selectedOption)
                 {
                     ForEach(dropdownValues, id: \.self) {
@@ -38,14 +40,16 @@ struct DropdownView: View {
                     }
                 }
                 .pickerStyle(DefaultPickerStyle())
-                .frame(maxWidth: 450, alignment: .trailing)
+                .frame(width: appvars.windowWidth/3, alignment: .trailing)
+                //.frame(maxWidth: 450, alignment: .trailing)
                 .onChange(of: selectedOption) { _ in
                     //update appvars with the option that was selected. this will be printed to stdout on exit
                     appvars.selectedOption = selectedOption
                     appvars.selectedIndex = dropdownValues.firstIndex {$0 == selectedOption} ?? -1
                 }
+                Spacer()
             }
-            .frame(maxWidth: 500)
+            //.frame(maxWidth: 500)
         }
     }
 }
