@@ -22,7 +22,7 @@ struct TextEntryView: View {
     init() {
         if cloptions.textField.present {
             textFieldPresent = true
-            for i in 0..<textFieldLabels.count {
+            for i in 0..<textFields.count {
                 textFieldValue.append(" ")
                 highlight.append(Color.clear)
                 if textFields[i].required {
@@ -35,6 +35,7 @@ struct TextEntryView: View {
         } else {
             fieldwidth = appvars.windowWidth - appvars.iconWidth
         }
+        print("highlight array is \(highlight)")
     }
     
     var body: some View {
@@ -46,7 +47,7 @@ struct TextEntryView: View {
                         Text(textFields[j].title)
                             .bold()
                             .font(.system(size: 15))
-                            .frame(idealWidth: fieldwidth*0.20, maxWidth: 90, alignment: .leading)
+                            .frame(idealWidth: fieldwidth*0.20, alignment: .leading)
                         Spacer()
                             .frame(width: 20)
                         HStack {
@@ -58,7 +59,7 @@ struct TextEntryView: View {
                                     .border(highlight[j])
                             }
                         }
-                        .frame(idealWidth: fieldwidth*0.50, maxWidth: 200, alignment: .trailing)
+                        .frame(idealWidth: fieldwidth*0.50, alignment: .trailing)
                         .onChange(of: textFieldValuej[j], perform: { value in
                             //update appvars with the text that was entered. this will be printed to stdout on exit
                             textFields[j].value = textFieldValuej[j]

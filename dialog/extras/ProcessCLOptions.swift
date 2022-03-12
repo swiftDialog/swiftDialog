@@ -80,10 +80,14 @@ func processCLOptions() {
     if cloptions.textField.present {
         if json[cloptions.textField.long].exists() {
             for i in 0..<json[cloptions.textField.long].arrayValue.count {
-                textFields.append(TextFieldState(title: String(json[cloptions.textField.long][i]["title"].stringValue),
+                if json[cloptions.textField.long][i]["title"].stringValue == "" {
+                    textFields.append(TextFieldState(title: String(json[cloptions.textField.long][i].stringValue)))
+                } else {
+                    textFields.append(TextFieldState(title: String(json[cloptions.textField.long][i]["title"].stringValue),
                                                  required: Bool(json[cloptions.textField.long][i]["required"].boolValue),
                                                  secure: Bool(json[cloptions.textField.long][i]["secure"].boolValue))
                                 )
+                }
             }
         } else {
             for textFieldOption in CLOptionMultiOptions(optionName: cloptions.textField.long) {
