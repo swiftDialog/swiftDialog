@@ -10,18 +10,24 @@ import SwiftUI
 struct TextEntryView: View {
     
     @State var textFieldValue = Array(repeating: "", count: 64)
+    @State var textFieldValuej = Array(repeating: "", count: 64)
     //@State var textFieldValue = ""
     //var textFieldLabel = CLOptionText(OptionName: cloptions.textField)
     let textFieldLabels = appvars.textOptionsArray
+    //let textfieldLabels2 = textFields
     var textFieldPresent: Bool = false
     var fieldwidth: CGFloat = 0
-    
+    var highlight = [Color]()
     
     init() {
         if cloptions.textField.present {
             textFieldPresent = true
-            for _ in textFieldLabels {
+            for i in 0..<textFieldLabels.count {
                 textFieldValue.append(" ")
+                highlight.append(Color.clear)
+                if textFields[i].required {
+                    highlight[i] = Color.red
+                }
             }
         }
         if cloptions.hideIcon.present {
@@ -34,26 +40,28 @@ struct TextEntryView: View {
     var body: some View {
         if textFieldPresent {
             VStack {
-                ForEach(0..<textFieldLabels.count, id: \.self) {i in
+                ForEach(0..<textFields.count, id: \.self) {j in
                     HStack {
                         Spacer()
-                        Text(String(textFieldLabels[i]).components(separatedBy: ",")[0])
+                        Text(textFields[j].title)
                             .bold()
                             .font(.system(size: 15))
                             .frame(idealWidth: fieldwidth*0.20, maxWidth: 90, alignment: .leading)
                         Spacer()
                             .frame(width: 20)
                         HStack {
-                            if textFieldLabels[i].lowercased().contains("password") {
-                                SecureField("", text: $textFieldValue[i])
+                            if textFields[j].secure {
+                                SecureField("", text: $textFieldValuej[j])
+                                    .border(highlight[j])
                             } else {
-                                TextField("", text: $textFieldValue[i])
+                                TextField("", text: $textFieldValuej[j])
+                                    .border(highlight[j])
                             }
                         }
                         .frame(idealWidth: fieldwidth*0.50, maxWidth: 200, alignment: .trailing)
-                        .onChange(of: textFieldValue[i], perform: { value in
+                        .onChange(of: textFieldValuej[j], perform: { value in
                             //update appvars with the text that was entered. this will be printed to stdout on exit
-                            appvars.textFieldText[i] = textFieldValue[i]
+                            textFields[j].value = textFieldValuej[j]
                         })
                         Spacer()
                     }

@@ -174,9 +174,9 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "") {
             json["SelectedIndex"].int = appvars.selectedIndex
         }
         if cloptions.textField.present {
-            for i in 0..<appvars.textOptionsArray.count {
-                outputArray.append("\"\(appvars.textOptionsArray[i])\" : \"\(appvars.textFieldText[i])\"")
-                json[appvars.textOptionsArray[i]].string = appvars.textFieldText[i]
+            for i in 0..<textFields.count {
+                outputArray.append("\"\(textFields[i].title)\" : \"\(textFields[i].value)\"")
+                json[textFields[i].title].string = textFields[i].value
             }
         }
         if cloptions.checkbox.present {

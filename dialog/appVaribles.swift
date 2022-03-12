@@ -14,8 +14,15 @@ var iconVisible: Bool = true
 
 // declare our app var in case we want to update values - e.g. future use, multiple dialog sizes
 var appvars = AppVariables()
-
 var cloptions = CLOptions()
+var textFields = [TextFieldState]()
+
+struct TextFieldState {
+    var title       : String
+    var required    : Bool      = false
+    var secure      : Bool      = false
+    var value       : String    = ""
+}
 
 struct AppVariables {
     
