@@ -14,6 +14,7 @@ struct TextEntryView: View {
     //var textFieldLabel = CLOptionText(OptionName: cloptions.textField)
     let textFieldLabels = appvars.textOptionsArray
     var textFieldPresent: Bool = false
+    var fieldwidth: CGFloat = 0
     
     
     init() {
@@ -22,6 +23,11 @@ struct TextEntryView: View {
             for _ in textFieldLabels {
                 textFieldValue.append(" ")
             }
+        }
+        if cloptions.hideIcon.present {
+            fieldwidth = appvars.windowWidth
+        } else {
+            fieldwidth = appvars.windowWidth - appvars.iconWidth
         }
     }
     
@@ -34,7 +40,7 @@ struct TextEntryView: View {
                         Text(String(textFieldLabels[i]).components(separatedBy: ",")[0])
                             .bold()
                             .font(.system(size: 15))
-                            .frame(width: appvars.windowWidth/5, alignment: .leading)
+                            .frame(idealWidth: fieldwidth*0.20, maxWidth: 90, alignment: .leading)
                         Spacer()
                             .frame(width: 20)
                         HStack {
@@ -44,7 +50,7 @@ struct TextEntryView: View {
                                 TextField("", text: $textFieldValue[i])
                             }
                         }
-                        .frame(width: appvars.windowWidth/3, alignment: .trailing)
+                        .frame(idealWidth: fieldwidth*0.50, maxWidth: 200, alignment: .trailing)
                         .onChange(of: textFieldValue[i], perform: { value in
                             //update appvars with the text that was entered. this will be printed to stdout on exit
                             appvars.textFieldText[i] = textFieldValue[i]
@@ -52,7 +58,7 @@ struct TextEntryView: View {
                         Spacer()
                     }
                 }
-            }//.frame(maxWidth: 500)
+            }
         }
     }
 }

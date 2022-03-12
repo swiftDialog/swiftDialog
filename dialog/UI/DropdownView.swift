@@ -18,7 +18,15 @@ struct DropdownView: View {
     var dropdownTitle: String = cloptions.dropdownTitle.value
     var showDropdown: Bool = cloptions.dropdownValues.present
     var defaultValue: String = ""
+    var fieldwidth: CGFloat = 0
     
+    init() {
+        if cloptions.hideIcon.present {
+            fieldwidth = appvars.windowWidth
+        } else {
+            fieldwidth = appvars.windowWidth - appvars.iconWidth
+        }
+    }
         
     var body: some View {
         if showDropdown {
@@ -29,8 +37,7 @@ struct DropdownView: View {
                 Text(dropdownTitle)
                     .bold()
                     .font(.system(size: 15))
-                    //.frame(alignment: .leading)
-                    .frame(width: appvars.windowWidth/5, alignment: .leading)
+                    .frame(idealWidth: fieldwidth*0.20, maxWidth: 90, alignment: .leading)
                 Spacer()
                     .frame(width: 20)
                 Picker("", selection: $selectedOption)
@@ -40,8 +47,7 @@ struct DropdownView: View {
                     }
                 }
                 .pickerStyle(DefaultPickerStyle())
-                .frame(width: appvars.windowWidth/3, alignment: .trailing)
-                //.frame(maxWidth: 450, alignment: .trailing)
+                .frame(idealWidth: fieldwidth*0.50, maxWidth: 200, alignment: .trailing)
                 .onChange(of: selectedOption) { _ in
                     //update appvars with the option that was selected. this will be printed to stdout on exit
                     appvars.selectedOption = selectedOption
@@ -49,7 +55,6 @@ struct DropdownView: View {
                 }
                 Spacer()
             }
-            //.frame(maxWidth: 500)
         }
     }
 }
