@@ -37,7 +37,7 @@ struct DropdownView: View {
                 Text(dropdownTitle)
                     .bold()
                     .font(.system(size: 15))
-                    .frame(idealWidth: fieldwidth*0.20, maxWidth: 90, alignment: .leading)
+                    .frame(idealWidth: fieldwidth*0.20, maxWidth: 150, alignment: .leading)
                 Spacer()
                     .frame(width: 20)
                 Picker("", selection: $selectedOption)
@@ -47,7 +47,7 @@ struct DropdownView: View {
                     }
                 }
                 .pickerStyle(DefaultPickerStyle())
-                .frame(idealWidth: fieldwidth*0.50, maxWidth: 200, alignment: .trailing)
+                .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
                 .onChange(of: selectedOption) { _ in
                     //update appvars with the option that was selected. this will be printed to stdout on exit
                     appvars.selectedOption = selectedOption

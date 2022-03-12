@@ -79,7 +79,7 @@ struct MessageContent: View {
                 HStack() {
                     //Spacer()
                     VStack {
-                        TextEntryView()
+                        TextEntryView(observedDialogContent: observedDialogContent)
                             //.padding(.leading, 50)
                             //.padding(.trailing, 50)
                             .padding(.bottom, 10)

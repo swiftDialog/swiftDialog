@@ -9,25 +9,21 @@ import SwiftUI
 
 struct TextEntryView: View {
     
-    @State var textFieldValue = Array(repeating: "", count: 64)
-    @State var textFieldValuej = Array(repeating: "", count: 64)
-    //@State var textFieldValue = ""
-    //var textFieldLabel = CLOptionText(OptionName: cloptions.textField)
-    let textFieldLabels = appvars.textOptionsArray
-    //let textfieldLabels2 = textFields
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    
+    @State var textFieldValue = Array(repeating: "", count: textFields.count)
+    
     var textFieldPresent: Bool = false
     var fieldwidth: CGFloat = 0
     var highlight = [Color]()
     
-    init() {
+    init(observedDialogContent : DialogUpdatableContent) {
+        self.observedDialogContent = observedDialogContent
         if cloptions.textField.present {
             textFieldPresent = true
-            for i in 0..<textFields.count {
+            for _ in 0..<textFields.count {
                 textFieldValue.append(" ")
                 highlight.append(Color.clear)
-                if textFields[i].required {
-                    highlight[i] = Color.red
-                }
             }
         }
         if cloptions.hideIcon.present {
@@ -35,34 +31,45 @@ struct TextEntryView: View {
         } else {
             fieldwidth = appvars.windowWidth - appvars.iconWidth
         }
-        print("highlight array is \(highlight)")
     }
     
     var body: some View {
         if textFieldPresent {
             VStack {
-                ForEach(0..<textFields.count, id: \.self) {j in
+                ForEach(0..<textFields.count, id: \.self) {index in
                     HStack {
                         Spacer()
-                        Text(textFields[j].title)
+                        Text(textFields[index].title)
                             .bold()
                             .font(.system(size: 15))
-                            .frame(idealWidth: fieldwidth*0.20, alignment: .leading)
+                            .frame(idealWidth: fieldwidth*0.20, maxWidth: 150, alignment: .leading)
                         Spacer()
                             .frame(width: 20)
                         HStack {
-                            if textFields[j].secure {
-                                SecureField("", text: $textFieldValuej[j])
-                                    .border(highlight[j])
+                            if textFields[index].secure {
+                                ZStack() {
+                                    SecureField("", text: $textFieldValue[index])
+                                        .disableAutocorrection(true)
+                                        .textContentType(.password)
+                                        //.border(highlight[index])
+                                        .overlay(RoundedRectangle(cornerRadius: 5)
+                                                    .stroke(observedDialogContent.requiredTextfieldHighlight[index], lineWidth: 1))
+
+                                    Image(systemName: "lock.fill")
+                                        .foregroundColor(stringToColour("#008815")).opacity(0.5)
+                                            .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
+                                }
                             } else {
-                                TextField("", text: $textFieldValuej[j])
-                                    .border(highlight[j])
+                                TextField("", text: $textFieldValue[index])
+                                    //.border(highlight[index])
+                                    .overlay(RoundedRectangle(cornerRadius: 5)
+                                                .stroke(observedDialogContent.requiredTextfieldHighlight[index], lineWidth: 1))
                             }
                         }
-                        .frame(idealWidth: fieldwidth*0.50, alignment: .trailing)
-                        .onChange(of: textFieldValuej[j], perform: { value in
+                        .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
+                        .onChange(of: textFieldValue[index], perform: { value in
                             //update appvars with the text that was entered. this will be printed to stdout on exit
-                            textFields[j].value = textFieldValuej[j]
+                            textFields[index].value = textFieldValue[index]
                         })
                         Spacer()
                     }
@@ -72,8 +79,4 @@ struct TextEntryView: View {
     }
 }
 
-struct TextEntryView_Previews: PreviewProvider {
-    static var previews: some View {
-        TextEntryView()
-    }
-}
+
