@@ -174,12 +174,15 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
             json["SelectedIndex"].int = appvars.selectedIndex
         }
         if cloptions.textField.present {
+            // check to see if fields marked as required have content before allowing the app to exit
+            // if there is an empty field, update the highlight colour
             var dontQuit = false
             for i in 0..<textFields.count {
-                
                 if textFields[i].required && textFields[i].value == "" {
                     observedObject?.requiredTextfieldHighlight[i] = Color.red.opacity(0.7)
                     dontQuit = true
+                } else {
+                    observedObject?.requiredTextfieldHighlight[i] = Color.clear
                 }
                 outputArray.append("\"\(textFields[i].title)\" : \"\(textFields[i].value)\"")
                 json[textFields[i].title].string = textFields[i].value
