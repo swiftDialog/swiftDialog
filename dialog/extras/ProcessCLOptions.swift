@@ -77,14 +77,38 @@ func processCLOptions() {
     
     }
     
-    
     if cloptions.textField.present {
         if json[cloptions.textField.long].exists() {
-            appvars.textOptionsArray = json[cloptions.textField.long].arrayValue.map {$0.stringValue}
+            for i in 0..<json[cloptions.textField.long].arrayValue.count {
+                if json[cloptions.textField.long][i]["title"].stringValue == "" {
+                    textFields.append(TextFieldState(title: String(json[cloptions.textField.long][i].stringValue)))
+                } else {
+                    textFields.append(TextFieldState(title: String(json[cloptions.textField.long][i]["title"].stringValue),
+                                                 required: Bool(json[cloptions.textField.long][i]["required"].boolValue),
+                                                 secure: Bool(json[cloptions.textField.long][i]["secure"].boolValue))
+                                )
+                }
+            }
         } else {
-            appvars.textOptionsArray =  CLOptionMultiOptions(optionName: cloptions.textField.long)
+            for textFieldOption in CLOptionMultiOptions(optionName: cloptions.textField.long) {
+                let items = textFieldOption.components(separatedBy: ",")
+                var fieldTitle : String = ""
+                var fieldSecure : Bool = false
+                var fieldRequire : Bool = false
+                for item in items {
+                    switch item.lowercased() {
+                    case "secure":
+                        fieldSecure = true
+                    case "required":
+                        fieldRequire = true
+                    default:
+                        fieldTitle = item
+                    }
+                }
+                textFields.append(TextFieldState(title: fieldTitle, required: fieldRequire, secure: fieldSecure))
+            }
         }
-        logger(logMessage: "textOptionsArray : \(appvars.textOptionsArray)")
+        logger(logMessage: "textOptionsArray : \(textFields)")
     }
     
     if cloptions.checkbox.present {

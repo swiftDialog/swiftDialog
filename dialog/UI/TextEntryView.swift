@@ -9,48 +9,87 @@ import SwiftUI
 
 struct TextEntryView: View {
     
-    @State var textFieldValue = Array(repeating: "", count: 64)
-    //@State var textFieldValue = ""
-    //var textFieldLabel = CLOptionText(OptionName: cloptions.textField)
-    let textFieldLabels = appvars.textOptionsArray
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    
+    @State var textFieldValue = Array(repeating: "", count: textFields.count)
+    
+    @State private var animationAmount = 1.0
+    
     var textFieldPresent: Bool = false
+    var fieldwidth: CGFloat = 0
+    var requiredFieldsPresent : Bool = false
     
-    
-    init() {
+    init(observedDialogContent : DialogUpdatableContent) {
+        self.observedDialogContent = observedDialogContent
         if cloptions.textField.present {
             textFieldPresent = true
-            for _ in textFieldLabels {
+            for i in 0..<textFields.count {
                 textFieldValue.append(" ")
+                if textFields[i].required {
+                    requiredFieldsPresent = true
+                }
+                //highlight.append(Color.clear)
             }
+        }
+        if cloptions.hideIcon.present {
+            fieldwidth = appvars.windowWidth
+        } else {
+            fieldwidth = appvars.windowWidth - appvars.iconWidth
         }
     }
     
     var body: some View {
         if textFieldPresent {
             VStack {
-                ForEach(0..<textFieldLabels.count, id: \.self) {i in
+                ForEach(0..<textFields.count, id: \.self) {index in
                     HStack {
                         Spacer()
-                        Text(textFieldLabels[i])
+                        Text(textFields[index].title + (textFields[index].required ? " *":""))
                             .bold()
                             .font(.system(size: 15))
-                            .frame(alignment: .leading)
+                            .frame(idealWidth: fieldwidth*0.20, maxWidth: 150, alignment: .leading)
                         Spacer()
-                        TextField("", text: $textFieldValue[i])
-                            .frame(maxWidth: 450, alignment: .trailing)
-                            .onChange(of: textFieldValue[i], perform: { value in
-                                //update appvars with the text that was entered. this will be printed to stdout on exit
-                                appvars.textFieldText[i] = textFieldValue[i]
-                            })
+                            .frame(width: 20)
+                        HStack {
+                            if textFields[index].secure {
+                                ZStack() {
+                                    SecureField("", text: $textFieldValue[index])
+                                        .disableAutocorrection(true)
+                                        .textContentType(.password)
+                                    Image(systemName: "lock.fill")
+                                        .foregroundColor(stringToColour("#008815")).opacity(0.5)
+                                            .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
+                                }
+                            } else {
+                                TextField("", text: $textFieldValue[index])
+                            }
+                        }
+                        .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
+                        .onChange(of: textFieldValue[index], perform: { value in
+                            //update appvars with the text that was entered. this will be printed to stdout on exit
+                            textFields[index].value = textFieldValue[index]
+                        })
+                        .overlay(RoundedRectangle(cornerRadius: 5)
+                                    .stroke(observedDialogContent.requiredTextfieldHighlight[index], lineWidth: 1)
+                                    .animation(.easeIn(duration: 0.2)
+                                                .repeatCount(3, autoreverses: true)
+                                               )
+                                 )
+                        Spacer()
                     }
                 }
-            }.frame(maxWidth: 500)
+                if requiredFieldsPresent {
+                    HStack {
+                        Spacer()
+                        Text("* Required Fields")
+                            .font(.system(size: 10)
+                                    .weight(.light))
+                            .padding(.trailing, 10)
+                    }
+                }
+            }
         }
     }
 }
 
-struct TextEntryView_Previews: PreviewProvider {
-    static var previews: some View {
-        TextEntryView()
-    }
-}
+

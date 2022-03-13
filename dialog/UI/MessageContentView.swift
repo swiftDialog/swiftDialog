@@ -14,6 +14,8 @@ struct MessageContent: View {
     @ObservedObject var observedDialogContent : DialogUpdatableContent
     @State private var contentHeight: CGFloat = 40
     
+    var fieldPadding: CGFloat = 10
+    
     var messageColour : NSColor = NSColor(appvars.messageFontColour)
     
     var useDefaultStyle = true
@@ -33,6 +35,12 @@ struct MessageContent: View {
     let messageContentOption: String = cloptions.messageOption.value
     let theAllignment: Alignment = .topLeading
     
+    init(observedDialogContent : DialogUpdatableContent) {
+        self.observedDialogContent = observedDialogContent
+        if cloptions.hideIcon.present {
+            fieldPadding = 40
+        }
+    }
     
     var body: some View {
         
@@ -69,22 +77,24 @@ struct MessageContent: View {
                 
                 Spacer()
                 HStack() {
-                    Spacer()
+                    //Spacer()
                     VStack {
-                        TextEntryView()
-                            .padding(.leading, 50)
-                            .padding(.trailing, 50)
+                        TextEntryView(observedDialogContent: observedDialogContent)
+                            //.padding(.leading, 50)
+                            //.padding(.trailing, 50)
+                            .padding(.bottom, 10)
                             .border(appvars.debugBorderColour, width: 2)
 
                         DropdownView()
-                            .padding(.leading, 50)
-                            .padding(.trailing, 50)
+                            //.padding(.leading, 50)
+                            //.padding(.trailing, 50)
+                            .padding(.bottom, 10)
                             .border(appvars.debugBorderColour, width: 2)
                     }
                 }
             }
-            .padding(.leading, 40)
-            .padding(.trailing, 40)
+            .padding(.leading, fieldPadding)
+            .padding(.trailing, fieldPadding)
         }
     }
 }
