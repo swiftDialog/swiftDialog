@@ -101,7 +101,7 @@ struct dialogApp: App {
                         window?.level = .normal
                     }
 
-                    if cloptions.blurScreen.present { //blur background
+                    if cloptions.blurScreen.present && !cloptions.fullScreenWindow.present { //blur background
                         background.showWindow(self)
                         NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow)))
                     }

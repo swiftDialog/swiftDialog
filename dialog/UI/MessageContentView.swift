@@ -22,14 +22,14 @@ struct MessageContent: View {
         
     var defaultStyle: MarkdownStyle {
         useDefaultStyle
-            ? DefaultMarkdownStyle(font: .system(size: appvars.messageFontSize), foregroundColor: messageColour)
-            : DefaultMarkdownStyle(font: .system(size: appvars.messageFontSize), foregroundColor: messageColour)
+        ? MarkdownStyle(font: .system(size: appvars.messageFontSize), foregroundColor: appvars.messageFontColour)
+        : MarkdownStyle(font: .system(size: appvars.messageFontSize), foregroundColor: appvars.messageFontColour)
     }
     
     var customStyle: MarkdownStyle {
         useDefaultStyle
-            ? DefaultMarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.titleFontSize), foregroundColor: messageColour)
-            : DefaultMarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.titleFontSize), foregroundColor: messageColour)
+        ? MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.titleFontSize), foregroundColor: appvars.messageFontColour)
+        : MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.titleFontSize), foregroundColor: appvars.messageFontColour)
     }
     
     let messageContentOption: String = cloptions.messageOption.value
@@ -49,7 +49,7 @@ struct MessageContent: View {
         } else {
             VStack {
                 if observedDialogContent.listItemPresent {
-                    Markdown(Document(observedDialogContent.messageText))
+                    Markdown(observedDialogContent.messageText)
                         .multilineTextAlignment(appvars.messageAlignment)
                         .markdownStyle(defaultStyle)
                     ListView(observedDialogContent: observedDialogContent)
@@ -57,11 +57,11 @@ struct MessageContent: View {
                 } else {
                     ScrollView() {
                         if appvars.messageFontName == "" {
-                            Markdown(Document(observedDialogContent.messageText))
+                            Markdown(observedDialogContent.messageText)
                                 .multilineTextAlignment(appvars.messageAlignment)
                                 .markdownStyle(defaultStyle)
                         } else {
-                            Markdown(Document(observedDialogContent.messageText))
+                            Markdown(observedDialogContent.messageText)
                                 .multilineTextAlignment(appvars.messageAlignment)
                                 .markdownStyle(customStyle)
                         }
