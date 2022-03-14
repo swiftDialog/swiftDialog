@@ -168,8 +168,6 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
         if appvars.selectedOption != "" {
             outputArray.append("\"SelectedOption\" : \"\(appvars.selectedOption)\"")
             json["SelectedOption"].string = appvars.selectedOption
-        }
-        if appvars.selectedIndex > 0 {
             outputArray.append("\"SelectedIndex\" : \(appvars.selectedIndex)")
             json["SelectedIndex"].int = appvars.selectedIndex
         }

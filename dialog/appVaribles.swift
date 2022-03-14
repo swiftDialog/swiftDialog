@@ -26,7 +26,7 @@ struct TextFieldState {
 
 struct AppVariables {
     
-    var cliversion                      = String("1.9.3")
+    var cliversion                      = String("1.9.4")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
