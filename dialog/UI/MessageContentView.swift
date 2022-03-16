@@ -52,6 +52,8 @@ struct MessageContent: View {
                 if appvars.iconIsCentred && !appvars.iconIsHidden && !(observedDialogContent.iconImage == "none") {
                     IconView(observedDialogContent: observedDialogContent)
                         .frame(width: appvars.iconWidth, alignment: .top)
+                        .padding(.top, 15)
+                        .padding(.bottom, 10)
                         .border(appvars.debugBorderColour, width: 2)
                 }
                 

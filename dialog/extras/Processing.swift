@@ -177,7 +177,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
             var dontQuit = false
             for i in 0..<textFields.count {
                 if textFields[i].required && textFields[i].value == "" {
-                    observedObject?.requiredTextfieldHighlight[i] = Color.red.opacity(0.7)
+                    observedObject?.requiredTextfieldHighlight[i] = Color.red
                     dontQuit = true
                 } else {
                     observedObject?.requiredTextfieldHighlight[i] = Color.clear

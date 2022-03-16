@@ -70,7 +70,7 @@ struct TextEntryView: View {
                             textFields[index].value = textFieldValue[index]
                         })
                         .overlay(RoundedRectangle(cornerRadius: 5)
-                                    .stroke(observedDialogContent.requiredTextfieldHighlight[index], lineWidth: 1)
+                                    .stroke(observedDialogContent.requiredTextfieldHighlight[index], lineWidth: 2)
                                     .animation(.easeIn(duration: 0.2)
                                                 .repeatCount(3, autoreverses: true)
                                                )
