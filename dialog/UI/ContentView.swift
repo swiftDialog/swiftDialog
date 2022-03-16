@@ -39,14 +39,16 @@ struct ContentView: View {
                         .border(appvars.debugBorderColour, width: 2)
                 }
 
-                // Dialog title
-                TitleView(observedDialogContent: observedDialogContent)
-                    .border(appvars.debugBorderColour, width: 2)
-                    .offset(y: 10) // shift the title down a notch
-                
-                // Horozontal Line
-                Divider()
-                    .frame(width: appvars.windowWidth*appvars.horozontalLineScale, height: 2)
+                if observedDialogContent.titleText != "none" {
+                    // Dialog title
+                    TitleView(observedDialogContent: observedDialogContent)
+                        .border(appvars.debugBorderColour, width: 2)
+                        .offset(y: 10) // shift the title down a notch
+                    
+                    // Horozontal Line
+                    Divider()
+                        .frame(width: appvars.windowWidth*appvars.horozontalLineScale, height: 2)
+                }
                 
                 if cloptions.video.present {
                     VideoView(videourl: cloptions.video.value, autoplay: cloptions.autoPlay.present, caption: cloptions.videoCaption.value)

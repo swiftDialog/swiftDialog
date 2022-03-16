@@ -303,9 +303,14 @@ func processCLOptions() {
         }
     }
             
-    if cloptions.hideIcon.present || cloptions.bannerImage.present {
+    if cloptions.hideIcon.present || cloptions.iconOption.value == "none" || cloptions.bannerImage.present {
         appvars.iconIsHidden = true
         logger(logMessage: "iconIsHidden = true")
+    }
+    
+    if cloptions.centreIcon.present {
+        appvars.iconIsCentred = true
+        logger(logMessage: "iconIsCentred = true")
     }
     
     if cloptions.lockWindow.present {
@@ -538,6 +543,7 @@ func processCLOptionValues() {
     cloptions.button2Option.present         = json[cloptions.button2Option.long].boolValue || CLOptionPresent(OptionName: cloptions.button2Option)
     cloptions.infoButtonOption.present      = json[cloptions.infoButtonOption.long].boolValue || CLOptionPresent(OptionName: cloptions.infoButtonOption)
     cloptions.hideIcon.present              = json[cloptions.hideIcon.long].boolValue || CLOptionPresent(OptionName: cloptions.hideIcon)
+    cloptions.centreIcon.present            = json[cloptions.centreIcon.long].boolValue || json[cloptions.centreIconSE.long].boolValue || CLOptionPresent(OptionName: cloptions.centreIcon) || CLOptionPresent(OptionName: cloptions.centreIconSE)
     cloptions.warningIcon.present           = json[cloptions.warningIcon.long].boolValue || CLOptionPresent(OptionName: cloptions.warningIcon)
     cloptions.infoIcon.present              = json[cloptions.infoIcon.long].boolValue || CLOptionPresent(OptionName: cloptions.infoIcon)
     cloptions.cautionIcon.present           = json[cloptions.cautionIcon.long].boolValue || CLOptionPresent(OptionName: cloptions.cautionIcon)

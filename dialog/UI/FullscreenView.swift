@@ -129,16 +129,18 @@ struct FullscreenView: View {
             }
             
             // title vstack
-            HStack {
-                // the spacers in this section push the title and thus the full screen area across the width of the display
-                Spacer()
-                Text(observedDialogContent.titleText)
-                    .foregroundColor(appvars.titleFontColour)
-                    .bold()
-                    .font(.system(size: titleContentFontSize, weight: appvars.titleFontWeight))
-                    .multilineTextAlignment(.center)
-                    .border(appvars.debugBorderColour, width: 2)
-                Spacer()
+            if observedDialogContent.titleText != "none" {
+                HStack {
+                    // the spacers in this section push the title and thus the full screen area across the width of the display
+                    Spacer()
+                    Text(observedDialogContent.titleText)
+                        .foregroundColor(appvars.titleFontColour)
+                        .bold()
+                        .font(.system(size: titleContentFontSize, weight: appvars.titleFontWeight))
+                        .multilineTextAlignment(.center)
+                        .border(appvars.debugBorderColour, width: 2)
+                    Spacer()
+                }
             }
             
             // icon and message vstack group

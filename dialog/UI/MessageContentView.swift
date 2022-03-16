@@ -48,6 +48,13 @@ struct MessageContent: View {
             ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: NumberFormatter().number(from: cloptions.autoPlay.value) as! CGFloat)
         } else {
             VStack {
+                
+                if appvars.iconIsCentred && !appvars.iconIsHidden && !(observedDialogContent.iconImage == "none") {
+                    IconView(observedDialogContent: observedDialogContent)
+                        .frame(width: appvars.iconWidth, alignment: .top)
+                        .border(appvars.debugBorderColour, width: 2)
+                }
+                
                 if observedDialogContent.listItemPresent {
                     Markdown(observedDialogContent.messageText)
                         .multilineTextAlignment(appvars.messageAlignment)

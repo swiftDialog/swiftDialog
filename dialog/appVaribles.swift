@@ -44,6 +44,7 @@ struct AppVariables {
     var windowIsMoveable                = Bool(false)
     var windowOnTop                     = Bool(false)
     var iconIsHidden                    = Bool(false)
+    var iconIsCentred                   = Bool(false)
     
     // Window Sizes
     var windowWidth                     = CGFloat(820)      // set default dialog width
@@ -186,6 +187,8 @@ struct CLOptions {
     var infoButtonOption         = (long: String("infobutton"),        short: String("3"),   value : String(""), present : Bool(false)) // -3
     var getVersion               = (long: String("version"),           short: String("v"),   value : String(""), present : Bool(false)) // -v
     var hideIcon                 = (long: String("hideicon"),          short: String("h"),   value : String(""), present : Bool(false)) // -h
+    var centreIcon               = (long: String("centreicon"),        short: String(""),    value : String(""), present : Bool(false))
+    var centreIconSE             = (long: String("centericon"),        short: String(""),    value : String(""), present : Bool(false))
     var helpOption               = (long: String("help"),              short: String(""),    value : String(""), present : Bool(false))
     var demoOption               = (long: String("demo"),              short: String(""),    value : String(""), present : Bool(false))
     var buyCoffee                = (long: String("coffee"),            short: String("☕️"),  value : String(""), present : Bool(false))
