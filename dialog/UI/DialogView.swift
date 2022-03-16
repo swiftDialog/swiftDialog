@@ -24,13 +24,11 @@ struct DialogView: View {
     
     var body: some View {
         VStack { //}(alignment: .top, spacing: nil) {
-            let iconFrameWidth: CGFloat = appvars.iconWidth
             HStack {
-                
-                if (!appvars.iconIsHidden) {
+                if (!appvars.iconIsHidden && !appvars.iconIsCentred && !(observedDialogContent.iconImage == "none")) {
                     VStack {
                         IconView(observedDialogContent: observedDialogContent)
-                            .frame(width: iconFrameWidth, alignment: .top)
+                            .frame(width: appvars.iconWidth, alignment: .top)
                             .border(appvars.debugBorderColour, width: 2)
                             .padding(.top, 20)
                             .padding(.leading, 30)
@@ -38,11 +36,8 @@ struct DialogView: View {
                     }
                 }
                 
-                //VStack(alignment: .center) {
-                    //TitleView()
-                    MessageContent(observedDialogContent: observedDialogContent)
-                        .border(appvars.debugBorderColour, width: 2)
-                //}
+                MessageContent(observedDialogContent: observedDialogContent)
+                    .border(appvars.debugBorderColour, width: 2)
             }
             TaskProgressView(observedDialogContent: observedDialogContent)
         }
