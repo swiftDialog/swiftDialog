@@ -16,17 +16,24 @@ var iconVisible: Bool = true
 var appvars = AppVariables()
 var cloptions = CLOptions()
 var textFields = [TextFieldState]()
+var dropdownItems = [DropDownItems]()
 
 struct TextFieldState {
-    var title       : String
-    var required    : Bool      = false
-    var secure      : Bool      = false
-    var value       : String    = ""
+    var title           : String
+    var required        : Bool      = false
+    var secure          : Bool      = false
+    var value           : String    = ""
+}
+
+struct DropDownItems {
+    var title           : String
+    var values          : [String]
+    var defaultValue    : String
 }
 
 struct AppVariables {
     
-    var cliversion                      = String("1.10.0")
+    var cliversion                      = String("1.10.0 Preview 1")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
@@ -91,6 +98,8 @@ struct AppVariables {
     var selectedOption                  = ""
     var selectedIndex                   = 0
     var dropdownValuesArray             = [String]()
+    
+    var dropdownOptionArray             = [Any]()
 
     var jsonOut                         = Bool(false)
     

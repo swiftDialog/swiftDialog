@@ -65,9 +65,20 @@ func processCLOptions() {
         if json[cloptions.dropdownValues.long].exists() {
             appvars.dropdownValuesArray = json[cloptions.dropdownValues.long].arrayValue.map {$0.stringValue}
         } else {
-    
             let dropdownValues = cloptions.dropdownValues.value.components(separatedBy: ",")
             appvars.dropdownValuesArray = dropdownValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
+            
+            let dropdownOptions = CLOptionMultiOptions(optionName: cloptions.dropdownValues.long)
+            let dropdownLabels = CLOptionMultiOptions(optionName: cloptions.dropdownTitle.long)
+            let dropdownDefaults = CLOptionMultiOptions(optionName: cloptions.dropdownDefault.long)
+
+            for i in 0..<(dropdownOptions.count) {
+                dropdownItems.append(DropDownItems(title: dropdownLabels[i], values: dropdownOptions[i].components(separatedBy: ","), defaultValue: dropdownDefaults[i]))
+            }
+            print(dropdownOptions)
+            print(dropdownLabels)
+            print(dropdownDefaults)
+            print(dropdownItems)
         }
     
         if json[cloptions.dropdownDefault.long].exists() || cloptions.dropdownDefault.present {
