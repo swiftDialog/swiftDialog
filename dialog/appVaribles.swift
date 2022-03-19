@@ -29,6 +29,7 @@ struct DropDownItems {
     var title           : String
     var values          : [String]
     var defaultValue    : String
+    var selectedValue   : String = ""
 }
 
 struct AppVariables {
