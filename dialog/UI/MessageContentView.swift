@@ -14,7 +14,7 @@ struct MessageContent: View {
     @ObservedObject var observedDialogContent : DialogUpdatableContent
     @State private var contentHeight: CGFloat = 40
     
-    var fieldPadding: CGFloat = 10
+    var fieldPadding: CGFloat = 15
     
     var messageColour : NSColor = NSColor(appvars.messageFontColour)
     
