@@ -34,7 +34,7 @@ struct DropDownItems {
 
 struct AppVariables {
     
-    var cliversion                      = String("1.10.0 Preview 1")
+    var cliversion                      = String("1.10.0")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
@@ -95,13 +95,7 @@ struct AppVariables {
     var overlayOffsetX                  = CGFloat(40)
     var overlayOffsetY                  = CGFloat(50)
     var overlayShadow                   = CGFloat(3)
-    
-    var selectedOption                  = ""
-    var selectedIndex                   = 0
-    var dropdownValuesArray             = [String]()
-    
-    var dropdownOptionArray             = [Any]()
-
+        
     var jsonOut                         = Bool(false)
     
     var willDisturb                     = Bool(false)
