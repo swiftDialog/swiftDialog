@@ -94,7 +94,7 @@ struct MessageContent: View {
                             .padding(.bottom, 10)
                             .border(appvars.debugBorderColour, width: 2)
 
-                        DropdownView()
+                        DropdownView(observedDialogContent: observedDialogContent)
                             //.padding(.leading, 50)
                             //.padding(.trailing, 50)
                             .padding(.bottom, 10)

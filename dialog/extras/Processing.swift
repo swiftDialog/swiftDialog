@@ -12,11 +12,6 @@ import SwiftUI
 import OSLog
 import SwiftyJSON
 
-class stdOutput: ObservableObject {
-    @Published var selectedOption: String = ""
-}
-
-
 public extension Color {
 
     static let background = Color(NSColor.windowBackgroundColor)
@@ -165,12 +160,21 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
         
         //build output array
         var outputArray : Array = [String]()
-        if appvars.selectedOption != "" {
-            outputArray.append("\"SelectedOption\" : \"\(appvars.selectedOption)\"")
-            json["SelectedOption"].string = appvars.selectedOption
-            outputArray.append("\"SelectedIndex\" : \(appvars.selectedIndex)")
-            json["SelectedIndex"].int = appvars.selectedIndex
+        
+        if cloptions.dropdownValues.present {
+            if dropdownItems.count == 1 {
+                outputArray.append("\"SelectedOption\" : \"\(dropdownItems[0].selectedValue)\"")
+                json["SelectedOption"].string = dropdownItems[0].selectedValue
+                outputArray.append("\"SelectedIndex\" : \(dropdownItems[0].values.firstIndex(of: dropdownItems[0].selectedValue) ?? -1)")
+                json["SelectedIndex"].int = dropdownItems[0].values.firstIndex(of: dropdownItems[0].selectedValue) ?? -1
+            }
+            for i in 0..<dropdownItems.count {
+                outputArray.append("\"\(dropdownItems[i].title)\" : \"\(dropdownItems[i].selectedValue)\"")
+                outputArray.append("\"\(dropdownItems[i].title)\" index : \"\(dropdownItems[i].values.firstIndex(of: dropdownItems[i].selectedValue) ?? -1)\"")
+                json[dropdownItems[i].title] = ["selectedValue" : dropdownItems[i].selectedValue, "selectedIndex" : dropdownItems[i].values.firstIndex(of: dropdownItems[i].selectedValue) ?? -1]
+            }
         }
+        
         if cloptions.textField.present {
             // check to see if fields marked as required have content before allowing the app to exit
             // if there is an empty field, update the highlight colour
