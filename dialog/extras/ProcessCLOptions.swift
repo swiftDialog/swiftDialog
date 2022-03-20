@@ -82,13 +82,23 @@ func processCLOptions() {
             }
             
         } else {
-            let dropdownOptions = CLOptionMultiOptions(optionName: cloptions.dropdownValues.long)
+            let dropdownValues = CLOptionMultiOptions(optionName: cloptions.dropdownValues.long)
             var selectValues = CLOptionMultiOptions(optionName: cloptions.dropdownTitle.long)
-            selectValues = selectValues.map { $0.trimmingCharacters(in: .whitespaces) }
-            let dropdownDefaults = CLOptionMultiOptions(optionName: cloptions.dropdownDefault.long)
-
-            for i in 0..<(dropdownOptions.count) {
-                dropdownItems.append(DropDownItems(title: selectValues[i], values: dropdownOptions[i].components(separatedBy: ","), defaultValue: dropdownDefaults[i], selectedValue: dropdownDefaults[i]))
+            var dropdownDefaults = CLOptionMultiOptions(optionName: cloptions.dropdownDefault.long)
+            print(dropdownValues.count)
+            print(selectValues.count)
+            print(dropdownDefaults.count)
+            
+            // need to make sure the title and default value arrays are the same size
+            for _ in selectValues.count..<dropdownValues.count {
+                selectValues.append("")
+            }
+            for _ in dropdownDefaults.count..<dropdownValues.count {
+                dropdownDefaults.append("")
+            }
+            
+            for i in 0..<(dropdownValues.count) {
+                dropdownItems.append(DropDownItems(title: selectValues[i], values: dropdownValues[i].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[i], selectedValue: dropdownDefaults[i]))
             }
         }
     }
