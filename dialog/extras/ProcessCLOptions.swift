@@ -425,7 +425,7 @@ func processCLOptionValues() {
             appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
             appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
         case "centre","center":
-            appvars.windowPositionVertical = NSWindow.Position.Vertical.center
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.deadcenter
             appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
         default:
             appvars.windowPositionVertical = NSWindow.Position.Vertical.center

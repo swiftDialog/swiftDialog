@@ -30,7 +30,7 @@ extension NSWindow.Position {
     }
 
     enum Vertical {
-        case top, center, bottom
+        case top, center, deadcenter, bottom
     }
 }
 
@@ -81,6 +81,7 @@ extension NSWindow.Position.Vertical {
         case .center:
             let screenheight = screenRange.upperBound - screenRange.lowerBound
             return ((screenRange.upperBound + screenRange.lowerBound - height) / 2) + (screenheight*0.15)
+        case .deadcenter: return (screenRange.upperBound + screenRange.lowerBound - height) / 2
         case .bottom: return screenRange.lowerBound + padding
         }
     }
