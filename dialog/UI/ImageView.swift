@@ -20,7 +20,9 @@ struct ImageView: View {
     
     init(imageArray: Array<String>, captionArray: Array<String>, autoPlaySeconds : CGFloat) {
         for imagePath in imageArray {
-            images.append(getImageFromPath(fileImagePath: imagePath))
+            if imagePath != "" {
+                images.append(getImageFromPath(fileImagePath: imagePath))
+            }
         }
         for imageCaption in captionArray {
             captions.append(imageCaption)

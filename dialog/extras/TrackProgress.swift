@@ -29,6 +29,7 @@ class DialogUpdatableContent : ObservableObject {
     @Published var button2Value: String
     @Published var infoButtonValue: String
     @Published var iconImage: String
+    @Published var iconPresent: Bool
     //@Published var image: String
     @Published var imagePresent: Bool
     @Published var imageCaptionPresent: Bool
@@ -77,6 +78,7 @@ class DialogUpdatableContent : ObservableObject {
         //requiredTextfieldHighlight = Color.clear
         
         iconImage = cloptions.iconOption.value
+        iconPresent = cloptions.iconOption.present
         
         //image = cloptions.mainImage.value
         appvars.imageArray = CLOptionMultiOptions(optionName: cloptions.mainImage.long)
@@ -224,6 +226,7 @@ class DialogUpdatableContent : ObservableObject {
                 
             // icon image
             case "\(cloptions.iconOption.long):" :
+                iconPresent = true
                 iconImage = line.replacingOccurrences(of: "\(cloptions.iconOption.long): ", with: "")
                 
             // image

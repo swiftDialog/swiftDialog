@@ -45,7 +45,16 @@ struct MessageContent: View {
     var body: some View {
         
         if observedDialogContent.imagePresent || (observedDialogContent.imagePresent && observedDialogContent.imageCaptionPresent) {
-            ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: NumberFormatter().number(from: cloptions.autoPlay.value) as! CGFloat)
+            VStack {
+                if observedDialogContent.iconPresent && appvars.iconIsCentred && !appvars.iconIsHidden && !(observedDialogContent.iconImage == "none") {
+                    IconView(observedDialogContent: observedDialogContent)
+                        .frame(width: appvars.iconWidth, alignment: .top)
+                        .padding(.top, 15)
+                        .padding(.bottom, 10)
+                        .border(appvars.debugBorderColour, width: 2)
+                }
+                ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: NumberFormatter().number(from: cloptions.autoPlay.value) as! CGFloat)
+            }
         } else {
             VStack {
                 
