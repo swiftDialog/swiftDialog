@@ -25,7 +25,7 @@ struct DialogView: View {
     var body: some View {
         VStack { //}(alignment: .top, spacing: nil) {
             HStack {
-                if (!appvars.iconIsHidden && !appvars.iconIsCentred && !(observedDialogContent.iconImage == "none")) {
+                if (!appvars.iconIsHidden && !observedDialogContent.centreIconPresent && !(observedDialogContent.iconImage == "none")) {
                     VStack {
                         IconView(observedDialogContent: observedDialogContent)
                             .frame(width: appvars.iconWidth, alignment: .top)

@@ -14,9 +14,11 @@ struct ContentView: View {
     var waterMarkFill          = String("")
     var progressSteps : CGFloat = appvars.timerDefaultSeconds
     
-    @ObservedObject var observedDialogContent = DialogUpdatableContent()
-
-    init () {
+    //@ObservedObject var observedDialogContent = DialogUpdatableContent()
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    
+    init (observedDialogContent : DialogUpdatableContent) {
+        self.observedDialogContent = observedDialogContent
         if cloptions.timerBar.present {
             progressSteps = NumberFormatter().number(from: cloptions.timerBar.value) as! CGFloat
         }

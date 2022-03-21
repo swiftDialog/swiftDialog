@@ -46,7 +46,7 @@ struct MessageContent: View {
         
         if observedDialogContent.imagePresent || (observedDialogContent.imagePresent && observedDialogContent.imageCaptionPresent) {
             VStack {
-                if observedDialogContent.iconPresent && appvars.iconIsCentred && !appvars.iconIsHidden && !(observedDialogContent.iconImage == "none") {
+                if observedDialogContent.iconPresent && observedDialogContent.centreIconPresent && !appvars.iconIsHidden && !(observedDialogContent.iconImage == "none") {
                     IconView(observedDialogContent: observedDialogContent)
                         .frame(width: appvars.iconWidth, alignment: .top)
                         .padding(.top, 15)
@@ -58,7 +58,7 @@ struct MessageContent: View {
         } else {
             VStack {
                 
-                if appvars.iconIsCentred && !appvars.iconIsHidden && !(observedDialogContent.iconImage == "none") {
+                if observedDialogContent.centreIconPresent && !appvars.iconIsHidden && !(observedDialogContent.iconImage == "none") {
                     IconView(observedDialogContent: observedDialogContent)
                         .frame(width: appvars.iconWidth, alignment: .top)
                         .padding(.top, 15)
