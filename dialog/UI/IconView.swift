@@ -128,7 +128,7 @@ struct IconView: View {
         } else if cloptions.infoIcon.present || messageUserImagePath == "info" {
             builtInIconName = "person.fill.questionmark"
             builtInIconPresent = true
-        } else if messageUserImagePath == "default" || !FileManager.default.fileExists(atPath: messageUserImagePath) {
+        } else if messageUserImagePath == "default" || (!builtInIconPresent && !FileManager.default.fileExists(atPath: messageUserImagePath)) {
             builtInIconName = "message.circle.fill"
             iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
             builtInIconPresent = true
