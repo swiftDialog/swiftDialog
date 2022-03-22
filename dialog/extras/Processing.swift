@@ -151,6 +151,11 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
         //print(exitCode)
         print("\(exitMessage!)")
     }
+    
+    // force quit
+    if exitCode == 255 {
+        exit(0)
+    }
         
     // only print if exit code os 0
     if exitCode == 0 {

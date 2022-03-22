@@ -121,6 +121,7 @@ struct AppVariables {
     
     // exit codes and error messages
     var exit0                           = (code: Int32(0),   message: String("")) // normal exit
+    var exitNow                         = (code: Int32(255), message: String("")) // forced exit
     var exit1                           = (code: Int32(1),   message: String("")) // pressed
     var exit2                           = (code: Int32(2),   message: String("")) // pressed button 2
     var exit3                           = (code: Int32(3),   message: String("")) // pressed button 3 (info button)

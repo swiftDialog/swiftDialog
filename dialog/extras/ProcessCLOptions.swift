@@ -195,23 +195,23 @@ func processCLOptions() {
     // process command line options that just display info and exit before we show the main window
     if (cloptions.helpOption.present || CommandLine.arguments.count == 1) {
         print(helpText)
-        quitDialog(exitCode: appvars.exit0.code)
+        quitDialog(exitCode: appvars.exitNow.code)
         //exit(0)
     }
     if cloptions.getVersion.present {
         printVersionString()
-        quitDialog(exitCode: appvars.exit0.code)
+        quitDialog(exitCode: appvars.exitNow.code)
         //exit(0)
     }
     if cloptions.showLicense.present {
         print(licenseText)
-        quitDialog(exitCode: appvars.exit0.code)
+        quitDialog(exitCode: appvars.exitNow.code)
         //exit(0)
     }
     if cloptions.buyCoffee.present {
         //I'm a teapot
         print("If you like this app and want to buy me a coffee https://www.buymeacoffee.com/bartreardon")
-        quitDialog(exitCode: 418)
+        quitDialog(exitCode: appvars.exitNow.code)
         //exit(418)
     }
     if cloptions.ignoreDND.present {
