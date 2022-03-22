@@ -12,6 +12,7 @@ struct TextEntryView: View {
     @ObservedObject var observedDialogContent : DialogUpdatableContent
     
     @State var textFieldValue = Array(repeating: "", count: textFields.count)
+    //var textPromptValue = Array(repeating: "", count: textFields.count)
     
     @State private var animationAmount = 1.0
     
@@ -61,7 +62,11 @@ struct TextEntryView: View {
                                             .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
                                 }
                             } else {
-                                TextField("", text: $textFieldValue[index])
+                                if #available(macOS 12.0, *) {
+                                    TextField("", text: $textFieldValue[index], prompt:Text(textFields[index].prompt))
+                                } else {
+                                    TextField("", text: $textFieldValue[index])
+                                }
                             }
                         }
                         .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)

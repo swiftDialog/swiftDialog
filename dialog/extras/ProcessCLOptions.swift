@@ -111,7 +111,8 @@ func processCLOptions() {
                 } else {
                     textFields.append(TextFieldState(title: String(json[cloptions.textField.long][i]["title"].stringValue),
                                                  required: Bool(json[cloptions.textField.long][i]["required"].boolValue),
-                                                 secure: Bool(json[cloptions.textField.long][i]["secure"].boolValue))
+                                                 secure: Bool(json[cloptions.textField.long][i]["secure"].boolValue),
+                                                 prompt: String(json[cloptions.textField.long][i]["prompt"].stringValue))
                                 )
                 }
             }
@@ -119,19 +120,24 @@ func processCLOptions() {
             for textFieldOption in CLOptionMultiOptions(optionName: cloptions.textField.long) {
                 let items = textFieldOption.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
                 var fieldTitle : String = ""
+                var fieldPrompt : String = ""
                 var fieldSecure : Bool = false
                 var fieldRequire : Bool = false
                 for item in items {
-                    switch item.lowercased() {
+                    let itemName = item.components(separatedBy: "=").first!
+                    let itemValue = item.components(separatedBy: "=").last!
+                    switch itemName.lowercased() {
                     case "secure":
                         fieldSecure = true
                     case "required":
                         fieldRequire = true
+                    case "prompt":
+                        fieldPrompt = itemValue
                     default:
-                        fieldTitle = item
+                        fieldTitle = itemName
                     }
                 }
-                textFields.append(TextFieldState(title: fieldTitle, required: fieldRequire, secure: fieldSecure))
+                textFields.append(TextFieldState(title: fieldTitle, required: fieldRequire, secure: fieldSecure, prompt: fieldPrompt))
             }
         }
         logger(logMessage: "textOptionsArray : \(textFields)")
