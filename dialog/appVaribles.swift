@@ -170,6 +170,7 @@ struct CLOptions {
     var checkbox                 = (long: String("checkbox"),          short: String(""),    value : String(""), present : Bool(false))
     var timerBar                 = (long: String("timer"),             short: String(""),    value : String(""), present : Bool(false))
     var progressBar              = (long: String("progress"),          short: String(""),    value : String(""), present : Bool(false))
+    var progressText             = (long: String("progresstext"),      short: String(""),    value : String(""), present : Bool(false))
     var mainImage                = (long: String("image"),             short: String("g"),   value : String(""), present : Bool(false))
     var mainImageCaption         = (long: String("imagecaption"),      short: String(""),    value : String(""), present : Bool(false))
     var windowWidth              = (long: String("width"),             short: String(""),    value : String(""), present : Bool(false))

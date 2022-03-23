@@ -71,7 +71,7 @@ class DialogUpdatableContent : ObservableObject {
                 
         titleText = cloptions.titleOption.value
         messageText = cloptions.messageOption.value
-        statusText = ""
+        statusText = cloptions.progressText.value
         progressValue = 0
         progressTotal = 0
         button1Value = cloptions.button1TextOption.value
