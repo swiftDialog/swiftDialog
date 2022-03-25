@@ -19,6 +19,8 @@ struct MessageContent: View {
     var messageColour : NSColor = NSColor(appvars.messageFontColour)
     
     var useDefaultStyle = true
+    
+    var iconDisplayWidth : CGFloat
         
     var defaultStyle: MarkdownStyle {
         useDefaultStyle
@@ -37,8 +39,12 @@ struct MessageContent: View {
     
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedDialogContent = observedDialogContent
-        if cloptions.hideIcon.present {
+        if !observedDialogContent.iconPresent { //cloptions.hideIcon.present {
             fieldPadding = 40
+            iconDisplayWidth = 0
+        } else {
+            fieldPadding = 15
+            iconDisplayWidth = observedDialogContent.iconSize
         }
     }
     
@@ -48,7 +54,7 @@ struct MessageContent: View {
             VStack {
                 if observedDialogContent.iconPresent && observedDialogContent.centreIconPresent && !appvars.iconIsHidden && !(observedDialogContent.iconImage == "none") {
                     IconView(observedDialogContent: observedDialogContent)
-                        .frame(width: appvars.iconWidth, alignment: .top)
+                        .frame(width: iconDisplayWidth, alignment: .top)
                         .padding(.top, 15)
                         .padding(.bottom, 10)
                         .border(appvars.debugBorderColour, width: 2)
@@ -58,9 +64,9 @@ struct MessageContent: View {
         } else {
             VStack {
                 
-                if observedDialogContent.centreIconPresent && !appvars.iconIsHidden && !(observedDialogContent.iconImage == "none") {
+                if observedDialogContent.centreIconPresent && observedDialogContent.centreIconPresent && !(observedDialogContent.iconImage == "none") {
                     IconView(observedDialogContent: observedDialogContent)
-                        .frame(width: appvars.iconWidth, alignment: .top)
+                        .frame(width: iconDisplayWidth, alignment: .top)
                         .padding(.top, 15)
                         .padding(.bottom, 10)
                         .border(appvars.debugBorderColour, width: 2)
