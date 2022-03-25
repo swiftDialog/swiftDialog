@@ -32,7 +32,7 @@ struct TextEntryView: View {
                 //highlight.append(Color.clear)
             }
         }
-        if cloptions.hideIcon.present {
+        if !observedDialogContent.iconPresent { //} cloptions.hideIcon.present {
             fieldwidth = appvars.windowWidth
         } else {
             fieldwidth = appvars.windowWidth - appvars.iconWidth

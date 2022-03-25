@@ -29,6 +29,7 @@ class DialogUpdatableContent : ObservableObject {
     @Published var button2Value: String
     @Published var infoButtonValue: String
     @Published var iconImage: String
+    @Published var iconSize: CGFloat
     @Published var iconPresent: Bool
     @Published var centreIconPresent: Bool
     //@Published var image: String
@@ -82,7 +83,8 @@ class DialogUpdatableContent : ObservableObject {
         //requiredTextfieldHighlight = Color.clear
         
         iconImage = cloptions.iconOption.value
-        iconPresent = cloptions.iconOption.present
+        iconSize = NumberFormatter().number(from: cloptions.iconSize.value) as! CGFloat
+        iconPresent = !appvars.iconIsHidden
         centreIconPresent = cloptions.centreIcon.present
         
         //image = cloptions.mainImage.value
@@ -245,17 +247,29 @@ class DialogUpdatableContent : ObservableObject {
             case "\(cloptions.iconOption.long):" :
                 //iconPresent = true
                 let iconState = line.replacingOccurrences(of: "\(cloptions.iconOption.long): ", with: "")
-                switch iconState {
-                case "centre", "center" :
-                    centreIconPresent = true
-                case "left", "default" :
-                    centreIconPresent = false
-                case "none" :
-                    iconPresent = false
-                    iconImage = iconState
-                default:
-                    iconPresent = true
-                    iconImage = iconState
+                
+                if iconState.components(separatedBy: ": ").first == "size" {
+                    //print(iconState)
+                    //if let readIconSize = iconState.replacingOccurrences(of: "size: ", with: "") {
+                    if iconState.replacingOccurrences(of: "size:", with: "").trimmingCharacters(in: .whitespaces) != "" {
+                        iconSize = NumberFormatter().number(from: iconState.replacingOccurrences(of: "size: ", with: "")) as! CGFloat
+                    } else {
+                        iconSize = appvars.iconWidth
+                    }
+                } else {
+                    switch iconState {
+                    case "centre", "center" :
+                        centreIconPresent = true
+                    case "left", "default" :
+                        centreIconPresent = false
+                    case "none" :
+                        iconPresent = false
+                        iconImage = iconState
+                    default:
+                        //centreIconPresent = false
+                        iconPresent = true
+                        iconImage = iconState
+                    }
                 }
                 //print("centre icon is \(centreIconPresent)")
                 //iconImage = line.replacingOccurrences(of: "\(cloptions.iconOption.long): ", with: "")
