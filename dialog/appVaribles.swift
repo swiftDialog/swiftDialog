@@ -14,12 +14,28 @@ var iconVisible: Bool = true
 
 // declare our app var in case we want to update values - e.g. future use, multiple dialog sizes
 var appvars = AppVariables()
-
 var cloptions = CLOptions()
+var textFields = [TextFieldState]()
+var dropdownItems = [DropDownItems]()
+
+struct TextFieldState {
+    var title           : String
+    var required        : Bool      = false
+    var secure          : Bool      = false
+    var prompt          : String    = ""
+    var value           : String    = ""
+}
+
+struct DropDownItems {
+    var title           : String
+    var values          : [String]
+    var defaultValue    : String
+    var selectedValue   : String = ""
+}
 
 struct AppVariables {
     
-    var cliversion                      = String("1.9.3")
+    var cliversion                      = String("1.10.0")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
@@ -37,6 +53,7 @@ struct AppVariables {
     var windowIsMoveable                = Bool(false)
     var windowOnTop                     = Bool(false)
     var iconIsHidden                    = Bool(false)
+    var iconIsCentred                   = Bool(false)
     
     // Window Sizes
     var windowWidth                     = CGFloat(820)      // set default dialog width
@@ -79,11 +96,7 @@ struct AppVariables {
     var overlayOffsetX                  = CGFloat(40)
     var overlayOffsetY                  = CGFloat(50)
     var overlayShadow                   = CGFloat(3)
-    
-    var selectedOption                  = ""
-    var selectedIndex                   = 0
-    var dropdownValuesArray             = [String]()
-
+        
     var jsonOut                         = Bool(false)
     
     var willDisturb                     = Bool(false)
@@ -108,6 +121,7 @@ struct AppVariables {
     
     // exit codes and error messages
     var exit0                           = (code: Int32(0),   message: String("")) // normal exit
+    var exitNow                         = (code: Int32(255), message: String("")) // forced exit
     var exit1                           = (code: Int32(1),   message: String("")) // pressed
     var exit2                           = (code: Int32(2),   message: String("")) // pressed button 2
     var exit3                           = (code: Int32(3),   message: String("")) // pressed button 3 (info button)
@@ -156,6 +170,7 @@ struct CLOptions {
     var checkbox                 = (long: String("checkbox"),          short: String(""),    value : String(""), present : Bool(false))
     var timerBar                 = (long: String("timer"),             short: String(""),    value : String(""), present : Bool(false))
     var progressBar              = (long: String("progress"),          short: String(""),    value : String(""), present : Bool(false))
+    var progressText             = (long: String("progresstext"),      short: String(""),    value : String(""), present : Bool(false))
     var mainImage                = (long: String("image"),             short: String("g"),   value : String(""), present : Bool(false))
     var mainImageCaption         = (long: String("imagecaption"),      short: String(""),    value : String(""), present : Bool(false))
     var windowWidth              = (long: String("width"),             short: String(""),    value : String(""), present : Bool(false))
@@ -179,6 +194,8 @@ struct CLOptions {
     var infoButtonOption         = (long: String("infobutton"),        short: String("3"),   value : String(""), present : Bool(false)) // -3
     var getVersion               = (long: String("version"),           short: String("v"),   value : String(""), present : Bool(false)) // -v
     var hideIcon                 = (long: String("hideicon"),          short: String("h"),   value : String(""), present : Bool(false)) // -h
+    var centreIcon               = (long: String("centreicon"),        short: String(""),    value : String(""), present : Bool(false))
+    var centreIconSE             = (long: String("centericon"),        short: String(""),    value : String(""), present : Bool(false))
     var helpOption               = (long: String("help"),              short: String(""),    value : String(""), present : Bool(false))
     var demoOption               = (long: String("demo"),              short: String(""),    value : String(""), present : Bool(false))
     var buyCoffee                = (long: String("coffee"),            short: String("☕️"),  value : String(""), present : Bool(false))

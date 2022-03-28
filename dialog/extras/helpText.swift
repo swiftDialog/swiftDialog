@@ -16,8 +16,9 @@ var helpText = """
     
         -\(cloptions.titleOption.short), --\(cloptions.titleOption.long) <text>
                     Set the Dialog title
-                    Text over 40 characters gets truncated
+                    Text beyond the length of the title area will get truncated
                     Default Title is "\(appvars.titleDefault)"
+                    Use keyword "none" to disable the title area entirely
 
         --\(cloptions.titleFont.long) <text>
                     Lets you modify the title text of the dialog.
@@ -110,6 +111,9 @@ var helpText = """
         --\(cloptions.iconSize.long)
                     Will render the icon with the specified size.
                     Default size is 170
+    
+        --\(cloptions.centreIcon.long)
+                    re-positions the icon to be in the centre, between the title and message areas
     
         -\(cloptions.overlayIconOption.short), --\(cloptions.overlayIconOption.long) <file> | <url>
                     Set an image to display as an overlay to --icon
@@ -214,6 +218,10 @@ var helpText = """
                     Makes an interactive progress bar visible with <int> steps.
                     To increment the progress bar send "progress: <int>" command to the dialog command file
     
+        --\(cloptions.progressText.long) <text>
+                    Initiate the progress text are with some useful content.
+                    To update progress text send "progresstext: <text>" command to the dialog command file
+    
         --\(cloptions.statusLogFile.long) <file>
                     Sets the path to the command file Dialog will read from to receive updates
                     Default file is /var/log/dialog.log
@@ -245,11 +253,33 @@ var helpText = """
     
                     Output of select items is only shown if Dialog's exit code is 0
     
-        --\(cloptions.textField.long) <text>
+                    Multiple dropdown caluse, titles and default selections can be specified as required.
+                    Associations are made in the order they are presented on the command line
+                    Or use json formatting for more direct control. for example:
+                    
+                    "selectitems" : [
+                        {"title" : "Select 1", "values" : ["one","two","three"]},
+                        {"title" : "Select 2", "values" : ["red","green","blue"], "default" : "red"}
+                    ]
+    
+                    When using multiple dropdown lists, output will be in the form:
+                    <title> : <value>
+                    <title> index : <index_value>
+    
+        --\(cloptions.textField.long) <text>(,required,secure,prompt="<text>")
                     Present a textfield with the specified label
                     When Dialog exits the contents of the textfield will be presented as <text> : <user_input>
                     in plain or as json using [-\(cloptions.jsonOutPut.short), --\(cloptions.jsonOutPut.long)] option
                     Multiple textfields can be specified as required.
+    
+                    Modifiers available to text fields are:
+                        secure   - Presends a secure input area. Contents of the textfield will not be shown on screen
+                        required - Dialog will not exit until the field is populated
+                        prompt   - Pre-fill the field with some prompt text (prompt text will not be returned, macOS 12+ only, macOS 11 safe)
+    
+                    modifiers can be combined e.g. --\(cloptions.textField.long) <text>,secure,required
+                                               or  --\(cloptions.textField.long) <text>,required,prompt="<text>"
+                    (secure fields cannot have the prompt modifier applied)
     
         --\(cloptions.checkbox.long) <text>
                     Present a checkbox with the specified label

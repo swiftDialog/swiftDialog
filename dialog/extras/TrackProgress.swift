@@ -7,6 +7,7 @@
 // concept and execution apropriated from depNotify
 
 import Foundation
+import SwiftUI
 
 enum StatusState {
     case start
@@ -28,6 +29,9 @@ class DialogUpdatableContent : ObservableObject {
     @Published var button2Value: String
     @Published var infoButtonValue: String
     @Published var iconImage: String
+    @Published var iconSize: CGFloat
+    @Published var iconPresent: Bool
+    @Published var centreIconPresent: Bool
     //@Published var image: String
     @Published var imagePresent: Bool
     @Published var imageCaptionPresent: Bool
@@ -35,6 +39,10 @@ class DialogUpdatableContent : ObservableObject {
     @Published var listItemStatus: [String]
     @Published var listItemUpdateRow: Int
     @Published var listItemPresent: Bool
+    @Published var requiredTextfieldHighlight: [Color] = Array(repeating: Color.clear, count: textFields.count)
+    
+    @Published var windowWidth: CGFloat
+    @Published var windowHeight: CGFloat
     
     var status: StatusState
     
@@ -64,7 +72,7 @@ class DialogUpdatableContent : ObservableObject {
                 
         titleText = cloptions.titleOption.value
         messageText = cloptions.messageOption.value
-        statusText = ""
+        statusText = cloptions.progressText.value
         progressValue = 0
         progressTotal = 0
         button1Value = cloptions.button1TextOption.value
@@ -72,7 +80,12 @@ class DialogUpdatableContent : ObservableObject {
         infoButtonValue = cloptions.infoButtonOption.value
         listItemUpdateRow = 0
         
+        //requiredTextfieldHighlight = Color.clear
+        
         iconImage = cloptions.iconOption.value
+        iconSize = NumberFormatter().number(from: cloptions.iconSize.value) as! CGFloat
+        iconPresent = !appvars.iconIsHidden
+        centreIconPresent = cloptions.centreIcon.present
         
         //image = cloptions.mainImage.value
         appvars.imageArray = CLOptionMultiOptions(optionName: cloptions.mainImage.long)
@@ -83,6 +96,9 @@ class DialogUpdatableContent : ObservableObject {
         listItemArray = appvars.listItemArray
         listItemStatus = appvars.listItemStatus
         listItemPresent = cloptions.listItem.present
+        
+        windowWidth = appvars.windowWidth
+        windowHeight = appvars.windowHeight
 
         // start the background process to monotor the command file
         status = .start
@@ -150,6 +166,15 @@ class DialogUpdatableContent : ObservableObject {
             let command = line.components(separatedBy: " ").first!.lowercased()
                         
             switch command {
+            /*
+            case "width:" :
+                windowWidth = NumberFormatter().number(from: line.replacingOccurrences(of: "width: ", with: "")) as! CGFloat
+                appvars.windowWidth = NumberFormatter().number(from: line.replacingOccurrences(of: "width: ", with: "")) as! CGFloat
+                
+            case "height:" :
+                windowHeight = NumberFormatter().number(from: line.replacingOccurrences(of: "height: ", with: "")) as! CGFloat
+                appvars.windowHeight = NumberFormatter().number(from: line.replacingOccurrences(of: "height: ", with: "")) as! CGFloat
+            */
             // Title
             case "\(cloptions.titleOption.long):" :
                 titleText = line.replacingOccurrences(of: "\(cloptions.titleOption.long): ", with: "")
@@ -220,7 +245,34 @@ class DialogUpdatableContent : ObservableObject {
                 
             // icon image
             case "\(cloptions.iconOption.long):" :
-                iconImage = line.replacingOccurrences(of: "\(cloptions.iconOption.long): ", with: "")
+                //iconPresent = true
+                let iconState = line.replacingOccurrences(of: "\(cloptions.iconOption.long): ", with: "")
+                
+                if iconState.components(separatedBy: ": ").first == "size" {
+                    //print(iconState)
+                    //if let readIconSize = iconState.replacingOccurrences(of: "size: ", with: "") {
+                    if iconState.replacingOccurrences(of: "size:", with: "").trimmingCharacters(in: .whitespaces) != "" {
+                        iconSize = NumberFormatter().number(from: iconState.replacingOccurrences(of: "size: ", with: "")) as! CGFloat
+                    } else {
+                        iconSize = appvars.iconWidth
+                    }
+                } else {
+                    switch iconState {
+                    case "centre", "center" :
+                        centreIconPresent = true
+                    case "left", "default" :
+                        centreIconPresent = false
+                    case "none" :
+                        iconPresent = false
+                        iconImage = iconState
+                    default:
+                        //centreIconPresent = false
+                        iconPresent = true
+                        iconImage = iconState
+                    }
+                }
+                //print("centre icon is \(centreIconPresent)")
+                //iconImage = line.replacingOccurrences(of: "\(cloptions.iconOption.long): ", with: "")
                 
             // image
             case "\(cloptions.mainImage.long):" :

@@ -128,18 +128,11 @@ struct IconView: View {
         } else if cloptions.infoIcon.present || messageUserImagePath == "info" {
             builtInIconName = "person.fill.questionmark"
             builtInIconPresent = true
-        } else if messageUserImagePath == "default" {
+        } else if messageUserImagePath == "default" || (!builtInIconPresent && !FileManager.default.fileExists(atPath: messageUserImagePath)) {
             builtInIconName = "message.circle.fill"
             iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
             builtInIconPresent = true
         }
-        
-                
-        if !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL && !imgFromAPP && !builtInIconPresent  {
-            observedDialogContent.end()
-            quitDialog(exitCode: appvars.exit202.code, exitMessage: "\(appvars.exit202.message) \(messageUserImagePath)")
-        }
-                
     }
     
     var body: some View {

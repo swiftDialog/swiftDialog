@@ -12,40 +12,58 @@ import Combine
 
 struct DropdownView: View {
     
-    @State var selectedOption = cloptions.dropdownDefault.value
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @State var selectedOption : [String]
 
-    var dropdownValues = appvars.dropdownValuesArray
-    var dropdownTitle: String = cloptions.dropdownTitle.value
     var showDropdown: Bool = cloptions.dropdownValues.present
-    var defaultValue: String = ""
+    var fieldwidth: CGFloat = 0
     
+    init(observedDialogContent : DialogUpdatableContent) {
+        self.observedDialogContent = observedDialogContent
+        if !observedDialogContent.iconPresent { //} cloptions.hideIcon.present {
+            fieldwidth = appvars.windowWidth
+        } else {
+            fieldwidth = appvars.windowWidth - appvars.iconWidth
+        }
+        
+        var defaultOptions : [String] = []
+        for i in 0..<dropdownItems.count {
+            defaultOptions.append(dropdownItems[i].defaultValue)
+        }
+        _selectedOption = State(initialValue: defaultOptions)
+    }
         
     var body: some View {
         if showDropdown {
-            HStack {
-                // we could print the title as part of the picker control but then we don't get easy access to swiftui text formatting
-                // so we print it seperatly and use a blank value in the picker
-                Spacer()
-                Text(dropdownTitle)
-                    .bold()
-                    .font(.system(size: 15))
-                    .frame(alignment: .leading)
-                Spacer()
-                Picker("", selection: $selectedOption)
-                {
-                    ForEach(dropdownValues, id: \.self) {
-                        Text($0)
+            VStack {
+                ForEach(0..<dropdownItems.count, id: \.self) {index in
+                    HStack {
+                        // we could print the title as part of the picker control but then we don't get easy access to swiftui text formatting
+                        // so we print it seperatly and use a blank value in the picker
+                        Spacer()
+                        Text(dropdownItems[index].title)
+                            .bold()
+                            .font(.system(size: 15))
+                            .frame(idealWidth: fieldwidth*0.20, maxWidth: 150, alignment: .leading)
+                        Spacer()
+                            .frame(width: 20)
+                        Picker("", selection: $selectedOption[index])
+                        {
+                            ForEach(dropdownItems[index].values, id: \.self) {
+                                Text($0)
+                            }
+                        }
+                        .pickerStyle(DefaultPickerStyle())
+                        .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
+                        .onChange(of: selectedOption[index]) { _ in
+                            //update dropdownItems with the option that was selected. this will be printed to stdout on exit
+                            dropdownItems[index].selectedValue = selectedOption[index]
+                        }
+                        Spacer()
                     }
                 }
-                .pickerStyle(DefaultPickerStyle())
-                .frame(maxWidth: 450, alignment: .trailing)
-                .onChange(of: selectedOption) { _ in
-                    //update appvars with the option that was selected. this will be printed to stdout on exit
-                    appvars.selectedOption = selectedOption
-                    appvars.selectedIndex = dropdownValues.firstIndex {$0 == selectedOption} ?? -1
-                }
             }
-            .frame(maxWidth: 500)
+        
         }
     }
 }

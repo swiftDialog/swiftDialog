@@ -16,6 +16,7 @@ struct ImageSlider<Content>: View where Content: View {
     let maxIndex: Int
     let content: () -> Content
     let autoPlaySeconds: Double
+    let imageoffset: CGFloat
 
     @State private var offset = CGFloat.zero
     @State private var dragging = false
@@ -25,6 +26,11 @@ struct ImageSlider<Content>: View where Content: View {
         self.maxIndex = maxIndex
         self.content = content
         self.autoPlaySeconds = autoPlaySeconds
+        if maxIndex > 0 {
+            imageoffset = 60
+        } else {
+            imageoffset = 0
+        }
     }
     
     var body: some View {
@@ -34,7 +40,7 @@ struct ImageSlider<Content>: View where Content: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 0) {
                             self.content()
-                                .frame(width: geometry.size.width, height: geometry.size.height-60)
+                                .frame(width: geometry.size.width, height: geometry.size.height-imageoffset)
                                 .clipped()
                         }
                     }

@@ -62,29 +62,85 @@ func processCLOptions() {
     let json : JSON = getJSON()
     
     if cloptions.dropdownValues.present {
-        if json[cloptions.dropdownValues.long].exists() {
-            appvars.dropdownValuesArray = json[cloptions.dropdownValues.long].arrayValue.map {$0.stringValue}
+        // checking for the pre 1.10 way of defining a select list
+        if json[cloptions.dropdownValues.long].exists() && !json["selectitems"].exists() {
+            let selectValues = json[cloptions.dropdownValues.long].stringValue.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+            let selectTitle = json[cloptions.dropdownTitle.long].stringValue
+            let selectDefault = json[cloptions.dropdownDefault.long].stringValue
+            dropdownItems.append(DropDownItems(title: selectTitle, values: selectValues, defaultValue: selectDefault, selectedValue: selectDefault))
+            print(dropdownItems)
+        }
+        
+        if json["selectitems"].exists() {            
+            for i in 0..<json["selectitems"].count {
+                
+                let selectTitle = json["selectitems"][i]["title"].stringValue
+                let selectValues = (json["selectitems"][i]["values"].arrayValue.map {$0.stringValue}).map { $0.trimmingCharacters(in: .whitespaces) }
+                let selectDefault = json["selectitems"][i]["default"].stringValue
+                
+                dropdownItems.append(DropDownItems(title: selectTitle, values: selectValues, defaultValue: selectDefault, selectedValue: selectDefault))
+            }
+            
         } else {
-    
-            let dropdownValues = cloptions.dropdownValues.value.components(separatedBy: ",")
-            appvars.dropdownValuesArray = dropdownValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
+            let dropdownValues = CLOptionMultiOptions(optionName: cloptions.dropdownValues.long)
+            var selectValues = CLOptionMultiOptions(optionName: cloptions.dropdownTitle.long)
+            var dropdownDefaults = CLOptionMultiOptions(optionName: cloptions.dropdownDefault.long)
+            print(dropdownValues.count)
+            print(selectValues.count)
+            print(dropdownDefaults.count)
+            
+            // need to make sure the title and default value arrays are the same size
+            for _ in selectValues.count..<dropdownValues.count {
+                selectValues.append("")
+            }
+            for _ in dropdownDefaults.count..<dropdownValues.count {
+                dropdownDefaults.append("")
+            }
+            
+            for i in 0..<(dropdownValues.count) {
+                dropdownItems.append(DropDownItems(title: selectValues[i], values: dropdownValues[i].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[i], selectedValue: dropdownDefaults[i]))
+            }
         }
-    
-        if json[cloptions.dropdownDefault.long].exists() || cloptions.dropdownDefault.present {
-            appvars.selectedOption = cloptions.dropdownDefault.value
-            appvars.selectedIndex = appvars.dropdownValuesArray.firstIndex {$0 == cloptions.dropdownDefault.value} ?? -1
-        }
-    
     }
-    
     
     if cloptions.textField.present {
         if json[cloptions.textField.long].exists() {
-            appvars.textOptionsArray = json[cloptions.textField.long].arrayValue.map {$0.stringValue}
+            for i in 0..<json[cloptions.textField.long].arrayValue.count {
+                if json[cloptions.textField.long][i]["title"].stringValue == "" {
+                    textFields.append(TextFieldState(title: String(json[cloptions.textField.long][i].stringValue)))
+                } else {
+                    textFields.append(TextFieldState(title: String(json[cloptions.textField.long][i]["title"].stringValue),
+                                                 required: Bool(json[cloptions.textField.long][i]["required"].boolValue),
+                                                 secure: Bool(json[cloptions.textField.long][i]["secure"].boolValue),
+                                                 prompt: String(json[cloptions.textField.long][i]["prompt"].stringValue))
+                                )
+                }
+            }
         } else {
-            appvars.textOptionsArray =  CLOptionMultiOptions(optionName: cloptions.textField.long)
+            for textFieldOption in CLOptionMultiOptions(optionName: cloptions.textField.long) {
+                let items = textFieldOption.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                var fieldTitle : String = ""
+                var fieldPrompt : String = ""
+                var fieldSecure : Bool = false
+                var fieldRequire : Bool = false
+                for item in items {
+                    let itemName = item.components(separatedBy: "=").first!
+                    let itemValue = item.components(separatedBy: "=").last!
+                    switch itemName.lowercased() {
+                    case "secure":
+                        fieldSecure = true
+                    case "required":
+                        fieldRequire = true
+                    case "prompt":
+                        fieldPrompt = itemValue
+                    default:
+                        fieldTitle = itemName
+                    }
+                }
+                textFields.append(TextFieldState(title: fieldTitle, required: fieldRequire, secure: fieldSecure, prompt: fieldPrompt))
+            }
         }
-        logger(logMessage: "textOptionsArray : \(appvars.textOptionsArray)")
+        logger(logMessage: "textOptionsArray : \(textFields)")
     }
     
     if cloptions.checkbox.present {
@@ -139,23 +195,23 @@ func processCLOptions() {
     // process command line options that just display info and exit before we show the main window
     if (cloptions.helpOption.present || CommandLine.arguments.count == 1) {
         print(helpText)
-        quitDialog(exitCode: appvars.exit0.code)
+        quitDialog(exitCode: appvars.exitNow.code)
         //exit(0)
     }
     if cloptions.getVersion.present {
         printVersionString()
-        quitDialog(exitCode: appvars.exit0.code)
+        quitDialog(exitCode: appvars.exitNow.code)
         //exit(0)
     }
     if cloptions.showLicense.present {
         print(licenseText)
-        quitDialog(exitCode: appvars.exit0.code)
+        quitDialog(exitCode: appvars.exitNow.code)
         //exit(0)
     }
     if cloptions.buyCoffee.present {
         //I'm a teapot
         print("If you like this app and want to buy me a coffee https://www.buymeacoffee.com/bartreardon")
-        quitDialog(exitCode: 418)
+        quitDialog(exitCode: appvars.exitNow.code)
         //exit(418)
     }
     if cloptions.ignoreDND.present {
@@ -279,9 +335,14 @@ func processCLOptions() {
         }
     }
             
-    if cloptions.hideIcon.present || cloptions.bannerImage.present {
+    if cloptions.hideIcon.present || cloptions.iconOption.value == "none" || cloptions.bannerImage.present {
         appvars.iconIsHidden = true
         logger(logMessage: "iconIsHidden = true")
+    }
+    
+    if cloptions.centreIcon.present {
+        appvars.iconIsCentred = true
+        logger(logMessage: "iconIsCentred = true")
     }
     
     if cloptions.lockWindow.present {
@@ -370,7 +431,7 @@ func processCLOptionValues() {
             appvars.windowPositionVertical = NSWindow.Position.Vertical.bottom
             appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
         case "centre","center":
-            appvars.windowPositionVertical = NSWindow.Position.Vertical.center
+            appvars.windowPositionVertical = NSWindow.Position.Vertical.deadcenter
             appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
         default:
             appvars.windowPositionVertical = NSWindow.Position.Vertical.center
@@ -381,7 +442,7 @@ func processCLOptionValues() {
     cloptions.iconOption.value              = json[cloptions.iconOption.long].string ?? CLOptionText(OptionName: cloptions.iconOption, DefaultValue: "default")
     cloptions.iconOption.present            = json[cloptions.iconOption.long].exists() || CLOptionPresent(OptionName: cloptions.iconOption)
     
-    cloptions.iconSize.value                = json[cloptions.iconOption.long].string ?? CLOptionText(OptionName: cloptions.iconSize)
+    cloptions.iconSize.value                = json[cloptions.iconSize.long].string ?? CLOptionText(OptionName: cloptions.iconSize, DefaultValue: "\(appvars.iconWidth)")
     cloptions.iconSize.present              = json[cloptions.iconSize.long].exists() || CLOptionPresent(OptionName: cloptions.iconSize)
     
     //cloptions.iconHeight.value              = CLOptionText(OptionName: cloptions.iconHeight)
@@ -416,13 +477,13 @@ func processCLOptionValues() {
     cloptions.buttonInfoActionOption.value  = json[cloptions.buttonInfoActionOption.long].string ?? CLOptionText(OptionName: cloptions.buttonInfoActionOption)
     cloptions.buttonInfoActionOption.present = json[cloptions.buttonInfoActionOption.long].exists() || CLOptionPresent(OptionName: cloptions.buttonInfoActionOption)
 
-    cloptions.dropdownTitle.value           = json[cloptions.dropdownTitle.long].string ?? CLOptionText(OptionName: cloptions.dropdownTitle)
+    //cloptions.dropdownTitle.value           = json[cloptions.dropdownTitle.long].string ?? CLOptionText(OptionName: cloptions.dropdownTitle)
     cloptions.dropdownTitle.present         = json[cloptions.dropdownTitle.long].exists() || CLOptionPresent(OptionName: cloptions.dropdownTitle)
 
-    cloptions.dropdownValues.value          = json[cloptions.dropdownValues.long].string ?? CLOptionText(OptionName: cloptions.dropdownValues)
-    cloptions.dropdownValues.present        = json[cloptions.dropdownValues.long].exists() || CLOptionPresent(OptionName: cloptions.dropdownValues)
+    //cloptions.dropdownValues.value          = json[cloptions.dropdownValues.long].string ?? CLOptionText(OptionName: cloptions.dropdownValues)
+    cloptions.dropdownValues.present        = json["selectitems"].exists() || json[cloptions.dropdownValues.long].exists() || CLOptionPresent(OptionName: cloptions.dropdownValues)
 
-    cloptions.dropdownDefault.value         = json[cloptions.dropdownDefault.long].string ?? CLOptionText(OptionName: cloptions.dropdownDefault)
+    //cloptions.dropdownDefault.value         = json[cloptions.dropdownDefault.long].string ?? CLOptionText(OptionName: cloptions.dropdownDefault)
     cloptions.dropdownDefault.present       = json[cloptions.dropdownDefault.long].exists() || CLOptionPresent(OptionName: cloptions.dropdownDefault)
 
     cloptions.titleFont.value               = json[cloptions.titleFont.long].string ?? CLOptionText(OptionName: cloptions.titleFont)
@@ -441,7 +502,10 @@ func processCLOptionValues() {
     
     cloptions.progressBar.value             = json[cloptions.progressBar.long].string ?? CLOptionText(OptionName: cloptions.progressBar)
     cloptions.progressBar.present           = json[cloptions.progressBar.long].exists() || CLOptionPresent(OptionName: cloptions.progressBar)
-                                                                                                        
+    
+    cloptions.progressText.value             = json[cloptions.progressText.long].string ?? CLOptionText(OptionName: cloptions.progressText, DefaultValue: " ")
+    cloptions.progressText.present           = json[cloptions.progressText.long].exists() || CLOptionPresent(OptionName: cloptions.progressText)
+    
     //cloptions.mainImage.value               = CLOptionText(OptionName: cloptions.mainImage)
     cloptions.mainImage.present             = json[cloptions.mainImage.long].exists() || CLOptionPresent(OptionName: cloptions.mainImage)
     
@@ -514,6 +578,7 @@ func processCLOptionValues() {
     cloptions.button2Option.present         = json[cloptions.button2Option.long].boolValue || CLOptionPresent(OptionName: cloptions.button2Option)
     cloptions.infoButtonOption.present      = json[cloptions.infoButtonOption.long].boolValue || CLOptionPresent(OptionName: cloptions.infoButtonOption)
     cloptions.hideIcon.present              = json[cloptions.hideIcon.long].boolValue || CLOptionPresent(OptionName: cloptions.hideIcon)
+    cloptions.centreIcon.present            = json[cloptions.centreIcon.long].boolValue || json[cloptions.centreIconSE.long].boolValue || CLOptionPresent(OptionName: cloptions.centreIcon) || CLOptionPresent(OptionName: cloptions.centreIconSE)
     cloptions.warningIcon.present           = json[cloptions.warningIcon.long].boolValue || CLOptionPresent(OptionName: cloptions.warningIcon)
     cloptions.infoIcon.present              = json[cloptions.infoIcon.long].boolValue || CLOptionPresent(OptionName: cloptions.infoIcon)
     cloptions.cautionIcon.present           = json[cloptions.cautionIcon.long].boolValue || CLOptionPresent(OptionName: cloptions.cautionIcon)

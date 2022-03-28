@@ -20,6 +20,8 @@ var background = BlurWindowController()
 @available(OSX 11.0, *)
 @main
 struct dialogApp: App {
+    
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
         
     init () {
         
@@ -84,6 +86,8 @@ struct dialogApp: App {
         }
         logger(logMessage: "width: \(appvars.windowWidth), height: \(appvars.windowHeight)")
         
+        observedDialogContent = DialogUpdatableContent()
+        
     }
     var body: some Scene {
 
@@ -110,8 +114,8 @@ struct dialogApp: App {
                 }
                 .frame(width: 0, height: 0) //ensures hostingwindowfinder isn't taking up any real estate
                 
-                ContentView()
-                    .frame(width: appvars.windowWidth, height: appvars.windowHeight) // + appvars.bannerHeight)
+                ContentView(observedDialogContent: observedDialogContent)
+                    .frame(width: observedDialogContent.windowWidth, height: observedDialogContent.windowHeight) // + appvars.bannerHeight)
                 //.frame(idealWidth: appvars.windowWidth, idealHeight: appvars.windowHeight)
 
             }
