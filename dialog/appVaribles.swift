@@ -35,7 +35,7 @@ struct DropDownItems {
 
 struct AppVariables {
     
-    var cliversion                      = String("1.10.0")
+    var cliversion                      = String("1.10.1")
     
     // message default strings
     var titleDefault                    = String("An Important Message")
