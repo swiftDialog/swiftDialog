@@ -262,28 +262,53 @@ func stringToColour(_ colourValue: String) -> Color {
         
     } else {
         switch colourValue {
-            case "black":
-                returnColor = Color.black
-            case "blue":
-                returnColor = Color.blue
-            case "gray":
-                returnColor = Color.gray
-            case "green":
-                returnColor = Color.green
-            case "orange":
-                returnColor = Color.orange
-            case "pink":
-                returnColor = Color.pink
-            case "purple":
-                returnColor = Color.purple
-            case "red":
-                returnColor = Color.red
-            case "white":
-                returnColor = Color.white
-            case "yellow":
-                returnColor = Color.yellow
-            default:
-                returnColor = Color.primary
+            
+        case "black":
+            returnColor = Color.black
+        case "blue":
+            returnColor = Color.blue
+        case "gray":
+            returnColor = Color.gray
+        case "green":
+            returnColor = Color.green
+        case "orange":
+            returnColor = Color.orange
+        case "pink":
+            returnColor = Color.pink
+        case "purple":
+            returnColor = Color.purple
+        case "red":
+            returnColor = Color.red
+        case "white":
+            returnColor = Color.white
+        case "yellow":
+            returnColor = Color.yellow
+        case "mint":
+            if #available(macOS 12.0, *) {
+                returnColor = Color.mint
+            } else {
+                returnColor = Color.init(red: 90, green: 196, blue: 198)
+            }
+        case "cyan":
+            if #available(macOS 12.0, *) {
+                returnColor = Color.cyan
+            } else {
+                returnColor = Color.init(red: 114, green: 187, blue: 235)
+            }
+        case "indego":
+            if #available(macOS 12.0, *) {
+                returnColor = Color.indigo
+            } else {
+                returnColor = Color.init(red: 88, green: 86, blue: 207)
+            }
+        case "teal":
+            if #available(macOS 12.0, *) {
+                returnColor = Color.teal
+            } else {
+                returnColor = Color.init(red: 110, green: 171, blue: 193)
+            }
+        default:
+            returnColor = Color.primary
         }
     }
     

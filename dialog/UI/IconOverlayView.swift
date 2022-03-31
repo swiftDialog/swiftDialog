@@ -144,14 +144,24 @@ struct IconOverlayView: View {
                                         .scaledToFit()
                                         .foregroundColor(Color.white)
                                         .font(Font.title.weight(builtInIconWeight))
-
-                                    Image(systemName: builtInIconName)
-                                        .renderingMode(iconRenderingMode)
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .scaledToFit()
-                                        .foregroundColor(builtInIconColour)
-                                        .font(Font.title.weight(builtInIconWeight))
+                                    if #available(macOS 12.0, *) {
+                                        Image(systemName: builtInIconName)
+                                            .resizable()
+                                            .renderingMode(iconRenderingMode)
+                                            .font(Font.title.weight(builtInIconWeight))
+                                            .symbolRenderingMode(.hierarchical)
+                                            .foregroundStyle(builtInIconColour)
+                                            .aspectRatio(contentMode: .fit)
+                                            .scaledToFit()
+                                    } else {
+                                        Image(systemName: builtInIconName)
+                                            .renderingMode(iconRenderingMode)
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .scaledToFit()
+                                            .foregroundColor(builtInIconColour)
+                                            .font(Font.title.weight(builtInIconWeight))
+                                    }
                                 }
                             }
                         }
