@@ -88,6 +88,8 @@ struct dialogApp: App {
         
         observedDialogContent = DialogUpdatableContent()
         
+        // bring to front on launch
+        NSApp.activate(ignoringOtherApps: true)
     }
     var body: some Scene {
 
@@ -110,7 +112,10 @@ struct dialogApp: App {
                         NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow)))
                     }
                     
-                    NSApp.activate(ignoringOtherApps: true)
+                    if cloptions.forceOnTop.present || cloptions.blurScreen.present {
+                        NSApp.activate(ignoringOtherApps: true)
+                    }
+                    
                 }
                 .frame(width: 0, height: 0) //ensures hostingwindowfinder isn't taking up any real estate
                 
