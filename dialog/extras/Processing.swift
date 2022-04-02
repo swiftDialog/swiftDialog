@@ -140,7 +140,11 @@ func printVersionString() -> Void {
 func getVersionString() -> String {
     var appVersion: String = appvars.cliversion
     if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
-        appVersion = version
+        if let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
+            appVersion = "\(version).\(build)"
+        } else {
+            appVersion = version
+        }
     }
     return appVersion
 }
