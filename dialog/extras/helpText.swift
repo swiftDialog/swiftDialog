@@ -32,7 +32,7 @@ var helpText = """
     
                         size=<float>              - accepts any float value.
     
-                        font=<fontname>           - accepts a font name or family
+                        name=<fontname>           - accepts a font name or family
                                                     list of available names can be determined with --\(cloptions.listFonts.long)
 
                         weight=[thin | light | regular | medium | heavy | bold]
