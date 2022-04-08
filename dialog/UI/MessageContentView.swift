@@ -59,7 +59,7 @@ struct MessageContent: View {
                         .padding(.bottom, 10)
                         .border(appvars.debugBorderColour, width: 2)
                 }
-                ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: NumberFormatter().number(from: cloptions.autoPlay.value) as! CGFloat)
+                ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: string2float(string: cloptions.autoPlay.value))
             }
         } else {
             VStack {

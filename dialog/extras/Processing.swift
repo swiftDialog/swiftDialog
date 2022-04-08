@@ -35,6 +35,23 @@ func logger(logType: String = "", logMessage: String) {
     }
 }
 
+func string2float(string: String, defaultValue: CGFloat = 0) -> CGFloat {
+    // take a umber in scring format and return a float
+    let numberFormatter = NumberFormatter()
+    numberFormatter.numberStyle = .decimal
+
+    var number: CGFloat?
+    if let num = numberFormatter.number(from: string) {
+        number = CGFloat(truncating: num)
+    } else {
+        numberFormatter.locale = Locale(identifier: "en")
+        if let num = numberFormatter.number(from: string) {
+            number = CGFloat(truncating: num)
+        }
+    }
+    return number ?? defaultValue
+}
+
 func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, imgHeight: CGFloat? = .infinity, returnErrorImage: Bool? = false) -> NSImage {
     // accept image as local file path or as URL and return NSImage
     // can pass in width and height as optional values otherwsie return the image as is.

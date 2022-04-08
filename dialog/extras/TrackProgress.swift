@@ -83,7 +83,7 @@ class DialogUpdatableContent : ObservableObject {
         //requiredTextfieldHighlight = Color.clear
         
         iconImage = cloptions.iconOption.value
-        iconSize = NumberFormatter().number(from: cloptions.iconSize.value) as! CGFloat
+        iconSize = string2float(string: cloptions.iconSize.value)
         iconPresent = !appvars.iconIsHidden
         centreIconPresent = cloptions.centreIcon.present
         
@@ -252,7 +252,7 @@ class DialogUpdatableContent : ObservableObject {
                     //print(iconState)
                     //if let readIconSize = iconState.replacingOccurrences(of: "size: ", with: "") {
                     if iconState.replacingOccurrences(of: "size:", with: "").trimmingCharacters(in: .whitespaces) != "" {
-                        iconSize = NumberFormatter().number(from: iconState.replacingOccurrences(of: "size: ", with: "")) as! CGFloat
+                        iconSize = string2float(string: iconState.replacingOccurrences(of: "size: ", with: ""))
                     } else {
                         iconSize = appvars.iconWidth
                     }
