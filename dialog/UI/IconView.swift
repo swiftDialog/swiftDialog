@@ -164,12 +164,21 @@ struct IconView: View {
                             .resizable()
                             .foregroundColor(Color.white)
                         if #available(macOS 12.0, *) {
-                            Image(systemName: builtInIconName)
-                                .resizable()
-                                .renderingMode(iconRenderingMode)
-                                .font(Font.title.weight(builtInIconWeight))
-                                .symbolRenderingMode(.hierarchical)
-                                .foregroundStyle(builtInIconColour)
+                            if messageUserImagePath == "default" {
+                                Image(systemName: builtInIconName)
+                                    .resizable()
+                                    .renderingMode(iconRenderingMode)
+                                    .font(Font.title.weight(builtInIconWeight))
+                                    .symbolRenderingMode(.monochrome)
+                                    .foregroundColor(builtInIconColour)
+                            } else {
+                                Image(systemName: builtInIconName)
+                                    .resizable()
+                                    .renderingMode(iconRenderingMode)
+                                    .font(Font.title.weight(builtInIconWeight))
+                                    .symbolRenderingMode(.hierarchical)
+                                    .foregroundStyle(builtInIconColour)
+                            }
                         } else {
                             // Fallback on earlier versions
                             Image(systemName: builtInIconName)
