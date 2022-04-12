@@ -18,6 +18,7 @@ var cloptions = CLOptions()
 var textFields = [TextFieldState]()
 var dropdownItems = [DropDownItems]()
 
+
 struct TextFieldState {
     var title           : String
     var required        : Bool      = false
@@ -31,6 +32,13 @@ struct DropDownItems {
     var values          : [String]
     var defaultValue    : String
     var selectedValue   : String = ""
+}
+
+struct ListItems {
+    var title           : String
+    var icon            : String = ""
+    var statusText      : String = ""
+    var statusIcon      : String = ""
 }
 
 struct AppVariables {
@@ -111,9 +119,8 @@ struct AppVariables {
     
     var imageArray                      = [String]()
     var imageCaptionArray               = [String]()
-    
-    var listItemArray                   = Array(repeating: "", count: 64)
-    var listItemStatus                  = Array(repeating: "", count: 64)
+        
+    var listItems = [ListItems]()
     
     var annimationSmoothing             = Double(20)
     
