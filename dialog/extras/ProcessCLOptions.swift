@@ -178,8 +178,8 @@ func processCLOptions() {
                 } else {
                     appvars.listItems.append(ListItems(title: String(json[cloptions.listItem.long][i]["title"].stringValue),
                                                icon: String(json[cloptions.listItem.long][i]["icon"].stringValue),
-                                               statusText: String(json[cloptions.listItem.long][i]["statusText"].stringValue),
-                                               statusIcon: String(json[cloptions.listItem.long][i]["statusIcon"].stringValue))
+                                               statusText: String(json[cloptions.listItem.long][i]["statustext"].stringValue),
+                                               statusIcon: String(json[cloptions.listItem.long][i]["status"].stringValue))
                                 )
                 }
             }
@@ -200,9 +200,9 @@ func processCLOptions() {
                         title = itemValue
                     case "icon":
                         icon = itemValue
-                    case "statusText":
+                    case "statustext":
                         statusText = itemValue
-                    case "statusIcon":
+                    case "status":
                         statusIcon = itemValue
                     default:
                         title = itemValue
