@@ -71,9 +71,7 @@ struct ListView: View {
                                         case "error" :
                                             StatusImage(name: "exclamationmark.circle.fill", colour: .yellow)
                                         default:
-                                            Text(observedDialogContent.listItemsArray[i].statusIcon)
-                                            .font(.system(size: appvars.messageFontSize))
-                                            .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
+                                            EmptyView()
                                         }
                                     }
                                     //.animation(.easeInOut(duration: 5))

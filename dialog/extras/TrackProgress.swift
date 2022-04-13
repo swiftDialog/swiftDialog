@@ -308,7 +308,8 @@ class DialogUpdatableContent : ObservableObject {
                 var icon            : String = ""
                 var statusText      : String = ""
                 var statusIcon      : String = ""
-                
+                let statusTypeArray = ["wait","success","fail","error","pending"]
+
                 let listCommand = line.replacingOccurrences(of: "\(cloptions.listItem.long): ", with: "")
                 
                 // Check for the origional way of doign things
@@ -318,8 +319,13 @@ class DialogUpdatableContent : ObservableObject {
                     statusIcon = listItemStateArray.last!
                     // if using the new method, these will not be set as the title value won't match the ItemValue
                     if let row = listItemsArray.firstIndex(where: {$0.title == title}) {
-                        listItemsArray[row].statusIcon = statusIcon
-                        listItemsArray[row].statusText = ""
+                        if statusTypeArray.contains(statusIcon) {
+                            listItemsArray[row].statusIcon = statusIcon
+                            listItemsArray[row].statusText = ""
+                        } else {
+                            listItemsArray[row].statusIcon = ""
+                            listItemsArray[row].statusText = statusIcon
+                        }
                         listItemUpdateRow = row
                         break
                     }
