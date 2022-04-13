@@ -171,9 +171,45 @@ func processCLOptions() {
     
     if cloptions.listItem.present {
         if json[cloptions.listItem.long].exists() {
-            appvars.listItemArray = json[cloptions.listItem.long].arrayValue.map {$0.stringValue}
+            
+            for i in 0..<json[cloptions.listItem.long].arrayValue.count {
+                if json[cloptions.listItem.long][i]["title"].stringValue == "" {
+                    appvars.listItems.append(ListItems(title: String(json[cloptions.listItem.long][i].stringValue)))
+                } else {
+                    appvars.listItems.append(ListItems(title: String(json[cloptions.listItem.long][i]["title"].stringValue),
+                                               icon: String(json[cloptions.listItem.long][i]["icon"].stringValue),
+                                               statusText: String(json[cloptions.listItem.long][i]["statustext"].stringValue),
+                                               statusIcon: String(json[cloptions.listItem.long][i]["status"].stringValue))
+                                )
+                }
+            }
+            
         } else {
-            appvars.listItemArray =  CLOptionMultiOptions(optionName: cloptions.listItem.long)
+            
+            for listItem in CLOptionMultiOptions(optionName: cloptions.listItem.long) {
+                let items = listItem.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                var title : String = ""
+                var icon : String = ""
+                var statusText : String = ""
+                var statusIcon : String = ""
+                for item in items {
+                    let itemName = item.components(separatedBy: "=").first!
+                    let itemValue = item.components(separatedBy: "=").last!
+                    switch itemName.lowercased() {
+                    case "title":
+                        title = itemValue
+                    case "icon":
+                        icon = itemValue
+                    case "statustext":
+                        statusText = itemValue
+                    case "status":
+                        statusIcon = itemValue
+                    default:
+                        title = itemValue
+                    }
+                }
+                appvars.listItems.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon))
+            }
         }
     }
     

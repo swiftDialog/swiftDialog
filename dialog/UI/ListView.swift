@@ -22,7 +22,9 @@ struct StatusImage: View {
             .resizable()
             .foregroundColor(colour)
             .scaledToFit()
-            .frame(height: 23)
+            .frame(width: 25, height: 25)
+            //.border(.red)
+            .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
     }
 }
 
@@ -40,46 +42,45 @@ struct ListView: View {
             ScrollViewReader { proxy in
                 //withAnimation(.default) {
                     VStack() {                        
-                        List(0..<observedDialogContent.listItemArray.count, id: \.self) {i in
+                        List(0..<observedDialogContent.listItemsArray.count, id: \.self) {i in
                             VStack {
                                 HStack {
-                                    Text(observedDialogContent.listItemArray[i])
+                                    Text(observedDialogContent.listItemsArray[i].title)
                                         .font(.system(size: appvars.messageFontSize))
                                         .id(i)
                                     Spacer()
-                                    switch observedDialogContent.listItemStatus[i] {
-                                    case "wait" :
-                                        ProgressView()
-                                            .frame(height: 10)
-                                    case "success" :
-                                        StatusImage(name: "checkmark.circle.fill", colour: .green)
-                                    case "fail" :
-                                        StatusImage(name: "xmark.circle.fill", colour: .red)
-                                    case "pending" :
-                                        StatusImage(name: "ellipsis.circle.fill", colour: .gray)
-                                    case "error" :
-                                        StatusImage(name: "exclamationmark.circle.fill", colour: .yellow)
-                                    default:
-                                        Text(observedDialogContent.listItemStatus[i])
-                                        .font(.system(size: appvars.messageFontSize))
-                                        .animation(.easeInOut(duration: 0.1))
+                                    HStack {
+                                        if observedDialogContent.listItemsArray[i].statusText != "" {
+                                            Text(observedDialogContent.listItemsArray[i].statusText)
+                                                .font(.system(size: appvars.messageFontSize))
+                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
+                                        }
+                                        switch observedDialogContent.listItemsArray[i].statusIcon {
+                                        case "wait" :
+                                            ProgressView()
+                                                .progressViewStyle(.circular)
+                                                .scaleEffect(0.8, anchor: .trailing)
+                                                .frame(height: 25)
+                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
+                                        case "success" :
+                                            StatusImage(name: "checkmark.circle.fill", colour: .green)
+                                        case "fail" :
+                                            StatusImage(name: "xmark.circle.fill", colour: .red)
+                                        case "pending" :
+                                            StatusImage(name: "ellipsis.circle.fill", colour: .gray)
+                                        case "error" :
+                                            StatusImage(name: "exclamationmark.circle.fill", colour: .yellow)
+                                        default:
+                                            Text(observedDialogContent.listItemsArray[i].statusIcon)
+                                            .font(.system(size: appvars.messageFontSize))
+                                            .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
+                                        }
                                     }
-                                    /*
-                                    if observedDialogContent.listItemStatus[i] == "wait" {
-                                        ProgressView()
-                                            .frame(height: 20)
-                                    } else {
-                                        Text(observedDialogContent.listItemStatus[i])
-                                        .font(.system(size: appvars.messageFontSize))
-                                        .animation(.easeInOut(duration: 0.1))
-                                    }
-                                     */
+                                    //.animation(.easeInOut(duration: 5))
+                                    //.transition(.opacity)
                                 }
-                                .padding(.top, 5)
-                                .padding(.bottom, 5)
-                                //if ( i < observedDialogContent.listItemArray.count-1 ) {
-                                    Divider()
-                                //}
+                                .frame(height: 34)
+                                Divider()
                             }
                         }
                     }
@@ -98,3 +99,33 @@ struct ListView: View {
 }
 
 
+public struct CircularProgressViewStyle: ProgressViewStyle {
+    var size: CGFloat
+    private let lineWidth: CGFloat = 3
+    private let defaultProgress = 0.0
+    private let gradient = LinearGradient(colors: [.purple, .blue], startPoint: .leading, endPoint: .trailing)
+    
+    public func makeBody(configuration: ProgressViewStyleConfiguration) -> some View {
+        ZStack {
+            configuration.label
+            progressCircleView(fractionCompleted: configuration.fractionCompleted ?? defaultProgress)
+            configuration.currentValueLabel
+        }
+    }
+    
+    private func progressCircleView(fractionCompleted: Double) -> some View {
+        Circle()
+            .stroke(gradient, lineWidth: lineWidth)
+            .opacity(0.2)
+            .overlay(progressFill(fractionCompleted: fractionCompleted))
+            .frame(width: size, height: size)
+    }
+    
+    private func progressFill(fractionCompleted: Double) -> some View {
+        Circle()
+            .trim(from: 0, to: CGFloat(fractionCompleted))
+            .stroke(gradient, lineWidth: lineWidth)
+            .frame(width: size)
+            .rotationEffect(.degrees(-90))
+    }
+}

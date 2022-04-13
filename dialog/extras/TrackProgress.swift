@@ -35,10 +35,11 @@ class DialogUpdatableContent : ObservableObject {
     //@Published var image: String
     @Published var imagePresent: Bool
     @Published var imageCaptionPresent: Bool
-    @Published var listItemArray: [String]
-    @Published var listItemStatus: [String]
+    
+    @Published var listItemsArray : [ListItems]
     @Published var listItemUpdateRow: Int
     @Published var listItemPresent: Bool
+    
     @Published var requiredTextfieldHighlight: [Color] = Array(repeating: Color.clear, count: textFields.count)
     
     @Published var windowWidth: CGFloat
@@ -92,9 +93,8 @@ class DialogUpdatableContent : ObservableObject {
         appvars.imageCaptionArray = CLOptionMultiOptions(optionName: cloptions.mainImageCaption.long)
         imagePresent = cloptions.mainImage.present
         imageCaptionPresent = cloptions.mainImageCaption.present
-                
-        listItemArray = appvars.listItemArray
-        listItemStatus = appvars.listItemStatus
+        
+        listItemsArray = appvars.listItems
         listItemPresent = cloptions.listItem.present
         
         windowWidth = appvars.windowWidth
@@ -288,28 +288,78 @@ class DialogUpdatableContent : ObservableObject {
             case "list:" :
                 if line.replacingOccurrences(of: "list: ", with: "") == "clear" {
                     // clean everything out and remove the listview from display
-                    listItemArray = Array(repeating: "", count: 64)
-                    listItemStatus = appvars.listItemStatus
                     listItemPresent = false
+                    listItemsArray = [ListItems]()
+                    
                 } else {
                     var listItems = line.replacingOccurrences(of: "list: ", with: "").components(separatedBy: ",")
                     listItems = listItems.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
-                    listItemArray = listItems
-                    listItemStatus = appvars.listItemStatus
+
+                    listItemsArray = [ListItems]()
+                    for itemTitle in listItems {
+                        listItemsArray.append(ListItems(title: itemTitle))
+                    }
                     listItemPresent = true
                 }
                 
             // list item status
             case "\(cloptions.listItem.long):" :
-                let listItem = line.replacingOccurrences(of: "\(cloptions.listItem.long): ", with: "")
+                var title           : String = ""
+                var icon            : String = ""
+                var statusText      : String = ""
+                var statusIcon      : String = ""
                 
-                let ItemValue = listItem.components(separatedBy: ": ").first!
-                let ItemStatus = listItem.components(separatedBy: ": ").last!
-                                
-                listItemStatus[listItemArray.firstIndex {$0 == ItemValue} ?? 63] = ItemStatus
-                listItemUpdateRow = listItemArray.firstIndex {$0 == ItemValue} ?? 63
+                let listCommand = line.replacingOccurrences(of: "\(cloptions.listItem.long): ", with: "")
                 
-                // update the listutem array named listItemValue with listItemStatus
+                // Check for the origional way of doign things
+                let listItemStateArray = listCommand.components(separatedBy: ": ")
+                if listItemStateArray.count > 0 {
+                    title = listItemStateArray.first!
+                    statusIcon = listItemStateArray.last!
+                    // if using the new method, these will not be set as the title value won't match the ItemValue
+                    if let row = listItemsArray.firstIndex(where: {$0.title == title}) {
+                        listItemsArray[row].statusIcon = statusIcon
+                        listItemsArray[row].statusText = ""
+                        listItemUpdateRow = row
+                        break
+                    }
+                }
+                
+                // And now for the new way
+                let commands = listCommand.components(separatedBy: ",")
+                
+                if commands.count > 0 {
+                    for command in commands {
+                        let action = command.components(separatedBy: ":")
+                        switch action[0].lowercased().trimmingCharacters(in: .whitespaces) {
+                            case "index":
+                                if let i = Int(action[1].trimmingCharacters(in: .whitespaces)) {
+                                    if i >= 0 && i < listItemsArray.count {
+                                        title = listItemsArray[i].title
+                                    }
+                                }
+                            case "title":
+                                title = action[1].trimmingCharacters(in: .whitespaces)
+                            case "icon":
+                                icon = action[1].trimmingCharacters(in: .whitespaces)
+                            case "statustext":
+                                statusText = action[1].trimmingCharacters(in: .whitespaces)
+                            case "status":
+                                statusIcon = action[1].trimmingCharacters(in: .whitespaces)
+                            default:
+                                break
+                            }
+                    }
+                    
+                    // update the list items array
+                    if let row = listItemsArray.firstIndex(where: {$0.title == title}) {
+                        listItemsArray[row].icon = icon
+                        listItemsArray[row].statusIcon = statusIcon
+                        listItemsArray[row].statusText = statusText
+                        listItemUpdateRow = row
+                    }
+                    
+                }
                 
             // quit
             case "quit:" :
