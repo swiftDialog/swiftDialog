@@ -291,8 +291,6 @@ var helpText = """
                     Creates a list item with the specified text as the item title.
                     Multiple items can be added by specifying --\(cloptions.listItem.long) multiple times
     
-                    Updates to items in the list can be sent to the command file specified by --\(cloptions.statusLogFile.long)
-    
                     Alternatly, specify a list item with either of the follwoing JSON formats:
                     Simple:
                     {
@@ -309,6 +307,18 @@ var helpText = """
                     
                     <status> can be one of "wait", "success", "fail", "error" or "pending"
                     and will display an apropriate icon in the status area.
+    
+                    Updates to items in the list can be sent to the command file specified by --\(cloptions.statusLogFile.long):
+                    Clear an existing list:
+                        list: clear
+                    Create a new list:
+                        list: <csv>
+                    Update a list item (simple):
+                        listitem: <title>: [<text>|<status>]
+                    Update a list item (advanced):
+                        listitem: [title: <title>|index: <index>], status: <status>, statustext: <text>
+                    
+                    <index> starts at 0
     
         -\(cloptions.watermarkImage.short), --\(cloptions.watermarkImage.long) <file>
                     Displays the selected file as a background image.
