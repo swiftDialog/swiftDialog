@@ -332,6 +332,12 @@ class DialogUpdatableContent : ObservableObject {
                     for command in commands {
                         let action = command.components(separatedBy: ":")
                         switch action[0].lowercased().trimmingCharacters(in: .whitespaces) {
+                            case "index":
+                                if let i = Int(action[1].trimmingCharacters(in: .whitespaces)) {
+                                    if i < listItemsArray.count {
+                                        title = listItemsArray[i].title
+                                    }
+                                }
                             case "title":
                                 title = action[1].trimmingCharacters(in: .whitespaces)
                             case "icon":
@@ -352,6 +358,7 @@ class DialogUpdatableContent : ObservableObject {
                         listItemsArray[row].statusText = statusText
                         listItemUpdateRow = row
                     }
+                    
                 }
                 
             // quit
