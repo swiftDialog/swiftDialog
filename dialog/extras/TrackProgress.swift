@@ -334,7 +334,7 @@ class DialogUpdatableContent : ObservableObject {
                         switch action[0].lowercased().trimmingCharacters(in: .whitespaces) {
                             case "index":
                                 if let i = Int(action[1].trimmingCharacters(in: .whitespaces)) {
-                                    if i < listItemsArray.count {
+                                    if i >= 0 && i < listItemsArray.count {
                                         title = listItemsArray[i].title
                                     }
                                 }
