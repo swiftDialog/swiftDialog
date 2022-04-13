@@ -24,6 +24,7 @@ struct StatusImage: View {
             .scaledToFit()
             .frame(width: 25, height: 25)
             //.border(.red)
+            .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
     }
 }
 
@@ -48,46 +49,38 @@ struct ListView: View {
                                         .font(.system(size: appvars.messageFontSize))
                                         .id(i)
                                     Spacer()
-                                    if observedDialogContent.listItemsArray[i].statusText != "" {
-                                        Text(observedDialogContent.listItemsArray[i].statusText)
+                                    HStack {
+                                        if observedDialogContent.listItemsArray[i].statusText != "" {
+                                            Text(observedDialogContent.listItemsArray[i].statusText)
+                                                .font(.system(size: appvars.messageFontSize))
+                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
+                                        }
+                                        switch observedDialogContent.listItemsArray[i].statusIcon {
+                                        case "wait" :
+                                            ProgressView()
+                                                .progressViewStyle(.circular)
+                                                .scaleEffect(0.8, anchor: .trailing)
+                                                .frame(height: 25)
+                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
+                                        case "success" :
+                                            StatusImage(name: "checkmark.circle.fill", colour: .green)
+                                        case "fail" :
+                                            StatusImage(name: "xmark.circle.fill", colour: .red)
+                                        case "pending" :
+                                            StatusImage(name: "ellipsis.circle.fill", colour: .gray)
+                                        case "error" :
+                                            StatusImage(name: "exclamationmark.circle.fill", colour: .yellow)
+                                        default:
+                                            Text(observedDialogContent.listItemsArray[i].statusIcon)
                                             .font(.system(size: appvars.messageFontSize))
+                                            .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
+                                        }
                                     }
-                                    switch observedDialogContent.listItemsArray[i].statusIcon {
-                                    case "wait" :
-                                        ProgressView()
-                                            .progressViewStyle(.circular)
-                                            .scaleEffect(0.8, anchor: .trailing)
-                                            .frame(height: 25)
-                                    case "success" :
-                                        StatusImage(name: "checkmark.circle.fill", colour: .green)
-                                    case "fail" :
-                                        StatusImage(name: "xmark.circle.fill", colour: .red)
-                                    case "pending" :
-                                        StatusImage(name: "ellipsis.circle.fill", colour: .gray)
-                                    case "error" :
-                                        StatusImage(name: "exclamationmark.circle.fill", colour: .yellow)
-                                    default:
-                                        Text(observedDialogContent.listItemsArray[i].statusIcon)
-                                        .font(.system(size: appvars.messageFontSize))
-                                        .animation(.easeInOut(duration: 0.1))
-                                    }
-                                    /*
-                                    if observedDialogContent.listItemStatus[i] == "wait" {
-                                        ProgressView()
-                                            .frame(height: 20)
-                                    } else {
-                                        Text(observedDialogContent.listItemStatus[i])
-                                        .font(.system(size: appvars.messageFontSize))
-                                        .animation(.easeInOut(duration: 0.1))
-                                    }
-                                     */
+                                    //.animation(.easeInOut(duration: 5))
+                                    //.transition(.opacity)
                                 }
                                 .frame(height: 34)
-                                //.padding(.top, 5)
-                                //.padding(.bottom, 5)
-                                //if ( i < observedDialogContent.listItemArray.count-1 ) {
-                                    Divider()
-                                //}
+                                Divider()
                             }
                         }
                     }
