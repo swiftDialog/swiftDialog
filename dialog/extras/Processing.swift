@@ -316,7 +316,7 @@ func stringToColour(_ colourValue: String) -> Color {
             } else {
                 returnColor = Color.init(red: 114, green: 187, blue: 235)
             }
-        case "indego":
+        case "indigo":
             if #available(macOS 12.0, *) {
                 returnColor = Color.indigo
             } else {
