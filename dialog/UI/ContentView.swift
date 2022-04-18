@@ -20,7 +20,7 @@ struct ContentView: View {
     init (observedDialogContent : DialogUpdatableContent) {
         self.observedDialogContent = observedDialogContent
         if cloptions.timerBar.present {
-            progressSteps = NumberFormatter().number(from: cloptions.timerBar.value) as! CGFloat
+            progressSteps = string2float(string: cloptions.timerBar.value)
         }
     }
 //
@@ -69,7 +69,6 @@ struct ContentView: View {
                         }
                     }
                     if cloptions.timerBar.present {
-                        //progressBarView(progressSteps: (NumberFormatter().number(from: cloptions.timerBar.value) as! CGFloat), visible: !cloptions.hideTimerBar.present)
                         timerBarView(progressSteps: progressSteps, visible: !cloptions.hideTimerBar.present, observedDialogContent : observedDialogContent)
                             .frame(alignment: .bottom)
                     }

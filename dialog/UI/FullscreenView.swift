@@ -148,7 +148,7 @@ struct FullscreenView: View {
                 if cloptions.mainImage.present {
                     // print image and caption
                     VStack {
-                        ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: NumberFormatter().number(from: cloptions.autoPlay.value) as! CGFloat)
+                        ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: string2float(string: cloptions.autoPlay.value))
                             .border(appvars.debugBorderColour, width: 2)
                     }
                 } else {
@@ -176,7 +176,7 @@ struct FullscreenView: View {
                         //TaskProgressView(observedDialogContent: observedDialogContent)  // future feature
                         
                         if cloptions.timerBar.present {
-                            timerBarView(progressSteps: NumberFormatter().number(from: cloptions.timerBar.value) as? CGFloat, visible: cloptions.timerBar.present, observedDialogContent: observedDialogContent)
+                            timerBarView(progressSteps: string2float(string: cloptions.timerBar.value), visible: cloptions.timerBar.present, observedDialogContent: observedDialogContent)
                         }
                     }
                     .padding(10)

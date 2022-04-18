@@ -59,7 +59,7 @@ struct MessageContent: View {
                         .padding(.bottom, 10)
                         .border(appvars.debugBorderColour, width: 2)
                 }
-                ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: NumberFormatter().number(from: cloptions.autoPlay.value) as! CGFloat)
+                ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: string2float(string: cloptions.autoPlay.value))
             }
         } else {
             VStack {
@@ -73,7 +73,7 @@ struct MessageContent: View {
                 }
                 
                 if observedDialogContent.listItemPresent {
-                    Markdown(observedDialogContent.messageText)
+                    Markdown(observedDialogContent.messageText, baseURL: URL(string: "http://"))
                         .multilineTextAlignment(appvars.messageAlignment)
                         .markdownStyle(defaultStyle)
                     ListView(observedDialogContent: observedDialogContent)
@@ -81,11 +81,11 @@ struct MessageContent: View {
                 } else {
                     ScrollView() {
                         if appvars.messageFontName == "" {
-                            Markdown(observedDialogContent.messageText)
+                            Markdown(observedDialogContent.messageText, baseURL: URL(string: "http://"))
                                 .multilineTextAlignment(appvars.messageAlignment)
                                 .markdownStyle(defaultStyle)
                         } else {
-                            Markdown(observedDialogContent.messageText)
+                            Markdown(observedDialogContent.messageText, baseURL: URL(string: "http://"))
                                 .multilineTextAlignment(appvars.messageAlignment)
                                 .markdownStyle(customStyle)
                         }

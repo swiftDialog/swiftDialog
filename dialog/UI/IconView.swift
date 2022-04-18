@@ -128,7 +128,7 @@ struct IconView: View {
         } else if cloptions.infoIcon.present || messageUserImagePath == "info" {
             builtInIconName = "person.fill.questionmark"
             builtInIconPresent = true
-        } else if messageUserImagePath == "default" || (!builtInIconPresent && !FileManager.default.fileExists(atPath: messageUserImagePath)) {
+        } else if messageUserImagePath == "default" || (!builtInIconPresent && !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL) {
             builtInIconName = "message.circle.fill"
             iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
             builtInIconPresent = true
@@ -163,11 +163,30 @@ struct IconView: View {
                         Image(systemName: builtInIconFill)
                             .resizable()
                             .foregroundColor(Color.white)
-                        Image(systemName: builtInIconName)
-                            .resizable()
-                            .renderingMode(iconRenderingMode)
-                            .font(Font.title.weight(builtInIconWeight))
-                            .foregroundColor(builtInIconColour)
+                        if #available(macOS 12.0, *) {
+                            if messageUserImagePath == "default" {
+                                Image(systemName: builtInIconName)
+                                    .resizable()
+                                    .renderingMode(iconRenderingMode)
+                                    .font(Font.title.weight(builtInIconWeight))
+                                    .symbolRenderingMode(.monochrome)
+                                    .foregroundColor(builtInIconColour)
+                            } else {
+                                Image(systemName: builtInIconName)
+                                    .resizable()
+                                    .renderingMode(iconRenderingMode)
+                                    .font(Font.title.weight(builtInIconWeight))
+                                    .symbolRenderingMode(.hierarchical)
+                                    .foregroundStyle(builtInIconColour)
+                            }
+                        } else {
+                            // Fallback on earlier versions
+                            Image(systemName: builtInIconName)
+                                .resizable()
+                                .renderingMode(iconRenderingMode)
+                                .font(Font.title.weight(builtInIconWeight))
+                                .foregroundColor(builtInIconColour)
+                        }
                     }
                 }
                 .aspectRatio(contentMode: .fit)

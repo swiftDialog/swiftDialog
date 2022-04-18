@@ -171,9 +171,45 @@ func processCLOptions() {
     
     if cloptions.listItem.present {
         if json[cloptions.listItem.long].exists() {
-            appvars.listItemArray = json[cloptions.listItem.long].arrayValue.map {$0.stringValue}
+            
+            for i in 0..<json[cloptions.listItem.long].arrayValue.count {
+                if json[cloptions.listItem.long][i]["title"].stringValue == "" {
+                    appvars.listItems.append(ListItems(title: String(json[cloptions.listItem.long][i].stringValue)))
+                } else {
+                    appvars.listItems.append(ListItems(title: String(json[cloptions.listItem.long][i]["title"].stringValue),
+                                               icon: String(json[cloptions.listItem.long][i]["icon"].stringValue),
+                                               statusText: String(json[cloptions.listItem.long][i]["statustext"].stringValue),
+                                               statusIcon: String(json[cloptions.listItem.long][i]["status"].stringValue))
+                                )
+                }
+            }
+            
         } else {
-            appvars.listItemArray =  CLOptionMultiOptions(optionName: cloptions.listItem.long)
+            
+            for listItem in CLOptionMultiOptions(optionName: cloptions.listItem.long) {
+                let items = listItem.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                var title : String = ""
+                var icon : String = ""
+                var statusText : String = ""
+                var statusIcon : String = ""
+                for item in items {
+                    let itemName = item.components(separatedBy: "=").first!
+                    let itemValue = item.components(separatedBy: "=").last!
+                    switch itemName.lowercased() {
+                    case "title":
+                        title = itemValue
+                    case "icon":
+                        icon = itemValue
+                    case "statustext":
+                        statusText = itemValue
+                    case "status":
+                        statusIcon = itemValue
+                    default:
+                        title = itemValue
+                    }
+                }
+                appvars.listItems.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon))
+            }
         }
     }
     
@@ -243,25 +279,25 @@ func processCLOptions() {
     if cloptions.windowWidth.present {
         //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: cloptions.windowWidth)
         if cloptions.windowWidth.value.last == "%" {
-            appvars.windowWidth = appvars.screenWidth * (NumberFormatter().number(from: String(cloptions.windowWidth.value.dropLast())) as! CGFloat)/100
+            appvars.windowWidth = appvars.screenWidth * string2float(string: String(cloptions.windowWidth.value.dropLast()))/100
         } else {
-            appvars.windowWidth = NumberFormatter().number(from: cloptions.windowWidth.value) as! CGFloat
+            appvars.windowWidth = string2float(string: cloptions.windowWidth.value)
         }
         logger(logMessage: "windowWidth : \(appvars.windowWidth)")
     }
     if cloptions.windowHeight.present {
         //appvars.windowHeight = CGFloat() //CLOptionText(OptionName: cloptions.windowHeight)
         if cloptions.windowHeight.value.last == "%" {
-            appvars.windowHeight = appvars.screenHeight * (NumberFormatter().number(from: String(cloptions.windowHeight.value.dropLast())) as! CGFloat)/100
+            appvars.windowHeight = appvars.screenHeight * string2float(string: String(cloptions.windowHeight.value.dropLast()))/100
         } else {
-            appvars.windowHeight = NumberFormatter().number(from: cloptions.windowHeight.value) as! CGFloat
+            appvars.windowHeight = string2float(string: cloptions.windowHeight.value)
         }
         logger(logMessage: "windowHeight : \(appvars.windowHeight)")
     }
     
     if cloptions.iconSize.present {
         //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: cloptions.windowWidth)
-        appvars.iconWidth = NumberFormatter().number(from: cloptions.iconSize.value) as! CGFloat
+        appvars.iconWidth = string2float(string: cloptions.iconSize.value)
         logger(logMessage: "iconWidth : \(appvars.iconWidth)")
     }
     /*
@@ -287,7 +323,7 @@ func processCLOptions() {
             // split by =
             let item = value.components(separatedBy: "=")
             if item[0] == "size" {
-                appvars.titleFontSize = CGFloat(truncating: NumberFormatter().number(from: item[1]) ?? 20)
+                appvars.titleFontSize = string2float(string: item[1], defaultValue: appvars.titleFontSize)
                 logger(logMessage: "titleFontSize : \(appvars.titleFontSize)")
             }
             if item[0] == "weight" {
@@ -317,7 +353,7 @@ func processCLOptions() {
             // split by =
             let item = value.components(separatedBy: "=")
             if item[0] == "size" {
-                appvars.messageFontSize = CGFloat(truncating: NumberFormatter().number(from: item[1]) ?? 20)
+                appvars.messageFontSize = string2float(string: item[1], defaultValue: appvars.messageFontSize)
                 logger(logMessage: "messageFontSize : \(appvars.messageFontSize)")
             }
             if item[0] == "weight" {
@@ -560,7 +596,7 @@ func processCLOptionValues() {
             // keep the same width ratio but change the height
             var wWidth = appvars.windowWidth
             if cloptions.windowWidth.present {
-                wWidth = NumberFormatter().number(from: cloptions.windowWidth.value) as! CGFloat
+                wWidth = string2float(string: cloptions.windowWidth.value)
             }
             let widthRatio = wWidth / bgImage.size.width  // get the ration of the image height to the current display width
             let newHeight = (bgImage.size.height * widthRatio) - 28 //28 needs to be removed to account for the phantom title bar height
