@@ -7,7 +7,6 @@
 
 import Foundation
 import SwiftUI
-import CommonMark
 
 struct BannerImageView: View {
     
