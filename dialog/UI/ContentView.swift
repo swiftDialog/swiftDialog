@@ -10,7 +10,7 @@ import Cocoa
 
 struct ContentView: View {
 
-    var bannerAdjustment       = CGFloat(5)
+    var titlePadding       = CGFloat(10)
     var waterMarkFill          = String("")
     var progressSteps : CGFloat = appvars.timerDefaultSeconds
     
@@ -21,6 +21,9 @@ struct ContentView: View {
         self.observedDialogContent = observedDialogContent
         if cloptions.timerBar.present {
             progressSteps = string2float(string: cloptions.timerBar.value)
+        }
+        if cloptions.bannerImage.present {
+            titlePadding = 0
         }
     }
 //
@@ -45,11 +48,13 @@ struct ContentView: View {
                     // Dialog title
                     TitleView(observedDialogContent: observedDialogContent)
                         .border(appvars.debugBorderColour, width: 2)
-                        .offset(y: 10) // shift the title down a notch
+                        .padding(.top, titlePadding)
+                        //.offset(y: 10) // shift the title down a notch
                     
                     // Horozontal Line
                     Divider()
                         .frame(width: appvars.windowWidth*appvars.horozontalLineScale, height: 2)
+                        .offset(y: -10) // shift the divider up a notch
                 }
                 
                 if cloptions.video.present {
