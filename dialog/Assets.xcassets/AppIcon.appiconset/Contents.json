@@ -1,61 +1,61 @@
 {
   "images" : [
     {
-      "filename" : "install_16.png",
+      "filename" : "swiftDialog_16.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "16x16"
     },
     {
-      "filename" : "install-7.png",
+      "filename" : "swiftDialog_16@2x.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "16x16"
     },
     {
-      "filename" : "install-6.png",
+      "filename" : "swiftDialog_32.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "32x32"
     },
     {
-      "filename" : "install-5.png",
+      "filename" : "swiftDialog_32@2x.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "32x32"
     },
     {
-      "filename" : "install-4.png",
+      "filename" : "swiftDialog_128.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "128x128"
     },
     {
-      "filename" : "install-3.png",
+      "filename" : "swiftDialog_128@2x.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "128x128"
     },
     {
-      "filename" : "install-2.png",
+      "filename" : "swiftDialog_256.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "256x256"
     },
     {
-      "filename" : "install-1.png",
+      "filename" : "swiftDialog_256@2x.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "256x256"
     },
     {
-      "filename" : "install.png",
+      "filename" : "swiftDialog_512.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "512x512"
     },
     {
-      "filename" : "Dialog_1024.png",
+      "filename" : "swiftDialog_512@2x.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "512x512"
