@@ -37,11 +37,10 @@ struct ContentView: View {
                 if cloptions.quitKey.value != "q" {
                     return nil
                 }
-            case "w":
+            case "w", "n":
                 return nil
             default:
                 return event
-                
             }
             return event
         }
