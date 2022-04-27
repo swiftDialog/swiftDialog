@@ -574,6 +574,8 @@ func processCLOptionValues() {
     cloptions.statusLogFile.value           = json[cloptions.statusLogFile.long].string ?? CLOptionText(OptionName: cloptions.statusLogFile)
     cloptions.statusLogFile.present         = json[cloptions.statusLogFile.long].exists() || CLOptionPresent(OptionName: cloptions.statusLogFile)
     
+    cloptions.quitKey.value                 = json[cloptions.quitKey.long].string ?? CLOptionText(OptionName: cloptions.quitKey, DefaultValue: appvars.quitKeyCharacter)
+    
     if !cloptions.statusLogFile.present {
         cloptions.statusLogFile.value = appvars.defaultStatusLogFile
     }
