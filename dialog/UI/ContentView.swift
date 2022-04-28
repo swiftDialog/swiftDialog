@@ -37,7 +37,7 @@ struct ContentView: View {
                 if cloptions.quitKey.value != "q" {
                     return nil
                 }
-            case "w", "n":
+            case "w", "n", "m": //disable close window, new window and minimise window
                 return nil
             default:
                 return event
