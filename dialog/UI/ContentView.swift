@@ -25,6 +25,25 @@ struct ContentView: View {
         if cloptions.bannerImage.present {
             titlePadding = 0
         }
+        
+        // capture command+quitKey for quit
+        NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            let key = event.characters(byApplyingModifiers: .command)
+            
+            switch key {
+            case cloptions.quitKey.value:
+                quitDialog(exitCode: appvars.exit10.code)
+            case "q":
+                if cloptions.quitKey.value != "q" {
+                    return nil
+                }
+            case "w", "n":
+                return nil
+            default:
+                return event
+            }
+            return event
+        }
     }
 //
 //    // set up timer to read data from temp file

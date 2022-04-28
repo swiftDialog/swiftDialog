@@ -17,21 +17,15 @@ struct MessageContent: View {
     var fieldPadding: CGFloat = 15
     
     var messageColour : NSColor = NSColor(appvars.messageFontColour)
-    
-    var useDefaultStyle = true
-    
+        
     var iconDisplayWidth : CGFloat
         
     var defaultStyle: MarkdownStyle {
-        useDefaultStyle
-        ? MarkdownStyle(font: .system(size: appvars.messageFontSize), foregroundColor: appvars.messageFontColour)
-        : MarkdownStyle(font: .system(size: appvars.messageFontSize), foregroundColor: appvars.messageFontColour)
+        return MarkdownStyle(font: .system(size: appvars.messageFontSize), foregroundColor: appvars.messageFontColour)
     }
     
     var customStyle: MarkdownStyle {
-        useDefaultStyle
-        ? MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.titleFontSize), foregroundColor: appvars.messageFontColour)
-        : MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.titleFontSize), foregroundColor: appvars.messageFontColour)
+        return MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.titleFontSize), foregroundColor: appvars.messageFontColour)
     }
     
     let messageContentOption: String = cloptions.messageOption.value
