@@ -64,11 +64,10 @@ func processCLOptions() {
     if cloptions.dropdownValues.present {
         // checking for the pre 1.10 way of defining a select list
         if json[cloptions.dropdownValues.long].exists() && !json["selectitems"].exists() {
-            let selectValues = json[cloptions.dropdownValues.long].stringValue.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+            let selectValues = json[cloptions.dropdownValues.long].arrayValue.map {$0.stringValue}
             let selectTitle = json[cloptions.dropdownTitle.long].stringValue
             let selectDefault = json[cloptions.dropdownDefault.long].stringValue
             dropdownItems.append(DropDownItems(title: selectTitle, values: selectValues, defaultValue: selectDefault, selectedValue: selectDefault))
-            print(dropdownItems)
         }
         
         if json["selectitems"].exists() {            
@@ -85,9 +84,6 @@ func processCLOptions() {
             let dropdownValues = CLOptionMultiOptions(optionName: cloptions.dropdownValues.long)
             var selectValues = CLOptionMultiOptions(optionName: cloptions.dropdownTitle.long)
             var dropdownDefaults = CLOptionMultiOptions(optionName: cloptions.dropdownDefault.long)
-            print(dropdownValues.count)
-            print(selectValues.count)
-            print(dropdownDefaults.count)
             
             // need to make sure the title and default value arrays are the same size
             for _ in selectValues.count..<dropdownValues.count {
