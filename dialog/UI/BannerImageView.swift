@@ -10,24 +10,26 @@ import SwiftUI
 
 struct BannerImageView: View {
     
-    var BannerImageOption : String = ""
-    var bannerHeight : CGFloat = 0
+    var bannerImage     : NSImage
+    var bannerHeight    : CGFloat = 0
+    var bannerWidth     : CGFloat = 0
     let maxBannerHeight : CGFloat = 150
-    
+        
     init(imagePath: String) {
-        BannerImageOption = imagePath
-        bannerHeight = appvars.windowHeight * 0.2
+        bannerImage = getImageFromPath(fileImagePath: imagePath)
+        bannerWidth = appvars.windowWidth
+        bannerHeight = bannerImage.size.height*(appvars.windowWidth / bannerImage.size.width)
         if bannerHeight > maxBannerHeight {
             bannerHeight = maxBannerHeight
         }
     }
     
     var body: some View {
-        Image(nsImage: getImageFromPath(fileImagePath: BannerImageOption))
+        Image(nsImage: bannerImage)
             .resizable()
             .aspectRatio(contentMode: .fill)
             .scaledToFill()
-            .frame(width: appvars.windowWidth, height: bannerHeight, alignment: .topLeading)
+            .frame(width: bannerWidth, height: bannerHeight, alignment: .topLeading)
             .clipped()
     }
 }

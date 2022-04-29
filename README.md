@@ -10,7 +10,7 @@ The latest version can be found on the [Releases](https://github.com/bartreardon
 
 Detailed documentation and information can be found in the [Wiki](https://github.com/bartreardon/Dialog/wiki)
 
-![swiftDialog Logo](https://user-images.githubusercontent.com/3598965/125153263-d1baf780-e195-11eb-92ee-9321aa848ffc.png)
+![wiftDialog](https://user-images.githubusercontent.com/3598965/165020290-4c5b7913-3785-4ce6-8b12-f5caf97f5388.png)
 
 ## What happened to Dialog?
 

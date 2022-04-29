@@ -129,7 +129,7 @@ struct IconView: View {
             builtInIconName = "person.fill.questionmark"
             builtInIconPresent = true
         } else if messageUserImagePath == "default" || (!builtInIconPresent && !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL) {
-            builtInIconName = "message.circle.fill"
+            builtInIconName = "bubble.left.circle.fill"
             iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
             builtInIconPresent = true
         }

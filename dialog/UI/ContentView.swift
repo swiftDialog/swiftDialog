@@ -10,7 +10,7 @@ import Cocoa
 
 struct ContentView: View {
 
-    var bannerAdjustment       = CGFloat(5)
+    var titlePadding       = CGFloat(10)
     var waterMarkFill          = String("")
     var progressSteps : CGFloat = appvars.timerDefaultSeconds
     
@@ -21,6 +21,28 @@ struct ContentView: View {
         self.observedDialogContent = observedDialogContent
         if cloptions.timerBar.present {
             progressSteps = string2float(string: cloptions.timerBar.value)
+        }
+        if cloptions.bannerImage.present {
+            titlePadding = 0
+        }
+        
+        // capture command+quitKey for quit
+        NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            let key = event.characters(byApplyingModifiers: .command)
+            
+            switch key {
+            case cloptions.quitKey.value:
+                quitDialog(exitCode: appvars.exit10.code)
+            case "q":
+                if cloptions.quitKey.value != "q" {
+                    return nil
+                }
+            case "w", "n", "m": //disable close window, new window and minimise window
+                return nil
+            default:
+                return event
+            }
+            return event
         }
     }
 //
@@ -45,11 +67,13 @@ struct ContentView: View {
                     // Dialog title
                     TitleView(observedDialogContent: observedDialogContent)
                         .border(appvars.debugBorderColour, width: 2)
-                        .offset(y: 10) // shift the title down a notch
+                        .padding(.top, titlePadding)
+                        //.offset(y: 10) // shift the title down a notch
                     
                     // Horozontal Line
                     Divider()
                         .frame(width: appvars.windowWidth*appvars.horozontalLineScale, height: 2)
+                        .offset(y: -10) // shift the divider up a notch
                 }
                 
                 if cloptions.video.present {
