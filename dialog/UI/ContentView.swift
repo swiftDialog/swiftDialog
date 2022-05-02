@@ -28,17 +28,15 @@ struct ContentView: View {
         
         // capture command+quitKey for quit
         NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            let key = event.characters(byApplyingModifiers: .command)
-            
-            switch key {
-            case cloptions.quitKey.value:
-                quitDialog(exitCode: appvars.exit10.code)
-            case "q":
+            switch event.modifierFlags.intersection(.deviceIndependentFlagsMask) {
+            case [.command] where "wnm".contains(event.characters ?? ""):
+                return nil
+            case [.command] where event.characters == "q":
                 if cloptions.quitKey.value != "q" {
                     return nil
                 }
-            case "w", "n", "m": //disable close window, new window and minimise window
-                return nil
+            case [.command] where event.characters == cloptions.quitKey.value:
+                quitDialog(exitCode: appvars.exit10.code)
             default:
                 return event
             }

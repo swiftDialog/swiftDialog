@@ -414,6 +414,9 @@ var helpText = """
         --\(cloptions.jsonString.long) <text>
                     Same data format as --\(cloptions.jsonFile.long) but passed in as a string on the command line without
                     requiring an intermediate file.
+    
+        --\(cloptions.quitKey.long) <char>
+                    Use the specified character as the command+ key combination for quitting instead of "q".
                     
 
         -\(cloptions.ignoreDND.short), --\(cloptions.ignoreDND.long)
