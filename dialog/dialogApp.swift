@@ -42,7 +42,7 @@ struct dialogApp: App {
         
         // check for jamfhelper mode
         if cloptions.jamfHelperMode.present {
-            print("converting jh to dialog")
+            logger(logMessage: "converting jh to dialog")
             convertFromJamfHelperSyntax()
         }
         
