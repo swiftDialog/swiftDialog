@@ -81,7 +81,7 @@ public func convertFromJamfHelperSyntax() {
     
     //icon size
     cloptions.iconSize.present = CLOptionPresent(OptionName: JHOptions.iconSize)
-    cloptions.iconSize.value = CLOptionText(OptionName: JHOptions.iconSize)
+    cloptions.iconSize.value = CLOptionText(OptionName: JHOptions.iconSize, DefaultValue: "\(appvars.iconWidth)")
 
     
     //button 1
