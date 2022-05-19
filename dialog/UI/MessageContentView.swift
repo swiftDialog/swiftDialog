@@ -25,7 +25,7 @@ struct MessageContent: View {
     }
     
     var customStyle: MarkdownStyle {
-        return MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.titleFontSize), foregroundColor: appvars.messageFontColour)
+        return MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.messageFontSize), foregroundColor: appvars.messageFontColour)
     }
     
     let messageContentOption: String = cloptions.messageOption.value
