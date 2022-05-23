@@ -52,6 +52,8 @@ class DialogUpdatableContent : ObservableObject {
     var fwDownloadsStarted = false
     var filesets = Set<String>()
     
+    let commandFilePermissions: [FileAttributeKey: Any] = [FileAttributeKey.posixPermissions: 0o666]
+    
     // init
     
     init() {
@@ -116,11 +118,20 @@ class DialogUpdatableContent : ObservableObject {
     func run() {
         
         // check to make sure the file exists
-        
-        if !fm.fileExists(atPath: path) {
-            // need to make the file
-            fm.createFile(atPath: path, contents: nil, attributes: nil)
+        if fm.fileExists(atPath: path) {
+            logger(logMessage: "Existing file at \(path). Cleaning")
+            let text = ""
+            do {
+                try text.write(toFile: path, atomically: false, encoding: String.Encoding.utf8)
+            } catch {
+                logger(logMessage: "Existing file at \(path) but couldn't clean. ")
+                logger(logMessage: "Error info: \(error)")
+            }
+        } else {
+            logger(logMessage: "Creating file at \(path)")
+            fm.createFile(atPath: path, contents: nil, attributes: commandFilePermissions)
         }
+        
         
         let pipe = Pipe()
         task.standardOutput = pipe
@@ -146,7 +157,7 @@ class DialogUpdatableContent : ObservableObject {
         var dataReady : NSObjectProtocol!
         dataReady = NotificationCenter.default.addObserver(forName: Process.didTerminateNotification,
         object: pipe.fileHandleForReading, queue: nil) { notification -> Void in
-            NSLog("Task terminated!")
+            logger(logMessage: "Task terminated!")
             NotificationCenter.default.removeObserver(dataReady as Any)
         }
         
@@ -388,7 +399,7 @@ class DialogUpdatableContent : ObservableObject {
                 try fs.removeItem(atPath: path)
                 //NSLog("Deleted Dialog command file")
             } catch {
-                NSLog("Unable to delete command file")
+                logger(logMessage: "Unable to delete command file")
             }
         }
     }

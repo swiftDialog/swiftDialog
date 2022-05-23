@@ -43,7 +43,7 @@ struct ListItems {
 
 struct AppVariables {
     
-    var cliversion                      = "1.10.3"
+    var cliversion                      = "1.10.4"
     
     // message default strings
     var titleDefault                    = String("An Important Message")
@@ -135,7 +135,7 @@ struct AppVariables {
     var exit2                           = (code: Int32(2),   message: String("")) // pressed button 2
     var exit3                           = (code: Int32(3),   message: String("")) // pressed button 3 (info button)
     var exit4                           = (code: Int32(4),   message: String(""))
-    var exit5                           = (code: Int32(4),   message: String("")) // quit via command file
+    var exit5                           = (code: Int32(5),   message: String("")) // quit via command file
     var exit10                          = (code: Int32(10),  message: String("")) // quit via command + quitKey
     var exit20                          = (code: Int32(20),  message: String("Timeout Exceeded"))
     var exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))
