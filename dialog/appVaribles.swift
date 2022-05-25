@@ -43,7 +43,7 @@ struct ListItems {
 
 struct AppVariables {
     
-    var cliversion                      = "1.10.4"
+    var cliversion                      = "1.10.5"
     
     // message default strings
     var titleDefault                    = String("An Important Message")
