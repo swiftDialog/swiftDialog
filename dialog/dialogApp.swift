@@ -63,7 +63,7 @@ struct dialogApp: App {
         
         //check debug mode and print info
         if cloptions.debug.present {
-            logger(logMessage: "debug options presented. dialog state sent to stdout and ")
+            logger(logMessage: "debug options presented. dialog state sent to stdout")
             appvars.debugMode = true
             appvars.debugBorderColour = Color.green
             

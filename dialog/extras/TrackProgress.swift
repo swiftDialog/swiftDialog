@@ -90,9 +90,6 @@ class DialogUpdatableContent : ObservableObject {
         iconPresent = !appvars.iconIsHidden
         centreIconPresent = cloptions.centreIcon.present
         
-        //image = cloptions.mainImage.value
-        appvars.imageArray = CLOptionMultiOptions(optionName: cloptions.mainImage.long)
-        appvars.imageCaptionArray = CLOptionMultiOptions(optionName: cloptions.mainImageCaption.long)
         imagePresent = cloptions.mainImage.present
         imageCaptionPresent = cloptions.mainImageCaption.present
         
