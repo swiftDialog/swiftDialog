@@ -7,7 +7,8 @@
 */
 
 // error sheet
-"invalid-input" = "One or more input fields is incorrect";
+"invalid-input" = "One or more input fields are incorrect";
+"is-required" = "is required";
 
 // required fields text
 "required-note" = "* Required Fields";
@@ -16,3 +17,7 @@
 "button-cancel" = "Cancel";
 "button-more-info" = "More Information";
 "button-ok" = "OK";
+
+//default text
+"default-title" = "An Important Message";
+"default-message" = "This contains important message content\n\nPlease read";

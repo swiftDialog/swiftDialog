@@ -48,16 +48,16 @@ struct AppVariables {
     var cliversion                      = "1.10.5"
     
     // message default strings
-    var titleDefault                    = String("An Important Message")
-    var messageDefault                  = String("\nThis is important message content\n\nPlease read")
+    var titleDefault                    = String("default-title".localized)
+    var messageDefault                  = String("default-message".localized)
     var messageAlignment : TextAlignment = .leading
     var messageAlignmentTextRepresentation = String("left")
     
     // button default strings
     // work out how to define a default width button that does what you tell it to. in the meantime, diry hack with spaces
-    var button1Default                  = String("OK")
-    var button2Default                  = String("Cancel")
-    var buttonInfoDefault               = String("More Information")
+    var button1Default                  = String("button-ok".localized)
+    var button2Default                  = String("button-cancel".localized)
+    var buttonInfoDefault               = String("button-more-info".localized)
     var buttonInfoActionDefault         = String("")
     
     var windowIsMoveable                = Bool(false)

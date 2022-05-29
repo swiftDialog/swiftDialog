@@ -119,7 +119,7 @@ func shell(_ command: String) -> String {
     return output
 }
 
-// taken wholesale from DEPNotify
+// taken wholesale from DEPNotify because Joel and team and jsut awesome so why re-invent the wheel?
 func checkRegexPattern(regexPattern: String, textToValidate: String) -> Bool {
     var returnValue = true
     
@@ -229,9 +229,10 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
             var dontQuit = false
             for i in 0..<textFields.count {
                 //check for required fields
-                if textFields[i].required && textFields[i].value == "" {
+                if textFields[i].required && textFields[i].value == "" && textFields[i].regex.isEmpty {
                     NSSound.beep()
                     observedObject?.requiredTextfieldHighlight[i] = Color.red
+                    observedObject?.sheetErrorMessage += "•"+textFields[i].title+" "+"is-required".localized+"\n"
                     dontQuit = true
                 } else {
                     observedObject?.requiredTextfieldHighlight[i] = Color.clear
@@ -241,7 +242,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
                     NSSound.beep()
                     observedObject?.requiredTextfieldHighlight[i] = Color.green
                     observedObject?.showSheet = true
-                    observedObject?.sheetErrorMessage = textFields[i].regexError
+                    observedObject?.sheetErrorMessage += "•"+textFields[i].regexError+"\n"
                     dontQuit = true
                 }
                 outputArray.append("\"\(textFields[i].title)\" : \"\(textFields[i].value)\"")
@@ -290,6 +291,16 @@ func textToFontWeight(_ weight: String) -> Font.Weight {
             return Font.Weight.thin
         default:
             return Font.Weight.thin
+    }
+}
+
+extension String {
+    var localized: String {
+      return NSLocalizedString(self, comment: "\(self)_comment")
+    }
+
+    func localized(_ args: CVarArg...) -> String {
+        return String(format: localized, arguments: args)
     }
 }
 

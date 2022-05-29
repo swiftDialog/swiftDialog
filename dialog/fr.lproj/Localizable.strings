@@ -8,6 +8,7 @@
 
 // error sheet
 "invalid-input" = "Un ou plusieurs champs de saisie sont incorrects";
+"is-required" = "est requis";
 
 // required fields text
 "required-note" = "* Champs obligatoires";
@@ -17,3 +18,6 @@
 "button-more-info" = "Plus d'information";
 "button-ok" = "D'accord";
 
+//default text
+"default-title" = "Un message important";
+"default-message" = "Ceci contient un contenu de message important\n\nLisez s'il vous plaît";

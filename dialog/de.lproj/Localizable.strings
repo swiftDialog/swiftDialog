@@ -1,0 +1,23 @@
+/* 
+  Localizable.strings
+  dialog
+
+  Created by Bart Reardon on 29/5/2022.
+  
+*/
+
+// error sheet
+"invalid-input" = "Ein oder mehrere Eingabefelder sind falsch";
+"is-required" = "ist nötig";
+
+// required fields text
+"required-note" = "* Benötigte Felder";
+
+//buttons
+"button-cancel" = "Absagen";
+"button-more-info" = "Mehr Informationen";
+"button-ok" = "OK";
+
+//default text
+"default-title" = "Eine wichtige Nachricht";
+"default-message" = "Diese enthält wichtige Nachrichteninhalte\n\nLesen Sie bitte";

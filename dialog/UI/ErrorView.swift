@@ -34,13 +34,18 @@ struct ErrorView: View {
             Text("invalid-input").bold()
                 .padding()
             Text(observedDialogContent.sheetErrorMessage)
+                .padding(.leading, 10)
+                .padding(.trailing, 10)
             Spacer()
-            Button(action: {observedDialogContent.showSheet = false}) {
-                Text("OK")
+            Button(action: {
+                observedDialogContent.showSheet = false
+                observedDialogContent.sheetErrorMessage = ""
+            }) {
+                Text("button-ok".localized)
             }
             .padding()
         }
-        .frame(width: 350, height: 250)
+        .frame(width: 400, height: 350)
     }
 }
 
