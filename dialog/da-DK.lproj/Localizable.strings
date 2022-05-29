@@ -1,0 +1,25 @@
+/* 
+  Localizable.strings
+  dialog
+
+  Created by Bart Reardon on 29/5/2022.
+  
+  Danish translation by Anders Damgaard Jensen
+*/
+
+// error sheet
+"invalid-input" = "Et eller flere input felter er forkerte";
+"is-required" = "Påkrævet";
+
+// required fields text
+"required-note" = "* Påkrævet felt";
+
+//buttons
+"button-cancel" = "Annuller";
+"button-more-info" = "Mere Information";
+"button-ok" = "OK";
+
+//default text
+"default-title" = "En vigtig besked";
+"default-message" = "Dette er en vigtigt besked\n\nLæs venligst";
+
