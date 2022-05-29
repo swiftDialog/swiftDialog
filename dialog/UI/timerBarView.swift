@@ -100,7 +100,6 @@ struct timerBarView: View {
                             // the size of this overlay is the same as the number of steps in the progress bar
                             // this gives the impression of a continiously moving progress
                             .frame(width: progressWidth, height: barheight)
-                            .clipShape(RoundedRectangle(cornerRadius: barRadius))
                             // linear animation with duration set to the same as timer tick of 1 sec makes a continuious bar animation
                             .animation(.linear(duration: 1))
 
@@ -116,9 +115,9 @@ struct timerBarView: View {
                     // add layer mask to define the roundness of the progress bar
                     .mask(Rectangle() // background of the progress bar
                             .frame(width: geometry.size.width, height: barheight)
-                            .clipShape(RoundedRectangle(cornerRadius: barRadius))
                             .opacity(1)
                     )
+                    .clipShape(RoundedRectangle(cornerRadius: barRadius))
                 }
             }.frame(height: barheight, alignment: .bottom) //needed to force limit the entire progress bar frame height
             .padding(10)
