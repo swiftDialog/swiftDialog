@@ -35,13 +35,23 @@ struct ContentView: View {
                 if cloptions.quitKey.value != "q" {
                     return nil
                 }
-            case [.command] where event.characters == cloptions.quitKey.value:
+            case [.command] where event.characters == cloptions.quitKey.value, [.command, .shift] where event.characters == cloptions.quitKey.value.lowercased():
                 quitDialog(exitCode: appvars.exit10.code)
             default:
                 return event
             }
             return event
         }
+        /*
+        // TODO: monitor for global events like minimise all app windows while the app isfocused and write to the log
+        NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { event in
+            switch event.modifierFlags.intersection(.deviceIndependentFlagsMask) {
+            case [.command, .option] where event.characters == "m":
+                print("app Minimised")
+            default: () //do nothing
+            }
+        }
+        */
     }
 //
 //    // set up timer to read data from temp file
