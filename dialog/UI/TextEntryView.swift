@@ -88,7 +88,7 @@ struct TextEntryView: View {
                 if requiredFieldsPresent {
                     HStack {
                         Spacer()
-                        Text("* Required Fields")
+                        Text("required-note")
                             .font(.system(size: 10)
                                     .weight(.light))
                             .padding(.trailing, 10)

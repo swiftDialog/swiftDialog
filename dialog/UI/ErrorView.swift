@@ -31,7 +31,7 @@ struct ErrorView: View {
             }
             .frame(width: 64, height: 64)
             .padding(20)
-            Text("One or more input fields is incorrect").bold()
+            Text("invalid-input").bold()
                 .padding()
             Text(observedDialogContent.sheetErrorMessage)
             Spacer()

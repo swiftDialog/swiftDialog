@@ -1,0 +1,18 @@
+/* 
+  Localizable.strings
+  dialog
+
+  Created by Bart Reardon on 29/5/2022.
+  
+*/
+
+// error sheet
+"invalid-input" = "One or more input fields is incorrect";
+
+// required fields text
+"required-note" = "* Required Fields";
+
+//buttons
+"button-cancel" = "Cancel";
+"button-more-info" = "More Information";
+"button-ok" = "OK";
