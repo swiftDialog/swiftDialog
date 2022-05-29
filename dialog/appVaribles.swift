@@ -45,7 +45,7 @@ struct ListItems {
 
 struct AppVariables {
     
-    var cliversion                      = "1.10.5"
+    var cliversion                      = "1.11.0"
     
     // message default strings
     var titleDefault                    = String("default-title".localized)
