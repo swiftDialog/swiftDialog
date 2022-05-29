@@ -24,6 +24,8 @@ struct TextFieldState {
     var required        : Bool      = false
     var secure          : Bool      = false
     var prompt          : String    = ""
+    var regex           : String    = ""
+    var regexError      : String    = ""
     var value           : String    = ""
 }
 

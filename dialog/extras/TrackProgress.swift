@@ -45,6 +45,9 @@ class DialogUpdatableContent : ObservableObject {
     @Published var windowWidth: CGFloat
     @Published var windowHeight: CGFloat
     
+    @Published var showSheet: Bool
+    @Published var sheetErrorMessage: String
+    
     var status: StatusState
     
     let task = Process()
@@ -98,6 +101,9 @@ class DialogUpdatableContent : ObservableObject {
         
         windowWidth = appvars.windowWidth
         windowHeight = appvars.windowHeight
+        
+        showSheet = false
+        sheetErrorMessage = ""
 
         // start the background process to monotor the command file
         status = .start

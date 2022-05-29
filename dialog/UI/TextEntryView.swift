@@ -16,6 +16,8 @@ struct TextEntryView: View {
     
     @State private var animationAmount = 1.0
     
+    @State private var showingSheet = false
+    
     var textFieldPresent: Bool = false
     var fieldwidth: CGFloat = 0
     var requiredFieldsPresent : Bool = false

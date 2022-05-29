@@ -106,9 +106,11 @@ func processCLOptions() {
                     textFields.append(TextFieldState(title: String(json[cloptions.textField.long][i].stringValue)))
                 } else {
                     textFields.append(TextFieldState(title: String(json[cloptions.textField.long][i]["title"].stringValue),
-                                                 required: Bool(json[cloptions.textField.long][i]["required"].boolValue),
-                                                 secure: Bool(json[cloptions.textField.long][i]["secure"].boolValue),
-                                                 prompt: String(json[cloptions.textField.long][i]["prompt"].stringValue))
+                                                     required: Bool(json[cloptions.textField.long][i]["regex"].exists() || json[cloptions.textField.long][i]["required"].boolValue),
+                                                     secure: Bool(json[cloptions.textField.long][i]["secure"].boolValue),
+                                                     prompt: String(json[cloptions.textField.long][i]["prompt"].stringValue),
+                                                     regex: String(json[cloptions.textField.long][i]["regex"].stringValue),
+                                                     regexError: String(json[cloptions.textField.long][i]["regexerror"].stringValue))
                                 )
                 }
             }
@@ -117,6 +119,8 @@ func processCLOptions() {
                 let items = textFieldOption.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
                 var fieldTitle : String = ""
                 var fieldPrompt : String = ""
+                var fieldRegex : String = ""
+                var fieldRegexErrror : String = ""
                 var fieldSecure : Bool = false
                 var fieldRequire : Bool = false
                 for item in items {
@@ -129,11 +133,16 @@ func processCLOptions() {
                         fieldRequire = true
                     case "prompt":
                         fieldPrompt = itemValue
+                    case "regex":
+                        fieldRegex = itemValue
+                        fieldRequire = true
+                    case "regexerror":
+                        fieldRegexErrror = itemValue
                     default:
                         fieldTitle = itemName
                     }
                 }
-                textFields.append(TextFieldState(title: fieldTitle, required: fieldRequire, secure: fieldSecure, prompt: fieldPrompt))
+                textFields.append(TextFieldState(title: fieldTitle, required: fieldRequire, secure: fieldSecure, prompt: fieldPrompt, regex: fieldRegex, regexError: fieldRegexErrror))
             }
         }
         logger(logMessage: "textOptionsArray : \(textFields)")

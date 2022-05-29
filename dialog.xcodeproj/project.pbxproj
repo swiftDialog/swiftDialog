@@ -38,6 +38,8 @@
 		417BD471279CB658009AE34A /* CheckboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD470279CB658009AE34A /* CheckboxView.swift */; };
 		417BD472279CB658009AE34A /* CheckboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD470279CB658009AE34A /* CheckboxView.swift */; };
 		417BF0BB260F1726009AD252 /* BannerImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BF0BA260F1726009AD252 /* BannerImageView.swift */; };
+		41832B6E2843143C0062AA1F /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41832B6D2843143C0062AA1F /* ErrorView.swift */; };
+		41832B6F2843143C0062AA1F /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41832B6D2843143C0062AA1F /* ErrorView.swift */; };
 		41876683275D87C70023A6A1 /* ImageSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41876682275D87C70023A6A1 /* ImageSlider.swift */; };
 		41876684275D88D60023A6A1 /* ImageSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41876682275D87C70023A6A1 /* ImageSlider.swift */; };
 		418A7B512759949A00E4D6F1 /* VideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4114E1EA27154B2200388274 /* VideoView.swift */; };
@@ -141,6 +143,7 @@
 		417BD43727992EDB009AE34A /* TaskProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskProgressView.swift; sourceTree = "<group>"; };
 		417BD470279CB658009AE34A /* CheckboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckboxView.swift; sourceTree = "<group>"; };
 		417BF0BA260F1726009AD252 /* BannerImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerImageView.swift; sourceTree = "<group>"; };
+		41832B6D2843143C0062AA1F /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
 		41876682275D87C70023A6A1 /* ImageSlider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageSlider.swift; sourceTree = "<group>"; };
 		418AE4222667A17A001E3423 /* DropdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropdownView.swift; sourceTree = "<group>"; };
 		41A44EAF26F2F25200FEE1AC /* watermarkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = watermarkView.swift; sourceTree = "<group>"; };
@@ -306,6 +309,7 @@
 				417BD43727992EDB009AE34A /* TaskProgressView.swift */,
 				417BD470279CB658009AE34A /* CheckboxView.swift */,
 				415E1FC927A2694B00DE971B /* ListView.swift */,
+				41832B6D2843143C0062AA1F /* ErrorView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -517,6 +521,7 @@
 				418A7B592759949B00E4D6F1 /* helpText.swift in Sources */,
 				417BD471279CB658009AE34A /* CheckboxView.swift in Sources */,
 				4153784E2604B71800AA0E76 /* TitleView.swift in Sources */,
+				41832B6E2843143C0062AA1F /* ErrorView.swift in Sources */,
 				4153785E2604B81300AA0E76 /* IconView.swift in Sources */,
 				417BF0BB260F1726009AD252 /* BannerImageView.swift in Sources */,
 				4153786C2604BF1A00AA0E76 /* MessageContentView.swift in Sources */,
@@ -571,6 +576,7 @@
 				41FB648D2680855300A54C3E /* ButtonView.swift in Sources */,
 				417BD472279CB658009AE34A /* CheckboxView.swift in Sources */,
 				41876683275D87C70023A6A1 /* ImageSlider.swift in Sources */,
+				41832B6F2843143C0062AA1F /* ErrorView.swift in Sources */,
 				41FB648E2680855300A54C3E /* DropdownView.swift in Sources */,
 				41FB648F2680855300A54C3E /* IconOverlayView.swift in Sources */,
 				41FB64902680855300A54C3E /* FullscreenView.swift in Sources */,

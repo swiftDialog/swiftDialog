@@ -119,6 +119,28 @@ func shell(_ command: String) -> String {
     return output
 }
 
+// taken wholesale from DEPNotify
+func checkRegexPattern(regexPattern: String, textToValidate: String) -> Bool {
+    var returnValue = true
+    
+    do {
+        let regex = try NSRegularExpression(pattern: regexPattern)
+        let nsString = textToValidate as NSString
+        let results = regex.matches(in: textToValidate, range: NSRange(location: 0, length: nsString.length))
+        
+        if results.count == 0
+        {
+            returnValue = false
+        }
+        
+    } catch let error as NSError {
+        logger(logMessage: "invalid regex: \(error.localizedDescription)")
+        returnValue = false
+    }
+    
+    return  returnValue
+}
+
 func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQuit: Bool = true, observedObject: DialogUpdatableContent? = nil) {
     //let action: String = CLOptionText(OptionName: cloptions.button1ActionOption, DefaultValue: "")
     
@@ -206,11 +228,21 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
             // if there is an empty field, update the highlight colour
             var dontQuit = false
             for i in 0..<textFields.count {
+                //check for required fields
                 if textFields[i].required && textFields[i].value == "" {
+                    NSSound.beep()
                     observedObject?.requiredTextfieldHighlight[i] = Color.red
                     dontQuit = true
                 } else {
                     observedObject?.requiredTextfieldHighlight[i] = Color.clear
+                }
+                //check for regex requirements
+                if !textFields[i].regex.isEmpty && !checkRegexPattern(regexPattern: textFields[i].regex, textToValidate: textFields[i].value) {
+                    NSSound.beep()
+                    observedObject?.requiredTextfieldHighlight[i] = Color.green
+                    observedObject?.showSheet = true
+                    observedObject?.sheetErrorMessage = textFields[i].regexError
+                    dontQuit = true
                 }
                 outputArray.append("\"\(textFields[i].title)\" : \"\(textFields[i].value)\"")
                 json[textFields[i].title].string = textFields[i].value

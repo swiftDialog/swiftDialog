@@ -122,6 +122,9 @@ struct dialogApp: App {
                 ContentView(observedDialogContent: observedDialogContent)
                     .frame(width: observedDialogContent.windowWidth, height: observedDialogContent.windowHeight) // + appvars.bannerHeight)
                 //.frame(idealWidth: appvars.windowWidth, idealHeight: appvars.windowHeight)
+                    .sheet(isPresented: $observedDialogContent.showSheet, content: {
+                        ErrorView(observedContent: observedDialogContent)
+                    })
 
             }
         }
