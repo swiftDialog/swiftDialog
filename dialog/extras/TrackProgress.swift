@@ -323,6 +323,8 @@ class DialogUpdatableContent : ObservableObject {
                 var statusText      : String = ""
                 var statusIcon      : String = ""
                 let statusTypeArray = ["wait","success","fail","error","pending"]
+                var deleteRow       : Bool = false
+                var addRow          : Bool = false
 
                 let listCommand = line.replacingOccurrences(of: "\(cloptions.listItem.long): ", with: "")
                 
@@ -361,11 +363,17 @@ class DialogUpdatableContent : ObservableObject {
                             case "title":
                                 title = action[1].trimmingCharacters(in: .whitespaces)
                             case "icon":
+                                // reserved for future use
                                 icon = action[1].trimmingCharacters(in: .whitespaces)
                             case "statustext":
                                 statusText = action[1].trimmingCharacters(in: .whitespaces)
                             case "status":
                                 statusIcon = action[1].trimmingCharacters(in: .whitespaces)
+                            case "delete":
+                                deleteRow = true
+                            case "add":
+                                print("set adding a row")
+                                addRow = true
                             default:
                                 break
                             }
@@ -373,10 +381,21 @@ class DialogUpdatableContent : ObservableObject {
                     
                     // update the list items array
                     if let row = listItemsArray.firstIndex(where: {$0.title == title}) {
-                        listItemsArray[row].icon = icon
-                        listItemsArray[row].statusIcon = statusIcon
-                        listItemsArray[row].statusText = statusText
-                        listItemUpdateRow = row
+                        if deleteRow {
+                            listItemsArray.remove(at: row)
+                            logger(logMessage: "deleted row at index \(row)")
+                        } else {
+                            listItemsArray[row].icon = icon
+                            listItemsArray[row].statusIcon = statusIcon
+                            listItemsArray[row].statusText = statusText
+                            listItemUpdateRow = row
+                        }
+                    }
+                    
+                    // add to the list items array
+                    if addRow {
+                        listItemsArray.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon))
+                        logger(logMessage: "row added with \(title) \(icon) \(statusText) \(statusIcon)")
                     }
                     
                 }
