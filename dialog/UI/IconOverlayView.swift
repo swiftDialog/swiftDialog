@@ -88,24 +88,26 @@ struct IconOverlayView: View {
                    iconRenderingMode = Image.TemplateRenderingMode.template
                }
             }
-        }
-        
-        if overlayImagePath == "warning" {
+            
+        } else if overlayImagePath == "warning" {
             builtInIconName = "exclamationmark.octagon.fill"
             builtInIconFill = "octagon.fill"
             builtInIconColour = Color.red
-            iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
+            iconRenderingMode = Image.TemplateRenderingMode.original
             builtInIconPresent = true
-        }
-        if overlayImagePath == "caution" {
+        
+        } else if overlayImagePath == "caution" {
             builtInIconName = "exclamationmark.triangle.fill"
             //builtInIconFill = "triangle.fill"
             //builtInIconColour = Color.yellow
             builtInIconPresent = true
-        }
-        if overlayImagePath == "info" {
+        
+        } else if overlayImagePath == "info" {
             builtInIconName = "person.fill.questionmark"
             builtInIconPresent = true
+        
+        } else if !FileManager.default.fileExists(atPath: overlayImagePath) {
+            cloptions.overlayIconOption.present = false
         }
     }
     

@@ -120,7 +120,7 @@ struct IconView: View {
             builtInIconName = "exclamationmark.octagon.fill"
             builtInIconFill = "octagon.fill" //does not have multicolour sf symbol so we have to make out own using a fill layer
             builtInIconColour = Color.red
-            iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
+            iconRenderingMode = Image.TemplateRenderingMode.original
             builtInIconPresent = true
         } else if cloptions.cautionIcon.present || messageUserImagePath == "caution" {
             builtInIconName = "exclamationmark.triangle.fill"  // yay multicolour sf symbol
