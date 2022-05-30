@@ -52,7 +52,7 @@ struct IconView: View {
         logoWidth = appvars.iconWidth
         logoHeight = appvars.iconHeight
         
-        if cloptions.overlayIconOption.present {
+        if observedDialogContent.overlayIconPresent {
             mainImageScale = mainImageWithOverlayScale
         }
         
@@ -252,7 +252,7 @@ struct IconView: View {
                     .scaleEffect(mainImageScale)
             }
 
-            IconOverlayView()
+            IconOverlayView(observedDialogContent: observedDialogContent)
                 .scaleEffect(overlayImageScale, anchor:.bottomTrailing)
 
         }
