@@ -158,16 +158,17 @@ struct IconView: View {
                                     .symbolRenderingMode(.palette)
                                     .foregroundStyle(builtInIconColour, builtInIconSecondaryColour, builtInIconTertiaryColour)
                             } else {
+                                // gradient instead of palette
                                 Image(systemName: builtInIconName)
                                     .resizable()
-                                    .symbolRenderingMode(.palette)
+                                    .symbolRenderingMode(.monochrome)
                                     .foregroundStyle(
                                         LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottomTrailing)
                                     )
                             }
                                 
                         } else {
-                        
+                            // macOS 11 doesn't support foregroundStyle so we'll do it the long way
                             // we need to add this twice - once as a clear version to force the right aspect ratio
                             // and again with the gradiet colour we want
                             // the reason for this is gradient by itself is greedy and will consume the entire height and witch of the display area
