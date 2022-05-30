@@ -25,6 +25,7 @@ struct TitleView: View {
         } else {
             Text(observedDialogContent.titleText)
                 .font(.custom(appvars.titleFontName, size: appvars.titleFontSize))
+                .fontWeight(appvars.titleFontWeight)
                 .foregroundColor(appvars.titleFontColour)
                 .frame(width: appvars.windowWidth , height: appvars.titleHeight, alignment: .center)
         }
