@@ -96,6 +96,8 @@ struct ContentView: View {
                 HStack() {
                     if cloptions.infoText.present {
                         Text(cloptions.infoText.value)
+                            .foregroundColor(.secondary.opacity(0.7))
+                            //.font(.system(size: 10))
                     } else if cloptions.infoButtonOption.present || cloptions.buttonInfoTextOption.present {
                         MoreInfoButton()
                         if !cloptions.timerBar.present {
