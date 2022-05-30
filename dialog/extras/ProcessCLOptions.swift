@@ -413,6 +413,11 @@ func processCLOptions() {
         appvars.scaleFactor = 1.25
         logger(logMessage: "bigWindow.present")
     }
+    
+    //if info button is present but no button action then default to quit on info
+    if !cloptions.buttonInfoActionOption.present {
+        cloptions.quitOnInfo.present = true
+    }
 }
 
 func processCLOptionValues() {
