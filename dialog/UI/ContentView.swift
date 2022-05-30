@@ -94,7 +94,9 @@ struct ContentView: View {
                 
                 // Buttons
                 HStack() {
-                    if cloptions.infoButtonOption.present || cloptions.buttonInfoTextOption.present {
+                    if cloptions.infoText.present {
+                        Text(cloptions.infoText.value)
+                    } else if cloptions.infoButtonOption.present || cloptions.buttonInfoTextOption.present {
                         MoreInfoButton()
                         if !cloptions.timerBar.present {
                             Spacer()
