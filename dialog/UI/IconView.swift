@@ -95,7 +95,24 @@ struct IconView: View {
                 if itemName == "weight" {
                     builtInIconWeight = textToFontWeight(item[1])
                 }
-                if itemName.hasPrefix("palette") || itemName.hasPrefix("colour") || itemName.hasPrefix("color") {
+                if itemName.hasPrefix("palette") {
+                    let paletteColours = itemValue.components(separatedBy: ":")
+                    if paletteColours.count > 1 {
+                        sfPalettePresent = true
+                    }
+                    for i in 0...paletteColours.count-1 {
+                        switch i {
+                        case 0:
+                            builtInIconColour = stringToColour(paletteColours[i])
+                        case 1:
+                            builtInIconSecondaryColour = stringToColour(paletteColours[i])
+                        case 2:
+                            builtInIconTertiaryColour = stringToColour(paletteColours[i])
+                        default: ()
+                        }
+                    }
+                }
+                if itemName.hasPrefix("colour") || itemName.hasPrefix("color") {
                     if itemValue == "auto" {
                         // detecting sf symbol properties seems to be annoying, at least in swiftui 2
                         // this is a bit of a workaround in that we let the user determine if they want the multicolour SF symbol
@@ -106,9 +123,6 @@ struct IconView: View {
                         iconRenderingMode = Image.TemplateRenderingMode.template // switches to monochrome which allows us to tint the sf symbol
                                                 
                         if itemName.hasSuffix("2") {
-                            if itemName.hasPrefix("palette") {
-                                sfPalettePresent = true
-                            }
                             sfGradientPresent = true
                             builtInIconSecondaryColour = stringToColour(itemValue)
                         } else if itemName.hasSuffix("3") {
