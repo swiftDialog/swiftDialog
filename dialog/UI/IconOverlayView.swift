@@ -20,11 +20,13 @@ struct IconOverlayView: View {
     var builtInIconName: String = ""
     var builtInIconColour: Color = Color.primary
     var builtInIconSecondaryColour: Color = Color.secondary
+    var builtInIconTertiaryColour: Color = Color.tertiaryBackground
     var builtInIconFill: String = ""
     var builtInIconPresent: Bool = false
     var builtInIconWeight = Font.Weight.thin
     
     var iconRenderingMode = Image.TemplateRenderingMode.original
+    var sfPalettePresent: Bool = false
     
     var sfSymbolName: String = ""
     var sfSymbolWeight = Font.Weight.thin
@@ -72,6 +74,28 @@ struct IconOverlayView: View {
                         sfBackgroundIconColour = .clear
                     } else {
                         sfBackgroundIconColour = stringToColour(itemValue)
+                    }
+                }
+                if itemName.hasPrefix("palette") {
+                    
+                    let paletteColours = itemValue.components(separatedBy: ":")
+                    print(paletteColours.count)
+                    if paletteColours.count > 1 {
+                        sfPalettePresent = true
+                    }
+                    for i in 0...paletteColours.count-1 {
+                        switch i {
+                        case 0:
+                            builtInIconColour = stringToColour(paletteColours[i])
+                        case 1:
+                            builtInIconSecondaryColour = stringToColour(paletteColours[i])
+                        case 2:
+                            builtInIconTertiaryColour = stringToColour(paletteColours[i])
+                        default: ()
+                        }
+                    }
+                    if paletteColours.count < 3 {
+                        builtInIconTertiaryColour = builtInIconSecondaryColour
                     }
                 }
                 if itemName.hasPrefix("colour") || itemName.hasPrefix("color") {
@@ -133,7 +157,26 @@ struct IconOverlayView: View {
                                 .shadow(color: .secondaryBackground.opacity(0.50), radius: 4, x:2, y:2) // gives the sf background some pop especially in dark mode
                         }
                         ZStack() {
-                            if sfGradientPresent {
+                            if sfGradientPresent || sfPalettePresent {
+                                
+                                if #available(macOS 12.0, *) {
+                                    if sfPalettePresent {
+                                        Image(systemName: builtInIconName)
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .symbolRenderingMode(.palette)
+                                            .foregroundStyle(builtInIconColour, builtInIconSecondaryColour, builtInIconTertiaryColour)
+                                    } else {
+                                        // gradient instead of palette
+                                        Image(systemName: builtInIconName)
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .symbolRenderingMode(.monochrome)
+                                            .foregroundStyle(
+                                                LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottomTrailing)
+                                            )
+                                    }
+                                } else {
                                 LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottomTrailing)
                                     .mask(
                                     Image(systemName: builtInIconName)
@@ -143,6 +186,7 @@ struct IconOverlayView: View {
                                         .foregroundColor(builtInIconColour)
                                         .font(Font.title.weight(builtInIconWeight))
                                 )
+                                }
                             } else {
                                 // background colour
                                 ZStack {
