@@ -116,30 +116,32 @@ func processCLOptions() {
             }
         } else {
             for textFieldOption in CLOptionMultiOptions(optionName: cloptions.textField.long) {
-                let items = textFieldOption.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                let items = textFieldOption.split(usingRegex: "(,? ?[a-zA-Z1-9]+=)")
                 var fieldTitle : String = ""
                 var fieldPrompt : String = ""
                 var fieldRegex : String = ""
                 var fieldRegexErrror : String = ""
                 var fieldSecure : Bool = false
                 var fieldRequire : Bool = false
-                for item in items {
-                    let itemName = item.components(separatedBy: "=").first!
-                    let itemValue = item.components(separatedBy: "=").last!
-                    switch itemName.lowercased() {
-                    case "secure":
-                        fieldSecure = true
-                    case "required":
-                        fieldRequire = true
-                    case "prompt":
-                        fieldPrompt = itemValue
-                    case "regex":
-                        fieldRegex = itemValue
-                        fieldRequire = true
-                    case "regexerror":
-                        fieldRegexErrror = itemValue
-                    default:
-                        fieldTitle = itemName
+                if items.count > 0 {
+                    fieldTitle = items[0]
+                    for index in 1...items.count-1 {
+                        switch items[index].lowercased()
+                            .replacingOccurrences(of: ",", with: "")
+                            .replacingOccurrences(of: "=", with: "")
+                            .trimmingCharacters(in: .whitespaces) {
+                        case "secure":
+                            fieldSecure = true
+                        case "required":
+                            fieldRequire = true
+                        case "prompt":
+                            fieldPrompt = items[index+1]
+                        case "regex":
+                            fieldRegex = items[index+1]
+                        case "regexerror":
+                            fieldRegexErrror = items[index+1]
+                        default: ()
+                        }
                     }
                 }
                 textFields.append(TextFieldState(title: fieldTitle, required: fieldRequire, secure: fieldSecure, prompt: fieldPrompt, regex: fieldRegex, regexError: fieldRegexErrror))
