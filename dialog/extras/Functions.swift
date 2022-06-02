@@ -229,22 +229,23 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
             var dontQuit = false
             for i in 0..<textFields.count {
                 //check for required fields
-                if textFields[i].required && textFields[i].value == "" && textFields[i].regex.isEmpty {
+                if textFields[i].required && textFields[i].value == "" { // && textFields[i].regex.isEmpty {
                     NSSound.beep()
                     observedObject?.requiredTextfieldHighlight[i] = Color.red
                     observedObject?.sheetErrorMessage += "•"+textFields[i].title+" "+"is-required".localized+"\n"
                     dontQuit = true
-                } else {
-                    observedObject?.requiredTextfieldHighlight[i] = Color.clear
-                }
+                
                 //check for regex requirements
-                if !textFields[i].regex.isEmpty && !checkRegexPattern(regexPattern: textFields[i].regex, textToValidate: textFields[i].value) {
+                } else if !textFields[i].regex.isEmpty && !checkRegexPattern(regexPattern: textFields[i].regex, textToValidate: textFields[i].value) {
                     NSSound.beep()
                     observedObject?.requiredTextfieldHighlight[i] = Color.green
                     observedObject?.showSheet = true
                     observedObject?.sheetErrorMessage += "•"+textFields[i].regexError+"\n"
                     dontQuit = true
+                } else {
+                    observedObject?.requiredTextfieldHighlight[i] = Color.clear
                 }
+                
                 outputArray.append("\"\(textFields[i].title)\" : \"\(textFields[i].value)\"")
                 json[textFields[i].title].string = textFields[i].value
             }

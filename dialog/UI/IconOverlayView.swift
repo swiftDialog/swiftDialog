@@ -55,7 +55,7 @@ struct IconOverlayView: View {
             builtInIconPresent = true
             
             //var SFValues = messageUserImagePath.components(separatedBy: ",")
-            var SFValues = overlayImagePath.split(usingRegex: "(,? ?[a-zA-Z1-9]+=)")
+            var SFValues = overlayImagePath.split(usingRegex: appvars.argRegex)
             SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
             
             var SFArg : String = ""

@@ -116,7 +116,7 @@ func processCLOptions() {
             }
         } else {
             for textFieldOption in CLOptionMultiOptions(optionName: cloptions.textField.long) {
-                let items = textFieldOption.split(usingRegex: "(,? ?[a-zA-Z1-9]+=)")
+                let items = textFieldOption.split(usingRegex: appvars.argRegex)
                 var fieldTitle : String = ""
                 var fieldPrompt : String = ""
                 var fieldRegex : String = ""
@@ -125,6 +125,7 @@ func processCLOptions() {
                 var fieldRequire : Bool = false
                 if items.count > 0 {
                     fieldTitle = items[0]
+                    fieldRegexErrror = "\"\(fieldTitle)\" "+"is-required".localized
                     for index in 1...items.count-1 {
                         switch items[index].lowercased()
                             .replacingOccurrences(of: ",", with: "")

@@ -130,6 +130,8 @@ struct AppVariables {
     
     var quitKeyCharacter                = String("q")
     
+    var argRegex                        = String("(,? ?[a-zA-Z1-9]+=|(,secure)|(,required))")
+    
     // exit codes and error messages
     var exit0                           = (code: Int32(0),   message: String("")) // normal exit
     var exitNow                         = (code: Int32(255), message: String("")) // forced exit
