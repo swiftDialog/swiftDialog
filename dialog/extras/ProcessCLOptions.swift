@@ -125,7 +125,7 @@ func processCLOptions() {
                 var fieldRequire : Bool = false
                 if items.count > 0 {
                     fieldTitle = items[0]
-                    fieldRegexErrror = "\"\(fieldTitle)\" "+"is-required".localized
+                    fieldRegexErrror = "\"\(fieldTitle)\" "+"no-pattern".localized
                     for index in 1...items.count-1 {
                         switch items[index].lowercased()
                             .replacingOccurrences(of: ",", with: "")

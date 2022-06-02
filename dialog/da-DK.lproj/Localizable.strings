@@ -10,6 +10,7 @@
 // error sheet
 "invalid-input" = "Et eller flere input felter er forkerte";
 "is-required" = "Påkrævet";
+"no-pattern" = "ikke svarer til det krævede format";
 
 // required fields text
 "required-note" = "* Påkrævet felt";

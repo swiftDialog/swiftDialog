@@ -10,6 +10,7 @@
 // error sheet
 "invalid-input" = "Een of meer invoervelden zijn onjuist";
 "is-required" = "is verplicht";
+"no-pattern" = "niet overeenkomt met het vereiste formaat";
 
 // required fields text
 "required-note" = "* Verplichte Velden";

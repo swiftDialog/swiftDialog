@@ -10,6 +10,7 @@
 // error sheet
 "invalid-input" = "Ein oder mehrere Eingabefelder sind fehlerhaft";
 "is-required" = "Ist erforderlich";
+"no-pattern" = "nicht dem erforderlichen Format entspricht";
 
 // required fields text
 "required-note" = "*Erforderliche Felder";

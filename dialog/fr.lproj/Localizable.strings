@@ -9,6 +9,7 @@
 // error sheet
 "invalid-input" = "Un ou plusieurs champs de saisie sont incorrects";
 "is-required" = "est requis";
+"no-pattern" = "ne correspond pas au format requis";
 
 // required fields text
 "required-note" = "* Champs obligatoires";
