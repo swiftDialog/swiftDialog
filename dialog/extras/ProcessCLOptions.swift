@@ -125,23 +125,25 @@ func processCLOptions() {
                 var fieldRequire : Bool = false
                 if items.count > 0 {
                     fieldTitle = items[0]
-                    fieldRegexErrror = "\"\(fieldTitle)\" "+"no-pattern".localized
-                    for index in 1...items.count-1 {
-                        switch items[index].lowercased()
-                            .replacingOccurrences(of: ",", with: "")
-                            .replacingOccurrences(of: "=", with: "")
-                            .trimmingCharacters(in: .whitespaces) {
-                        case "secure":
-                            fieldSecure = true
-                        case "required":
-                            fieldRequire = true
-                        case "prompt":
-                            fieldPrompt = items[index+1]
-                        case "regex":
-                            fieldRegex = items[index+1]
-                        case "regexerror":
-                            fieldRegexErrror = items[index+1]
-                        default: ()
+                    if items.count > 1 {
+                        fieldRegexErrror = "\"\(fieldTitle)\" "+"no-pattern".localized
+                        for index in 1...items.count-1 {
+                            switch items[index].lowercased()
+                                .replacingOccurrences(of: ",", with: "")
+                                .replacingOccurrences(of: "=", with: "")
+                                .trimmingCharacters(in: .whitespaces) {
+                            case "secure":
+                                fieldSecure = true
+                            case "required":
+                                fieldRequire = true
+                            case "prompt":
+                                fieldPrompt = items[index+1]
+                            case "regex":
+                                fieldRegex = items[index+1]
+                            case "regexerror":
+                                fieldRegexErrror = items[index+1]
+                            default: ()
+                            }
                         }
                     }
                 }

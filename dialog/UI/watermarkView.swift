@@ -12,6 +12,7 @@ struct watermarkView: View {
     var mainImage: NSImage
     var imageOpacity: Double
     var imagePosition : Alignment = .leading
+    var imageAlignmentGuite : Alignment = .center
     var imageScaleFill : String
     
     init(imagePath: String?, opacity: Double?, position: String? = "center", scale: String? = "") {
@@ -64,7 +65,7 @@ struct watermarkView: View {
                 }
                 
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: imagePosition)
+            .frame(maxWidth: geometry.size.width, maxHeight: geometry.size.height, alignment: imagePosition)
         }
     }
 }

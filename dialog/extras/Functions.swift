@@ -236,7 +236,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
                     dontQuit = true
                 
                 //check for regex requirements
-                } else if !textFields[i].value.isEmpty && !checkRegexPattern(regexPattern: textFields[i].regex, textToValidate: textFields[i].value) {
+                } else if !textFields[i].value.isEmpty && !textFields[i].regex.isEmpty && !checkRegexPattern(regexPattern: textFields[i].regex, textToValidate: textFields[i].value) {
                     NSSound.beep()
                     observedObject?.requiredTextfieldHighlight[i] = Color.green
                     observedObject?.showSheet = true
