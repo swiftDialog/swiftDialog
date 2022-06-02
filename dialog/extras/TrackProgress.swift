@@ -313,12 +313,18 @@ class DialogUpdatableContent : ObservableObject {
                 
             // list items
             case "list:" :
-                if line.replacingOccurrences(of: "list: ", with: "") == "clear" {
+                switch line.replacingOccurrences(of: "list: ", with: "") {
+                case "clear":
                     // clean everything out and remove the listview from display
                     listItemPresent = false
                     listItemsArray = [ListItems]()
-                    
-                } else {
+                case "show":
+                    // show the list
+                    listItemPresent = true
+                case "hide":
+                    // hide the list but don't delete the contents
+                    listItemPresent = false
+                default:
                     var listItems = line.replacingOccurrences(of: "list: ", with: "").components(separatedBy: ",")
                     listItems = listItems.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
 
@@ -385,7 +391,6 @@ class DialogUpdatableContent : ObservableObject {
                             case "delete":
                                 deleteRow = true
                             case "add":
-                                print("set adding a row")
                                 addRow = true
                             default:
                                 break
