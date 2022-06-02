@@ -590,6 +590,9 @@ func processCLOptionValues() {
     cloptions.watermarkFill.value           = json[cloptions.watermarkFill.long].string ?? CLOptionText(OptionName: cloptions.watermarkFill)
     cloptions.watermarkFill.present         = json[cloptions.watermarkFill.long].exists() || CLOptionPresent(OptionName: cloptions.watermarkFill)
     
+    cloptions.watermarkFill.value           = json[cloptions.watermarkScale.long].string ?? CLOptionText(OptionName: cloptions.watermarkScale)
+    cloptions.watermarkFill.present         = json[cloptions.watermarkScale.long].exists() || CLOptionPresent(OptionName: cloptions.watermarkScale)
+    
     cloptions.autoPlay.value                = json[cloptions.autoPlay.long].string ?? CLOptionText(OptionName: cloptions.autoPlay, DefaultValue: "\(appvars.timerDefaultSeconds)")
     cloptions.autoPlay.present              = json[cloptions.autoPlay.long].exists() || CLOptionPresent(OptionName: cloptions.autoPlay)
     

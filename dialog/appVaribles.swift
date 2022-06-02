@@ -193,9 +193,10 @@ struct CLOptions {
     var watermarkAlpha           = (long: String("bgalpha"),           short: String("ba"),  value : String(""), present : Bool(false)) // -ba
     var watermarkPosition        = (long: String("bgposition"),        short: String("bp"),  value : String(""), present : Bool(false)) // -bp
     var watermarkFill            = (long: String("bgfill"),            short: String("bf"),  value : String(""), present : Bool(false)) // -bf
-    var position                 = (long: String("position"),          short: String(""),    value : String(""), present : Bool(false)) // -bf
+    var watermarkScale           = (long: String("bgscale"),           short: String("bs"),  value : String(""), present : Bool(false)) // -bs
+    var position                 = (long: String("position"),          short: String(""),    value : String(""), present : Bool(false))
     var video                    = (long: String("video"),             short: String(""),    value : String(""), present : Bool(false))
-    var videoCaption             = (long: String("videocaption"),      short: String(""),    value : String(""), present : Bool(false))// -bf
+    var videoCaption             = (long: String("videocaption"),      short: String(""),    value : String(""), present : Bool(false))
     var debug                    = (long: String("debug"),             short: String(""),    value : String(""), present : Bool(false))
     var jsonFile                 = (long: String("jsonfile"),          short: String(""),    value : String(""), present : Bool(false))
     var jsonString               = (long: String("jsonstring"),        short: String(""),    value : String(""), present : Bool(false))

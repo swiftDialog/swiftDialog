@@ -354,6 +354,7 @@ var helpText = """
                     Default is center
     
         -\(cloptions.watermarkFill.short), --\(cloptions.watermarkFill.long) [fill | fit]
+        -\(cloptions.watermarkScale.short), --\(cloptions.watermarkScale.long) [fill | fit]
                     fill - resizes the image to fill the entire window. Image will be truncated if necessary
                     fit  - resizes the image to fit the window but will not truncate
                     Default is none which will display the image at its native resolution
