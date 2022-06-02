@@ -21,7 +21,7 @@ struct MessageContent: View {
     var iconDisplayWidth : CGFloat
         
     var defaultStyle: MarkdownStyle {
-        return MarkdownStyle(font: .system(size: appvars.messageFontSize), foregroundColor: appvars.messageFontColour)
+        return MarkdownStyle(font: .system(size: appvars.messageFontSize, weight: appvars.messageFontWeight), foregroundColor: appvars.messageFontColour)
     }
     
     var customStyle: MarkdownStyle {
