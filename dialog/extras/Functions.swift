@@ -119,6 +119,28 @@ func shell(_ command: String) -> String {
     return output
 }
 
+// taken wholesale from DEPNotify because Joel and team and jsut awesome so why re-invent the wheel?
+func checkRegexPattern(regexPattern: String, textToValidate: String) -> Bool {
+    var returnValue = true
+    
+    do {
+        let regex = try NSRegularExpression(pattern: regexPattern)
+        let nsString = textToValidate as NSString
+        let results = regex.matches(in: textToValidate, range: NSRange(location: 0, length: nsString.length))
+        
+        if results.count == 0
+        {
+            returnValue = false
+        }
+        
+    } catch let error as NSError {
+        logger(logMessage: "invalid regex: \(error.localizedDescription)")
+        returnValue = false
+    }
+    
+    return  returnValue
+}
+
 func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQuit: Bool = true, observedObject: DialogUpdatableContent? = nil) {
     //let action: String = CLOptionText(OptionName: cloptions.button1ActionOption, DefaultValue: "")
     
@@ -206,12 +228,24 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
             // if there is an empty field, update the highlight colour
             var dontQuit = false
             for i in 0..<textFields.count {
-                if textFields[i].required && textFields[i].value == "" {
+                //check for required fields
+                if textFields[i].required && textFields[i].value == "" { // && textFields[i].regex.isEmpty {
+                    NSSound.beep()
                     observedObject?.requiredTextfieldHighlight[i] = Color.red
+                    observedObject?.sheetErrorMessage += "• "+textFields[i].title+" "+"is-required".localized+"\n"
+                    dontQuit = true
+                
+                //check for regex requirements
+                } else if !textFields[i].value.isEmpty && !textFields[i].regex.isEmpty && !checkRegexPattern(regexPattern: textFields[i].regex, textToValidate: textFields[i].value) {
+                    NSSound.beep()
+                    observedObject?.requiredTextfieldHighlight[i] = Color.green
+                    observedObject?.showSheet = true
+                    observedObject?.sheetErrorMessage += "• "+textFields[i].regexError+"\n"
                     dontQuit = true
                 } else {
                     observedObject?.requiredTextfieldHighlight[i] = Color.clear
                 }
+                
                 outputArray.append("\"\(textFields[i].title)\" : \"\(textFields[i].value)\"")
                 json[textFields[i].title].string = textFields[i].value
             }
@@ -258,6 +292,31 @@ func textToFontWeight(_ weight: String) -> Font.Weight {
             return Font.Weight.thin
         default:
             return Font.Weight.thin
+    }
+}
+
+extension String {
+    var localized: String {
+      return NSLocalizedString(self, comment: "\(self)_comment")
+    }
+
+    func localized(_ args: CVarArg...) -> String {
+        return String(format: localized, arguments: args)
+    }
+}
+
+extension String {
+    func split(usingRegex pattern: String) -> [String] {
+        let regex = try! NSRegularExpression(pattern: pattern)
+        let matches = regex.matches(in: self, range: NSRange(startIndex..., in: self))
+        let splits = [startIndex]
+            + matches
+                .map { Range($0.range, in: self)! }
+                .flatMap { [ $0.lowerBound, $0.upperBound ] }
+            + [endIndex]
+
+        return zip(splits, splits.dropFirst())
+            .map { String(self[$0 ..< $1])}
     }
 }
 

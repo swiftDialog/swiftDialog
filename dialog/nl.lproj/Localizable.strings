@@ -1,0 +1,25 @@
+/* 
+  Localizable.strings
+  dialog
+
+  Created by Bart Reardon on 29/5/2022.
+  
+  Dutch Translation by Henk Codfried
+*/
+
+// error sheet
+"invalid-input" = "Een of meer invoervelden zijn onjuist";
+"is-required" = "is verplicht";
+"no-pattern" = "niet overeenkomt met het vereiste formaat";
+
+// required fields text
+"required-note" = "* Verplichte Velden";
+
+//buttons
+"button-cancel" = "Annuleer";
+"button-more-info" = "Meer informatie";
+"button-ok" = "OK";
+
+//default text
+"default-title" = "Een belangrijk bericht";
+"default-message" = "Dit bevat een belangrijk bericht\n\n Lees dit alsjeblieft";

@@ -134,8 +134,14 @@ var helpText = """
 
                     color,colour=<text><hex>          - specified in hex format, e.g. #00A4C7
                     bgcolor,bgcolour=<text><hex>
+                    palette=<text><hex>               - palette accepts up to three colours for use in multicolour
+                                                        SF Symbols
+                                                        Use comma seperated values, e.g. palette=red,green,blue
+    
                                                       Also accepts any of the standard Apple colours
-                                                      black, blue, gray, green, orange, pink, purple, red, white, yellow
+                                                      black, blue, gray, green, orange, pink, purple, red, white,
+                                                      yellow, mint, cyan, indigo or teal
+    
                                                       default if option is invalid is system primary colour
     
                                                       bgcolour, bgcolor will set the background colour of the icon overlay
@@ -197,9 +203,13 @@ var helpText = """
                     If not specified, Info button will not be displayed
     
         --\(cloptions.buttonInfoActionOption.long)  <url>
-                    Set the action to take.
-                    Accepts URL
-                    Default action if not specified is no action
+                    Set the action to take when clicking \(cloptions.infoButtonOption.long). Setting this option prevents the info
+                    button from triggering a dialog exit
+                    Default action if not specified is to exit with return code 3
+    
+        --\(cloptions.infoText.long) (<text>)
+                    Will display the specified text in place of the info button
+                    If no text is supplied, will display the current swiftDialog version
     
         --\(cloptions.quitOnInfo.long)
                     Will tell Dialog to quit when the info button is selected
@@ -273,12 +283,15 @@ var helpText = """
                     Multiple textfields can be specified as required.
     
                     Modifiers available to text fields are:
-                        secure   - Presends a secure input area. Contents of the textfield will not be shown on screen
-                        required - Dialog will not exit until the field is populated
-                        prompt   - Pre-fill the field with some prompt text (prompt text will not be returned, macOS 12+ only, macOS 11 safe)
+                        secure     - Presends a secure input area. Contents of the textfield will not be shown on screen
+                        required   - Dialog will not exit until the field is populated
+                        prompt     - Pre-fill the field with some prompt text (prompt text will not be returned, macOS 12+ only, macOS 11 safe)
+                        regex      - Specify a regular expression that the field must satisfy for the content to be accepted.
+                        regexerror - Specify a custom error to display if regex conditions are not met
     
                     modifiers can be combined e.g. --\(cloptions.textField.long) <text>,secure,required
-                                               or  --\(cloptions.textField.long) <text>,required,prompt="<text>"
+                                                   --\(cloptions.textField.long) <text>,required,prompt="<text>"
+                                                   --\(cloptions.textField.long) <text>,regex="\\d{6}",prompt="000000",regexerror="Enter 6 digits"
                     (secure fields cannot have the prompt modifier applied)
     
         --\(cloptions.checkbox.long) <text>
@@ -291,7 +304,7 @@ var helpText = """
                     Creates a list item with the specified text as the item title.
                     Multiple items can be added by specifying --\(cloptions.listItem.long) multiple times
     
-                    Alternatly, specify a list item with either of the follwoing JSON formats:
+                    Alternatly, specify a list item with either of the follwoing JSON formats (in conjunction with --\(cloptions.jsonFile.long) or \(cloptions.jsonString.long):
                     Simple:
                     {
                       "listitem" : ["Item One", "Item Two", "Item Three", "Item Four", "Item Five"]
@@ -317,6 +330,11 @@ var helpText = """
                         listitem: <title>: [<text>|<status>]
                     Update a list item (advanced):
                         listitem: [title: <title>|index: <index>], status: <status>, statustext: <text>
+                    Add an item to the end of the current list:
+                        listitem: add: title: <text>, status: <status>, statustext: <text>
+                    Delete an item (one of):
+                        listitem: index: <index>, delete:
+                        listitem: title: <text>, delete:
                     
                     <index> starts at 0
     
@@ -336,6 +354,7 @@ var helpText = """
                     Default is center
     
         -\(cloptions.watermarkFill.short), --\(cloptions.watermarkFill.long) [fill | fit]
+        -\(cloptions.watermarkScale.short), --\(cloptions.watermarkScale.long) [fill | fit]
                     fill - resizes the image to fill the entire window. Image will be truncated if necessary
                     fit  - resizes the image to fit the window but will not truncate
                     Default is none which will display the image at its native resolution
@@ -417,6 +436,7 @@ var helpText = """
     
         --\(cloptions.quitKey.long) <char>
                     Use the specified character as the command+ key combination for quitting instead of "q".
+                    Capitol letters can be used in which case command+shift+<key> will be required
                     
 
         -\(cloptions.ignoreDND.short), --\(cloptions.ignoreDND.long)

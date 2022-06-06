@@ -35,13 +35,25 @@ struct ContentView: View {
                 if cloptions.quitKey.value != "q" {
                     return nil
                 }
-            case [.command] where event.characters == cloptions.quitKey.value:
+                observedDialogContent.end()
+            case [.command] where event.characters == cloptions.quitKey.value, [.command, .shift] where event.characters == cloptions.quitKey.value.lowercased():
+                observedDialogContent.end()
                 quitDialog(exitCode: appvars.exit10.code)
             default:
                 return event
             }
             return event
         }
+        /*
+        // TODO: monitor for global events like minimise all app windows while the app isfocused and write to the log
+        NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { event in
+            switch event.modifierFlags.intersection(.deviceIndependentFlagsMask) {
+            case [.command, .option] where event.characters == "m":
+                print("app Minimised")
+            default: () //do nothing
+            }
+        }
+        */
     }
 //
 //    // set up timer to read data from temp file
@@ -66,12 +78,11 @@ struct ContentView: View {
                     TitleView(observedDialogContent: observedDialogContent)
                         .border(appvars.debugBorderColour, width: 2)
                         .padding(.top, titlePadding)
-                        //.offset(y: 10) // shift the title down a notch
+                        .frame(minWidth: appvars.windowWidth, minHeight: appvars.titleHeight, alignment: .center)
                     
                     // Horozontal Line
                     Divider()
                         .frame(width: appvars.windowWidth*appvars.horozontalLineScale, height: 2)
-                        .offset(y: -10) // shift the divider up a notch
                 }
                 
                 if cloptions.video.present {
@@ -84,7 +95,11 @@ struct ContentView: View {
                 
                 // Buttons
                 HStack() {
-                    if cloptions.infoButtonOption.present || cloptions.buttonInfoTextOption.present {
+                    if cloptions.infoText.present {
+                        Text(cloptions.infoText.value)
+                            .foregroundColor(.secondary.opacity(0.7))
+                            //.font(.system(size: 10))
+                    } else if cloptions.infoButtonOption.present || cloptions.buttonInfoTextOption.present {
                         MoreInfoButton()
                         if !cloptions.timerBar.present {
                             Spacer()

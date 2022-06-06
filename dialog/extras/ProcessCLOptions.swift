@@ -106,34 +106,48 @@ func processCLOptions() {
                     textFields.append(TextFieldState(title: String(json[cloptions.textField.long][i].stringValue)))
                 } else {
                     textFields.append(TextFieldState(title: String(json[cloptions.textField.long][i]["title"].stringValue),
-                                                 required: Bool(json[cloptions.textField.long][i]["required"].boolValue),
-                                                 secure: Bool(json[cloptions.textField.long][i]["secure"].boolValue),
-                                                 prompt: String(json[cloptions.textField.long][i]["prompt"].stringValue))
+                                                     required: Bool(json[cloptions.textField.long][i]["regex"].exists() || json[cloptions.textField.long][i]["required"].boolValue),
+                                                     secure: Bool(json[cloptions.textField.long][i]["secure"].boolValue),
+                                                     prompt: String(json[cloptions.textField.long][i]["prompt"].stringValue),
+                                                     regex: String(json[cloptions.textField.long][i]["regex"].stringValue),
+                                                     regexError: String(json[cloptions.textField.long][i]["regexerror"].stringValue))
                                 )
                 }
             }
         } else {
             for textFieldOption in CLOptionMultiOptions(optionName: cloptions.textField.long) {
-                let items = textFieldOption.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                let items = textFieldOption.split(usingRegex: appvars.argRegex)
                 var fieldTitle : String = ""
                 var fieldPrompt : String = ""
+                var fieldRegex : String = ""
+                var fieldRegexErrror : String = ""
                 var fieldSecure : Bool = false
                 var fieldRequire : Bool = false
-                for item in items {
-                    let itemName = item.components(separatedBy: "=").first!
-                    let itemValue = item.components(separatedBy: "=").last!
-                    switch itemName.lowercased() {
-                    case "secure":
-                        fieldSecure = true
-                    case "required":
-                        fieldRequire = true
-                    case "prompt":
-                        fieldPrompt = itemValue
-                    default:
-                        fieldTitle = itemName
+                if items.count > 0 {
+                    fieldTitle = items[0]
+                    if items.count > 1 {
+                        fieldRegexErrror = "\"\(fieldTitle)\" "+"no-pattern".localized
+                        for index in 1...items.count-1 {
+                            switch items[index].lowercased()
+                                .replacingOccurrences(of: ",", with: "")
+                                .replacingOccurrences(of: "=", with: "")
+                                .trimmingCharacters(in: .whitespaces) {
+                            case "secure":
+                                fieldSecure = true
+                            case "required":
+                                fieldRequire = true
+                            case "prompt":
+                                fieldPrompt = items[index+1]
+                            case "regex":
+                                fieldRegex = items[index+1]
+                            case "regexerror":
+                                fieldRegexErrror = items[index+1]
+                            default: ()
+                            }
+                        }
                     }
                 }
-                textFields.append(TextFieldState(title: fieldTitle, required: fieldRequire, secure: fieldSecure, prompt: fieldPrompt))
+                textFields.append(TextFieldState(title: fieldTitle, required: fieldRequire, secure: fieldSecure, prompt: fieldPrompt, regex: fieldRegex, regexError: fieldRegexErrror))
             }
         }
         logger(logMessage: "textOptionsArray : \(textFields)")
@@ -366,10 +380,16 @@ func processCLOptions() {
             }
         }
     }
-            
+        
+    // hide the icon if asked to or if banner image is present
     if cloptions.hideIcon.present || cloptions.iconOption.value == "none" || cloptions.bannerImage.present {
         appvars.iconIsHidden = true
         logger(logMessage: "iconIsHidden = true")
+    }
+    
+    // of both banner image and icon are specified, re-enable the icon.
+    if cloptions.bannerImage.present && cloptions.iconOption.present {
+        appvars.iconIsHidden = false
     }
     
     if cloptions.centreIcon.present {
@@ -397,12 +417,18 @@ func processCLOptions() {
         // scale everything down a notch
         appvars.smallWindow = true
         appvars.scaleFactor = 0.75
+        cloptions.iconSize.value = "120"
         logger(logMessage: "smallWindow.present")
     } else if cloptions.bigWindow.present {
         // scale everything up a notch
         appvars.bigWindow = true
         appvars.scaleFactor = 1.25
         logger(logMessage: "bigWindow.present")
+    }
+    
+    //if info button is present but no button action then default to quit on info
+    if !cloptions.buttonInfoActionOption.present {
+        cloptions.quitOnInfo.present = true
     }
 }
 
@@ -564,11 +590,17 @@ func processCLOptionValues() {
     cloptions.watermarkFill.value           = json[cloptions.watermarkFill.long].string ?? CLOptionText(OptionName: cloptions.watermarkFill)
     cloptions.watermarkFill.present         = json[cloptions.watermarkFill.long].exists() || CLOptionPresent(OptionName: cloptions.watermarkFill)
     
+    cloptions.watermarkFill.value           = json[cloptions.watermarkScale.long].string ?? CLOptionText(OptionName: cloptions.watermarkScale)
+    cloptions.watermarkFill.present         = json[cloptions.watermarkScale.long].exists() || CLOptionPresent(OptionName: cloptions.watermarkScale)
+    
     cloptions.autoPlay.value                = json[cloptions.autoPlay.long].string ?? CLOptionText(OptionName: cloptions.autoPlay, DefaultValue: "\(appvars.timerDefaultSeconds)")
     cloptions.autoPlay.present              = json[cloptions.autoPlay.long].exists() || CLOptionPresent(OptionName: cloptions.autoPlay)
     
     cloptions.statusLogFile.value           = json[cloptions.statusLogFile.long].string ?? CLOptionText(OptionName: cloptions.statusLogFile)
     cloptions.statusLogFile.present         = json[cloptions.statusLogFile.long].exists() || CLOptionPresent(OptionName: cloptions.statusLogFile)
+    
+    cloptions.infoText.value                = json[cloptions.infoText.long].string ?? CLOptionText(OptionName: cloptions.infoText, DefaultValue: "swiftDialog \(appvars.cliversion)")
+    cloptions.infoText.present              = json[cloptions.infoText.long].exists() || CLOptionPresent(OptionName: cloptions.infoText)
     
     cloptions.quitKey.value                 = json[cloptions.quitKey.long].string ?? CLOptionText(OptionName: cloptions.quitKey, DefaultValue: appvars.quitKeyCharacter)
     

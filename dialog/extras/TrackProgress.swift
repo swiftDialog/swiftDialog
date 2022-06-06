@@ -31,6 +31,8 @@ class DialogUpdatableContent : ObservableObject {
     @Published var iconImage: String
     @Published var iconSize: CGFloat
     @Published var iconPresent: Bool
+    @Published var overlayIconImage: String
+    @Published var overlayIconPresent: Bool
     @Published var centreIconPresent: Bool
     //@Published var image: String
     @Published var imagePresent: Bool
@@ -44,6 +46,9 @@ class DialogUpdatableContent : ObservableObject {
     
     @Published var windowWidth: CGFloat
     @Published var windowHeight: CGFloat
+    
+    @Published var showSheet: Bool
+    @Published var sheetErrorMessage: String
     
     var status: StatusState
     
@@ -90,17 +95,20 @@ class DialogUpdatableContent : ObservableObject {
         iconPresent = !appvars.iconIsHidden
         centreIconPresent = cloptions.centreIcon.present
         
-        //image = cloptions.mainImage.value
-        appvars.imageArray = CLOptionMultiOptions(optionName: cloptions.mainImage.long)
-        appvars.imageCaptionArray = CLOptionMultiOptions(optionName: cloptions.mainImageCaption.long)
         imagePresent = cloptions.mainImage.present
         imageCaptionPresent = cloptions.mainImageCaption.present
+        
+        overlayIconImage = cloptions.overlayIconOption.value
+        overlayIconPresent = cloptions.overlayIconOption.present
         
         listItemsArray = appvars.listItems
         listItemPresent = cloptions.listItem.present
         
         windowWidth = appvars.windowWidth
         windowHeight = appvars.windowHeight
+        
+        showSheet = false
+        sheetErrorMessage = ""
 
         // start the background process to monotor the command file
         status = .start
@@ -285,6 +293,14 @@ class DialogUpdatableContent : ObservableObject {
                 //print("centre icon is \(centreIconPresent)")
                 //iconImage = line.replacingOccurrences(of: "\(cloptions.iconOption.long): ", with: "")
                 
+            // overlay icon
+            case "\(cloptions.overlayIconOption.long):":
+                overlayIconImage = line.replacingOccurrences(of: "\(cloptions.overlayIconOption.long): ", with: "")
+                overlayIconPresent = true
+                if overlayIconImage == "none" {
+                    overlayIconPresent = false
+                }
+                
             // image
             case "\(cloptions.mainImage.long):" :
                 appvars.imageArray = [line.replacingOccurrences(of: "\(cloptions.mainImage.long): ", with: "")]
@@ -297,12 +313,18 @@ class DialogUpdatableContent : ObservableObject {
                 
             // list items
             case "list:" :
-                if line.replacingOccurrences(of: "list: ", with: "") == "clear" {
+                switch line.replacingOccurrences(of: "list: ", with: "") {
+                case "clear":
                     // clean everything out and remove the listview from display
                     listItemPresent = false
                     listItemsArray = [ListItems]()
-                    
-                } else {
+                case "show":
+                    // show the list
+                    listItemPresent = true
+                case "hide":
+                    // hide the list but don't delete the contents
+                    listItemPresent = false
+                default:
                     var listItems = line.replacingOccurrences(of: "list: ", with: "").components(separatedBy: ",")
                     listItems = listItems.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
 
@@ -320,6 +342,8 @@ class DialogUpdatableContent : ObservableObject {
                 var statusText      : String = ""
                 var statusIcon      : String = ""
                 let statusTypeArray = ["wait","success","fail","error","pending"]
+                var deleteRow       : Bool = false
+                var addRow          : Bool = false
 
                 let listCommand = line.replacingOccurrences(of: "\(cloptions.listItem.long): ", with: "")
                 
@@ -358,11 +382,16 @@ class DialogUpdatableContent : ObservableObject {
                             case "title":
                                 title = action[1].trimmingCharacters(in: .whitespaces)
                             case "icon":
+                                // reserved for future use
                                 icon = action[1].trimmingCharacters(in: .whitespaces)
                             case "statustext":
                                 statusText = action[1].trimmingCharacters(in: .whitespaces)
                             case "status":
                                 statusIcon = action[1].trimmingCharacters(in: .whitespaces)
+                            case "delete":
+                                deleteRow = true
+                            case "add":
+                                addRow = true
                             default:
                                 break
                             }
@@ -370,10 +399,21 @@ class DialogUpdatableContent : ObservableObject {
                     
                     // update the list items array
                     if let row = listItemsArray.firstIndex(where: {$0.title == title}) {
-                        listItemsArray[row].icon = icon
-                        listItemsArray[row].statusIcon = statusIcon
-                        listItemsArray[row].statusText = statusText
-                        listItemUpdateRow = row
+                        if deleteRow {
+                            listItemsArray.remove(at: row)
+                            logger(logMessage: "deleted row at index \(row)")
+                        } else {
+                            listItemsArray[row].icon = icon
+                            listItemsArray[row].statusIcon = statusIcon
+                            listItemsArray[row].statusText = statusText
+                            listItemUpdateRow = row
+                        }
+                    }
+                    
+                    // add to the list items array
+                    if addRow {
+                        listItemsArray.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon))
+                        logger(logMessage: "row added with \(title) \(icon) \(statusText) \(statusIcon)")
                     }
                     
                 }

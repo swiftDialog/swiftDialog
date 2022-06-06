@@ -21,12 +21,11 @@ struct TitleView: View {
             Text(observedDialogContent.titleText)
                 .font(.system(size: appvars.titleFontSize, weight: appvars.titleFontWeight))
                 .foregroundColor(appvars.titleFontColour)
-                .frame(width: appvars.windowWidth , height: appvars.titleHeight, alignment: .center)
         } else {
             Text(observedDialogContent.titleText)
                 .font(.custom(appvars.titleFontName, size: appvars.titleFontSize))
+                .fontWeight(appvars.titleFontWeight)
                 .foregroundColor(appvars.titleFontColour)
-                .frame(width: appvars.windowWidth , height: appvars.titleHeight, alignment: .center)
         }
     }
 }

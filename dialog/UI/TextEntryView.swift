@@ -16,6 +16,8 @@ struct TextEntryView: View {
     
     @State private var animationAmount = 1.0
     
+    @State private var showingSheet = false
+    
     var textFieldPresent: Bool = false
     var fieldwidth: CGFloat = 0
     var requiredFieldsPresent : Bool = false
@@ -86,7 +88,7 @@ struct TextEntryView: View {
                 if requiredFieldsPresent {
                     HStack {
                         Spacer()
-                        Text("* Required Fields")
+                        Text("required-note")
                             .font(.system(size: 10)
                                     .weight(.light))
                             .padding(.trailing, 10)

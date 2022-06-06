@@ -24,6 +24,8 @@ struct TextFieldState {
     var required        : Bool      = false
     var secure          : Bool      = false
     var prompt          : String    = ""
+    var regex           : String    = ""
+    var regexError      : String    = ""
     var value           : String    = ""
 }
 
@@ -43,19 +45,19 @@ struct ListItems {
 
 struct AppVariables {
     
-    var cliversion                      = "1.10.4"
+    var cliversion                      = "1.11.0"
     
     // message default strings
-    var titleDefault                    = String("An Important Message")
-    var messageDefault                  = String("\nThis is important message content\n\nPlease read")
+    var titleDefault                    = String("default-title".localized)
+    var messageDefault                  = String("default-message".localized)
     var messageAlignment : TextAlignment = .leading
     var messageAlignmentTextRepresentation = String("left")
     
     // button default strings
     // work out how to define a default width button that does what you tell it to. in the meantime, diry hack with spaces
-    var button1Default                  = String("OK")
-    var button2Default                  = String("Cancel")
-    var buttonInfoDefault               = String("More Information")
+    var button1Default                  = String("button-ok".localized)
+    var button2Default                  = String("button-cancel".localized)
+    var buttonInfoDefault               = String("button-more-info".localized)
     var buttonInfoActionDefault         = String("")
     
     var windowIsMoveable                = Bool(false)
@@ -128,6 +130,8 @@ struct AppVariables {
     
     var quitKeyCharacter                = String("q")
     
+    var argRegex                        = String("(,? ?[a-zA-Z1-9]+=|(,\\s?secure)|(,\\s?required))")
+    
     // exit codes and error messages
     var exit0                           = (code: Int32(0),   message: String("")) // normal exit
     var exitNow                         = (code: Int32(255), message: String("")) // forced exit
@@ -189,15 +193,17 @@ struct CLOptions {
     var watermarkAlpha           = (long: String("bgalpha"),           short: String("ba"),  value : String(""), present : Bool(false)) // -ba
     var watermarkPosition        = (long: String("bgposition"),        short: String("bp"),  value : String(""), present : Bool(false)) // -bp
     var watermarkFill            = (long: String("bgfill"),            short: String("bf"),  value : String(""), present : Bool(false)) // -bf
-    var position                 = (long: String("position"),          short: String(""),    value : String(""), present : Bool(false)) // -bf
+    var watermarkScale           = (long: String("bgscale"),           short: String("bs"),  value : String(""), present : Bool(false)) // -bs
+    var position                 = (long: String("position"),          short: String(""),    value : String(""), present : Bool(false))
     var video                    = (long: String("video"),             short: String(""),    value : String(""), present : Bool(false))
-    var videoCaption             = (long: String("videocaption"),      short: String(""),    value : String(""), present : Bool(false))// -bf
+    var videoCaption             = (long: String("videocaption"),      short: String(""),    value : String(""), present : Bool(false))
     var debug                    = (long: String("debug"),             short: String(""),    value : String(""), present : Bool(false))
     var jsonFile                 = (long: String("jsonfile"),          short: String(""),    value : String(""), present : Bool(false))
     var jsonString               = (long: String("jsonstring"),        short: String(""),    value : String(""), present : Bool(false))
     var statusLogFile            = (long: String("commandfile"),       short: String(""),    value : String(""), present : Bool(false))
     var listItem                 = (long: String("listitem"),          short: String(""),    value : String(""), present : Bool(false))
     var quitKey                  = (long: String("quitkey"),           short: String(""),    value : String(""), present : Bool(false))
+    var infoText                 = (long: String("infotext"),          short: String(""),    value : String(""), present : Bool(false))
 
     // command line options that take no additional parameters
     var button1Disabled          = (long: String("button1disabled"),   short: String(""),    value : String(""), present : Bool(false))

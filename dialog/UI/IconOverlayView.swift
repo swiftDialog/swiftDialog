@@ -10,18 +10,23 @@ import SwiftUI
 
 struct IconOverlayView: View {
     
-    let overlayImagePath: String = cloptions.overlayIconOption.value // CLOptionText(OptionName: cloptions.overlayIconOption)
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    
+    var overlayImagePath: String // cloptions.overlayIconOption.value // CLOptionText(OptionName: cloptions.overlayIconOption)
+    var overlayIconPresent: Bool
     var imgFromURL: Bool = false
     var imgFromAPP: Bool = false
     
     var builtInIconName: String = ""
     var builtInIconColour: Color = Color.primary
     var builtInIconSecondaryColour: Color = Color.secondary
+    var builtInIconTertiaryColour: Color = Color.tertiaryBackground
     var builtInIconFill: String = ""
     var builtInIconPresent: Bool = false
     var builtInIconWeight = Font.Weight.thin
     
     var iconRenderingMode = Image.TemplateRenderingMode.original
+    var sfPalettePresent: Bool = false
     
     var sfSymbolName: String = ""
     var sfSymbolWeight = Font.Weight.thin
@@ -32,7 +37,11 @@ struct IconOverlayView: View {
     var sfGradientPresent: Bool = false
     var sfBackgroundIconColour: Color = Color.background
         
-    init() {
+    init (observedDialogContent : DialogUpdatableContent) {
+        self.observedDialogContent = observedDialogContent
+        
+        overlayImagePath = observedDialogContent.overlayIconImage
+        overlayIconPresent = observedDialogContent.overlayIconPresent
         
         if overlayImagePath.starts(with: "http") {
             imgFromURL = true
@@ -45,72 +54,99 @@ struct IconOverlayView: View {
             sfSymbolPresent = true
             builtInIconPresent = true
             
-            var SFValues = overlayImagePath.components(separatedBy: ",")
+            //var SFValues = messageUserImagePath.components(separatedBy: ",")
+            var SFValues = overlayImagePath.split(usingRegex: appvars.argRegex)
             SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
             
-            for value in SFValues {
-                // split by =
-                let item = value.components(separatedBy: "=")
-                let itemName = item[0]
-                let itemValue = item[1]
-
-                if itemName == "SF" {
-                    builtInIconName = itemValue
-                }
-                if itemName == "weight" {
-                    builtInIconWeight = textToFontWeight(item[1])
-                }
-                if itemName.hasPrefix("bgcolour") || itemName.hasPrefix("bgcolor") {
-                    if itemValue == "none" {
-                        sfBackgroundIconColour = .clear
-                    } else {
-                        sfBackgroundIconColour = stringToColour(itemValue)
+            var SFArg : String = ""
+            var SFArgValue : String = ""
+                
+            if SFValues.count > 0 {
+                for index in 0...SFValues.count-1 {
+                    SFArg = SFValues[index]
+                        .replacingOccurrences(of: ",", with: "")
+                        .replacingOccurrences(of: "=", with: "")
+                        .trimmingCharacters(in: .whitespaces)
+                    
+                    if index < SFValues.count-1 {
+                        SFArgValue = SFValues[index+1]
                     }
-                }
-                if itemName.hasPrefix("colour") || itemName.hasPrefix("color") {
-                    if itemValue == "auto" {
-                        // detecting sf symbol properties seems to be annoying, at least in swiftui 2
-                        // this is a bit of a workaround in that we let the user determine if they want the multicolour SF symbol
-                        // or a standard template style. sefault is template. "auto" will use the built in SF Symbol colours
-                        iconRenderingMode = Image.TemplateRenderingMode.original
-                    } else { //check to see if it's in the right length and only contains the right characters
-                        
-                        iconRenderingMode = Image.TemplateRenderingMode.template // switches to monochrome which allows us to tint the sf symbol
-                                                
-                        if itemName.hasSuffix("2") {
-                            sfGradientPresent = true
-                            builtInIconSecondaryColour = stringToColour(itemValue)
+                    
+                    switch SFArg {
+                    case "SF":
+                        builtInIconName = SFArgValue
+                    case "weight":
+                        builtInIconWeight = textToFontWeight(SFArgValue)
+                    case _ where SFArg.hasPrefix("colo"):
+                        if SFArgValue == "auto" {
+                            // detecting sf symbol properties seems to be annoying, at least in swiftui 2
+                            // this is a bit of a workaround in that we let the user determine if they want the multicolour SF symbol
+                            // or a standard template style. sefault is template. "auto" will use the built in SF Symbol colours
+                            iconRenderingMode = Image.TemplateRenderingMode.original
                         } else {
-                            builtInIconColour = stringToColour(itemValue)
+                            //check to see if it's in the right length and only contains the right characters
+                            iconRenderingMode = Image.TemplateRenderingMode.template // switches to monochrome which allows us to tint the sf symbol
+                            if SFArg.hasSuffix("2") {
+                                sfGradientPresent = true
+                                builtInIconSecondaryColour = stringToColour(SFArgValue)
+                            } else if SFArg.hasSuffix("3") {
+                                builtInIconTertiaryColour = stringToColour(SFArgValue)
+                            } else {
+                                builtInIconColour = stringToColour(SFArgValue)
+                            }
                         }
+                    case _ where SFArg.hasPrefix("bgcolo"):
+                        if SFArgValue == "none" {
+                            sfBackgroundIconColour = .clear
+                        } else {
+                            sfBackgroundIconColour = stringToColour(SFArgValue)
+                        }
+                    case "palette":
+                        let paletteColours = SFArgValue.components(separatedBy: ",".trimmingCharacters(in: .whitespaces))
+                        if paletteColours.count > 1 {
+                            sfPalettePresent = true
+                        }
+                        for i in 0...paletteColours.count-1 {
+                            switch i {
+                            case 0:
+                                builtInIconColour = stringToColour(paletteColours[i])
+                            case 1:
+                                builtInIconSecondaryColour = stringToColour(paletteColours[i])
+                            case 2:
+                                builtInIconTertiaryColour = stringToColour(paletteColours[i])
+                            default: ()
+                            }
+                        }
+                    default:
+                        iconRenderingMode = Image.TemplateRenderingMode.template
                     }
-                } else {
-                   iconRenderingMode = Image.TemplateRenderingMode.template
-               }
+                }
             }
-        }
-        
-        if overlayImagePath == "warning" {
+            
+        } else if overlayImagePath == "warning" {
             builtInIconName = "exclamationmark.octagon.fill"
             builtInIconFill = "octagon.fill"
             builtInIconColour = Color.red
-            iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
+            iconRenderingMode = Image.TemplateRenderingMode.original
             builtInIconPresent = true
-        }
-        if overlayImagePath == "caution" {
+        
+        } else if overlayImagePath == "caution" {
             builtInIconName = "exclamationmark.triangle.fill"
             //builtInIconFill = "triangle.fill"
             //builtInIconColour = Color.yellow
             builtInIconPresent = true
-        }
-        if overlayImagePath == "info" {
+        
+        } else if overlayImagePath == "info" {
             builtInIconName = "person.fill.questionmark"
             builtInIconPresent = true
+        
+        } else if !FileManager.default.fileExists(atPath: overlayImagePath) {
+            overlayIconPresent = false
         }
     }
     
     var body: some View {
-        if cloptions.overlayIconOption.present {
+        if overlayIconPresent {
             ZStack {
                 if builtInIconPresent {
                     ZStack {
@@ -124,7 +160,26 @@ struct IconOverlayView: View {
                                 .shadow(color: .secondaryBackground.opacity(0.50), radius: 4, x:2, y:2) // gives the sf background some pop especially in dark mode
                         }
                         ZStack() {
-                            if sfGradientPresent {
+                            if sfGradientPresent || sfPalettePresent {
+                                
+                                if #available(macOS 12.0, *) {
+                                    if sfPalettePresent {
+                                        Image(systemName: builtInIconName)
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .symbolRenderingMode(.palette)
+                                            .foregroundStyle(builtInIconColour, builtInIconSecondaryColour, builtInIconTertiaryColour)
+                                    } else {
+                                        // gradient instead of palette
+                                        Image(systemName: builtInIconName)
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .symbolRenderingMode(.monochrome)
+                                            .foregroundStyle(
+                                                LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottomTrailing)
+                                            )
+                                    }
+                                } else {
                                 LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottomTrailing)
                                     .mask(
                                     Image(systemName: builtInIconName)
@@ -134,6 +189,7 @@ struct IconOverlayView: View {
                                         .foregroundColor(builtInIconColour)
                                         .font(Font.title.weight(builtInIconWeight))
                                 )
+                                }
                             } else {
                                 // background colour
                                 ZStack {

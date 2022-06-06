@@ -1,0 +1,25 @@
+/* 
+  Localizable.strings
+  dialog
+
+  Created by Bart Reardon on 29/5/2022.
+  
+  German translation by colorenz
+*/
+
+// error sheet
+"invalid-input" = "Ein oder mehrere Eingabefelder sind fehlerhaft";
+"is-required" = "Ist erforderlich";
+"no-pattern" = "nicht dem erforderlichen Format entspricht";
+
+// required fields text
+"required-note" = "*Erforderliche Felder";
+
+//buttons
+"button-cancel" = "Abbrechen";
+"button-more-info" = "Mehr Informationen";
+"button-ok" = "OK";
+
+//default text
+"default-title" = "Eine wichtige Nachricht";
+"default-message" = "Diese ist eine wichtige Nachrichten\n\n Bitte lesen Sie diese";

@@ -23,6 +23,7 @@ struct IconView: View {
     var builtInIconName: String = ""
     var builtInIconColour: Color = Color.primary
     var builtInIconSecondaryColour: Color = Color.secondary
+    var builtInIconTertiaryColour: Color = Color.primary
     var builtInIconFill: String = ""
     var builtInIconPresent: Bool = false
     var builtInIconWeight = Font.Weight.thin
@@ -36,6 +37,7 @@ struct IconView: View {
     var sfSymbolPresent: Bool = false
     
     var sfGradientPresent: Bool = false
+    var sfPalettePresent: Bool = false
     
     var mainImageScale: CGFloat = 1
     let mainImageWithOverlayScale: CGFloat = 0.88
@@ -50,7 +52,7 @@ struct IconView: View {
         logoWidth = appvars.iconWidth
         logoHeight = appvars.iconHeight
         
-        if cloptions.overlayIconOption.present {
+        if observedDialogContent.overlayIconPresent {
             mainImageScale = mainImageWithOverlayScale
         }
         
@@ -78,49 +80,75 @@ struct IconView: View {
             sfSymbolPresent = true
             builtInIconPresent = true
             
-            var SFValues = messageUserImagePath.components(separatedBy: ",")
+            //var SFValues = messageUserImagePath.components(separatedBy: ",")
+            var SFValues = messageUserImagePath.split(usingRegex: appvars.argRegex)
             SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
             
-            for value in SFValues {
-                // split by =
-                let item = value.components(separatedBy: "=")
-                let itemName = item[0]
-                let itemValue = item[1]
-
-                if itemName == "SF" {
-                    builtInIconName = itemValue
-                }
-                if itemName == "weight" {
-                    builtInIconWeight = textToFontWeight(item[1])
-                }
-                if itemName.hasPrefix("colour") || itemName.hasPrefix("color") {
-                    if itemValue == "auto" {
-                        // detecting sf symbol properties seems to be annoying, at least in swiftui 2
-                        // this is a bit of a workaround in that we let the user determine if they want the multicolour SF symbol
-                        // or a standard template style. sefault is template. "auto" will use the built in SF Symbol colours
-                        iconRenderingMode = Image.TemplateRenderingMode.original
-                    } else { //check to see if it's in the right length and only contains the right characters
-                        
-                        iconRenderingMode = Image.TemplateRenderingMode.template // switches to monochrome which allows us to tint the sf symbol
-                                                
-                        if itemName.hasSuffix("2") {
-                            sfGradientPresent = true
-                            builtInIconSecondaryColour = stringToColour(itemValue)
-                        } else {
-                            builtInIconColour = stringToColour(itemValue)
-                        }
+            var SFArg : String = ""
+            var SFArgValue : String = ""
+                
+            if SFValues.count > 0 {
+                for index in 0...SFValues.count-1 {
+                    SFArg = SFValues[index]
+                        .replacingOccurrences(of: ",", with: "")
+                        .replacingOccurrences(of: "=", with: "")
+                        .trimmingCharacters(in: .whitespaces)
+                    
+                    if index < SFValues.count-1 {
+                        SFArgValue = SFValues[index+1]
                     }
-                } else {
-                   iconRenderingMode = Image.TemplateRenderingMode.template
-               }
+                    
+                    switch SFArg {
+                    case "SF":
+                        builtInIconName = SFArgValue
+                    case "weight":
+                        builtInIconWeight = textToFontWeight(SFArgValue)
+                    case _ where SFArg.hasPrefix("colo"):
+                        if SFArgValue == "auto" {
+                            // detecting sf symbol properties seems to be annoying, at least in swiftui 2
+                            // this is a bit of a workaround in that we let the user determine if they want the multicolour SF symbol
+                            // or a standard template style. sefault is template. "auto" will use the built in SF Symbol colours
+                            iconRenderingMode = Image.TemplateRenderingMode.original
+                        } else {
+                            //check to see if it's in the right length and only contains the right characters
+                            iconRenderingMode = Image.TemplateRenderingMode.template // switches to monochrome which allows us to tint the sf symbol
+                            if SFArg.hasSuffix("2") {
+                                sfGradientPresent = true
+                                builtInIconSecondaryColour = stringToColour(SFArgValue)
+                            } else if SFArg.hasSuffix("3") {
+                                builtInIconTertiaryColour = stringToColour(SFArgValue)
+                            } else {
+                                builtInIconColour = stringToColour(SFArgValue)
+                            }
+                        }
+                    case "palette":
+                        let paletteColours = SFArgValue.components(separatedBy: ",".trimmingCharacters(in: .whitespaces))
+                        if paletteColours.count > 1 {
+                            sfPalettePresent = true
+                        }
+                        for i in 0...paletteColours.count-1 {
+                            switch i {
+                            case 0:
+                                builtInIconColour = stringToColour(paletteColours[i])
+                            case 1:
+                                builtInIconSecondaryColour = stringToColour(paletteColours[i])
+                            case 2:
+                                builtInIconTertiaryColour = stringToColour(paletteColours[i])
+                            default: ()
+                            }
+                        }
+                    default:
+                        iconRenderingMode = Image.TemplateRenderingMode.template
+                    }
+                }
             }
         }
-        
+            
         if cloptions.warningIcon.present || messageUserImagePath == "warning" {
             builtInIconName = "exclamationmark.octagon.fill"
             builtInIconFill = "octagon.fill" //does not have multicolour sf symbol so we have to make out own using a fill layer
             builtInIconColour = Color.red
-            iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
+            iconRenderingMode = Image.TemplateRenderingMode.original
             builtInIconPresent = true
         } else if cloptions.cautionIcon.present || messageUserImagePath == "caution" {
             builtInIconName = "exclamationmark.triangle.fill"  // yay multicolour sf symbol
@@ -139,25 +167,47 @@ struct IconView: View {
         ZStack {
             if builtInIconPresent {
                 ZStack {
-                    if sfGradientPresent {
-                        // we need to add this twice - once as a clear version to force the right aspect ratio
-                        // and again with the gradiet colour we want
-                        // the reason for this is gradient by itself is greedy and will consume the entire height and witch of the display area
-                        // this causes some SF Symbols like applelogo and applescript to look distorted
-                        Image(systemName: builtInIconName)
-                            .renderingMode(iconRenderingMode)
-                            .resizable()
-                            .foregroundColor(.clear)
-                            .font(Font.title.weight(builtInIconWeight))
-                            
-                        LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottomTrailing)
-                            .mask(
+                    if sfGradientPresent || sfPalettePresent {
+                        
+                        if #available(macOS 12.0, *) {
+                            if sfPalettePresent {
+                                Image(systemName: builtInIconName)
+                                    .resizable()
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(builtInIconColour, builtInIconSecondaryColour, builtInIconTertiaryColour)
+                                    .font(Font.title.weight(builtInIconWeight))
+                            } else {
+                                // gradient instead of palette
+                                Image(systemName: builtInIconName)
+                                    .resizable()
+                                    .symbolRenderingMode(.monochrome)
+                                    .foregroundStyle(
+                                        LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottomTrailing)
+                                    )
+                                    .font(Font.title.weight(builtInIconWeight))
+                            }
+                                
+                        } else {
+                            // macOS 11 doesn't support foregroundStyle so we'll do it the long way
+                            // we need to add this twice - once as a clear version to force the right aspect ratio
+                            // and again with the gradiet colour we want
+                            // the reason for this is gradient by itself is greedy and will consume the entire height and witch of the display area
+                            // this causes some SF Symbols like applelogo and applescript to look distorted
                             Image(systemName: builtInIconName)
                                 .renderingMode(iconRenderingMode)
                                 .resizable()
-                                .foregroundColor(builtInIconColour)
+                                .foregroundColor(.clear)
                                 .font(Font.title.weight(builtInIconWeight))
-                            )
+                                
+                            LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottomTrailing)
+                                .mask(
+                                Image(systemName: builtInIconName)
+                                    .renderingMode(iconRenderingMode)
+                                    .resizable()
+                                    .foregroundColor(builtInIconColour)
+                                    .font(Font.title.weight(builtInIconWeight))
+                                )
+                        }
                         
                     } else {
                         Image(systemName: builtInIconFill)
@@ -208,7 +258,7 @@ struct IconView: View {
                     .scaleEffect(mainImageScale)
             }
 
-            IconOverlayView()
+            IconOverlayView(observedDialogContent: observedDialogContent)
                 .scaleEffect(overlayImageScale, anchor:.bottomTrailing)
 
         }
