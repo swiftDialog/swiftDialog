@@ -417,7 +417,9 @@ func processCLOptions() {
         // scale everything down a notch
         appvars.smallWindow = true
         appvars.scaleFactor = 0.75
-        cloptions.iconSize.value = "120"
+        if !cloptions.iconSize.present {
+            cloptions.iconSize.value = "120"
+        }
         logger(logMessage: "smallWindow.present")
     } else if cloptions.bigWindow.present {
         // scale everything up a notch
