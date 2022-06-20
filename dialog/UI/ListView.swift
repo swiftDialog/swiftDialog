@@ -11,10 +11,12 @@ struct StatusImage: View {
     
     var name: String
     var colour: Color
+    var statusSize: CGFloat
     
-    init(name: String, colour: Color) {
+    init(name: String, colour: Color, size: CGFloat) {
         self.name = name
         self.colour = colour
+        self.statusSize = size
     }
     
     var body: some View {
@@ -22,7 +24,7 @@ struct StatusImage: View {
             .resizable()
             .foregroundColor(colour)
             .scaledToFit()
-            .frame(width: 25, height: 25)
+            .frame(width: statusSize, height: statusSize)
             //.border(.red)
             .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
     }
@@ -32,8 +34,25 @@ struct ListView: View {
     
     @ObservedObject var observedDialogContent : DialogUpdatableContent
     
+    var listHeight: CGFloat = appvars.messageFontSize + 14
+    var statusHeight: CGFloat = appvars.messageFontSize + 5
+    var fontSize: CGFloat = appvars.messageFontSize
+    
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedDialogContent = observedDialogContent
+        if cloptions.listStyle.present {
+            switch cloptions.listStyle.value {
+            case "expanded":
+                listHeight = listHeight + 15
+                //statusHeight = statusHeight + 10
+                //fontSize = 30
+            case "compact":
+                listHeight = listHeight - 15
+                //statusHeight = statusHeight - 10
+                //fontSize = 15
+            default: ()
+            }
+        }
     }
     
     
@@ -46,13 +65,13 @@ struct ListView: View {
                             VStack {
                                 HStack {
                                     Text(observedDialogContent.listItemsArray[i].title)
-                                        .font(.system(size: appvars.messageFontSize))
+                                        .font(.system(size: fontSize))
                                         .id(i)
                                     Spacer()
                                     HStack {
                                         if observedDialogContent.listItemsArray[i].statusText != "" {
                                             Text(observedDialogContent.listItemsArray[i].statusText)
-                                                .font(.system(size: appvars.messageFontSize))
+                                                .font(.system(size: fontSize))
                                                 .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
                                         }
                                         switch observedDialogContent.listItemsArray[i].statusIcon {
@@ -60,16 +79,16 @@ struct ListView: View {
                                             ProgressView()
                                                 .progressViewStyle(.circular)
                                                 .scaleEffect(0.8, anchor: .trailing)
-                                                .frame(height: 25)
+                                                .frame(height: statusHeight)
                                                 .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
                                         case "success" :
-                                            StatusImage(name: "checkmark.circle.fill", colour: .green)
+                                            StatusImage(name: "checkmark.circle.fill", colour: .green, size: statusHeight)
                                         case "fail" :
-                                            StatusImage(name: "xmark.circle.fill", colour: .red)
+                                            StatusImage(name: "xmark.circle.fill", colour: .red, size: statusHeight)
                                         case "pending" :
-                                            StatusImage(name: "ellipsis.circle.fill", colour: .gray)
+                                            StatusImage(name: "ellipsis.circle.fill", colour: .gray, size: statusHeight)
                                         case "error" :
-                                            StatusImage(name: "exclamationmark.circle.fill", colour: .yellow)
+                                            StatusImage(name: "exclamationmark.circle.fill", colour: .yellow, size: statusHeight)
                                         default:
                                             EmptyView()
                                         }
@@ -77,7 +96,7 @@ struct ListView: View {
                                     //.animation(.easeInOut(duration: 5))
                                     //.transition(.opacity)
                                 }
-                                .frame(height: 34)
+                                .frame(height: listHeight)
                                 Divider()
                             }
                         }

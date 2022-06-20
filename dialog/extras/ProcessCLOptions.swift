@@ -573,6 +573,9 @@ func processCLOptionValues() {
     cloptions.mainImageCaption.present      = json[cloptions.mainImageCaption.long].exists() || CLOptionPresent(OptionName: cloptions.mainImageCaption)
     
     cloptions.listItem.present              = json[cloptions.listItem.long].exists() || CLOptionPresent(OptionName: cloptions.listItem)
+    
+    cloptions.listStyle.value               = json[cloptions.listStyle.long].string ?? CLOptionText(OptionName: cloptions.listStyle)
+    cloptions.listStyle.present             = json[cloptions.listStyle.long].exists() || CLOptionPresent(OptionName: cloptions.listStyle)
 
     cloptions.windowWidth.value             = json[cloptions.windowWidth.long].string ?? CLOptionText(OptionName: cloptions.windowWidth)
     cloptions.windowWidth.present           = json[cloptions.windowWidth.long].exists() || CLOptionPresent(OptionName: cloptions.windowWidth)
