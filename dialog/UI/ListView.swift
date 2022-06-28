@@ -34,22 +34,18 @@ struct ListView: View {
     
     @ObservedObject var observedDialogContent : DialogUpdatableContent
     
-    var listHeight: CGFloat = appvars.messageFontSize + 14
-    var statusHeight: CGFloat = appvars.messageFontSize + 5
-    var fontSize: CGFloat = appvars.messageFontSize
+    var rowHeight: CGFloat = appvars.messageFontSize + 14
+    var rowStatusHeight: CGFloat = appvars.messageFontSize + 5
+    var rowFontSize: CGFloat = appvars.messageFontSize
     
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedDialogContent = observedDialogContent
         if cloptions.listStyle.present {
             switch cloptions.listStyle.value {
             case "expanded":
-                listHeight = listHeight + 15
-                //statusHeight = statusHeight + 10
-                //fontSize = 30
+                rowHeight = rowHeight + 15
             case "compact":
-                listHeight = listHeight - 15
-                //statusHeight = statusHeight - 10
-                //fontSize = 15
+                rowHeight = rowHeight - 15
             default: ()
             }
         }
@@ -65,13 +61,13 @@ struct ListView: View {
                             VStack {
                                 HStack {
                                     Text(observedDialogContent.listItemsArray[i].title)
-                                        .font(.system(size: fontSize))
+                                        .font(.system(size: rowFontSize))
                                         .id(i)
                                     Spacer()
                                     HStack {
                                         if observedDialogContent.listItemsArray[i].statusText != "" {
                                             Text(observedDialogContent.listItemsArray[i].statusText)
-                                                .font(.system(size: fontSize))
+                                                .font(.system(size: rowFontSize))
                                                 .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
                                         }
                                         switch observedDialogContent.listItemsArray[i].statusIcon {
@@ -79,16 +75,16 @@ struct ListView: View {
                                             ProgressView()
                                                 .progressViewStyle(.circular)
                                                 .scaleEffect(0.8, anchor: .trailing)
-                                                .frame(height: statusHeight)
+                                                .frame(height: rowStatusHeight)
                                                 .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
                                         case "success" :
-                                            StatusImage(name: "checkmark.circle.fill", colour: .green, size: statusHeight)
+                                            StatusImage(name: "checkmark.circle.fill", colour: .green, size: rowStatusHeight)
                                         case "fail" :
-                                            StatusImage(name: "xmark.circle.fill", colour: .red, size: statusHeight)
+                                            StatusImage(name: "xmark.circle.fill", colour: .red, size: rowStatusHeight)
                                         case "pending" :
-                                            StatusImage(name: "ellipsis.circle.fill", colour: .gray, size: statusHeight)
+                                            StatusImage(name: "ellipsis.circle.fill", colour: .gray, size: rowStatusHeight)
                                         case "error" :
-                                            StatusImage(name: "exclamationmark.circle.fill", colour: .yellow, size: statusHeight)
+                                            StatusImage(name: "exclamationmark.circle.fill", colour: .yellow, size: rowStatusHeight)
                                         default:
                                             EmptyView()
                                         }
@@ -96,7 +92,7 @@ struct ListView: View {
                                     //.animation(.easeInOut(duration: 5))
                                     //.transition(.opacity)
                                 }
-                                .frame(height: listHeight)
+                                .frame(height: rowHeight)
                                 Divider()
                             }
                         }
