@@ -15,6 +15,8 @@
 		414550AA27C799D000D756E3 /* BackgroundBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414550A927C799D000D756E3 /* BackgroundBlur.swift */; };
 		414550AB27C799D000D756E3 /* BackgroundBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414550A927C799D000D756E3 /* BackgroundBlur.swift */; };
 		414550AD27C79BAB00D756E3 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 414550AC27C79BAB00D756E3 /* SwiftyJSON */; };
+		41512CC2286C77F200F22B86 /* ConstructionKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41512CC1286C77F200F22B86 /* ConstructionKitView.swift */; };
+		41512CC3286C77F200F22B86 /* ConstructionKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41512CC1286C77F200F22B86 /* ConstructionKitView.swift */; };
 		4153783226001A0900AA0E76 /* StringProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153783126001A0900AA0E76 /* StringProcessing.swift */; };
 		4153784E2604B71800AA0E76 /* TitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153784D2604B71800AA0E76 /* TitleView.swift */; };
 		415378532604B79F00AA0E76 /* IconOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415378522604B79E00AA0E76 /* IconOverlayView.swift */; };
@@ -118,6 +120,7 @@
 		4114E1E827153FEE00388274 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		4114E1EA27154B2200388274 /* VideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoView.swift; sourceTree = "<group>"; };
 		414550A927C799D000D756E3 /* BackgroundBlur.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundBlur.swift; sourceTree = "<group>"; };
+		41512CC1286C77F200F22B86 /* ConstructionKitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstructionKitView.swift; sourceTree = "<group>"; };
 		4153783126001A0900AA0E76 /* StringProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringProcessing.swift; sourceTree = "<group>"; };
 		4153784D2604B71800AA0E76 /* TitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleView.swift; sourceTree = "<group>"; };
 		415378522604B79E00AA0E76 /* IconOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconOverlayView.swift; sourceTree = "<group>"; };
@@ -318,6 +321,7 @@
 				417BD470279CB658009AE34A /* CheckboxView.swift */,
 				415E1FC927A2694B00DE971B /* ListView.swift */,
 				41832B6D2843143C0062AA1F /* ErrorView.swift */,
+				41512CC1286C77F200F22B86 /* ConstructionKitView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -520,6 +524,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				41512CC2286C77F200F22B86 /* ConstructionKitView.swift in Sources */,
 				415E1FCB27A2B0A000DE971B /* ListView.swift in Sources */,
 				417BD4362798FE48009AE34A /* TrackProgress.swift in Sources */,
 				41876684275D88D60023A6A1 /* ImageSlider.swift in Sources */,
@@ -575,6 +580,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				41512CC3286C77F200F22B86 /* ConstructionKitView.swift in Sources */,
 				41FB64872680855300A54C3E /* ContentView.swift in Sources */,
 				41FD460026C8DC5D006976FC /* ImageView.swift in Sources */,
 				41FD45FE26C40366006976FC /* timerBarView.swift in Sources */,

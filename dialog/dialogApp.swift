@@ -88,6 +88,8 @@ struct dialogApp: App {
         
         observedDialogContent = DialogUpdatableContent()
         
+        ConstructionKitView(observedDialogContent: observedDialogContent).showConstructionKit()
+        
         // bring to front on launch
         NSApp.activate(ignoringOtherApps: true)
     }
@@ -130,6 +132,11 @@ struct dialogApp: App {
         }
         // Hide Title Bar
         .windowStyle(HiddenTitleBarWindowStyle())
+        /*
+        WindowGroup("ConstructionKit") {
+            ConstructionKitView(observedDialogContent: observedDialogContent)
+        }
+         */
     }
 
     
