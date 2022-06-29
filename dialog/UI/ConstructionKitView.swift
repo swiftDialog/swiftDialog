@@ -11,7 +11,7 @@ struct ConstructionKitView: View {
     
     @ObservedObject var observedDialogContent : DialogUpdatableContent
     
-    
+    //@State var titleColour : Color
     // values being updated
     //@State var dialogTitle : String
     
@@ -21,6 +21,7 @@ struct ConstructionKitView: View {
         self.observedDialogContent = observedDialogContent
         
         //dialogTitle = observedDialogContent.titleText
+        //titleColour = .primary
     }
     
     public func showConstructionKit() {
@@ -40,9 +41,15 @@ struct ConstructionKitView: View {
     
     var body: some View {
         VStack {
-            HStack {   // title
+            VStack {   // title
                 Text("Title")
-                TextField("", text: $observedDialogContent.titleText)
+                HStack {
+                    TextField("", text: $observedDialogContent.titleText)
+                    ColorPicker("Colour",selection: $observedDialogContent.titleFontColour)
+                    Button("Default") {
+                        observedDialogContent.titleFontColour = .primary
+                    }
+                }
             }
             Divider()
             HStack {   // title
@@ -55,28 +62,67 @@ struct ConstructionKitView: View {
                 HStack {
                     Text("Height")
                     Slider(value: $observedDialogContent.windowHeight, in: 0...2000)
-                    Text("Current Height value: \(observedDialogContent.windowHeight, specifier: "%.0f")")
+                    //Text("Current Height value: \(observedDialogContent.windowHeight, specifier: "%.0f")")
+                    TextField("Height value:", value: $observedDialogContent.windowHeight, formatter: NumberFormatter())
+                        .frame(width: 50)
                 }
                 HStack {
                     Text("Width")
                     Slider(value: $observedDialogContent.windowWidth, in: 0...2000)
-                    Text("Current Width value: \(observedDialogContent.windowWidth, specifier: "%.0f")")
+                    TextField("Width value:", value: $observedDialogContent.windowWidth, formatter: NumberFormatter())
+                        .frame(width: 50)
+                    //Text("Current Width value: \(observedDialogContent.windowWidth, specifier: "%.0f")")
                 }
             }
-            HStack {
+            Divider()
+            VStack {
                 Text("Icon")
-                Toggle("Visible", isOn: $observedDialogContent.iconPresent)
-                TextField("", text: $observedDialogContent.iconImage)
+                HStack {
+                    Toggle("Visible", isOn: $observedDialogContent.iconPresent)
+                    Button("Select")
+                          {
+                            let panel = NSOpenPanel()
+                            panel.allowsMultipleSelection = false
+                            panel.canChooseDirectories = false
+                            panel.allowedContentTypes = [.image]
+                            if panel.runModal() == .OK {
+                                observedDialogContent.iconImage = panel.url?.path ?? "<none>"
+                            }
+                          }
+                    TextField("", text: $observedDialogContent.iconImage)
+                }
+                HStack {
+                    Text("Icon Size")
+                    Slider(value: $observedDialogContent.iconSize, in: 0...400)
+                    //Text("Current value: \(observedDialogContent.iconSize, specifier: "%.0f")")
+                    TextField("Size value:", value: $observedDialogContent.iconSize, formatter: NumberFormatter())
+                        .frame(width: 50)
+                }
             }
-            HStack {
-                Text("Icon Size")
-                Slider(value: $observedDialogContent.iconSize, in: 0...400)
-                Text("Current value: \(observedDialogContent.iconSize, specifier: "%.0f")")
-            }
-            HStack {
+            Divider()
+            VStack {
                 Text("Overlay")
-                Toggle("Visible", isOn: $observedDialogContent.overlayIconPresent)
-                TextField("", text: $observedDialogContent.overlayIconImage)
+                HStack {
+                    Toggle("Visible", isOn: $observedDialogContent.overlayIconPresent)
+                    Button("Select")
+                          {
+                            let panel = NSOpenPanel()
+                            panel.allowsMultipleSelection = false
+                            panel.canChooseDirectories = false
+                            panel.allowedContentTypes = [.image]
+                            if panel.runModal() == .OK {
+                                observedDialogContent.overlayIconImage = panel.url?.path ?? "<none>"
+                            }
+                          }
+                    TextField("", text: $observedDialogContent.overlayIconImage)
+                }
+            }
+            //Divider()
+            
+            HStack {
+                Spacer()
+                Button("Export JSON") {}
+                Button("Export Command") {}
             }
         }
         .frame(width: 800, height: 600)

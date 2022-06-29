@@ -78,11 +78,11 @@ struct ContentView: View {
                     TitleView(observedDialogContent: observedDialogContent)
                         .border(appvars.debugBorderColour, width: 2)
                         .padding(.top, titlePadding)
-                        .frame(minWidth: appvars.windowWidth, minHeight: appvars.titleHeight, alignment: .center)
+                        .frame(minWidth: observedDialogContent.windowWidth, minHeight: appvars.titleHeight, alignment: .center)
                     
                     // Horozontal Line
                     Divider()
-                        .frame(width: appvars.windowWidth*appvars.horozontalLineScale, height: 2)
+                        .frame(width: observedDialogContent.windowWidth*appvars.horozontalLineScale, height: 2)
                 }
                 
                 if cloptions.video.present {

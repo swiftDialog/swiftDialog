@@ -35,9 +35,9 @@ struct TextEntryView: View {
             }
         }
         if !observedDialogContent.iconPresent { //} cloptions.hideIcon.present {
-            fieldwidth = appvars.windowWidth
+            fieldwidth = observedDialogContent.windowWidth
         } else {
-            fieldwidth = appvars.windowWidth - appvars.iconWidth
+            fieldwidth = observedDialogContent.windowWidth - observedDialogContent.iconSize
         }
     }
     

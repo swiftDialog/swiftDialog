@@ -20,12 +20,12 @@ struct TitleView: View {
             //Text(TitleViewOption)
             Text(observedDialogContent.titleText)
                 .font(.system(size: appvars.titleFontSize, weight: appvars.titleFontWeight))
-                .foregroundColor(appvars.titleFontColour)
+                .foregroundColor(observedDialogContent.titleFontColour)
         } else {
             Text(observedDialogContent.titleText)
                 .font(.custom(appvars.titleFontName, size: appvars.titleFontSize))
                 .fontWeight(appvars.titleFontWeight)
-                .foregroundColor(appvars.titleFontColour)
+                .foregroundColor(observedDialogContent.titleFontColour)
         }
     }
 }

@@ -20,6 +20,7 @@ class DialogUpdatableContent : ObservableObject {
     
     var path: String
     @Published var titleText: String
+    @Published var titleFontColour: Color
     @Published var messageText: String
     @Published var statusText: String
     @Published var progressValue: Double
@@ -79,6 +80,7 @@ class DialogUpdatableContent : ObservableObject {
         }
                 
         titleText = cloptions.titleOption.value
+        titleFontColour = appvars.titleFontColour
         messageText = cloptions.messageOption.value
         statusText = cloptions.progressText.value
         progressValue = 0

@@ -122,7 +122,7 @@ struct dialogApp: App {
                 .frame(width: 0, height: 0) //ensures hostingwindowfinder isn't taking up any real estate
                 
                 ContentView(observedDialogContent: observedDialogContent)
-                    .frame(width: observedDialogContent.windowWidth, height: observedDialogContent.windowHeight) // + appvars.bannerHeight)
+                    .frame(width: observedDialogContent.windowWidth.rounded(), height: observedDialogContent.windowHeight.rounded()) // + appvars.bannerHeight)
                 //.frame(idealWidth: appvars.windowWidth, idealHeight: appvars.windowHeight)
                     .sheet(isPresented: $observedDialogContent.showSheet, content: {
                         ErrorView(observedContent: observedDialogContent)
