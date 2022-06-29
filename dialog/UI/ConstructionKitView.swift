@@ -30,6 +30,7 @@ struct ConstructionKitView: View {
                contentRect: NSRect(x: 0, y: 0, width: 480, height: 300),
                styleMask: [.titled, .closable, .miniaturizable, .resizable],
                backing: .buffered, defer: false)
+        window.title = "swiftDialog Construction Kit"
         window.makeKeyAndOrderFront(self)
         window.isReleasedWhenClosed = false
         window.center()
@@ -71,6 +72,11 @@ struct ConstructionKitView: View {
                 Text("Icon Size")
                 Slider(value: $observedDialogContent.iconSize, in: 0...400)
                 Text("Current value: \(observedDialogContent.iconSize, specifier: "%.0f")")
+            }
+            HStack {
+                Text("Overlay")
+                Toggle("Visible", isOn: $observedDialogContent.overlayIconPresent)
+                TextField("", text: $observedDialogContent.overlayIconImage)
             }
         }
         .frame(width: 800, height: 600)
