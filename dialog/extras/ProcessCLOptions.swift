@@ -107,7 +107,7 @@ func processCLOptions() {
                 } else {
                     textFields.append(TextFieldState(
                         title: String(json[cloptions.textField.long][i]["title"].stringValue),
-                        required: Bool(json[cloptions.textField.long][i]["regex"].exists() || json[cloptions.textField.long][i]["required"].boolValue),
+                        required: Bool(json[cloptions.textField.long][i]["required"].boolValue),
                         secure: Bool(json[cloptions.textField.long][i]["secure"].boolValue),
                         prompt: String(json[cloptions.textField.long][i]["prompt"].stringValue),
                         regex: String(json[cloptions.textField.long][i]["regex"].stringValue),
