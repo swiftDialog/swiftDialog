@@ -37,6 +37,7 @@ struct ListView: View {
     var rowHeight: CGFloat = appvars.messageFontSize + 14
     var rowStatusHeight: CGFloat = appvars.messageFontSize + 5
     var rowFontSize: CGFloat = appvars.messageFontSize
+    var proportionalListHeight: CGFloat = 0
     
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedDialogContent = observedDialogContent
@@ -45,7 +46,10 @@ struct ListView: View {
             case "expanded":
                 rowHeight = rowHeight + 15
             case "compact":
-                rowHeight = rowHeight - 15
+                rowHeight = rowHeight - 10
+            //case "proportional":
+            //    rowHeight = 0
+            //    proportionalListHeight = 1
             default: ()
             }
         }
@@ -55,8 +59,10 @@ struct ListView: View {
     var body: some View {
         if observedDialogContent.listItemPresent {
             ScrollViewReader { proxy in
+                GeometryReader { geometry in
+                    let listHeightPadding = ((geometry.size.height/CGFloat(observedDialogContent.listItemsArray.count)/2) * proportionalListHeight)
                 //withAnimation(.default) {
-                    VStack() {                        
+                    VStack() {
                         List(0..<observedDialogContent.listItemsArray.count, id: \.self) {i in
                             VStack {
                                 HStack {
@@ -92,9 +98,10 @@ struct ListView: View {
                                     //.animation(.easeInOut(duration: 5))
                                     //.transition(.opacity)
                                 }
-                                .frame(height: rowHeight)
+                                .frame(height: rowHeight+listHeightPadding)
                                 Divider()
                             }
+                            //.frame(height: rowHeight+listHeightPadding)
                         }
                     }
                     .onChange(of: observedDialogContent.listItemUpdateRow, perform: { _ in
@@ -105,7 +112,7 @@ struct ListView: View {
                         }
                     })
                     .clipShape(RoundedRectangle(cornerRadius: 8))
-                //}
+                }
             }
         }
     }
