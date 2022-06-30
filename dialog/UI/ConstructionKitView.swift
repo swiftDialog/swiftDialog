@@ -44,7 +44,7 @@ struct ConstructionKitView: View {
             VStack {   // title
                 Text("Title")
                 HStack {
-                    TextField("", text: $observedDialogContent.titleText)
+                    TextField("", text: $observedDialogContent.args.titleOption.value)
                     ColorPicker("Colour",selection: $observedDialogContent.titleFontColour)
                     Button("Default") {
                         observedDialogContent.titleFontColour = .primary
@@ -75,49 +75,76 @@ struct ConstructionKitView: View {
                 }
             }
             Divider()
-            VStack {
-                Text("Icon")
-                HStack {
-                    Toggle("Visible", isOn: $observedDialogContent.iconPresent)
-                    Button("Select")
-                          {
-                            let panel = NSOpenPanel()
-                            panel.allowsMultipleSelection = false
-                            panel.canChooseDirectories = false
-                            panel.allowedContentTypes = [.image]
-                            if panel.runModal() == .OK {
-                                observedDialogContent.iconImage = panel.url?.path ?? "<none>"
-                            }
-                          }
-                    TextField("", text: $observedDialogContent.iconImage)
+            Group { // icon and icon overlay
+                VStack {
+                    Text("Icon")
+                    HStack {
+                        Toggle("Visible", isOn: $observedDialogContent.iconPresent)
+                        Button("Select")
+                              {
+                                let panel = NSOpenPanel()
+                                panel.allowsMultipleSelection = false
+                                panel.canChooseDirectories = false
+                                panel.allowedContentTypes = [.image]
+                                if panel.runModal() == .OK {
+                                    observedDialogContent.iconImage = panel.url?.path ?? "<none>"
+                                }
+                              }
+                        TextField("", text: $observedDialogContent.iconImage)
+                    }
+                    HStack {
+                        Text("Icon Size")
+                        Slider(value: $observedDialogContent.iconSize, in: 0...400)
+                        //Text("Current value: \(observedDialogContent.iconSize, specifier: "%.0f")")
+                        TextField("Size value:", value: $observedDialogContent.iconSize, formatter: NumberFormatter())
+                            .frame(width: 50)
+                    }
                 }
-                HStack {
-                    Text("Icon Size")
-                    Slider(value: $observedDialogContent.iconSize, in: 0...400)
-                    //Text("Current value: \(observedDialogContent.iconSize, specifier: "%.0f")")
-                    TextField("Size value:", value: $observedDialogContent.iconSize, formatter: NumberFormatter())
-                        .frame(width: 50)
+                Divider()
+                VStack {
+                    Text("Overlay")
+                    HStack {
+                        Toggle("Visible", isOn: $observedDialogContent.overlayIconPresent)
+                        Button("Select")
+                              {
+                                let panel = NSOpenPanel()
+                                panel.allowsMultipleSelection = false
+                                panel.canChooseDirectories = false
+                                panel.allowedContentTypes = [.image]
+                                if panel.runModal() == .OK {
+                                    observedDialogContent.overlayIconImage = panel.url?.path ?? "<none>"
+                                }
+                              }
+                        TextField("", text: $observedDialogContent.overlayIconImage)
+                    }
                 }
             }
             Divider()
-            VStack {
-                Text("Overlay")
-                HStack {
-                    Toggle("Visible", isOn: $observedDialogContent.overlayIconPresent)
-                    Button("Select")
-                          {
-                            let panel = NSOpenPanel()
-                            panel.allowsMultipleSelection = false
-                            panel.canChooseDirectories = false
-                            panel.allowedContentTypes = [.image]
-                            if panel.runModal() == .OK {
-                                observedDialogContent.overlayIconImage = panel.url?.path ?? "<none>"
-                            }
-                          }
-                    TextField("", text: $observedDialogContent.overlayIconImage)
+            Group { //buttons
+                VStack {
+                    Text("Button1")
+                    HStack {
+                        Toggle("Enabled", isOn: $observedDialogContent.button1Disabled)
+                        TextField("", text: $observedDialogContent.button1Value)
+                    }
+                }
+                Divider()
+                VStack {
+                    Text("Button2")
+                    HStack {
+                        Toggle("Visible", isOn: $observedDialogContent.button2Present)
+                        TextField("", text: $observedDialogContent.button2Value)
+                    }
+                }
+                Divider()
+                VStack {
+                    Text("Info Button")
+                    HStack {
+                        Toggle("Visible", isOn: $observedDialogContent.infoButtonPresent)
+                        TextField("", text: $observedDialogContent.infoButtonValue)
+                    }
                 }
             }
-            //Divider()
             
             HStack {
                 Spacer()

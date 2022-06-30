@@ -88,7 +88,9 @@ struct dialogApp: App {
         
         observedDialogContent = DialogUpdatableContent()
         
-        ConstructionKitView(observedDialogContent: observedDialogContent).showConstructionKit()
+        if cloptions.constructionKit.present {
+            ConstructionKitView(observedDialogContent: observedDialogContent).showConstructionKit()
+        }
         
         // bring to front on launch
         NSApp.activate(ignoringOtherApps: true)

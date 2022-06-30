@@ -73,12 +73,12 @@ struct ContentView: View {
                         .border(appvars.debugBorderColour, width: 2)
                 }
 
-                if observedDialogContent.titleText != "none" {
+                if observedDialogContent.args.titleOption.value != "none" {
                     // Dialog title
                     TitleView(observedDialogContent: observedDialogContent)
                         .border(appvars.debugBorderColour, width: 2)
                         .padding(.top, titlePadding)
-                        .frame(minWidth: observedDialogContent.windowWidth, minHeight: appvars.titleHeight, alignment: .center)
+                        .frame(minWidth: string2float(string: observedDialogContent.args.windowWidth.value), minHeight: appvars.titleHeight, alignment: .center)
                     
                     // Horozontal Line
                     Divider()
@@ -99,8 +99,8 @@ struct ContentView: View {
                         Text(cloptions.infoText.value)
                             .foregroundColor(.secondary.opacity(0.7))
                             //.font(.system(size: 10))
-                    } else if cloptions.infoButtonOption.present || cloptions.buttonInfoTextOption.present {
-                        MoreInfoButton()
+                    } else if observedDialogContent.infoButtonPresent { //} || cloptions.buttonInfoTextOption.present {
+                        MoreInfoButton(observedDialogContent: observedDialogContent)
                         if !cloptions.timerBar.present {
                             Spacer()
                         }

@@ -18,11 +18,11 @@ struct TitleView: View {
     var body: some View {
         if appvars.titleFontName == "" {
             //Text(TitleViewOption)
-            Text(observedDialogContent.titleText)
+            Text(observedDialogContent.args.titleOption.value)
                 .font(.system(size: appvars.titleFontSize, weight: appvars.titleFontWeight))
                 .foregroundColor(observedDialogContent.titleFontColour)
         } else {
-            Text(observedDialogContent.titleText)
+            Text(observedDialogContent.args.titleOption.value)
                 .font(.custom(appvars.titleFontName, size: appvars.titleFontSize))
                 .fontWeight(appvars.titleFontWeight)
                 .foregroundColor(observedDialogContent.titleFontColour)

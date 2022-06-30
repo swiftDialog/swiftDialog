@@ -224,6 +224,7 @@ struct CLOptions {
     var hideTimerBar             = (long: String("hidetimerbar"),      short: String(""),    value : String(""), present : Bool(false))
     var autoPlay                 = (long: String("autoplay"),          short: String(""),    value : String(""), present : Bool(false))
     var blurScreen               = (long: String("blurscreen"),        short: String(""),    value : String(""), present : Bool(false))
+    var constructionKit          = (long: String("builder"),           short: String(""),    value : String(""), present : Bool(false))
     
     var lockWindow               = (long: String("moveable"),          short: String("o"),   value : String(""), present : Bool(false)) // -o
     var forceOnTop               = (long: String("ontop"),             short: String("p"),   value : String(""), present : Bool(false)) // -p
