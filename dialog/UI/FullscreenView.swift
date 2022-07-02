@@ -23,7 +23,7 @@ extension Color {
 
 struct FullscreenView: View {
             
-    @ObservedObject var observedDialogContent = DialogUpdatableContent()
+    @ObservedObject var observedData = DialogUpdatableContent()
         
     var TitleViewOption: String = appArguments.titleOption.value // CLOptionText(OptionName: appArguments.titleOption, DefaultValue: appvars.titleDefault)
     var messageContentOption: String = appArguments.messageOption.value // CLOptionText(OptionName: appArguments.messageOption, DefaultValue: appvars.messageDefault)
@@ -129,11 +129,11 @@ struct FullscreenView: View {
             }
             
             // title vstack
-            if observedDialogContent.args.titleOption.value != "none" {
+            if observedData.args.titleOption.value != "none" {
                 HStack {
                     // the spacers in this section push the title and thus the full screen area across the width of the display
                     Spacer()
-                    Text(observedDialogContent.args.titleOption.value)
+                    Text(observedData.args.titleOption.value)
                         .foregroundColor(appvars.titleFontColour)
                         .bold()
                         .font(.system(size: titleContentFontSize, weight: appvars.titleFontWeight))
@@ -155,7 +155,7 @@ struct FullscreenView: View {
                     // icon vstack
                     VStack {
                         if appArguments.iconOption.present {
-                            IconView(observedDialogContent: observedDialogContent)
+                            IconView(observedDialogContent: observedData)
                         } else {
                             VStack{}.padding(emptyStackPadding)
                         }
@@ -166,7 +166,7 @@ struct FullscreenView: View {
                 
                     // message vstack
                     VStack() {
-                        Markdown(observedDialogContent.messageText)
+                        Markdown(observedData.messageText)
                             //.multilineTextAlignment(appvars.messageAlignment)
                             .markdownStyle(defaultStyle)
                             .multilineTextAlignment(.center)
@@ -176,7 +176,7 @@ struct FullscreenView: View {
                         //TaskProgressView(observedDialogContent: observedDialogContent)  // future feature
                         
                         if appArguments.timerBar.present {
-                            timerBarView(progressSteps: string2float(string: appArguments.timerBar.value), visible: appArguments.timerBar.present, observedDialogContent: observedDialogContent)
+                            timerBarView(progressSteps: string2float(string: appArguments.timerBar.value), visible: appArguments.timerBar.present, observedDialogContent: observedData)
                         }
                     }
                     .padding(10)

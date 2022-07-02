@@ -15,10 +15,10 @@ struct ContentView: View {
     var progressSteps : CGFloat = appvars.timerDefaultSeconds
     
     //@ObservedObject var observedDialogContent = DialogUpdatableContent()
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
     
     init (observedDialogContent : DialogUpdatableContent) {
-        self.observedDialogContent = observedDialogContent
+        self.observedData = observedDialogContent
         if appArguments.timerBar.present {
             progressSteps = string2float(string: appArguments.timerBar.value)
         }
@@ -73,22 +73,22 @@ struct ContentView: View {
                         .border(appvars.debugBorderColour, width: 2)
                 }
 
-                if observedDialogContent.args.titleOption.value != "none" {
+                if observedData.args.titleOption.value != "none" {
                     // Dialog title
-                    TitleView(observedDialogContent: observedDialogContent)
+                    TitleView(observedData: observedData)
                         .border(appvars.debugBorderColour, width: 2)
                         .padding(.top, titlePadding)
-                        .frame(minWidth: string2float(string: observedDialogContent.args.windowWidth.value), minHeight: appvars.titleHeight, alignment: .center)
+                        .frame(minWidth: string2float(string: observedData.args.windowWidth.value), minHeight: appvars.titleHeight, alignment: .center)
                     
                     // Horozontal Line
                     Divider()
-                        .frame(width: observedDialogContent.windowWidth*appvars.horozontalLineScale, height: 2)
+                        .frame(width: observedData.windowWidth*appvars.horozontalLineScale, height: 2)
                 }
                 
                 if appArguments.video.present {
                     VideoView(videourl: appArguments.video.value, autoplay: appArguments.autoPlay.present, caption: appArguments.videoCaption.value)
                 } else {
-                    DialogView(observedDialogContent: observedDialogContent)
+                    DialogView(observedDialogContent: observedData)
                 }
                 
                 Spacer()
@@ -99,18 +99,18 @@ struct ContentView: View {
                         Text(appArguments.infoText.value)
                             .foregroundColor(.secondary.opacity(0.7))
                             //.font(.system(size: 10))
-                    } else if observedDialogContent.args.infoButtonOption.present { //} || appArguments.buttonInfoTextOption.present {
-                        MoreInfoButton(observedDialogContent: observedDialogContent)
+                    } else if observedData.args.infoButtonOption.present { //} || appArguments.buttonInfoTextOption.present {
+                        MoreInfoButton(observedDialogContent: observedData)
                         if !appArguments.timerBar.present {
                             Spacer()
                         }
                     }
                     if appArguments.timerBar.present {
-                        timerBarView(progressSteps: progressSteps, visible: !appArguments.hideTimerBar.present, observedDialogContent : observedDialogContent)
+                        timerBarView(progressSteps: progressSteps, visible: !appArguments.hideTimerBar.present, observedDialogContent : observedData)
                             .frame(alignment: .bottom)
                     }
                     if (appArguments.timerBar.present && appArguments.button1TextOption.present) || !appArguments.timerBar.present || appArguments.hideTimerBar.present  {
-                        ButtonView(observedDialogContent: observedDialogContent) // contains both button 1 and button 2
+                        ButtonView(observedDialogContent: observedData) // contains both button 1 and button 2
                     }
                 }
                 //.frame(alignment: .bottom)

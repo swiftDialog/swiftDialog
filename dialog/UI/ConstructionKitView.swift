@@ -30,7 +30,7 @@ struct LabelView: View {
 
 struct ConstructionKitView: View {
     
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
     
     //@State var titleColour : Color
     // values being updated
@@ -39,7 +39,7 @@ struct ConstructionKitView: View {
     
         
     init(observedDialogContent : DialogUpdatableContent) {
-        self.observedDialogContent = observedDialogContent
+        self.observedData = observedDialogContent
         
         // mark all standard fields visible
         observedDialogContent.args.titleOption.present = true
@@ -64,7 +64,7 @@ struct ConstructionKitView: View {
         window.makeKeyAndOrderFront(self)
         window.isReleasedWhenClosed = false
         window.center()
-        window.contentView = NSHostingView(rootView: ConstructionKitView(observedDialogContent: observedDialogContent))
+        window.contentView = NSHostingView(rootView: ConstructionKitView(observedDialogContent: observedData))
 
     }
     
@@ -72,7 +72,7 @@ struct ConstructionKitView: View {
         var json = JSON()
         var jsonDEBUG = JSON()
         //var propertyValue = (long: String(""),short: String(""),value : String(""), present : Bool(false))
-        let mirrored_appArguments = Mirror(reflecting: observedDialogContent.args)
+        let mirrored_appArguments = Mirror(reflecting: observedData.args)
         for (_, attr) in mirrored_appArguments.children.enumerated() {
             if let propertyValue = attr.value as? (long: String, short: String, value: String, present: Bool) {
                 if propertyValue.present && propertyValue.value != "" {
@@ -93,23 +93,23 @@ struct ConstructionKitView: View {
             VStack {
                 LabelView(label: "Title")
                 HStack {
-                    TextField("", text: $observedDialogContent.args.titleOption.value)
-                    ColorPicker("Colour",selection: $observedDialogContent.titleFontColour)
+                    TextField("", text: $observedData.args.titleOption.value)
+                    ColorPicker("Colour",selection: $observedData.titleFontColour)
                     Button("Default") {
-                        observedDialogContent.titleFontColour = .primary
+                        observedData.titleFontColour = .primary
                     }
                 }
                 HStack {
                     Text("Font Size: ")
-                    Slider(value: $observedDialogContent.titleFontSize, in: 10...80)
-                    TextField("value:", value: $observedDialogContent.titleFontSize, formatter: NumberFormatter())
+                    Slider(value: $observedData.titleFontSize, in: 10...80)
+                    TextField("value:", value: $observedData.titleFontSize, formatter: NumberFormatter())
                         .frame(width: 50)
                 }
             }
 
             LabelView(label: "Message")
             HStack {   // title
-                TextEditor(text: $observedDialogContent.args.messageOption.value)
+                TextEditor(text: $observedData.args.messageOption.value)
                     .frame(minHeight: 50)
             }
             
@@ -117,15 +117,15 @@ struct ConstructionKitView: View {
                 LabelView(label: "--Window Size--")
                 LabelView(label: "Height")
                 HStack {
-                    Slider(value: $observedDialogContent.windowHeight, in: 200...2000)
+                    Slider(value: $observedData.windowHeight, in: 200...2000)
                     //Text("Current Height value: \(observedDialogContent.windowHeight, specifier: "%.0f")")
-                    TextField("Height value:", value: $observedDialogContent.windowHeight, formatter: NumberFormatter())
+                    TextField("Height value:", value: $observedData.windowHeight, formatter: NumberFormatter())
                         .frame(width: 50)
                 }
                 LabelView(label: "Width")
                 HStack {
-                    Slider(value: $observedDialogContent.windowWidth, in: 200...2000)
-                    TextField("Width value:", value: $observedDialogContent.windowWidth, formatter: NumberFormatter())
+                    Slider(value: $observedData.windowWidth, in: 200...2000)
+                    TextField("Width value:", value: $observedData.windowWidth, formatter: NumberFormatter())
                         .frame(width: 50)
                     //Text("Current Width value: \(observedDialogContent.windowWidth, specifier: "%.0f")")
                 }
@@ -134,7 +134,7 @@ struct ConstructionKitView: View {
                 VStack {
                     LabelView(label: "Icon")
                     HStack {
-                        Toggle("Visible", isOn: $observedDialogContent.args.iconOption.present)
+                        Toggle("Visible", isOn: $observedData.args.iconOption.present)
                         Button("Select")
                               {
                                 let panel = NSOpenPanel()
@@ -142,23 +142,23 @@ struct ConstructionKitView: View {
                                 panel.canChooseDirectories = false
                                 panel.allowedContentTypes = [.image]
                                 if panel.runModal() == .OK {
-                                    observedDialogContent.args.iconOption.value = panel.url?.path ?? "<none>"
+                                    observedData.args.iconOption.value = panel.url?.path ?? "<none>"
                                 }
                               }
-                        TextField("", text: $observedDialogContent.args.iconOption.value)
+                        TextField("", text: $observedData.args.iconOption.value)
                     }
                     LabelView(label: "Icon Size")
                     HStack {
-                        Slider(value: $observedDialogContent.iconSize, in: 0...400)
+                        Slider(value: $observedData.iconSize, in: 0...400)
                         //Text("Current value: \(observedDialogContent.iconSize, specifier: "%.0f")")
-                        TextField("Size value:", value: $observedDialogContent.iconSize, formatter: NumberFormatter())
+                        TextField("Size value:", value: $observedData.iconSize, formatter: NumberFormatter())
                             .frame(width: 50)
                     }
                 }
                 VStack {
                     LabelView(label: "Overlay")
                     HStack {
-                        Toggle("Visible", isOn: $observedDialogContent.args.overlayIconOption.present)
+                        Toggle("Visible", isOn: $observedData.args.overlayIconOption.present)
                         Button("Select")
                               {
                                 let panel = NSOpenPanel()
@@ -166,10 +166,10 @@ struct ConstructionKitView: View {
                                 panel.canChooseDirectories = false
                                 panel.allowedContentTypes = [.image]
                                 if panel.runModal() == .OK {
-                                    observedDialogContent.args.overlayIconOption.value = panel.url?.path ?? "<none>"
+                                    observedData.args.overlayIconOption.value = panel.url?.path ?? "<none>"
                                 }
                               }
-                        TextField("", text: $observedDialogContent.args.overlayIconOption.value)
+                        TextField("", text: $observedData.args.overlayIconOption.value)
                     }
                 }
             }
@@ -177,33 +177,33 @@ struct ConstructionKitView: View {
                 VStack {
                     LabelView(label: "Button1")
                     HStack {
-                        Toggle("Disabled", isOn: $observedDialogContent.args.button1Disabled.present)
-                        TextField("", text: $observedDialogContent.args.button1TextOption.value)
+                        Toggle("Disabled", isOn: $observedData.args.button1Disabled.present)
+                        TextField("", text: $observedData.args.button1TextOption.value)
                     }
                 }
                 VStack {
                     LabelView(label: "Button2")
                     HStack {
-                        Toggle("Visible", isOn: $observedDialogContent.args.button2Option.present)
-                        TextField("", text: $observedDialogContent.args.button2TextOption.value)
+                        Toggle("Visible", isOn: $observedData.args.button2Option.present)
+                        TextField("", text: $observedData.args.button2TextOption.value)
                     }
                 }
                 VStack {
                     LabelView(label: "Info Button")
                     HStack {
-                        Toggle("Visible", isOn: $observedDialogContent.args.infoButtonOption.present)
-                        Toggle("Quit on Info", isOn: $observedDialogContent.args.quitOnInfo.present)
+                        Toggle("Visible", isOn: $observedData.args.infoButtonOption.present)
+                        Toggle("Quit on Info", isOn: $observedData.args.quitOnInfo.present)
                         Spacer()
                     }
                     HStack {
                         Text("Label: ")
-                        TextField("", text: $observedDialogContent.args.buttonInfoTextOption.value)
+                        TextField("", text: $observedData.args.buttonInfoTextOption.value)
                     }
                     HStack {
                         Text("Info Button Action: ")
-                        TextField("", text: $observedDialogContent.args.buttonInfoActionOption.value)
-                            .onChange(of: observedDialogContent.args.buttonInfoActionOption.value, perform: { _ in
-                                observedDialogContent.args.buttonInfoActionOption.present = true
+                        TextField("", text: $observedData.args.buttonInfoActionOption.value)
+                            .onChange(of: observedData.args.buttonInfoActionOption.value, perform: { _ in
+                                observedData.args.buttonInfoActionOption.present = true
                             })
                         Spacer()
                     }

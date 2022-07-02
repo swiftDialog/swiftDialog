@@ -21,7 +21,7 @@ var background = BlurWindowController()
 @main
 struct dialogApp: App {
     
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
         
     init () {
         
@@ -86,10 +86,10 @@ struct dialogApp: App {
         }
         logger(logMessage: "width: \(appvars.windowWidth), height: \(appvars.windowHeight)")
         
-        observedDialogContent = DialogUpdatableContent()
+        observedData = DialogUpdatableContent()
         
         if appArguments.constructionKit.present {
-            ConstructionKitView(observedDialogContent: observedDialogContent).showConstructionKit()
+            ConstructionKitView(observedDialogContent: observedData).showConstructionKit()
             appvars.windowIsMoveable = true
         }
         
@@ -124,11 +124,11 @@ struct dialogApp: App {
                 }
                 .frame(width: 0, height: 0) //ensures hostingwindowfinder isn't taking up any real estate
                 
-                ContentView(observedDialogContent: observedDialogContent)
-                    .frame(width: observedDialogContent.windowWidth.rounded(), height: observedDialogContent.windowHeight.rounded()) // + appvars.bannerHeight)
+                ContentView(observedDialogContent: observedData)
+                    .frame(width: observedData.windowWidth.rounded(), height: observedData.windowHeight.rounded()) // + appvars.bannerHeight)
                 //.frame(idealWidth: appvars.windowWidth, idealHeight: appvars.windowHeight)
-                    .sheet(isPresented: $observedDialogContent.showSheet, content: {
-                        ErrorView(observedContent: observedDialogContent)
+                    .sheet(isPresented: $observedData.showSheet, content: {
+                        ErrorView(observedContent: observedData)
                     })
 
             }

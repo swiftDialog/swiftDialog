@@ -10,7 +10,7 @@ import SwiftUI
 
 struct ButtonView: View {
     
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
 
     var button1action: String = ""
     var buttonShellAction: Bool = false
@@ -24,7 +24,7 @@ struct ButtonView: View {
     let timer = Timer.publish(every: 3.0, on: .main, in: .common).autoconnect() //trigger after 4 seconds
     
     init(observedDialogContent : DialogUpdatableContent) {
-        self.observedDialogContent = observedDialogContent
+        self.observedData = observedDialogContent
         
         if observedDialogContent.args.button1ShellActionOption.present {
             button1action = observedDialogContent.args.button1ShellActionOption.value
@@ -38,10 +38,10 @@ struct ButtonView: View {
         //secondary button
         Spacer()
         HStack {
-            if observedDialogContent.args.button2Option.present || observedDialogContent.args.button2TextOption.present {
-                let button2Text: String = observedDialogContent.args.button2TextOption.value
+            if observedData.args.button2Option.present || observedData.args.button2TextOption.present {
+                let button2Text: String = observedData.args.button2TextOption.value
                 Button(action: {
-                    observedDialogContent.end()
+                    observedData.end()
                     quitDialog(exitCode: appvars.exit2.code)
                 }, label: {
                     Text(button2Text)
@@ -52,11 +52,11 @@ struct ButtonView: View {
             }
         }
         // default button aka button 1
-        let button1Text: String = observedDialogContent.args.button1TextOption.value
+        let button1Text: String = observedData.args.button1TextOption.value
 
         Button(action: {
-            observedDialogContent.end()
-            buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction, observedObject: observedDialogContent)
+            observedData.end()
+            buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction, observedObject: observedData)
             
         }, label: {
             Text(button1Text)
@@ -64,10 +64,10 @@ struct ButtonView: View {
             }
         )
         .keyboardShortcut(.defaultAction)
-        .disabled(observedDialogContent.args.button1Disabled.present)
+        .disabled(observedData.args.button1Disabled.present)
         .onReceive(timer) { _ in
-            if observedDialogContent.args.timerBar.present && !observedDialogContent.args.hideTimerBar.present {
-                observedDialogContent.args.button1Disabled.present = false
+            if observedData.args.timerBar.present && !observedData.args.hideTimerBar.present {
+                observedData.args.button1Disabled.present = false
             }
             //button1disabled = false
         }
@@ -79,23 +79,23 @@ struct MoreInfoButton: View {
     //let buttonInfoAction: String = observedDialogContent.args.buttonInfoActionOption.value
     //var buttonInfoText : String = appArguments.buttonInfoTextOption.value
     
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
     
     init(observedDialogContent : DialogUpdatableContent) {
-        self.observedDialogContent = observedDialogContent
+        self.observedData = observedDialogContent
     }
     
     var body: some View {
         HStack() {
             Button(action: {
                     buttonAction(
-                    action: observedDialogContent.args.buttonInfoActionOption.value,
+                    action: observedData.args.buttonInfoActionOption.value,
                     exitCode: 3,
                     executeShell: false,
-                    shouldQuit: observedDialogContent.args.quitOnInfo.present
+                    shouldQuit: observedData.args.quitOnInfo.present
                     )},
                    label: {
-                    Text(observedDialogContent.args.buttonInfoTextOption.value)
+                    Text(observedData.args.buttonInfoTextOption.value)
                         .frame(minWidth: 40, alignment: .center)
                     }
             )

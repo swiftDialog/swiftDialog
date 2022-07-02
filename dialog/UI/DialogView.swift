@@ -12,7 +12,7 @@ import AppKit
 
 struct DialogView: View {
     
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
     
     var iconDisplayWidth : CGFloat
     
@@ -22,16 +22,16 @@ struct DialogView: View {
         } else {
             iconDisplayWidth = observedDialogContent.iconSize
         }
-        self.observedDialogContent = observedDialogContent
+        self.observedData = observedDialogContent
     }
     
     
     var body: some View {
         VStack { //}(alignment: .top, spacing: nil) {
             HStack {
-                if (observedDialogContent.args.iconOption.present && !observedDialogContent.centreIconPresent && !(observedDialogContent.args.iconOption.value == "none")) {
+                if (observedData.args.iconOption.present && !observedData.centreIconPresent && !(observedData.args.iconOption.value == "none")) {
                     VStack {
-                        IconView(observedDialogContent: observedDialogContent)
+                        IconView(observedDialogContent: observedData)
                             .frame(width: iconDisplayWidth, alignment: .top)
                             .border(appvars.debugBorderColour, width: 2)
                             .padding(.top, 20)
@@ -40,10 +40,10 @@ struct DialogView: View {
                     }
                 }
                 
-                MessageContent(observedDialogContent: observedDialogContent)
+                MessageContent(observedDialogContent: observedData)
                     .border(appvars.debugBorderColour, width: 2)
             }
-            TaskProgressView(observedDialogContent: observedDialogContent)
+            TaskProgressView(observedData: observedData)
         }
     }
 }

@@ -10,7 +10,7 @@ import SwiftUI
 
 struct IconOverlayView: View {
     
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
     
     var overlayImagePath: String // appArguments.overlayIconOption.value // CLOptionText(OptionName: appArguments.overlayIconOption)
     var overlayIconPresent: Bool
@@ -38,7 +38,7 @@ struct IconOverlayView: View {
     var sfBackgroundIconColour: Color = Color.background
         
     init (observedDialogContent : DialogUpdatableContent) {
-        self.observedDialogContent = observedDialogContent
+        self.observedData = observedDialogContent
         
         overlayImagePath = observedDialogContent.args.overlayIconOption.value
         overlayIconPresent = observedDialogContent.args.overlayIconOption.present

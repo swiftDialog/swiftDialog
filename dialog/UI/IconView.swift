@@ -12,7 +12,7 @@ import SwiftUI
 struct IconView: View {
     @Environment(\.colorScheme) var colorScheme
     
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
     
     var messageUserImagePath: String //= appArguments.iconOption.value // CLOptionText(OptionName: appArguments.iconOption, DefaultValue: "default")
     var logoWidth: CGFloat = appvars.iconWidth
@@ -45,7 +45,7 @@ struct IconView: View {
     
   
     init(observedDialogContent : DialogUpdatableContent) {
-        self.observedDialogContent = observedDialogContent
+        self.observedData = observedDialogContent
         
         messageUserImagePath = observedDialogContent.args.iconOption.value // observedDialogContent.iconImage
         
@@ -258,7 +258,7 @@ struct IconView: View {
                     .scaleEffect(mainImageScale)
             }
 
-            IconOverlayView(observedDialogContent: observedDialogContent)
+            IconOverlayView(observedDialogContent: observedData)
                 .scaleEffect(overlayImageScale, anchor:.bottomTrailing)
 
         }

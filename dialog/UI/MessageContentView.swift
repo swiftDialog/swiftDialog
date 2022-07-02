@@ -11,7 +11,7 @@ import MarkdownUI
 
 struct MessageContent: View {
     
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
     @State private var contentHeight: CGFloat = 40
     
     var fieldPadding: CGFloat = 15
@@ -31,7 +31,7 @@ struct MessageContent: View {
     let theAllignment: Alignment = .topLeading
     
     init(observedDialogContent : DialogUpdatableContent) {
-        self.observedDialogContent = observedDialogContent
+        self.observedData = observedDialogContent
         if !observedDialogContent.args.hideIcon.present  { //appArguments.hideIcon.present {
             fieldPadding = 40
             iconDisplayWidth = 0
@@ -43,10 +43,10 @@ struct MessageContent: View {
     
     var body: some View {
         
-        if observedDialogContent.imagePresent || (observedDialogContent.imagePresent && observedDialogContent.imageCaptionPresent) {
+        if observedData.imagePresent || (observedData.imagePresent && observedData.imageCaptionPresent) {
             VStack {
-                if observedDialogContent.args.iconOption.present && observedDialogContent.centreIconPresent && !observedDialogContent.args.hideIcon.present && !(observedDialogContent.args.iconOption.value == "none") {
-                    IconView(observedDialogContent: observedDialogContent)
+                if observedData.args.iconOption.present && observedData.centreIconPresent && !observedData.args.hideIcon.present && !(observedData.args.iconOption.value == "none") {
+                    IconView(observedDialogContent: observedData)
                         .frame(width: iconDisplayWidth, alignment: .top)
                         .padding(.top, 15)
                         .padding(.bottom, 10)
@@ -57,28 +57,28 @@ struct MessageContent: View {
         } else {
             VStack {
                 
-                if observedDialogContent.centreIconPresent && observedDialogContent.centreIconPresent && !(observedDialogContent.args.iconOption.value == "none") {
-                    IconView(observedDialogContent: observedDialogContent)
+                if observedData.centreIconPresent && observedData.centreIconPresent && !(observedData.args.iconOption.value == "none") {
+                    IconView(observedDialogContent: observedData)
                         .frame(width: iconDisplayWidth, alignment: .top)
                         .padding(.top, 15)
                         .padding(.bottom, 10)
                         .border(appvars.debugBorderColour, width: 2)
                 }
                 
-                if observedDialogContent.listItemPresent {
-                    Markdown(observedDialogContent.args.messageOption.value, baseURL: URL(string: "http://"))
+                if observedData.listItemPresent {
+                    Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
                         .multilineTextAlignment(appvars.messageAlignment)
                         .markdownStyle(defaultStyle)
-                    ListView(observedDialogContent: observedDialogContent)
+                    ListView(observedDialogContent: observedData)
                         .padding(.top, 10)
                 } else {
                     ScrollView() {
                         if appvars.messageFontName == "" {
-                            Markdown(observedDialogContent.args.messageOption.value, baseURL: URL(string: "http://"))
+                            Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
                                 .multilineTextAlignment(appvars.messageAlignment)
                                 .markdownStyle(defaultStyle)
                         } else {
-                            Markdown(observedDialogContent.args.messageOption.value, baseURL: URL(string: "http://"))
+                            Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
                                 .multilineTextAlignment(appvars.messageAlignment)
                                 .markdownStyle(customStyle)
                         }
@@ -96,13 +96,13 @@ struct MessageContent: View {
                 HStack() {
                     //Spacer()
                     VStack {
-                        TextEntryView(observedDialogContent: observedDialogContent)
+                        TextEntryView(observedDialogContent: observedData)
                             //.padding(.leading, 50)
                             //.padding(.trailing, 50)
                             .padding(.bottom, 10)
                             .border(appvars.debugBorderColour, width: 2)
 
-                        DropdownView(observedDialogContent: observedDialogContent)
+                        DropdownView(observedDialogContent: observedData)
                             //.padding(.leading, 50)
                             //.padding(.trailing, 50)
                             .padding(.bottom, 10)

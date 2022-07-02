@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TextEntryView: View {
     
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
     
     @State var textFieldValue = Array(repeating: "", count: textFields.count)
     //var textPromptValue = Array(repeating: "", count: textFields.count)
@@ -23,7 +23,7 @@ struct TextEntryView: View {
     var requiredFieldsPresent : Bool = false
     
     init(observedDialogContent : DialogUpdatableContent) {
-        self.observedDialogContent = observedDialogContent
+        self.observedData = observedDialogContent
         if appArguments.textField.present {
             textFieldPresent = true
             for i in 0..<textFields.count {
@@ -77,7 +77,7 @@ struct TextEntryView: View {
                             textFields[index].value = textFieldValue[index]
                         })
                         .overlay(RoundedRectangle(cornerRadius: 5)
-                                    .stroke(observedDialogContent.requiredTextfieldHighlight[index], lineWidth: 2)
+                                    .stroke(observedData.requiredTextfieldHighlight[index], lineWidth: 2)
                                     .animation(.easeIn(duration: 0.2)
                                                 .repeatCount(3, autoreverses: true)
                                                )
