@@ -20,20 +20,24 @@ class DialogUpdatableContent : ObservableObject {
     
     var path: String
     
+    // bring in all the collected cloptions
+    // TODO: reduce double handling of data.
     @Published var args : CLOptions = cloptions
     
-    @Published var titleText: String
+    //@Published var titleText: String   // unused
     @Published var titleFontColour: Color
+    @Published var titleFontSize: CGFloat
+    
     @Published var messageText: String
     @Published var statusText: String
     @Published var progressValue: Double
     @Published var progressTotal: Double
-    @Published var button1Value: String
-    @Published var button1Disabled: Bool
-    @Published var button2Value: String
-    @Published var button2Present: Bool
-    @Published var infoButtonValue: String
-    @Published var infoButtonPresent: Bool
+    //@Published var button1Value: String
+    //@Published var button1Disabled: Bool
+    //@Published var button2Value: String
+    //@Published var button2Present: Bool
+    //@Published var infoButtonValue: String
+    //@Published var infoButtonPresent: Bool
     @Published var iconImage: String
     @Published var iconSize: CGFloat
     @Published var iconPresent: Bool
@@ -78,23 +82,25 @@ class DialogUpdatableContent : ObservableObject {
         // initialise all our observed variables
         // for the most part we pull from whatever was passed in save for some tracking variables
         
-        button1Disabled = cloptions.button1Disabled.present
+        //button1Disabled = args.button1Disabled.present
         if cloptions.timerBar.present && !cloptions.hideTimerBar.present {
             //self._button1disabled = State(initialValue: true)
-            button1Disabled = true
+            cloptions.button1Disabled.present = true
         }
                 
-        titleText = cloptions.titleOption.value
+        //titleText = cloptions.titleOption.value
         titleFontColour = appvars.titleFontColour
+        titleFontSize = appvars.titleFontSize
+        
         messageText = cloptions.messageOption.value
         statusText = cloptions.progressText.value
         progressValue = 0
         progressTotal = 0
-        button1Value = cloptions.button1TextOption.value
-        button2Value = cloptions.button2TextOption.value
-        button2Present = cloptions.button2Option.present
-        infoButtonValue = cloptions.infoButtonOption.value
-        infoButtonPresent = cloptions.infoButtonOption.present || cloptions.buttonInfoTextOption.present
+        //button1Value = cloptions.button1TextOption.value
+        //button2Value = cloptions.button2TextOption.value
+        //button2Present = cloptions.button2Option.present
+        //infoButtonValue = cloptions.infoButtonOption.value
+        //infoButtonPresent = cloptions.infoButtonOption.present || cloptions.buttonInfoTextOption.present
         listItemUpdateRow = 0
         
         //requiredTextfieldHighlight = Color.clear
@@ -205,11 +211,11 @@ class DialogUpdatableContent : ObservableObject {
             */
             // Title
             case "\(cloptions.titleOption.long):" :
-                titleText = line.replacingOccurrences(of: "\(cloptions.titleOption.long): ", with: "")
+                args.titleOption.value = line.replacingOccurrences(of: "\(cloptions.titleOption.long): ", with: "")
             
             // Message
             case "\(cloptions.messageOption.long):" :
-                messageText = line.replacingOccurrences(of: "\(cloptions.messageOption.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n")
+                args.messageOption.value = line.replacingOccurrences(of: "\(cloptions.messageOption.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n")
                 imagePresent = false
                 imageCaptionPresent = false
                 //listItemPresent = false
@@ -249,27 +255,27 @@ class DialogUpdatableContent : ObservableObject {
             
             // Button 1 label
             case "\(cloptions.button1TextOption.long):" :
-                button1Value = line.replacingOccurrences(of: "\(cloptions.button1TextOption.long): ", with: "")
+                args.button1TextOption.value = line.replacingOccurrences(of: "\(cloptions.button1TextOption.long): ", with: "")
                 
             // Button 1 status
             case "button1:" :
                 let buttonCMD = line.replacingOccurrences(of: "button1: ", with: "")
                 switch buttonCMD {
                 case "disable" :
-                    button1Disabled = true
+                    args.button1Disabled.present = true
                 case "enable" :
-                    button1Disabled = false
+                    args.button1Disabled.present = false
                 default :
-                    button1Disabled = button1Disabled
+                    args.button1Disabled.present = false
                 }
 
             // Button 2 label
             case "\(cloptions.button2TextOption.long):" :
-                button2Value = line.replacingOccurrences(of: "\(cloptions.button2TextOption.long): ", with: "")
+                args.button2TextOption.value = line.replacingOccurrences(of: "\(cloptions.button2TextOption.long): ", with: "")
             
             // Info Button label
             case "\(cloptions.infoButtonOption.long):" :
-                infoButtonValue = line.replacingOccurrences(of: "\(cloptions.infoButtonOption.long): ", with: "")
+                args.infoButtonOption.value = line.replacingOccurrences(of: "\(cloptions.infoButtonOption.long): ", with: "")
                 
             // icon image
             case "\(cloptions.iconOption.long):" :

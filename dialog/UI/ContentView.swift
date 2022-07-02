@@ -99,7 +99,7 @@ struct ContentView: View {
                         Text(cloptions.infoText.value)
                             .foregroundColor(.secondary.opacity(0.7))
                             //.font(.system(size: 10))
-                    } else if observedDialogContent.infoButtonPresent { //} || cloptions.buttonInfoTextOption.present {
+                    } else if observedDialogContent.args.infoButtonOption.present { //} || cloptions.buttonInfoTextOption.present {
                         MoreInfoButton(observedDialogContent: observedDialogContent)
                         if !cloptions.timerBar.present {
                             Spacer()

@@ -28,7 +28,6 @@ struct MessageContent: View {
         return MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.messageFontSize), foregroundColor: appvars.messageFontColour)
     }
     
-    let messageContentOption: String = cloptions.messageOption.value
     let theAllignment: Alignment = .topLeading
     
     init(observedDialogContent : DialogUpdatableContent) {
@@ -67,7 +66,7 @@ struct MessageContent: View {
                 }
                 
                 if observedDialogContent.listItemPresent {
-                    Markdown(observedDialogContent.messageText, baseURL: URL(string: "http://"))
+                    Markdown(observedDialogContent.args.messageOption.value, baseURL: URL(string: "http://"))
                         .multilineTextAlignment(appvars.messageAlignment)
                         .markdownStyle(defaultStyle)
                     ListView(observedDialogContent: observedDialogContent)
@@ -75,11 +74,11 @@ struct MessageContent: View {
                 } else {
                     ScrollView() {
                         if appvars.messageFontName == "" {
-                            Markdown(observedDialogContent.messageText, baseURL: URL(string: "http://"))
+                            Markdown(observedDialogContent.args.messageOption.value, baseURL: URL(string: "http://"))
                                 .multilineTextAlignment(appvars.messageAlignment)
                                 .markdownStyle(defaultStyle)
                         } else {
-                            Markdown(observedDialogContent.messageText, baseURL: URL(string: "http://"))
+                            Markdown(observedDialogContent.args.messageOption.value, baseURL: URL(string: "http://"))
                                 .multilineTextAlignment(appvars.messageAlignment)
                                 .markdownStyle(customStyle)
                         }

@@ -90,6 +90,7 @@ struct dialogApp: App {
         
         if cloptions.constructionKit.present {
             ConstructionKitView(observedDialogContent: observedDialogContent).showConstructionKit()
+            appvars.windowIsMoveable = true
         }
         
         // bring to front on launch
