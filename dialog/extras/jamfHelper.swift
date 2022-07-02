@@ -37,30 +37,30 @@ struct JHOptions {
 
 public func convertFromJamfHelperSyntax() {
     // read the jamfhelper syntax from the command line and populate the appropriate dialog values
-    //cloptions.smallWindow.present = true
+    //appArguments.smallWindow.present = true
     
     //fullscreen
     if CLOptionPresent(OptionName: JHOptions.windowType) && CLOptionText(OptionName: JHOptions.windowType) == "fs" {
-        cloptions.fullScreenWindow.present = true
+        appArguments.fullScreenWindow.present = true
     }
     
     // title
-    cloptions.titleOption.present = CLOptionPresent(OptionName: JHOptions.title)
-    cloptions.titleOption.value = CLOptionText(OptionName: JHOptions.title)
+    appArguments.titleOption.present = CLOptionPresent(OptionName: JHOptions.title)
+    appArguments.titleOption.value = CLOptionText(OptionName: JHOptions.title)
     
     // message
-    cloptions.messageOption.present = CLOptionPresent(OptionName: JHOptions.description)
-    if !cloptions.fullScreenWindow.present {
-        cloptions.messageOption.value = "#### \(CLOptionText(OptionName: JHOptions.heading))\n\n\(CLOptionText(OptionName: JHOptions.description))"
+    appArguments.messageOption.present = CLOptionPresent(OptionName: JHOptions.description)
+    if !appArguments.fullScreenWindow.present {
+        appArguments.messageOption.value = "#### \(CLOptionText(OptionName: JHOptions.heading))\n\n\(CLOptionText(OptionName: JHOptions.description))"
     } else {
-        cloptions.messageOption.value = "\(CLOptionText(OptionName: JHOptions.heading))\n\n\(CLOptionText(OptionName: JHOptions.description))"
+        appArguments.messageOption.value = "\(CLOptionText(OptionName: JHOptions.heading))\n\n\(CLOptionText(OptionName: JHOptions.description))"
     }
     
     // message alignment
-    cloptions.messageAlignment.present = CLOptionPresent(OptionName: JHOptions.alignDescription)
-    cloptions.messageAlignment.value = CLOptionText(OptionName: JHOptions.alignDescription)
-    if cloptions.messageAlignment.present {
-        switch cloptions.messageAlignment.value {
+    appArguments.messageAlignment.present = CLOptionPresent(OptionName: JHOptions.alignDescription)
+    appArguments.messageAlignment.value = CLOptionText(OptionName: JHOptions.alignDescription)
+    if appArguments.messageAlignment.present {
+        switch appArguments.messageAlignment.value {
         case "left":
             appvars.messageAlignment = .leading
         case "centre", "center":
@@ -73,31 +73,31 @@ public func convertFromJamfHelperSyntax() {
     }
     
     //icon
-    cloptions.iconOption.present         = CLOptionPresent(OptionName: JHOptions.icon)
-    cloptions.iconOption.value = CLOptionText(OptionName: JHOptions.icon)
-    if !cloptions.iconOption.present {
+    appArguments.iconOption.present         = CLOptionPresent(OptionName: JHOptions.icon)
+    appArguments.iconOption.value = CLOptionText(OptionName: JHOptions.icon)
+    if !appArguments.iconOption.present {
         appvars.iconIsHidden = true
     }
     
     //icon size
-    cloptions.iconSize.present = CLOptionPresent(OptionName: JHOptions.iconSize)
-    cloptions.iconSize.value = CLOptionText(OptionName: JHOptions.iconSize, DefaultValue: "\(appvars.iconWidth)")
+    appArguments.iconSize.present = CLOptionPresent(OptionName: JHOptions.iconSize)
+    appArguments.iconSize.value = CLOptionText(OptionName: JHOptions.iconSize, DefaultValue: "\(appvars.iconWidth)")
 
     
     //button 1
-    cloptions.button1TextOption.present = CLOptionPresent(OptionName: JHOptions.button1)
-    cloptions.button1TextOption.value = CLOptionText(OptionName: JHOptions.button1)
-    if !cloptions.button1TextOption.present {
-        cloptions.button1TextOption.value = "OK"
+    appArguments.button1TextOption.present = CLOptionPresent(OptionName: JHOptions.button1)
+    appArguments.button1TextOption.value = CLOptionText(OptionName: JHOptions.button1)
+    if !appArguments.button1TextOption.present {
+        appArguments.button1TextOption.value = "OK"
     }
     
     //button 2
-    cloptions.button2TextOption.present = CLOptionPresent(OptionName: JHOptions.button2)
-    cloptions.button2TextOption.value = CLOptionText(OptionName: JHOptions.button2)
+    appArguments.button2TextOption.present = CLOptionPresent(OptionName: JHOptions.button2)
+    appArguments.button2TextOption.value = CLOptionText(OptionName: JHOptions.button2)
     
     //countdown or timer
-    cloptions.timerBar.present = CLOptionPresent(OptionName: JHOptions.timeout)
-    cloptions.timerBar.value = CLOptionText(OptionName: JHOptions.timeout)
+    appArguments.timerBar.present = CLOptionPresent(OptionName: JHOptions.timeout)
+    appArguments.timerBar.value = CLOptionText(OptionName: JHOptions.timeout)
     
     // window location on screen
     if CLOptionPresent(OptionName: JHOptions.windowPosition) {

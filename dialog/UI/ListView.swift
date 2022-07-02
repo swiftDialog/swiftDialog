@@ -41,8 +41,8 @@ struct ListView: View {
     
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedDialogContent = observedDialogContent
-        if cloptions.listStyle.present {
-            switch cloptions.listStyle.value {
+        if appArguments.listStyle.present {
+            switch appArguments.listStyle.value {
             case "expanded":
                 rowHeight = rowHeight + 15
             case "compact":

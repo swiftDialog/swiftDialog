@@ -77,7 +77,7 @@ struct ButtonView: View {
 
 struct MoreInfoButton: View {
     //let buttonInfoAction: String = observedDialogContent.args.buttonInfoActionOption.value
-    //var buttonInfoText : String = cloptions.buttonInfoTextOption.value
+    //var buttonInfoText : String = appArguments.buttonInfoTextOption.value
     
     @ObservedObject var observedDialogContent : DialogUpdatableContent
     

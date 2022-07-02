@@ -43,14 +43,14 @@ func processJSONString(jsonString: String) -> JSON {
 
 func getJSON() -> JSON {
     var json = JSON()
-    if CLOptionPresent(OptionName: cloptions.jsonFile) {
+    if CLOptionPresent(OptionName: appArguments.jsonFile) {
         // read json in from file
-        json = processJSON(jsonFilePath: CLOptionText(OptionName: cloptions.jsonFile))
+        json = processJSON(jsonFilePath: CLOptionText(OptionName: appArguments.jsonFile))
     }
     
-    if CLOptionPresent(OptionName: cloptions.jsonString) {
+    if CLOptionPresent(OptionName: appArguments.jsonString) {
         // read json in from text string
-        json = processJSONString(jsonString: CLOptionText(OptionName: cloptions.jsonString))
+        json = processJSONString(jsonString: CLOptionText(OptionName: appArguments.jsonString))
     }
     return json
 }
@@ -61,12 +61,12 @@ func processCLOptions() {
     
     let json : JSON = getJSON()
     
-    if cloptions.dropdownValues.present {
+    if appArguments.dropdownValues.present {
         // checking for the pre 1.10 way of defining a select list
-        if json[cloptions.dropdownValues.long].exists() && !json["selectitems"].exists() {
-            let selectValues = json[cloptions.dropdownValues.long].arrayValue.map {$0.stringValue}
-            let selectTitle = json[cloptions.dropdownTitle.long].stringValue
-            let selectDefault = json[cloptions.dropdownDefault.long].stringValue
+        if json[appArguments.dropdownValues.long].exists() && !json["selectitems"].exists() {
+            let selectValues = json[appArguments.dropdownValues.long].arrayValue.map {$0.stringValue}
+            let selectTitle = json[appArguments.dropdownTitle.long].stringValue
+            let selectDefault = json[appArguments.dropdownDefault.long].stringValue
             dropdownItems.append(DropDownItems(title: selectTitle, values: selectValues, defaultValue: selectDefault, selectedValue: selectDefault))
         }
         
@@ -81,9 +81,9 @@ func processCLOptions() {
             }
             
         } else {
-            let dropdownValues = CLOptionMultiOptions(optionName: cloptions.dropdownValues.long)
-            var selectValues = CLOptionMultiOptions(optionName: cloptions.dropdownTitle.long)
-            var dropdownDefaults = CLOptionMultiOptions(optionName: cloptions.dropdownDefault.long)
+            let dropdownValues = CLOptionMultiOptions(optionName: appArguments.dropdownValues.long)
+            var selectValues = CLOptionMultiOptions(optionName: appArguments.dropdownTitle.long)
+            var dropdownDefaults = CLOptionMultiOptions(optionName: appArguments.dropdownDefault.long)
             
             // need to make sure the title and default value arrays are the same size
             for _ in selectValues.count..<dropdownValues.count {
@@ -99,24 +99,24 @@ func processCLOptions() {
         }
     }
     
-    if cloptions.textField.present {
-        if json[cloptions.textField.long].exists() {
-            for i in 0..<json[cloptions.textField.long].arrayValue.count {
-                if json[cloptions.textField.long][i]["title"].stringValue == "" {
-                    textFields.append(TextFieldState(title: String(json[cloptions.textField.long][i].stringValue)))
+    if appArguments.textField.present {
+        if json[appArguments.textField.long].exists() {
+            for i in 0..<json[appArguments.textField.long].arrayValue.count {
+                if json[appArguments.textField.long][i]["title"].stringValue == "" {
+                    textFields.append(TextFieldState(title: String(json[appArguments.textField.long][i].stringValue)))
                 } else {
                     textFields.append(TextFieldState(
-                        title: String(json[cloptions.textField.long][i]["title"].stringValue),
-                        required: Bool(json[cloptions.textField.long][i]["required"].boolValue),
-                        secure: Bool(json[cloptions.textField.long][i]["secure"].boolValue),
-                        prompt: String(json[cloptions.textField.long][i]["prompt"].stringValue),
-                        regex: String(json[cloptions.textField.long][i]["regex"].stringValue),
-                        regexError: String(json[cloptions.textField.long][i]["regexerror"].stringValue))
+                        title: String(json[appArguments.textField.long][i]["title"].stringValue),
+                        required: Bool(json[appArguments.textField.long][i]["required"].boolValue),
+                        secure: Bool(json[appArguments.textField.long][i]["secure"].boolValue),
+                        prompt: String(json[appArguments.textField.long][i]["prompt"].stringValue),
+                        regex: String(json[appArguments.textField.long][i]["regex"].stringValue),
+                        regexError: String(json[appArguments.textField.long][i]["regexerror"].stringValue))
                     )
                 }
             }
         } else {
-            for textFieldOption in CLOptionMultiOptions(optionName: cloptions.textField.long) {
+            for textFieldOption in CLOptionMultiOptions(optionName: appArguments.textField.long) {
                 let items = textFieldOption.split(usingRegex: appvars.argRegex)
                 var fieldTitle : String = ""
                 var fieldPrompt : String = ""
@@ -154,50 +154,50 @@ func processCLOptions() {
         logger(logMessage: "textOptionsArray : \(textFields)")
     }
     
-    if cloptions.checkbox.present {
-        if json[cloptions.checkbox.long].exists() {
-            appvars.checkboxOptionsArray = json[cloptions.checkbox.long].arrayValue.map {$0["label"].stringValue}
-            appvars.checkboxValue = json[cloptions.checkbox.long].arrayValue.map {$0["checked"].boolValue}
-            appvars.checkboxDisabled = json[cloptions.checkbox.long].arrayValue.map {$0["disabled"].boolValue}
+    if appArguments.checkbox.present {
+        if json[appArguments.checkbox.long].exists() {
+            appvars.checkboxOptionsArray = json[appArguments.checkbox.long].arrayValue.map {$0["label"].stringValue}
+            appvars.checkboxValue = json[appArguments.checkbox.long].arrayValue.map {$0["checked"].boolValue}
+            appvars.checkboxDisabled = json[appArguments.checkbox.long].arrayValue.map {$0["disabled"].boolValue}
         } else {
-            appvars.checkboxOptionsArray =  CLOptionMultiOptions(optionName: cloptions.checkbox.long)
+            appvars.checkboxOptionsArray =  CLOptionMultiOptions(optionName: appArguments.checkbox.long)
         }
         logger(logMessage: "checkboxOptionsArray : \(appvars.checkboxOptionsArray)")
     }
     
-    if cloptions.mainImage.present {
-        if json[cloptions.mainImage.long].exists() {
-            if json[cloptions.mainImage.long].array == nil {
+    if appArguments.mainImage.present {
+        if json[appArguments.mainImage.long].exists() {
+            if json[appArguments.mainImage.long].array == nil {
                 // not an array so pull the single value
-                appvars.imageArray.append(json[cloptions.mainImage.long].stringValue)
+                appvars.imageArray.append(json[appArguments.mainImage.long].stringValue)
             } else {
-                appvars.imageArray = json[cloptions.mainImage.long].arrayValue.map {$0["imagename"].stringValue}
-                appvars.imageCaptionArray = json[cloptions.mainImage.long].arrayValue.map {$0["caption"].stringValue}
+                appvars.imageArray = json[appArguments.mainImage.long].arrayValue.map {$0["imagename"].stringValue}
+                appvars.imageCaptionArray = json[appArguments.mainImage.long].arrayValue.map {$0["caption"].stringValue}
             }
         } else {
-            appvars.imageArray = CLOptionMultiOptions(optionName: cloptions.mainImage.long)
+            appvars.imageArray = CLOptionMultiOptions(optionName: appArguments.mainImage.long)
         }
         logger(logMessage: "imageArray : \(appvars.imageArray)")
     }
     
-    if cloptions.listItem.present {
-        if json[cloptions.listItem.long].exists() {
+    if appArguments.listItem.present {
+        if json[appArguments.listItem.long].exists() {
             
-            for i in 0..<json[cloptions.listItem.long].arrayValue.count {
-                if json[cloptions.listItem.long][i]["title"].stringValue == "" {
-                    appvars.listItems.append(ListItems(title: String(json[cloptions.listItem.long][i].stringValue)))
+            for i in 0..<json[appArguments.listItem.long].arrayValue.count {
+                if json[appArguments.listItem.long][i]["title"].stringValue == "" {
+                    appvars.listItems.append(ListItems(title: String(json[appArguments.listItem.long][i].stringValue)))
                 } else {
-                    appvars.listItems.append(ListItems(title: String(json[cloptions.listItem.long][i]["title"].stringValue),
-                                               icon: String(json[cloptions.listItem.long][i]["icon"].stringValue),
-                                               statusText: String(json[cloptions.listItem.long][i]["statustext"].stringValue),
-                                               statusIcon: String(json[cloptions.listItem.long][i]["status"].stringValue))
+                    appvars.listItems.append(ListItems(title: String(json[appArguments.listItem.long][i]["title"].stringValue),
+                                               icon: String(json[appArguments.listItem.long][i]["icon"].stringValue),
+                                               statusText: String(json[appArguments.listItem.long][i]["statustext"].stringValue),
+                                               statusIcon: String(json[appArguments.listItem.long][i]["status"].stringValue))
                                 )
                 }
             }
             
         } else {
             
-            for listItem in CLOptionMultiOptions(optionName: cloptions.listItem.long) {
+            for listItem in CLOptionMultiOptions(optionName: appArguments.listItem.long) {
                 let items = listItem.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
                 var title : String = ""
                 var icon : String = ""
@@ -225,47 +225,47 @@ func processCLOptions() {
     }
     
     
-    if json[cloptions.mainImageCaption.long].exists() || cloptions.mainImageCaption.present {
-        if json[cloptions.mainImageCaption.long].exists() {
-            appvars.imageCaptionArray.append(json[cloptions.mainImageCaption.long].stringValue)
+    if json[appArguments.mainImageCaption.long].exists() || appArguments.mainImageCaption.present {
+        if json[appArguments.mainImageCaption.long].exists() {
+            appvars.imageCaptionArray.append(json[appArguments.mainImageCaption.long].stringValue)
         } else {
-            appvars.imageCaptionArray = CLOptionMultiOptions(optionName: cloptions.mainImageCaption.long)
+            appvars.imageCaptionArray = CLOptionMultiOptions(optionName: appArguments.mainImageCaption.long)
         }
         logger(logMessage: "imageCaptionArray : \(appvars.imageCaptionArray)")
     }
     
-    if !json[cloptions.autoPlay.long].exists() && !cloptions.autoPlay.present {
-        cloptions.autoPlay.value = "0"
-        logger(logMessage: "autoPlay.value : \(cloptions.autoPlay.value)")
+    if !json[appArguments.autoPlay.long].exists() && !appArguments.autoPlay.present {
+        appArguments.autoPlay.value = "0"
+        logger(logMessage: "autoPlay.value : \(appArguments.autoPlay.value)")
     }
     
     // process command line options that just display info and exit before we show the main window
-    if (cloptions.helpOption.present || CommandLine.arguments.count == 1) {
+    if (appArguments.helpOption.present || CommandLine.arguments.count == 1) {
         print(helpText)
         quitDialog(exitCode: appvars.exitNow.code)
         //exit(0)
     }
-    if cloptions.getVersion.present {
+    if appArguments.getVersion.present {
         printVersionString()
         quitDialog(exitCode: appvars.exitNow.code)
         //exit(0)
     }
-    if cloptions.showLicense.present {
+    if appArguments.showLicense.present {
         print(licenseText)
         quitDialog(exitCode: appvars.exitNow.code)
         //exit(0)
     }
-    if cloptions.buyCoffee.present {
+    if appArguments.buyCoffee.present {
         //I'm a teapot
         print("If you like this app and want to buy me a coffee https://www.buymeacoffee.com/bartreardon")
         quitDialog(exitCode: appvars.exitNow.code)
         //exit(418)
     }
-    if cloptions.ignoreDND.present {
+    if appArguments.ignoreDND.present {
         appvars.willDisturb = true
     }
     
-    if cloptions.listFonts.present {
+    if appArguments.listFonts.present {
         //All font Families
         let fontfamilies = NSFontManager.shared.availableFontFamilies
         print("Available font families:")
@@ -287,34 +287,34 @@ func processCLOptions() {
         quitDialog(exitCode: 20, exitMessage: "Do Not Disturb is enabled. Exiting")
     }
         
-    if cloptions.windowWidth.present {
-        //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: cloptions.windowWidth)
-        if cloptions.windowWidth.value.last == "%" {
-            appvars.windowWidth = appvars.screenWidth * string2float(string: String(cloptions.windowWidth.value.dropLast()))/100
+    if appArguments.windowWidth.present {
+        //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: appArguments.windowWidth)
+        if appArguments.windowWidth.value.last == "%" {
+            appvars.windowWidth = appvars.screenWidth * string2float(string: String(appArguments.windowWidth.value.dropLast()))/100
         } else {
-            appvars.windowWidth = string2float(string: cloptions.windowWidth.value)
+            appvars.windowWidth = string2float(string: appArguments.windowWidth.value)
         }
         logger(logMessage: "windowWidth : \(appvars.windowWidth)")
     }
-    if cloptions.windowHeight.present {
-        //appvars.windowHeight = CGFloat() //CLOptionText(OptionName: cloptions.windowHeight)
-        if cloptions.windowHeight.value.last == "%" {
-            appvars.windowHeight = appvars.screenHeight * string2float(string: String(cloptions.windowHeight.value.dropLast()))/100
+    if appArguments.windowHeight.present {
+        //appvars.windowHeight = CGFloat() //CLOptionText(OptionName: appArguments.windowHeight)
+        if appArguments.windowHeight.value.last == "%" {
+            appvars.windowHeight = appvars.screenHeight * string2float(string: String(appArguments.windowHeight.value.dropLast()))/100
         } else {
-            appvars.windowHeight = string2float(string: cloptions.windowHeight.value)
+            appvars.windowHeight = string2float(string: appArguments.windowHeight.value)
         }
         logger(logMessage: "windowHeight : \(appvars.windowHeight)")
     }
     
-    if cloptions.iconSize.present {
-        //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: cloptions.windowWidth)
-        appvars.iconWidth = string2float(string: cloptions.iconSize.value)
+    if appArguments.iconSize.present {
+        //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: appArguments.windowWidth)
+        appvars.iconWidth = string2float(string: appArguments.iconSize.value)
         logger(logMessage: "iconWidth : \(appvars.iconWidth)")
     }
     /*
-    if cloptions.iconHeight.present {
-        //appvars.windowHeight = CGFloat() //CLOptionText(OptionName: cloptions.windowHeight)
-        appvars.iconHeight = NumberFormatter().number(from: cloptions.iconHeight.value) as! CGFloat
+    if appArguments.iconHeight.present {
+        //appvars.windowHeight = CGFloat() //CLOptionText(OptionName: appArguments.windowHeight)
+        appvars.iconHeight = NumberFormatter().number(from: appArguments.iconHeight.value) as! CGFloat
     }
     */
     // Correct feng shui so the app accepts keyboard input
@@ -323,23 +323,23 @@ func processCLOptions() {
     //app.setActivationPolicy(.regular)
     app.setActivationPolicy(.accessory)
             
-    if cloptions.titleFont.present {
+    if appArguments.titleFont.present {
         
-        if cloptions.titleFont.value == "" {
-            logger(logMessage: "titleFont.object : \(json[cloptions.titleFont.long].object)")
+        if appArguments.titleFont.value == "" {
+            logger(logMessage: "titleFont.object : \(json[appArguments.titleFont.long].object)")
             
-            appvars.titleFontSize = string2float(string: json[cloptions.titleFont.long]["size"].stringValue, defaultValue: appvars.titleFontSize)
-            appvars.titleFontWeight = textToFontWeight(json[cloptions.titleFont.long]["weight"].stringValue)
-            if json[cloptions.messageFont.long]["colour"].exists() {
-                appvars.titleFontColour = stringToColour(json[cloptions.titleFont.long]["colour"].stringValue)
+            appvars.titleFontSize = string2float(string: json[appArguments.titleFont.long]["size"].stringValue, defaultValue: appvars.titleFontSize)
+            appvars.titleFontWeight = textToFontWeight(json[appArguments.titleFont.long]["weight"].stringValue)
+            if json[appArguments.messageFont.long]["colour"].exists() {
+                appvars.titleFontColour = stringToColour(json[appArguments.titleFont.long]["colour"].stringValue)
             } else {
-                appvars.titleFontColour = stringToColour(json[cloptions.titleFont.long]["color"].stringValue)
+                appvars.titleFontColour = stringToColour(json[appArguments.titleFont.long]["color"].stringValue)
             }
-            appvars.titleFontName = json[cloptions.titleFont.long]["name"].stringValue
+            appvars.titleFontName = json[appArguments.titleFont.long]["name"].stringValue
         } else {
         
-            logger(logMessage: "titleFont.value : \(cloptions.titleFont.value)")
-            let fontCLValues = cloptions.titleFont.value
+            logger(logMessage: "titleFont.value : \(appArguments.titleFont.value)")
+            let fontCLValues = appArguments.titleFont.value
             var fontValues = [""]
             //split by ,
             fontValues = fontCLValues.components(separatedBy: ",")
@@ -368,23 +368,23 @@ func processCLOptions() {
         }
     }
     
-    if cloptions.messageFont.present {
+    if appArguments.messageFont.present {
         
-        if cloptions.messageFont.value == "" {
-            logger(logMessage: "messageFont.object : \(json[cloptions.messageFont.long].object)")
+        if appArguments.messageFont.value == "" {
+            logger(logMessage: "messageFont.object : \(json[appArguments.messageFont.long].object)")
             
-            appvars.messageFontSize = string2float(string: json[cloptions.messageFont.long]["size"].stringValue, defaultValue: appvars.messageFontSize)
-            appvars.messageFontWeight = textToFontWeight(json[cloptions.messageFont.long]["weight"].stringValue)
-            if json[cloptions.messageFont.long]["colour"].exists() {
-                appvars.messageFontColour = stringToColour(json[cloptions.messageFont.long]["colour"].stringValue)
+            appvars.messageFontSize = string2float(string: json[appArguments.messageFont.long]["size"].stringValue, defaultValue: appvars.messageFontSize)
+            appvars.messageFontWeight = textToFontWeight(json[appArguments.messageFont.long]["weight"].stringValue)
+            if json[appArguments.messageFont.long]["colour"].exists() {
+                appvars.messageFontColour = stringToColour(json[appArguments.messageFont.long]["colour"].stringValue)
             } else {
-                appvars.messageFontColour = stringToColour(json[cloptions.messageFont.long]["color"].stringValue)
+                appvars.messageFontColour = stringToColour(json[appArguments.messageFont.long]["color"].stringValue)
             }
-            appvars.messageFontName = json[cloptions.messageFont.long]["name"].stringValue
+            appvars.messageFontName = json[appArguments.messageFont.long]["name"].stringValue
         } else {
         
-            logger(logMessage: "messageFont.value : \(cloptions.messageFont.value)")
-            let fontCLValues = cloptions.messageFont.value
+            logger(logMessage: "messageFont.value : \(appArguments.messageFont.value)")
+            let fontCLValues = appArguments.messageFont.value
             var fontValues = [""]
             //split by ,
             fontValues = fontCLValues.components(separatedBy: ",")
@@ -412,51 +412,53 @@ func processCLOptions() {
         }
     }
     
-    if cloptions.iconOption.value != "" {
-        cloptions.iconOption.present = true
+    if appArguments.iconOption.value != "" {
+        appArguments.iconOption.present = true
     }
     
     // hide the icon if asked to or if banner image is present
-    if cloptions.hideIcon.present || cloptions.iconOption.value == "none" || cloptions.bannerImage.present {
-        cloptions.iconOption.present = true
+    if appArguments.hideIcon.present || appArguments.iconOption.value == "none" || appArguments.bannerImage.present {
+        appArguments.iconOption.present = false
+        appArguments.hideIcon.present = true
         logger(logMessage: "iconIsHidden = true")
     }
     
     // of both banner image and icon are specified, re-enable the icon.
-    if cloptions.bannerImage.present && cloptions.iconOption.present {
-        cloptions.hideIcon.present = false
+    if appArguments.bannerImage.present && appArguments.iconOption.present {
+        appArguments.hideIcon.present = false
+        appArguments.iconOption.present = true
     }
     
-    if cloptions.centreIcon.present {
+    if appArguments.centreIcon.present {
         appvars.iconIsCentred = true
         logger(logMessage: "iconIsCentred = true")
     }
     
-    if cloptions.lockWindow.present {
+    if appArguments.lockWindow.present {
         appvars.windowIsMoveable = true
         logger(logMessage: "windowIsMoveable = true")
     }
     
-    if cloptions.forceOnTop.present {
+    if appArguments.forceOnTop.present {
         appvars.windowOnTop = true
         logger(logMessage: "windowOnTop = true")
     }
     
-    if cloptions.jsonOutPut.present {
+    if appArguments.jsonOutPut.present {
         appvars.jsonOut = true
         logger(logMessage: "jsonOut = true")
     }
     
     // we define this stuff here as we will use the info to draw the window.
-    if cloptions.smallWindow.present {
+    if appArguments.smallWindow.present {
         // scale everything down a notch
         appvars.smallWindow = true
         appvars.scaleFactor = 0.75
-        if !cloptions.iconSize.present {
-            cloptions.iconSize.value = "120"
+        if !appArguments.iconSize.present {
+            appArguments.iconSize.value = "120"
         }
         logger(logMessage: "smallWindow.present")
-    } else if cloptions.bigWindow.present {
+    } else if appArguments.bigWindow.present {
         // scale everything up a notch
         appvars.bigWindow = true
         appvars.scaleFactor = 1.25
@@ -464,29 +466,29 @@ func processCLOptions() {
     }
     
     //if info button is present but no button action then default to quit on info
-    if !cloptions.buttonInfoActionOption.present {
-        cloptions.quitOnInfo.present = true
+    if !appArguments.buttonInfoActionOption.present {
+        appArguments.quitOnInfo.present = true
     }
 }
 
 func processCLOptionValues() {
     
-    // this method reads in arguments from either json file or from the command line and loads them into the cloptions object
+    // this method reads in arguments from either json file or from the command line and loads them into the appArguments object
     // also records whether an argument is present or not
     
     let json : JSON = getJSON()
     
-    cloptions.titleOption.value             = json[cloptions.titleOption.long].string ?? CLOptionText(OptionName: cloptions.titleOption, DefaultValue: appvars.titleDefault)
-    cloptions.titleOption.present           = json[cloptions.titleOption.long].exists() || CLOptionPresent(OptionName: cloptions.titleOption)
+    appArguments.titleOption.value             = json[appArguments.titleOption.long].string ?? CLOptionText(OptionName: appArguments.titleOption, DefaultValue: appvars.titleDefault)
+    appArguments.titleOption.present           = json[appArguments.titleOption.long].exists() || CLOptionPresent(OptionName: appArguments.titleOption)
 
-    cloptions.messageOption.value           = json[cloptions.messageOption.long].string ?? CLOptionText(OptionName: cloptions.messageOption, DefaultValue: appvars.messageDefault)
-    cloptions.messageOption.present         = json[cloptions.titleOption.long].exists() || CLOptionPresent(OptionName: cloptions.messageOption)
+    appArguments.messageOption.value           = json[appArguments.messageOption.long].string ?? CLOptionText(OptionName: appArguments.messageOption, DefaultValue: appvars.messageDefault)
+    appArguments.messageOption.present         = json[appArguments.titleOption.long].exists() || CLOptionPresent(OptionName: appArguments.messageOption)
     
-    cloptions.messageAlignment.value        = json[cloptions.messageAlignment.long].string ?? CLOptionText(OptionName: cloptions.messageAlignment, DefaultValue: appvars.messageAlignmentTextRepresentation)
-    cloptions.messageAlignment.present      = json[cloptions.messageAlignment.long].exists() || CLOptionPresent(OptionName: cloptions.messageAlignment)
+    appArguments.messageAlignment.value        = json[appArguments.messageAlignment.long].string ?? CLOptionText(OptionName: appArguments.messageAlignment, DefaultValue: appvars.messageAlignmentTextRepresentation)
+    appArguments.messageAlignment.present      = json[appArguments.messageAlignment.long].exists() || CLOptionPresent(OptionName: appArguments.messageAlignment)
     
-    if cloptions.messageAlignment.present {
-        switch cloptions.messageAlignment.value {
+    if appArguments.messageAlignment.present {
+        switch appArguments.messageAlignment.value {
         case "left":
             appvars.messageAlignment = .leading
         case "centre","center":
@@ -499,8 +501,8 @@ func processCLOptionValues() {
     }
     
     // window location on screen
-    if CLOptionPresent(OptionName: cloptions.position) {
-        switch CLOptionText(OptionName: cloptions.position) {
+    if CLOptionPresent(OptionName: appArguments.position) {
+        switch CLOptionText(OptionName: appArguments.position) {
         case "topleft":
             appvars.windowPositionVertical = NSWindow.Position.Vertical.top
             appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.left
@@ -534,180 +536,180 @@ func processCLOptionValues() {
         }
     }
 
-    cloptions.iconOption.value              = json[cloptions.iconOption.long].string ?? CLOptionText(OptionName: cloptions.iconOption, DefaultValue: "default")
-    cloptions.iconOption.present            = json[cloptions.iconOption.long].exists() || CLOptionPresent(OptionName: cloptions.iconOption)
+    appArguments.iconOption.value              = json[appArguments.iconOption.long].string ?? CLOptionText(OptionName: appArguments.iconOption, DefaultValue: "default")
+    appArguments.iconOption.present            = json[appArguments.iconOption.long].exists() || CLOptionPresent(OptionName: appArguments.iconOption)
     
-    cloptions.iconSize.value                = json[cloptions.iconSize.long].string ?? CLOptionText(OptionName: cloptions.iconSize, DefaultValue: "\(appvars.iconWidth)")
-    cloptions.iconSize.present              = json[cloptions.iconSize.long].exists() || CLOptionPresent(OptionName: cloptions.iconSize)
+    appArguments.iconSize.value                = json[appArguments.iconSize.long].string ?? CLOptionText(OptionName: appArguments.iconSize, DefaultValue: "\(appvars.iconWidth)")
+    appArguments.iconSize.present              = json[appArguments.iconSize.long].exists() || CLOptionPresent(OptionName: appArguments.iconSize)
     
-    //cloptions.iconHeight.value              = CLOptionText(OptionName: cloptions.iconHeight)
-    //cloptions.iconHeight.present            = CLOptionPresent(OptionName: cloptions.iconHeight)
+    //appArguments.iconHeight.value              = CLOptionText(OptionName: appArguments.iconHeight)
+    //appArguments.iconHeight.present            = CLOptionPresent(OptionName: appArguments.iconHeight)
 
-    cloptions.overlayIconOption.value       = json[cloptions.overlayIconOption.long].string ?? CLOptionText(OptionName: cloptions.overlayIconOption)
-    cloptions.overlayIconOption.present     = json[cloptions.overlayIconOption.long].exists() || CLOptionPresent(OptionName: cloptions.overlayIconOption)
+    appArguments.overlayIconOption.value       = json[appArguments.overlayIconOption.long].string ?? CLOptionText(OptionName: appArguments.overlayIconOption)
+    appArguments.overlayIconOption.present     = json[appArguments.overlayIconOption.long].exists() || CLOptionPresent(OptionName: appArguments.overlayIconOption)
 
-    cloptions.bannerImage.value             = json[cloptions.bannerImage.long].string ?? CLOptionText(OptionName: cloptions.bannerImage)
-    cloptions.bannerImage.present           = json[cloptions.bannerImage.long].exists() || CLOptionPresent(OptionName: cloptions.bannerImage)
+    appArguments.bannerImage.value             = json[appArguments.bannerImage.long].string ?? CLOptionText(OptionName: appArguments.bannerImage)
+    appArguments.bannerImage.present           = json[appArguments.bannerImage.long].exists() || CLOptionPresent(OptionName: appArguments.bannerImage)
 
-    cloptions.button1TextOption.value       = json[cloptions.button1TextOption.long].string ?? CLOptionText(OptionName: cloptions.button1TextOption, DefaultValue: appvars.button1Default)
-    cloptions.button1TextOption.present     = json[cloptions.button1TextOption.long].exists() || CLOptionPresent(OptionName: cloptions.button1TextOption)
+    appArguments.button1TextOption.value       = json[appArguments.button1TextOption.long].string ?? CLOptionText(OptionName: appArguments.button1TextOption, DefaultValue: appvars.button1Default)
+    appArguments.button1TextOption.present     = json[appArguments.button1TextOption.long].exists() || CLOptionPresent(OptionName: appArguments.button1TextOption)
 
-    cloptions.button1ActionOption.value     = json[cloptions.button1ActionOption.long].string ?? CLOptionText(OptionName: cloptions.button1ActionOption)
-    cloptions.button1ActionOption.present   = json[cloptions.button1ActionOption.long].exists() || CLOptionPresent(OptionName: cloptions.button1ActionOption)
+    appArguments.button1ActionOption.value     = json[appArguments.button1ActionOption.long].string ?? CLOptionText(OptionName: appArguments.button1ActionOption)
+    appArguments.button1ActionOption.present   = json[appArguments.button1ActionOption.long].exists() || CLOptionPresent(OptionName: appArguments.button1ActionOption)
 
-    cloptions.button1ShellActionOption.value = json[cloptions.button1ShellActionOption.long].string ?? CLOptionText(OptionName: cloptions.button1ShellActionOption)
-    cloptions.button1ShellActionOption.present = json[cloptions.button1ShellActionOption.long].exists() || CLOptionPresent(OptionName: cloptions.button1ShellActionOption)
+    appArguments.button1ShellActionOption.value = json[appArguments.button1ShellActionOption.long].string ?? CLOptionText(OptionName: appArguments.button1ShellActionOption)
+    appArguments.button1ShellActionOption.present = json[appArguments.button1ShellActionOption.long].exists() || CLOptionPresent(OptionName: appArguments.button1ShellActionOption)
     
-    cloptions.button1Disabled.present       = json[cloptions.button1Disabled.long].exists() || CLOptionPresent(OptionName: cloptions.button1Disabled)
+    appArguments.button1Disabled.present       = json[appArguments.button1Disabled.long].exists() || CLOptionPresent(OptionName: appArguments.button1Disabled)
 
-    cloptions.button2TextOption.value       = json[cloptions.button2TextOption.long].string ?? CLOptionText(OptionName: cloptions.button2TextOption, DefaultValue: appvars.button2Default)
-    cloptions.button2TextOption.present     = json[cloptions.button2TextOption.long].exists() || CLOptionPresent(OptionName: cloptions.button2TextOption)
+    appArguments.button2TextOption.value       = json[appArguments.button2TextOption.long].string ?? CLOptionText(OptionName: appArguments.button2TextOption, DefaultValue: appvars.button2Default)
+    appArguments.button2TextOption.present     = json[appArguments.button2TextOption.long].exists() || CLOptionPresent(OptionName: appArguments.button2TextOption)
 
-    cloptions.button2ActionOption.value     = json[cloptions.button2ActionOption.long].string ?? CLOptionText(OptionName: cloptions.button2ActionOption)
-    cloptions.button2ActionOption.present   = json[cloptions.button2ActionOption.long].exists() || CLOptionPresent(OptionName: cloptions.button2ActionOption)
+    appArguments.button2ActionOption.value     = json[appArguments.button2ActionOption.long].string ?? CLOptionText(OptionName: appArguments.button2ActionOption)
+    appArguments.button2ActionOption.present   = json[appArguments.button2ActionOption.long].exists() || CLOptionPresent(OptionName: appArguments.button2ActionOption)
 
-    cloptions.buttonInfoTextOption.value    = json[cloptions.buttonInfoTextOption.long].string ?? CLOptionText(OptionName: cloptions.buttonInfoTextOption, DefaultValue: appvars.buttonInfoDefault)
-    cloptions.buttonInfoTextOption.present  = json[cloptions.buttonInfoTextOption.long].exists() || CLOptionPresent(OptionName: cloptions.buttonInfoTextOption)
+    appArguments.buttonInfoTextOption.value    = json[appArguments.buttonInfoTextOption.long].string ?? CLOptionText(OptionName: appArguments.buttonInfoTextOption, DefaultValue: appvars.buttonInfoDefault)
+    appArguments.buttonInfoTextOption.present  = json[appArguments.buttonInfoTextOption.long].exists() || CLOptionPresent(OptionName: appArguments.buttonInfoTextOption)
 
-    cloptions.buttonInfoActionOption.value  = json[cloptions.buttonInfoActionOption.long].string ?? CLOptionText(OptionName: cloptions.buttonInfoActionOption)
-    cloptions.buttonInfoActionOption.present = json[cloptions.buttonInfoActionOption.long].exists() || CLOptionPresent(OptionName: cloptions.buttonInfoActionOption)
+    appArguments.buttonInfoActionOption.value  = json[appArguments.buttonInfoActionOption.long].string ?? CLOptionText(OptionName: appArguments.buttonInfoActionOption)
+    appArguments.buttonInfoActionOption.present = json[appArguments.buttonInfoActionOption.long].exists() || CLOptionPresent(OptionName: appArguments.buttonInfoActionOption)
 
-    //cloptions.dropdownTitle.value           = json[cloptions.dropdownTitle.long].string ?? CLOptionText(OptionName: cloptions.dropdownTitle)
-    cloptions.dropdownTitle.present         = json[cloptions.dropdownTitle.long].exists() || CLOptionPresent(OptionName: cloptions.dropdownTitle)
+    //appArguments.dropdownTitle.value           = json[appArguments.dropdownTitle.long].string ?? CLOptionText(OptionName: appArguments.dropdownTitle)
+    appArguments.dropdownTitle.present         = json[appArguments.dropdownTitle.long].exists() || CLOptionPresent(OptionName: appArguments.dropdownTitle)
 
-    //cloptions.dropdownValues.value          = json[cloptions.dropdownValues.long].string ?? CLOptionText(OptionName: cloptions.dropdownValues)
-    cloptions.dropdownValues.present        = json["selectitems"].exists() || json[cloptions.dropdownValues.long].exists() || CLOptionPresent(OptionName: cloptions.dropdownValues)
+    //appArguments.dropdownValues.value          = json[appArguments.dropdownValues.long].string ?? CLOptionText(OptionName: appArguments.dropdownValues)
+    appArguments.dropdownValues.present        = json["selectitems"].exists() || json[appArguments.dropdownValues.long].exists() || CLOptionPresent(OptionName: appArguments.dropdownValues)
 
-    //cloptions.dropdownDefault.value         = json[cloptions.dropdownDefault.long].string ?? CLOptionText(OptionName: cloptions.dropdownDefault)
-    cloptions.dropdownDefault.present       = json[cloptions.dropdownDefault.long].exists() || CLOptionPresent(OptionName: cloptions.dropdownDefault)
+    //appArguments.dropdownDefault.value         = json[appArguments.dropdownDefault.long].string ?? CLOptionText(OptionName: appArguments.dropdownDefault)
+    appArguments.dropdownDefault.present       = json[appArguments.dropdownDefault.long].exists() || CLOptionPresent(OptionName: appArguments.dropdownDefault)
 
-    cloptions.titleFont.value               = json[cloptions.titleFont.long].string ?? CLOptionText(OptionName: cloptions.titleFont)
-    cloptions.titleFont.present             = json[cloptions.titleFont.long].exists() || CLOptionPresent(OptionName: cloptions.titleFont)
+    appArguments.titleFont.value               = json[appArguments.titleFont.long].string ?? CLOptionText(OptionName: appArguments.titleFont)
+    appArguments.titleFont.present             = json[appArguments.titleFont.long].exists() || CLOptionPresent(OptionName: appArguments.titleFont)
     
-    cloptions.messageFont.value             = json[cloptions.messageFont.long].string ?? CLOptionText(OptionName: cloptions.messageFont)
-    cloptions.messageFont.present           = json[cloptions.messageFont.long].exists() || CLOptionPresent(OptionName: cloptions.messageFont)
+    appArguments.messageFont.value             = json[appArguments.messageFont.long].string ?? CLOptionText(OptionName: appArguments.messageFont)
+    appArguments.messageFont.present           = json[appArguments.messageFont.long].exists() || CLOptionPresent(OptionName: appArguments.messageFont)
 
-    //cloptions.textField.value               = CLOptionText(OptionName: cloptions.textField)
-    cloptions.textField.present             = json[cloptions.textField.long].exists() || CLOptionPresent(OptionName: cloptions.textField)
+    //appArguments.textField.value               = CLOptionText(OptionName: appArguments.textField)
+    appArguments.textField.present             = json[appArguments.textField.long].exists() || CLOptionPresent(OptionName: appArguments.textField)
     
-    cloptions.checkbox.present             = json[cloptions.checkbox.long].exists() || CLOptionPresent(OptionName: cloptions.checkbox)
+    appArguments.checkbox.present             = json[appArguments.checkbox.long].exists() || CLOptionPresent(OptionName: appArguments.checkbox)
 
-    cloptions.timerBar.value                = json[cloptions.timerBar.long].string ?? CLOptionText(OptionName: cloptions.timerBar, DefaultValue: "\(appvars.timerDefaultSeconds)")
-    cloptions.timerBar.present              = json[cloptions.timerBar.long].exists() || CLOptionPresent(OptionName: cloptions.timerBar)
+    appArguments.timerBar.value                = json[appArguments.timerBar.long].string ?? CLOptionText(OptionName: appArguments.timerBar, DefaultValue: "\(appvars.timerDefaultSeconds)")
+    appArguments.timerBar.present              = json[appArguments.timerBar.long].exists() || CLOptionPresent(OptionName: appArguments.timerBar)
     
-    cloptions.progressBar.value             = json[cloptions.progressBar.long].string ?? CLOptionText(OptionName: cloptions.progressBar)
-    cloptions.progressBar.present           = json[cloptions.progressBar.long].exists() || CLOptionPresent(OptionName: cloptions.progressBar)
+    appArguments.progressBar.value             = json[appArguments.progressBar.long].string ?? CLOptionText(OptionName: appArguments.progressBar)
+    appArguments.progressBar.present           = json[appArguments.progressBar.long].exists() || CLOptionPresent(OptionName: appArguments.progressBar)
     
-    cloptions.progressText.value             = json[cloptions.progressText.long].string ?? CLOptionText(OptionName: cloptions.progressText, DefaultValue: " ")
-    cloptions.progressText.present           = json[cloptions.progressText.long].exists() || CLOptionPresent(OptionName: cloptions.progressText)
+    appArguments.progressText.value             = json[appArguments.progressText.long].string ?? CLOptionText(OptionName: appArguments.progressText, DefaultValue: " ")
+    appArguments.progressText.present           = json[appArguments.progressText.long].exists() || CLOptionPresent(OptionName: appArguments.progressText)
     
-    //cloptions.mainImage.value               = CLOptionText(OptionName: cloptions.mainImage)
-    cloptions.mainImage.present             = json[cloptions.mainImage.long].exists() || CLOptionPresent(OptionName: cloptions.mainImage)
+    //appArguments.mainImage.value               = CLOptionText(OptionName: appArguments.mainImage)
+    appArguments.mainImage.present             = json[appArguments.mainImage.long].exists() || CLOptionPresent(OptionName: appArguments.mainImage)
     
-    //cloptions.mainImageCaption.value        = CLOptionText(OptionName: cloptions.mainImageCaption)
-    cloptions.mainImageCaption.present      = json[cloptions.mainImageCaption.long].exists() || CLOptionPresent(OptionName: cloptions.mainImageCaption)
+    //appArguments.mainImageCaption.value        = CLOptionText(OptionName: appArguments.mainImageCaption)
+    appArguments.mainImageCaption.present      = json[appArguments.mainImageCaption.long].exists() || CLOptionPresent(OptionName: appArguments.mainImageCaption)
     
-    cloptions.listItem.present              = json[cloptions.listItem.long].exists() || CLOptionPresent(OptionName: cloptions.listItem)
+    appArguments.listItem.present              = json[appArguments.listItem.long].exists() || CLOptionPresent(OptionName: appArguments.listItem)
     
-    cloptions.listStyle.value               = json[cloptions.listStyle.long].string ?? CLOptionText(OptionName: cloptions.listStyle)
-    cloptions.listStyle.present             = json[cloptions.listStyle.long].exists() || CLOptionPresent(OptionName: cloptions.listStyle)
+    appArguments.listStyle.value               = json[appArguments.listStyle.long].string ?? CLOptionText(OptionName: appArguments.listStyle)
+    appArguments.listStyle.present             = json[appArguments.listStyle.long].exists() || CLOptionPresent(OptionName: appArguments.listStyle)
 
-    cloptions.windowWidth.value             = json[cloptions.windowWidth.long].string ?? CLOptionText(OptionName: cloptions.windowWidth)
-    cloptions.windowWidth.present           = json[cloptions.windowWidth.long].exists() || CLOptionPresent(OptionName: cloptions.windowWidth)
+    appArguments.windowWidth.value             = json[appArguments.windowWidth.long].string ?? CLOptionText(OptionName: appArguments.windowWidth)
+    appArguments.windowWidth.present           = json[appArguments.windowWidth.long].exists() || CLOptionPresent(OptionName: appArguments.windowWidth)
 
-    cloptions.windowHeight.value            = json[cloptions.windowHeight.long].string ?? CLOptionText(OptionName: cloptions.windowHeight)
-    cloptions.windowHeight.present          = json[cloptions.windowHeight.long].exists() || CLOptionPresent(OptionName: cloptions.windowHeight)
+    appArguments.windowHeight.value            = json[appArguments.windowHeight.long].string ?? CLOptionText(OptionName: appArguments.windowHeight)
+    appArguments.windowHeight.present          = json[appArguments.windowHeight.long].exists() || CLOptionPresent(OptionName: appArguments.windowHeight)
     
-    cloptions.watermarkImage.value          = json[cloptions.watermarkImage.long].string ?? CLOptionText(OptionName: cloptions.watermarkImage)
-    cloptions.watermarkImage.present        = json[cloptions.watermarkImage.long].exists() || CLOptionPresent(OptionName: cloptions.watermarkImage)
+    appArguments.watermarkImage.value          = json[appArguments.watermarkImage.long].string ?? CLOptionText(OptionName: appArguments.watermarkImage)
+    appArguments.watermarkImage.present        = json[appArguments.watermarkImage.long].exists() || CLOptionPresent(OptionName: appArguments.watermarkImage)
         
-    cloptions.watermarkAlpha.value          = json[cloptions.watermarkAlpha.long].string ?? CLOptionText(OptionName: cloptions.watermarkAlpha)
-    cloptions.watermarkAlpha.present        = json[cloptions.watermarkAlpha.long].exists() || CLOptionPresent(OptionName: cloptions.watermarkAlpha)
+    appArguments.watermarkAlpha.value          = json[appArguments.watermarkAlpha.long].string ?? CLOptionText(OptionName: appArguments.watermarkAlpha)
+    appArguments.watermarkAlpha.present        = json[appArguments.watermarkAlpha.long].exists() || CLOptionPresent(OptionName: appArguments.watermarkAlpha)
     
-    cloptions.watermarkPosition.value       = json[cloptions.watermarkPosition.long].string ?? CLOptionText(OptionName: cloptions.watermarkPosition)
-    cloptions.watermarkPosition.present     = json[cloptions.watermarkPosition.long].exists() || CLOptionPresent(OptionName: cloptions.watermarkPosition)
+    appArguments.watermarkPosition.value       = json[appArguments.watermarkPosition.long].string ?? CLOptionText(OptionName: appArguments.watermarkPosition)
+    appArguments.watermarkPosition.present     = json[appArguments.watermarkPosition.long].exists() || CLOptionPresent(OptionName: appArguments.watermarkPosition)
     
-    cloptions.watermarkFill.value           = json[cloptions.watermarkFill.long].string ?? CLOptionText(OptionName: cloptions.watermarkFill)
-    cloptions.watermarkFill.present         = json[cloptions.watermarkFill.long].exists() || CLOptionPresent(OptionName: cloptions.watermarkFill)
+    appArguments.watermarkFill.value           = json[appArguments.watermarkFill.long].string ?? CLOptionText(OptionName: appArguments.watermarkFill)
+    appArguments.watermarkFill.present         = json[appArguments.watermarkFill.long].exists() || CLOptionPresent(OptionName: appArguments.watermarkFill)
     
-    cloptions.watermarkFill.value           = json[cloptions.watermarkScale.long].string ?? CLOptionText(OptionName: cloptions.watermarkScale)
-    cloptions.watermarkFill.present         = json[cloptions.watermarkScale.long].exists() || CLOptionPresent(OptionName: cloptions.watermarkScale)
+    appArguments.watermarkFill.value           = json[appArguments.watermarkScale.long].string ?? CLOptionText(OptionName: appArguments.watermarkScale)
+    appArguments.watermarkFill.present         = json[appArguments.watermarkScale.long].exists() || CLOptionPresent(OptionName: appArguments.watermarkScale)
     
-    cloptions.autoPlay.value                = json[cloptions.autoPlay.long].string ?? CLOptionText(OptionName: cloptions.autoPlay, DefaultValue: "\(appvars.timerDefaultSeconds)")
-    cloptions.autoPlay.present              = json[cloptions.autoPlay.long].exists() || CLOptionPresent(OptionName: cloptions.autoPlay)
+    appArguments.autoPlay.value                = json[appArguments.autoPlay.long].string ?? CLOptionText(OptionName: appArguments.autoPlay, DefaultValue: "\(appvars.timerDefaultSeconds)")
+    appArguments.autoPlay.present              = json[appArguments.autoPlay.long].exists() || CLOptionPresent(OptionName: appArguments.autoPlay)
     
-    cloptions.statusLogFile.value           = json[cloptions.statusLogFile.long].string ?? CLOptionText(OptionName: cloptions.statusLogFile)
-    cloptions.statusLogFile.present         = json[cloptions.statusLogFile.long].exists() || CLOptionPresent(OptionName: cloptions.statusLogFile)
+    appArguments.statusLogFile.value           = json[appArguments.statusLogFile.long].string ?? CLOptionText(OptionName: appArguments.statusLogFile)
+    appArguments.statusLogFile.present         = json[appArguments.statusLogFile.long].exists() || CLOptionPresent(OptionName: appArguments.statusLogFile)
     
-    cloptions.infoText.value                = json[cloptions.infoText.long].string ?? CLOptionText(OptionName: cloptions.infoText, DefaultValue: "swiftDialog \(appvars.cliversion)")
-    cloptions.infoText.present              = json[cloptions.infoText.long].exists() || CLOptionPresent(OptionName: cloptions.infoText)
+    appArguments.infoText.value                = json[appArguments.infoText.long].string ?? CLOptionText(OptionName: appArguments.infoText, DefaultValue: "swiftDialog \(appvars.cliversion)")
+    appArguments.infoText.present              = json[appArguments.infoText.long].exists() || CLOptionPresent(OptionName: appArguments.infoText)
     
-    cloptions.quitKey.value                 = json[cloptions.quitKey.long].string ?? CLOptionText(OptionName: cloptions.quitKey, DefaultValue: appvars.quitKeyCharacter)
+    appArguments.quitKey.value                 = json[appArguments.quitKey.long].string ?? CLOptionText(OptionName: appArguments.quitKey, DefaultValue: appvars.quitKeyCharacter)
     
-    if !cloptions.statusLogFile.present {
-        cloptions.statusLogFile.value = appvars.defaultStatusLogFile
+    if !appArguments.statusLogFile.present {
+        appArguments.statusLogFile.value = appvars.defaultStatusLogFile
     }
     
-    cloptions.video.value                   = json[cloptions.video.long].string ?? CLOptionText(OptionName: cloptions.video)
-    cloptions.video.present                 = json[cloptions.video.long].exists() || CLOptionPresent(OptionName: cloptions.video)
-    if cloptions.video.present {
+    appArguments.video.value                   = json[appArguments.video.long].string ?? CLOptionText(OptionName: appArguments.video)
+    appArguments.video.present                 = json[appArguments.video.long].exists() || CLOptionPresent(OptionName: appArguments.video)
+    if appArguments.video.present {
         // set a larger window size. 900x600 will fit a standard 16:9 video
         appvars.windowWidth = appvars.videoWindowWidth
         appvars.windowHeight = appvars.videoWindowHeight
     }
     
-    cloptions.videoCaption.value            = json[cloptions.videoCaption.long].string ?? CLOptionText(OptionName: cloptions.videoCaption)
-    cloptions.videoCaption.present          = json[cloptions.videoCaption.long].exists() || CLOptionPresent(OptionName: cloptions.videoCaption)
+    appArguments.videoCaption.value            = json[appArguments.videoCaption.long].string ?? CLOptionText(OptionName: appArguments.videoCaption)
+    appArguments.videoCaption.present          = json[appArguments.videoCaption.long].exists() || CLOptionPresent(OptionName: appArguments.videoCaption)
 
-    if cloptions.watermarkImage.present {
+    if appArguments.watermarkImage.present {
         // return the image resolution and re-size the window to match
-        let bgImage = getImageFromPath(fileImagePath: cloptions.watermarkImage.value)
-        if bgImage.size.width > appvars.windowWidth && bgImage.size.height > appvars.windowHeight && !cloptions.windowHeight.present && !cloptions.watermarkFill.present {
+        let bgImage = getImageFromPath(fileImagePath: appArguments.watermarkImage.value)
+        if bgImage.size.width > appvars.windowWidth && bgImage.size.height > appvars.windowHeight && !appArguments.windowHeight.present && !appArguments.watermarkFill.present {
             // keep the same width ratio but change the height
             var wWidth = appvars.windowWidth
-            if cloptions.windowWidth.present {
-                wWidth = string2float(string: cloptions.windowWidth.value)
+            if appArguments.windowWidth.present {
+                wWidth = string2float(string: appArguments.windowWidth.value)
             }
             let widthRatio = wWidth / bgImage.size.width  // get the ration of the image height to the current display width
             let newHeight = (bgImage.size.height * widthRatio) - 28 //28 needs to be removed to account for the phantom title bar height
             appvars.windowHeight = floor(newHeight) // floor() will strip any fractional values as a result of the above multiplication
                                                     // we need to do this as window heights can't be fractional and weird things happen
                         
-            if !cloptions.watermarkFill.present {
-                cloptions.watermarkFill.present = true
-                cloptions.watermarkFill.value = "fill"
+            if !appArguments.watermarkFill.present {
+                appArguments.watermarkFill.present = true
+                appArguments.watermarkFill.value = "fill"
             }
         }
     }
     
     // anthing that is an option only with no value
-    cloptions.button2Option.present         = json[cloptions.button2Option.long].boolValue || CLOptionPresent(OptionName: cloptions.button2Option)
-    cloptions.infoButtonOption.present      = json[cloptions.infoButtonOption.long].boolValue || CLOptionPresent(OptionName: cloptions.infoButtonOption)
-    cloptions.hideIcon.present              = json[cloptions.hideIcon.long].boolValue || CLOptionPresent(OptionName: cloptions.hideIcon)
-    cloptions.centreIcon.present            = json[cloptions.centreIcon.long].boolValue || json[cloptions.centreIconSE.long].boolValue || CLOptionPresent(OptionName: cloptions.centreIcon) || CLOptionPresent(OptionName: cloptions.centreIconSE)
-    cloptions.warningIcon.present           = json[cloptions.warningIcon.long].boolValue || CLOptionPresent(OptionName: cloptions.warningIcon)
-    cloptions.infoIcon.present              = json[cloptions.infoIcon.long].boolValue || CLOptionPresent(OptionName: cloptions.infoIcon)
-    cloptions.cautionIcon.present           = json[cloptions.cautionIcon.long].boolValue || CLOptionPresent(OptionName: cloptions.cautionIcon)
-    cloptions.lockWindow.present            = json[cloptions.lockWindow.long].boolValue || CLOptionPresent(OptionName: cloptions.lockWindow)
-    cloptions.forceOnTop.present            = json[cloptions.forceOnTop.long].boolValue || CLOptionPresent(OptionName: cloptions.forceOnTop)
-    cloptions.smallWindow.present           = json[cloptions.smallWindow.long].boolValue || CLOptionPresent(OptionName: cloptions.smallWindow)
-    cloptions.bigWindow.present             = json[cloptions.bigWindow.long].boolValue || CLOptionPresent(OptionName: cloptions.bigWindow)
-    cloptions.fullScreenWindow.present      = json[cloptions.fullScreenWindow.long].boolValue || CLOptionPresent(OptionName: cloptions.fullScreenWindow)
-    cloptions.jsonOutPut.present            = json[cloptions.jsonOutPut.long].boolValue || CLOptionPresent(OptionName: cloptions.jsonOutPut)
-    cloptions.ignoreDND.present             = json[cloptions.ignoreDND.long].boolValue || CLOptionPresent(OptionName: cloptions.ignoreDND)
-    cloptions.hideTimerBar.present          = json[cloptions.hideTimerBar.long].boolValue || CLOptionPresent(OptionName: cloptions.hideTimerBar)
-    cloptions.quitOnInfo.present            = json[cloptions.quitOnInfo.long].boolValue || CLOptionPresent(OptionName: cloptions.quitOnInfo)
-    cloptions.blurScreen.present            = json[cloptions.blurScreen.long].boolValue || CLOptionPresent(OptionName: cloptions.blurScreen)
-    cloptions.constructionKit.present       = json[cloptions.constructionKit.long].boolValue || CLOptionPresent(OptionName: cloptions.constructionKit)
+    appArguments.button2Option.present         = json[appArguments.button2Option.long].boolValue || CLOptionPresent(OptionName: appArguments.button2Option)
+    appArguments.infoButtonOption.present      = json[appArguments.infoButtonOption.long].boolValue || CLOptionPresent(OptionName: appArguments.infoButtonOption)
+    appArguments.hideIcon.present              = json[appArguments.hideIcon.long].boolValue || CLOptionPresent(OptionName: appArguments.hideIcon)
+    appArguments.centreIcon.present            = json[appArguments.centreIcon.long].boolValue || json[appArguments.centreIconSE.long].boolValue || CLOptionPresent(OptionName: appArguments.centreIcon) || CLOptionPresent(OptionName: appArguments.centreIconSE)
+    appArguments.warningIcon.present           = json[appArguments.warningIcon.long].boolValue || CLOptionPresent(OptionName: appArguments.warningIcon)
+    appArguments.infoIcon.present              = json[appArguments.infoIcon.long].boolValue || CLOptionPresent(OptionName: appArguments.infoIcon)
+    appArguments.cautionIcon.present           = json[appArguments.cautionIcon.long].boolValue || CLOptionPresent(OptionName: appArguments.cautionIcon)
+    appArguments.lockWindow.present            = json[appArguments.lockWindow.long].boolValue || CLOptionPresent(OptionName: appArguments.lockWindow)
+    appArguments.forceOnTop.present            = json[appArguments.forceOnTop.long].boolValue || CLOptionPresent(OptionName: appArguments.forceOnTop)
+    appArguments.smallWindow.present           = json[appArguments.smallWindow.long].boolValue || CLOptionPresent(OptionName: appArguments.smallWindow)
+    appArguments.bigWindow.present             = json[appArguments.bigWindow.long].boolValue || CLOptionPresent(OptionName: appArguments.bigWindow)
+    appArguments.fullScreenWindow.present      = json[appArguments.fullScreenWindow.long].boolValue || CLOptionPresent(OptionName: appArguments.fullScreenWindow)
+    appArguments.jsonOutPut.present            = json[appArguments.jsonOutPut.long].boolValue || CLOptionPresent(OptionName: appArguments.jsonOutPut)
+    appArguments.ignoreDND.present             = json[appArguments.ignoreDND.long].boolValue || CLOptionPresent(OptionName: appArguments.ignoreDND)
+    appArguments.hideTimerBar.present          = json[appArguments.hideTimerBar.long].boolValue || CLOptionPresent(OptionName: appArguments.hideTimerBar)
+    appArguments.quitOnInfo.present            = json[appArguments.quitOnInfo.long].boolValue || CLOptionPresent(OptionName: appArguments.quitOnInfo)
+    appArguments.blurScreen.present            = json[appArguments.blurScreen.long].boolValue || CLOptionPresent(OptionName: appArguments.blurScreen)
+    appArguments.constructionKit.present       = json[appArguments.constructionKit.long].boolValue || CLOptionPresent(OptionName: appArguments.constructionKit)
     
     // command line only options
-    cloptions.listFonts.present             = CLOptionPresent(OptionName: cloptions.listFonts)
-    cloptions.helpOption.present            = CLOptionPresent(OptionName: cloptions.helpOption)
-    cloptions.demoOption.present            = CLOptionPresent(OptionName: cloptions.demoOption)
-    cloptions.buyCoffee.present             = CLOptionPresent(OptionName: cloptions.buyCoffee)
-    cloptions.showLicense.present           = CLOptionPresent(OptionName: cloptions.showLicense)
-    cloptions.jamfHelperMode.present        = CLOptionPresent(OptionName: cloptions.jamfHelperMode)
-    cloptions.debug.present                 = CLOptionPresent(OptionName: cloptions.debug)
-    cloptions.getVersion.present            = CLOptionPresent(OptionName: cloptions.getVersion)
+    appArguments.listFonts.present             = CLOptionPresent(OptionName: appArguments.listFonts)
+    appArguments.helpOption.present            = CLOptionPresent(OptionName: appArguments.helpOption)
+    appArguments.demoOption.present            = CLOptionPresent(OptionName: appArguments.demoOption)
+    appArguments.buyCoffee.present             = CLOptionPresent(OptionName: appArguments.buyCoffee)
+    appArguments.showLicense.present           = CLOptionPresent(OptionName: appArguments.showLicense)
+    appArguments.jamfHelperMode.present        = CLOptionPresent(OptionName: appArguments.jamfHelperMode)
+    appArguments.debug.present                 = CLOptionPresent(OptionName: appArguments.debug)
+    appArguments.getVersion.present            = CLOptionPresent(OptionName: appArguments.getVersion)
 
 }

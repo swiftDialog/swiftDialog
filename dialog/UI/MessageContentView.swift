@@ -32,7 +32,7 @@ struct MessageContent: View {
     
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedDialogContent = observedDialogContent
-        if !observedDialogContent.args.hideIcon.present  { //cloptions.hideIcon.present {
+        if !observedDialogContent.args.hideIcon.present  { //appArguments.hideIcon.present {
             fieldPadding = 40
             iconDisplayWidth = 0
         } else {
@@ -52,7 +52,7 @@ struct MessageContent: View {
                         .padding(.bottom, 10)
                         .border(appvars.debugBorderColour, width: 2)
                 }
-                ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: string2float(string: cloptions.autoPlay.value))
+                ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: string2float(string: appArguments.autoPlay.value))
             }
         } else {
             VStack {

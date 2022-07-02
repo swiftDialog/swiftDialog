@@ -46,7 +46,7 @@ struct ImageView: View {
                             .scaledToFit()
                             .cornerRadius(10)
                         if captions.count > 0 {
-                            if cloptions.fullScreenWindow.present {
+                            if appArguments.fullScreenWindow.present {
                                 Text(captions[imageIndex])
                                     .font(.system(size: 60))
                                     .foregroundColor(.white)

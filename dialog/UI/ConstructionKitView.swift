@@ -72,8 +72,8 @@ struct ConstructionKitView: View {
         var json = JSON()
         var jsonDEBUG = JSON()
         //var propertyValue = (long: String(""),short: String(""),value : String(""), present : Bool(false))
-        let mirrored_cloptions = Mirror(reflecting: observedDialogContent.args)
-        for (_, attr) in mirrored_cloptions.children.enumerated() {
+        let mirrored_appArguments = Mirror(reflecting: observedDialogContent.args)
+        for (_, attr) in mirrored_appArguments.children.enumerated() {
             if let propertyValue = attr.value as? (long: String, short: String, value: String, present: Bool) {
                 if propertyValue.present && propertyValue.value != "" {
                     json[propertyValue.long].string = propertyValue.value

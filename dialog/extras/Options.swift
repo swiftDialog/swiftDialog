@@ -39,7 +39,7 @@ func CLOptionText(OptionName: (long: String, short: String, value: String, prese
         if valueIndex >= CommandLine.arguments.startIndex
             && valueIndex < CommandLine.arguments.endIndex
         {
-            //if CommandLine.arguments[commandIndex] != "--\(cloptions.timerBar.long)" {
+            //if CommandLine.arguments[commandIndex] != "--\(appArguments.timerBar.long)" {
                 CLOptionTextValue = CommandLine.arguments[valueIndex]
                 if (CLOptionTextValue.starts(with: "-")) {
                     //print("Argument \(CommandLine.arguments[commandIndex]) was not passed a value.")

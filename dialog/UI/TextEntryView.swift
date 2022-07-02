@@ -24,7 +24,7 @@ struct TextEntryView: View {
     
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedDialogContent = observedDialogContent
-        if cloptions.textField.present {
+        if appArguments.textField.present {
             textFieldPresent = true
             for i in 0..<textFields.count {
                 textFieldValue.append(" ")
@@ -34,7 +34,7 @@ struct TextEntryView: View {
                 //highlight.append(Color.clear)
             }
         }
-        if !observedDialogContent.args.hideIcon.present { //} cloptions.hideIcon.present {
+        if !observedDialogContent.args.hideIcon.present { //} appArguments.hideIcon.present {
             fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value)
         } else {
             fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value) - string2float(string: observedDialogContent.args.iconSize.value)

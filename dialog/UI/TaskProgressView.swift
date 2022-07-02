@@ -12,7 +12,7 @@ struct TaskProgressView: View {
     @ObservedObject var observedDialogContent : DialogUpdatableContent
     
     var body: some View {
-        if cloptions.progressBar.present {
+        if appArguments.progressBar.present {
             VStack {
                 ProgressView(value: observedDialogContent.progressValue, total: observedDialogContent.progressTotal)
                     .padding(.leading,40)

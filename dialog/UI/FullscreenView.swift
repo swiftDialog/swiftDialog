@@ -25,8 +25,8 @@ struct FullscreenView: View {
             
     @ObservedObject var observedDialogContent = DialogUpdatableContent()
         
-    var TitleViewOption: String = cloptions.titleOption.value // CLOptionText(OptionName: cloptions.titleOption, DefaultValue: appvars.titleDefault)
-    var messageContentOption: String = cloptions.messageOption.value // CLOptionText(OptionName: cloptions.messageOption, DefaultValue: appvars.messageDefault)
+    var TitleViewOption: String = appArguments.titleOption.value // CLOptionText(OptionName: appArguments.titleOption, DefaultValue: appvars.titleDefault)
+    var messageContentOption: String = appArguments.messageOption.value // CLOptionText(OptionName: appArguments.messageOption, DefaultValue: appvars.messageDefault)
     
     let displayDetails:CGRect = NSScreen.main!.frame
     var windowHeight:CGFloat = 0
@@ -43,7 +43,7 @@ struct FullscreenView: View {
     var minScreenHeightToDisplayBanner:CGFloat = 1000
     var messageTextLineSpacing:CGFloat = 20
     
-    var BannerImageOption: String = cloptions.bannerImage.value // CLOptionText(OptionName: cloptions.bannerImage)
+    var BannerImageOption: String = appArguments.bannerImage.value // CLOptionText(OptionName: appArguments.bannerImage)
     
     var useDefaultStyle = true
     var defaultStyle: MarkdownStyle {
@@ -111,7 +111,7 @@ struct FullscreenView: View {
         
         VStack{
             // banner image vstack
-            if cloptions.bannerImage.present {
+            if appArguments.bannerImage.present {
                 Image(nsImage: getImageFromPath(fileImagePath: BannerImageOption))
                     .resizable()
                     .clipShape(RoundedRectangle(cornerRadius: 15))
@@ -145,16 +145,16 @@ struct FullscreenView: View {
             
             // icon and message vstack group
             VStack {
-                if cloptions.mainImage.present {
+                if appArguments.mainImage.present {
                     // print image and caption
                     VStack {
-                        ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: string2float(string: cloptions.autoPlay.value))
+                        ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: string2float(string: appArguments.autoPlay.value))
                             .border(appvars.debugBorderColour, width: 2)
                     }
                 } else {
                     // icon vstack
                     VStack {
-                        if cloptions.iconOption.present {
+                        if appArguments.iconOption.present {
                             IconView(observedDialogContent: observedDialogContent)
                         } else {
                             VStack{}.padding(emptyStackPadding)
@@ -175,8 +175,8 @@ struct FullscreenView: View {
                         
                         //TaskProgressView(observedDialogContent: observedDialogContent)  // future feature
                         
-                        if cloptions.timerBar.present {
-                            timerBarView(progressSteps: string2float(string: cloptions.timerBar.value), visible: cloptions.timerBar.present, observedDialogContent: observedDialogContent)
+                        if appArguments.timerBar.present {
+                            timerBarView(progressSteps: string2float(string: appArguments.timerBar.value), visible: appArguments.timerBar.present, observedDialogContent: observedDialogContent)
                         }
                     }
                     .padding(10)

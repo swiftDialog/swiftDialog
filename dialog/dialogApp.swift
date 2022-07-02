@@ -41,7 +41,7 @@ struct dialogApp: App {
         processCLOptionValues()
         
         // check for jamfhelper mode
-        if cloptions.jamfHelperMode.present {
+        if appArguments.jamfHelperMode.present {
             logger(logMessage: "converting jh to dialog")
             convertFromJamfHelperSyntax()
         }
@@ -57,12 +57,12 @@ struct dialogApp: App {
         appvars.iconWidth = appvars.iconWidth * appvars.scaleFactor
         appvars.iconHeight = appvars.iconHeight * appvars.scaleFactor
         
-        if cloptions.fullScreenWindow.present {
+        if appArguments.fullScreenWindow.present {
             FullscreenView().showFullScreen()
         }
         
         //check debug mode and print info
-        if cloptions.debug.present {
+        if appArguments.debug.present {
             logger(logMessage: "debug options presented. dialog state sent to stdout")
             appvars.debugMode = true
             appvars.debugBorderColour = Color.green
@@ -77,8 +77,8 @@ struct dialogApp: App {
               }
             }
             print("\nApplication Command Line Options")
-            let mirrored_cloptions = Mirror(reflecting: cloptions)
-            for (_, attr) in mirrored_cloptions.children.enumerated() {
+            let mirrored_appArguments = Mirror(reflecting: appArguments)
+            for (_, attr) in mirrored_appArguments.children.enumerated() {
                 if let propertyName = attr.label as String? {
                 print("  \(propertyName) = \(attr.value)")
               }
@@ -88,7 +88,7 @@ struct dialogApp: App {
         
         observedDialogContent = DialogUpdatableContent()
         
-        if cloptions.constructionKit.present {
+        if appArguments.constructionKit.present {
             ConstructionKitView(observedDialogContent: observedDialogContent).showConstructionKit()
             appvars.windowIsMoveable = true
         }
@@ -112,12 +112,12 @@ struct dialogApp: App {
                         window?.level = .normal
                     }
 
-                    if cloptions.blurScreen.present && !cloptions.fullScreenWindow.present { //blur background
+                    if appArguments.blurScreen.present && !appArguments.fullScreenWindow.present { //blur background
                         background.showWindow(self)
                         NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow)))
                     }
                     
-                    if cloptions.forceOnTop.present || cloptions.blurScreen.present {
+                    if appArguments.forceOnTop.present || appArguments.blurScreen.present {
                         NSApp.activate(ignoringOtherApps: true)
                     }
                     

@@ -20,9 +20,9 @@ class DialogUpdatableContent : ObservableObject {
     
     var path: String
     
-    // bring in all the collected cloptions
+    // bring in all the collected appArguments
     // TODO: reduce double handling of data.
-    @Published var args : CLOptions = cloptions
+    @Published var args : CommandLineArguments = appArguments
     
     //@Published var titleText: String   // unused
     @Published var titleFontColour: Color
@@ -73,8 +73,8 @@ class DialogUpdatableContent : ObservableObject {
     
     init() {
         
-        if cloptions.statusLogFile.present {
-            path = cloptions.statusLogFile.value
+        if appArguments.statusLogFile.present {
+            path = appArguments.statusLogFile.value
         } else {
             path = "/var/tmp/dialog.log"
         }
@@ -83,41 +83,41 @@ class DialogUpdatableContent : ObservableObject {
         // for the most part we pull from whatever was passed in save for some tracking variables
         
         //button1Disabled = args.button1Disabled.present
-        if cloptions.timerBar.present && !cloptions.hideTimerBar.present {
+        if appArguments.timerBar.present && !appArguments.hideTimerBar.present {
             //self._button1disabled = State(initialValue: true)
-            cloptions.button1Disabled.present = true
+            appArguments.button1Disabled.present = true
         }
                 
-        //titleText = cloptions.titleOption.value
+        //titleText = appArguments.titleOption.value
         titleFontColour = appvars.titleFontColour
         titleFontSize = appvars.titleFontSize
         
-        messageText = cloptions.messageOption.value
-        statusText = cloptions.progressText.value
+        messageText = appArguments.messageOption.value
+        statusText = appArguments.progressText.value
         progressValue = 0
         progressTotal = 0
-        //button1Value = cloptions.button1TextOption.value
-        //button2Value = cloptions.button2TextOption.value
-        //button2Present = cloptions.button2Option.present
-        //infoButtonValue = cloptions.infoButtonOption.value
-        //infoButtonPresent = cloptions.infoButtonOption.present || cloptions.buttonInfoTextOption.present
+        //button1Value = appArguments.button1TextOption.value
+        //button2Value = appArguments.button2TextOption.value
+        //button2Present = appArguments.button2Option.present
+        //infoButtonValue = appArguments.infoButtonOption.value
+        //infoButtonPresent = appArguments.infoButtonOption.present || appArguments.buttonInfoTextOption.present
         listItemUpdateRow = 0
         
         //requiredTextfieldHighlight = Color.clear
         
-        //iconImage = cloptions.iconOption.value
-        iconSize = string2float(string: cloptions.iconSize.value)
+        //iconImage = appArguments.iconOption.value
+        iconSize = string2float(string: appArguments.iconSize.value)
         //iconPresent = !appvars.iconIsHidden
-        centreIconPresent = cloptions.centreIcon.present
+        centreIconPresent = appArguments.centreIcon.present
         
-        imagePresent = cloptions.mainImage.present
-        imageCaptionPresent = cloptions.mainImageCaption.present
+        imagePresent = appArguments.mainImage.present
+        imageCaptionPresent = appArguments.mainImageCaption.present
         
-        //overlayIconImage = cloptions.overlayIconOption.value
-        //overlayIconPresent = cloptions.overlayIconOption.present
+        //overlayIconImage = appArguments.overlayIconOption.value
+        //overlayIconPresent = appArguments.overlayIconOption.present
         
         listItemsArray = appvars.listItems
-        listItemPresent = cloptions.listItem.present
+        listItemPresent = appArguments.listItem.present
         
         windowWidth = appvars.windowWidth
         windowHeight = appvars.windowHeight
@@ -210,29 +210,29 @@ class DialogUpdatableContent : ObservableObject {
                 appvars.windowHeight = NumberFormatter().number(from: line.replacingOccurrences(of: "height: ", with: "")) as! CGFloat
             */
             // Title
-            case "\(cloptions.titleOption.long):" :
-                args.titleOption.value = line.replacingOccurrences(of: "\(cloptions.titleOption.long): ", with: "")
+            case "\(appArguments.titleOption.long):" :
+                args.titleOption.value = line.replacingOccurrences(of: "\(appArguments.titleOption.long): ", with: "")
             
             // Message
-            case "\(cloptions.messageOption.long):" :
-                args.messageOption.value = line.replacingOccurrences(of: "\(cloptions.messageOption.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n")
+            case "\(appArguments.messageOption.long):" :
+                args.messageOption.value = line.replacingOccurrences(of: "\(appArguments.messageOption.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n")
                 imagePresent = false
                 imageCaptionPresent = false
                 //listItemPresent = false
                 
             //Progress Bar
-            case "\(cloptions.progressBar.long):" :
-                let incrementValue = line.replacingOccurrences(of: "\(cloptions.progressBar.long): ", with: "")
+            case "\(appArguments.progressBar.long):" :
+                let incrementValue = line.replacingOccurrences(of: "\(appArguments.progressBar.long): ", with: "")
                 switch incrementValue {
                 case "increment" :
                     if progressTotal == 0 {
-                        progressTotal = Double(cloptions.progressBar.value) ?? 100
+                        progressTotal = Double(appArguments.progressBar.value) ?? 100
                     }
                     progressValue = progressValue + 1
                 case "reset" :
                     progressValue = 0
                 case "complete" :
-                    progressValue = Double(cloptions.progressBar.value) ?? 1000
+                    progressValue = Double(appArguments.progressBar.value) ?? 1000
                 //case "indeterminate" :
                 //    progressTotal = 0
                 //    progressValue = 0
@@ -240,22 +240,22 @@ class DialogUpdatableContent : ObservableObject {
                 //    progressValue = 0
                 default :
                     if progressTotal == 0 {
-                        progressTotal = Double(cloptions.progressBar.value) ?? 100
+                        progressTotal = Double(appArguments.progressBar.value) ?? 100
                     }
                     progressValue = Double(incrementValue) ?? 0
                 }
                 
             //Progress Bar Label
-            case "\(cloptions.progressBar.long)text:" :
-                statusText = line.replacingOccurrences(of: "\(cloptions.progressBar.long)text: ", with: "")
+            case "\(appArguments.progressBar.long)text:" :
+                statusText = line.replacingOccurrences(of: "\(appArguments.progressBar.long)text: ", with: "")
                 
             //Progress Bar Label (typo version with capital T)
-            case "\(cloptions.progressBar.long)Text:" :
-                statusText = line.replacingOccurrences(of: "\(cloptions.progressBar.long)Text: ", with: "")
+            case "\(appArguments.progressBar.long)Text:" :
+                statusText = line.replacingOccurrences(of: "\(appArguments.progressBar.long)Text: ", with: "")
             
             // Button 1 label
-            case "\(cloptions.button1TextOption.long):" :
-                args.button1TextOption.value = line.replacingOccurrences(of: "\(cloptions.button1TextOption.long): ", with: "")
+            case "\(appArguments.button1TextOption.long):" :
+                args.button1TextOption.value = line.replacingOccurrences(of: "\(appArguments.button1TextOption.long): ", with: "")
                 
             // Button 1 status
             case "button1:" :
@@ -270,17 +270,17 @@ class DialogUpdatableContent : ObservableObject {
                 }
 
             // Button 2 label
-            case "\(cloptions.button2TextOption.long):" :
-                args.button2TextOption.value = line.replacingOccurrences(of: "\(cloptions.button2TextOption.long): ", with: "")
+            case "\(appArguments.button2TextOption.long):" :
+                args.button2TextOption.value = line.replacingOccurrences(of: "\(appArguments.button2TextOption.long): ", with: "")
             
             // Info Button label
-            case "\(cloptions.infoButtonOption.long):" :
-                args.infoButtonOption.value = line.replacingOccurrences(of: "\(cloptions.infoButtonOption.long): ", with: "")
+            case "\(appArguments.infoButtonOption.long):" :
+                args.infoButtonOption.value = line.replacingOccurrences(of: "\(appArguments.infoButtonOption.long): ", with: "")
                 
             // icon image
-            case "\(cloptions.iconOption.long):" :
+            case "\(appArguments.iconOption.long):" :
                 //iconPresent = true
-                let iconState = line.replacingOccurrences(of: "\(cloptions.iconOption.long): ", with: "")
+                let iconState = line.replacingOccurrences(of: "\(appArguments.iconOption.long): ", with: "")
                 
                 if iconState.components(separatedBy: ": ").first == "size" {
                     //print(iconState)
@@ -306,24 +306,24 @@ class DialogUpdatableContent : ObservableObject {
                     }
                 }
                 //print("centre icon is \(centreIconPresent)")
-                //iconImage = line.replacingOccurrences(of: "\(cloptions.iconOption.long): ", with: "")
+                //iconImage = line.replacingOccurrences(of: "\(appArguments.iconOption.long): ", with: "")
                 
             // overlay icon
-            case "\(cloptions.overlayIconOption.long):":
-                args.overlayIconOption.value = line.replacingOccurrences(of: "\(cloptions.overlayIconOption.long): ", with: "")
+            case "\(appArguments.overlayIconOption.long):":
+                args.overlayIconOption.value = line.replacingOccurrences(of: "\(appArguments.overlayIconOption.long): ", with: "")
                 args.overlayIconOption.present = true
                 if args.overlayIconOption.value == "none" {
                     args.overlayIconOption.present = false
                 }
                 
             // image
-            case "\(cloptions.mainImage.long):" :
-                appvars.imageArray = [line.replacingOccurrences(of: "\(cloptions.mainImage.long): ", with: "")]
+            case "\(appArguments.mainImage.long):" :
+                appvars.imageArray = [line.replacingOccurrences(of: "\(appArguments.mainImage.long): ", with: "")]
                 imagePresent = true
                 
             // image Caption
-            case "\(cloptions.mainImageCaption.long):" :
-                appvars.imageCaptionArray = [line.replacingOccurrences(of: "\(cloptions.mainImageCaption.long): ", with: "")]
+            case "\(appArguments.mainImageCaption.long):" :
+                appvars.imageCaptionArray = [line.replacingOccurrences(of: "\(appArguments.mainImageCaption.long): ", with: "")]
                 imageCaptionPresent = true
                 
             // list items
@@ -351,7 +351,7 @@ class DialogUpdatableContent : ObservableObject {
                 }
                 
             // list item status
-            case "\(cloptions.listItem.long):" :
+            case "\(appArguments.listItem.long):" :
                 var title           : String = ""
                 var icon            : String = ""
                 var statusText      : String = ""
@@ -360,7 +360,7 @@ class DialogUpdatableContent : ObservableObject {
                 var deleteRow       : Bool = false
                 var addRow          : Bool = false
 
-                let listCommand = line.replacingOccurrences(of: "\(cloptions.listItem.long): ", with: "")
+                let listCommand = line.replacingOccurrences(of: "\(appArguments.listItem.long): ", with: "")
                 
                 // Check for the origional way of doign things
                 let listItemStateArray = listCommand.components(separatedBy: ": ")
