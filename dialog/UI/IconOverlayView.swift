@@ -40,8 +40,8 @@ struct IconOverlayView: View {
     init (observedDialogContent : DialogUpdatableContent) {
         self.observedDialogContent = observedDialogContent
         
-        overlayImagePath = observedDialogContent.overlayIconImage
-        overlayIconPresent = observedDialogContent.overlayIconPresent
+        overlayImagePath = observedDialogContent.args.overlayIconOption.value
+        overlayIconPresent = observedDialogContent.args.overlayIconOption.present
         
         if overlayImagePath.starts(with: "http") {
             imgFromURL = true

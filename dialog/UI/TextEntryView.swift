@@ -34,7 +34,7 @@ struct TextEntryView: View {
                 //highlight.append(Color.clear)
             }
         }
-        if !observedDialogContent.args.iconOption.present { //} cloptions.hideIcon.present {
+        if !observedDialogContent.args.hideIcon.present { //} cloptions.hideIcon.present {
             fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value)
         } else {
             fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value) - string2float(string: observedDialogContent.args.iconSize.value)

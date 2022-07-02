@@ -411,16 +411,20 @@ func processCLOptions() {
             }
         }
     }
-        
+    
+    if cloptions.iconOption.value != "" {
+        cloptions.iconOption.present = true
+    }
+    
     // hide the icon if asked to or if banner image is present
     if cloptions.hideIcon.present || cloptions.iconOption.value == "none" || cloptions.bannerImage.present {
-        appvars.iconIsHidden = true
+        cloptions.iconOption.present = true
         logger(logMessage: "iconIsHidden = true")
     }
     
     // of both banner image and icon are specified, re-enable the icon.
     if cloptions.bannerImage.present && cloptions.iconOption.present {
-        appvars.iconIsHidden = false
+        cloptions.hideIcon.present = false
     }
     
     if cloptions.centreIcon.present {

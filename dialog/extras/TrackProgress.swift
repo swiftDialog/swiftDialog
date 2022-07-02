@@ -41,8 +41,8 @@ class DialogUpdatableContent : ObservableObject {
     //@Published var iconImage: String
     @Published var iconSize: CGFloat
     //@Published var iconPresent: Bool
-    @Published var overlayIconImage: String
-    @Published var overlayIconPresent: Bool
+    //@Published var overlayIconImage: String
+    //@Published var overlayIconPresent: Bool
     @Published var centreIconPresent: Bool
     //@Published var image: String
     @Published var imagePresent: Bool
@@ -113,8 +113,8 @@ class DialogUpdatableContent : ObservableObject {
         imagePresent = cloptions.mainImage.present
         imageCaptionPresent = cloptions.mainImageCaption.present
         
-        overlayIconImage = cloptions.overlayIconOption.value
-        overlayIconPresent = cloptions.overlayIconOption.present
+        //overlayIconImage = cloptions.overlayIconOption.value
+        //overlayIconPresent = cloptions.overlayIconOption.present
         
         listItemsArray = appvars.listItems
         listItemPresent = cloptions.listItem.present
@@ -310,10 +310,10 @@ class DialogUpdatableContent : ObservableObject {
                 
             // overlay icon
             case "\(cloptions.overlayIconOption.long):":
-                overlayIconImage = line.replacingOccurrences(of: "\(cloptions.overlayIconOption.long): ", with: "")
-                overlayIconPresent = true
-                if overlayIconImage == "none" {
-                    overlayIconPresent = false
+                args.overlayIconOption.value = line.replacingOccurrences(of: "\(cloptions.overlayIconOption.long): ", with: "")
+                args.overlayIconOption.present = true
+                if args.overlayIconOption.value == "none" {
+                    args.overlayIconOption.present = false
                 }
                 
             // image

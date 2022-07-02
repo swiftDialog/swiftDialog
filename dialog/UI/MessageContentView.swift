@@ -32,7 +32,7 @@ struct MessageContent: View {
     
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedDialogContent = observedDialogContent
-        if !observedDialogContent.args.iconOption.present  { //cloptions.hideIcon.present {
+        if !observedDialogContent.args.hideIcon.present  { //cloptions.hideIcon.present {
             fieldPadding = 40
             iconDisplayWidth = 0
         } else {
@@ -45,7 +45,7 @@ struct MessageContent: View {
         
         if observedDialogContent.imagePresent || (observedDialogContent.imagePresent && observedDialogContent.imageCaptionPresent) {
             VStack {
-                if observedDialogContent.args.iconOption.present && observedDialogContent.centreIconPresent && !appvars.iconIsHidden && !(observedDialogContent.args.iconOption.value == "none") {
+                if observedDialogContent.args.iconOption.present && observedDialogContent.centreIconPresent && !observedDialogContent.args.hideIcon.present && !(observedDialogContent.args.iconOption.value == "none") {
                     IconView(observedDialogContent: observedDialogContent)
                         .frame(width: iconDisplayWidth, alignment: .top)
                         .padding(.top, 15)

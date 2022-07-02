@@ -158,7 +158,7 @@ struct ConstructionKitView: View {
                 VStack {
                     LabelView(label: "Overlay")
                     HStack {
-                        Toggle("Visible", isOn: $observedDialogContent.overlayIconPresent)
+                        Toggle("Visible", isOn: $observedDialogContent.args.overlayIconOption.present)
                         Button("Select")
                               {
                                 let panel = NSOpenPanel()
@@ -166,10 +166,10 @@ struct ConstructionKitView: View {
                                 panel.canChooseDirectories = false
                                 panel.allowedContentTypes = [.image]
                                 if panel.runModal() == .OK {
-                                    observedDialogContent.overlayIconImage = panel.url?.path ?? "<none>"
+                                    observedDialogContent.args.overlayIconOption.value = panel.url?.path ?? "<none>"
                                 }
                               }
-                        TextField("", text: $observedDialogContent.overlayIconImage)
+                        TextField("", text: $observedDialogContent.args.overlayIconOption.value)
                     }
                 }
             }
