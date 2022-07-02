@@ -11,10 +11,12 @@ struct StatusImage: View {
     
     var name: String
     var colour: Color
+    var statusSize: CGFloat
     
-    init(name: String, colour: Color) {
+    init(name: String, colour: Color, size: CGFloat) {
         self.name = name
         self.colour = colour
+        self.statusSize = size
     }
     
     var body: some View {
@@ -22,7 +24,7 @@ struct StatusImage: View {
             .resizable()
             .foregroundColor(colour)
             .scaledToFit()
-            .frame(width: 25, height: 25)
+            .frame(width: statusSize, height: statusSize)
             //.border(.red)
             .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
     }
@@ -32,27 +34,46 @@ struct ListView: View {
     
     @ObservedObject var observedDialogContent : DialogUpdatableContent
     
+    var rowHeight: CGFloat = appvars.messageFontSize + 14
+    var rowStatusHeight: CGFloat = appvars.messageFontSize + 5
+    var rowFontSize: CGFloat = appvars.messageFontSize
+    var proportionalListHeight: CGFloat = 0
+    
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedDialogContent = observedDialogContent
+        if cloptions.listStyle.present {
+            switch cloptions.listStyle.value {
+            case "expanded":
+                rowHeight = rowHeight + 15
+            case "compact":
+                rowHeight = rowHeight - 10
+            //case "proportional":
+            //    rowHeight = 0
+            //    proportionalListHeight = 1
+            default: ()
+            }
+        }
     }
     
     
     var body: some View {
         if observedDialogContent.listItemPresent {
             ScrollViewReader { proxy in
+                GeometryReader { geometry in
+                    let listHeightPadding = ((geometry.size.height/CGFloat(observedDialogContent.listItemsArray.count)/2) * proportionalListHeight)
                 //withAnimation(.default) {
-                    VStack() {                        
+                    VStack() {
                         List(0..<observedDialogContent.listItemsArray.count, id: \.self) {i in
                             VStack {
                                 HStack {
                                     Text(observedDialogContent.listItemsArray[i].title)
-                                        .font(.system(size: appvars.messageFontSize))
+                                        .font(.system(size: rowFontSize))
                                         .id(i)
                                     Spacer()
                                     HStack {
                                         if observedDialogContent.listItemsArray[i].statusText != "" {
                                             Text(observedDialogContent.listItemsArray[i].statusText)
-                                                .font(.system(size: appvars.messageFontSize))
+                                                .font(.system(size: rowFontSize))
                                                 .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
                                         }
                                         switch observedDialogContent.listItemsArray[i].statusIcon {
@@ -60,16 +81,16 @@ struct ListView: View {
                                             ProgressView()
                                                 .progressViewStyle(.circular)
                                                 .scaleEffect(0.8, anchor: .trailing)
-                                                .frame(height: 25)
+                                                .frame(height: rowStatusHeight)
                                                 .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
                                         case "success" :
-                                            StatusImage(name: "checkmark.circle.fill", colour: .green)
+                                            StatusImage(name: "checkmark.circle.fill", colour: .green, size: rowStatusHeight)
                                         case "fail" :
-                                            StatusImage(name: "xmark.circle.fill", colour: .red)
+                                            StatusImage(name: "xmark.circle.fill", colour: .red, size: rowStatusHeight)
                                         case "pending" :
-                                            StatusImage(name: "ellipsis.circle.fill", colour: .gray)
+                                            StatusImage(name: "ellipsis.circle.fill", colour: .gray, size: rowStatusHeight)
                                         case "error" :
-                                            StatusImage(name: "exclamationmark.circle.fill", colour: .yellow)
+                                            StatusImage(name: "exclamationmark.circle.fill", colour: .yellow, size: rowStatusHeight)
                                         default:
                                             EmptyView()
                                         }
@@ -77,9 +98,10 @@ struct ListView: View {
                                     //.animation(.easeInOut(duration: 5))
                                     //.transition(.opacity)
                                 }
-                                .frame(height: 34)
+                                .frame(height: rowHeight+listHeightPadding)
                                 Divider()
                             }
+                            //.frame(height: rowHeight+listHeightPadding)
                         }
                     }
                     .onChange(of: observedDialogContent.listItemUpdateRow, perform: { _ in
@@ -90,7 +112,7 @@ struct ListView: View {
                         }
                     })
                     .clipShape(RoundedRectangle(cornerRadius: 8))
-                //}
+                }
             }
         }
     }

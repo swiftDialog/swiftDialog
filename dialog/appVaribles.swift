@@ -45,7 +45,7 @@ struct ListItems {
 
 struct AppVariables {
     
-    var cliversion                      = "1.11.0"
+    var cliversion                      = "1.11.1"
     
     // message default strings
     var titleDefault                    = String("default-title".localized)
@@ -202,6 +202,7 @@ struct CLOptions {
     var jsonString               = (long: String("jsonstring"),        short: String(""),    value : String(""), present : Bool(false))
     var statusLogFile            = (long: String("commandfile"),       short: String(""),    value : String(""), present : Bool(false))
     var listItem                 = (long: String("listitem"),          short: String(""),    value : String(""), present : Bool(false))
+    var listStyle                = (long: String("liststyle"),         short: String(""),    value : String(""), present : Bool(false))
     var quitKey                  = (long: String("quitkey"),           short: String(""),    value : String(""), present : Bool(false))
     var infoText                 = (long: String("infotext"),          short: String(""),    value : String(""), present : Bool(false))
 

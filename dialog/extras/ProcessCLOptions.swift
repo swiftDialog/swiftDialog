@@ -105,13 +105,14 @@ func processCLOptions() {
                 if json[cloptions.textField.long][i]["title"].stringValue == "" {
                     textFields.append(TextFieldState(title: String(json[cloptions.textField.long][i].stringValue)))
                 } else {
-                    textFields.append(TextFieldState(title: String(json[cloptions.textField.long][i]["title"].stringValue),
-                                                     required: Bool(json[cloptions.textField.long][i]["regex"].exists() || json[cloptions.textField.long][i]["required"].boolValue),
-                                                     secure: Bool(json[cloptions.textField.long][i]["secure"].boolValue),
-                                                     prompt: String(json[cloptions.textField.long][i]["prompt"].stringValue),
-                                                     regex: String(json[cloptions.textField.long][i]["regex"].stringValue),
-                                                     regexError: String(json[cloptions.textField.long][i]["regexerror"].stringValue))
-                                )
+                    textFields.append(TextFieldState(
+                        title: String(json[cloptions.textField.long][i]["title"].stringValue),
+                        required: Bool(json[cloptions.textField.long][i]["required"].boolValue),
+                        secure: Bool(json[cloptions.textField.long][i]["secure"].boolValue),
+                        prompt: String(json[cloptions.textField.long][i]["prompt"].stringValue),
+                        regex: String(json[cloptions.textField.long][i]["regex"].stringValue),
+                        regexError: String(json[cloptions.textField.long][i]["regexerror"].stringValue))
+                    )
                 }
             }
         } else {
@@ -323,60 +324,90 @@ func processCLOptions() {
     app.setActivationPolicy(.accessory)
             
     if cloptions.titleFont.present {
-        logger(logMessage: "titleFont.value : \(cloptions.titleFont.value)")
-        let fontCLValues = cloptions.titleFont.value
-        var fontValues = [""]
-        //split by ,
-        fontValues = fontCLValues.components(separatedBy: ",")
-        fontValues = fontValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
-        for value in fontValues {
-            // split by =
-            let item = value.components(separatedBy: "=")
-            if item[0] == "size" {
-                appvars.titleFontSize = string2float(string: item[1], defaultValue: appvars.titleFontSize)
-                logger(logMessage: "titleFontSize : \(appvars.titleFontSize)")
-            }
-            if item[0] == "weight" {
-                appvars.titleFontWeight = textToFontWeight(item[1])
-                logger(logMessage: "titleFontWeight : \(appvars.titleFontWeight)")
-            }
-            if item[0] == "colour" || item[0] == "color" {
-                appvars.titleFontColour = stringToColour(item[1])
-                logger(logMessage: "titleFontColour : \(appvars.titleFontColour)")
-            }
-            if item[0] == "name" {
-                appvars.titleFontName = item[1]
-                logger(logMessage: "titleFontName : \(appvars.titleFontName)")
-            }
+        
+        if cloptions.titleFont.value == "" {
+            logger(logMessage: "titleFont.object : \(json[cloptions.titleFont.long].object)")
             
+            appvars.titleFontSize = string2float(string: json[cloptions.titleFont.long]["size"].stringValue, defaultValue: appvars.titleFontSize)
+            appvars.titleFontWeight = textToFontWeight(json[cloptions.titleFont.long]["weight"].stringValue)
+            if json[cloptions.messageFont.long]["colour"].exists() {
+                appvars.titleFontColour = stringToColour(json[cloptions.titleFont.long]["colour"].stringValue)
+            } else {
+                appvars.titleFontColour = stringToColour(json[cloptions.titleFont.long]["color"].stringValue)
+            }
+            appvars.titleFontName = json[cloptions.titleFont.long]["name"].stringValue
+        } else {
+        
+            logger(logMessage: "titleFont.value : \(cloptions.titleFont.value)")
+            let fontCLValues = cloptions.titleFont.value
+            var fontValues = [""]
+            //split by ,
+            fontValues = fontCLValues.components(separatedBy: ",")
+            fontValues = fontValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
+            for value in fontValues {
+                // split by =
+                let item = value.components(separatedBy: "=")
+                if item[0] == "size" {
+                    appvars.titleFontSize = string2float(string: item[1], defaultValue: appvars.titleFontSize)
+                    logger(logMessage: "titleFontSize : \(appvars.titleFontSize)")
+                }
+                if item[0] == "weight" {
+                    appvars.titleFontWeight = textToFontWeight(item[1])
+                    logger(logMessage: "titleFontWeight : \(appvars.titleFontWeight)")
+                }
+                if item[0] == "colour" || item[0] == "color" {
+                    appvars.titleFontColour = stringToColour(item[1])
+                    logger(logMessage: "titleFontColour : \(appvars.titleFontColour)")
+                }
+                if item[0] == "name" {
+                    appvars.titleFontName = item[1]
+                    logger(logMessage: "titleFontName : \(appvars.titleFontName)")
+                }
+                
+            }
         }
     }
     
     if cloptions.messageFont.present {
-        logger(logMessage: "messageFont.value : \(cloptions.messageFont.value)")
-        let fontCLValues = cloptions.messageFont.value
-        var fontValues = [""]
-        //split by ,
-        fontValues = fontCLValues.components(separatedBy: ",")
-        fontValues = fontValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
-        for value in fontValues {
-            // split by =
-            let item = value.components(separatedBy: "=")
-            if item[0] == "size" {
-                appvars.messageFontSize = string2float(string: item[1], defaultValue: appvars.messageFontSize)
-                logger(logMessage: "messageFontSize : \(appvars.messageFontSize)")
+        
+        if cloptions.messageFont.value == "" {
+            logger(logMessage: "messageFont.object : \(json[cloptions.messageFont.long].object)")
+            
+            appvars.messageFontSize = string2float(string: json[cloptions.messageFont.long]["size"].stringValue, defaultValue: appvars.messageFontSize)
+            appvars.messageFontWeight = textToFontWeight(json[cloptions.messageFont.long]["weight"].stringValue)
+            if json[cloptions.messageFont.long]["colour"].exists() {
+                appvars.messageFontColour = stringToColour(json[cloptions.messageFont.long]["colour"].stringValue)
+            } else {
+                appvars.messageFontColour = stringToColour(json[cloptions.messageFont.long]["color"].stringValue)
             }
-            if item[0] == "weight" {
-                appvars.messageFontWeight = textToFontWeight(item[1])
-                logger(logMessage: "messageFontWeight : \(appvars.messageFontWeight)")
-            }
-            if item[0] == "colour" || item[0] == "color" {
-                appvars.messageFontColour = stringToColour(item[1])
-                logger(logMessage: "messageFontColour : \(appvars.messageFontColour)")
-            }
-            if item[0] == "name" {
-                appvars.messageFontName = item[1]
-                logger(logMessage: "messageFontName : \(appvars.messageFontName)")
+            appvars.messageFontName = json[cloptions.messageFont.long]["name"].stringValue
+        } else {
+        
+            logger(logMessage: "messageFont.value : \(cloptions.messageFont.value)")
+            let fontCLValues = cloptions.messageFont.value
+            var fontValues = [""]
+            //split by ,
+            fontValues = fontCLValues.components(separatedBy: ",")
+            fontValues = fontValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
+            for value in fontValues {
+                // split by =
+                let item = value.components(separatedBy: "=")
+                if item[0] == "size" {
+                    appvars.messageFontSize = string2float(string: item[1], defaultValue: appvars.messageFontSize)
+                    logger(logMessage: "messageFontSize : \(appvars.messageFontSize)")
+                }
+                if item[0] == "weight" {
+                    appvars.messageFontWeight = textToFontWeight(item[1])
+                    logger(logMessage: "messageFontWeight : \(appvars.messageFontWeight)")
+                }
+                if item[0] == "colour" || item[0] == "color" {
+                    appvars.messageFontColour = stringToColour(item[1])
+                    logger(logMessage: "messageFontColour : \(appvars.messageFontColour)")
+                }
+                if item[0] == "name" {
+                    appvars.messageFontName = item[1]
+                    logger(logMessage: "messageFontName : \(appvars.messageFontName)")
+                }
             }
         }
     }
@@ -417,7 +448,9 @@ func processCLOptions() {
         // scale everything down a notch
         appvars.smallWindow = true
         appvars.scaleFactor = 0.75
-        cloptions.iconSize.value = "120"
+        if !cloptions.iconSize.present {
+            cloptions.iconSize.value = "120"
+        }
         logger(logMessage: "smallWindow.present")
     } else if cloptions.bigWindow.present {
         // scale everything up a notch
@@ -571,6 +604,9 @@ func processCLOptionValues() {
     cloptions.mainImageCaption.present      = json[cloptions.mainImageCaption.long].exists() || CLOptionPresent(OptionName: cloptions.mainImageCaption)
     
     cloptions.listItem.present              = json[cloptions.listItem.long].exists() || CLOptionPresent(OptionName: cloptions.listItem)
+    
+    cloptions.listStyle.value               = json[cloptions.listStyle.long].string ?? CLOptionText(OptionName: cloptions.listStyle)
+    cloptions.listStyle.present             = json[cloptions.listStyle.long].exists() || CLOptionPresent(OptionName: cloptions.listStyle)
 
     cloptions.windowWidth.value             = json[cloptions.windowWidth.long].string ?? CLOptionText(OptionName: cloptions.windowWidth)
     cloptions.windowWidth.present           = json[cloptions.windowWidth.long].exists() || CLOptionPresent(OptionName: cloptions.windowWidth)
