@@ -47,12 +47,12 @@ struct IconView: View {
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedDialogContent = observedDialogContent
         
-        messageUserImagePath = observedDialogContent.iconImage
+        messageUserImagePath = observedDialogContent.args.iconOption.value // observedDialogContent.iconImage
         
         logoWidth = appvars.iconWidth
         logoHeight = appvars.iconHeight
         
-        if observedDialogContent.overlayIconPresent {
+        if observedDialogContent.args.overlayIconOption.present {
             mainImageScale = mainImageWithOverlayScale
         }
         

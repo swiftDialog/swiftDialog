@@ -134,7 +134,7 @@ struct ConstructionKitView: View {
                 VStack {
                     LabelView(label: "Icon")
                     HStack {
-                        Toggle("Visible", isOn: $observedDialogContent.iconPresent)
+                        Toggle("Visible", isOn: $observedDialogContent.args.iconOption.present)
                         Button("Select")
                               {
                                 let panel = NSOpenPanel()
@@ -142,10 +142,10 @@ struct ConstructionKitView: View {
                                 panel.canChooseDirectories = false
                                 panel.allowedContentTypes = [.image]
                                 if panel.runModal() == .OK {
-                                    observedDialogContent.iconImage = panel.url?.path ?? "<none>"
+                                    observedDialogContent.args.iconOption.value = panel.url?.path ?? "<none>"
                                 }
                               }
-                        TextField("", text: $observedDialogContent.iconImage)
+                        TextField("", text: $observedDialogContent.args.iconOption.value)
                     }
                     LabelView(label: "Icon Size")
                     HStack {

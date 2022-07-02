@@ -17,7 +17,7 @@ struct DialogView: View {
     var iconDisplayWidth : CGFloat
     
     init(observedDialogContent : DialogUpdatableContent) {
-        if !observedDialogContent.iconPresent { //} appvars.iconIsHidden {
+        if !observedDialogContent.args.iconOption.present { //} appvars.iconIsHidden {
             iconDisplayWidth = 0
         } else {
             iconDisplayWidth = observedDialogContent.iconSize
@@ -29,7 +29,7 @@ struct DialogView: View {
     var body: some View {
         VStack { //}(alignment: .top, spacing: nil) {
             HStack {
-                if (observedDialogContent.iconPresent && !observedDialogContent.centreIconPresent && !(observedDialogContent.iconImage == "none")) {
+                if (observedDialogContent.args.iconOption.present && !observedDialogContent.centreIconPresent && !(observedDialogContent.args.iconOption.value == "none")) {
                     VStack {
                         IconView(observedDialogContent: observedDialogContent)
                             .frame(width: iconDisplayWidth, alignment: .top)

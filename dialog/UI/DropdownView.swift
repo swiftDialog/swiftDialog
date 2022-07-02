@@ -20,7 +20,7 @@ struct DropdownView: View {
     
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedDialogContent = observedDialogContent
-        if !observedDialogContent.iconPresent { //} cloptions.hideIcon.present {
+        if !observedDialogContent.args.iconOption.present { //} cloptions.hideIcon.present {
             fieldwidth = observedDialogContent.windowWidth
         } else {
             fieldwidth = observedDialogContent.windowWidth - appvars.iconWidth

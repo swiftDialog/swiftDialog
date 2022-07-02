@@ -38,9 +38,9 @@ class DialogUpdatableContent : ObservableObject {
     //@Published var button2Present: Bool
     //@Published var infoButtonValue: String
     //@Published var infoButtonPresent: Bool
-    @Published var iconImage: String
+    //@Published var iconImage: String
     @Published var iconSize: CGFloat
-    @Published var iconPresent: Bool
+    //@Published var iconPresent: Bool
     @Published var overlayIconImage: String
     @Published var overlayIconPresent: Bool
     @Published var centreIconPresent: Bool
@@ -105,9 +105,9 @@ class DialogUpdatableContent : ObservableObject {
         
         //requiredTextfieldHighlight = Color.clear
         
-        iconImage = cloptions.iconOption.value
+        //iconImage = cloptions.iconOption.value
         iconSize = string2float(string: cloptions.iconSize.value)
-        iconPresent = !appvars.iconIsHidden
+        //iconPresent = !appvars.iconIsHidden
         centreIconPresent = cloptions.centreIcon.present
         
         imagePresent = cloptions.mainImage.present
@@ -297,12 +297,12 @@ class DialogUpdatableContent : ObservableObject {
                     case "left", "default" :
                         centreIconPresent = false
                     case "none" :
-                        iconPresent = false
-                        iconImage = iconState
+                        args.iconOption.present = false
+                        args.iconOption.value = iconState
                     default:
                         //centreIconPresent = false
-                        iconPresent = true
-                        iconImage = iconState
+                        args.iconOption.present = true
+                        args.iconOption.value = iconState
                     }
                 }
                 //print("centre icon is \(centreIconPresent)")
