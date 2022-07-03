@@ -114,15 +114,14 @@ struct ConstructionKitView: View {
             }
             
             VStack {
-                LabelView(label: "--Window Size--")
-                LabelView(label: "Height")
+                LabelView(label: "Window Height")
                 HStack {
                     Slider(value: $observedData.windowHeight, in: 200...2000)
                     //Text("Current Height value: \(observedDialogContent.windowHeight, specifier: "%.0f")")
                     TextField("Height value:", value: $observedData.windowHeight, formatter: NumberFormatter())
                         .frame(width: 50)
                 }
-                LabelView(label: "Width")
+                LabelView(label: "Window Width")
                 HStack {
                     Slider(value: $observedData.windowWidth, in: 200...2000)
                     TextField("Width value:", value: $observedData.windowWidth, formatter: NumberFormatter())

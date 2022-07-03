@@ -33,8 +33,8 @@
 		415E1FCA27A2694B00DE971B /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415E1FC927A2694B00DE971B /* ListView.swift */; };
 		415E1FCB27A2B0A000DE971B /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415E1FC927A2694B00DE971B /* ListView.swift */; };
 		416DED42261C5FE00049B6B5 /* FullscreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416DED41261C5FE00049B6B5 /* FullscreenView.swift */; };
-		417BD4352798FE39009AE34A /* TrackProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD4342798FE38009AE34A /* TrackProgress.swift */; };
-		417BD4362798FE48009AE34A /* TrackProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD4342798FE38009AE34A /* TrackProgress.swift */; };
+		417BD4352798FE39009AE34A /* DialogUpdatableContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD4342798FE38009AE34A /* DialogUpdatableContent.swift */; };
+		417BD4362798FE48009AE34A /* DialogUpdatableContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD4342798FE38009AE34A /* DialogUpdatableContent.swift */; };
 		417BD43827992EDB009AE34A /* TaskProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD43727992EDB009AE34A /* TaskProgressView.swift */; };
 		417BD43927992EDB009AE34A /* TaskProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD43727992EDB009AE34A /* TaskProgressView.swift */; };
 		417BD471279CB658009AE34A /* CheckboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD470279CB658009AE34A /* CheckboxView.swift */; };
@@ -143,7 +143,7 @@
 		415934D926DB7604009C9C3A /* WindowPositioning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowPositioning.swift; sourceTree = "<group>"; };
 		415E1FC927A2694B00DE971B /* ListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
 		416DED41261C5FE00049B6B5 /* FullscreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullscreenView.swift; sourceTree = "<group>"; };
-		417BD4342798FE38009AE34A /* TrackProgress.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackProgress.swift; sourceTree = "<group>"; };
+		417BD4342798FE38009AE34A /* DialogUpdatableContent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DialogUpdatableContent.swift; sourceTree = "<group>"; };
 		417BD43727992EDB009AE34A /* TaskProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskProgressView.swift; sourceTree = "<group>"; };
 		417BD470279CB658009AE34A /* CheckboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckboxView.swift; sourceTree = "<group>"; };
 		417BF0BA260F1726009AD252 /* BannerImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerImageView.swift; sourceTree = "<group>"; };
@@ -284,7 +284,7 @@
 		4154C30C25F782E900A3D373 /* extras */ = {
 			isa = PBXGroup;
 			children = (
-				417BD4342798FE38009AE34A /* TrackProgress.swift */,
+				417BD4342798FE38009AE34A /* DialogUpdatableContent.swift */,
 				41D81E6B25F8209F00D1F7E1 /* Options.swift */,
 				41D81E7825F870A500D1F7E1 /* Functions.swift */,
 				41110A2725F9E79E008171D2 /* License.swift */,
@@ -526,7 +526,7 @@
 			files = (
 				41512CC2286C77F200F22B86 /* ConstructionKitView.swift in Sources */,
 				415E1FCB27A2B0A000DE971B /* ListView.swift in Sources */,
-				417BD4362798FE48009AE34A /* TrackProgress.swift in Sources */,
+				417BD4362798FE48009AE34A /* DialogUpdatableContent.swift in Sources */,
 				41876684275D88D60023A6A1 /* ImageSlider.swift in Sources */,
 				414550AA27C799D000D756E3 /* BackgroundBlur.swift in Sources */,
 				418A7B512759949A00E4D6F1 /* VideoView.swift in Sources */,
@@ -601,7 +601,7 @@
 				41FB648F2680855300A54C3E /* IconOverlayView.swift in Sources */,
 				41FB64902680855300A54C3E /* FullscreenView.swift in Sources */,
 				415E1FCA27A2694B00DE971B /* ListView.swift in Sources */,
-				417BD4352798FE39009AE34A /* TrackProgress.swift in Sources */,
+				417BD4352798FE39009AE34A /* DialogUpdatableContent.swift in Sources */,
 				417BD43927992EDB009AE34A /* TaskProgressView.swift in Sources */,
 				41FB64912680855300A54C3E /* Options.swift in Sources */,
 				41A44EB026F2F25200FEE1AC /* watermarkView.swift in Sources */,

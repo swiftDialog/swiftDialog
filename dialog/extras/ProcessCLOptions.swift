@@ -67,7 +67,7 @@ func processCLOptions() {
             let selectValues = json[appArguments.dropdownValues.long].arrayValue.map {$0.stringValue}
             let selectTitle = json[appArguments.dropdownTitle.long].stringValue
             let selectDefault = json[appArguments.dropdownDefault.long].stringValue
-            dropdownItems.append(DropDownItems(title: selectTitle, values: selectValues, defaultValue: selectDefault, selectedValue: selectDefault))
+            appvars.dropdownItems.append(DropDownItems(title: selectTitle, values: selectValues, defaultValue: selectDefault, selectedValue: selectDefault))
         }
         
         if json["selectitems"].exists() {            
@@ -77,7 +77,7 @@ func processCLOptions() {
                 let selectValues = (json["selectitems"][i]["values"].arrayValue.map {$0.stringValue}).map { $0.trimmingCharacters(in: .whitespaces) }
                 let selectDefault = json["selectitems"][i]["default"].stringValue
                 
-                dropdownItems.append(DropDownItems(title: selectTitle, values: selectValues, defaultValue: selectDefault, selectedValue: selectDefault))
+                appvars.dropdownItems.append(DropDownItems(title: selectTitle, values: selectValues, defaultValue: selectDefault, selectedValue: selectDefault))
             }
             
         } else {
@@ -94,7 +94,7 @@ func processCLOptions() {
             }
             
             for i in 0..<(dropdownValues.count) {
-                dropdownItems.append(DropDownItems(title: selectValues[i], values: dropdownValues[i].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[i], selectedValue: dropdownDefaults[i]))
+                appvars.dropdownItems.append(DropDownItems(title: selectValues[i], values: dropdownValues[i].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[i], selectedValue: dropdownDefaults[i]))
             }
         }
     }
@@ -103,9 +103,9 @@ func processCLOptions() {
         if json[appArguments.textField.long].exists() {
             for i in 0..<json[appArguments.textField.long].arrayValue.count {
                 if json[appArguments.textField.long][i]["title"].stringValue == "" {
-                    textFields.append(TextFieldState(title: String(json[appArguments.textField.long][i].stringValue)))
+                    appvars.textFields.append(TextFieldState(title: String(json[appArguments.textField.long][i].stringValue)))
                 } else {
-                    textFields.append(TextFieldState(
+                    appvars.textFields.append(TextFieldState(
                         title: String(json[appArguments.textField.long][i]["title"].stringValue),
                         required: Bool(json[appArguments.textField.long][i]["required"].boolValue),
                         secure: Bool(json[appArguments.textField.long][i]["secure"].boolValue),
@@ -148,10 +148,10 @@ func processCLOptions() {
                         }
                     }
                 }
-                textFields.append(TextFieldState(title: fieldTitle, required: fieldRequire, secure: fieldSecure, prompt: fieldPrompt, regex: fieldRegex, regexError: fieldRegexErrror))
+                appvars.textFields.append(TextFieldState(title: fieldTitle, required: fieldRequire, secure: fieldSecure, prompt: fieldPrompt, regex: fieldRegex, regexError: fieldRegexErrror))
             }
         }
-        logger(logMessage: "textOptionsArray : \(textFields)")
+        logger(logMessage: "textOptionsArray : \(appvars.textFields)")
     }
     
     if appArguments.checkbox.present {

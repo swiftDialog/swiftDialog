@@ -11,8 +11,8 @@ struct TextEntryView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
     
-    @State var textFieldValue = Array(repeating: "", count: textFields.count)
-    //var textPromptValue = Array(repeating: "", count: textFields.count)
+    @State var textFieldValue = Array(repeating: "", count: appvars.textFields.count)
+    //var textPromptValue = Array(repeating: "", count: appvars.textFields.count)
     
     @State private var animationAmount = 1.0
     
@@ -26,9 +26,9 @@ struct TextEntryView: View {
         self.observedData = observedDialogContent
         if appArguments.textField.present {
             textFieldPresent = true
-            for i in 0..<textFields.count {
+            for i in 0..<appvars.textFields.count {
                 textFieldValue.append(" ")
-                if textFields[i].required {
+                if appvars.textFields[i].required {
                     requiredFieldsPresent = true
                 }
                 //highlight.append(Color.clear)
@@ -44,17 +44,17 @@ struct TextEntryView: View {
     var body: some View {
         if textFieldPresent {
             VStack {
-                ForEach(0..<textFields.count, id: \.self) {index in
+                ForEach(0..<appvars.textFields.count, id: \.self) {index in
                     HStack {
                         Spacer()
-                        Text(textFields[index].title + (textFields[index].required ? " *":""))
+                        Text(appvars.textFields[index].title + (appvars.textFields[index].required ? " *":""))
                             .bold()
                             .font(.system(size: 15))
                             .frame(idealWidth: fieldwidth*0.20, maxWidth: 150, alignment: .leading)
                         Spacer()
                             .frame(width: 20)
                         HStack {
-                            if textFields[index].secure {
+                            if appvars.textFields[index].secure {
                                 ZStack() {
                                     SecureField("", text: $textFieldValue[index])
                                         .disableAutocorrection(true)
@@ -65,7 +65,7 @@ struct TextEntryView: View {
                                 }
                             } else {
                                 if #available(macOS 12.0, *) {
-                                    TextField("", text: $textFieldValue[index], prompt:Text(textFields[index].prompt))
+                                    TextField("", text: $textFieldValue[index], prompt:Text(appvars.textFields[index].prompt))
                                 } else {
                                     TextField("", text: $textFieldValue[index])
                                 }
@@ -74,7 +74,7 @@ struct TextEntryView: View {
                         .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
                         .onChange(of: textFieldValue[index], perform: { value in
                             //update appvars with the text that was entered. this will be printed to stdout on exit
-                            textFields[index].value = textFieldValue[index]
+                            appvars.textFields[index].value = textFieldValue[index]
                         })
                         .overlay(RoundedRectangle(cornerRadius: 5)
                                     .stroke(observedData.requiredTextfieldHighlight[index], lineWidth: 2)

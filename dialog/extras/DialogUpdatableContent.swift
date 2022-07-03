@@ -52,7 +52,7 @@ class DialogUpdatableContent : ObservableObject {
     @Published var listItemUpdateRow: Int
     @Published var listItemPresent: Bool
     
-    @Published var requiredTextfieldHighlight: [Color] = Array(repeating: Color.clear, count: textFields.count)
+    @Published var requiredTextfieldHighlight: [Color] = Array(repeating: Color.clear, count: appvars.textFields.count)
     
     @Published var windowWidth: CGFloat
     @Published var windowHeight: CGFloat
