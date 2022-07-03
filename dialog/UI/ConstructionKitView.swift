@@ -60,7 +60,7 @@ struct ConstructionKitView: View {
             contentRect: NSRect(x: 0, y: 0, width: 0, height: 0),
                styleMask: [.titled, .closable, .miniaturizable, .resizable],
                backing: .buffered, defer: false)
-        window.title = "swiftDialog Construction Kit"
+        window.title = "swiftDialog Construction Kit (ALPHA)"
         window.makeKeyAndOrderFront(self)
         window.isReleasedWhenClosed = false
         window.center()
@@ -71,10 +71,15 @@ struct ConstructionKitView: View {
     private func exportJSON() {
         var json = JSON()
         var jsonDEBUG = JSON()
-        //var propertyValue = (long: String(""),short: String(""),value : String(""), present : Bool(false))
+        
+        // copy modifyable objects into args
+        observedData.args.iconSize.value = "\(observedData.iconSize)"
+        observedData.args.windowWidth.value = "\(observedData.windowWidth)"
+        observedData.args.windowHeight.value = "\(observedData.windowHeight)"
+        
         let mirrored_appArguments = Mirror(reflecting: observedData.args)
         for (_, attr) in mirrored_appArguments.children.enumerated() {
-            if let propertyValue = attr.value as? (long: String, short: String, value: String, present: Bool) {
+            if let propertyValue = attr.value as? CLArgument {
                 if propertyValue.present && propertyValue.value != "" {
                     json[propertyValue.long].string = propertyValue.value
                 }
@@ -220,7 +225,9 @@ struct ConstructionKitView: View {
                 Button("Export JSON") {
                     exportJSON()
                 }
+                .disabled(false)
                 Button("Export Command") {}
+                    .disabled(true)
             }
         }
         .padding(20)

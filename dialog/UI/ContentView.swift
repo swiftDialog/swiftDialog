@@ -95,7 +95,7 @@ struct ContentView: View {
                 
                 // Buttons
                 HStack() {
-                    if appArguments.infoText.present {
+                    if appArguments.infoText.present || getVersionString().starts(with: "Alpha") || getVersionString().starts(with: "Beta"){
                         Text(appArguments.infoText.value)
                             .foregroundColor(.secondary.opacity(0.7))
                             //.font(.system(size: 10))
