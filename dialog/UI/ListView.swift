@@ -32,19 +32,22 @@ struct StatusImage: View {
 
 struct CirclerPercentageProgressViewStyle : ProgressViewStyle {
     public func makeBody(configuration: LinearProgressViewStyle.Configuration) -> some View {
+        let stroke : CGFloat = 5
+        let padding : CGFloat = stroke / 2
         VStack() {
             ZStack {
                 Circle()
-                    .stroke(lineWidth: 5.0)
+                    .stroke(lineWidth: stroke)
                     .opacity(0.3)
                     .foregroundColor(Color.accentColor.opacity(0.5))
-                
                 Circle()
                     .trim(from: 0.0, to: CGFloat(configuration.fractionCompleted ?? 0))
-                .stroke(style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round))
+                .stroke(style: StrokeStyle(lineWidth: stroke, lineCap: .round, lineJoin: .round))
                 .foregroundColor(Color.accentColor)
                 .rotationEffect(.degrees(-90))
+                .animation(.linear)
             }
+            .padding(.trailing, padding)
         }
     }
 }
@@ -98,9 +101,9 @@ struct ListView: View {
                                         switch observedData.listItemsArray[i].statusIcon {
                                         case "progress" :
                                             ProgressView("", value: observedData.listItemsArray[i].progress, total: 100)
-                                                                .progressViewStyle(CirclerPercentageProgressViewStyle())
-                                                                .frame(width: rowStatusHeight-5, height: rowStatusHeight-5, alignment: .leading)
-                                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
+                                                .progressViewStyle(CirclerPercentageProgressViewStyle())
+                                                .frame(width: rowStatusHeight, height: rowStatusHeight-5)
+                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
                                         case "wait" :
                                             ProgressView()
                                                 .progressViewStyle(.circular)
