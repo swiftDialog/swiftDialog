@@ -644,6 +644,10 @@ func processCLOptionValues() {
     appArguments.infoText.value                = json[appArguments.infoText.long].string ?? CLOptionText(OptionName: appArguments.infoText, DefaultValue: "swiftDialog \(getVersionString())")
     appArguments.infoText.present              = json[appArguments.infoText.long].exists() || CLOptionPresent(OptionName: appArguments.infoText)
     
+    if getVersionString().starts(with: "Alpha") || getVersionString().starts(with: "Beta") {
+        appArguments.infoText.present = true
+    }
+    
     appArguments.quitKey.value                 = json[appArguments.quitKey.long].string ?? CLOptionText(OptionName: appArguments.quitKey, DefaultValue: appvars.quitKeyCharacter)
     
     if !appArguments.statusLogFile.present {

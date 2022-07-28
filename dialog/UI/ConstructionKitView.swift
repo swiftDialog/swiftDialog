@@ -196,6 +196,9 @@ struct ConstructionKitView: View {
                     LabelView(label: "Info Button")
                     HStack {
                         Toggle("Visible", isOn: $observedData.args.infoButtonOption.present)
+                            .onChange(of: observedData.args.infoButtonOption.present, perform: { _ in
+                                observedData.args.infoText.present.toggle()
+                            })
                         Toggle("Quit on Info", isOn: $observedData.args.quitOnInfo.present)
                         Spacer()
                     }

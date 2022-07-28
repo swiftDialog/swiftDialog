@@ -356,7 +356,8 @@ class DialogUpdatableContent : ObservableObject {
                 var icon            : String = ""
                 var statusText      : String = ""
                 var statusIcon      : String = ""
-                let statusTypeArray = ["wait","success","fail","error","pending"]
+                let statusTypeArray = ["wait","success","fail","error","pending","progress"]
+                var progressValue   : CGFloat = 0
                 var deleteRow       : Bool = false
                 var addRow          : Bool = false
 
@@ -403,6 +404,9 @@ class DialogUpdatableContent : ObservableObject {
                                 statusText = action[1].trimmingCharacters(in: .whitespaces)
                             case "status":
                                 statusIcon = action[1].trimmingCharacters(in: .whitespaces)
+                            case "progress":
+                                progressValue = string2float(string: action[1].trimmingCharacters(in: .whitespaces))
+                                statusIcon = "progress"
                             case "delete":
                                 deleteRow = true
                             case "add":
@@ -421,13 +425,14 @@ class DialogUpdatableContent : ObservableObject {
                             listItemsArray[row].icon = icon
                             listItemsArray[row].statusIcon = statusIcon
                             listItemsArray[row].statusText = statusText
+                            listItemsArray[row].progress = progressValue
                             listItemUpdateRow = row
                         }
                     }
                     
                     // add to the list items array
                     if addRow {
-                        listItemsArray.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon))
+                        listItemsArray.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon, progress: progressValue))
                         logger(logMessage: "row added with \(title) \(icon) \(statusText) \(statusIcon)")
                     }
                     

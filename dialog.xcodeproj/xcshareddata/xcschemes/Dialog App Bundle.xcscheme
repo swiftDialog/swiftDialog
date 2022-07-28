@@ -52,7 +52,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "--title &quot;Builder Test&quot; --builder"
+            argument = "--title &quot;Builder Test&quot; --jsonstring &apos;{&quot;selectitems&quot; : [     {&quot;title&quot; : &quot;Select 1&quot;, &quot;values&quot; : [&quot;one&quot;,&quot;two&quot;,&quot;three&quot;]},     {&quot;title&quot; : &quot;Select 2&quot;, &quot;values&quot; : [&quot;red&quot;,&quot;green&quot;,&quot;blue&quot;], &quot;default&quot; : &quot;red&quot;} ]}&apos;  "
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

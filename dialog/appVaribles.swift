@@ -38,6 +38,7 @@ struct ListItems {
     var icon            : String = ""
     var statusText      : String = ""
     var statusIcon      : String = ""
+    var progress        : CGFloat = 0
 }
 
 struct CLArgument {
