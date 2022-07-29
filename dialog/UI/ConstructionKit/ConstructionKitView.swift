@@ -110,6 +110,11 @@ struct ConstructionKitView: View {
                         Text("Buttons")
                     }
                 }
+                Section(header: Text("Advanced")) {
+                    NavigationLink(destination: CKListView(observedDialogContent: observedData)){
+                        Text("List Items")
+                    }
+                }
                 Spacer()
             }
             .padding(10)

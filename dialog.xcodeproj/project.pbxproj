@@ -20,6 +20,12 @@
 		4116923328939DEB00A88700 /* CKIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116923128939DEB00A88700 /* CKIconView.swift */; };
 		4116923528939E4D00A88700 /* CKButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116923428939E4D00A88700 /* CKButtonView.swift */; };
 		4116923628939E4D00A88700 /* CKButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116923428939E4D00A88700 /* CKButtonView.swift */; };
+		411692382893A21500A88700 /* CKImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411692372893A21500A88700 /* CKImageView.swift */; };
+		411692392893A21500A88700 /* CKImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411692372893A21500A88700 /* CKImageView.swift */; };
+		4116923B2893A22300A88700 /* CKListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116923A2893A22300A88700 /* CKListView.swift */; };
+		4116923C2893A22300A88700 /* CKListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116923A2893A22300A88700 /* CKListView.swift */; };
+		4116923E2893A24300A88700 /* CKDataEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116923D2893A24300A88700 /* CKDataEntryView.swift */; };
+		4116923F2893A24300A88700 /* CKDataEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116923D2893A24300A88700 /* CKDataEntryView.swift */; };
 		414550AA27C799D000D756E3 /* BackgroundBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414550A927C799D000D756E3 /* BackgroundBlur.swift */; };
 		414550AB27C799D000D756E3 /* BackgroundBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414550A927C799D000D756E3 /* BackgroundBlur.swift */; };
 		414550AD27C79BAB00D756E3 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 414550AC27C79BAB00D756E3 /* SwiftyJSON */; };
@@ -131,6 +137,9 @@
 		4116922E28939C2A00A88700 /* CKWindowProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKWindowProperties.swift; sourceTree = "<group>"; };
 		4116923128939DEB00A88700 /* CKIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKIconView.swift; sourceTree = "<group>"; };
 		4116923428939E4D00A88700 /* CKButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKButtonView.swift; sourceTree = "<group>"; };
+		411692372893A21500A88700 /* CKImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKImageView.swift; sourceTree = "<group>"; };
+		4116923A2893A22300A88700 /* CKListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKListView.swift; sourceTree = "<group>"; };
+		4116923D2893A24300A88700 /* CKDataEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKDataEntryView.swift; sourceTree = "<group>"; };
 		414550A927C799D000D756E3 /* BackgroundBlur.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundBlur.swift; sourceTree = "<group>"; };
 		41512CC1286C77F200F22B86 /* ConstructionKitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstructionKitView.swift; sourceTree = "<group>"; };
 		4153783126001A0900AA0E76 /* StringProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringProcessing.swift; sourceTree = "<group>"; };
@@ -236,6 +245,9 @@
 				4116922E28939C2A00A88700 /* CKWindowProperties.swift */,
 				4116923128939DEB00A88700 /* CKIconView.swift */,
 				4116923428939E4D00A88700 /* CKButtonView.swift */,
+				411692372893A21500A88700 /* CKImageView.swift */,
+				4116923A2893A22300A88700 /* CKListView.swift */,
+				4116923D2893A24300A88700 /* CKDataEntryView.swift */,
 			);
 			path = ConstructionKit;
 			sourceTree = "<group>";
@@ -559,14 +571,17 @@
 				418A7B522759949A00E4D6F1 /* watermarkView.swift in Sources */,
 				418A7B532759949A00E4D6F1 /* TextEntryView.swift in Sources */,
 				418A7B542759949A00E4D6F1 /* timerBarView.swift in Sources */,
+				4116923B2893A22300A88700 /* CKListView.swift in Sources */,
 				418A7B552759949B00E4D6F1 /* ImageView.swift in Sources */,
 				418A7B562759949B00E4D6F1 /* jamfHelper.swift in Sources */,
 				418A7B572759949B00E4D6F1 /* ProcessCLOptions.swift in Sources */,
+				411692382893A21500A88700 /* CKImageView.swift in Sources */,
 				418A7B582759949B00E4D6F1 /* WindowPositioning.swift in Sources */,
 				418A7B592759949B00E4D6F1 /* helpText.swift in Sources */,
 				4116923528939E4D00A88700 /* CKButtonView.swift in Sources */,
 				417BD471279CB658009AE34A /* CheckboxView.swift in Sources */,
 				4116923228939DEB00A88700 /* CKIconView.swift in Sources */,
+				4116923E2893A24300A88700 /* CKDataEntryView.swift in Sources */,
 				4153784E2604B71800AA0E76 /* TitleView.swift in Sources */,
 				41832B6E2843143C0062AA1F /* ErrorView.swift in Sources */,
 				4153785E2604B81300AA0E76 /* IconView.swift in Sources */,
@@ -619,14 +634,17 @@
 				41FB64892680855300A54C3E /* MessageContentView.swift in Sources */,
 				415934DA26DB7604009C9C3A /* WindowPositioning.swift in Sources */,
 				415934D826DB1B44009C9C3A /* ProcessCLOptions.swift in Sources */,
+				4116923C2893A22300A88700 /* CKListView.swift in Sources */,
 				41A44EB226F4C43A00FEE1AC /* helpText.swift in Sources */,
 				41FB648A2680855300A54C3E /* IconView.swift in Sources */,
 				41FB648B2680855300A54C3E /* TitleView.swift in Sources */,
+				411692392893A21500A88700 /* CKImageView.swift in Sources */,
 				41FB648C2680855300A54C3E /* BannerImageView.swift in Sources */,
 				41FB648D2680855300A54C3E /* ButtonView.swift in Sources */,
 				4116923628939E4D00A88700 /* CKButtonView.swift in Sources */,
 				417BD472279CB658009AE34A /* CheckboxView.swift in Sources */,
 				4116923328939DEB00A88700 /* CKIconView.swift in Sources */,
+				4116923F2893A24300A88700 /* CKDataEntryView.swift in Sources */,
 				41876683275D87C70023A6A1 /* ImageSlider.swift in Sources */,
 				41832B6F2843143C0062AA1F /* ErrorView.swift in Sources */,
 				41FB648E2680855300A54C3E /* DropdownView.swift in Sources */,
