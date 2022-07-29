@@ -45,8 +45,9 @@ struct CirclerPercentageProgressViewStyle : ProgressViewStyle {
                 .stroke(style: StrokeStyle(lineWidth: stroke, lineCap: .round, lineJoin: .round))
                 .foregroundColor(Color.accentColor)
                 .rotationEffect(.degrees(-90))
-                .animation(.linear)
+                //.animation(.linear)
             }
+            .animation(.linear)
             .padding(.trailing, padding)
         }
     }

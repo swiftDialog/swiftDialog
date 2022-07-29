@@ -10,9 +10,13 @@ import SwiftUI
 struct CKListView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
-    
+        
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent
+    }
+    
+    func removeItems(at offsets: IndexSet) {
+        observedData.listItemsArray.remove(atOffsets: offsets)
     }
     
     let statusTypeArray = ["wait","success","fail","error","pending","progress"]
@@ -24,38 +28,37 @@ struct CKListView: View {
                     observedData.listItemsArray.append(ListItems(title: "", icon: "", statusText: "", statusIcon: "", progress: 0))
                     observedData.listItemPresent = true
                 }, label: {
-                    Image(systemName: "plus.square")
+                    Image(systemName: "plus")
                 })
                 Toggle("Show", isOn: $observedData.listItemPresent)
                     .toggleStyle(.switch)
-                /*
-                Button("Clear All") {
-                    observedData.listItemPresent = false
-                    observedData.listItemsArray = [ListItems]()
-                }
-                 */
+                
+                //Button("Clear All") {
+                //    observedData.listItemPresent = false
+                //    observedData.listItemsArray = [ListItems]()
+                //}
+                
                 Spacer()
             }
-            //List(0..<observedData.listItemsArray.count, id: \.self) {i in
             
-            ForEach(0..<observedData.listItemsArray.count, id: \.self) {i in
+            //ForEach(observedData.listItemsArray, id: \.self)
+            
+            ForEach(0..<observedData.listItemsArray.count, id: \.self) { item in
                 HStack {
-                    /*
                     Button(action: {
-                        observedData.listItemsArray.remove(at: i)
+                        //observedData.listItemsArray.remove(at: i)
                     }, label: {
                         Image(systemName: "trash")
                     })
-                     */
-                    TextField("Title", text: $observedData.listItemsArray[i].title)
-                    TextField("Status Text", text: $observedData.listItemsArray[i].statusText)
-                    Picker("Status", selection: $observedData.listItemsArray[i].statusIcon)
+                    TextField("Title", text: $observedData.listItemsArray[item].title)
+                    TextField("Status Text", text: $observedData.listItemsArray[item].statusText)
+                    Picker("Status", selection: $observedData.listItemsArray[item].statusIcon)
                     {
                         ForEach(statusTypeArray, id: \.self) {
                             Text($0)
                         }
                     }
-                    Slider(value: $observedData.listItemsArray[i].progress, in: 0...100)
+                    Slider(value: $observedData.listItemsArray[item].progress, in: 0...100)
                 }
             }
             Spacer()

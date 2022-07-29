@@ -21,6 +21,7 @@ struct CKIconView: View {
                 LabelView(label: "Icon")
                 HStack {
                     Toggle("Visible", isOn: $observedData.args.iconOption.present)
+                        .toggleStyle(.switch)
                     Button("Select")
                           {
                             let panel = NSOpenPanel()
@@ -45,6 +46,7 @@ struct CKIconView: View {
                 LabelView(label: "Overlay")
                 HStack {
                     Toggle("Visible", isOn: $observedData.args.overlayIconOption.present)
+                        .toggleStyle(.switch)
                     Button("Select")
                           {
                             let panel = NSOpenPanel()

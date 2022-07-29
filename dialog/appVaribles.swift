@@ -33,7 +33,7 @@ struct DropDownItems {
     var selectedValue   : String = ""
 }
 
-struct ListItems {
+struct ListItems: Hashable {
     var title           : String
     var icon            : String = ""
     var statusText      : String = ""
