@@ -11,6 +11,8 @@ struct CKBasicsView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
     
+    let alignmentArray = ["left", "centre", "right"]
+    
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent
     }
@@ -34,6 +36,18 @@ struct CKBasicsView: View {
             }
             
             LabelView(label: "Message")
+            HStack {
+                Picker("Text Alignment", selection: $observedData.args.messageAlignment.value)
+                {
+                    ForEach(alignmentArray, id: \.self) {
+                        Text($0)
+                    }
+                }
+                ColorPicker("Colour",selection: $observedData.appProperties.messageFontColour)
+                Button("Default") {
+                    observedData.appProperties.messageFontColour = .primary
+                }
+            }
             TextEditor(text: $observedData.args.messageOption.value)
                 .frame(minHeight: 50)
         }
