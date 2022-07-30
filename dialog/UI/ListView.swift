@@ -80,7 +80,7 @@ struct ListView: View {
     
     
     var body: some View {
-        if observedData.listItemPresent {
+        if observedData.args.listItem.present {
             ScrollViewReader { proxy in
                 GeometryReader { geometry in
                     let listHeightPadding = ((geometry.size.height/CGFloat(observedData.listItemsArray.count)/2) * proportionalListHeight)

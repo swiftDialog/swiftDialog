@@ -26,11 +26,11 @@ struct CKListView: View {
             HStack {
                 Button(action: {
                     observedData.listItemsArray.append(ListItems(title: "", icon: "", statusText: "", statusIcon: "", progress: 0))
-                    observedData.listItemPresent = true
+                    observedData.args.listItem.present = true
                 }, label: {
                     Image(systemName: "plus")
                 })
-                Toggle("Show", isOn: $observedData.listItemPresent)
+                Toggle("Show", isOn: $observedData.args.listItem.present)
                     .toggleStyle(.switch)
                 
                 //Button("Clear All") {
