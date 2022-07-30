@@ -46,6 +46,8 @@ class DialogUpdatableContent : ObservableObject {
     //@Published var overlayIconPresent: Bool
     //@Published var centreIconPresent: Bool
     //@Published var image: String
+    
+    @Published var imageArray : [MainImage]
     @Published var imagePresent: Bool
     @Published var imageCaptionPresent: Bool
     
@@ -111,6 +113,7 @@ class DialogUpdatableContent : ObservableObject {
         //iconPresent = !appvars.iconIsHidden
         //centreIconPresent = appArguments.centreIcon.present
         
+        imageArray = appvars.imageArray
         imagePresent = appArguments.mainImage.present
         imageCaptionPresent = appArguments.mainImageCaption.present
         

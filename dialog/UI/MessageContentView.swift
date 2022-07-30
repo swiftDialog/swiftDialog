@@ -50,7 +50,7 @@ struct MessageContent: View {
                         .padding(.bottom, 10)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                 }
-                ImageView(imageArray: observedData.appProperties.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: string2float(string: observedData.args.autoPlay.value))
+                ImageView(imageArray: observedData.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: string2float(string: observedData.args.autoPlay.value))
             }
         } else {
             VStack {
