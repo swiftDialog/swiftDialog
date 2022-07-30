@@ -29,7 +29,7 @@ struct DialogView: View {
     var body: some View {
         VStack { //}(alignment: .top, spacing: nil) {
             HStack {
-                if (observedData.args.iconOption.present && !observedData.centreIconPresent && !(observedData.args.iconOption.value == "none")) {
+                if (observedData.args.iconOption.present && !observedData.args.centreIcon.present && !(observedData.args.iconOption.value == "none")) {
                     VStack {
                         IconView(observedDialogContent: observedData)
                             .frame(width: iconDisplayWidth, alignment: .top)
@@ -41,7 +41,7 @@ struct DialogView: View {
                 }
                 
                 MessageContent(observedDialogContent: observedData)
-                    .border(appvars.debugBorderColour, width: 2)
+                    .border(observedData.appProperties.debugBorderColour, width: 2)
             }
             TaskProgressView(observedData: observedData)
         }

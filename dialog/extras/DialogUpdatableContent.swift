@@ -23,6 +23,7 @@ class DialogUpdatableContent : ObservableObject {
     // bring in all the collected appArguments
     // TODO: reduce double handling of data.
     @Published var args : CommandLineArguments = appArguments
+    @Published var appProperties : AppVariables = appvars
     
     //@Published var titleText: String   // unused
     @Published var titleFontColour: Color
@@ -43,7 +44,7 @@ class DialogUpdatableContent : ObservableObject {
     //@Published var iconPresent: Bool
     //@Published var overlayIconImage: String
     //@Published var overlayIconPresent: Bool
-    @Published var centreIconPresent: Bool
+    //@Published var centreIconPresent: Bool
     //@Published var image: String
     @Published var imagePresent: Bool
     @Published var imageCaptionPresent: Bool
@@ -108,7 +109,7 @@ class DialogUpdatableContent : ObservableObject {
         //iconImage = appArguments.iconOption.value
         iconSize = string2float(string: appArguments.iconSize.value)
         //iconPresent = !appvars.iconIsHidden
-        centreIconPresent = appArguments.centreIcon.present
+        //centreIconPresent = appArguments.centreIcon.present
         
         imagePresent = appArguments.mainImage.present
         imageCaptionPresent = appArguments.mainImageCaption.present
@@ -293,9 +294,9 @@ class DialogUpdatableContent : ObservableObject {
                 } else {
                     switch iconState {
                     case "centre", "center" :
-                        centreIconPresent = true
+                        args.centreIcon.present = true
                     case "left", "default" :
-                        centreIconPresent = false
+                        args.centreIcon.present = false
                     case "none" :
                         args.iconOption.present = false
                         args.iconOption.value = iconState

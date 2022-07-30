@@ -16,17 +16,12 @@ struct MessageContent: View {
     
     var fieldPadding: CGFloat = 15
     
-    var messageColour : NSColor = NSColor(appvars.messageFontColour)
+    var messageColour : NSColor
         
     var iconDisplayWidth : CGFloat
         
-    var defaultStyle: MarkdownStyle {
-        return MarkdownStyle(font: .system(size: appvars.messageFontSize, weight: appvars.messageFontWeight), foregroundColor: appvars.messageFontColour)
-    }
-    
-    var customStyle: MarkdownStyle {
-        return MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.messageFontSize), foregroundColor: appvars.messageFontColour)
-    }
+    var defaultStyle: MarkdownStyle
+    var customStyle: MarkdownStyle
     
     let theAllignment: Alignment = .topLeading
     
@@ -39,57 +34,60 @@ struct MessageContent: View {
             fieldPadding = 15
             iconDisplayWidth = observedDialogContent.iconSize
         }
+        messageColour = NSColor(observedDialogContent.appProperties.messageFontColour)
+        defaultStyle = MarkdownStyle(font: .system(size: observedDialogContent.appProperties.messageFontSize, weight: observedDialogContent.appProperties.messageFontWeight), foregroundColor: observedDialogContent.appProperties.messageFontColour)
+        customStyle = MarkdownStyle(font: .custom(observedDialogContent.appProperties.messageFontName, size: observedDialogContent.appProperties.messageFontSize), foregroundColor: observedDialogContent.appProperties.messageFontColour)
     }
     
     var body: some View {
         
-        if observedData.imagePresent || (observedData.imagePresent && observedData.imageCaptionPresent) {
+        if observedData.args.mainImage.present || (observedData.args.mainImage.present && observedData.args.mainImageCaption.present) {
             VStack {
-                if observedData.args.iconOption.present && observedData.centreIconPresent && !observedData.args.hideIcon.present && !(observedData.args.iconOption.value == "none") {
+                if observedData.args.iconOption.present && observedData.args.centreIcon.present && !observedData.args.hideIcon.present && !(observedData.args.iconOption.value == "none") {
                     IconView(observedDialogContent: observedData)
                         .frame(width: iconDisplayWidth, alignment: .top)
                         .padding(.top, 15)
                         .padding(.bottom, 10)
-                        .border(appvars.debugBorderColour, width: 2)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
                 }
-                ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: string2float(string: appArguments.autoPlay.value))
+                ImageView(imageArray: observedData.appProperties.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: string2float(string: observedData.args.autoPlay.value))
             }
         } else {
             VStack {
                 
-                if observedData.centreIconPresent && observedData.centreIconPresent && !(observedData.args.iconOption.value == "none") {
+                if observedData.args.centreIcon.present && !(observedData.args.iconOption.value == "none") {
                     IconView(observedDialogContent: observedData)
                         .frame(width: iconDisplayWidth, alignment: .top)
                         .padding(.top, 15)
                         .padding(.bottom, 10)
-                        .border(appvars.debugBorderColour, width: 2)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
                 }
                 
-                if observedData.listItemPresent {
+                if observedData.args.listItem.present {
                     Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                        .multilineTextAlignment(appvars.messageAlignment)
+                        .multilineTextAlignment(observedData.appProperties.messageAlignment)
                         .markdownStyle(defaultStyle)
                     ListView(observedDialogContent: observedData)
                         .padding(.top, 10)
                 } else {
                     ScrollView() {
-                        if appvars.messageFontName == "" {
+                        if observedData.appProperties.messageFontName == "" {
                             Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                                .multilineTextAlignment(appvars.messageAlignment)
+                                .multilineTextAlignment(observedData.appProperties.messageAlignment)
                                 .markdownStyle(defaultStyle)
                         } else {
                             Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                                .multilineTextAlignment(appvars.messageAlignment)
+                                .multilineTextAlignment(observedData.appProperties.messageAlignment)
                                 .markdownStyle(customStyle)
                         }
                         
                         CheckboxView()
-                            .border(appvars.debugBorderColour, width: 2)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
                             .padding(.top, 10)
                     
                     }
                     .padding(.top, 10)
-                    .border(appvars.debugBorderColour, width: 2)
+                    .border(observedData.appProperties.debugBorderColour, width: 2)
                 }
                 
                 Spacer()
@@ -100,13 +98,13 @@ struct MessageContent: View {
                             //.padding(.leading, 50)
                             //.padding(.trailing, 50)
                             .padding(.bottom, 10)
-                            .border(appvars.debugBorderColour, width: 2)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
 
                         DropdownView(observedDialogContent: observedData)
                             //.padding(.leading, 50)
                             //.padding(.trailing, 50)
                             .padding(.bottom, 10)
-                            .border(appvars.debugBorderColour, width: 2)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
                     }
                 }
             }

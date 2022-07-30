@@ -22,6 +22,10 @@ struct CKIconView: View {
                 HStack {
                     Toggle("Visible", isOn: $observedData.args.iconOption.present)
                         .toggleStyle(.switch)
+                    Toggle("Centred", isOn: $observedData.args.centreIcon.present)
+                        .toggleStyle(.switch)
+                    Toggle("Hide", isOn: $observedData.args.hideIcon.present)
+                        .toggleStyle(.switch)
                     Button("Select")
                           {
                             let panel = NSOpenPanel()
