@@ -319,7 +319,8 @@ class DialogUpdatableContent : ObservableObject {
                 
             // image
             case "\(appArguments.mainImage.long):" :
-                appvars.imageArray = [line.replacingOccurrences(of: "\(appArguments.mainImage.long): ", with: "")]
+                //appvars.imageArray = [line.replacingOccurrences(of: "\(appArguments.mainImage.long): ", with: "")]
+                appvars.imageArray.append(MainImage(path: line.replacingOccurrences(of: "\(appArguments.mainImage.long): ", with: "")))
                 imagePresent = true
                 
             // image Caption

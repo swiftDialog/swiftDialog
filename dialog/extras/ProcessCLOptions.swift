@@ -169,15 +169,30 @@ func processCLOptions() {
         if json[appArguments.mainImage.long].exists() {
             if json[appArguments.mainImage.long].array == nil {
                 // not an array so pull the single value
-                appvars.imageArray.append(json[appArguments.mainImage.long].stringValue)
+                appvars.imageArray.append(MainImage(path: json[appArguments.mainImage.long].stringValue))
             } else {
-                appvars.imageArray = json[appArguments.mainImage.long].arrayValue.map {$0["imagename"].stringValue}
-                appvars.imageCaptionArray = json[appArguments.mainImage.long].arrayValue.map {$0["caption"].stringValue}
+                for i in 0..<json[appArguments.mainImage.long].arrayValue.count {
+                    appvars.imageArray.append(MainImage(path: json[appArguments.mainImage.long][i].stringValue, caption: json[appArguments.mainImageCaption.long][i].stringValue))
+                    //appvars.imageArray = json[appArguments.mainImage.long][i].stringValue
+                    //appvars.imageCaptionArray = json[appArguments.mainImage.long].arrayValue.map {$0["caption"].stringValue}
+                }
             }
         } else {
-            appvars.imageArray = CLOptionMultiOptions(optionName: appArguments.mainImage.long)
+            let imgArray = CLOptionMultiOptions(optionName: appArguments.mainImage.long)
+            for i in 0..<imgArray.count {
+                appvars.imageArray.append(MainImage(path: imgArray[i]))
+            }
         }
         logger(logMessage: "imageArray : \(appvars.imageArray)")
+    }
+    //MARK: Need to work out how to manage image captions. May require a breaking update?
+    if json[appArguments.mainImageCaption.long].exists() || appArguments.mainImageCaption.present {
+        if json[appArguments.mainImageCaption.long].exists() {
+            appvars.imageCaptionArray.append(json[appArguments.mainImageCaption.long].stringValue)
+        } else {
+            appvars.imageCaptionArray = CLOptionMultiOptions(optionName: appArguments.mainImageCaption.long)
+        }
+        logger(logMessage: "imageCaptionArray : \(appvars.imageCaptionArray)")
     }
     
     if appArguments.listItem.present {
@@ -222,16 +237,6 @@ func processCLOptions() {
                 appvars.listItems.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon))
             }
         }
-    }
-    
-    
-    if json[appArguments.mainImageCaption.long].exists() || appArguments.mainImageCaption.present {
-        if json[appArguments.mainImageCaption.long].exists() {
-            appvars.imageCaptionArray.append(json[appArguments.mainImageCaption.long].stringValue)
-        } else {
-            appvars.imageCaptionArray = CLOptionMultiOptions(optionName: appArguments.mainImageCaption.long)
-        }
-        logger(logMessage: "imageCaptionArray : \(appvars.imageCaptionArray)")
     }
     
     if !json[appArguments.autoPlay.long].exists() && !appArguments.autoPlay.present {

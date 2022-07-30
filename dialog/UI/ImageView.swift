@@ -18,12 +18,14 @@ struct ImageView: View {
     var autoPlaySeconds : CGFloat
     
     
-    init(imageArray: Array<String>, captionArray: Array<String>, autoPlaySeconds : CGFloat) {
-        for imagePath in imageArray {
-            if imagePath != "" {
-                images.append(getImageFromPath(fileImagePath: imagePath))
+    init(imageArray: [MainImage], captionArray: Array<String>, autoPlaySeconds : CGFloat) {
+        //for imagePath in imageArray {
+        for i in 0..<imageArray.count {
+                if imageArray[i].path != "" {
+                    images.append(getImageFromPath(fileImagePath: imageArray[i].path))
+                }
             }
-        }
+        //}
         for imageCaption in captionArray {
             captions.append(imageCaption)
         }

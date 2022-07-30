@@ -41,6 +41,12 @@ struct ListItems: Hashable {
     var progress        : CGFloat = 0
 }
 
+struct MainImage {
+    var title           : String = ""
+    var path            : String
+    var caption         : String = ""
+}
+
 struct CLArgument {
     var long: String
     var short: String = ""
@@ -124,7 +130,7 @@ struct AppVariables {
     var checkboxValue                   = Array(repeating: false, count: 64)
     var checkboxDisabled                = Array(repeating: false, count: 64)
     
-    var imageArray                      = [String]()
+    var imageArray                      = [MainImage]()
     var imageCaptionArray               = [String]()
         
     var listItems = [ListItems]()
