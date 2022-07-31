@@ -50,6 +50,7 @@ struct CKListView: View {
                     }, label: {
                         Image(systemName: "trash")
                     })
+                    .disabled(true) // MARK: disabled until I can work out how to delete from the array without causing a crash
                     TextField("Title", text: $observedData.listItemsArray[item].title)
                     TextField("Status Text", text: $observedData.listItemsArray[item].statusText)
                     Picker("Status", selection: $observedData.listItemsArray[item].statusIcon)
@@ -59,7 +60,7 @@ struct CKListView: View {
                         }
                     }
                     Slider(value: $observedData.listItemsArray[item].progress, in: 0...100)
-                    TextField("Height value:", value: $observedData.listItemsArray, formatter: NumberFormatter())
+                    TextField("", value: $observedData.listItemsArray[item].progress, formatter: formatter)
                         .frame(width: 30)
                 }
             }

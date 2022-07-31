@@ -10,12 +10,6 @@ import SwiftyJSON
 
 struct LabelView: View {
     var label : String
-    
-    
-    //init(label: String) {
-    //    self.label = label
-    //}
-    
     var body: some View {
         VStack {
             Divider()
@@ -24,6 +18,22 @@ struct LabelView: View {
                     .fontWeight(.bold)
                 Spacer()
             }
+        }
+    }
+}
+
+struct WelcomeView: View {
+    var body: some View {
+        VStack {
+            Image(systemName: "bubble.left.circle.fill")
+                .resizable()
+                .frame(width: 150, height: 150)
+            
+            Text("Welcome to the swiftDialog builder")
+                .font(.largeTitle)
+            Divider()
+            Text("Select properties on the left to modify. swiftDialog will update to show the changes in realtime")
+                .foregroundColor(.secondary)
         }
     }
 }
@@ -95,6 +105,10 @@ struct ConstructionKitView: View {
         if observedData.listItemsArray.count > 0 {
             json[appArguments.listItem.long].arrayObject = Array(repeating: 0, count: observedData.listItemsArray.count)
             for i in 0..<observedData.listItemsArray.count {
+                if observedData.listItemsArray[i].title.isEmpty {
+                    observedData.listItemsArray[i].title = "Item \(i)"
+                }
+                print(observedData.listItemsArray[i].dictionary)
                 json[appArguments.listItem.long][i].dictionaryObject = observedData.listItemsArray[i].dictionary
             }
         }
@@ -144,6 +158,8 @@ struct ConstructionKitView: View {
                 Spacer()
             }
             .padding(10)
+            
+            WelcomeView()
         }
         .listStyle(SidebarListStyle())
         .frame(minWidth: 800, minHeight: 800)

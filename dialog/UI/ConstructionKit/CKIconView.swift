@@ -40,7 +40,7 @@ struct CKIconView: View {
                 HStack {
                     Slider(value: $observedData.iconSize, in: 0...400)
                     //Text("Current value: \(observedDialogContent.iconSize, specifier: "%.0f")")
-                    TextField("Size value:", value: $observedData.iconSize, formatter: NumberFormatter())
+                    TextField("Size value:", value: $observedData.iconSize, formatter: formatter)
                         .frame(width: 50)
                 }
             }

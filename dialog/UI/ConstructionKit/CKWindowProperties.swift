@@ -20,7 +20,7 @@ struct CKWindowProperties: View {
         VStack {
             LabelView(label: "Window Height")
             HStack {
-                TextField("Height value:", value: $observedData.windowHeight, formatter: NumberFormatter())
+                TextField("Height value:", value: $observedData.windowHeight, formatter: formatter )
                     .frame(width: 50)
                 Slider(value: $observedData.windowHeight, in: 200...2000)
                     .frame(width: 200)
@@ -28,7 +28,7 @@ struct CKWindowProperties: View {
             }
             LabelView(label: "Window Width")
             HStack {
-                TextField("Width value:", value: $observedData.windowWidth, formatter: NumberFormatter())
+                TextField("Width value:", value: $observedData.windowWidth, formatter: formatter)
                     .frame(width: 50)
                 Slider(value: $observedData.windowWidth, in: 200...2000)
                     .frame(width: 200)

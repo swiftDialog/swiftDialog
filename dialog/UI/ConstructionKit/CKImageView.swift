@@ -41,6 +41,17 @@ struct CKImageView: View {
                     }, label: {
                         Image(systemName: "trash")
                     })
+                    .disabled(true) // MARK: disabled until I can work out how to delete from the array without causing a crash
+                    Button("Select")
+                          {
+                            let panel = NSOpenPanel()
+                            panel.allowsMultipleSelection = false
+                            panel.canChooseDirectories = false
+                            panel.allowedContentTypes = [.image]
+                            if panel.runModal() == .OK {
+                                observedData.imageArray[item].path = panel.url?.path ?? "<none>"
+                            }
+                          }
                     TextField("Path", text: $observedData.imageArray[item].path)
                     TextField("Caption", text: $observedData.imageArray[item].caption)
                 }

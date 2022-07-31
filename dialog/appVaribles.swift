@@ -16,6 +16,14 @@ var iconVisible: Bool = true
 var appvars = AppVariables()
 var appArguments = CommandLineArguments()
 
+let formatter: NumberFormatter = {
+    let formatter = NumberFormatter()
+    //formatter.usesSignificantDigits = false
+    formatter.maximumFractionDigits = 0
+    formatter.numberStyle = .decimal
+    return formatter
+}()
+
 struct TextFieldState {
     var title           : String
     var required        : Bool      = false
