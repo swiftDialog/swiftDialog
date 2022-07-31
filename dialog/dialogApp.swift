@@ -90,7 +90,7 @@ struct dialogApp: App {
         
         if appArguments.constructionKit.present {
             ConstructionKitView(observedDialogContent: observedData).showConstructionKit()
-            appvars.windowIsMoveable = true
+            observedData.args.movableWindow.present = true
         }
         
         // bring to front on launch
@@ -104,20 +104,26 @@ struct dialogApp: App {
                     window?.standardWindowButton(.closeButton)?.isHidden = true //hides the red close button
                     window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
                     window?.standardWindowButton(.zoomButton)?.isHidden = true //this removes the green zoom button
-                    window?.isMovable = appvars.windowIsMoveable
+                    window?.isMovable = observedData.args.movableWindow.present
 
-                    if appvars.windowOnTop {
+                    if observedData.args.forceOnTop.present {
                         window?.level = .floating
                     } else {
                         window?.level = .normal
                     }
 
-                    if appArguments.blurScreen.present && !appArguments.fullScreenWindow.present { //blur background
+                    if observedData.args.blurScreen.present && !appArguments.fullScreenWindow.present { //blur background
                         background.showWindow(self)
-                        NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow)))
+                        for i in 0..<NSApp.windows.count {
+                            if NSApp.windows[i].identifier != NSUserInterfaceItemIdentifier("blur") {
+                                NSApp.windows[i].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow)))
+                            }
+                        }
+                    } else {
+                        background.close()
                     }
                     
-                    if appArguments.forceOnTop.present || appArguments.blurScreen.present {
+                    if observedData.args.forceOnTop.present || observedData.args.blurScreen.present {
                         NSApp.activate(ignoringOtherApps: true)
                     }
                     

@@ -433,7 +433,7 @@ func processCLOptions() {
         appArguments.iconOption.present = true
     }
         
-    if appArguments.lockWindow.present {
+    if appArguments.movableWindow.present {
         appvars.windowIsMoveable = true
         logger(logMessage: "windowIsMoveable = true")
     }
@@ -693,7 +693,7 @@ func processCLOptionValues() {
     appArguments.warningIcon.present           = json[appArguments.warningIcon.long].boolValue || CLOptionPresent(OptionName: appArguments.warningIcon)
     appArguments.infoIcon.present              = json[appArguments.infoIcon.long].boolValue || CLOptionPresent(OptionName: appArguments.infoIcon)
     appArguments.cautionIcon.present           = json[appArguments.cautionIcon.long].boolValue || CLOptionPresent(OptionName: appArguments.cautionIcon)
-    appArguments.lockWindow.present            = json[appArguments.lockWindow.long].boolValue || CLOptionPresent(OptionName: appArguments.lockWindow)
+    appArguments.movableWindow.present            = json[appArguments.movableWindow.long].boolValue || CLOptionPresent(OptionName: appArguments.movableWindow)
     appArguments.forceOnTop.present            = json[appArguments.forceOnTop.long].boolValue || CLOptionPresent(OptionName: appArguments.forceOnTop)
     appArguments.smallWindow.present           = json[appArguments.smallWindow.long].boolValue || CLOptionPresent(OptionName: appArguments.smallWindow)
     appArguments.bigWindow.present             = json[appArguments.bigWindow.long].boolValue || CLOptionPresent(OptionName: appArguments.bigWindow)

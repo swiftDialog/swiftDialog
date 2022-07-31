@@ -22,7 +22,7 @@ struct ContentView: View {
         if appArguments.timerBar.present {
             progressSteps = string2float(string: appArguments.timerBar.value)
         }
-        if appArguments.bannerImage.present {
+        if observedData.args.bannerImage.present {
             titlePadding = 0
         }
         
@@ -68,9 +68,9 @@ struct ContentView: View {
         
             // this stack controls the main view. Consists of a VStack containing all the content, and a HStack positioned at the bottom of the display area
             VStack {
-                if appArguments.bannerImage.present {
-                    BannerImageView(imagePath: appArguments.bannerImage.value)
-                        .border(appvars.debugBorderColour, width: 2)
+                if observedData.args.bannerImage.present {
+                    BannerImageView(imagePath: observedData.args.bannerImage.value)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
                 }
 
                 if observedData.args.titleOption.value != "none" {

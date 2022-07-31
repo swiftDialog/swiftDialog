@@ -24,7 +24,7 @@ struct CKBasicsView: View {
             HStack {
                 TextField("", text: $observedData.args.titleOption.value)
                 ColorPicker("Colour",selection: $observedData.titleFontColour)
-                Button("Default") {
+                Button("Reset") {
                     observedData.titleFontColour = .primary
                 }
             }
@@ -44,7 +44,7 @@ struct CKBasicsView: View {
                     }
                 }
                 ColorPicker("Colour",selection: $observedData.appProperties.messageFontColour)
-                Button("Default") {
+                Button("Reset") {
                     observedData.appProperties.messageFontColour = .primary
                 }
             }

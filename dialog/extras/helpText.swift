@@ -382,7 +382,7 @@ var helpText = """
                     Will hide the timer bar. Dialog will close after time specified by --\(appArguments.timerBar.long)
                     Default OK button is displayed. This is to prevent persistant or unclosable dialogs of unknown duration.
     
-        -\(appArguments.lockWindow.short), --\(appArguments.lockWindow.long)
+        -\(appArguments.movableWindow.short), --\(appArguments.movableWindow.long)
                     Let window me moved around the screen. Default is not moveable
 
         -\(appArguments.forceOnTop.short), --\(appArguments.forceOnTop.long)

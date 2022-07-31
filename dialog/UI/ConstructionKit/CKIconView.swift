@@ -24,14 +24,12 @@ struct CKIconView: View {
                         .toggleStyle(.switch)
                     Toggle("Centred", isOn: $observedData.args.centreIcon.present)
                         .toggleStyle(.switch)
-                    Toggle("Hide", isOn: $observedData.args.hideIcon.present)
-                        .toggleStyle(.switch)
                     Button("Select")
                           {
                             let panel = NSOpenPanel()
                             panel.allowsMultipleSelection = false
                             panel.canChooseDirectories = false
-                            panel.allowedContentTypes = [.image]
+                            panel.allowedContentTypes = [.image, .application, .systemPreferencesPane]
                             if panel.runModal() == .OK {
                                 observedData.args.iconOption.value = panel.url?.path ?? "<none>"
                             }

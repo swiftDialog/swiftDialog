@@ -253,7 +253,7 @@ struct CommandLineArguments {
     var autoPlay                 = CLArgument(long: "autoplay")
     var blurScreen               = CLArgument(long: "blurscreen", isbool: true)
     var constructionKit          = CLArgument(long: "builder", isbool: true)
-    var lockWindow               = CLArgument(long: "moveable", short: "o", isbool: true)
+    var movableWindow            = CLArgument(long: "moveable", short: "o", isbool: true)
     var forceOnTop               = CLArgument(long: "ontop", short: "p", isbool: true)
     var smallWindow              = CLArgument(long: "small", short: "s", isbool: true)
     var bigWindow                = CLArgument(long: "big", short: "b", isbool: true)
