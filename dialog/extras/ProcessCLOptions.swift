@@ -424,21 +424,15 @@ func processCLOptions() {
     // hide the icon if asked to or if banner image is present
     if appArguments.hideIcon.present || appArguments.iconOption.value == "none" || appArguments.bannerImage.present {
         appArguments.iconOption.present = false
-        appArguments.hideIcon.present = true
-        logger(logMessage: "iconIsHidden = true")
+        //appArguments.hideIcon.present = true
     }
     
     // of both banner image and icon are specified, re-enable the icon.
     if appArguments.bannerImage.present && appArguments.iconOption.present {
-        appArguments.hideIcon.present = false
+        //appArguments.hideIcon.present = false
         appArguments.iconOption.present = true
     }
-    
-    if appArguments.centreIcon.present {
-        appvars.iconIsCentred = true
-        logger(logMessage: "iconIsCentred = true")
-    }
-    
+        
     if appArguments.lockWindow.present {
         appvars.windowIsMoveable = true
         logger(logMessage: "windowIsMoveable = true")

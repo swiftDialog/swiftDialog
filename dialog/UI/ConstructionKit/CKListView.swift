@@ -59,6 +59,8 @@ struct CKListView: View {
                         }
                     }
                     Slider(value: $observedData.listItemsArray[item].progress, in: 0...100)
+                    TextField("Height value:", value: $observedData.listItemsArray, formatter: NumberFormatter())
+                        .frame(width: 30)
                 }
             }
             Spacer()

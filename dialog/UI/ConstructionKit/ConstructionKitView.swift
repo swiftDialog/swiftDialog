@@ -68,7 +68,7 @@ struct ConstructionKitView: View {
 
     }
     
-    private func exportJSON() {
+    private func exportJSON(debug : Bool = false) {
         var json = JSON()
         var jsonDEBUG = JSON()
         
@@ -80,16 +80,39 @@ struct ConstructionKitView: View {
         let mirrored_appArguments = Mirror(reflecting: observedData.args)
         for (_, attr) in mirrored_appArguments.children.enumerated() {
             if let propertyValue = attr.value as? CLArgument {
-                if propertyValue.present && propertyValue.value != "" {
-                    json[propertyValue.long].string = propertyValue.value
+                if propertyValue.present { //}&& propertyValue.value != "" {
+                    if propertyValue.value != "" {
+                        json[propertyValue.long].string = propertyValue.value
+                    } else if propertyValue.isbool {
+                        json[propertyValue.long].string = "\(propertyValue.present)"
+                    }
                 }
                 jsonDEBUG[propertyValue.long].string = propertyValue.value
-          }
+                jsonDEBUG["\(propertyValue.long)-present"].bool = propertyValue.present
+            }
         }
+
+        if observedData.listItemsArray.count > 0 {
+            json[appArguments.listItem.long].arrayObject = Array(repeating: 0, count: observedData.listItemsArray.count)
+            for i in 0..<observedData.listItemsArray.count {
+                json[appArguments.listItem.long][i].dictionaryObject = observedData.listItemsArray[i].dictionary
+            }
+        }
+        
+        if observedData.imageArray.count > 0 {
+            json[appArguments.mainImage.long].arrayObject = Array(repeating: 0, count: observedData.imageArray.count)
+            for i in 0..<observedData.imageArray.count {
+                json[appArguments.mainImage.long][i].dictionaryObject = observedData.imageArray[i].dictionary
+            }
+        }
+        
+        
         print("Generated JSON")
         print(json)
-        print("DEBUG JSON")
-        print(jsonDEBUG)
+        if debug {
+            print("DEBUG JSON")
+            print(jsonDEBUG)
+        }
     }
     
     var body: some View {
@@ -128,6 +151,9 @@ struct ConstructionKitView: View {
         ZStack {
             Spacer()
             HStack {
+                Button("Quit") {
+                    quitDialog(exitCode: observedData.appProperties.exit0.code)
+                }
                 Spacer()
                 Button("Export JSON") {
                     exportJSON()

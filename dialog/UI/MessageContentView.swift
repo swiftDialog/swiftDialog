@@ -27,13 +27,13 @@ struct MessageContent: View {
     
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent
-        if !observedDialogContent.args.hideIcon.present  { //appArguments.hideIcon.present {
+        //if !observedDialogContent.args.hideIcon.present  { //appArguments.hideIcon.present {
+        //    fieldPadding = 40
+        //    iconDisplayWidth = 0
+        //} else {
             fieldPadding = 40
-            iconDisplayWidth = 0
-        } else {
-            fieldPadding = 15
             iconDisplayWidth = observedDialogContent.iconSize
-        }
+        //}
         messageColour = NSColor(observedDialogContent.appProperties.messageFontColour)
         defaultStyle = MarkdownStyle(font: .system(size: observedDialogContent.appProperties.messageFontSize, weight: observedDialogContent.appProperties.messageFontWeight), foregroundColor: observedDialogContent.appProperties.messageFontColour)
         customStyle = MarkdownStyle(font: .custom(observedDialogContent.appProperties.messageFontName, size: observedDialogContent.appProperties.messageFontSize), foregroundColor: observedDialogContent.appProperties.messageFontColour)
@@ -41,9 +41,9 @@ struct MessageContent: View {
     
     var body: some View {
         
-        if observedData.args.mainImage.present || (observedData.args.mainImage.present && observedData.args.mainImageCaption.present) {
+        if observedData.args.mainImage.present {
             VStack {
-                if observedData.args.iconOption.present && observedData.args.centreIcon.present && !observedData.args.hideIcon.present && !(observedData.args.iconOption.value == "none") {
+                if observedData.args.iconOption.present && observedData.args.centreIcon.present { //}&& observedData.args.iconOption.value != "none" {
                     IconView(observedDialogContent: observedData)
                         .frame(width: iconDisplayWidth, alignment: .top)
                         .padding(.top, 15)
@@ -55,7 +55,7 @@ struct MessageContent: View {
         } else {
             VStack {
                 
-                if observedData.args.centreIcon.present && !(observedData.args.iconOption.value == "none") {
+                if observedData.args.centreIcon.present && observedData.args.iconOption.present {
                     IconView(observedDialogContent: observedData)
                         .frame(width: iconDisplayWidth, alignment: .top)
                         .padding(.top, 15)

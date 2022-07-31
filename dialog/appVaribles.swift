@@ -33,18 +33,34 @@ struct DropDownItems {
     var selectedValue   : String = ""
 }
 
-struct ListItems: Hashable {
+struct ListItems: Codable {
     var title           : String
     var icon            : String = ""
     var statusText      : String = ""
     var statusIcon      : String = ""
     var progress        : CGFloat = 0
+    var dictionary: [String: Any] {
+            return ["title": title,
+                    "statustext": statusText,
+                    "status": statusIcon,
+                    "progress": progress]
+        }
+    var nsDictionary: NSDictionary {
+            return dictionary as NSDictionary
+        }
 }
 
 struct MainImage {
     var title           : String = ""
     var path            : String
     var caption         : String = ""
+    var dictionary: [String: Any] {
+            return ["imagename": path,
+                    "caption": caption]
+        }
+    var nsDictionary: NSDictionary {
+            return dictionary as NSDictionary
+        }
 }
 
 struct CLArgument {
@@ -52,6 +68,7 @@ struct CLArgument {
     var short: String = ""
     var value : String = ""
     var present : Bool = false
+    var isbool : Bool = false
 }
 
 struct AppVariables {
@@ -73,8 +90,6 @@ struct AppVariables {
     
     var windowIsMoveable                = Bool(false)
     var windowOnTop                     = Bool(false)
-    var iconIsHidden                    = Bool(false)
-    var iconIsCentred                   = Bool(false)
     
     // Window Sizes
     var windowWidth                     = CGFloat(820)      // set default dialog width
@@ -220,13 +235,13 @@ struct CommandLineArguments {
     var quitKey                  = CLArgument(long: "quitkey")
 
     // command line options that take no additional parameters
-    var button1Disabled          = CLArgument(long: "button1disabled")
-    var button2Option            = CLArgument(long: "button2", short: "2")
-    var infoButtonOption         = CLArgument(long: "infobutton", short: "3")
+    var button1Disabled          = CLArgument(long: "button1disabled", isbool: true)
+    var button2Option            = CLArgument(long: "button2", short: "2", isbool: true)
+    var infoButtonOption         = CLArgument(long: "infobutton", short: "3", isbool: true)
     var getVersion               = CLArgument(long: "version", short: "v")
     var hideIcon                 = CLArgument(long: "hideicon", short: "h")
-    var centreIcon               = CLArgument(long: "centreicon")
-    var centreIconSE             = CLArgument(long: "centericon")
+    var centreIcon               = CLArgument(long: "centreicon", isbool: true)
+    var centreIconSE             = CLArgument(long: "centericon", isbool: true) // the other way of spelling
     var helpOption               = CLArgument(long: "help")
     var demoOption               = CLArgument(long: "demo")
     var buyCoffee                = CLArgument(long: "coffee", short: "☕️")
@@ -236,16 +251,16 @@ struct CommandLineArguments {
     var cautionIcon              = CLArgument(long: "cautionicon") // Deprecated
     var hideTimerBar             = CLArgument(long: "hidetimerbar")
     var autoPlay                 = CLArgument(long: "autoplay")
-    var blurScreen               = CLArgument(long: "blurscreen")
-    var constructionKit          = CLArgument(long: "builder")
-    var lockWindow               = CLArgument(long: "moveable", short: "o")
-    var forceOnTop               = CLArgument(long: "ontop", short: "p")
-    var smallWindow              = CLArgument(long: "small", short: "s")
-    var bigWindow                = CLArgument(long: "big", short: "b")
-    var fullScreenWindow         = CLArgument(long: "fullscreen", short: "f")
-    var quitOnInfo               = CLArgument(long: "quitoninfo")
+    var blurScreen               = CLArgument(long: "blurscreen", isbool: true)
+    var constructionKit          = CLArgument(long: "builder", isbool: true)
+    var lockWindow               = CLArgument(long: "moveable", short: "o", isbool: true)
+    var forceOnTop               = CLArgument(long: "ontop", short: "p", isbool: true)
+    var smallWindow              = CLArgument(long: "small", short: "s", isbool: true)
+    var bigWindow                = CLArgument(long: "big", short: "b", isbool: true)
+    var fullScreenWindow         = CLArgument(long: "fullscreen", short: "f", isbool: true)
+    var quitOnInfo               = CLArgument(long: "quitoninfo", isbool: true)
     var listFonts                = CLArgument(long: "listfonts")
-    var jsonOutPut               = CLArgument(long: "json", short: "j")
-    var ignoreDND                = CLArgument(long: "ignorednd", short: "d")
-    var jamfHelperMode           = CLArgument(long: "jh", short: "jh")
+    var jsonOutPut               = CLArgument(long: "json", short: "j", isbool: true)
+    var ignoreDND                = CLArgument(long: "ignorednd", short: "d", isbool: true)
+    var jamfHelperMode           = CLArgument(long: "jh", short: "jh", isbool: true)
 }

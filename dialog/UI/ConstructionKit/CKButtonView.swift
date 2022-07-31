@@ -29,6 +29,9 @@ struct CKButtonView: View {
                 LabelView(label: "Button2")
                 HStack {
                     Toggle("Visible", isOn: $observedData.args.button2Option.present)
+                        .onChange(of: observedData.args.button2Option.present, perform: { _ in
+                            observedData.args.button2TextOption.present = true
+                        })
                         .toggleStyle(.switch)
                     TextField("", text: $observedData.args.button2TextOption.value)
                 }
@@ -38,7 +41,8 @@ struct CKButtonView: View {
                 HStack {
                     Toggle("Visible", isOn: $observedData.args.infoButtonOption.present)
                         .onChange(of: observedData.args.infoButtonOption.present, perform: { _ in
-                            observedData.args.infoText.present.toggle()
+                            observedData.args.infoText.present = true
+                            observedData.args.buttonInfoTextOption.present = true
                         })
                         .toggleStyle(.switch)
                     Toggle("Quit on Info", isOn: $observedData.args.quitOnInfo.present)
