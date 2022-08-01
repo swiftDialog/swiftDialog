@@ -248,7 +248,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
                     observedObject?.textEntryArray[i].requiredTextfieldHighlight = Color.clear
                 }
                 
-                outputArray.append("\"\(String(describing: observedObject?.textEntryArray[i].title))\" : \"\(String(describing: observedObject?.textEntryArray[i].value))\"")
+                outputArray.append("\(observedObject?.textEntryArray[i].title ?? "field \(i)") : \(observedObject?.textEntryArray[i].value ?? "")")
                 json[observedObject?.textEntryArray[i].title ?? "Field \(i)"].string = observedObject?.textEntryArray[i].value
             }
             if dontQuit { return }
