@@ -261,7 +261,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
         }
                  
         // print the output
-        if appvars.jsonOut {
+        if observedObject?.args.jsonOutPut.present ?? false { //} appvars.jsonOut {
             print(json)
         } else  {
             for i in 0..<outputArray.count {

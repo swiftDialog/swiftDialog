@@ -17,6 +17,11 @@ struct CKDataEntryView: View {
     
     var body: some View {
         VStack {
+            HStack {
+                Toggle("Format output as JSON", isOn: $observedData.args.jsonOutPut.present)
+                .toggleStyle(.switch)
+                Spacer()
+            }
             LabelView(label: "Textfields")
             HStack {
                 Button(action: {
