@@ -32,6 +32,20 @@ struct TextFieldState {
     var regex           : String    = ""
     var regexError      : String    = ""
     var value           : String    = ""
+    var requiredTextfieldHighlight : Color = .clear
+    var dictionary: [String: Any] {
+            return ["title": title,
+                    "required": required,
+                    "secure": secure,
+                    "prompt": prompt,
+                    "regex":regex,
+                    "regexerror":regexError,
+                    "value":value
+            ]
+        }
+    var nsDictionary: NSDictionary {
+            return dictionary as NSDictionary
+        }
 }
 
 struct DropDownItems {
@@ -63,7 +77,7 @@ struct MainImage {
     var path            : String
     var caption         : String = ""
     var dictionary: [String: Any] {
-            return ["imagename": path,
+        return ["imagename": "\(path)",
                     "caption": caption]
         }
     var nsDictionary: NSDictionary {

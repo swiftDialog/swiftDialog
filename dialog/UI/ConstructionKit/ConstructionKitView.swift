@@ -122,7 +122,13 @@ struct ConstructionKitView: View {
         
         
         print("Generated JSON")
-        print(json)
+        //convert the JSON to a raw String
+        if let rawString = json.rawString() {
+            print(rawString)
+        } else {
+            print("json is nil")
+        }
+                
         if debug {
             print("DEBUG JSON")
             print(jsonDEBUG)
@@ -142,6 +148,9 @@ struct ConstructionKitView: View {
                     }
                     NavigationLink(destination: CKIconView(observedDialogContent: observedData)){
                         Text("Icon")
+                    }
+                    NavigationLink(destination: CKDataEntryView(observedDialogContent: observedData)){
+                        Text("Data Entry")
                     }
                     NavigationLink(destination: CKButtonView(observedDialogContent: observedData)){
                         Text("Buttons")

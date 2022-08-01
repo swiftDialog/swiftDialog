@@ -81,7 +81,7 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
             return errorImage
         } else {
         
-            quitDialog(exitCode: appvars.exit201.code, exitMessage: "\(appvars.exit201.message) \(fileImagePath)")
+            quitDialog(exitCode: appvars.exit201.code, exitMessage: "\(appvars.exit201.message) \(fileImagePath)", observedObject: DialogUpdatableContent())
         }
     }
   
@@ -141,7 +141,7 @@ func checkRegexPattern(regexPattern: String, textToValidate: String) -> Bool {
     return  returnValue
 }
 
-func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQuit: Bool = true, observedObject: DialogUpdatableContent? = nil) {
+func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQuit: Bool = true, observedObject: DialogUpdatableContent) {
     //let action: String = CLOptionText(OptionName: appArguments.button1ActionOption, DefaultValue: "")
     
     if (action != "") {
@@ -227,27 +227,29 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
             // check to see if fields marked as required have content before allowing the app to exit
             // if there is an empty field, update the highlight colour
             var dontQuit = false
-            for i in 0..<appvars.textFields.count {
+            for i in 0..<(observedObject?.textEntryArray.count ?? 0) {
                 //check for required fields
-                if appvars.textFields[i].required && appvars.textFields[i].value == "" { // && textFields[i].regex.isEmpty {
+                if observedObject?.textEntryArray[i].required ?? false && observedObject?.textEntryArray[i].value == "" { // && textFields[i].regex.isEmpty {
                     NSSound.beep()
-                    observedObject?.requiredTextfieldHighlight[i] = Color.red
-                    observedObject?.sheetErrorMessage += "• "+appvars.textFields[i].title+" "+"is-required".localized+"\n"
+                    observedObject?.textEntryArray[i].requiredTextfieldHighlight = Color.red
+                    observedObject?.sheetErrorMessage += "• "+(observedObject?.textEntryArray[i].title ?? "Field \(i)")+" "+"is-required".localized+"\n"
                     dontQuit = true
                 
                 //check for regex requirements
-                } else if !appvars.textFields[i].value.isEmpty && !appvars.textFields[i].regex.isEmpty && !checkRegexPattern(regexPattern: appvars.textFields[i].regex, textToValidate: appvars.textFields[i].value) {
+                } else if !(observedObject?.textEntryArray[i].value.isEmpty ?? false)
+                            && !(observedObject?.textEntryArray[i].regex.isEmpty ?? false)
+                            && !checkRegexPattern(regexPattern: observedObject?.textEntryArray[i].regex ?? "", textToValidate: observedObject?.textEntryArray[i].value ?? "") {
                     NSSound.beep()
-                    observedObject?.requiredTextfieldHighlight[i] = Color.green
+                    observedObject?.textEntryArray[i].requiredTextfieldHighlight = Color.green
                     observedObject?.showSheet = true
-                    observedObject?.sheetErrorMessage += "• "+appvars.textFields[i].regexError+"\n"
+                    observedObject?.sheetErrorMessage += "• "+(observedObject?.textEntryArray[i].regexError ?? "Regex Check Failed\n")
                     dontQuit = true
                 } else {
-                    observedObject?.requiredTextfieldHighlight[i] = Color.clear
+                    observedObject?.textEntryArray[i].requiredTextfieldHighlight = Color.clear
                 }
                 
-                outputArray.append("\"\(appvars.textFields[i].title)\" : \"\(appvars.textFields[i].value)\"")
-                json[appvars.textFields[i].title].string = appvars.textFields[i].value
+                outputArray.append("\"\(String(describing: observedObject?.textEntryArray[i].title))\" : \"\(String(describing: observedObject?.textEntryArray[i].value))\"")
+                json[observedObject?.textEntryArray[i].title ?? "Field \(i)"].string = observedObject?.textEntryArray[i].value
             }
             if dontQuit { return }
         }
@@ -422,7 +424,7 @@ func isDNDEnabled() -> Bool {
             return userPref["enabled"] as! Bool
         }
     } catch {
-        quitDialog(exitCode: 21, exitMessage: "DND Prefs unavailable")
+        quitDialog(exitCode: 21, exitMessage: "DND Prefs unavailable", observedObject: DialogUpdatableContent())
     }
     return false
 }

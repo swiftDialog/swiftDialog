@@ -42,7 +42,7 @@ struct ButtonView: View {
                 let button2Text: String = observedData.args.button2TextOption.value
                 Button(action: {
                     observedData.end()
-                    quitDialog(exitCode: appvars.exit2.code)
+                    quitDialog(exitCode: appvars.exit2.code, observedObject: observedData)
                 }, label: {
                     Text(button2Text)
                         .frame(minWidth: 40, alignment: .center)
@@ -92,8 +92,7 @@ struct MoreInfoButton: View {
                     action: observedData.args.buttonInfoActionOption.value,
                     exitCode: 3,
                     executeShell: false,
-                    shouldQuit: observedData.args.quitOnInfo.present
-                    )},
+                    shouldQuit: observedData.args.quitOnInfo.present, observedObject: observedData)},
                    label: {
                     Text(observedData.args.buttonInfoTextOption.value)
                         .frame(minWidth: 40, alignment: .center)

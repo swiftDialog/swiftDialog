@@ -172,7 +172,7 @@ func processCLOptions() {
                 appvars.imageArray.append(MainImage(path: json[appArguments.mainImage.long].stringValue))
             } else {
                 for i in 0..<json[appArguments.mainImage.long].arrayValue.count {
-                    appvars.imageArray.append(MainImage(path: json[appArguments.mainImage.long][i].stringValue, caption: json[appArguments.mainImageCaption.long][i].stringValue))
+                    appvars.imageArray.append(MainImage(path: json[appArguments.mainImage.long][i]["imagename"].stringValue, caption: json[appArguments.mainImage.long][i]["caption"].stringValue))
                     //appvars.imageArray = json[appArguments.mainImage.long][i].stringValue
                     //appvars.imageCaptionArray = json[appArguments.mainImage.long].arrayValue.map {$0["caption"].stringValue}
                 }

@@ -55,7 +55,10 @@ class DialogUpdatableContent : ObservableObject {
     @Published var listItemUpdateRow: Int
     @Published var listItemPresent: Bool
     
+    @Published var textEntryArray : [TextFieldState]
+    
     @Published var requiredTextfieldHighlight: [Color] = Array(repeating: Color.clear, count: appvars.textFields.count)
+    @Published var requiredFieldsPresent : Bool
     
     @Published var windowWidth: CGFloat
     @Published var windowHeight: CGFloat
@@ -122,6 +125,9 @@ class DialogUpdatableContent : ObservableObject {
         
         listItemsArray = appvars.listItems
         listItemPresent = appArguments.listItem.present
+        
+        textEntryArray = appvars.textFields
+        requiredFieldsPresent = false
         
         windowWidth = appvars.windowWidth
         windowHeight = appvars.windowHeight
