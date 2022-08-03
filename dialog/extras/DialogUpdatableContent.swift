@@ -243,9 +243,13 @@ class DialogUpdatableContent : ObservableObject {
                     progressValue = 0
                 case "complete" :
                     progressValue = Double(appArguments.progressBar.value) ?? 1000
-                //case "indeterminate" :
+                case "indeterminate" :
                 //    progressTotal = 0
-                //    progressValue = 0
+                    progressValue = Double(-1)
+                case "remove" :
+                    args.progressBar.present = false
+                case "create" :
+                    args.progressBar.present = true
                 //case "determinate" :
                 //    progressValue = 0
                 default :
