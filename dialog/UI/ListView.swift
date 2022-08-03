@@ -66,6 +66,10 @@ struct ListView: View {
                         List(0..<observedDialogContent.listItemsArray.count, id: \.self) {i in
                             VStack {
                                 HStack {
+                                    if observedDialogContent.listItemsArray[i].icon != "" {
+                                        IconView(observedDialogContent: observedDialogContent, image: observedDialogContent.listItemsArray[i].icon)
+                                            .frame(maxHeight: rowHeight)
+                                    }
                                     Text(observedDialogContent.listItemsArray[i].title)
                                         .font(.system(size: rowFontSize))
                                         .id(i)

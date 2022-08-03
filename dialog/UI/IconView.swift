@@ -44,10 +44,14 @@ struct IconView: View {
     let overlayImageScale: CGFloat = 0.4
     
   
-    init(observedDialogContent : DialogUpdatableContent) {
+    init(observedDialogContent : DialogUpdatableContent, image : String = "") {
         self.observedDialogContent = observedDialogContent
         
-        messageUserImagePath = observedDialogContent.iconImage
+        if image != "" {
+            messageUserImagePath = image
+        } else {
+            messageUserImagePath = observedDialogContent.iconImage
+        }
         
         logoWidth = appvars.iconWidth
         logoHeight = appvars.iconHeight

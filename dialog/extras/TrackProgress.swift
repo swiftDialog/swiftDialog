@@ -372,7 +372,7 @@ class DialogUpdatableContent : ObservableObject {
                 
                 if commands.count > 0 {
                     for command in commands {
-                        let action = command.components(separatedBy: ":")
+                        let action = command.components(separatedBy: ": ")
                         switch action[0].lowercased().trimmingCharacters(in: .whitespaces) {
                             case "index":
                                 if let i = Int(action[1].trimmingCharacters(in: .whitespaces)) {
