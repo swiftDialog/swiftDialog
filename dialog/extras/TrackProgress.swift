@@ -337,13 +337,14 @@ class DialogUpdatableContent : ObservableObject {
                 
             // list item status
             case "\(cloptions.listItem.long):" :
-                var title           : String = ""
-                var icon            : String = ""
-                var statusText      : String = ""
-                var statusIcon      : String = ""
-                let statusTypeArray = ["wait","success","fail","error","pending"]
-                var deleteRow       : Bool = false
-                var addRow          : Bool = false
+                var title             : String = ""
+                var icon              : String = ""
+                var statusText        : String = ""
+                var statusIcon        : String = ""
+                let statusTypeArray = ["wait","success","fail","error","pending","progress"]
+                var listProgressValue : CGFloat = 0
+                var deleteRow         : Bool = false
+                var addRow            : Bool = false
 
                 let listCommand = line.replacingOccurrences(of: "\(cloptions.listItem.long): ", with: "")
                 
@@ -388,6 +389,9 @@ class DialogUpdatableContent : ObservableObject {
                                 statusText = action[1].trimmingCharacters(in: .whitespaces)
                             case "status":
                                 statusIcon = action[1].trimmingCharacters(in: .whitespaces)
+                            case "progress":
+                                listProgressValue = string2float(string: action[1].trimmingCharacters(in: .whitespaces))
+                                statusIcon = "progress"
                             case "delete":
                                 deleteRow = true
                             case "add":
@@ -406,13 +410,14 @@ class DialogUpdatableContent : ObservableObject {
                             listItemsArray[row].icon = icon
                             listItemsArray[row].statusIcon = statusIcon
                             listItemsArray[row].statusText = statusText
+                            listItemsArray[row].progress = listProgressValue
                             listItemUpdateRow = row
                         }
                     }
                     
                     // add to the list items array
                     if addRow {
-                        listItemsArray.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon))
+                        listItemsArray.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon, progress: listProgressValue))
                         logger(logMessage: "row added with \(title) \(icon) \(statusText) \(statusIcon)")
                     }
                     

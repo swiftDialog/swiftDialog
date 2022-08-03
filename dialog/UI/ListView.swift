@@ -78,6 +78,11 @@ struct ListView: View {
                                                 .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
                                         }
                                         switch observedDialogContent.listItemsArray[i].statusIcon {
+                                        case "progress" :
+                                            ProgressView("", value: observedDialogContent.listItemsArray[i].progress, total: 100)
+                                                .progressViewStyle(CirclerPercentageProgressViewStyle())
+                                                .frame(width: rowStatusHeight, height: rowStatusHeight-5)
+                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
                                         case "wait" :
                                             ProgressView()
                                                 .progressViewStyle(.circular)
@@ -119,6 +124,28 @@ struct ListView: View {
     }
 }
 
+struct CirclerPercentageProgressViewStyle : ProgressViewStyle {
+    public func makeBody(configuration: LinearProgressViewStyle.Configuration) -> some View {
+        let stroke : CGFloat = 5
+        let padding : CGFloat = stroke / 2
+        VStack() {
+            ZStack {
+                Circle()
+                    .stroke(lineWidth: stroke)
+                    .opacity(0.3)
+                    .foregroundColor(Color.accentColor.opacity(0.5))
+                Circle()
+                    .trim(from: 0.0, to: CGFloat(configuration.fractionCompleted ?? 0))
+                .stroke(style: StrokeStyle(lineWidth: stroke, lineCap: .round, lineJoin: .round))
+                .foregroundColor(Color.accentColor)
+                .rotationEffect(.degrees(-90))
+                //.animation(.linear)
+            }
+            .animation(.linear)
+            .padding(.trailing, padding)
+        }
+    }
+}
 
 public struct CircularProgressViewStyle: ProgressViewStyle {
     var size: CGFloat

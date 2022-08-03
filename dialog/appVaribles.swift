@@ -36,16 +36,26 @@ struct DropDownItems {
     var selectedValue   : String = ""
 }
 
-struct ListItems {
+struct ListItems: Codable {
     var title           : String
     var icon            : String = ""
     var statusText      : String = ""
     var statusIcon      : String = ""
+    var progress        : CGFloat = 0
+    var dictionary: [String: Any] {
+            return ["title": title,
+                    "statustext": statusText,
+                    "status": statusIcon,
+                    "progress": progress]
+        }
+    var nsDictionary: NSDictionary {
+            return dictionary as NSDictionary
+        }
 }
 
 struct AppVariables {
     
-    var cliversion                      = "1.11.1"
+    var cliversion                      = "1.11.2"
     
     // message default strings
     var titleDefault                    = String("default-title".localized)
