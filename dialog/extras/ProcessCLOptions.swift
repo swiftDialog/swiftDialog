@@ -109,6 +109,7 @@ func processCLOptions() {
                         title: String(json[cloptions.textField.long][i]["title"].stringValue),
                         required: Bool(json[cloptions.textField.long][i]["required"].boolValue),
                         secure: Bool(json[cloptions.textField.long][i]["secure"].boolValue),
+                        editor: Bool(json[cloptions.textField.long][i]["editor"].boolValue),
                         prompt: String(json[cloptions.textField.long][i]["prompt"].stringValue),
                         regex: String(json[cloptions.textField.long][i]["regex"].stringValue),
                         regexError: String(json[cloptions.textField.long][i]["regexerror"].stringValue))
@@ -124,6 +125,7 @@ func processCLOptions() {
                 var fieldRegexErrror : String = ""
                 var fieldSecure : Bool = false
                 var fieldRequire : Bool = false
+                var fieldEditor : Bool = false
                 if items.count > 0 {
                     fieldTitle = items[0]
                     if items.count > 1 {
@@ -137,6 +139,8 @@ func processCLOptions() {
                                 fieldSecure = true
                             case "required":
                                 fieldRequire = true
+                            case "editor":
+                                fieldEditor = true
                             case "prompt":
                                 fieldPrompt = items[index+1]
                             case "regex":
@@ -148,7 +152,7 @@ func processCLOptions() {
                         }
                     }
                 }
-                textFields.append(TextFieldState(title: fieldTitle, required: fieldRequire, secure: fieldSecure, prompt: fieldPrompt, regex: fieldRegex, regexError: fieldRegexErrror))
+                textFields.append(TextFieldState(title: fieldTitle, required: fieldRequire, secure: fieldSecure, editor: fieldEditor, prompt: fieldPrompt, regex: fieldRegex, regexError: fieldRegexErrror))
             }
         }
         logger(logMessage: "textOptionsArray : \(textFields)")

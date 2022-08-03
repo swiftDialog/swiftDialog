@@ -45,45 +45,63 @@ struct TextEntryView: View {
         if textFieldPresent {
             VStack {
                 ForEach(0..<textFields.count, id: \.self) {index in
-                    HStack {
-                        Spacer()
-                        Text(textFields[index].title + (textFields[index].required ? " *":""))
-                            .bold()
-                            .font(.system(size: 15))
-                            .frame(idealWidth: fieldwidth*0.20, maxWidth: 150, alignment: .leading)
-                        Spacer()
-                            .frame(width: 20)
-                        HStack {
-                            if textFields[index].secure {
-                                ZStack() {
-                                    SecureField("", text: $textFieldValue[index])
-                                        .disableAutocorrection(true)
-                                        .textContentType(.password)
-                                    Image(systemName: "lock.fill")
-                                        .foregroundColor(stringToColour("#008815")).opacity(0.5)
-                                            .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
+                    Group {
+                        if textFields[index].editor {
+                            VStack {
+                                HStack {
+                                    Text(textFields[index].title + (textFields[index].required ? " *":""))
+                                        .bold()
+                                        .font(.system(size: 15))
+                                        .frame(idealWidth: fieldwidth*0.20, maxWidth: 150, alignment: .leading)
+                                    Spacer()
                                 }
-                            } else {
-                                if #available(macOS 12.0, *) {
-                                    TextField("", text: $textFieldValue[index], prompt:Text(textFields[index].prompt))
-                                } else {
-                                    TextField("", text: $textFieldValue[index])
+                                TextEditor(text: $textFieldValue[index])
+                                        .font(.custom("HelveticaNeue", size: 14))
+                                        .frame(height: 80)
+                            }
+                        } else {
+                            HStack {
+                                Spacer()
+                                Text(textFields[index].title + (textFields[index].required ? " *":""))
+                                    .bold()
+                                    .font(.system(size: 15))
+                                    .frame(idealWidth: fieldwidth*0.20, maxWidth: 150, alignment: .leading)
+                                Spacer()
+                                    .frame(width: 20)
+                                HStack {
+                                    if textFields[index].secure {
+                                        ZStack() {
+                                            SecureField("", text: $textFieldValue[index])
+                                                .disableAutocorrection(true)
+                                                .textContentType(.password)
+                                            Image(systemName: "lock.fill")
+                                                .foregroundColor(stringToColour("#008815")).opacity(0.5)
+                                                    .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
+                                        }
+                                    } else {
+                                        if #available(macOS 12.0, *) {
+                                            TextField("", text: $textFieldValue[index], prompt:Text(textFields[index].prompt))
+                                        } else {
+                                            TextField("", text: $textFieldValue[index])
+                                        }
+                                    }
                                 }
+                                .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
+                                
+                                .overlay(RoundedRectangle(cornerRadius: 5)
+                                            .stroke(observedDialogContent.requiredTextfieldHighlight[index], lineWidth: 2)
+                                            .animation(.easeIn(duration: 0.2)
+                                                        .repeatCount(3, autoreverses: true)
+                                                       )
+                                         )
+                                Spacer()
                             }
                         }
-                        .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
-                        .onChange(of: textFieldValue[index], perform: { value in
-                            //update appvars with the text that was entered. this will be printed to stdout on exit
-                            textFields[index].value = textFieldValue[index]
-                        })
-                        .overlay(RoundedRectangle(cornerRadius: 5)
-                                    .stroke(observedDialogContent.requiredTextfieldHighlight[index], lineWidth: 2)
-                                    .animation(.easeIn(duration: 0.2)
-                                                .repeatCount(3, autoreverses: true)
-                                               )
-                                 )
-                        Spacer()
                     }
+                    .onChange(of: textFieldValue[index], perform: { value in
+                        //update appvars with the text that was entered. this will be printed to stdout on exit
+                        textFields[index].value = textFieldValue[index]
+                    })
                 }
                 if requiredFieldsPresent {
                     HStack {

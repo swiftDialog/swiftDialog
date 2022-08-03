@@ -18,11 +18,11 @@ var cloptions = CLOptions()
 var textFields = [TextFieldState]()
 var dropdownItems = [DropDownItems]()
 
-
 struct TextFieldState {
     var title           : String
     var required        : Bool      = false
     var secure          : Bool      = false
+    var editor          : Bool      = false
     var prompt          : String    = ""
     var regex           : String    = ""
     var regexError      : String    = ""
@@ -140,7 +140,7 @@ struct AppVariables {
     
     var quitKeyCharacter                = String("q")
     
-    var argRegex                        = String("(,? ?[a-zA-Z1-9]+=|(,\\s?secure)|(,\\s?required))")
+    var argRegex                        = String("(,? ?[a-zA-Z1-9]+=|(,\\s?secure)|(,\\s?required)|(,\\s?editor))")
     
     // exit codes and error messages
     var exit0                           = (code: Int32(0),   message: String("")) // normal exit
