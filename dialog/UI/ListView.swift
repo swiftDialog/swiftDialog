@@ -73,7 +73,8 @@ struct ListView: View {
                                     HStack {
                                         if observedDialogContent.listItemsArray[i].statusText != "" {
                                             Text(observedDialogContent.listItemsArray[i].statusText)
-                                                .font(.system(size: rowFontSize))
+                                                .font(.system(size: (rowFontSize * 0.8)))
+                                                .foregroundColor(.secondary)
                                                 .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
                                         }
                                         switch observedDialogContent.listItemsArray[i].statusIcon {
