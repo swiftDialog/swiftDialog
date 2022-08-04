@@ -24,6 +24,9 @@ struct TextFieldState {
     var secure          : Bool      = false
     var editor          : Bool      = false
     var prompt          : String    = ""
+    var fileSelect      : Bool      = false
+    var selectLabel     : String    = ""
+    var fileType        : String    = ""
     var regex           : String    = ""
     var regexError      : String    = ""
     var value           : String    = ""
@@ -140,7 +143,7 @@ struct AppVariables {
     
     var quitKeyCharacter                = String("q")
     
-    var argRegex                        = String("(,? ?[a-zA-Z1-9]+=|(,\\s?secure)|(,\\s?required)|(,\\s?editor))")
+    var argRegex                        = String("(,? ?[a-zA-Z1-9]+=|(,\\s?secure)|(,\\s?required)|(,\\s?editor)|(,\\s?fileselect))")
     
     // exit codes and error messages
     var exit0                           = (code: Int32(0),   message: String("")) // normal exit

@@ -68,6 +68,20 @@ struct TextEntryView: View {
                                     .frame(idealWidth: fieldwidth*0.20, maxWidth: 150, alignment: .leading)
                                 Spacer()
                                     .frame(width: 20)
+                                if textFields[index].fileSelect {
+                                    Button("button-select".localized)
+                                    {
+                                        let panel = NSOpenPanel()
+                                        panel.allowsMultipleSelection = false
+                                        panel.canChooseDirectories = false
+                                        if textFields[index].fileType != "" {
+                                            panel.allowedFileTypes = [textFields[index].fileType]
+                                        }
+                                        if panel.runModal() == .OK {
+                                            textFieldValue[index] = panel.url?.path ?? "<none>"
+                                        }
+                                    }
+                                }
                                 HStack {
                                     if textFields[index].secure {
                                         ZStack() {
@@ -79,11 +93,8 @@ struct TextEntryView: View {
                                                     .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
                                         }
                                     } else {
-                                        if #available(macOS 12.0, *) {
-                                            TextField("", text: $textFieldValue[index], prompt:Text(textFields[index].prompt))
-                                        } else {
-                                            TextField("", text: $textFieldValue[index])
-                                        }
+                                        TextField(textFields[index].prompt, text: $textFieldValue[index])
+                                            
                                     }
                                 }
                                 .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)

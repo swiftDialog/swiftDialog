@@ -111,6 +111,8 @@ func processCLOptions() {
                         secure: Bool(json[cloptions.textField.long][i]["secure"].boolValue),
                         editor: Bool(json[cloptions.textField.long][i]["editor"].boolValue),
                         prompt: String(json[cloptions.textField.long][i]["prompt"].stringValue),
+                        fileSelect: Bool(json[cloptions.textField.long][i]["fileselect"].boolValue),
+                        fileType: String(json[cloptions.textField.long][i]["filetype"].stringValue),
                         regex: String(json[cloptions.textField.long][i]["regex"].stringValue),
                         regexError: String(json[cloptions.textField.long][i]["regexerror"].stringValue))
                     )
@@ -121,6 +123,8 @@ func processCLOptions() {
                 let items = textFieldOption.split(usingRegex: appvars.argRegex)
                 var fieldTitle : String = ""
                 var fieldPrompt : String = ""
+                var fieldSelectType : String = ""
+                var fieldFileSelect : Bool = false
                 var fieldRegex : String = ""
                 var fieldRegexErrror : String = ""
                 var fieldSecure : Bool = false
@@ -143,6 +147,10 @@ func processCLOptions() {
                                 fieldEditor = true
                             case "prompt":
                                 fieldPrompt = items[index+1]
+                            case "fileselect":
+                                fieldFileSelect = true
+                            case "filetype":
+                                fieldSelectType = items[index+1]
                             case "regex":
                                 fieldRegex = items[index+1]
                             case "regexerror":
@@ -152,7 +160,15 @@ func processCLOptions() {
                         }
                     }
                 }
-                textFields.append(TextFieldState(title: fieldTitle, required: fieldRequire, secure: fieldSecure, editor: fieldEditor, prompt: fieldPrompt, regex: fieldRegex, regexError: fieldRegexErrror))
+                textFields.append(TextFieldState(title: fieldTitle,
+                                                 required: fieldRequire,
+                                                 secure: fieldSecure,
+                                                 editor: fieldEditor,
+                                                 prompt: fieldPrompt,
+                                                 fileSelect: fieldFileSelect,
+                                                 fileType: fieldSelectType,
+                                                 regex: fieldRegex,
+                                                 regexError: fieldRegexErrror))
             }
         }
         logger(logMessage: "textOptionsArray : \(textFields)")

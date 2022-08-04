@@ -19,6 +19,7 @@
 "button-cancel" = "Annuller";
 "button-more-info" = "Mere Information";
 "button-ok" = "OK";
+"button-select" = "Vælg";
 
 //default text
 "default-title" = "En vigtig besked";
