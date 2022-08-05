@@ -234,7 +234,7 @@ var helpText = """
     
         --\(cloptions.statusLogFile.long) <file>
                     Sets the path to the command file Dialog will read from to receive updates
-                    Default file is /var/log/dialog.log
+                    Default file is /var/tmp/dialog.log
 
         -\(cloptions.bannerImage.short), --\(cloptions.bannerImage.long) <file> | <url>
                     Shows a banner image at the top of the dialog
