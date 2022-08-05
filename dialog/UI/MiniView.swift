@@ -16,6 +16,7 @@ struct MiniProgressView: View {
             VStack {
                 ProgressView(value: observedDialogContent.progressValue, total: observedDialogContent.progressTotal)
                 Text(observedDialogContent.statusText)
+                    .lineLimit(1)
             }
         }
     }
@@ -27,7 +28,6 @@ struct MiniView: View {
     init(observedContent : DialogUpdatableContent) {
         self.observedDialogContent = observedContent
     }
-    
     
     var body: some View {
         ZStack {
@@ -41,34 +41,30 @@ struct MiniView: View {
                     .offset(y: -5)
                 HStack {
                     VStack{
-                        IconView(observedDialogContent: observedDialogContent)
-                            .frame( height: 80, alignment: .center)
-                            //.border(.green, width: 2)
-                            .padding(.leading, 30)
-                        Spacer()
+                        if (observedDialogContent.iconPresent && observedDialogContent.iconImage != "none") {
+                            IconView(observedDialogContent: observedDialogContent)
+                                .frame( height: 80, alignment: .center)
+                                .padding(.leading, 30)
+                            Spacer()
+                        }
                     }
                     .frame( height: observedDialogContent.windowHeight, alignment: .center)
-                    //Spacer()
                     VStack {
                         HStack {
                             Text(observedDialogContent.messageText)
                                 .font(.system(size: 15))
+                                .lineLimit(2)
                             Spacer()
                         }
-                        //.border(.blue, width: 2)
-                        //.padding(.leading, 40)
-                        //.padding(.trailing,40)
                         if cloptions.progressBar.present {
-                            //Spacer()
+                            Spacer()
                             MiniProgressView(observedDialogContent: observedDialogContent)
-                                //.border(.orange, width: 2)
                         }
                         Spacer()
                     }
                     .padding(.leading,40)
                     .padding(.trailing,40)
                     .padding(.bottom, 20)
-                    //.border(.blue, width: 2)
                 }
             }
             if !cloptions.progressBar.present {
@@ -77,7 +73,6 @@ struct MiniView: View {
                     HStack {
                         Spacer()
                         ButtonView(observedDialogContent: observedDialogContent)
-                            //.frame(height: 20)
                             .padding(.bottom, 30)
                             .padding(.trailing, 15)
                     }
