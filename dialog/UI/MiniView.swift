@@ -36,6 +36,7 @@ struct MiniView: View {
                     .font(.system(size: 18, weight: .semibold))
                     .border(appvars.debugBorderColour, width: 2)
                     .padding(.top, 5)
+                    .lineLimit(1)
                 Divider()
                     .frame(height: 0)
                     .offset(y: -5)
