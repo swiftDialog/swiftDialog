@@ -251,4 +251,5 @@ struct CLOptions {
     // civhmtsb
     
     var jamfHelperMode           = (long: String("jh"),                short: String("jh"),  value : String(""), present : Bool(false))
+    var miniMode                 = (long: String("mini"),              short: String(""),    value : String(""), present : Bool(false))
 }

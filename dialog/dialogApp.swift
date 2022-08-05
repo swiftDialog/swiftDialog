@@ -57,6 +57,11 @@ struct dialogApp: App {
         appvars.iconWidth = appvars.iconWidth * appvars.scaleFactor
         appvars.iconHeight = appvars.iconHeight * appvars.scaleFactor
         
+        if cloptions.miniMode.present {
+            appvars.windowWidth = 540
+            appvars.windowHeight = 125
+        }
+        
         if cloptions.fullScreenWindow.present {
             FullscreenView().showFullScreen()
         }
@@ -100,6 +105,7 @@ struct dialogApp: App {
                     window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
                     window?.standardWindowButton(.zoomButton)?.isHidden = true //this removes the green zoom button
                     window?.isMovable = appvars.windowIsMoveable
+                    
 
                     if appvars.windowOnTop {
                         window?.level = .floating
@@ -119,12 +125,17 @@ struct dialogApp: App {
                 }
                 .frame(width: 0, height: 0) //ensures hostingwindowfinder isn't taking up any real estate
                 
-                ContentView(observedDialogContent: observedDialogContent)
-                    .frame(width: observedDialogContent.windowWidth, height: observedDialogContent.windowHeight) // + appvars.bannerHeight)
-                //.frame(idealWidth: appvars.windowWidth, idealHeight: appvars.windowHeight)
-                    .sheet(isPresented: $observedDialogContent.showSheet, content: {
-                        ErrorView(observedContent: observedDialogContent)
-                    })
+                if cloptions.miniMode.present {
+                    MiniView(observedContent: observedDialogContent)
+                        .frame(width: observedDialogContent.windowWidth, height: observedDialogContent.windowHeight)
+                        //.border(.red)
+                } else {
+                    ContentView(observedDialogContent: observedDialogContent)
+                        .frame(width: observedDialogContent.windowWidth, height: observedDialogContent.windowHeight) // + appvars.bannerHeight)
+                        .sheet(isPresented: $observedDialogContent.showSheet, content: {
+                            ErrorView(observedContent: observedDialogContent)
+                        })
+                }
 
             }
         }

@@ -714,6 +714,7 @@ func processCLOptionValues() {
     cloptions.hideTimerBar.present          = json[cloptions.hideTimerBar.long].boolValue || CLOptionPresent(OptionName: cloptions.hideTimerBar)
     cloptions.quitOnInfo.present            = json[cloptions.quitOnInfo.long].boolValue || CLOptionPresent(OptionName: cloptions.quitOnInfo)
     cloptions.blurScreen.present            = json[cloptions.blurScreen.long].boolValue || CLOptionPresent(OptionName: cloptions.blurScreen)
+    cloptions.miniMode.present              = json[cloptions.miniMode.long].boolValue || CLOptionPresent(OptionName: cloptions.miniMode)
     
     // command line only options
     cloptions.listFonts.present             = CLOptionPresent(OptionName: cloptions.listFonts)
