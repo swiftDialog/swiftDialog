@@ -50,7 +50,7 @@ struct DropdownView: View {
                         Picker("", selection: $selectedOption[index])
                         {
                             ForEach(dropdownItems[index].values, id: \.self) {
-                                Text($0)
+                                Text($0).tag($0)
                             }
                         }
                         .pickerStyle(DefaultPickerStyle())

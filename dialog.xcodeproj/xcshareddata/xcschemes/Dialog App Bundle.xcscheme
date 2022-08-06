@@ -52,7 +52,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "--message &quot;this is a test&quot; --title &quot;testing&quot; --listitem Test"
+            argument = "--message &quot;this is a test&quot; --mini"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

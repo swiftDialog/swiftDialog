@@ -7,6 +7,16 @@
 
 import SwiftUI
 
+extension NSTextView {
+    open override var frame: CGRect {
+        didSet {
+            backgroundColor = .clear
+            drawsBackground = true
+        }
+
+    }
+}
+
 struct TextEntryView: View {
     
     @ObservedObject var observedDialogContent : DialogUpdatableContent
@@ -39,6 +49,7 @@ struct TextEntryView: View {
         } else {
             fieldwidth = appvars.windowWidth - appvars.iconWidth
         }
+
     }
     
     var body: some View {
@@ -56,8 +67,10 @@ struct TextEntryView: View {
                                     Spacer()
                                 }
                                 TextEditor(text: $textFieldValue[index])
-                                        .font(.custom("HelveticaNeue", size: 14))
-                                        .frame(height: 80)
+                                    .background(Color("editorBackgroundColour"))
+                                    .font(.custom("HelveticaNeue", size: 14))
+                                    .cornerRadius(3.0)
+                                    .frame(height: 80)
                             }
                         } else {
                             HStack {
