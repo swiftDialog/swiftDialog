@@ -7,6 +7,15 @@
 
 import SwiftUI
 
+extension NSTableView {
+  open override func viewDidMoveToWindow() {
+    super.viewDidMoveToWindow()
+
+    backgroundColor = NSColor.clear
+    enclosingScrollView!.drawsBackground = false
+  }
+}
+
 struct StatusImage: View {
     
     var name: String
@@ -113,6 +122,7 @@ struct ListView: View {
                             }
                             //.frame(height: rowHeight+listHeightPadding)
                         }
+                        .background(Color("editorBackgroundColour"))
                     }
                     .onChange(of: observedDialogContent.listItemUpdateRow, perform: { _ in
                         DispatchQueue.main.async {
