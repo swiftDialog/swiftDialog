@@ -63,7 +63,7 @@ struct TextEntryView: View {
                                     Text(textFields[index].title + (textFields[index].required ? " *":""))
                                         .bold()
                                         .font(.system(size: 15))
-                                        .frame(idealWidth: fieldwidth*0.20, maxWidth: 150, alignment: .leading)
+                                        .frame(alignment: .leading)
                                     Spacer()
                                 }
                                 TextEditor(text: $textFieldValue[index])
@@ -72,15 +72,16 @@ struct TextEntryView: View {
                                     .cornerRadius(3.0)
                                     .frame(height: 80)
                             }
+                            .padding(.bottom, 10)
                         } else {
                             HStack {
-                                Spacer()
+                                //Spacer()
                                 Text(textFields[index].title + (textFields[index].required ? " *":""))
                                     .bold()
                                     .font(.system(size: 15))
-                                    .frame(idealWidth: fieldwidth*0.20, maxWidth: 150, alignment: .leading)
+                                    .frame(idealWidth: fieldwidth*0.20, alignment: .leading)
                                 Spacer()
-                                    .frame(width: 20)
+                                    //.frame(width: 20)
                                 if textFields[index].fileSelect {
                                     Button("button-select".localized)
                                     {
@@ -103,14 +104,14 @@ struct TextEntryView: View {
                                                 .textContentType(.password)
                                             Image(systemName: "lock.fill")
                                                 .foregroundColor(stringToColour("#008815")).opacity(0.5)
-                                                    .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
+                                                    .frame(idealWidth: fieldwidth*0.50, maxWidth: 250, alignment: .trailing)
                                         }
                                     } else {
                                         TextField(textFields[index].prompt, text: $textFieldValue[index])
                                             
                                     }
                                 }
-                                .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
+                                .frame(idealWidth: fieldwidth*0.50, maxWidth: 250, alignment: .trailing)
                                 
                                 .overlay(RoundedRectangle(cornerRadius: 5)
                                             .stroke(observedDialogContent.requiredTextfieldHighlight[index], lineWidth: 2)
@@ -118,7 +119,6 @@ struct TextEntryView: View {
                                                         .repeatCount(3, autoreverses: true)
                                                        )
                                          )
-                                Spacer()
                             }
                         }
                     }

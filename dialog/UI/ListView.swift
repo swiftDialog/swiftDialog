@@ -76,7 +76,7 @@ struct ListView: View {
                             VStack {
                                 HStack {
                                     if observedDialogContent.listItemsArray[i].icon != "" {
-                                        IconView(observedDialogContent: observedDialogContent, image: observedDialogContent.listItemsArray[i].icon)
+                                        IconView(image: observedDialogContent.listItemsArray[i].icon, overlay: "")
                                             .frame(maxHeight: rowHeight)
                                     }
                                     Text(observedDialogContent.listItemsArray[i].title)

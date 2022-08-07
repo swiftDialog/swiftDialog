@@ -43,7 +43,7 @@ struct MiniView: View {
                 HStack {
                     VStack{
                         if (observedDialogContent.iconPresent && observedDialogContent.iconImage != "none") {
-                            IconView(observedDialogContent: observedDialogContent)
+                            IconView(image: observedDialogContent.iconImage, overlay: observedDialogContent.overlayIconImage)
                                 .frame( height: 80, alignment: .center)
                                 .padding(.leading, 30)
                             Spacer()

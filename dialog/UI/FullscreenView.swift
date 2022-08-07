@@ -155,7 +155,7 @@ struct FullscreenView: View {
                     // icon vstack
                     VStack {
                         if cloptions.iconOption.present {
-                            IconView(observedDialogContent: observedDialogContent)
+                            IconView(image: observedDialogContent.iconImage, overlay: observedDialogContent.overlayIconImage)
                         } else {
                             VStack{}.padding(emptyStackPadding)
                         }

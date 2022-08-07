@@ -47,7 +47,7 @@ struct MessageContent: View {
         if observedDialogContent.imagePresent || (observedDialogContent.imagePresent && observedDialogContent.imageCaptionPresent) {
             VStack {
                 if observedDialogContent.iconPresent && observedDialogContent.centreIconPresent && !appvars.iconIsHidden && !(observedDialogContent.iconImage == "none") {
-                    IconView(observedDialogContent: observedDialogContent)
+                    IconView(image: observedDialogContent.iconImage, overlay: observedDialogContent.overlayIconImage)
                         .frame(width: iconDisplayWidth, alignment: .top)
                         .padding(.top, 15)
                         .padding(.bottom, 10)
@@ -59,7 +59,7 @@ struct MessageContent: View {
             VStack {
                 
                 if observedDialogContent.centreIconPresent && observedDialogContent.centreIconPresent && !(observedDialogContent.iconImage == "none") {
-                    IconView(observedDialogContent: observedDialogContent)
+                    IconView(image: observedDialogContent.iconImage, overlay: observedDialogContent.overlayIconImage)
                         .frame(width: iconDisplayWidth, alignment: .top)
                         .padding(.top, 15)
                         .padding(.bottom, 10)
@@ -98,14 +98,14 @@ struct MessageContent: View {
                     //Spacer()
                     VStack {
                         TextEntryView(observedDialogContent: observedDialogContent)
-                            //.padding(.leading, 50)
-                            //.padding(.trailing, 50)
+                            //.padding(.leading, 30)
+                            .padding(.trailing, 30)
                             .padding(.bottom, 10)
                             .border(appvars.debugBorderColour, width: 2)
 
                         DropdownView(observedDialogContent: observedDialogContent)
-                            //.padding(.leading, 50)
-                            //.padding(.trailing, 50)
+                            //.padding(.leading, 30)
+                            .padding(.trailing, 30)
                             .padding(.bottom, 10)
                             .border(appvars.debugBorderColour, width: 2)
                     }
