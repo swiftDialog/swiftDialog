@@ -283,11 +283,12 @@ var helpText = """
                     Multiple textfields can be specified as required.
     
                     Modifiers available to text fields are:
-                        secure     - Presends a secure input area. Contents of the textfield will not be shown on screen
-                        required   - Dialog will not exit until the field is populated
-                        prompt     - Pre-fill the field with some prompt text (prompt text will not be returned, macOS 12+ only, macOS 11 safe)
-                        regex      - Specify a regular expression that the field must satisfy for the content to be accepted.
-                        regexerror - Specify a custom error to display if regex conditions are not met
+                        secure       - Presends a secure input area. Contents of the textfield will not be shown on screen
+                        required     - Dialog will not exit until the field is populated
+                        passwordfill - Use the `.password` modifier to use the built in macOS password manager to create or fill passwords
+                        prompt       - Pre-fill the field with some prompt text (prompt text will not be returned, macOS 12+ only, macOS 11 safe)
+                        regex        - Specify a regular expression that the field must satisfy for the content to be accepted.
+                        regexerror   - Specify a custom error to display if regex conditions are not met
     
                     modifiers can be combined e.g. --\(cloptions.textField.long) <text>,secure,required
                                                    --\(cloptions.textField.long) <text>,required,prompt="<text>"

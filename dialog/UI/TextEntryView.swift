@@ -58,7 +58,7 @@ struct TextEntryView: View {
                                 ZStack() {
                                     SecureField("", text: $textFieldValue[index])
                                         .disableAutocorrection(true)
-                                        .textContentType(.password)
+                                        .textContentType(textFields[index].passwordfill ? .password : .none)
                                     Image(systemName: "lock.fill")
                                         .foregroundColor(stringToColour("#008815")).opacity(0.5)
                                             .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
@@ -98,5 +98,4 @@ struct TextEntryView: View {
         }
     }
 }
-
 
