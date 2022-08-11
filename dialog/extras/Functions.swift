@@ -267,6 +267,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
             }
         }
     }
+    observedObject?.end()
     exit(exitCode)
 }
 
