@@ -59,7 +59,7 @@ struct dialogApp: App {
         
         if cloptions.miniMode.present {
             appvars.windowWidth = 540
-            appvars.windowHeight = 125
+            appvars.windowHeight = 128
         }
         
         if cloptions.fullScreenWindow.present {
@@ -128,6 +128,7 @@ struct dialogApp: App {
                 if cloptions.miniMode.present {
                     MiniView(observedContent: observedDialogContent)
                         .frame(width: observedDialogContent.windowWidth, height: observedDialogContent.windowHeight)
+                        //.frame(height: 128)
                         //.border(.red)
                 } else {
                     ContentView(observedDialogContent: observedDialogContent)

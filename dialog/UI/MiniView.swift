@@ -31,55 +31,60 @@ struct MiniView: View {
     
     var body: some View {
         ZStack {
-            VStack {
-                Text(observedDialogContent.titleText)
-                    .font(.system(size: 18, weight: .semibold))
-                    .border(appvars.debugBorderColour, width: 2)
-                    .padding(.top, 5)
-                    .lineLimit(1)
-                Divider()
-                    .frame(height: 0)
-                    .offset(y: -5)
-                HStack {
-                    VStack{
-                        if (observedDialogContent.iconPresent && observedDialogContent.iconImage != "none") {
-                            IconView(image: observedDialogContent.iconImage, overlay: observedDialogContent.overlayIconImage)
-                                .frame( height: 80, alignment: .center)
-                                .padding(.leading, 30)
-                            Spacer()
-                        }
-                    }
-                    .frame( height: observedDialogContent.windowHeight, alignment: .center)
-                    VStack {
-                        HStack {
-                            Text(observedDialogContent.messageText)
-                                .font(.system(size: 15))
-                                .lineLimit(2)
-                            Spacer()
-                        }
-                        if cloptions.progressBar.present {
-                            Spacer()
-                            MiniProgressView(observedDialogContent: observedDialogContent)
-                        }
-                        Spacer()
-                    }
-                    .padding(.leading,40)
-                    .padding(.trailing,40)
-                    .padding(.bottom, 20)
-                }
-            }
             if !cloptions.progressBar.present {
                 VStack {
-                    Spacer()
+                    Spacer() //push button bar to the bottom of the window
                     HStack {
-                        Spacer()
                         ButtonView(observedDialogContent: observedDialogContent)
-                            .padding(.bottom, 30)
+                            .padding(.bottom, 15)
                             .padding(.trailing, 15)
                     }
                 }
             }
-            
+            VStack {
+                if observedDialogContent.titleText != "none" {
+                    Text(observedDialogContent.titleText)
+                        .font(.system(size: 18, weight: .semibold))
+                        .border(appvars.debugBorderColour, width: 2)
+                        .padding(.top, 5)
+                        .lineLimit(1)
+                    
+                    Divider()
+                        .frame(height: 1)
+                        .offset(y: -5)
+                    
+                } else {
+                    Spacer()
+                        .frame(height: 34)
+                }
+
+                HStack {
+                    VStack{
+                        if (observedDialogContent.iconPresent && observedDialogContent.iconImage != "none") {
+                            IconView(image: observedDialogContent.iconImage, overlay: observedDialogContent.overlayIconImage)
+                                .frame( maxHeight: 90)
+                                .padding(.leading, 25)
+                            Spacer()
+                        }
+                    }
+                    VStack {
+                        HStack {
+                            Text(observedDialogContent.messageText)
+                                .lineLimit(4)
+                                .font(.system(size: 15))
+                                .frame(maxWidth: .infinity, alignment: .topLeading)
+                        }
+                        Spacer()
+                        if cloptions.progressBar.present {
+                            
+                            MiniProgressView(observedDialogContent: observedDialogContent)
+                        }
+                    }
+                    .padding(.leading,40)
+                    .padding(.trailing,40)
+                    .padding(.bottom, 15)
+                }
+            }
         }
         .edgesIgnoringSafeArea(.all)
         .border(appvars.debugBorderColour, width: 2)
