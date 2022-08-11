@@ -345,6 +345,11 @@ class DialogUpdatableContent : ObservableObject {
                 var listProgressValue : CGFloat = 0
                 var deleteRow         : Bool = false
                 var addRow            : Bool = false
+                
+                var iconIsSet         : Bool = false
+                var statusIsSet       : Bool = false
+                var statusTextIsSet   : Bool = false
+                var progressIsSet     : Bool = false
 
                 let listCommand = line.replacingOccurrences(of: "\(cloptions.listItem.long): ", with: "")
                 
@@ -383,15 +388,19 @@ class DialogUpdatableContent : ObservableObject {
                             case "title":
                                 title = action[1].trimmingCharacters(in: .whitespaces)
                             case "icon":
-                                // reserved for future use
                                 icon = action[1].trimmingCharacters(in: .whitespaces)
+                                iconIsSet = true
                             case "statustext":
                                 statusText = action[1].trimmingCharacters(in: .whitespaces)
+                                statusTextIsSet = true
                             case "status":
                                 statusIcon = action[1].trimmingCharacters(in: .whitespaces)
+                                statusIsSet = true
                             case "progress":
                                 listProgressValue = string2float(string: action[1].trimmingCharacters(in: .whitespaces))
                                 statusIcon = "progress"
+                                progressIsSet = true
+                                statusIsSet = true
                             case "delete":
                                 deleteRow = true
                             case "add":
@@ -407,10 +416,10 @@ class DialogUpdatableContent : ObservableObject {
                             listItemsArray.remove(at: row)
                             logger(logMessage: "deleted row at index \(row)")
                         } else {
-                            listItemsArray[row].icon = icon
-                            listItemsArray[row].statusIcon = statusIcon
-                            listItemsArray[row].statusText = statusText
-                            listItemsArray[row].progress = listProgressValue
+                            if iconIsSet { listItemsArray[row].icon = icon }
+                            if statusIsSet { listItemsArray[row].statusIcon = statusIcon }
+                            if statusTextIsSet { listItemsArray[row].statusText = statusText }
+                            if progressIsSet  {listItemsArray[row].progress = listProgressValue }
                             listItemUpdateRow = row
                         }
                     }
@@ -425,6 +434,7 @@ class DialogUpdatableContent : ObservableObject {
                 
             // quit
             case "quit:" :
+                self.end()
                 quitDialog(exitCode: appvars.exit5.code)
 
             default:
