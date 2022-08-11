@@ -108,11 +108,11 @@ struct TextEntryView: View {
                                         }
                                     } else {
                                         TextField(textFields[index].prompt, text: $textFieldValue[index])
-
+                                            
                                     }
                                 }
                                 .frame(idealWidth: fieldwidth*0.50, maxWidth: 250, alignment: .trailing)
-
+                                
                                 .overlay(RoundedRectangle(cornerRadius: 5)
                                             .stroke(observedDialogContent.requiredTextfieldHighlight[index], lineWidth: 2)
                                             .animation(.easeIn(duration: 0.2)

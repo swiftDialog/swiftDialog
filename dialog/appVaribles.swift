@@ -58,9 +58,9 @@ struct ListItems: Codable {
 }
 
 struct AppVariables {
-
+    
     var cliversion                      = "1.11.2"
-
+    
     // message default strings
     var titleDefault                    = String("default-title".localized)
     var messageDefault                  = String("default-message".localized)

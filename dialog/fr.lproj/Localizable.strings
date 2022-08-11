@@ -18,6 +18,7 @@
 "button-cancel" = "Annuler";
 "button-more-info" = "Plus d'information";
 "button-ok" = "D'accord";
+"button-select" = "Sélectionner";
 
 //default text
 "default-title" = "Un message important";
