@@ -36,8 +36,8 @@ struct MiniView: View {
                     Spacer() //push button bar to the bottom of the window
                     HStack {
                         ButtonView(observedDialogContent: observedDialogContent)
-                            .padding(.bottom, 15)
-                            .padding(.trailing, 15)
+                            .padding(.bottom, 10)
+                            .padding(.trailing, 10)
                     }
                 }
             }
@@ -80,8 +80,8 @@ struct MiniView: View {
                             MiniProgressView(observedDialogContent: observedDialogContent)
                         }
                     }
-                    .padding(.leading,40)
-                    .padding(.trailing,40)
+                    .padding(.leading,20)
+                    .padding(.trailing,20)
                     .padding(.bottom, 15)
                 }
             }
