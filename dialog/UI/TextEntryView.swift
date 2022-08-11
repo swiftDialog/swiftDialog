@@ -18,20 +18,20 @@ extension NSTextView {
 }
 
 struct TextEntryView: View {
-    
+
     @ObservedObject var observedDialogContent : DialogUpdatableContent
-    
+
     @State var textFieldValue = Array(repeating: "", count: textFields.count)
     //var textPromptValue = Array(repeating: "", count: textFields.count)
-    
+
     @State private var animationAmount = 1.0
-    
+
     @State private var showingSheet = false
-    
+
     var textFieldPresent: Bool = false
     var fieldwidth: CGFloat = 0
     var requiredFieldsPresent : Bool = false
-    
+
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedDialogContent = observedDialogContent
         if cloptions.textField.present {
@@ -51,7 +51,7 @@ struct TextEntryView: View {
         }
 
     }
-    
+
     var body: some View {
         if textFieldPresent {
             VStack {
@@ -101,7 +101,7 @@ struct TextEntryView: View {
                                         ZStack() {
                                             SecureField("", text: $textFieldValue[index])
                                                 .disableAutocorrection(true)
-                                                .textContentType(.password)
+                                                .textContentType(textFields[index].passwordFill ? .password : .none)
                                             Image(systemName: "lock.fill")
                                                 .foregroundColor(stringToColour("#008815")).opacity(0.5)
                                                     .frame(idealWidth: fieldwidth*0.50, maxWidth: 250, alignment: .trailing)
@@ -140,5 +140,3 @@ struct TextEntryView: View {
         }
     }
 }
-
-
