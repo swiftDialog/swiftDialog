@@ -18,14 +18,18 @@ var cloptions = CLOptions()
 var textFields = [TextFieldState]()
 var dropdownItems = [DropDownItems]()
 
-
 struct TextFieldState {
-    var title           : String
-    var required        : Bool      = false
-    var secure          : Bool      = false
+    var editor          : Bool      = false
+    var fileSelect      : Bool      = false
+    var fileType        : String    = ""
+    var passwordFill    : Bool      = false
     var prompt          : String    = ""
     var regex           : String    = ""
     var regexError      : String    = ""
+    var required        : Bool      = false
+    var secure          : Bool      = false
+    var selectLabel     : String    = ""
+    var title           : String
     var value           : String    = ""
 }
 
@@ -36,60 +40,70 @@ struct DropDownItems {
     var selectedValue   : String = ""
 }
 
-struct ListItems {
+struct ListItems: Codable {
     var title           : String
     var icon            : String = ""
     var statusText      : String = ""
     var statusIcon      : String = ""
+    var progress        : CGFloat = 0
+    var dictionary: [String: Any] {
+            return ["title": title,
+                    "statustext": statusText,
+                    "status": statusIcon,
+                    "progress": progress]
+        }
+    var nsDictionary: NSDictionary {
+            return dictionary as NSDictionary
+        }
 }
 
 struct AppVariables {
     
-    var cliversion                      = "1.11.1"
+    var cliversion                      = "1.11.2"
     
     // message default strings
     var titleDefault                    = String("default-title".localized)
     var messageDefault                  = String("default-message".localized)
     var messageAlignment : TextAlignment = .leading
     var messageAlignmentTextRepresentation = String("left")
-    
+
     // button default strings
     // work out how to define a default width button that does what you tell it to. in the meantime, diry hack with spaces
     var button1Default                  = String("button-ok".localized)
     var button2Default                  = String("button-cancel".localized)
     var buttonInfoDefault               = String("button-more-info".localized)
     var buttonInfoActionDefault         = String("")
-    
+
     var windowIsMoveable                = Bool(false)
     var windowOnTop                     = Bool(false)
     var iconIsHidden                    = Bool(false)
     var iconIsCentred                   = Bool(false)
-    
+
     // Window Sizes
     var windowWidth                     = CGFloat(820)      // set default dialog width
     var windowHeight                    = CGFloat(380)      // set default dialog height
-    
+
     // Screen Size
     var screenWidth                     = CGFloat(0)
     var screenHeight                    = CGFloat(0)
-    
+
     var videoWindowWidth                = CGFloat(900)
     var videoWindowHeight               = CGFloat(600)
-    
+
     var windowPositionVertical          = NSWindow.Position.Vertical.center
     var windowPositionHorozontal        = NSWindow.Position.Horizontal.center
- 
+
     var iconWidth                      = CGFloat(170)      // set default image area width
     var iconHeight                     = CGFloat(260)      // set default image area height
     var titleHeight                     = CGFloat(50)
     var bannerHeight                    = CGFloat(-10)
-    
+
     var smallWindow                     = Bool(false)
     var bigWindow                       = Bool(false)
     var scaleFactor                     = CGFloat(1)
-    
+
     var timerDefaultSeconds             = CGFloat(10)
-    
+
     var autoPlayDefaultSeconds          = CGFloat(10)
 
     var horozontalLineScale             = CGFloat(0.9)
@@ -106,32 +120,32 @@ struct AppVariables {
     var overlayOffsetX                  = CGFloat(40)
     var overlayOffsetY                  = CGFloat(50)
     var overlayShadow                   = CGFloat(3)
-        
+
     var jsonOut                         = Bool(false)
-    
+
     var willDisturb                     = Bool(false)
-    
+
     var textOptionsArray                = [String]()
     var textFieldText                   = Array(repeating: "", count: 64)
-    
+
     var checkboxOptionsArray            = [String]()
     var checkboxText                    = Array(repeating: "", count: 64)
     var checkboxValue                   = Array(repeating: false, count: 64)
     var checkboxDisabled                = Array(repeating: false, count: 64)
-    
+
     var imageArray                      = [String]()
     var imageCaptionArray               = [String]()
-        
+
     var listItems = [ListItems]()
-    
+
     var annimationSmoothing             = Double(20)
-    
+
     var defaultStatusLogFile            = String("/var/tmp/dialog.log")
-    
+
     var quitKeyCharacter                = String("q")
-    
-    var argRegex                        = String("(,? ?[a-zA-Z1-9]+=|(,\\s?secure)|(,\\s?required))")
-    
+
+    var argRegex                        = String("(,? ?[a-zA-Z1-9]+=|(,\\s?editor)|(,\\s?fileselect))|(,\\s?passwordfill)|(,\\s?required)|(,\\s?secure)")
+
     // exit codes and error messages
     var exit0                           = (code: Int32(0),   message: String("")) // normal exit
     var exitNow                         = (code: Int32(255), message: String("")) // forced exit
@@ -152,7 +166,7 @@ struct AppVariables {
     var exit208                         = (code: Int32(208), message: String(""))
     var exit209                         = (code: Int32(209), message: String(""))
     var exit210                         = (code: Int32(210), message: String(""))
-        
+
     // debug flag
     var debugMode                       = Bool(false)
     var debugBorderColour               = Color.clear
@@ -224,7 +238,7 @@ struct CLOptions {
     var hideTimerBar             = (long: String("hidetimerbar"),      short: String(""),    value : String(""), present : Bool(false))
     var autoPlay                 = (long: String("autoplay"),          short: String(""),    value : String(""), present : Bool(false))
     var blurScreen               = (long: String("blurscreen"),        short: String(""),    value : String(""), present : Bool(false))
-    
+
     var lockWindow               = (long: String("moveable"),          short: String("o"),   value : String(""), present : Bool(false)) // -o
     var forceOnTop               = (long: String("ontop"),             short: String("p"),   value : String(""), present : Bool(false)) // -p
     var smallWindow              = (long: String("small"),             short: String("s"),   value : String(""), present : Bool(false)) // -s
@@ -232,10 +246,11 @@ struct CLOptions {
     var fullScreenWindow         = (long: String("fullscreen"),        short: String("f"),   value : String(""), present : Bool(false)) // -f
     var quitOnInfo               = (long: String("quitoninfo"),        short: String(""),    value : String(""), present : Bool(false))
     var listFonts                = (long: String("listfonts"),         short: String(""),    value : String(""), present : Bool(false))
-    
+
     var jsonOutPut               = (long: String("json"),              short: String("j"),   value : String(""), present : Bool(false)) // -j
     var ignoreDND                = (long: String("ignorednd"),         short: String("d"),   value : String(""), present : Bool(false)) // -j
     // civhmtsb
-    
+
     var jamfHelperMode           = (long: String("jh"),                short: String("jh"),  value : String(""), present : Bool(false))
+    var miniMode                 = (long: String("mini"),              short: String(""),    value : String(""), present : Bool(false))
 }

@@ -12,6 +12,8 @@
 		41110A2825F9E79E008171D2 /* License.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41110A2725F9E79E008171D2 /* License.swift */; };
 		4114E1E927153FEE00388274 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4114E1E827153FEE00388274 /* AVKit.framework */; };
 		4114E1EB27154B2200388274 /* VideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4114E1EA27154B2200388274 /* VideoView.swift */; };
+		412B26AF289CE02100493EFF /* MiniView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412B26AE289CE02100493EFF /* MiniView.swift */; };
+		412B26B0289CE02100493EFF /* MiniView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412B26AE289CE02100493EFF /* MiniView.swift */; };
 		414550AA27C799D000D756E3 /* BackgroundBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414550A927C799D000D756E3 /* BackgroundBlur.swift */; };
 		414550AB27C799D000D756E3 /* BackgroundBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414550A927C799D000D756E3 /* BackgroundBlur.swift */; };
 		414550AD27C79BAB00D756E3 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 414550AC27C79BAB00D756E3 /* SwiftyJSON */; };
@@ -117,6 +119,7 @@
 		41110A2725F9E79E008171D2 /* License.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = License.swift; sourceTree = "<group>"; };
 		4114E1E827153FEE00388274 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		4114E1EA27154B2200388274 /* VideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoView.swift; sourceTree = "<group>"; };
+		412B26AE289CE02100493EFF /* MiniView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniView.swift; sourceTree = "<group>"; };
 		414550A927C799D000D756E3 /* BackgroundBlur.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundBlur.swift; sourceTree = "<group>"; };
 		4153783126001A0900AA0E76 /* StringProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringProcessing.swift; sourceTree = "<group>"; };
 		4153784D2604B71800AA0E76 /* TitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleView.swift; sourceTree = "<group>"; };
@@ -318,6 +321,7 @@
 				417BD470279CB658009AE34A /* CheckboxView.swift */,
 				415E1FC927A2694B00DE971B /* ListView.swift */,
 				41832B6D2843143C0062AA1F /* ErrorView.swift */,
+				412B26AE289CE02100493EFF /* MiniView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -551,6 +555,7 @@
 				4154C2DE25F76BDB00A3D373 /* dialogApp.swift in Sources */,
 				41D81E6C25F8209F00D1F7E1 /* Options.swift in Sources */,
 				41D81E7125F845D200D1F7E1 /* appVaribles.swift in Sources */,
+				412B26AF289CE02100493EFF /* MiniView.swift in Sources */,
 				41D81E7925F870A500D1F7E1 /* Functions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -606,6 +611,7 @@
 				4114E1EB27154B2200388274 /* VideoView.swift in Sources */,
 				41FB64952680855300A54C3E /* dialogApp.swift in Sources */,
 				41FB64962680855300A54C3E /* appVaribles.swift in Sources */,
+				412B26B0289CE02100493EFF /* MiniView.swift in Sources */,
 				41AD75B626AA81760023EBD8 /* TextEntryView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -787,7 +793,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.11.1;
+				MARKETING_VERSION = 1.11.2;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -814,7 +820,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.11.1;
+				MARKETING_VERSION = 1.11.2;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -910,7 +916,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/dialog/Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.11.1;
+				MARKETING_VERSION = 1.11.2;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialogcli;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -927,7 +933,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/dialog/Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 1.11.1;
+				MARKETING_VERSION = 1.11.2;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialogcli;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

@@ -40,7 +40,6 @@ struct ButtonView: View {
         HStack {
             if cloptions.button2Option.present {
                 Button(action: {
-                    observedDialogContent.end()
                     quitDialog(exitCode: appvars.exit2.code)
                 }, label: {
                     Text(appvars.button2Default)
@@ -51,7 +50,6 @@ struct ButtonView: View {
             } else if cloptions.button2TextOption.present {
                 let button2Text: String = observedDialogContent.button2Value
                 Button(action: {
-                    observedDialogContent.end()
                     quitDialog(exitCode: appvars.exit2.code)
                 }, label: {
                     Text(button2Text)
@@ -65,7 +63,6 @@ struct ButtonView: View {
         let button1Text: String = observedDialogContent.button1Value
 
         Button(action: {
-            observedDialogContent.end()
             buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction, observedObject: observedDialogContent)
             
         }, label: {
