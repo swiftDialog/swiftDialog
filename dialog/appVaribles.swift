@@ -95,7 +95,7 @@ struct CLArgument {
 
 struct AppVariables {
     //TODO: remove the need for this variable
-    var cliversion                      = "Alpha 1.12.0"  // fallback if reading the bundle version doesn't work.
+    var cliversion                      = "Alpha 2.0"  // fallback if reading the bundle version doesn't work.
     
     // message default strings
     var titleDefault                    = String("default-title".localized)
