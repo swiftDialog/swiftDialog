@@ -39,29 +39,6 @@ struct StatusImage: View {
     }
 }
 
-struct CirclerPercentageProgressViewStyle : ProgressViewStyle {
-    public func makeBody(configuration: LinearProgressViewStyle.Configuration) -> some View {
-        let stroke : CGFloat = 5
-        let padding : CGFloat = stroke / 2
-        VStack() {
-            ZStack {
-                Circle()
-                    .stroke(lineWidth: stroke)
-                    .opacity(0.3)
-                    .foregroundColor(Color.accentColor.opacity(0.5))
-                Circle()
-                    .trim(from: 0.0, to: CGFloat(configuration.fractionCompleted ?? 0))
-                .stroke(style: StrokeStyle(lineWidth: stroke, lineCap: .round, lineJoin: .round))
-                .foregroundColor(Color.accentColor)
-                .rotationEffect(.degrees(-90))
-                //.animation(.linear)
-            }
-            .animation(.linear)
-            .padding(.trailing, padding)
-        }
-    }
-}
-
 struct ListView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
@@ -98,11 +75,11 @@ struct ListView: View {
                         List(0..<observedData.listItemsArray.count, id: \.self) {i in
                             VStack {
                                 HStack {
-                                    if observedDialogContent.listItemsArray[i].icon != "" {
-                                        IconView(image: observedDialogContent.listItemsArray[i].icon, overlay: "")
+                                    if observedData.listItemsArray[i].icon != "" {
+                                        IconView(image: observedData.listItemsArray[i].icon, overlay: "")
                                             .frame(maxHeight: rowHeight)
                                     }
-                                    Text(observedDialogContent.listItemsArray[i].title)
+                                    Text(observedData.listItemsArray[i].title)
                                         .font(.system(size: rowFontSize))
                                         .id(i)
                                     Spacer()

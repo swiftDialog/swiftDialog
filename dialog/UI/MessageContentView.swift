@@ -44,7 +44,7 @@ struct MessageContent: View {
         if observedData.args.mainImage.present {
             VStack {
                 if observedData.args.iconOption.present && observedData.args.centreIcon.present { //}&& observedData.args.iconOption.value != "none" {
-                    IconView(observedDialogContent: observedData)
+                    IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
                         .frame(width: iconDisplayWidth, alignment: .top)
                         .padding(.top, 15)
                         .padding(.bottom, 10)
@@ -56,7 +56,7 @@ struct MessageContent: View {
             VStack {
                 
                 if observedData.args.centreIcon.present && observedData.args.iconOption.present {
-                    IconView(observedDialogContent: observedData)
+                    IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
                         .frame(width: iconDisplayWidth, alignment: .top)
                         .padding(.top, 15)
                         .padding(.bottom, 10)

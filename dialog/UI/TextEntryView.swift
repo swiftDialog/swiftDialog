@@ -52,52 +52,76 @@ struct TextEntryView: View {
     var body: some View {
         if observedData.args.textField.present {
             VStack {
-                ForEach(0..<observedData.textEntryArray.count, id: \.self) {index in
-                    HStack {
-                        Spacer()
-                        Text(observedData.textEntryArray[index].title + (observedData.textEntryArray[index].required ? " *":""))
-                            .bold()
-                            .font(.system(size: 15))
-                            .frame(idealWidth: fieldwidth*0.20, maxWidth: 150, alignment: .leading)
-                        Spacer()
-                            .frame(width: 20)
-                        HStack {
-                            if observedData.textEntryArray[index].secure {
-                                ZStack() {
-                                    SecureField("", text: $observedData.textEntryArray[index].value)
-                                        .disableAutocorrection(true)
-                                        .textContentType(.password)
-                                    Image(systemName: "lock.fill")
-                                        .foregroundColor(stringToColour("#008815")).opacity(0.5)
-                                            .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
+                ForEach(0..<appvars.textFields.count, id: \.self) {index in
+                    Group {
+                        if appvars.textFields[index].editor {
+                            VStack {
+                                HStack {
+                                    Text(appvars.textFields[index].title + (appvars.textFields[index].required ? " *":""))
+                                        .bold()
+                                        .font(.system(size: 15))
+                                        .frame(alignment: .leading)
+                                    Spacer()
                                 }
-                            } else {
-                                //if #available(macOS 12.0, *) {
-                                //    TextField("", text: $observedData.appProperties.textFields[index].value, prompt:Text(observedData.appProperties.textFields[index].prompt))
-                                //} else {
-                                    TextField(observedData.textEntryArray[index].prompt, text: $observedData.textEntryArray[index].value)
-                                //}
+                                TextEditor(text: $observedData.textEntryArray[index].value)
+                                    .background(Color("editorBackgroundColour"))
+                                    .font(.custom("HelveticaNeue", size: 14))
+                                    .cornerRadius(3.0)
+                                    .frame(height: 80)
+                            }
+                            .padding(.bottom, 10)
+                        } else {
+                            HStack {
+                                //Spacer()
+                                Text(appvars.textFields[index].title + (appvars.textFields[index].required ? " *":""))
+                                    .bold()
+                                    .font(.system(size: 15))
+                                    .frame(idealWidth: fieldwidth*0.20, alignment: .leading)
+                                Spacer()
+                                    //.frame(width: 20)
+                                if appvars.textFields[index].fileSelect {
+                                    Button("button-select".localized)
+                                    {
+                                        let panel = NSOpenPanel()
+                                        panel.allowsMultipleSelection = false
+                                        panel.canChooseDirectories = false
+                                        if appvars.textFields[index].fileType != "" {
+                                            panel.allowedFileTypes = [appvars.textFields[index].fileType]
+                                        }
+                                        if panel.runModal() == .OK {
+                                            observedData.textEntryArray[index].value = panel.url?.path ?? "<none>"
+                                        }
+                                    }
+                                }
+                                HStack {
+                                    if appvars.textFields[index].secure {
+                                        ZStack() {
+                                            SecureField("", text: $observedData.textEntryArray[index].value)
+                                                .disableAutocorrection(true)
+                                                .textContentType(appvars.textFields[index].passwordFill ? .password : .none)
+                                            Image(systemName: "lock.fill")
+                                                .foregroundColor(stringToColour("#008815")).opacity(0.5)
+                                                    .frame(idealWidth: fieldwidth*0.50, maxWidth: 250, alignment: .trailing)
+                                        }
+                                    } else {
+                                        TextField(appvars.textFields[index].prompt, text: $observedData.textEntryArray[index].value)
+                                            
+                                    }
+                                }
+                                .frame(idealWidth: fieldwidth*0.50, maxWidth: 250, alignment: .trailing)
+                                
+                                .overlay(RoundedRectangle(cornerRadius: 5)
+                                            .stroke(observedData.textEntryArray[index].requiredTextfieldHighlight, lineWidth: 2)
+                                            .animation(.easeIn(duration: 0.2)
+                                                        .repeatCount(3, autoreverses: true)
+                                                       )
+                                         )
+                                Spacer()
                             }
                         }
-                        .frame(idealWidth: fieldwidth*0.50, maxWidth: 300, alignment: .trailing)
-                        //.onChange(of: observedData.textEntryArray[index].value, perform: { value in
-                            //update appvars with the text that was entered. this will be printed to stdout on exit
-                            //appvars.textFields[index].value = observedData.textEntryArray[index].value
-                        //})
-                        .overlay(RoundedRectangle(cornerRadius: 5)
-                            .stroke(observedData.textEntryArray[index].requiredTextfieldHighlight, lineWidth: 2)
-                                    .animation(.easeIn(duration: 0.2)
-                                                .repeatCount(3, autoreverses: true)
-                                               )
-                                 )
-                        Spacer()
                     }
-                    .onChange(of: textFieldValue[index], perform: { value in
-                        //update appvars with the text that was entered. this will be printed to stdout on exit
-                        textFields[index].value = textFieldValue[index]
-                    })
                 }
-                if observedData.requiredFieldsPresent {
+                if requiredFieldsPresent {
                     HStack {
                         Spacer()
                         Text("required-note")
@@ -107,6 +131,7 @@ struct TextEntryView: View {
                     }
                 }
             }
+                    
         }
     }
 }

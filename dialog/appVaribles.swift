@@ -77,6 +77,27 @@ struct ListItems: Codable {
         }
 }
 
+struct MainImage {
+    var title           : String = ""
+    var path            : String
+    var caption         : String = ""
+    var dictionary: [String: Any] {
+        return ["imagename": "\(path)",
+                    "caption": caption]
+        }
+    var nsDictionary: NSDictionary {
+            return dictionary as NSDictionary
+        }
+}
+
+struct CLArgument {
+    var long: String
+    var short: String = ""
+    var value : String = ""
+    var present : Bool = false
+    var isbool : Bool = false
+}
+
 struct AppVariables {
     
     var cliversion                      = "1.11.2"
@@ -153,10 +174,12 @@ struct AppVariables {
     var checkboxValue                   = Array(repeating: false, count: 64)
     var checkboxDisabled                = Array(repeating: false, count: 64)
 
-    var imageArray                      = [String]()
+    var imageArray                      = [MainImage]()
     var imageCaptionArray               = [String]()
 
     var listItems = [ListItems]()
+    var textFields = [TextFieldState]()
+    var dropdownItems = [DropDownItems]()
 
     var annimationSmoothing             = Double(20)
 
@@ -258,6 +281,8 @@ struct CommandLineArguments {
     var hideTimerBar             = CLArgument(long: "hidetimerbar")
     var autoPlay                 = CLArgument(long: "autoplay")
     var blurScreen               = CLArgument(long: "blurscreen", isbool: true)
+    
+    //var lockWindow               = CLArgument(long: "moveable", short: "o")
     var constructionKit          = CLArgument(long: "builder", isbool: true)
     var movableWindow            = CLArgument(long: "moveable", short: "o", isbool: true)
     var forceOnTop               = CLArgument(long: "ontop", short: "p", isbool: true)
@@ -269,4 +294,5 @@ struct CommandLineArguments {
     var jsonOutPut               = CLArgument(long: "json", short: "j", isbool: true)
     var ignoreDND                = CLArgument(long: "ignorednd", short: "d", isbool: true)
     var jamfHelperMode           = CLArgument(long: "jh", short: "jh", isbool: true)
+    var miniMode                 = CLArgument(long: "mini")
 }

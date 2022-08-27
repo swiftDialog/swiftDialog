@@ -366,7 +366,7 @@ class DialogUpdatableContent : ObservableObject {
                 }
                 
             // list item status
-            case "\(cloptions.listItem.long):" :
+            case "\(appArguments.listItem.long):" :
                 var title             : String = ""
                 var icon              : String = ""
                 var statusText        : String = ""

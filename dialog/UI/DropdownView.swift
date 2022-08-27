@@ -41,7 +41,7 @@ struct DropdownView: View {
                         // we could print the title as part of the picker control but then we don't get easy access to swiftui text formatting
                         // so we print it seperatly and use a blank value in the picker
                         //Spacer()
-                        Text(dropdownItems[index].title)
+                        Text(appvars.dropdownItems[index].title)
                             .bold()
                             .font(.system(size: 15))
                             .frame(idealWidth: fieldwidth*0.20, alignment: .leading)
@@ -49,7 +49,7 @@ struct DropdownView: View {
                         //    .frame(width: 20)
                         Picker("", selection: $selectedOption[index])
                         {
-                            ForEach(dropdownItems[index].values, id: \.self) {
+                            ForEach(appvars.dropdownItems[index].values, id: \.self) {
                                 Text($0).tag($0)
                             }
                         }

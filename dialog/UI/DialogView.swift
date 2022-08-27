@@ -31,7 +31,7 @@ struct DialogView: View {
             HStack {
                 if (observedData.args.iconOption.present && !observedData.args.centreIcon.present && observedData.args.iconOption.value != "none") {
                     VStack {
-                        IconView(image: observedDialogContent.iconImage, overlay: observedDialogContent.overlayIconImage)
+                        IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
                             .frame(width: iconDisplayWidth, alignment: .top)
                             .border(appvars.debugBorderColour, width: 2)
                             .padding(.top, 20)
