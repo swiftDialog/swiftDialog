@@ -52,7 +52,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "--title &quot;Builder Test&quot; --builder"
+            argument = "--title &quot;Builder Test&quot; --textfield Test,required"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

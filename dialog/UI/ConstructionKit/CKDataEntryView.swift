@@ -25,7 +25,7 @@ struct CKDataEntryView: View {
             LabelView(label: "Textfields")
             HStack {
                 Button(action: {
-                    observedData.textEntryArray.append(TextFieldState(title: ""))
+                    observedData.appProperties.textFields.append(TextFieldState(title: ""))
                     observedData.args.textField.present = true
                     appArguments.textField.present = true
                 }, label: {
@@ -42,7 +42,7 @@ struct CKDataEntryView: View {
                 Spacer()
             }
             
-            ForEach(0..<observedData.textEntryArray.count, id: \.self) { item in
+            ForEach(0..<observedData.appProperties.textFields.count, id: \.self) { item in
                 HStack {
                     Button(action: {
                         //observedData.listItemsArray.remove(at: i)
@@ -50,24 +50,24 @@ struct CKDataEntryView: View {
                         Image(systemName: "trash")
                     })
                     .disabled(true) // MARK: disabled until I can work out how to delete from the array without causing a crash
-                    Toggle("Required", isOn: $observedData.textEntryArray[item].required)
-                        .onChange(of: observedData.textEntryArray[item].required, perform: { _ in
+                    Toggle("Required", isOn: $observedData.appProperties.textFields[item].required)
+                        .onChange(of: observedData.appProperties.textFields[item].required, perform: { _ in
                             observedData.requiredFieldsPresent.toggle()
                         })
                         .toggleStyle(.switch)
-                    Toggle("Secure", isOn: $observedData.textEntryArray[item].secure)
+                    Toggle("Secure", isOn: $observedData.appProperties.textFields[item].secure)
                         .toggleStyle(.switch)
                     Spacer()
                 }
                 HStack {
-                    TextField("Title", text: $observedData.textEntryArray[item].title)
-                    TextField("Value", text: $observedData.textEntryArray[item].value)
-                    TextField("Prompt", text: $observedData.textEntryArray[item].prompt)
+                    TextField("Title", text: $observedData.appProperties.textFields[item].title)
+                    TextField("Value", text: $observedData.appProperties.textFields[item].value)
+                    TextField("Prompt", text: $observedData.appProperties.textFields[item].prompt)
                 }
                 .padding(.leading, 20)
                 HStack {
-                    TextField("Regex", text: $observedData.textEntryArray[item].regex)
-                    TextField("Regex Error", text: $observedData.textEntryArray[item].regexError)
+                    TextField("Regex", text: $observedData.appProperties.textFields[item].regex)
+                    TextField("Regex Error", text: $observedData.appProperties.textFields[item].regexError)
                 }
                 .padding(.leading, 20)
                 Divider()

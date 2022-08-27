@@ -227,32 +227,32 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
             // check to see if fields marked as required have content before allowing the app to exit
             // if there is an empty field, update the highlight colour
             var dontQuit = false
-            for i in 0..<(observedObject?.textEntryArray.count ?? 0) {
+            for i in 0..<(observedObject?.appProperties.textFields.count ?? 0) {
                 //check for required fields
-                if observedObject?.textEntryArray[i].required ?? false && observedObject?.textEntryArray[i].value == "" { // && textFields[i].regex.isEmpty {
+                if observedObject?.appProperties.textFields[i].required ?? false && observedObject?.appProperties.textFields[i].value == "" { // && textFields[i].regex.isEmpty {
                     NSSound.beep()
-                    let requiredString = appvars.textFields[i].title+" "+"is-required".localized
-                    observedObject?.requiredTextfieldHighlight[i] = Color.red
+                    let requiredString = (observedObject?.appProperties.textFields[i].value ?? "")+" "+"is-required".localized
+                    observedObject?.appProperties.textFields[i].requiredTextfieldHighlight = Color.red
                     if !(observedObject?.sheetErrorMessage.contains(requiredString) ?? false) {
-                        observedObject?.sheetErrorMessage += "• "+appvars.textFields[i].title+" "+"is-required".localized+"\n"
+                        observedObject?.sheetErrorMessage += "• "+(observedObject?.appProperties.textFields[i].value ?? "")+" "+"is-required".localized+"\n"
                     }
                     dontQuit = true
                 
                 //check for regex requirements
-                } else if !(observedObject?.textEntryArray[i].value.isEmpty ?? false)
-                            && !(observedObject?.textEntryArray[i].regex.isEmpty ?? false)
-                            && !checkRegexPattern(regexPattern: observedObject?.textEntryArray[i].regex ?? "", textToValidate: observedObject?.textEntryArray[i].value ?? "") {
+                } else if !(observedObject?.appProperties.textFields[i].value.isEmpty ?? false)
+                            && !(observedObject?.appProperties.textFields[i].regex.isEmpty ?? false)
+                            && !checkRegexPattern(regexPattern: observedObject?.appProperties.textFields[i].regex ?? "", textToValidate: observedObject?.appProperties.textFields[i].value ?? "") {
                     NSSound.beep()
-                    observedObject?.textEntryArray[i].requiredTextfieldHighlight = Color.green
+                    observedObject?.appProperties.textFields[i].requiredTextfieldHighlight = Color.green
                     observedObject?.showSheet = true
-                    observedObject?.sheetErrorMessage += "• "+(observedObject?.textEntryArray[i].regexError ?? "Regex Check Failed\n")
+                    observedObject?.sheetErrorMessage += "• "+(observedObject?.appProperties.textFields[i].regexError ?? "Regex Check Failed\n")
                     dontQuit = true
                 } else {
-                    observedObject?.textEntryArray[i].requiredTextfieldHighlight = Color.clear
+                    observedObject?.appProperties.textFields[i].requiredTextfieldHighlight = Color.clear
                 }
                 
-                outputArray.append("\(observedObject?.textEntryArray[i].title ?? "field \(i)") : \(observedObject?.textEntryArray[i].value ?? "")")
-                json[observedObject?.textEntryArray[i].title ?? "Field \(i)"].string = observedObject?.textEntryArray[i].value
+                outputArray.append("\(observedObject?.appProperties.textFields[i].title ?? "field \(i)") : \(observedObject?.appProperties.textFields[i].value ?? "")")
+                json[observedObject?.appProperties.textFields[i].title ?? "Field \(i)"].string = observedObject?.appProperties.textFields[i].value
             }
             if dontQuit { return }
         }

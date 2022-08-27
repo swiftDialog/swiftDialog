@@ -20,23 +20,30 @@ struct MessageContent: View {
         
     var iconDisplayWidth : CGFloat
         
-    var defaultStyle: MarkdownStyle
-    var customStyle: MarkdownStyle
+    //var defaultStyle: MarkdownStyle
+    //var customStyle: MarkdownStyle
+    
+    var defaultStyle: MarkdownStyle {
+            return MarkdownStyle(font: .system(size: appvars.messageFontSize, weight: appvars.messageFontWeight), foregroundColor: appvars.messageFontColour)
+        }
+        
+        var customStyle: MarkdownStyle {
+            return MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.messageFontSize), foregroundColor: appvars.messageFontColour)
+        }
     
     let theAllignment: Alignment = .topLeading
     
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent
-        //if !observedDialogContent.args.hideIcon.present  { //appArguments.hideIcon.present {
-        //    fieldPadding = 40
-        //    iconDisplayWidth = 0
-        //} else {
+        if !observedDialogContent.args.iconOption.present { //cloptions.hideIcon.present {
             fieldPadding = 40
+            iconDisplayWidth = 0
+        } else {
+            fieldPadding = 15
             iconDisplayWidth = observedDialogContent.iconSize
-        //}
+        }
         messageColour = NSColor(observedDialogContent.appProperties.messageFontColour)
-        defaultStyle = MarkdownStyle(font: .system(size: observedDialogContent.appProperties.messageFontSize, weight: observedDialogContent.appProperties.messageFontWeight), foregroundColor: observedDialogContent.appProperties.messageFontColour)
-        customStyle = MarkdownStyle(font: .custom(observedDialogContent.appProperties.messageFontName, size: observedDialogContent.appProperties.messageFontSize), foregroundColor: observedDialogContent.appProperties.messageFontColour)
+
     }
     
     var body: some View {
@@ -96,13 +103,13 @@ struct MessageContent: View {
                     VStack {
                         TextEntryView(observedDialogContent: observedData)
                             //.padding(.leading, 50)
-                            //.padding(.trailing, 50)
+                            .padding(.trailing, 30)
                             .padding(.bottom, 10)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
 
                         DropdownView(observedDialogContent: observedData)
                             //.padding(.leading, 50)
-                            //.padding(.trailing, 50)
+                            .padding(.trailing, 30)
                             .padding(.bottom, 10)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
                     }
