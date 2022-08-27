@@ -69,7 +69,7 @@ struct ContentView: View {
             // this stack controls the main view. Consists of a VStack containing all the content, and a HStack positioned at the bottom of the display area
             VStack {
                 if observedData.args.bannerImage.present {
-                    BannerImageView(imagePath: observedData.args.bannerImage.value)
+                    BannerImageView(observedDialogContent: observedData)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                 }
 

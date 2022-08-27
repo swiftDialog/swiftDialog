@@ -98,6 +98,7 @@ struct CLArgument {
     var isbool : Bool = false
 }
 
+
 struct AppVariables {
     
     var cliversion                      = "Alpha 2.0"

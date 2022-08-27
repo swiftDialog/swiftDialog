@@ -50,6 +50,7 @@ struct CKBasicsView: View {
             }
             TextEditor(text: $observedData.args.messageOption.value)
                 .frame(minHeight: 50)
+                .background(Color("editorBackgroundColour"))
         }
         .padding(20)
 
