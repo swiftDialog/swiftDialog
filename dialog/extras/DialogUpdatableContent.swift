@@ -366,15 +366,20 @@ class DialogUpdatableContent : ObservableObject {
                 }
                 
             // list item status
-            case "\(appArguments.listItem.long):" :
-                var title           : String = ""
-                var icon            : String = ""
-                var statusText      : String = ""
-                var statusIcon      : String = ""
+            case "\(cloptions.listItem.long):" :
+                var title             : String = ""
+                var icon              : String = ""
+                var statusText        : String = ""
+                var statusIcon        : String = ""
                 let statusTypeArray = ["wait","success","fail","error","pending","progress"]
-                var progressValue   : CGFloat = 0
-                var deleteRow       : Bool = false
-                var addRow          : Bool = false
+                var listProgressValue : CGFloat = 0
+                var deleteRow         : Bool = false
+                var addRow            : Bool = false
+                
+                var iconIsSet         : Bool = false
+                var statusIsSet       : Bool = false
+                var statusTextIsSet   : Bool = false
+                var progressIsSet     : Bool = false
 
                 let listCommand = line.replacingOccurrences(of: "\(appArguments.listItem.long): ", with: "")
                 
@@ -402,7 +407,7 @@ class DialogUpdatableContent : ObservableObject {
                 
                 if commands.count > 0 {
                     for command in commands {
-                        let action = command.components(separatedBy: ":")
+                        let action = command.components(separatedBy: ": ")
                         switch action[0].lowercased().trimmingCharacters(in: .whitespaces) {
                             case "index":
                                 if let i = Int(action[1].trimmingCharacters(in: .whitespaces)) {
@@ -413,15 +418,19 @@ class DialogUpdatableContent : ObservableObject {
                             case "title":
                                 title = action[1].trimmingCharacters(in: .whitespaces)
                             case "icon":
-                                // reserved for future use
                                 icon = action[1].trimmingCharacters(in: .whitespaces)
+                                iconIsSet = true
                             case "statustext":
                                 statusText = action[1].trimmingCharacters(in: .whitespaces)
+                                statusTextIsSet = true
                             case "status":
                                 statusIcon = action[1].trimmingCharacters(in: .whitespaces)
+                                statusIsSet = true
                             case "progress":
-                                progressValue = string2float(string: action[1].trimmingCharacters(in: .whitespaces))
+                                listProgressValue = string2float(string: action[1].trimmingCharacters(in: .whitespaces))
                                 statusIcon = "progress"
+                                progressIsSet = true
+                                statusIsSet = true
                             case "delete":
                                 deleteRow = true
                             case "add":
@@ -437,17 +446,17 @@ class DialogUpdatableContent : ObservableObject {
                             listItemsArray.remove(at: row)
                             logger(logMessage: "deleted row at index \(row)")
                         } else {
-                            listItemsArray[row].icon = icon
-                            listItemsArray[row].statusIcon = statusIcon
-                            listItemsArray[row].statusText = statusText
-                            listItemsArray[row].progress = progressValue
+                            if iconIsSet { listItemsArray[row].icon = icon }
+                            if statusIsSet { listItemsArray[row].statusIcon = statusIcon }
+                            if statusTextIsSet { listItemsArray[row].statusText = statusText }
+                            if progressIsSet  {listItemsArray[row].progress = listProgressValue }
                             listItemUpdateRow = row
                         }
                     }
                     
                     // add to the list items array
                     if addRow {
-                        listItemsArray.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon, progress: progressValue))
+                        listItemsArray.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon, progress: listProgressValue))
                         logger(logMessage: "row added with \(title) \(icon) \(statusText) \(statusIcon)")
                     }
                     
@@ -455,6 +464,7 @@ class DialogUpdatableContent : ObservableObject {
                 
             // quit
             case "quit:" :
+                self.end()
                 quitDialog(exitCode: appvars.exit5.code)
 
             default:

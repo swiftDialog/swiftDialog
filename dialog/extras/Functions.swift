@@ -231,8 +231,11 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
                 //check for required fields
                 if observedObject?.textEntryArray[i].required ?? false && observedObject?.textEntryArray[i].value == "" { // && textFields[i].regex.isEmpty {
                     NSSound.beep()
-                    observedObject?.textEntryArray[i].requiredTextfieldHighlight = Color.red
-                    observedObject?.sheetErrorMessage += "• "+(observedObject?.textEntryArray[i].title ?? "Field \(i)")+" "+"is-required".localized+"\n"
+                    let requiredString = textFields[i].title+" "+"is-required".localized
+                    observedObject?.requiredTextfieldHighlight[i] = Color.red
+                    if !(observedObject?.sheetErrorMessage.contains(requiredString) ?? false) {
+                        observedObject?.sheetErrorMessage += "• "+textFields[i].title+" "+"is-required".localized+"\n"
+                    }
                     dontQuit = true
                 
                 //check for regex requirements
@@ -269,6 +272,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
             }
         }
     }
+    observedObject?.end()
     exit(exitCode)
 }
 

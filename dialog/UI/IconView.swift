@@ -12,9 +12,11 @@ import SwiftUI
 struct IconView: View {
     @Environment(\.colorScheme) var colorScheme
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    //@ObservedObject var observedDialogContent : DialogUpdatableContent
     
-    var messageUserImagePath: String //= appArguments.iconOption.value // CLOptionText(OptionName: appArguments.iconOption, DefaultValue: "default")
+    var messageUserImagePath: String //= cloptions.iconOption.value // CLOptionText(OptionName: cloptions.iconOption, DefaultValue: "default")
+    
+    var iconOverlay : String
     var logoWidth: CGFloat = appvars.iconWidth
     var logoHeight: CGFloat  = appvars.iconHeight
     var imgFromURL: Bool = false
@@ -44,15 +46,20 @@ struct IconView: View {
     let overlayImageScale: CGFloat = 0.4
     
   
-    init(observedDialogContent : DialogUpdatableContent) {
-        self.observedData = observedDialogContent
+    init(image : String = "", overlay : String = "") {
+        //self.observedDialogContent = observedDialogContent
         
-        messageUserImagePath = observedDialogContent.args.iconOption.value // observedDialogContent.iconImage
+        //if image != "" {
+        messageUserImagePath = image
+        iconOverlay = overlay
+        //} else {
+        //    messageUserImagePath = observedDialogContent.iconImage
+        //}
         
         logoWidth = appvars.iconWidth
         logoHeight = appvars.iconHeight
         
-        if observedDialogContent.args.overlayIconOption.present {
+        if overlay != "" {
             mainImageScale = mainImageWithOverlayScale
         }
         
@@ -258,7 +265,7 @@ struct IconView: View {
                     .scaleEffect(mainImageScale)
             }
 
-            IconOverlayView(observedDialogContent: observedData)
+            IconOverlayView(image: iconOverlay)
                 .scaleEffect(overlayImageScale, anchor:.bottomTrailing)
 
         }

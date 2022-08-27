@@ -7,6 +7,16 @@
 
 import SwiftUI
 
+extension NSTextView {
+    open override var frame: CGRect {
+        didSet {
+            backgroundColor = .clear
+            drawsBackground = true
+        }
+
+    }
+}
+
 struct TextEntryView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
@@ -15,13 +25,13 @@ struct TextEntryView: View {
     //var textPromptValue = Array(repeating: "", count: appvars.textFields.count)
     
     @State private var animationAmount = 1.0
-    
+
     @State private var showingSheet = false
-    
-    
-    //var textFieldPresent: Bool = false
+
+    var textFieldPresent: Bool = false
     var fieldwidth: CGFloat = 0
-    
+    var requiredFieldsPresent : Bool = false
+
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent
         if appArguments.textField.present {
@@ -36,8 +46,9 @@ struct TextEntryView: View {
         } else {
             fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value) - string2float(string: observedDialogContent.args.iconSize.value)
         }
+
     }
-    
+
     var body: some View {
         if observedData.args.textField.present {
             VStack {
@@ -81,6 +92,10 @@ struct TextEntryView: View {
                                  )
                         Spacer()
                     }
+                    .onChange(of: textFieldValue[index], perform: { value in
+                        //update appvars with the text that was entered. this will be printed to stdout on exit
+                        textFields[index].value = textFieldValue[index]
+                    })
                 }
                 if observedData.requiredFieldsPresent {
                     HStack {
@@ -95,5 +110,3 @@ struct TextEntryView: View {
         }
     }
 }
-
-

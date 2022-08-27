@@ -57,7 +57,12 @@ struct dialogApp: App {
         appvars.iconWidth = appvars.iconWidth * appvars.scaleFactor
         appvars.iconHeight = appvars.iconHeight * appvars.scaleFactor
         
-        if appArguments.fullScreenWindow.present {
+        if cloptions.miniMode.present {
+            appvars.windowWidth = 540
+            appvars.windowHeight = 128
+        }
+        
+        if cloptions.fullScreenWindow.present {
             FullscreenView().showFullScreen()
         }
         
@@ -130,12 +135,18 @@ struct dialogApp: App {
                 }
                 .frame(width: 0, height: 0) //ensures hostingwindowfinder isn't taking up any real estate
                 
-                ContentView(observedDialogContent: observedData)
-                    .frame(width: observedData.windowWidth.rounded(), height: observedData.windowHeight.rounded()) // + appvars.bannerHeight)
-                //.frame(idealWidth: appvars.windowWidth, idealHeight: appvars.windowHeight)
-                    .sheet(isPresented: $observedData.showSheet, content: {
-                        ErrorView(observedContent: observedData)
-                    })
+                if cloptions.miniMode.present {
+                    MiniView(observedContent: observedDialogContent)
+                        .frame(width: observedDialogContent.windowWidth, height: observedDialogContent.windowHeight)
+                        //.frame(height: 128)
+                        //.border(.red)
+                } else {
+                    ContentView(observedDialogContent: observedDialogContent)
+                        .frame(width: observedDialogContent.windowWidth, height: observedDialogContent.windowHeight) // + appvars.bannerHeight)
+                        .sheet(isPresented: $observedDialogContent.showSheet, content: {
+                            ErrorView(observedContent: observedDialogContent)
+                        })
+                }
 
             }
         }

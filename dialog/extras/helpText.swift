@@ -11,7 +11,7 @@ var helpText = """
     Dialog version \(getVersionString()) ©2022 Bart Reardon
 
     OPTIONS:
-    
+
     ** Basic Options - - - - - - - - - - - - - - - -
     
         -\(appArguments.titleOption.short), --\(appArguments.titleOption.long) <text>
@@ -22,22 +22,22 @@ var helpText = """
 
         --\(appArguments.titleFont.long) <text>
                     Lets you modify the title text of the dialog.
-    
+
                     Can accept up to three parameters, in a comma seperated list, to modify font properties.
-                    
+
                         color,colour=<text><hex>  - specified in hex format, e.g. #00A4C7
                                                     Also accepts any of the standard Apple colours
                                                     black, blue, gray, green, orange, pink, purple, red, white, yellow
                                                     default if option is invalid is system primary colour
-    
+
                         size=<float>              - accepts any float value.
-    
+
                         name=<fontname>           - accepts a font name or family
                                                     list of available names can be determined with --\(appArguments.listFonts.long)
 
                         weight=[thin | light | regular | medium | heavy | bold]
                             default is bold
-    
+
                     Example1: \"colour=#00A4C7,weight=light,size=60\"
                     Example2: \"name=Chalkboard,colour=#FFD012,size=40\"
         
@@ -54,25 +54,25 @@ var helpText = """
     
         --\(appArguments.messageFont.long) <text>
                     Lets you modify the message text of the dialog.
-    
+
                     Can accept up to three parameters, in a comma seperated list, to modify font properties.
-                    
+
                         color,colour=<text><hex>  - specified in hex format, e.g. #00A4C7
                                                     Also accepts any of the standard Apple colours
                                                     black, blue, gray, green, orange, pink, purple, red, white, yellow
                                                     default if option is invalid is system primary colour
-    
+
                         size=<float>              - accepts any float value.
-    
+
                         name=<fontname>           - accepts a font name or family
                                                     list of available names can be determined with --\(appArguments.listFonts.long)
 
                         weight=[thin | light | regular | medium | heavy | bold]
                             default is regular
-    
+
                     Example1: \"colour=#00A4C7,weight=light,size=60\"
                     Example2: \"name=Chalkboard,colour=#FFD012,size=40\"
-    
+
                     ## CAUTION : Results may be unexpected when mixing font names and weights with markdown
         
         -\(appArguments.mainImage.short), --\(appArguments.mainImage.long)  <file> | <url>
@@ -124,12 +124,12 @@ var helpText = """
                     URL of file resource              -  "https://someurl/file.[png|jpg]"
                     SF Symbol                         -  "SF=sf.symbol.name"
                     builtin                           -  info | caution | warning
-    
+
                 When Specifying SF Symbols for icon or overlay icon, additional parameters for colour and weight are available:
                 additionl parameters are seperated by comma
 
                     "SF=sf.symbol.name,colour=<text><hex>,weight=<text>"
-    
+
                     SF Symbols - visit https://developer.apple.com/sf-symbols/ for details on over 3,100 symbols
 
                     color,colour=<text><hex>          - specified in hex format, e.g. #00A4C7
@@ -137,16 +137,16 @@ var helpText = """
                     palette=<text><hex>               - palette accepts up to three colours for use in multicolour
                                                         SF Symbols
                                                         Use comma seperated values, e.g. palette=red,green,blue
-    
+
                                                       Also accepts any of the standard Apple colours
                                                       black, blue, gray, green, orange, pink, purple, red, white,
                                                       yellow, mint, cyan, indigo or teal
-    
+
                                                       default if option is invalid is system primary colour
-    
+
                                                       bgcolour, bgcolor will set the background colour of the icon overlay
                                                         when SF Symbols are used
-    
+
                                                       - Special colour "auto".
                                                       When used with a multicolor SF Symbol, the symbols
                                                         default colour scheem will be used
@@ -195,7 +195,7 @@ var helpText = """
 
         -\(appArguments.infoButtonOption.short), --\(appArguments.infoButtonOption.long)
                     Displays info button with default label of "\(appvars.buttonInfoDefault)"
-            
+
             OR
 
         --\(appArguments.buttonInfoTextOption.long) <text>
@@ -214,7 +214,7 @@ var helpText = """
         --\(appArguments.quitOnInfo.long)
                     Will tell Dialog to quit when the info button is selected
                     Return code when actioned is 3
-    
+
     ** Advanced Options - - - - - - - - - - - - - - - -
     
         -\(appArguments.fullScreenWindow.short), --\(appArguments.fullScreenWindow.long)
@@ -234,7 +234,7 @@ var helpText = """
     
         --\(appArguments.statusLogFile.long) <file>
                     Sets the path to the command file Dialog will read from to receive updates
-                    Default file is /var/log/dialog.log
+                    Default file is /var/tmp/dialog.log
 
         -\(appArguments.bannerImage.short), --\(appArguments.bannerImage.long) <file> | <url>
                     Shows a banner image at the top of the dialog
@@ -252,26 +252,26 @@ var helpText = """
     
         --\(appArguments.dropdownDefault.long) <text>
                     Default option to be selected (must match one of the items in the list)
-    
+
                     If specified, the selected option will be sent to stdout in two forms:
                       SelectedOption - Outputs the text of the option seelcted
                       SelectedIndex  - Outputs the index of the option selected, starting at 0
-    
+
                       example output b:
                         SelectedOption: Option 1
                         SelectedIndex: 0
-    
+
                     Output of select items is only shown if Dialog's exit code is 0
-    
+
                     Multiple dropdown caluse, titles and default selections can be specified as required.
                     Associations are made in the order they are presented on the command line
                     Or use json formatting for more direct control. for example:
-                    
+
                     "selectitems" : [
                         {"title" : "Select 1", "values" : ["one","two","three"]},
                         {"title" : "Select 2", "values" : ["red","green","blue"], "default" : "red"}
                     ]
-    
+
                     When using multiple dropdown lists, output will be in the form:
                     <title> : <value>
                     <title> index : <index_value>
@@ -281,7 +281,7 @@ var helpText = """
                     When Dialog exits the contents of the textfield will be presented as <text> : <user_input>
                     in plain or as json using [-\(appArguments.jsonOutPut.short), --\(appArguments.jsonOutPut.long)] option
                     Multiple textfields can be specified as required.
-    
+
                     Modifiers available to text fields are:
                         secure     - Presends a secure input area. Contents of the textfield will not be shown on screen
                         required   - Dialog will not exit until the field is populated
@@ -309,7 +309,7 @@ var helpText = """
                     {
                       "listitem" : ["Item One", "Item Two", "Item Three", "Item Four", "Item Five"]
                     }
-    
+
                     Advanced:
                     {
                       "listitem" : [
@@ -317,7 +317,7 @@ var helpText = """
                         {"title" : "<text>", "status" : "<status>", "statustext" : "<text>"}
                       ]
                     }
-                    
+
                     <status> can be one of "wait", "success", "fail", "error" or "pending"
                     and will display an apropriate icon in the status area.
     
@@ -335,7 +335,7 @@ var helpText = """
                     Delete an item (one of):
                         listitem: index: <index>, delete:
                         listitem: title: <text>, delete:
-                    
+
                     <index> starts at 0
     
         -\(appArguments.watermarkImage.short), --\(appArguments.watermarkImage.long) <file>
@@ -400,7 +400,7 @@ var helpText = """
     
         --\(appArguments.jsonFile.long) <file>
                     Use JSON formatted data file as input instead of command line paramaters
-    
+
                     Uses the same naming convention as the long form command line options
                     e.g.
                     {
@@ -437,7 +437,7 @@ var helpText = """
         --\(appArguments.quitKey.long) <char>
                     Use the specified character as the command+ key combination for quitting instead of "q".
                     Capitol letters can be used in which case command+shift+<key> will be required
-                    
+
 
         -\(appArguments.ignoreDND.short), --\(appArguments.ignoreDND.long)
                     Will ignore user Do Not Disturb setting

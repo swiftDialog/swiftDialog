@@ -43,6 +43,19 @@ struct ButtonView: View {
                 Button(action: {
                     observedData.end()
                     quitDialog(exitCode: appvars.exit2.code, observedObject: observedData)
+            if cloptions.button2Option.present {
+                Button(action: {
+                    quitDialog(exitCode: appvars.exit2.code)
+                }, label: {
+                    Text(appvars.button2Default)
+                        .frame(minWidth: 40, alignment: .center)
+                    }
+                )
+                .keyboardShortcut(.cancelAction)
+            } else if cloptions.button2TextOption.present {
+                let button2Text: String = observedDialogContent.button2Value
+                Button(action: {
+                    quitDialog(exitCode: appvars.exit2.code)
                 }, label: {
                     Text(button2Text)
                         .frame(minWidth: 40, alignment: .center)
