@@ -34,7 +34,7 @@ struct TextFieldState {
     var regexError      : String    = ""
     var required        : Bool      = false
     var secure          : Bool      = false
-    var selectLabel     : String    = ""
+    //var selectLabel     : String    = ""
     var title           : String
     var value           : String    = ""
     var requiredTextfieldHighlight : Color = .clear
@@ -100,7 +100,7 @@ struct CLArgument {
 
 struct AppVariables {
     
-    var cliversion                      = "1.11.2"
+    var cliversion                      = "Alpha 2.0"
     
     // message default strings
     var titleDefault                    = String("default-title".localized)
@@ -165,9 +165,6 @@ struct AppVariables {
     var jsonOut                         = Bool(false)
 
     var willDisturb                     = Bool(false)
-
-    var textOptionsArray                = [String]()
-    var textFieldText                   = Array(repeating: "", count: 64)
 
     var checkboxOptionsArray            = [String]()
     var checkboxText                    = Array(repeating: "", count: 64)
