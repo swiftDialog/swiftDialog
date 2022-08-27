@@ -217,9 +217,11 @@ struct IconView: View {
                         }
                         
                     } else {
-                        Image(systemName: builtInIconFill)
-                            .resizable()
-                            .foregroundColor(Color.white)
+                        if builtInIconFill != "" {
+                            Image(systemName: builtInIconFill)
+                                .resizable()
+                                .foregroundColor(Color.white)
+                        }
                         if #available(macOS 12.0, *) {
                             if messageUserImagePath == "default" {
                                 Image(systemName: builtInIconName)

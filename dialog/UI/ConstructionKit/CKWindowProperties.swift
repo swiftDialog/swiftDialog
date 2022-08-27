@@ -34,27 +34,58 @@ struct CKWindowProperties: View {
                     .frame(width: 200)
                 Spacer()
             }
-            LabelView(label: "Window Properties")
-            HStack {
-                Text("Screen Background Blur")
-                    .frame(width: 100, alignment: .leading)
-                Toggle("", isOn: $observedData.args.blurScreen.present)
-                    .toggleStyle(.switch)
-                Spacer()
-            }
-            HStack {
-                Text("Movable")
-                    .frame(width: 100, alignment: .leading)
-                Toggle("", isOn: $observedData.args.movableWindow.present)
-                    .toggleStyle(.switch)
-                Spacer()
-            }
-            HStack {
-                Text("Force on Top")
-                    .frame(width: 100, alignment: .leading)
-                Toggle("", isOn: $observedData.args.forceOnTop.present)
-                    .toggleStyle(.switch)
-                Spacer()
+            Group {
+                LabelView(label: "Window Properties")
+                //HStack {
+                //    Text("Mini view")
+                //        .frame(width: 100, alignment: .leading)
+                //    Toggle("", isOn: $observedData.args.miniMode.present)
+                //        .toggleStyle(.switch)
+                //    Spacer()
+                //}
+                HStack {
+                    Text("Preset Sizes")
+                        .frame(width: 100, alignment: .leading)
+                    Toggle("Small", isOn: $observedData.args.smallWindow.present)
+                        .toggleStyle(.switch)
+                        .onChange(of: observedData.args.smallWindow.present, perform: { _ in
+                            observedData.appProperties.scaleFactor = 0.75
+                            observedData.iconSize = 120
+                            if observedData.args.smallWindow.present {
+                                observedData.args.bigWindow.present = false
+                            }
+                        })
+                    Toggle("Big", isOn: $observedData.args.bigWindow.present)
+                        .toggleStyle(.switch)
+                        .onChange(of: observedData.args.bigWindow.present, perform: { _ in
+                            observedData.appProperties.scaleFactor = 1.25
+                            if observedData.args.bigWindow.present {
+                                observedData.args.smallWindow.present = false
+                            }
+                        })
+                    Spacer()
+                }
+                HStack {
+                    Text("Screen Background Blur")
+                        .frame(width: 100, alignment: .leading)
+                    Toggle("", isOn: $observedData.args.blurScreen.present)
+                        .toggleStyle(.switch)
+                    Spacer()
+                }
+                HStack {
+                    Text("Movable")
+                        .frame(width: 100, alignment: .leading)
+                    Toggle("", isOn: $observedData.args.movableWindow.present)
+                        .toggleStyle(.switch)
+                    Spacer()
+                }
+                HStack {
+                    Text("Force on Top")
+                        .frame(width: 100, alignment: .leading)
+                    Toggle("", isOn: $observedData.args.forceOnTop.present)
+                        .toggleStyle(.switch)
+                    Spacer()
+                }
             }
             HStack {
                 Text("Banner Image")
