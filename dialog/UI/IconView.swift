@@ -21,6 +21,7 @@ struct IconView: View {
     var logoHeight: CGFloat  = appvars.iconHeight
     var imgFromURL: Bool = false
     var imgFromAPP: Bool = false
+    var imgFromBase64: Bool = false
     
     var builtInIconName: String = ""
     var builtInIconColour: Color = Color.primary
@@ -72,6 +73,10 @@ struct IconView: View {
         
         if messageUserImagePath.starts(with: "http") {
             imgFromURL = true
+        }
+        
+        if messageUserImagePath.starts(with: "base64") {
+            imgFromBase64 = true
         }
         
         if messageUserImagePath.hasSuffix(".app") || messageUserImagePath.hasSuffix("prefPane") {
@@ -163,7 +168,7 @@ struct IconView: View {
         } else if appArguments.infoIcon.present || messageUserImagePath == "info" {
             builtInIconName = "person.fill.questionmark"
             builtInIconPresent = true
-        } else if messageUserImagePath == "default" || (!builtInIconPresent && !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL) {
+        } else if messageUserImagePath == "default" || (!builtInIconPresent && !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL && !imgFromBase64) {
             builtInIconName = "bubble.left.circle.fill"
             iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
             builtInIconPresent = true

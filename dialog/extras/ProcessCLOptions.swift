@@ -244,8 +244,12 @@ func processCLOptions() {
                 var statusText : String = ""
                 var statusIcon : String = ""
                 for item in items {
-                    let itemName = item.components(separatedBy: "=").first!
-                    let itemValue = item.components(separatedBy: "=").last!
+                    var itemKeyValuePair = item.split(separator: "=", maxSplits: 1)
+                    for _ in itemKeyValuePair.count...2 {
+                        itemKeyValuePair.append("")
+                    }
+                    let itemName = String(itemKeyValuePair[0])
+                    let itemValue = String(itemKeyValuePair[1])
                     switch itemName.lowercased() {
                     case "title":
                         title = itemValue

@@ -3,4 +3,69 @@
    uuid = "A4484579-600A-427F-B4ED-249EDA4C71FA"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "4E285650-B72F-4D10-BA11-A25C73FD8E2C"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "dialog/UI/IconView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "50"
+            endingLineNumber = "50"
+            landmarkName = "init(image:overlay:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "4E285650-B72F-4D10-BA11-A25C73FD8E2C - 36d799dc95de4491"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "default argument 0 of Dialog.IconView.init(image: Swift.String, overlay: Swift.String) -&gt; Dialog.IconView"
+                  moduleName = "Dialog"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/rea094/Documents/code/Dialog-public/dialog/UI/IconView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "49"
+                  endingLineNumber = "49"
+                  offsetFromSymbolStart = "24">
+               </Location>
+               <Location
+                  uuid = "4E285650-B72F-4D10-BA11-A25C73FD8E2C - 73e86e5fe637148e"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "default argument 1 of Dialog.IconView.init(image: Swift.String, overlay: Swift.String) -&gt; Dialog.IconView"
+                  moduleName = "Dialog"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/rea094/Documents/code/Dialog-public/dialog/UI/IconView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "49"
+                  endingLineNumber = "49"
+                  offsetFromSymbolStart = "24">
+               </Location>
+               <Location
+                  uuid = "4E285650-B72F-4D10-BA11-A25C73FD8E2C - ae07fd9a267fe32c"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Dialog.IconView.init(image: Swift.String, overlay: Swift.String) -&gt; Dialog.IconView"
+                  moduleName = "Dialog"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/rea094/Documents/code/Dialog-public/dialog/UI/IconView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "13"
+                  endingLineNumber = "13"
+                  offsetFromSymbolStart = "488">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>

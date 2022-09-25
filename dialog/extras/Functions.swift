@@ -63,6 +63,11 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
     var urlPath = NSURL(string: "")!
     var imageData = NSData()
     
+    // check if it's base64 image data
+    if fileImagePath.hasPrefix("base64") {
+        return getImageFromBase64(base64String: fileImagePath.replacingOccurrences(of: "base64=", with: ""))
+    }
+    
     // checking for anything starting with http - crude but it works (for now)
     if fileImagePath.hasPrefix("http") {
         urlPath = NSURL(string: fileImagePath)!
@@ -91,6 +96,14 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
         .bestRepresentation(for: NSRect(x: 0, y: 0, width: imgWidth!, height: imgHeight!), context: nil, hints: nil) {
         image.size = rep.size
         image.addRepresentation(rep)
+    }
+    return image
+}
+
+func getImageFromBase64(base64String: String) -> NSImage {
+    var image = NSImage(systemSymbolName: "applelogo", accessibilityDescription: nil)!
+    if let imageData = Data(base64Encoded: base64String, options: .ignoreUnknownCharacters) {
+        image = NSImage(data: imageData)!
     }
     return image
 }
