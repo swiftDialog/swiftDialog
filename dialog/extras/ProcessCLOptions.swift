@@ -546,6 +546,9 @@ func processCLOptionValues() {
             appvars.messageAlignment = .leading
         }
     }
+    
+    appArguments.messageVerticalAlignment.value = json[appArguments.messageVerticalAlignment.long].string ?? CLOptionText(OptionName: appArguments.messageVerticalAlignment)
+    appArguments.messageVerticalAlignment.present = json[appArguments.messageVerticalAlignment.long].exists() || CLOptionPresent(OptionName: appArguments.messageVerticalAlignment)
 
     // window location on screen
     if CLOptionPresent(OptionName: appArguments.position) {

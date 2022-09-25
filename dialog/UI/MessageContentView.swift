@@ -61,52 +61,55 @@ struct MessageContent: View {
             }
         } else {
             VStack {
-                
-                if observedData.args.centreIcon.present && observedData.args.iconOption.present {
-                    IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
-                        .frame(width: iconDisplayWidth, alignment: .top)
-                        .padding(.top, 15)
-                        .padding(.bottom, 10)
-                        .border(observedData.appProperties.debugBorderColour, width: 2)
-                }
-                
-                if observedData.args.listItem.present {
-                    Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                        .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                        .markdownStyle(defaultStyle)
-                    ListView(observedDialogContent: observedData)
-                        .padding(.top, 10)
-                } else {
-                    ScrollView() {
-                        if observedData.appProperties.messageFontName == "" {
-                            Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                                .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                                .markdownStyle(defaultStyle)
-                        } else {
-                            Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                                .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                                .markdownStyle(customStyle)
-                        }
-                        
-                        CheckboxView()
+                GeometryReader { proxy in
+                    if observedData.args.centreIcon.present && observedData.args.iconOption.present {
+                        IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
+                            .frame(width: iconDisplayWidth, alignment: .top)
+                            .padding(.top, 15)
+                            .padding(.bottom, 10)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
-                            .padding(.top, 10)
-                    
                     }
-                    .padding(.top, 10)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
+                    
+                    if observedData.args.listItem.present {
+                        Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
+                            .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                            .markdownStyle(defaultStyle)
+                        ListView(observedDialogContent: observedData)
+                            .padding(.top, 10)
+                    } else if observedData.args.messageVerticalAlignment.present {
+                        Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
+                            .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                            .markdownStyle(defaultStyle)
+                            .frame(minHeight: proxy.size.height)
+                    } else {
+                        ScrollView() {
+                            if observedData.appProperties.messageFontName == "" {
+                                Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
+                                    .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                                    .markdownStyle(defaultStyle)
+                            } else {
+                                Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
+                                    .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                                    .markdownStyle(customStyle)
+                            }
+                        }
+                        .padding(.top, 10)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
+                    }
                 }
-                
                 Spacer()
                 HStack() {
                     //Spacer()
                     VStack {
+                        CheckboxView()
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .padding(.trailing, 30)
+                            .padding(.bottom, 10)
                         TextEntryView(observedDialogContent: observedData)
                             //.padding(.leading, 50)
                             .padding(.trailing, 30)
                             .padding(.bottom, 10)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
-
                         DropdownView(observedDialogContent: observedData)
                             //.padding(.leading, 50)
                             .padding(.trailing, 30)

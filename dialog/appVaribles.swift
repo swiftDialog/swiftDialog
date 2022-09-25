@@ -218,6 +218,7 @@ struct CommandLineArguments {
     var titleOption              = CLArgument(long: "title", short: "t")
     var messageOption            = CLArgument(long: "message", short: "m")
     var messageAlignment         = CLArgument(long: "alignment")
+    var messageVerticalAlignment = CLArgument(long: "vertical-alignment")
     var iconOption               = CLArgument(long: "icon", short: "i")
     var iconSize                 = CLArgument(long: "iconsize")
   //var iconHeight               = CLArgument(long: "iconheight")
