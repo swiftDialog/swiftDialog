@@ -122,8 +122,6 @@ struct ContentView: View {
         
         }
         .edgesIgnoringSafeArea(.all)
-        //.hostingWindowPosition(vertical: appvars.windowPositionVertical, horizontal: appvars.windowPositionHorozontal)
-
          
     }
     

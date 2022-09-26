@@ -44,8 +44,8 @@ struct dialogApp: App {
         let visibleFrame = main.visibleFrame
         let windowSize = window.frame.size
         
-        let windowX = setWindowXPos(screenWidth: visibleFrame.width - windowSize.width, position: appvars.windowPositionHorozontal)
-        let windowY = setWindowYPos(screenHeight: visibleFrame.height - windowSize.height, position: appvars.windowPositionVertical)
+        let windowX = calculateWindowXPos(screenWidth: visibleFrame.width - windowSize.width, position: appvars.windowPositionHorozontal)
+        let windowY = calculateWindowYPos(screenHeight: visibleFrame.height - windowSize.height, position: appvars.windowPositionVertical)
         
         let desiredOrigin = CGPoint(x: visibleFrame.origin.x + windowX, y: visibleFrame.origin.y + windowY)
         window.setFrameOrigin(desiredOrigin)
@@ -135,7 +135,7 @@ struct dialogApp: App {
 
         WindowGroup {
             ZStack {
-                HostingWindowFinder {window in
+                WindowAccessor {window in
                     window?.standardWindowButton(.closeButton)?.isHidden = true //hides the red close button
                     window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
                     window?.standardWindowButton(.zoomButton)?.isHidden = true //this removes the green zoom button
@@ -163,48 +163,32 @@ struct dialogApp: App {
                     }
                     
                 }
-                .frame(width: 0, height: 0) //ensures hostingwindowfinder isn't taking up any real estate
+                .frame(width: 0, height: 0) //ensures WindowAccessor isn't taking up any real estate
                 
                 if appArguments.miniMode.present {
                     MiniView(observedContent: observedData)
                         .frame(width: observedData.windowWidth, height: observedData.windowHeight)
-                        .background(WindowAccessor { newWindow in
-                                if let newWindow = newWindow {
-                                    monitorVisibility(window: newWindow)
-
-                                } else {
-                                    // window closed: release all references
-                                    self.window = nil
-                                    self.cancellables.removeAll()
-                                }
-                            })
                 } else {
                     ContentView(observedDialogContent: observedData)
-                        .frame(width: observedData.windowWidth, height: observedData.windowHeight) // + appvars.bannerHeight)
+                        .frame(width: observedData.windowWidth, height: observedData.windowHeight)
                         .sheet(isPresented: $observedData.showSheet, content: {
                             ErrorView(observedContent: observedData)
                         })
-                        .background(WindowAccessor { newWindow in
-                                if let newWindow = newWindow {
-                                    monitorVisibility(window: newWindow)
-
-                                } else {
-                                    // window closed: release all references
-                                    self.window = nil
-                                    self.cancellables.removeAll()
-                                }
-                            })
                 }
-
             }
+            // Monitor window visibility, process position on screen before rendering.
+            .background(WindowAccessor { newWindow in
+                    if let newWindow = newWindow {
+                        monitorVisibility(window: newWindow)
+                    } else {
+                        // window closed: release all references
+                        self.window = nil
+                        self.cancellables.removeAll()
+                    }
+                })
         }
         // Hide Title Bar
         .windowStyle(HiddenTitleBarWindowStyle())
-        /*
-        WindowGroup("ConstructionKit") {
-            ConstructionKitView(observedDialogContent: observedDialogContent)
-        }
-         */
     }
 
     

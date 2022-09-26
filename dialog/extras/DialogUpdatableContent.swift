@@ -214,6 +214,9 @@ class DialogUpdatableContent : ObservableObject {
             case "width:" :
                 windowWidth = NumberFormatter().number(from: line.replacingOccurrences(of: "width: ", with: "")) as! CGFloat
                 appProperties.windowWidth = windowWidth
+                //dialogApp.placeWindow(NSApp.mainWindow)
+                WindowAccessor
+                
                 
             case "height:" :
                 windowHeight = NumberFormatter().number(from: line.replacingOccurrences(of: "height: ", with: "")) as! CGFloat                
