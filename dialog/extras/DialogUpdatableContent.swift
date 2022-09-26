@@ -9,6 +9,7 @@
 import Foundation
 import SwiftUI
 
+
 enum StatusState {
     case start
     case done
@@ -19,6 +20,8 @@ class DialogUpdatableContent : ObservableObject {
     // set up some defaults
     
     var path: String
+    
+    @Published var mainWindow : NSWindow?
     
     // bring in all the collected appArguments
     // TODO: reduce double handling of data.
@@ -214,9 +217,6 @@ class DialogUpdatableContent : ObservableObject {
             case "width:" :
                 windowWidth = NumberFormatter().number(from: line.replacingOccurrences(of: "width: ", with: "")) as! CGFloat
                 appProperties.windowWidth = windowWidth
-                //dialogApp.placeWindow(NSApp.mainWindow)
-                WindowAccessor
-                
                 
             case "height:" :
                 windowHeight = NumberFormatter().number(from: line.replacingOccurrences(of: "height: ", with: "")) as! CGFloat                

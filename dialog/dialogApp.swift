@@ -25,32 +25,20 @@ struct dialogApp: App {
     @ObservedObject var observedData : DialogUpdatableContent
     
     @State private var cancellables = Set<AnyCancellable>()
-    @State var window : NSWindow?
+    //@State var window : NSWindow?
     
     func monitorVisibility(window: NSWindow) {
         window.publisher(for: \.isVisible)
             .dropFirst()  // we know: the first value is not interesting
             .sink(receiveValue: { isVisible in
                 if isVisible {
-                    self.window = window
+                    observedData.mainWindow = window
                     placeWindow(window)
                 }
             })
             .store(in: &cancellables)
     }
     
-    func placeWindow(_ window: NSWindow) {
-        let main = NSScreen.main!
-        let visibleFrame = main.visibleFrame
-        let windowSize = window.frame.size
-        
-        let windowX = calculateWindowXPos(screenWidth: visibleFrame.width - windowSize.width, position: appvars.windowPositionHorozontal)
-        let windowY = calculateWindowYPos(screenHeight: visibleFrame.height - windowSize.height, position: appvars.windowPositionVertical)
-        
-        let desiredOrigin = CGPoint(x: visibleFrame.origin.x + windowX, y: visibleFrame.origin.y + windowY)
-        window.setFrameOrigin(desiredOrigin)
-    }
-        
     init () {
         
         logger(logMessage: "Dialog Launched")
@@ -182,7 +170,7 @@ struct dialogApp: App {
                         monitorVisibility(window: newWindow)
                     } else {
                         // window closed: release all references
-                        self.window = nil
+                        observedData.mainWindow = nil
                         self.cancellables.removeAll()
                     }
                 })
