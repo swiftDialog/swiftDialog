@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 import SystemConfiguration
 
@@ -22,6 +23,33 @@ var background = BlurWindowController()
 struct dialogApp: App {
     
     @ObservedObject var observedData : DialogUpdatableContent
+    
+    @State private var cancellables = Set<AnyCancellable>()
+    @State var window : NSWindow?
+    
+    func monitorVisibility(window: NSWindow) {
+        window.publisher(for: \.isVisible)
+            .dropFirst()  // we know: the first value is not interesting
+            .sink(receiveValue: { isVisible in
+                if isVisible {
+                    self.window = window
+                    placeWindow(window)
+                }
+            })
+            .store(in: &cancellables)
+    }
+    
+    func placeWindow(_ window: NSWindow) {
+        let main = NSScreen.main!
+        let visibleFrame = main.visibleFrame
+        let windowSize = window.frame.size
+        
+        let windowX = setWindowXPos(screenWidth: visibleFrame.width - windowSize.width, position: appvars.windowPositionHorozontal)
+        let windowY = setWindowYPos(screenHeight: visibleFrame.height - windowSize.height, position: appvars.windowPositionVertical)
+        
+        let desiredOrigin = CGPoint(x: visibleFrame.origin.x + windowX, y: visibleFrame.origin.y + windowY)
+        window.setFrameOrigin(desiredOrigin)
+    }
         
     init () {
         
@@ -102,6 +130,7 @@ struct dialogApp: App {
         // bring to front on launch
         NSApp.activate(ignoringOtherApps: true)
     }
+    
     var body: some Scene {
 
         WindowGroup {
@@ -139,14 +168,32 @@ struct dialogApp: App {
                 if appArguments.miniMode.present {
                     MiniView(observedContent: observedData)
                         .frame(width: observedData.windowWidth, height: observedData.windowHeight)
-                        //.frame(height: 128)
-                        //.border(.red)
+                        .background(WindowAccessor { newWindow in
+                                if let newWindow = newWindow {
+                                    monitorVisibility(window: newWindow)
+
+                                } else {
+                                    // window closed: release all references
+                                    self.window = nil
+                                    self.cancellables.removeAll()
+                                }
+                            })
                 } else {
                     ContentView(observedDialogContent: observedData)
                         .frame(width: observedData.windowWidth, height: observedData.windowHeight) // + appvars.bannerHeight)
                         .sheet(isPresented: $observedData.showSheet, content: {
                             ErrorView(observedContent: observedData)
                         })
+                        .background(WindowAccessor { newWindow in
+                                if let newWindow = newWindow {
+                                    monitorVisibility(window: newWindow)
+
+                                } else {
+                                    // window closed: release all references
+                                    self.window = nil
+                                    self.cancellables.removeAll()
+                                }
+                            })
                 }
 
             }

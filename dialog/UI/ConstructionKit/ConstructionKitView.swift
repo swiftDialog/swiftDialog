@@ -41,9 +41,89 @@ struct WelcomeView: View {
 }
 
 struct JSONView: View {
-    @State var jsonText : String
+    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    
+    @State private var jsonText : String = ""
+    
+    private func exportJSON(debug : Bool = false) -> String {
+        var json = JSON()
+        var jsonDEBUG = JSON()
+        
+        // copy modifyable objects into args
+        observedDialogContent.args.iconSize.value = "\(observedDialogContent.iconSize)"
+        observedDialogContent.args.windowWidth.value = "\(observedDialogContent.windowWidth)"
+        observedDialogContent.args.windowHeight.value = "\(observedDialogContent.windowHeight)"
+        
+        let mirrored_appArguments = Mirror(reflecting: observedDialogContent.args)
+        for (_, attr) in mirrored_appArguments.children.enumerated() {
+            if let propertyValue = attr.value as? CLArgument {
+                if propertyValue.present { //}&& propertyValue.value != "" {
+                    if propertyValue.value != "" {
+                        json[propertyValue.long].string = propertyValue.value
+                    } else if propertyValue.isbool {
+                        json[propertyValue.long].string = "\(propertyValue.present)"
+                    }
+                }
+                jsonDEBUG[propertyValue.long].string = propertyValue.value
+                jsonDEBUG["\(propertyValue.long)-present"].bool = propertyValue.present
+            }
+        }
+
+        if observedDialogContent.listItemsArray.count > 0 {
+            json[appArguments.listItem.long].arrayObject = Array(repeating: 0, count: observedDialogContent.listItemsArray.count)
+            for i in 0..<observedDialogContent.listItemsArray.count {
+                if observedDialogContent.listItemsArray[i].title.isEmpty {
+                    observedDialogContent.listItemsArray[i].title = "Item \(i)"
+                }
+                print(observedDialogContent.listItemsArray[i].dictionary)
+                json[appArguments.listItem.long][i].dictionaryObject = observedDialogContent.listItemsArray[i].dictionary
+            }
+        }
+        
+        if observedDialogContent.imageArray.count > 0 {
+            json[appArguments.mainImage.long].arrayObject = Array(repeating: 0, count: observedDialogContent.imageArray.count)
+            for i in 0..<observedDialogContent.imageArray.count {
+                json[appArguments.mainImage.long][i].dictionaryObject = observedDialogContent.imageArray[i].dictionary
+            }
+        }
+                
+        //print("Generated JSON")
+        //convert the JSON to a raw String
+        jsonFormattedOutout = json.rawString() ?? "json is nil"
+
+        if debug {
+            jsonFormattedOutout = jsonDEBUG.rawString() ?? ""
+        }
+        return jsonFormattedOutout
+    }
+    
+    init (observedDialogContent : DialogUpdatableContent) {
+        self.observedDialogContent = observedDialogContent
+    }
+    
     var body: some View {
-        TextEditor(text: $jsonText)
+        VStack {
+            HStack {
+                Button("Generate") {
+                    jsonText = exportJSON()
+                }
+                Button("Copy to clipboard") {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.writeObjects([NSString(string: exportJSON())])
+                }
+                Spacer()
+            }
+            .padding(.top, 10)
+            .padding(.leading, 10)
+            Divider()
+            HStack {
+                Text(jsonText)
+                Spacer()
+            }
+            .padding(.top, 10)
+            .padding(.leading, 10)
+            Spacer()
+        }
     }
 }
 
@@ -69,7 +149,6 @@ struct ConstructionKitView: View {
         observedDialogContent.args.windowWidth.present = true
         observedDialogContent.args.windowHeight.present = true
         
-        exportJSON()
     }
     
     public func showConstructionKit() {
@@ -85,57 +164,6 @@ struct ConstructionKitView: View {
         window.center()
         window.contentView = NSHostingView(rootView: ConstructionKitView(observedDialogContent: observedData))
 
-    }
-    
-    private func exportJSON(debug : Bool = false) {
-        var json = JSON()
-        var jsonDEBUG = JSON()
-        
-        // copy modifyable objects into args
-        observedData.args.iconSize.value = "\(observedData.iconSize)"
-        observedData.args.windowWidth.value = "\(observedData.windowWidth)"
-        observedData.args.windowHeight.value = "\(observedData.windowHeight)"
-        
-        let mirrored_appArguments = Mirror(reflecting: observedData.args)
-        for (_, attr) in mirrored_appArguments.children.enumerated() {
-            if let propertyValue = attr.value as? CLArgument {
-                if propertyValue.present { //}&& propertyValue.value != "" {
-                    if propertyValue.value != "" {
-                        json[propertyValue.long].string = propertyValue.value
-                    } else if propertyValue.isbool {
-                        json[propertyValue.long].string = "\(propertyValue.present)"
-                    }
-                }
-                jsonDEBUG[propertyValue.long].string = propertyValue.value
-                jsonDEBUG["\(propertyValue.long)-present"].bool = propertyValue.present
-            }
-        }
-
-        if observedData.listItemsArray.count > 0 {
-            json[appArguments.listItem.long].arrayObject = Array(repeating: 0, count: observedData.listItemsArray.count)
-            for i in 0..<observedData.listItemsArray.count {
-                if observedData.listItemsArray[i].title.isEmpty {
-                    observedData.listItemsArray[i].title = "Item \(i)"
-                }
-                print(observedData.listItemsArray[i].dictionary)
-                json[appArguments.listItem.long][i].dictionaryObject = observedData.listItemsArray[i].dictionary
-            }
-        }
-        
-        if observedData.imageArray.count > 0 {
-            json[appArguments.mainImage.long].arrayObject = Array(repeating: 0, count: observedData.imageArray.count)
-            for i in 0..<observedData.imageArray.count {
-                json[appArguments.mainImage.long][i].dictionaryObject = observedData.imageArray[i].dictionary
-            }
-        }
-                
-        //print("Generated JSON")
-        //convert the JSON to a raw String
-        jsonFormattedOutout = json.rawString() ?? "json is nil"
-
-        if debug {
-            jsonFormattedOutout = jsonDEBUG.rawString() ?? ""
-        }
     }
     
     var body: some View {
@@ -169,7 +197,7 @@ struct ConstructionKitView: View {
                 }
                 Spacer()
                 Section(header: Text("Output")) {
-                    NavigationLink(destination: JSONView(jsonText: jsonFormattedOutout) ){
+                    NavigationLink(destination: JSONView(observedDialogContent: observedData) ){
                         Text("JSON Output")
                     }
                 }
@@ -188,9 +216,6 @@ struct ConstructionKitView: View {
                     quitDialog(exitCode: observedData.appProperties.exit0.code)
                 }
                 Spacer()
-                Button("Export JSON") {
-                    exportJSON()
-                }
                 .disabled(false)
                 Button("Export Command") {}
                     .disabled(true)

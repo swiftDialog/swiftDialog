@@ -4,6 +4,7 @@
 // from https://gist.github.com/ABridoux/b935c21c7ead92033d39b357fae6366b
 
 import AppKit
+import Combine
 
 #if canImport(SwiftUI)
 import SwiftUI
@@ -162,3 +163,107 @@ extension View {
     }
 }
 #endif
+
+
+struct WindowHandler {
+    @State private var cancellables = Set<AnyCancellable>()
+    @State var window : NSWindow?
+    
+    func monitorVisibility(window: NSWindow) {
+        window.publisher(for: \.isVisible)
+            .dropFirst()  // we know: the first value is not interesting
+            .sink(receiveValue: { isVisible in
+                if isVisible {
+                    self.window = window
+                    placeWindow(window)
+                }
+            })
+            .store(in: &cancellables)
+    }
+    
+    func placeWindow(_ window: NSWindow) {
+        let main = NSScreen.main!
+        let visibleFrame = main.visibleFrame
+        let windowSize = window.frame.size
+        
+        let windowX = setWindowXPos(screenWidth: visibleFrame.width - windowSize.width, position: appvars.windowPositionHorozontal)
+        let windowY = setWindowYPos(screenHeight: visibleFrame.height - windowSize.height, position: appvars.windowPositionVertical)
+        
+        let desiredOrigin = CGPoint(x: visibleFrame.origin.x + windowX, y: visibleFrame.origin.y + windowY)
+        window.setFrameOrigin(desiredOrigin)
+    }
+}
+
+struct WindowAccessor: NSViewRepresentable {
+    let onChange: (NSWindow?) -> Void
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        context.coordinator.monitorView(view)
+        return view
+    }
+
+    func updateNSView(_ view: NSView, context: Context) {
+    }
+
+    func makeCoordinator() -> WindowMonitor {
+        WindowMonitor(onChange)
+    }
+
+    class WindowMonitor: NSObject {
+        private var cancellables = Set<AnyCancellable>()
+        private var onChange: (NSWindow?) -> Void
+
+        init(_ onChange: @escaping (NSWindow?) -> Void) {
+            self.onChange = onChange
+        }
+
+        /// This function uses KVO to observe the `window` property of `view` and calls `onChange()`
+        func monitorView(_ view: NSView) {
+            view.publisher(for: \.window)
+                .removeDuplicates()
+                .dropFirst()
+                .sink { [weak self] newWindow in
+                    guard let self = self else { return }
+                    self.onChange(newWindow)
+                    if let newWindow = newWindow {
+                        self.monitorClosing(of: newWindow)
+                    }
+                }
+                .store(in: &cancellables)
+        }
+
+        /// This function uses notifications to track closing of `window`
+        private func monitorClosing(of window: NSWindow) {
+            NotificationCenter.default
+                .publisher(for: NSWindow.willCloseNotification, object: window)
+                .sink { [weak self] notification in
+                    guard let self = self else { return }
+                    self.onChange(nil)
+                    self.cancellables.removeAll()
+                }
+                .store(in: &cancellables)
+        }
+    }
+}
+
+func setWindowYPos(screenHeight: CGFloat, position: NSWindow.Position.Vertical) -> CGFloat {
+    let padding : CGFloat = 16
+    switch position {
+    case .top: return screenHeight - padding
+    case .center:
+        //let screenheight = screenRange.upperBound - screenRange.lowerBound
+        return (screenHeight / 2) + (screenHeight * 0.15)
+    case .deadcenter: return screenHeight / 2
+    case .bottom: return padding
+    }
+}
+
+func setWindowXPos(screenWidth: CGFloat, position: NSWindow.Position.Horizontal) -> CGFloat {
+    let padding : CGFloat = 16
+    switch position {
+    case .left: return padding
+    case .center: return screenWidth / 2
+    case .right: return screenWidth - padding
+    }
+}

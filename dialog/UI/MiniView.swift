@@ -88,7 +88,6 @@ struct MiniView: View {
         }
         .edgesIgnoringSafeArea(.all)
         .border(appvars.debugBorderColour, width: 2)
-        .hostingWindowPosition(vertical: appvars.windowPositionVertical, horizontal: appvars.windowPositionHorozontal)
     }
 }
 

@@ -210,15 +210,15 @@ class DialogUpdatableContent : ObservableObject {
             let command = line.components(separatedBy: " ").first!.lowercased()
                         
             switch command {
-            /*
+            
             case "width:" :
                 windowWidth = NumberFormatter().number(from: line.replacingOccurrences(of: "width: ", with: "")) as! CGFloat
-                appvars.windowWidth = NumberFormatter().number(from: line.replacingOccurrences(of: "width: ", with: "")) as! CGFloat
+                appProperties.windowWidth = windowWidth
                 
             case "height:" :
-                windowHeight = NumberFormatter().number(from: line.replacingOccurrences(of: "height: ", with: "")) as! CGFloat
-                appvars.windowHeight = NumberFormatter().number(from: line.replacingOccurrences(of: "height: ", with: "")) as! CGFloat
-            */
+                windowHeight = NumberFormatter().number(from: line.replacingOccurrences(of: "height: ", with: "")) as! CGFloat                
+                appProperties.windowHeight = windowHeight
+            
             // Title
             case "\(appArguments.titleOption.long):" :
                 args.titleOption.value = line.replacingOccurrences(of: "\(appArguments.titleOption.long): ", with: "")
