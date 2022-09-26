@@ -21,6 +21,7 @@ class BlurWindowController: NSWindowController {
         
     override func loadWindow() {
         window = BlurWindow(contentRect: NSMakeRect(0, 0, 100, 100), styleMask: [], backing: .buffered, defer: true)
+        self.window?.identifier = NSUserInterfaceItemIdentifier("blur")
         self.window?.contentViewController = BlurViewController()
         self.window?.standardWindowButton(.closeButton)?.isHidden = true //hides the red close button
         self.window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button

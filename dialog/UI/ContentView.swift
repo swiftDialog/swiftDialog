@@ -15,14 +15,14 @@ struct ContentView: View {
     var progressSteps : CGFloat = appvars.timerDefaultSeconds
     
     //@ObservedObject var observedDialogContent = DialogUpdatableContent()
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
     
     init (observedDialogContent : DialogUpdatableContent) {
-        self.observedDialogContent = observedDialogContent
-        if cloptions.timerBar.present {
-            progressSteps = string2float(string: cloptions.timerBar.value)
+        self.observedData = observedDialogContent
+        if appArguments.timerBar.present {
+            progressSteps = string2float(string: appArguments.timerBar.value)
         }
-        if cloptions.bannerImage.present {
+        if observedData.args.bannerImage.present {
             titlePadding = 0
         }
         
@@ -32,11 +32,11 @@ struct ContentView: View {
             case [.command] where "wnm".contains(event.characters ?? ""):
                 return nil
             case [.command] where event.characters == "q":
-                if cloptions.quitKey.value != "q" {
+                if appArguments.quitKey.value != "q" {
                     return nil
                 }
                 observedDialogContent.end()
-            case [.command] where event.characters == cloptions.quitKey.value, [.command, .shift] where event.characters == cloptions.quitKey.value.lowercased():
+            case [.command] where event.characters == appArguments.quitKey.value, [.command, .shift] where event.characters == appArguments.quitKey.value.lowercased():
                 observedDialogContent.end()
                 quitDialog(exitCode: appvars.exit10.code)
             default:
@@ -62,55 +62,55 @@ struct ContentView: View {
     var body: some View {
                         
         ZStack {            
-            if cloptions.watermarkImage.present {
-                    watermarkView(imagePath: cloptions.watermarkImage.value, opacity: Double(cloptions.watermarkAlpha.value), position: cloptions.watermarkPosition.value, scale: cloptions.watermarkFill.value)
+            if appArguments.watermarkImage.present {
+                    watermarkView(imagePath: appArguments.watermarkImage.value, opacity: Double(appArguments.watermarkAlpha.value), position: appArguments.watermarkPosition.value, scale: appArguments.watermarkFill.value)
             }
         
             // this stack controls the main view. Consists of a VStack containing all the content, and a HStack positioned at the bottom of the display area
             VStack {
-                if cloptions.bannerImage.present {
-                    BannerImageView(imagePath: cloptions.bannerImage.value)
-                        .border(appvars.debugBorderColour, width: 2)
+                if observedData.args.bannerImage.present {
+                    BannerImageView(observedDialogContent: observedData)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
                 }
 
-                if observedDialogContent.titleText != "none" {
+                if observedData.args.titleOption.value != "none" {
                     // Dialog title
-                    TitleView(observedDialogContent: observedDialogContent)
+                    TitleView(observedData: observedData)
                         .border(appvars.debugBorderColour, width: 2)
                         .padding(.top, titlePadding)
-                        .frame(minWidth: appvars.windowWidth, minHeight: appvars.titleHeight, alignment: .center)
+                        .frame(minWidth: string2float(string: observedData.args.windowWidth.value), minHeight: appvars.titleHeight, alignment: .center)
                     
                     // Horozontal Line
                     Divider()
-                        .frame(width: appvars.windowWidth*appvars.horozontalLineScale, height: 2)
+                        .frame(width: observedData.windowWidth*appvars.horozontalLineScale, height: 2)
                 }
                 
-                if cloptions.video.present {
-                    VideoView(videourl: cloptions.video.value, autoplay: cloptions.autoPlay.present, caption: cloptions.videoCaption.value)
+                if appArguments.video.present {
+                    VideoView(videourl: appArguments.video.value, autoplay: appArguments.autoPlay.present, caption: appArguments.videoCaption.value)
                 } else {
-                    DialogView(observedDialogContent: observedDialogContent)
+                    DialogView(observedDialogContent: observedData)
                 }
                 
                 Spacer()
                 
                 // Buttons
                 HStack() {
-                    if cloptions.infoText.present {
-                        Text(cloptions.infoText.value)
+                    if appArguments.infoText.present {
+                        Text(appArguments.infoText.value)
                             .foregroundColor(.secondary.opacity(0.7))
                             //.font(.system(size: 10))
-                    } else if cloptions.infoButtonOption.present || cloptions.buttonInfoTextOption.present {
-                        MoreInfoButton()
-                        if !cloptions.timerBar.present {
+                    } else if observedData.args.infoButtonOption.present { //} || appArguments.buttonInfoTextOption.present {
+                        MoreInfoButton(observedDialogContent: observedData)
+                        if !appArguments.timerBar.present {
                             Spacer()
                         }
                     }
-                    if cloptions.timerBar.present {
-                        timerBarView(progressSteps: progressSteps, visible: !cloptions.hideTimerBar.present, observedDialogContent : observedDialogContent)
+                    if appArguments.timerBar.present {
+                        timerBarView(progressSteps: progressSteps, visible: !appArguments.hideTimerBar.present, observedDialogContent : observedData)
                             .frame(alignment: .bottom)
                     }
-                    if (cloptions.timerBar.present && cloptions.button1TextOption.present) || !cloptions.timerBar.present || cloptions.hideTimerBar.present  {
-                        ButtonView(observedDialogContent: observedDialogContent) // contains both button 1 and button 2
+                    if (appArguments.timerBar.present && appArguments.button1TextOption.present) || !appArguments.timerBar.present || appArguments.hideTimerBar.present  {
+                        ButtonView(observedDialogContent: observedData) // contains both button 1 and button 2
                     }
                 }
                 //.frame(alignment: .bottom)
@@ -122,8 +122,6 @@ struct ContentView: View {
         
         }
         .edgesIgnoringSafeArea(.all)
-        .hostingWindowPosition(vertical: appvars.windowPositionVertical, horizontal: appvars.windowPositionHorozontal)
-
          
     }
     

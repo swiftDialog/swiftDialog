@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 import SystemConfiguration
 
@@ -21,8 +22,23 @@ var background = BlurWindowController()
 @main
 struct dialogApp: App {
     
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
-        
+    @ObservedObject var observedData : DialogUpdatableContent
+    
+    @State private var cancellables = Set<AnyCancellable>()
+    //@State var window : NSWindow?
+    
+    func monitorVisibility(window: NSWindow) {
+        window.publisher(for: \.isVisible)
+            .dropFirst()  // we know: the first value is not interesting
+            .sink(receiveValue: { isVisible in
+                if isVisible {
+                    observedData.mainWindow = window
+                    placeWindow(window)
+                }
+            })
+            .store(in: &cancellables)
+    }
+    
     init () {
         
         logger(logMessage: "Dialog Launched")
@@ -41,7 +57,7 @@ struct dialogApp: App {
         processCLOptionValues()
         
         // check for jamfhelper mode
-        if cloptions.jamfHelperMode.present {
+        if appArguments.jamfHelperMode.present {
             logger(logMessage: "converting jh to dialog")
             convertFromJamfHelperSyntax()
         }
@@ -57,17 +73,18 @@ struct dialogApp: App {
         appvars.iconWidth = appvars.iconWidth * appvars.scaleFactor
         appvars.iconHeight = appvars.iconHeight * appvars.scaleFactor
         
-        if cloptions.miniMode.present {
+        if appArguments.miniMode.present {
+            print("mini mode")
             appvars.windowWidth = 540
             appvars.windowHeight = 128
         }
         
-        if cloptions.fullScreenWindow.present {
+        if appArguments.fullScreenWindow.present {
             FullscreenView().showFullScreen()
         }
         
         //check debug mode and print info
-        if cloptions.debug.present {
+        if appArguments.debug.present {
             logger(logMessage: "debug options presented. dialog state sent to stdout")
             appvars.debugMode = true
             appvars.debugBorderColour = Color.green
@@ -82,8 +99,8 @@ struct dialogApp: App {
               }
             }
             print("\nApplication Command Line Options")
-            let mirrored_cloptions = Mirror(reflecting: cloptions)
-            for (_, attr) in mirrored_cloptions.children.enumerated() {
+            let mirrored_appArguments = Mirror(reflecting: appArguments)
+            for (_, attr) in mirrored_appArguments.children.enumerated() {
                 if let propertyName = attr.label as String? {
                 print("  \(propertyName) = \(attr.value)")
               }
@@ -91,54 +108,72 @@ struct dialogApp: App {
         }
         logger(logMessage: "width: \(appvars.windowWidth), height: \(appvars.windowHeight)")
         
-        observedDialogContent = DialogUpdatableContent()
+        observedData = DialogUpdatableContent()
+        
+        if appArguments.constructionKit.present {
+            ConstructionKitView(observedDialogContent: observedData).showConstructionKit()
+            observedData.args.movableWindow.present = true
+        }
         
         // bring to front on launch
         NSApp.activate(ignoringOtherApps: true)
     }
+    
     var body: some Scene {
 
         WindowGroup {
             ZStack {
-                HostingWindowFinder {window in
+                WindowAccessor {window in
                     window?.standardWindowButton(.closeButton)?.isHidden = true //hides the red close button
                     window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
                     window?.standardWindowButton(.zoomButton)?.isHidden = true //this removes the green zoom button
-                    window?.isMovable = appvars.windowIsMoveable
-                    
+                    window?.isMovable = observedData.args.movableWindow.present
 
-                    if appvars.windowOnTop {
+                    if observedData.args.forceOnTop.present {
                         window?.level = .floating
                     } else {
                         window?.level = .normal
                     }
 
-                    if cloptions.blurScreen.present && !cloptions.fullScreenWindow.present { //blur background
+                    if observedData.args.blurScreen.present && !appArguments.fullScreenWindow.present { //blur background
                         background.showWindow(self)
-                        NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow)))
+                        for i in 0..<NSApp.windows.count {
+                            if NSApp.windows[i].identifier != NSUserInterfaceItemIdentifier("blur") {
+                                NSApp.windows[i].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow)))
+                            }
+                        }
+                    } else {
+                        background.close()
                     }
                     
-                    if cloptions.forceOnTop.present || cloptions.blurScreen.present {
+                    if observedData.args.forceOnTop.present || observedData.args.blurScreen.present {
                         NSApp.activate(ignoringOtherApps: true)
                     }
                     
                 }
-                .frame(width: 0, height: 0) //ensures hostingwindowfinder isn't taking up any real estate
+                .frame(width: 0, height: 0) //ensures WindowAccessor isn't taking up any real estate
                 
-                if cloptions.miniMode.present {
-                    MiniView(observedContent: observedDialogContent)
-                        .frame(width: observedDialogContent.windowWidth, height: observedDialogContent.windowHeight)
-                        //.frame(height: 128)
-                        //.border(.red)
+                if appArguments.miniMode.present {
+                    MiniView(observedContent: observedData)
+                        .frame(width: observedData.windowWidth, height: observedData.windowHeight)
                 } else {
-                    ContentView(observedDialogContent: observedDialogContent)
-                        .frame(width: observedDialogContent.windowWidth, height: observedDialogContent.windowHeight) // + appvars.bannerHeight)
-                        .sheet(isPresented: $observedDialogContent.showSheet, content: {
-                            ErrorView(observedContent: observedDialogContent)
+                    ContentView(observedDialogContent: observedData)
+                        .frame(width: observedData.windowWidth, height: observedData.windowHeight)
+                        .sheet(isPresented: $observedData.showSheet, content: {
+                            ErrorView(observedContent: observedData)
                         })
                 }
-
             }
+            // Monitor window visibility, process position on screen before rendering.
+            .background(WindowAccessor { newWindow in
+                    if let newWindow = newWindow {
+                        monitorVisibility(window: newWindow)
+                    } else {
+                        // window closed: release all references
+                        observedData.mainWindow = nil
+                        self.cancellables.removeAll()
+                    }
+                })
         }
         // Hide Title Bar
         .windowStyle(HiddenTitleBarWindowStyle())

@@ -21,6 +21,7 @@ struct IconView: View {
     var logoHeight: CGFloat  = appvars.iconHeight
     var imgFromURL: Bool = false
     var imgFromAPP: Bool = false
+    var imgFromBase64: Bool = false
     
     var builtInIconName: String = ""
     var builtInIconColour: Color = Color.primary
@@ -65,13 +66,17 @@ struct IconView: View {
         
         // fullscreen runs on a dark background so invert the default icon colour for info and default
         // also set the icon offset to 0
-        if cloptions.fullScreenWindow.present {
+        if appArguments.fullScreenWindow.present {
             // fullscreen background is dark, so we want to use white as the default colour
             builtInIconColour = Color.white
         }
         
         if messageUserImagePath.starts(with: "http") {
             imgFromURL = true
+        }
+        
+        if messageUserImagePath.starts(with: "base64") {
+            imgFromBase64 = true
         }
         
         if messageUserImagePath.hasSuffix(".app") || messageUserImagePath.hasSuffix("prefPane") {
@@ -151,19 +156,19 @@ struct IconView: View {
             }
         }
             
-        if cloptions.warningIcon.present || messageUserImagePath == "warning" {
+        if appArguments.warningIcon.present || messageUserImagePath == "warning" {
             builtInIconName = "exclamationmark.octagon.fill"
             builtInIconFill = "octagon.fill" //does not have multicolour sf symbol so we have to make out own using a fill layer
             builtInIconColour = Color.red
             iconRenderingMode = Image.TemplateRenderingMode.original
             builtInIconPresent = true
-        } else if cloptions.cautionIcon.present || messageUserImagePath == "caution" {
+        } else if appArguments.cautionIcon.present || messageUserImagePath == "caution" {
             builtInIconName = "exclamationmark.triangle.fill"  // yay multicolour sf symbol
             builtInIconPresent = true
-        } else if cloptions.infoIcon.present || messageUserImagePath == "info" {
+        } else if appArguments.infoIcon.present || messageUserImagePath == "info" {
             builtInIconName = "person.fill.questionmark"
             builtInIconPresent = true
-        } else if messageUserImagePath == "default" || (!builtInIconPresent && !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL) {
+        } else if messageUserImagePath == "default" || (!builtInIconPresent && !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL && !imgFromBase64) {
             builtInIconName = "bubble.left.circle.fill"
             iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
             builtInIconPresent = true
@@ -217,9 +222,11 @@ struct IconView: View {
                         }
                         
                     } else {
-                        Image(systemName: builtInIconFill)
-                            .resizable()
-                            .foregroundColor(Color.white)
+                        if builtInIconFill != "" {
+                            Image(systemName: builtInIconFill)
+                                .resizable()
+                                .foregroundColor(Color.white)
+                        }
                         if #available(macOS 12.0, *) {
                             if messageUserImagePath == "default" {
                                 Image(systemName: builtInIconName)

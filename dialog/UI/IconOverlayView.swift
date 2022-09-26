@@ -12,7 +12,7 @@ struct IconOverlayView: View {
     
     //@ObservedObject var observedDialogContent : DialogUpdatableContent
     
-    var overlayImagePath: String // cloptions.overlayIconOption.value // CLOptionText(OptionName: cloptions.overlayIconOption)
+    var overlayImagePath: String // appArguments.overlayIconOption.value // CLOptionText(OptionName: appArguments.overlayIconOption)
     var overlayIconPresent: Bool
     var imgFromURL: Bool = false
     var imgFromAPP: Bool = false
