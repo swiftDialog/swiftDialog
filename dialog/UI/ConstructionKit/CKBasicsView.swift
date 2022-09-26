@@ -39,9 +39,13 @@ struct CKBasicsView: View {
             HStack {
                 Picker("Text Alignment", selection: $observedData.args.messageAlignment.value)
                 {
-                    ForEach(alignmentArray, id: \.self) {
+                    ForEach(observedData.appProperties.allignmentStates.keys.sorted(), id: \.self) {
                         Text($0)
                     }
+                }
+                .onChange(of: observedData.args.messageAlignment.value) {
+                    observedData.appProperties.messageAlignment = observedData.appProperties.allignmentStates[$0] ?? .leading
+                    observedData.args.messageAlignment.present = true
                 }
                 ColorPicker("Colour",selection: $observedData.appProperties.messageFontColour)
                 Button("Reset") {

@@ -539,16 +539,7 @@ func processCLOptionValues() {
     appArguments.messageAlignment.present      = json[appArguments.messageAlignment.long].exists() || CLOptionPresent(OptionName: appArguments.messageAlignment)
     
     if appArguments.messageAlignment.present {
-        switch appArguments.messageAlignment.value {
-        case "left":
-            appvars.messageAlignment = .leading
-        case "centre","center":
-            appvars.messageAlignment = .center
-        case "right":
-            appvars.messageAlignment = .trailing
-        default:
-            appvars.messageAlignment = .leading
-        }
+        appvars.messageAlignment = appvars.allignmentStates[appArguments.messageAlignment.value] ?? .leading
     }
     
     appArguments.messageVerticalAlignment.value = json[appArguments.messageVerticalAlignment.long].string ?? CLOptionText(OptionName: appArguments.messageVerticalAlignment)

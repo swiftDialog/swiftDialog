@@ -108,6 +108,9 @@ struct AppVariables {
     var messageDefault                  = String("default-message".localized)
     var messageAlignment : TextAlignment = .leading
     var messageAlignmentTextRepresentation = String("left")
+    var allignmentStates : [String: TextAlignment] = ["left" : .leading,
+                                                      "right" : .trailing,
+                                                      "centre" : .center]
 
     // button default strings
     // work out how to define a default width button that does what you tell it to. in the meantime, diry hack with spaces

@@ -8,6 +8,8 @@
 import SwiftUI
 import SwiftyJSON
 
+var jsonFormattedOutout : String = ""
+
 struct LabelView: View {
     var label : String
     var body: some View {
@@ -38,6 +40,13 @@ struct WelcomeView: View {
     }
 }
 
+struct JSONView: View {
+    @State var jsonText : String
+    var body: some View {
+        TextEditor(text: $jsonText)
+    }
+}
+
 struct ConstructionKitView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
@@ -46,8 +55,6 @@ struct ConstructionKitView: View {
     // values being updated
     //@State var dialogTitle : String
     
-    
-        
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent
         
@@ -61,6 +68,8 @@ struct ConstructionKitView: View {
         observedDialogContent.args.button1TextOption.present = true
         observedDialogContent.args.windowWidth.present = true
         observedDialogContent.args.windowHeight.present = true
+        
+        exportJSON()
     }
     
     public func showConstructionKit() {
@@ -119,19 +128,13 @@ struct ConstructionKitView: View {
                 json[appArguments.mainImage.long][i].dictionaryObject = observedData.imageArray[i].dictionary
             }
         }
-        
-        
-        print("Generated JSON")
-        //convert the JSON to a raw String
-        if let rawString = json.rawString() {
-            print(rawString)
-        } else {
-            print("json is nil")
-        }
                 
+        //print("Generated JSON")
+        //convert the JSON to a raw String
+        jsonFormattedOutout = json.rawString() ?? "json is nil"
+
         if debug {
-            print("DEBUG JSON")
-            print(jsonDEBUG)
+            jsonFormattedOutout = jsonDEBUG.rawString() ?? ""
         }
     }
     
@@ -165,6 +168,11 @@ struct ConstructionKitView: View {
                     }
                 }
                 Spacer()
+                Section(header: Text("Output")) {
+                    NavigationLink(destination: JSONView(jsonText: jsonFormattedOutout) ){
+                        Text("JSON Output")
+                    }
+                }
             }
             .padding(10)
             
