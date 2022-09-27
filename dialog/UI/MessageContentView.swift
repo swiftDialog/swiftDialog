@@ -68,6 +68,7 @@ struct MessageContent: View {
                 }
                 if observedData.args.messageOption.value != "" && observedData.args.messageOption.value != "none" {
                     if observedData.args.messageVerticalAlignment.present {
+                        Spacer()
                         if observedData.appProperties.messageFontName == "" {
                             Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
                                 .multilineTextAlignment(observedData.appProperties.messageAlignment)
@@ -77,6 +78,7 @@ struct MessageContent: View {
                                 .multilineTextAlignment(observedData.appProperties.messageAlignment)
                                 .markdownStyle(customStyle)
                         }
+                        Spacer()
                     } else {
                         ScrollView() {
                             if observedData.appProperties.messageFontName == "" {
@@ -95,20 +97,20 @@ struct MessageContent: View {
                 }
 
                 ListView(observedDialogContent: observedData)
-                    .padding(.trailing, 30)
+                    //.padding(.trailing, 30)
                     .padding(.bottom, 10)
                 CheckboxView()
                     .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .padding(.trailing, 30)
+                    //.padding(.trailing, 30)
                     .padding(.bottom, 10)
                 TextEntryView(observedDialogContent: observedData)
                     //.padding(.leading, 50)
-                    .padding(.trailing, 30)
+                    //.padding(.trailing, 30)
                     .padding(.bottom, 10)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
                 DropdownView(observedDialogContent: observedData)
                     //.padding(.leading, 50)
-                    .padding(.trailing, 30)
+                    //.padding(.trailing, 30)
                     .padding(.bottom, 10)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
 

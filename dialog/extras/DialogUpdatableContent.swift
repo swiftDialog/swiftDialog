@@ -233,6 +233,10 @@ class DialogUpdatableContent : ObservableObject {
                 imageCaptionPresent = false
                 //listItemPresent = false
                 
+            // Message Position
+            case "alignment:" :
+                appArguments.messageAlignment.value = line.replacingOccurrences(of: "alignment: ", with: "")
+                
             //Progress Bar
             case "\(appArguments.progressBar.long):" :
                 let incrementValue = line.replacingOccurrences(of: "\(appArguments.progressBar.long): ", with: "")

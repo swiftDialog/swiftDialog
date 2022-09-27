@@ -75,7 +75,7 @@ struct JSONView: View {
                 if observedDialogContent.listItemsArray[i].title.isEmpty {
                     observedDialogContent.listItemsArray[i].title = "Item \(i)"
                 }
-                print(observedDialogContent.listItemsArray[i].dictionary)
+                //print(observedDialogContent.listItemsArray[i].dictionary)
                 json[appArguments.listItem.long][i].dictionaryObject = observedDialogContent.listItemsArray[i].dictionary
             }
         }

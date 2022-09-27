@@ -74,7 +74,7 @@ struct dialogApp: App {
         appvars.iconHeight = appvars.iconHeight * appvars.scaleFactor
         
         if appArguments.miniMode.present {
-            print("mini mode")
+            //print("mini mode")
             appvars.windowWidth = 540
             appvars.windowHeight = 128
         }

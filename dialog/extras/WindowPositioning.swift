@@ -112,7 +112,7 @@ func placeWindow(_ window: NSWindow) {
     let main = NSScreen.main!
     let visibleFrame = main.visibleFrame
     let windowSize = window.frame.size
-    print(windowSize)
+    //print(windowSize)
     
     let windowX = calculateWindowXPos(screenWidth: visibleFrame.width - windowSize.width, position: appvars.windowPositionHorozontal)
     let windowY = calculateWindowYPos(screenHeight: visibleFrame.height - windowSize.height, position: appvars.windowPositionVertical)

@@ -689,7 +689,7 @@ func processCLOptionValues() {
     appArguments.infoText.value                = json[appArguments.infoText.long].string ?? CLOptionText(OptionName: appArguments.infoText, DefaultValue: "swiftDialog \(getVersionString())")
     appArguments.infoText.present              = json[appArguments.infoText.long].exists() || CLOptionPresent(OptionName: appArguments.infoText)
     
-    if getVersionString().starts(with: "Alpha") || getVersionString().starts(with: "Beta") {
+    if (getVersionString().starts(with: "Alpha") || getVersionString().starts(with: "Beta")) && !appArguments.constructionKit.present {
         appArguments.infoText.present = true
     }
     

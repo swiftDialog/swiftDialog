@@ -47,6 +47,8 @@ struct CKBasicsView: View {
                     observedData.appProperties.messageAlignment = observedData.appProperties.allignmentStates[$0] ?? .leading
                     observedData.args.messageAlignment.present = true
                 }
+                Toggle("Vertical Position", isOn: $observedData.args.messageVerticalAlignment.present)
+                    .toggleStyle(.switch)
                 ColorPicker("Colour",selection: $observedData.appProperties.messageFontColour)
                 Button("Reset") {
                     observedData.appProperties.messageFontColour = .primary
