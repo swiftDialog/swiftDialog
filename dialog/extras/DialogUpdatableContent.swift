@@ -216,11 +216,11 @@ class DialogUpdatableContent : ObservableObject {
             
             case "width:" :
                 windowWidth = NumberFormatter().number(from: line.replacingOccurrences(of: "width: ", with: "")) as! CGFloat
-                appProperties.windowWidth = windowWidth
+                placeWindow(mainWindow!, size: CGSize(width: windowWidth, height: windowHeight+28))
                 
             case "height:" :
-                windowHeight = NumberFormatter().number(from: line.replacingOccurrences(of: "height: ", with: "")) as! CGFloat                
-                appProperties.windowHeight = windowHeight
+                windowHeight = NumberFormatter().number(from: line.replacingOccurrences(of: "height: ", with: "")) as! CGFloat
+                placeWindow(mainWindow!, size: CGSize(width: windowWidth, height: windowHeight+28))
             
             // Title
             case "\(appArguments.titleOption.long):" :
