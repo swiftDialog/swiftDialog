@@ -445,3 +445,15 @@ func isDNDEnabled() -> Bool {
     }
     return false
 }
+
+
+func savePNG(image: NSImage, path:String) {
+    // from https://gist.github.com/WilliamD47/e0a2a02b5e32018139a47f5e53ff3bb4
+    let imageRep = NSBitmapImageRep(data: image.tiffRepresentation!)
+    let pngData = imageRep?.representation(using: .png, properties: [:])
+    do {
+        try pngData!.write(to: URL(fileURLWithPath: path))
+    } catch {
+        print(error)
+    }
+}

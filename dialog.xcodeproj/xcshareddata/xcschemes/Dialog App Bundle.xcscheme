@@ -53,6 +53,10 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "--position bottom"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--notification"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

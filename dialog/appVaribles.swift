@@ -283,6 +283,7 @@ struct CommandLineArguments {
     var hideTimerBar             = CLArgument(long: "hidetimerbar")
     var autoPlay                 = CLArgument(long: "autoplay")
     var blurScreen               = CLArgument(long: "blurscreen", isbool: true)
+    var notification             = CLArgument(long: "notification", isbool: true)
     
     //var lockWindow               = CLArgument(long: "moveable", short: "o")
     var constructionKit          = CLArgument(long: "builder", isbool: true)

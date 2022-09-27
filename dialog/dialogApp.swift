@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import UserNotifications
 
 import SystemConfiguration
 
@@ -18,11 +19,25 @@ extension StringProtocol {
 
 var background = BlurWindowController()
 
+class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ aNotification: Notification) {
+        UNUserNotificationCenter.current().delegate = self
+    }
+}
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        return completionHandler([.list, .sound])
+    }
+}
+
+
 @available(OSX 11.0, *)
 @main
 struct dialogApp: App {
     
     @ObservedObject var observedData : DialogUpdatableContent
+    //@ObservedObject var notificationManager = LocalNotificationManager()
     
     @State private var cancellables = Set<AnyCancellable>()
     //@State var window : NSWindow?
@@ -55,6 +70,18 @@ struct dialogApp: App {
         
         // get all the command line option values
         processCLOptionValues()
+                
+        // check for notification
+        if appArguments.notification.present {
+            var notificationIcon = ""
+            if appArguments.iconOption.present {
+                notificationIcon = appArguments.iconOption.value
+            }
+            sendNotification(title: appArguments.titleOption.value, message: appArguments.messageOption.value, image: notificationIcon)
+            usleep(100000)
+            quitDialog(exitCode: 0)
+        }
+        
         
         // check for jamfhelper mode
         if appArguments.jamfHelperMode.present {
@@ -152,16 +179,17 @@ struct dialogApp: App {
                     
                 }
                 .frame(width: 0, height: 0) //ensures WindowAccessor isn't taking up any real estate
-                
-                if appArguments.miniMode.present {
-                    MiniView(observedContent: observedData)
-                        .frame(width: observedData.windowWidth, height: observedData.windowHeight)
-                } else {
-                    ContentView(observedDialogContent: observedData)
-                        .frame(width: observedData.windowWidth, height: observedData.windowHeight)
-                        .sheet(isPresented: $observedData.showSheet, content: {
-                            ErrorView(observedContent: observedData)
-                        })
+                if !appArguments.notification.present {
+                    if appArguments.miniMode.present {
+                        MiniView(observedContent: observedData)
+                            .frame(width: observedData.windowWidth, height: observedData.windowHeight)
+                    } else {
+                        ContentView(observedDialogContent: observedData)
+                            .frame(width: observedData.windowWidth, height: observedData.windowHeight)
+                            .sheet(isPresented: $observedData.showSheet, content: {
+                                ErrorView(observedContent: observedData)
+                            })
+                    }
                 }
             }
             // Monitor window visibility, process position on screen before rendering.
