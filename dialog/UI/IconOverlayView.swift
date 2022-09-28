@@ -198,12 +198,14 @@ struct IconOverlayView: View {
                                 // background colour
                                 ZStack {
                                     // first image required to render as background fill (hopefully this is fixed in later versions of sf symbols, e.g. caution symbol
-                                    Image(systemName: builtInIconFill)
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .scaledToFit()
-                                        .foregroundColor(Color.white)
-                                        .font(Font.title.weight(builtInIconWeight))
+                                    if builtInIconFill != "" {
+                                        Image(systemName: builtInIconFill)
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .scaledToFit()
+                                            .foregroundColor(Color.white)
+                                            .font(Font.title.weight(builtInIconWeight))
+                                    }
                                     if #available(macOS 12.0, *) {
                                         Image(systemName: builtInIconName)
                                             .resizable()
