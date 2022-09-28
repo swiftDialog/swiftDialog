@@ -10,29 +10,31 @@ import UserNotifications
 import AppKit
 import SwiftUI
 
-func sendNotification(title: String = "", message: String = "", image: String = "") {
+func sendNotification(title: String = "", subtitle: String = "", message: String = "", image: String = "") {
     
-    let center = UNUserNotificationCenter.current()
+    let notification = UNUserNotificationCenter.current()
+    let tempImagePath : String = "/var/tmp/sdnotification.png"
     
-    center.requestAuthorization(options: [.alert, .sound]) { granted, error in
+    notification.requestAuthorization(options: [.alert, .sound]) { granted, error in
         if error != nil {
             print("Notifications are not available: \(error?.localizedDescription as Any)")
         }
     }
     
-    center.getNotificationSettings { settings in
+    notification.getNotificationSettings { settings in
         guard (settings.authorizationStatus == .authorized) ||
                 (settings.authorizationStatus == .provisional) else { return }
                 
         if settings.authorizationStatus == .authorized {
             
-            
             let content = UNMutableNotificationContent()
             content.title = title
             content.body = message
-            //content.subtitle = "test subtitle"
-            
+            content.subtitle = subtitle
+            content.categoryIdentifier = "DIALOG_NOTIFICATION"
+
             if image != "" {
+                // default image just in case
                 var importedImage : NSImage = NSImage(systemSymbolName: "applelogo", accessibilityDescription: "Apple logo")!
 
                 if image.hasSuffix(".app") || image.hasSuffix("prefPane") {
@@ -40,12 +42,12 @@ func sendNotification(title: String = "", message: String = "", image: String = 
                 } else {
                     importedImage = getImageFromPath(fileImagePath: image)
                 }
-                                
+                
                 // need to save a temp version of the image for the notification to be able to load it
-                savePNG(image: importedImage, path: "/var/tmp/sdnotification.png")
+                savePNG(image: importedImage, path: tempImagePath)
                 do {
-                    let fileURL = URL(fileURLWithPath: "/var/tmp/sdnotification.png")
-                    let attachment = try UNNotificationAttachment(identifier: "attachment", url: fileURL)
+                    let fileURL = URL(fileURLWithPath: tempImagePath)
+                    let attachment = try UNNotificationAttachment(identifier: "AttachedContent", url: fileURL)
                     content.attachments = [attachment]
                 } catch let error {
                     print(error.localizedDescription)
@@ -57,9 +59,9 @@ func sendNotification(title: String = "", message: String = "", image: String = 
             let uuidString = UUID().uuidString
             let request = UNNotificationRequest(identifier: uuidString,
                         content: content, trigger: nil)
-
+        
             // Schedule the request with the system.
-            center.add(request) { (error) in
+            notification.add(request) { (error) in
                if error != nil {
                    print(error?.localizedDescription as Any)
                }

@@ -19,6 +19,9 @@ var helpText = """
                     Text beyond the length of the title area will get truncated
                     Default Title is "\(appvars.titleDefault)"
                     Use keyword "none" to disable the title area entirely
+    
+        --\(appArguments.subTitleOption.long) <text>
+                    Text to use as subtitle when sending a system notification (see --\(appArguments.notification.long))
 
         --\(appArguments.titleFont.long) <text>
                     Lets you modify the title text of the dialog.
@@ -52,6 +55,11 @@ var helpText = """
                     Set the message alignment.
                     Default is 'left'
     
+        --\(appArguments.messageVerticalAlignment.long) [top* | centre | center | bottom*]
+                    Set the message position.
+                    
+                    * the only supported option at this time is [center]
+                    
         --\(appArguments.messageFont.long) <text>
                     Lets you modify the message text of the dialog.
 
@@ -74,6 +82,16 @@ var helpText = """
                     Example2: \"name=Chalkboard,colour=#FFD012,size=40\"
 
                     ## CAUTION : Results may be unexpected when mixing font names and weights with markdown
+    
+        --\(appArguments.notification.long)
+                    Send a system notification
+                    Accepts the following arguments:
+                      --\(appArguments.titleOption.long) <text>
+                      --\(appArguments.subTitleOption.long) <text>
+                      --\(appArguments.messageOption.long) <text> (as plain text. newlines supported as \\n)
+                      --\(appArguments.iconOption.long) <image> *
+    
+                    * <image> must refer to a local file or app bundle. remote images sources are not supported.
         
         -\(appArguments.mainImage.short), --\(appArguments.mainImage.long)  <file> | <url>
                     Display an image instead of a message.
@@ -216,7 +234,7 @@ var helpText = """
                     Return code when actioned is 3
 
     ** Advanced Options - - - - - - - - - - - - - - - -
-    
+        
         -\(appArguments.fullScreenWindow.short), --\(appArguments.fullScreenWindow.long)
                     Uses full screen view.
                     In this view, only banner, title, icon and the message area are visible.

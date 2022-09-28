@@ -101,7 +101,7 @@ struct CLArgument {
 
 struct AppVariables {
     
-    var cliversion                      = "Alpha 2.0"
+    var cliversion                      = "2.0 Preview"
     
     // message default strings
     var titleDefault                    = String("default-title".localized)
@@ -219,9 +219,11 @@ struct AppVariables {
 struct CommandLineArguments {
     // command line options that take string parameters
     var titleOption              = CLArgument(long: "title", short: "t")
+    var subTitleOption           = CLArgument(long: "subtitle")
     var messageOption            = CLArgument(long: "message", short: "m")
-    var messageAlignment         = CLArgument(long: "alignment")
-    var messageVerticalAlignment = CLArgument(long: "vertical-alignment")
+    var messageAlignment         = CLArgument(long: "messagealignment")
+    var messageAlignmentOld      = CLArgument(long: "alignment")
+    var messageVerticalAlignment = CLArgument(long: "messageposition")
     var iconOption               = CLArgument(long: "icon", short: "i")
     var iconSize                 = CLArgument(long: "iconsize")
   //var iconHeight               = CLArgument(long: "iconheight")

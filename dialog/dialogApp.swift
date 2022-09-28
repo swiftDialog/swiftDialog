@@ -19,6 +19,7 @@ extension StringProtocol {
 
 var background = BlurWindowController()
 
+// AppDelegate and extension used for notifications
 class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         UNUserNotificationCenter.current().delegate = self
@@ -77,7 +78,7 @@ struct dialogApp: App {
             if appArguments.iconOption.present {
                 notificationIcon = appArguments.iconOption.value
             }
-            sendNotification(title: appArguments.titleOption.value, message: appArguments.messageOption.value, image: notificationIcon)
+            sendNotification(title: appArguments.titleOption.value, subtitle: appArguments.subTitleOption.value, message: appArguments.messageOption.value, image: notificationIcon)
             usleep(100000)
             quitDialog(exitCode: 0)
         }

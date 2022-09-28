@@ -531,12 +531,23 @@ func processCLOptionValues() {
     
     appArguments.titleOption.value             = json[appArguments.titleOption.long].string ?? CLOptionText(OptionName: appArguments.titleOption, DefaultValue: appvars.titleDefault)
     appArguments.titleOption.present           = json[appArguments.titleOption.long].exists() || CLOptionPresent(OptionName: appArguments.titleOption)
+    
+    appArguments.subTitleOption.value          = json[appArguments.subTitleOption.long].string ?? CLOptionText(OptionName: appArguments.subTitleOption)
+    appArguments.subTitleOption.present        = json[appArguments.subTitleOption.long].exists() || CLOptionPresent(OptionName: appArguments.subTitleOption)
 
     appArguments.messageOption.value           = json[appArguments.messageOption.long].string ?? CLOptionText(OptionName: appArguments.messageOption, DefaultValue: appvars.messageDefault)
     appArguments.messageOption.present         = json[appArguments.titleOption.long].exists() || CLOptionPresent(OptionName: appArguments.messageOption)
     
     appArguments.messageAlignment.value        = json[appArguments.messageAlignment.long].string ?? CLOptionText(OptionName: appArguments.messageAlignment, DefaultValue: appvars.messageAlignmentTextRepresentation)
     appArguments.messageAlignment.present      = json[appArguments.messageAlignment.long].exists() || CLOptionPresent(OptionName: appArguments.messageAlignment)
+    
+    appArguments.messageAlignmentOld.value        = json[appArguments.messageAlignmentOld.long].string ?? CLOptionText(OptionName: appArguments.messageAlignmentOld, DefaultValue: appvars.messageAlignmentTextRepresentation)
+    appArguments.messageAlignmentOld.present      = json[appArguments.messageAlignmentOld.long].exists() || CLOptionPresent(OptionName: appArguments.messageAlignmentOld)
+    
+    if appArguments.messageAlignmentOld.present {
+        appArguments.messageAlignment.present = appArguments.messageAlignmentOld.present
+        appArguments.messageAlignment.value = appArguments.messageAlignmentOld.value
+    }
     
     if appArguments.messageAlignment.present {
         appvars.messageAlignment = appvars.allignmentStates[appArguments.messageAlignment.value] ?? .leading

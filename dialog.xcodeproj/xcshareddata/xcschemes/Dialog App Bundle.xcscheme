@@ -56,7 +56,7 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--notification"
+            argument = "--notification --title &quot;swiftDialog Notifications&quot; --subtitle &quot;Test Subtitle&quot; --message &quot;Line 1\nLine 2\nLine 3\nLine 4&quot; --icon /etc/csiro/logo.png"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
