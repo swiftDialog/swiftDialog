@@ -67,7 +67,7 @@ struct MessageContent: View {
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                 }
                 if observedData.args.messageOption.value != "" && observedData.args.messageOption.value != "none" {
-                    if observedData.args.messageVerticalAlignment.present {
+                    if observedData.args.messageVerticalAlignment.present || observedData.args.webcontent.present {
                         Spacer()
                         if observedData.appProperties.messageFontName == "" {
                             Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
@@ -95,6 +95,11 @@ struct MessageContent: View {
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                     }
                 }
+                
+                WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
+                    .border(observedData.appProperties.debugBorderColour, width: 2)
+                    //.padding(.trailing, 30)
+                    .padding(.bottom, 10)
 
                 ListView(observedDialogContent: observedData)
                     //.padding(.trailing, 30)

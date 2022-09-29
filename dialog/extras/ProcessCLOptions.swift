@@ -331,9 +331,9 @@ func processCLOptions() {
     }
 
     //check for DND and exit if it's on
-    if isDNDEnabled() && !appvars.willDisturb {
-        quitDialog(exitCode: 20, exitMessage: "Do Not Disturb is enabled. Exiting")
-    }
+    //if isDNDEnabled() && !appvars.willDisturb {
+    //    quitDialog(exitCode: 20, exitMessage: "Do Not Disturb is enabled. Exiting")
+    //}
         
     if appArguments.windowWidth.present {
         //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: appArguments.windowWidth)
@@ -710,9 +710,12 @@ func processCLOptionValues() {
         appArguments.statusLogFile.value = appvars.defaultStatusLogFile
     }
     
+    appArguments.webcontent.value           = json[appArguments.webcontent.long].string ?? CLOptionText(OptionName: appArguments.webcontent)
+    appArguments.webcontent.present         = json[appArguments.webcontent.long].exists() || CLOptionPresent(OptionName: appArguments.webcontent)
+    
     appArguments.video.value                   = json[appArguments.video.long].string ?? CLOptionText(OptionName: appArguments.video)
     appArguments.video.present                 = json[appArguments.video.long].exists() || CLOptionPresent(OptionName: appArguments.video)
-    if appArguments.video.present {
+    if appArguments.video.present || appArguments.webcontent.present {
         // set a larger window size. 900x600 will fit a standard 16:9 video
         appvars.windowWidth = appvars.videoWindowWidth
         appvars.windowHeight = appvars.videoWindowHeight

@@ -266,6 +266,7 @@ struct CommandLineArguments {
     var listStyle                = CLArgument(long: "liststyle")
     var infoText                 = CLArgument(long: "infotext")
     var quitKey                  = CLArgument(long: "quitkey")
+    var webcontent               = CLArgument(long: "webcontent")
 
     // command line options that take no additional parameters
     var button1Disabled          = CLArgument(long: "button1disabled", isbool: true)

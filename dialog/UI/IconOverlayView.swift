@@ -144,7 +144,7 @@ struct IconOverlayView: View {
             builtInIconName = "person.fill.questionmark"
             builtInIconPresent = true
         
-        } else if !FileManager.default.fileExists(atPath: overlayImagePath) {
+        } else if !FileManager.default.fileExists(atPath: overlayImagePath) && !imgFromURL {
             overlayIconPresent = false
         }
     }

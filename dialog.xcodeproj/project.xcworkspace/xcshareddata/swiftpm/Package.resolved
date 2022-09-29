@@ -55,6 +55,15 @@
       }
     },
     {
+      "identity" : "webviewkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/danielsaidi/WebViewKit.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "15d7422c883f15a0dafc8291e0bc8f4f4ae9070f"
+      }
+    },
+    {
       "identity" : "xctest-dynamic-overlay",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
