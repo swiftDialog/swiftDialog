@@ -53,7 +53,7 @@ struct MessageContent: View {
                 if observedData.args.iconOption.present && observedData.args.centreIcon.present { //}&& observedData.args.iconOption.value != "none" {
                     IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
                         .frame(width: iconDisplayWidth, alignment: .top)
-                        .padding(.top, 15)
+                        //.padding(.top, 15)
                         .padding(.bottom, 10)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                 }
@@ -62,7 +62,7 @@ struct MessageContent: View {
                 if observedData.args.centreIcon.present && observedData.args.iconOption.present {
                     IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
                         .frame(width: iconDisplayWidth, alignment: .top)
-                        .padding(.top, 15)
+                        //.padding(.top, 15)
                         .padding(.bottom, 10)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                 }
@@ -91,7 +91,7 @@ struct MessageContent: View {
                                     .markdownStyle(customStyle)
                             }
                         }
-                        .padding(.top, 10)
+                        //.padding(.top, 10)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                     }
                 }
@@ -123,6 +123,7 @@ struct MessageContent: View {
         }
         .padding(.leading, fieldPadding)
         .padding(.trailing, fieldPadding)
+        .padding(.top, fieldPadding)
     }
 }
 
