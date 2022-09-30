@@ -10,6 +10,9 @@ import SwiftUI
 struct CKWindowProperties: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
+    @State var bgAlpha : Double = 0.5
+    let positionArray = ["topleft", "left", "bottomleft", "top", "center", "bottom", "topright", "right", "bottomright"]
+    let fillScaleArray = ["fill", "fit"]
     
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent
@@ -127,11 +130,32 @@ struct CKWindowProperties: View {
                 TextField("", text: $observedData.args.watermarkImage.value)
             }
             VStack {
-                
-                TextField("Fill", text: $observedData.args.watermarkFill.value)
+                Picker("Fill", selection: $observedData.args.watermarkFill.value)
+                {
+                    ForEach(fillScaleArray, id: \.self) {
+                        Text($0)
+                    }
+                }
                 TextField("Aplha", text: $observedData.args.watermarkAlpha.value)
-                TextField("Scale", text: $observedData.args.watermarkScale.value)
-                TextField("Position", text: $observedData.args.watermarkPosition.value)
+                HStack {
+                    Text("Alpha")
+                    Slider(value: $bgAlpha, in: 0.0...1.0, step: 0.1)
+                        .onChange(of: bgAlpha, perform: { _ in
+                            observedData.args.watermarkAlpha.value = String(bgAlpha)
+                        })
+                }
+                Picker("Scale", selection: $observedData.args.watermarkScale.value)
+                {
+                    ForEach(fillScaleArray, id: \.self) {
+                        Text($0)
+                    }
+                }
+                Picker("Position", selection: $observedData.args.watermarkPosition.value)
+                {
+                    ForEach(positionArray, id: \.self) {
+                        Text($0)
+                    }
+                }
             }
             Spacer()
         }

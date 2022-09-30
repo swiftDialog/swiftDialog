@@ -62,8 +62,8 @@ struct ContentView: View {
     var body: some View {
                         
         ZStack {            
-            if appArguments.watermarkImage.present {
-                    watermarkView(imagePath: appArguments.watermarkImage.value, opacity: Double(appArguments.watermarkAlpha.value), position: appArguments.watermarkPosition.value, scale: appArguments.watermarkFill.value)
+            if observedData.args.watermarkImage.present {
+                    watermarkView(observedContent: observedData)
             }
         
             // this stack controls the main view. Consists of a VStack containing all the content, and a HStack positioned at the bottom of the display area

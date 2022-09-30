@@ -92,6 +92,9 @@ var helpText = """
                       --\(appArguments.iconOption.long) <image> *
     
                     * <image> must refer to a local file or app bundle. remote images sources are not supported.
+    
+        --\(appArguments.webcontent.long)
+                    Display a web page
         
         -\(appArguments.mainImage.short), --\(appArguments.mainImage.long)  <file> | <url>
                     Display an image instead of a message.
