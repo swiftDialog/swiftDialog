@@ -36,7 +36,7 @@ struct MessageContent: View {
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent
         if !observedDialogContent.args.iconOption.present { //cloptions.hideIcon.present {
-            fieldPadding = 40
+            fieldPadding = 30
             iconDisplayWidth = 0
         } else {
             fieldPadding = 15
@@ -67,7 +67,7 @@ struct MessageContent: View {
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                 }
                 if observedData.args.messageOption.value != "" && observedData.args.messageOption.value != "none" {
-                    if observedData.args.messageVerticalAlignment.present || observedData.args.webcontent.present {
+                    if observedData.args.messageVerticalAlignment.present || observedData.args.webcontent.present || observedData.args.listItem.present {
                         Spacer()
                         if observedData.appProperties.messageFontName == "" {
                             Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))

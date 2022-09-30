@@ -260,7 +260,7 @@ func processCLOptions() {
                     case "status":
                         statusIcon = itemValue
                     default:
-                        title = itemValue
+                        title = itemName
                     }
                 }
                 appvars.listItems.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon))

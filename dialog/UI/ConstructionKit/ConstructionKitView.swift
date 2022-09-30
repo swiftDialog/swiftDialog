@@ -194,6 +194,9 @@ struct ConstructionKitView: View {
                     NavigationLink(destination: CKImageView(observedDialogContent: observedData)){
                         Text("Images")
                     }
+                    NavigationLink(destination: CKMediaView(observedDialogContent: observedData)){
+                        Text("Media")
+                    }
                 }
                 Spacer()
                 Section(header: Text("Output")) {
