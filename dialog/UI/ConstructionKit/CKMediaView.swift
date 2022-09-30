@@ -23,6 +23,8 @@ struct CKMediaView: View {
                 HStack {
                     Toggle("Enable", isOn: $observedData.args.video.present)
                         .toggleStyle(.switch)
+                    Toggle("Autoplay", isOn: $observedData.args.autoPlay.present)
+                        .toggleStyle(.switch)
                     Spacer()
                 }
                 Button("Select")

@@ -108,6 +108,31 @@ struct CKWindowProperties: View {
                       }
                 TextField("", text: $observedData.args.bannerImage.value)
             }
+            HStack {
+                Text("Watermark")
+                    .frame(width: 100, alignment: .leading)
+                Toggle("", isOn: $observedData.args.watermarkImage.present)
+                    .toggleStyle(.switch)
+                    .disabled(observedData.args.watermarkImage.value == "")
+                Button("Select")
+                {
+                    let panel = NSOpenPanel()
+                    panel.allowsMultipleSelection = false
+                    panel.canChooseDirectories = false
+                    panel.allowedContentTypes = [.image]
+                    if panel.runModal() == .OK {
+                        observedData.args.watermarkImage.value = panel.url?.path ?? ""
+                    }
+                }
+                TextField("", text: $observedData.args.watermarkImage.value)
+            }
+            VStack {
+                
+                TextField("Fill", text: $observedData.args.watermarkFill.value)
+                TextField("Aplha", text: $observedData.args.watermarkAlpha.value)
+                TextField("Scale", text: $observedData.args.watermarkScale.value)
+                TextField("Position", text: $observedData.args.watermarkPosition.value)
+            }
             Spacer()
         }
         .padding(20)
