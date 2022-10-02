@@ -56,7 +56,7 @@ class DialogUpdatableContent : ObservableObject {
     
     @Published var listItemsArray : [ListItems]
     @Published var listItemUpdateRow: Int
-    @Published var listItemPresent: Bool
+    //@Published var listItemPresent: Bool
     
     //@Published var textEntryArray : [TextFieldState]
     
@@ -127,7 +127,7 @@ class DialogUpdatableContent : ObservableObject {
         //overlayIconPresent = appArguments.overlayIconOption.present
         
         listItemsArray = appvars.listItems
-        listItemPresent = appArguments.listItem.present
+        //listItemPresent = appArguments.listItem.present
         
         //textEntryArray = appvars.textFields
         requiredFieldsPresent = false
@@ -353,14 +353,14 @@ class DialogUpdatableContent : ObservableObject {
                 switch line.replacingOccurrences(of: "list: ", with: "") {
                 case "clear":
                     // clean everything out and remove the listview from display
-                    listItemPresent = false
+                    args.listItem.present = false
                     listItemsArray = [ListItems]()
                 case "show":
                     // show the list
-                    listItemPresent = true
+                    args.listItem.present = true
                 case "hide":
                     // hide the list but don't delete the contents
-                    listItemPresent = false
+                    args.listItem.present = false
                 default:
                     var listItems = line.replacingOccurrences(of: "list: ", with: "").components(separatedBy: ",")
                     listItems = listItems.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
@@ -369,7 +369,7 @@ class DialogUpdatableContent : ObservableObject {
                     for itemTitle in listItems {
                         listItemsArray.append(ListItems(title: itemTitle))
                     }
-                    listItemPresent = true
+                    args.listItem.present = true
                 }
                 
             // list item status

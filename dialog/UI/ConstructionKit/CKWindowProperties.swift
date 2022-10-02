@@ -136,12 +136,11 @@ struct CKWindowProperties: View {
                         Text($0)
                     }
                 }
-                TextField("Aplha", text: $observedData.args.watermarkAlpha.value)
                 HStack {
                     Text("Alpha")
                     Slider(value: $bgAlpha, in: 0.0...1.0, step: 0.1)
                         .onChange(of: bgAlpha, perform: { _ in
-                            observedData.args.watermarkAlpha.value = String(bgAlpha)
+                            observedData.args.watermarkAlpha.value = String(format: "%.1f", bgAlpha)
                         })
                 }
                 Picker("Scale", selection: $observedData.args.watermarkScale.value)
@@ -157,6 +156,8 @@ struct CKWindowProperties: View {
                     }
                 }
             }
+            .frame(width: 250)
+            
             Spacer()
         }
         .padding(20)
