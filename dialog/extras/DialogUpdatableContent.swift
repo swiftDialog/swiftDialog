@@ -28,7 +28,11 @@ class CommandFileReader: SFSMonitorDelegate {
     func receivedNotification(_ notification: SFSMonitorNotification, url: URL, queue: SFSMonitor) {
         monitorDispatchQueue.async(flags: .barrier) { // Multithread protection
             //print(shell("tail -n1 \(url.path)"))
-            self.observedData.processCommands(commands: shell("tail -n1 \(url.path)"))
+            let command = shell("tail -n1 \(url.path)")
+            if command != self.observedData.previousCommand {
+                self.observedData.processCommands(commands: shell("/usr/bin/tail -n1 \(url.path)"))
+                self.observedData.previousCommand = command
+            }
         }
     }
     
@@ -39,6 +43,7 @@ class DialogUpdatableContent : ObservableObject {
     // set up some defaults
     
     var path: String
+    var previousCommand : String = ""
     
     @Published var mainWindow : NSWindow?
     

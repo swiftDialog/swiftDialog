@@ -352,7 +352,7 @@ var helpText = """
                     Update a list item (advanced):
                         listitem: [title: <title>|index: <index>], status: <status>, statustext: <text>
                     Add an item to the end of the current list:
-                        listitem: add: title: <text>, status: <status>, statustext: <text>
+                        listitem: add: , title: <text>, status: <status>, statustext: <text>
                     Delete an item (one of):
                         listitem: index: <index>, delete:
                         listitem: title: <text>, delete:
