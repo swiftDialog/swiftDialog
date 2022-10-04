@@ -8,11 +8,30 @@
 
 import Foundation
 import SwiftUI
+import SFSMonitor
 
 
 enum StatusState {
     case start
     case done
+}
+
+class CommandFileReader: SFSMonitorDelegate {
+    
+    let monitorDispatchQueue =  DispatchQueue(label: "monitorDispatchQueue", qos: .utility)
+    @ObservedObject var observedData : DialogUpdatableContent
+    
+    init(observedDialogContent : DialogUpdatableContent) {
+        self.observedData = observedDialogContent
+    }
+    
+    func receivedNotification(_ notification: SFSMonitorNotification, url: URL, queue: SFSMonitor) {
+        monitorDispatchQueue.async(flags: .barrier) { // Multithread protection
+            //print(shell("tail -n1 \(url.path)"))
+            self.observedData.processCommands(commands: shell("tail -n1 \(url.path)"))
+        }
+    }
+    
 }
 
 class DialogUpdatableContent : ObservableObject {
@@ -28,7 +47,6 @@ class DialogUpdatableContent : ObservableObject {
     @Published var args : CommandLineArguments = appArguments
     @Published var appProperties : AppVariables = appvars
     
-    //@Published var titleText: String   // unused
     @Published var titleFontColour: Color
     @Published var titleFontSize: CGFloat
     
@@ -36,19 +54,7 @@ class DialogUpdatableContent : ObservableObject {
     @Published var statusText: String
     @Published var progressValue: Double
     @Published var progressTotal: Double
-    //@Published var button1Value: String
-    //@Published var button1Disabled: Bool
-    //@Published var button2Value: String
-    //@Published var button2Present: Bool
-    //@Published var infoButtonValue: String
-    //@Published var infoButtonPresent: Bool
-    //@Published var iconImage: String
     @Published var iconSize: CGFloat
-    //@Published var iconPresent: Bool
-    //@Published var overlayIconImage: String
-    //@Published var overlayIconPresent: Bool
-    //@Published var centreIconPresent: Bool
-    //@Published var image: String
     
     @Published var imageArray : [MainImage]
     @Published var imagePresent: Bool
@@ -56,11 +62,7 @@ class DialogUpdatableContent : ObservableObject {
     
     @Published var listItemsArray : [ListItems]
     @Published var listItemUpdateRow: Int
-    //@Published var listItemPresent: Bool
-    
-    //@Published var textEntryArray : [TextFieldState]
-    
-    //@Published var requiredTextfieldHighlight: [Color] = Array(repeating: Color.clear, count: appvars.textFields.count)
+
     @Published var requiredFieldsPresent : Bool
     
     @Published var windowWidth: CGFloat
@@ -71,13 +73,8 @@ class DialogUpdatableContent : ObservableObject {
     
     var status: StatusState
     
-    let task = Process()
-    let fm = FileManager()
-    var fwDownloadsStarted = false
-    var filesets = Set<String>()
-    
     let commandFilePermissions: [FileAttributeKey: Any] = [FileAttributeKey.posixPermissions: 0o666]
-    
+        
     // init
     
     init() {
@@ -87,6 +84,7 @@ class DialogUpdatableContent : ObservableObject {
         } else {
             path = "/var/tmp/dialog.log"
         }
+                
         
         // initialise all our observed variables
         // for the most part we pull from whatever was passed in save for some tracking variables
@@ -97,7 +95,6 @@ class DialogUpdatableContent : ObservableObject {
             appArguments.button1Disabled.present = true
         }
                 
-        //titleText = appArguments.titleOption.value
         titleFontColour = appvars.titleFontColour
         titleFontSize = appvars.titleFontSize
         
@@ -105,31 +102,16 @@ class DialogUpdatableContent : ObservableObject {
         statusText = appArguments.progressText.value
         progressValue = 0
         progressTotal = 0
-        //button1Value = appArguments.button1TextOption.value
-        //button2Value = appArguments.button2TextOption.value
-        //button2Present = appArguments.button2Option.present
-        //infoButtonValue = appArguments.infoButtonOption.value
-        //infoButtonPresent = appArguments.infoButtonOption.present || appArguments.buttonInfoTextOption.present
         listItemUpdateRow = 0
         
-        //requiredTextfieldHighlight = Color.clear
-        
-        //iconImage = appArguments.iconOption.value
         iconSize = string2float(string: appArguments.iconSize.value)
-        //iconPresent = !appvars.iconIsHidden
-        //centreIconPresent = appArguments.centreIcon.present
         
         imageArray = appvars.imageArray
         imagePresent = appArguments.mainImage.present
         imageCaptionPresent = appArguments.mainImageCaption.present
         
-        //overlayIconImage = appArguments.overlayIconOption.value
-        //overlayIconPresent = appArguments.overlayIconOption.present
-        
         listItemsArray = appvars.listItems
-        //listItemPresent = appArguments.listItem.present
-        
-        //textEntryArray = appvars.textFields
+
         requiredFieldsPresent = false
         
         windowWidth = appvars.windowWidth
@@ -140,70 +122,40 @@ class DialogUpdatableContent : ObservableObject {
 
         // start the background process to monotor the command file
         status = .start
-        task.launchPath = "/usr/bin/tail"
-        task.arguments = ["-f", path]
         
         // delete if it already exists
         self.killCommandFile()
-        self.run()
+
+        // create a fresh command file
+        self.createCommandFile(commandFilePath: path)
+        
+        // start the background process to monotor the command file
+        let commandFileDelegate = CommandFileReader(observedDialogContent: self)
+        let commandQueue = SFSMonitor(delegate: commandFileDelegate)
+        commandQueue?.setMaxMonitored(number: 200)
+        _ = commandQueue?.addURL(URL(fileURLWithPath: path))
         
     }
     
-    // watch for updates and post them
-    
-    func run() {
+    func createCommandFile(commandFilePath: String) {
+        let fm = FileManager()
         
         // check to make sure the file exists
-        if fm.fileExists(atPath: path) {
-            logger(logMessage: "Existing file at \(path). Cleaning")
+        if fm.fileExists(atPath: commandFilePath) {
+            logger(logMessage: "Existing file at \(commandFilePath). Cleaning")
             let text = ""
             do {
                 try text.write(toFile: path, atomically: false, encoding: String.Encoding.utf8)
             } catch {
-                logger(logMessage: "Existing file at \(path) but couldn't clean. ")
+                logger(logMessage: "Existing file at \(commandFilePath) but couldn't clean. ")
                 logger(logMessage: "Error info: \(error)")
             }
         } else {
-            logger(logMessage: "Creating file at \(path)")
+            logger(logMessage: "Creating file at \(commandFilePath)")
             fm.createFile(atPath: path, contents: nil, attributes: commandFilePermissions)
         }
-        
-        
-        let pipe = Pipe()
-        task.standardOutput = pipe
-        
-        let outputHandle = pipe.fileHandleForReading
-        outputHandle.waitForDataInBackgroundAndNotify()
-        
-        var dataAvailable : NSObjectProtocol!
-        dataAvailable = NotificationCenter.default.addObserver(forName: NSNotification.Name.NSFileHandleDataAvailable,
-        object: outputHandle, queue: nil) {  notification -> Void in
-            let data = pipe.fileHandleForReading.availableData
-            if data.count > 0 {
-                if let str = NSString(data: data, encoding: String.Encoding.utf8.rawValue) {
-                    //print("Task sent some data: \(str)")
-                    self.processCommands(commands: str as String)
-                }
-                outputHandle.waitForDataInBackgroundAndNotify()
-            } else {
-                NotificationCenter.default.removeObserver(dataAvailable as Any)
-            }
-        }
-        
-        var dataReady : NSObjectProtocol!
-        dataReady = NotificationCenter.default.addObserver(forName: Process.didTerminateNotification,
-        object: pipe.fileHandleForReading, queue: nil) { notification -> Void in
-            logger(logMessage: "Task terminated!")
-            NotificationCenter.default.removeObserver(dataReady as Any)
-        }
-        
-        task.launch()
     }
-    
-    func end() {
-        task.terminate()
-    }
-    
+            
     func processCommands(commands: String) {
         
         let allCommands = commands.components(separatedBy: "\n")
@@ -471,7 +423,6 @@ class DialogUpdatableContent : ObservableObject {
                 
             // quit
             case "quit:" :
-                self.end()
                 quitDialog(exitCode: appvars.exit5.code)
 
             default:

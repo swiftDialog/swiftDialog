@@ -35,9 +35,7 @@ struct ContentView: View {
                 if appArguments.quitKey.value != "q" {
                     return nil
                 }
-                observedDialogContent.end()
             case [.command] where event.characters == appArguments.quitKey.value, [.command, .shift] where event.characters == appArguments.quitKey.value.lowercased():
-                observedDialogContent.end()
                 quitDialog(exitCode: appvars.exit10.code)
             default:
                 return event

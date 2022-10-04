@@ -41,7 +41,6 @@ struct ButtonView: View {
             if observedData.args.button2Option.present || observedData.args.button2TextOption.present {
                 let button2Text: String = observedData.args.button2TextOption.value
                 Button(action: {
-                    observedData.end()
                     quitDialog(exitCode: appvars.exit2.code, observedObject: observedData)
                 }, label: {
                     Text(button2Text)
@@ -55,7 +54,6 @@ struct ButtonView: View {
         let button1Text: String = observedData.args.button1TextOption.value
 
         Button(action: {
-            observedData.end()
             buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction, observedObject: observedData)
             
         }, label: {
