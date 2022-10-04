@@ -89,6 +89,20 @@ struct CKWindowProperties: View {
                         .toggleStyle(.switch)
                     Spacer()
                 }
+                HStack {
+                    Text("Progress Bar")
+                        .frame(width: 100, alignment: .leading)
+                    Toggle("", isOn: $observedData.args.progressBar.present)
+                        .toggleStyle(.switch)
+                    TextField("Progress value:", value: $observedData.args.progressBar.value, formatter: formatter)
+                        .frame(width: 50)
+                    TextField("Progress Text:", value: $observedData.args.progressText.value, formatter: formatter)
+                        .frame(width: 150)
+                        .onChange(of: observedData.args.progressText.value, perform: { _ in
+                            observedData.args.progressText.present = true                            
+                        })
+                    Spacer()
+                }
             }
             HStack {
                 Text("Banner Image")
