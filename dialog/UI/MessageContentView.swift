@@ -69,33 +69,19 @@ struct MessageContent: View {
                 if observedData.args.messageOption.value != "" && observedData.args.messageOption.value != "none" {
                     if observedData.args.messageVerticalAlignment.present || observedData.args.webcontent.present || observedData.args.listItem.present {
                         Spacer()
-                        if observedData.appProperties.messageFontName == "" {
-                            Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                                .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                                .markdownStyle(defaultStyle)
-                                .border(observedData.appProperties.debugBorderColour, width: 2)
-                        } else {
-                            Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                                .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                                .markdownStyle(customStyle)
-                                .border(observedData.appProperties.debugBorderColour, width: 2)
-                        }
-                        Spacer()
-                    } else {
-                        ScrollView() {
-                            if observedData.appProperties.messageFontName == "" {
-                                Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                                    .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                                    .markdownStyle(defaultStyle)
-                            } else {
-                                Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                                    .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                                    .markdownStyle(customStyle)
-                            }
-                        }
-                        //.padding(.top, 10)
-                        .border(observedData.appProperties.debugBorderColour, width: 2)
                     }
+                    if observedData.appProperties.messageFontName == "" {
+                        Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
+                            .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                            .markdownStyle(defaultStyle)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                    } else {
+                        Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
+                            .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                            .markdownStyle(customStyle)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                    }
+                    Spacer()
                 }
                 
                 WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
@@ -104,6 +90,7 @@ struct MessageContent: View {
                     .padding(.bottom, observedData.appProperties.bottomPadding)
 
                 ListView(observedDialogContent: observedData)
+                    .border(observedData.appProperties.debugBorderColour, width: 2)
                     //.padding(.trailing, 30)
                     .padding(.bottom, observedData.appProperties.bottomPadding)
                 CheckboxView()

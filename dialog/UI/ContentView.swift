@@ -80,7 +80,9 @@ struct ContentView: View {
                     
                     // Horozontal Line
                     Divider()
-                        .frame(width: observedData.windowWidth*appvars.horozontalLineScale, height: 2)
+                        .padding(.leading, observedData.appProperties.sidePadding)
+                        .padding(.trailing, observedData.appProperties.sidePadding)
+                        .frame(height: 2)
                 }
                 
                 if appArguments.video.present {
@@ -112,8 +114,8 @@ struct ContentView: View {
                     }
                 }
                 //.frame(alignment: .bottom)
-                .padding(.leading, observedData.appProperties.sidePadding)
-                .padding(.trailing, observedData.appProperties.sidePadding)
+                .padding(.leading, observedData.appProperties.bottomPadding)
+                .padding(.trailing, observedData.appProperties.bottomPadding)
                 .padding(.bottom, observedData.appProperties.bottomPadding)
                 .border(appvars.debugBorderColour, width: 2)
             }
