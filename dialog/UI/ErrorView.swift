@@ -30,12 +30,12 @@ struct ErrorView: View {
                     .foregroundColor(.yellow)
             }
             .frame(width: 64, height: 64)
-            .padding(20)
+            .padding(observedData.appProperties.sidePadding)
             Text("invalid-input").bold()
                 .padding()
             Text(observedData.sheetErrorMessage)
-                .padding(.leading, 10)
-                .padding(.trailing, 10)
+                .padding(.leading, observedData.appProperties.sidePadding)
+                .padding(.trailing, observedData.appProperties.sidePadding)
             Spacer()
             Button(action: {
                 observedData.showSheet = false
@@ -43,7 +43,7 @@ struct ErrorView: View {
             }) {
                 Text("button-ok".localized)
             }
-            .padding()
+            .padding(observedData.appProperties.sidePadding)
         }
         .frame(width: 400, height: 350)
     }

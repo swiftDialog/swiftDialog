@@ -34,8 +34,8 @@ struct DialogView: View {
                         IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
                             .frame(width: iconDisplayWidth, alignment: .top)
                             .border(appvars.debugBorderColour, width: 2)
-                            .padding(.top, 20)
-                            .padding(.leading, 30)
+                            .padding(.top, observedData.appProperties.topPadding)
+                            .padding(.leading, observedData.appProperties.sidePadding)
                         Spacer()
                     }
                 }

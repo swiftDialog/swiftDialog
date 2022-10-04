@@ -39,7 +39,7 @@ struct MessageContent: View {
             fieldPadding = 30
             iconDisplayWidth = 0
         } else {
-            fieldPadding = 15
+            fieldPadding = 20
             iconDisplayWidth = observedDialogContent.iconSize
         }
         messageColour = NSColor(observedDialogContent.appProperties.messageFontColour)
@@ -54,7 +54,7 @@ struct MessageContent: View {
                     IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
                         .frame(width: iconDisplayWidth, alignment: .top)
                         //.padding(.top, 15)
-                        .padding(.bottom, 10)
+                        .padding(.bottom, observedData.appProperties.bottomPadding)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                 }
                 ImageView(imageArray: observedData.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: string2float(string: observedData.args.autoPlay.value))
@@ -63,7 +63,7 @@ struct MessageContent: View {
                     IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
                         .frame(width: iconDisplayWidth, alignment: .top)
                         //.padding(.top, 15)
-                        .padding(.bottom, 10)
+                        .padding(.bottom, observedData.appProperties.bottomPadding)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                 }
                 if observedData.args.messageOption.value != "" && observedData.args.messageOption.value != "none" {
@@ -73,10 +73,12 @@ struct MessageContent: View {
                             Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
                                 .multilineTextAlignment(observedData.appProperties.messageAlignment)
                                 .markdownStyle(defaultStyle)
+                                .border(observedData.appProperties.debugBorderColour, width: 2)
                         } else {
                             Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
                                 .multilineTextAlignment(observedData.appProperties.messageAlignment)
                                 .markdownStyle(customStyle)
+                                .border(observedData.appProperties.debugBorderColour, width: 2)
                         }
                         Spacer()
                     } else {
@@ -99,31 +101,31 @@ struct MessageContent: View {
                 WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
                     //.padding(.trailing, 30)
-                    .padding(.bottom, 10)
+                    .padding(.bottom, observedData.appProperties.bottomPadding)
 
                 ListView(observedDialogContent: observedData)
                     //.padding(.trailing, 30)
-                    .padding(.bottom, 10)
+                    .padding(.bottom, observedData.appProperties.bottomPadding)
                 CheckboxView()
                     .border(observedData.appProperties.debugBorderColour, width: 2)
                     //.padding(.trailing, 30)
-                    .padding(.bottom, 10)
+                    .padding(.bottom, observedData.appProperties.bottomPadding)
                 TextEntryView(observedDialogContent: observedData)
                     //.padding(.leading, 50)
                     //.padding(.trailing, 30)
-                    .padding(.bottom, 10)
+                    .padding(.bottom, observedData.appProperties.bottomPadding)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
                 DropdownView(observedDialogContent: observedData)
                     //.padding(.leading, 50)
                     //.padding(.trailing, 30)
-                    .padding(.bottom, 10)
+                    .padding(.bottom, observedData.appProperties.bottomPadding)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
 
             }
         }
-        .padding(.leading, fieldPadding)
-        .padding(.trailing, fieldPadding)
-        .padding(.top, fieldPadding)
+        .padding(.leading, observedData.appProperties.sidePadding)
+        .padding(.trailing, observedData.appProperties.sidePadding)
+        //.padding(.top, observedData.appProperties.topPadding)
     }
 }
 

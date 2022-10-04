@@ -55,11 +55,11 @@ func getJSON() -> JSON {
     return json
 }
 
-func processCLOptions() {
+func processCLOptions(json : JSON = getJSON()) {
 
     //this method goes through the arguments that are present and performs any processing required before use
 
-    let json : JSON = getJSON()
+    //let json : JSON = getJSON()
     
     if appArguments.dropdownValues.present {
         // checking for the pre 1.10 way of defining a select list
@@ -467,12 +467,10 @@ func processCLOptions() {
     // hide the icon if asked to or if banner image is present
     if appArguments.hideIcon.present || appArguments.iconOption.value == "none" || appArguments.bannerImage.present {
         appArguments.iconOption.present = false
-        //appArguments.hideIcon.present = true
     }
 
     // of both banner image and icon are specified, re-enable the icon.
-    if appArguments.bannerImage.present && appArguments.iconOption.present {
-        //appArguments.hideIcon.present = false
+    if appArguments.bannerImage.present && appArguments.iconOption.value != "none" && appArguments.iconOption.value != "default" {
         appArguments.iconOption.present = true
     }
         

@@ -70,7 +70,7 @@ struct TextEntryView: View {
                                             )
                                          )
                         }
-                        .padding(.bottom, 10)
+                        .padding(.bottom, observedData.appProperties.bottomPadding)
                     } else {
                         HStack {
 
@@ -127,7 +127,7 @@ struct TextEntryView: View {
                         Text("required-note")
                             .font(.system(size: 10)
                                     .weight(.light))
-                            .padding(.trailing, 10)
+                            .padding(.trailing, observedData.appProperties.sidePadding)
                     }
                 }
             }

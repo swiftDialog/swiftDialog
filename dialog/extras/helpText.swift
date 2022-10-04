@@ -131,7 +131,7 @@ var helpText = """
     
         --\(appArguments.iconSize.long)
                     Will render the icon with the specified size.
-                    Default size is 170
+                    Default size is 150
     
         --\(appArguments.centreIcon.long)
                     re-positions the icon to be in the centre, between the title and message areas

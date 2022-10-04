@@ -18,8 +18,8 @@ struct TaskProgressView: View {
                     .progressViewStyle(.linear)
                 Text(observedData.statusText)
             }
-            .padding(.leading,40)
-            .padding(.trailing,40)
+            .padding(.leading,observedData.appProperties.sidePadding)
+            .padding(.trailing,observedData.appProperties.sidePadding)
         }
     }
 }

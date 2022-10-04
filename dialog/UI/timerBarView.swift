@@ -120,7 +120,7 @@ struct timerBarView: View {
                     .clipShape(RoundedRectangle(cornerRadius: barRadius))
                 }
             }.frame(height: barheight, alignment: .bottom) //needed to force limit the entire progress bar frame height
-            .padding(10)
+            .padding(observedData.appProperties.sidePadding)
         } else {
             Spacer()
                 .onReceive(timer) { _ in

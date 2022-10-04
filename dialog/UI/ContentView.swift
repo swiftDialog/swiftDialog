@@ -114,9 +114,9 @@ struct ContentView: View {
                     }
                 }
                 //.frame(alignment: .bottom)
-                .padding(.leading, 15)
-                .padding(.trailing, 15)
-                .padding(.bottom, 15)
+                .padding(.leading, observedData.appProperties.sidePadding)
+                .padding(.trailing, observedData.appProperties.sidePadding)
+                .padding(.bottom, observedData.appProperties.bottomPadding)
                 .border(appvars.debugBorderColour, width: 2)
             }
         

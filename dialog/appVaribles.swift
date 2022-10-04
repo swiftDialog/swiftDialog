@@ -127,6 +127,11 @@ struct AppVariables {
     // Window Sizes
     var windowWidth                     = CGFloat(820)      // set default dialog width
     var windowHeight                    = CGFloat(380)      // set default dialog height
+    
+    // Content padding
+    var sidePadding                     = CGFloat(20)
+    var topPadding                      = CGFloat(10)
+    var bottomPadding                   = CGFloat(10)
 
     // Screen Size
     var screenWidth                     = CGFloat(0)
@@ -138,7 +143,7 @@ struct AppVariables {
     var windowPositionVertical          = NSWindow.Position.Vertical.center
     var windowPositionHorozontal        = NSWindow.Position.Horizontal.center
 
-    var iconWidth                      = CGFloat(170)      // set default image area width
+    var iconWidth                      = CGFloat(150)      // set default image area width
     var iconHeight                     = CGFloat(260)      // set default image area height
     var titleHeight                     = CGFloat(50)
     var bannerHeight                    = CGFloat(-10)
