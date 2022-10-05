@@ -54,7 +54,7 @@ struct DropdownView: View {
                             }
                         }
                         .pickerStyle(DefaultPickerStyle())
-                        .frame(idealWidth: fieldwidth*0.50, maxWidth: 250, alignment: .trailing)
+                        .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
                         .onChange(of: selectedOption[index]) { _ in
                             //update appvars.dropdownItems with the option that was selected. this will be printed to stdout on exit
                             appvars.dropdownItems[index].selectedValue = selectedOption[index]

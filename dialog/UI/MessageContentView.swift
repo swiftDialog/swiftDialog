@@ -89,17 +89,21 @@ struct MessageContent: View {
                 CheckboxView()
                     .border(observedData.appProperties.debugBorderColour, width: 2)
                     //.padding(.trailing, 30)
+                
                     .padding(.bottom, observedData.appProperties.bottomPadding)
+                    .frame(maxWidth: 600)
                 TextEntryView(observedDialogContent: observedData)
                     //.padding(.leading, 50)
                     //.padding(.trailing, 30)
                     .padding(.bottom, observedData.appProperties.bottomPadding)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
+                    .frame(maxWidth: 600)
                 DropdownView(observedDialogContent: observedData)
                     //.padding(.leading, 50)
                     //.padding(.trailing, 30)
                     .padding(.bottom, observedData.appProperties.bottomPadding)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
+                    .frame(maxWidth: 600)
 
             }
         }

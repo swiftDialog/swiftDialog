@@ -129,9 +129,9 @@ struct AppVariables {
     var windowHeight                    = CGFloat(380)      // set default dialog height
     
     // Content padding
-    var sidePadding                     = CGFloat(20)
+    var sidePadding                     = CGFloat(15)
     var topPadding                      = CGFloat(10)
-    var bottomPadding                   = CGFloat(10)
+    var bottomPadding                   = CGFloat(15)
 
     // Screen Size
     var screenWidth                     = CGFloat(0)

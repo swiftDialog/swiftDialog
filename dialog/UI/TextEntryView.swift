@@ -128,7 +128,7 @@ struct TextEntryView: View {
                         Text("required-note")
                             .font(.system(size: 10)
                                     .weight(.light))
-                            .padding(.trailing, observedData.appProperties.sidePadding)
+                            //.padding(.trailing, observedData.appProperties.sidePadding)
                     }
                 }
             }

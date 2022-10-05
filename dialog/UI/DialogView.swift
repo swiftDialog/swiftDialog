@@ -35,7 +35,8 @@ struct DialogView: View {
                             .frame(width: iconDisplayWidth, alignment: .top)
                             .border(appvars.debugBorderColour, width: 2)
                             .padding(.top, observedData.appProperties.topPadding)
-                            .padding(.leading, observedData.appProperties.sidePadding)
+                            .padding(.leading, observedData.appProperties.sidePadding+10)
+                            .padding(.trailing, observedData.appProperties.sidePadding+10)
                         Spacer()
                     }
                 }
