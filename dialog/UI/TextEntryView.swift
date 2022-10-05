@@ -61,7 +61,7 @@ struct TextEntryView: View {
                                 .background(Color("editorBackgroundColour"))
                                 .font(.custom("HelveticaNeue", size: 14))
                                 .cornerRadius(3.0)
-                                .frame(height: 80)
+                                .frame(maxHeight: observedData.appProperties.windowHeight/2)
                                 .overlay(RoundedRectangle(cornerRadius: 5)
                                             .stroke(observedData.appProperties.textFields[index].requiredTextfieldHighlight, lineWidth: 2)
                                             .animation(
@@ -102,14 +102,14 @@ struct TextEntryView: View {
                                             .textContentType(observedData.appProperties.textFields[index].passwordFill ? .password : .none)
                                         Image(systemName: "lock.fill")
                                             .foregroundColor(stringToColour("#008815")).opacity(0.5)
-                                                .frame(idealWidth: fieldwidth*0.50, maxWidth: 250, alignment: .trailing)
+                                            .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
                                     }
                                 } else {
                                     TextField(observedData.appProperties.textFields[index].prompt, text: $observedData.appProperties.textFields[index].value)
                                         
                                 }
                             }
-                            .frame(idealWidth: fieldwidth*0.50, maxWidth: 250, alignment: .trailing)
+                            .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
                             
                             .overlay(RoundedRectangle(cornerRadius: 5)
                                         .stroke(observedData.appProperties.textFields[index].requiredTextfieldHighlight, lineWidth: 2)
@@ -119,6 +119,7 @@ struct TextEntryView: View {
                                         )
                                      )
                         }
+                        .frame(maxWidth: 600)
                     }
                 }
                 if self.requiredFieldsPresent {

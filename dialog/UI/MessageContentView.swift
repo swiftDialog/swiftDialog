@@ -23,14 +23,14 @@ struct MessageContent: View {
     //var defaultStyle: MarkdownStyle
     //var customStyle: MarkdownStyle
     
-    var defaultStyle: MarkdownStyle {
+    var markdownStyle: MarkdownStyle {
+        if observedData.appProperties.messageFontName == "" {
             return MarkdownStyle(font: .system(size: appvars.messageFontSize, weight: appvars.messageFontWeight), foregroundColor: appvars.messageFontColour)
+        } else {
+            return MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.messageFontSize), foregroundColor: appvars.messageFontColour)
         }
-        
-    var customStyle: MarkdownStyle {
-        return MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.messageFontSize), foregroundColor: appvars.messageFontColour)
     }
-    
+            
     let theAllignment: Alignment = .topLeading
     
     init(observedDialogContent : DialogUpdatableContent) {
@@ -70,17 +70,10 @@ struct MessageContent: View {
                     if observedData.args.messageVerticalAlignment.present || observedData.args.webcontent.present || observedData.args.listItem.present {
                         Spacer()
                     }
-                    if observedData.appProperties.messageFontName == "" {
-                        Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                            .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                            .markdownStyle(defaultStyle)
-                            .border(observedData.appProperties.debugBorderColour, width: 2)
-                    } else {
-                        Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                            .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                            .markdownStyle(customStyle)
-                            .border(observedData.appProperties.debugBorderColour, width: 2)
-                    }
+                    Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
+                        .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                        .markdownStyle(markdownStyle)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
                     Spacer()
                 }
                 
