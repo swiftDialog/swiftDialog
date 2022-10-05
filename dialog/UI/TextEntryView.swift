@@ -61,7 +61,7 @@ struct TextEntryView: View {
                                 .background(Color("editorBackgroundColour"))
                                 .font(.custom("HelveticaNeue", size: 14))
                                 .cornerRadius(3.0)
-                                .frame(maxHeight: observedData.appProperties.windowHeight/2)
+                                .frame(minHeight: 80, maxHeight: observedData.appProperties.windowHeight/2)
                                 .overlay(RoundedRectangle(cornerRadius: 5)
                                             .stroke(observedData.appProperties.textFields[index].requiredTextfieldHighlight, lineWidth: 2)
                                             .animation(
