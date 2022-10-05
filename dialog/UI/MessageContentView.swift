@@ -27,9 +27,9 @@ struct MessageContent: View {
             return MarkdownStyle(font: .system(size: appvars.messageFontSize, weight: appvars.messageFontWeight), foregroundColor: appvars.messageFontColour)
         }
         
-        var customStyle: MarkdownStyle {
-            return MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.messageFontSize), foregroundColor: appvars.messageFontColour)
-        }
+    var customStyle: MarkdownStyle {
+        return MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.messageFontSize), foregroundColor: appvars.messageFontColour)
+    }
     
     let theAllignment: Alignment = .topLeading
     
