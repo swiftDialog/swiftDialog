@@ -415,6 +415,12 @@ var helpText = """
         -\(appArguments.smallWindow.short), --\(appArguments.smallWindow.long)
                     Makes the dialog 25% smaller. Less room for message text.
     
+        --\(appArguments.miniMode.long)
+                    Presents a mini mode dialog of fixed size, presenting title, icon and message, limited to two lines.
+                    Button 1 and 2 with modofocations are available.
+                    When used with --progress, buttons are replaced by progress bar and progress text.
+                        * In this presentation, quitting the dialog is acheived with use of the command file.
+    
         -\(appArguments.jsonOutPut.short), --\(appArguments.jsonOutPut.long)
                     Outputs any results in json format for easier processing
                     (for dropdown item selections and textfield responses)
