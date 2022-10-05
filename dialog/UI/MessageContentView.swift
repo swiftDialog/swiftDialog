@@ -67,13 +67,22 @@ struct MessageContent: View {
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                 }
                 if observedData.args.messageOption.value != "" && observedData.args.messageOption.value != "none" {
-                    if observedData.args.messageVerticalAlignment.present || observedData.args.webcontent.present || observedData.args.listItem.present {
+                    if observedData.args.messageVerticalAlignment.present {
                         Spacer()
                     }
-                    Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                        .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                        .markdownStyle(markdownStyle)
-                        .border(observedData.appProperties.debugBorderColour, width: 2)
+                    if observedData.args.webcontent.present || observedData.args.listItem.present {
+                        Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
+                            .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                            .markdownStyle(markdownStyle)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                    } else {
+                        ScrollView() {
+                            Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
+                                .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                                .markdownStyle(markdownStyle)
+                                .border(observedData.appProperties.debugBorderColour, width: 2)
+                        }
+                    }
                     Spacer()
                 }
                 
