@@ -8,10 +8,10 @@
 import SwiftUI
 import SwiftyJSON
 
-var jsonFormattedOutout : String = ""
+var jsonFormattedOutout: String = ""
 
 struct LabelView: View {
-    var label : String
+    var label: String
     var body: some View {
         VStack {
             Divider()
@@ -30,7 +30,7 @@ struct WelcomeView: View {
             Image(systemName: "bubble.left.circle.fill")
                 .resizable()
                 .frame(width: 150, height: 150)
-            
+
             Text("Welcome to the swiftDialog builder")
                 .font(.largeTitle)
             Divider()
@@ -41,19 +41,19 @@ struct WelcomeView: View {
 }
 
 struct JSONView: View {
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
-    
-    @State private var jsonText : String = ""
-    
-    private func exportJSON(debug : Bool = false) -> String {
+    @ObservedObject var observedDialogContent: DialogUpdatableContent
+
+    @State private var jsonText: String = ""
+
+    private func exportJSON(debug: Bool = false) -> String {
         var json = JSON()
         var jsonDEBUG = JSON()
-        
+
         // copy modifyable objects into args
         observedDialogContent.args.iconSize.value = "\(observedDialogContent.iconSize)"
         observedDialogContent.args.windowWidth.value = "\(observedDialogContent.windowWidth)"
         observedDialogContent.args.windowHeight.value = "\(observedDialogContent.windowHeight)"
-        
+
         let mirrored_appArguments = Mirror(reflecting: observedDialogContent.args)
         for (_, attr) in mirrored_appArguments.children.enumerated() {
             if let propertyValue = attr.value as? CLArgument {
@@ -75,20 +75,20 @@ struct JSONView: View {
                 if observedDialogContent.listItemsArray[i].title.isEmpty {
                     observedDialogContent.listItemsArray[i].title = "Item \(i)"
                 }
-                //print(observedDialogContent.listItemsArray[i].dictionary)
+                // print(observedDialogContent.listItemsArray[i].dictionary)
                 json[appArguments.listItem.long][i].dictionaryObject = observedDialogContent.listItemsArray[i].dictionary
             }
         }
-        
+
         if observedDialogContent.imageArray.count > 0 {
             json[appArguments.mainImage.long].arrayObject = Array(repeating: 0, count: observedDialogContent.imageArray.count)
             for i in 0..<observedDialogContent.imageArray.count {
                 json[appArguments.mainImage.long][i].dictionaryObject = observedDialogContent.imageArray[i].dictionary
             }
         }
-                
-        //print("Generated JSON")
-        //convert the JSON to a raw String
+
+        // print("Generated JSON")
+        // convert the JSON to a raw String
         jsonFormattedOutout = json.rawString() ?? "json is nil"
 
         if debug {
@@ -96,11 +96,11 @@ struct JSONView: View {
         }
         return jsonFormattedOutout
     }
-    
-    init (observedDialogContent : DialogUpdatableContent) {
+
+    init (observedDialogContent: DialogUpdatableContent) {
         self.observedDialogContent = observedDialogContent
     }
-    
+
     var body: some View {
         VStack {
             HStack {
@@ -128,16 +128,16 @@ struct JSONView: View {
 }
 
 struct ConstructionKitView: View {
-    
-    @ObservedObject var observedData : DialogUpdatableContent
-    
-    //@State var titleColour : Color
+
+    @ObservedObject var observedData: DialogUpdatableContent
+
+    // @State var titleColour: Color
     // values being updated
-    //@State var dialogTitle : String
-    
-    init(observedDialogContent : DialogUpdatableContent) {
+    // @State var dialogTitle: String
+
+    init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
-        
+
         // mark all standard fields visible
         observedDialogContent.args.titleOption.present = true
         observedDialogContent.args.titleFont.present = true
@@ -148,11 +148,11 @@ struct ConstructionKitView: View {
         observedDialogContent.args.button1TextOption.present = true
         observedDialogContent.args.windowWidth.present = true
         observedDialogContent.args.windowHeight.present = true
-        
+
     }
-    
+
     public func showConstructionKit() {
-        
+
         var window: NSWindow!
         window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 0, height: 0),
@@ -165,48 +165,48 @@ struct ConstructionKitView: View {
         window.contentView = NSHostingView(rootView: ConstructionKitView(observedDialogContent: observedData))
 
     }
-    
+
     var body: some View {
-        
+
         NavigationView {
-            List() {
+            List {
                 Section(header: Text("Basic")) {
-                    NavigationLink(destination: CKBasicsView(observedDialogContent: observedData)){
+                    NavigationLink(destination: CKBasicsView(observedDialogContent: observedData)) {
                         Text("Content")
                     }
-                    NavigationLink(destination: CKWindowProperties(observedDialogContent: observedData)){
+                    NavigationLink(destination: CKWindowProperties(observedDialogContent: observedData)) {
                         Text("Window")
                     }
-                    NavigationLink(destination: CKIconView(observedDialogContent: observedData)){
+                    NavigationLink(destination: CKIconView(observedDialogContent: observedData)) {
                         Text("Icon")
                     }
-                    NavigationLink(destination: CKDataEntryView(observedDialogContent: observedData)){
+                    NavigationLink(destination: CKDataEntryView(observedDialogContent: observedData)) {
                         Text("Data Entry")
                     }
-                    NavigationLink(destination: CKButtonView(observedDialogContent: observedData)){
+                    NavigationLink(destination: CKButtonView(observedDialogContent: observedData)) {
                         Text("Buttons")
                     }
                 }
                 Section(header: Text("Advanced")) {
-                    NavigationLink(destination: CKListView(observedDialogContent: observedData)){
+                    NavigationLink(destination: CKListView(observedDialogContent: observedData)) {
                         Text("List Items")
                     }
-                    NavigationLink(destination: CKImageView(observedDialogContent: observedData)){
+                    NavigationLink(destination: CKImageView(observedDialogContent: observedData)) {
                         Text("Images")
                     }
-                    NavigationLink(destination: CKMediaView(observedDialogContent: observedData)){
+                    NavigationLink(destination: CKMediaView(observedDialogContent: observedData)) {
                         Text("Media")
                     }
                 }
                 Spacer()
                 Section(header: Text("Output")) {
-                    NavigationLink(destination: JSONView(observedDialogContent: observedData) ){
+                    NavigationLink(destination: JSONView(observedDialogContent: observedData) ) {
                         Text("JSON Output")
                     }
                 }
             }
             .padding(10)
-            
+
             WelcomeView()
         }
         .listStyle(SidebarListStyle())
@@ -227,5 +227,3 @@ struct ConstructionKitView: View {
         .padding(20)
     }
 }
-
-
