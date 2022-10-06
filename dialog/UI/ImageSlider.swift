@@ -148,15 +148,15 @@ struct PageControl: View {
                 ZStack() {
                     Image(systemName: "circle.fill")
                         .resizable()
-                        .foregroundColor(Color.white)
+                        .foregroundColor(Color.tertiaryBackground)
                     
                     Image(systemName: "chevron.left.circle.fill")
                         .resizable()
-                        .foregroundColor(Color.black)
+                        .foregroundColor(Color.primary)
                 }
             })
             //.buttonStyle(.borderless)
-            .frame(width: 25, height: 25)
+            .frame(width: 20, height: 20)
             
         
             Spacer()
@@ -164,7 +164,7 @@ struct PageControl: View {
             // Centre dots
             ForEach(0...maxIndex, id: \.self) { index in
                 Circle()
-                    .fill(index == self.index ? Color.white : Color.gray)
+                    .fill(index == self.index ? Color.primary : Color.secondary)
                     .frame(width: 8, height: 8)
             }
             
@@ -175,18 +175,18 @@ struct PageControl: View {
                 ZStack() {
                     Image(systemName: "circle.fill")
                         .resizable()
-                        .foregroundColor(Color.white)
+                        .foregroundColor(Color.tertiaryBackground)
                     
                     Image(systemName: "chevron.right.circle.fill")
                         .resizable()
-                        .foregroundColor(Color.black)
+                        .foregroundColor(Color.primary)
                 }
                 //.frame(width: 25, height: 25)
                 //.opacity(0.80)
                     
             })
-            .frame(width: 25, height: 25)
-            .padding() 
+            .frame(width: 20, height: 20)
+            //.padding()
             //.opacity(0.80)
         }
         .opacity(0.80)
