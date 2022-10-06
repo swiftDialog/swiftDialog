@@ -210,7 +210,7 @@ func processCLOptions(json : JSON = getJSON()) {
         }
         logger(logMessage: "imageArray : \(appvars.imageArray)")
     }
-    //MARK: Need to work out how to manage image captions. May require a breaking update?
+
     if json[appArguments.mainImageCaption.long].exists() || appArguments.mainImageCaption.present {
         if json[appArguments.mainImageCaption.long].exists() {
             appvars.imageCaptionArray.append(json[appArguments.mainImageCaption.long].stringValue)
@@ -218,6 +218,11 @@ func processCLOptions(json : JSON = getJSON()) {
             appvars.imageCaptionArray = CLOptionMultiOptions(optionName: appArguments.mainImageCaption.long)
         }
         logger(logMessage: "imageCaptionArray : \(appvars.imageCaptionArray)")
+        for i in 0..<appvars.imageCaptionArray.count {
+            if i < appvars.imageArray.count {
+                appvars.imageArray[i].caption = appvars.imageCaptionArray[i]
+            }
+        }
     }
     
     if appArguments.listItem.present {
