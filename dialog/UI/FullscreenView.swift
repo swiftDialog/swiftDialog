@@ -23,7 +23,7 @@ extension Color {
 
 struct FullscreenView: View {
             
-    @ObservedObject var observedData = DialogUpdatableContent()
+    @ObservedObject var observedData : DialogUpdatableContent
         
     var TitleViewOption: String = appArguments.titleOption.value // CLOptionText(OptionName: appArguments.titleOption, DefaultValue: appvars.titleDefault)
     var messageContentOption: String = appArguments.messageOption.value // CLOptionText(OptionName: appArguments.messageOption, DefaultValue: appvars.messageDefault)
@@ -54,7 +54,8 @@ struct FullscreenView: View {
                                foregroundColor: .white)
     }
      
-    init () {
+    init (observedData : DialogUpdatableContent) {
+        self.observedData = observedData
         // Ensure the singleton NSApplication exists.
         // required for correct determination of screen dimentions for the screen in use in multi screen scenarios
         _ = NSApplication.shared
@@ -100,7 +101,7 @@ struct FullscreenView: View {
         window.makeKeyAndOrderFront(self)
         window.isReleasedWhenClosed = false
         window.center()
-        window.contentView = NSHostingView(rootView: FullscreenView())
+        window.contentView = NSHostingView(rootView: FullscreenView(observedData: observedData))
 
         // open fullScreen mode
         let mainScreen: NSScreen = NSScreen.main!

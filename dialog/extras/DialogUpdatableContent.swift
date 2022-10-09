@@ -170,7 +170,7 @@ class DialogUpdatableContent : ObservableObject {
             let command = line.components(separatedBy: " ").first!.lowercased()
                         
             switch command {
-            
+            /*
             case "width:" :
                 windowWidth = NumberFormatter().number(from: line.replacingOccurrences(of: "width: ", with: "")) as! CGFloat
                 placeWindow(mainWindow!, size: CGSize(width: windowWidth, height: windowHeight+28))
@@ -178,7 +178,7 @@ class DialogUpdatableContent : ObservableObject {
             case "height:" :
                 windowHeight = NumberFormatter().number(from: line.replacingOccurrences(of: "height: ", with: "")) as! CGFloat
                 placeWindow(mainWindow!, size: CGSize(width: windowWidth, height: windowHeight+28))
-            
+            */
             // Title
             case "\(appArguments.titleOption.long):" :
                 args.titleOption.value = line.replacingOccurrences(of: "\(appArguments.titleOption.long): ", with: "")

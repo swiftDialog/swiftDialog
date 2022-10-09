@@ -48,7 +48,7 @@ struct dialogApp: App {
             .dropFirst()  // we know: the first value is not interesting
             .sink(receiveValue: { isVisible in
                 if isVisible {
-                    observedData.mainWindow = window
+                    //observedData.mainWindow = window
                     placeWindow(window)
                 }
             })
@@ -106,11 +106,7 @@ struct dialogApp: App {
             appvars.windowWidth = 540
             appvars.windowHeight = 128
         }
-        
-        if appArguments.fullScreenWindow.present {
-            FullscreenView().showFullScreen()
-        }
-        
+                
         //check debug mode and print info
         if appArguments.debug.present {
             logger(logMessage: "debug options presented. dialog state sent to stdout")
@@ -137,6 +133,10 @@ struct dialogApp: App {
         logger(logMessage: "width: \(appvars.windowWidth), height: \(appvars.windowHeight)")
         
         observedData = DialogUpdatableContent()
+        
+        if appArguments.fullScreenWindow.present {
+            FullscreenView(observedData: observedData).showFullScreen()
+        }
         
         if appArguments.constructionKit.present {
             ConstructionKitView(observedDialogContent: observedData).showConstructionKit()
@@ -177,7 +177,6 @@ struct dialogApp: App {
                     if observedData.args.forceOnTop.present || observedData.args.blurScreen.present {
                         NSApp.activate(ignoringOtherApps: true)
                     }
-                    
                 }
                 .frame(width: 0, height: 0) //ensures WindowAccessor isn't taking up any real estate
                 if !appArguments.notification.present {
@@ -197,12 +196,14 @@ struct dialogApp: App {
             .background(WindowAccessor { newWindow in
                     if let newWindow = newWindow {
                         monitorVisibility(window: newWindow)
+                        observedData.mainWindow = newWindow
                     } else {
                         // window closed: release all references
                         observedData.mainWindow = nil
                         self.cancellables.removeAll()
                     }
                 })
+             
         }
         // Hide Title Bar
         .windowStyle(HiddenTitleBarWindowStyle())
