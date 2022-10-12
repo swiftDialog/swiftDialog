@@ -719,6 +719,13 @@ func processCLOptionValues() {
     appArguments.video.value                   = json[appArguments.video.long].string ?? CLOptionText(OptionName: appArguments.video)
     appArguments.video.present                 = json[appArguments.video.long].exists() || CLOptionPresent(OptionName: appArguments.video)
     if appArguments.video.present || appArguments.webcontent.present {
+        // check if it's a youtube id
+        if appArguments.video.value.hasPrefix("youtubeid=") {
+            let youTubeID = appArguments.video.value.replacingOccurrences(of: "youtubeid=", with: "")
+            let youtubeURL = "https://www.youtube.com/embed/\(youTubeID)?autoplay=\(appArguments.autoPlay.present ? 1 : 0)&controls=0&showinfo=0"
+            appArguments.video.value = youtubeURL
+            print(youtubeURL)
+        }
         // set a larger window size. 900x600 will fit a standard 16:9 video
         appvars.windowWidth = appvars.videoWindowWidth
         appvars.windowHeight = appvars.videoWindowHeight
