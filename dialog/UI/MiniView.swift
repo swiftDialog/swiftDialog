@@ -69,7 +69,7 @@ struct MiniView: View {
                     }
                     VStack {
                         HStack {
-                            Text(observedData.messageText)
+                            Text(observedData.args.messageOption.value)
                                 .lineLimit(4)
                                 .font(.system(size: 15))
                                 .frame(maxWidth: .infinity, alignment: .topLeading)

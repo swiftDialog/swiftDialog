@@ -19,8 +19,8 @@ struct ContentView: View {
     
     init (observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent
-        if appArguments.timerBar.present {
-            progressSteps = string2float(string: appArguments.timerBar.value)
+        if observedDialogContent.args.timerBar.present {
+            progressSteps = string2float(string: observedDialogContent.args.timerBar.value)
         }
         if observedData.args.bannerImage.present {
             titlePadding = 0
@@ -32,11 +32,11 @@ struct ContentView: View {
             case [.command] where "wnm".contains(event.characters ?? ""):
                 return nil
             case [.command] where event.characters == "q":
-                if appArguments.quitKey.value != "q" {
+                if observedDialogContent.args.quitKey.value != "q" {
                     return nil
                 }
-            case [.command] where event.characters == appArguments.quitKey.value, [.command, .shift] where event.characters == appArguments.quitKey.value.lowercased():
-                quitDialog(exitCode: appvars.exit10.code)
+            case [.command] where event.characters == observedDialogContent.args.quitKey.value, [.command, .shift] where event.characters == observedDialogContent.args.quitKey.value.lowercased():
+                quitDialog(exitCode: observedDialogContent.appProperties.exit10.code)
             default:
                 return event
             }
@@ -85,8 +85,8 @@ struct ContentView: View {
                         .frame(height: 2)
                 }
                 
-                if appArguments.video.present {
-                    VideoView(videourl: appArguments.video.value, autoplay: appArguments.autoPlay.present, caption: appArguments.videoCaption.value)
+                if observedData.args.video.present {
+                    VideoView(videourl: observedData.args.video.value, autoplay: observedData.args.autoPlay.present, caption: observedData.args.videoCaption.value)
                 } else {
                     DialogView(observedDialogContent: observedData)
                 }
@@ -95,21 +95,21 @@ struct ContentView: View {
                 
                 // Buttons
                 HStack() {
-                    if appArguments.infoText.present {
-                        Text(appArguments.infoText.value)
+                    if observedData.args.infoText.present {
+                        Text(observedData.args.infoText.value)
                             .foregroundColor(.secondary.opacity(0.7))
                             //.font(.system(size: 10))
-                    } else if observedData.args.infoButtonOption.present { //} || appArguments.buttonInfoTextOption.present {
+                    } else if observedData.args.infoButtonOption.present || observedData.args.buttonInfoTextOption.present {
                         MoreInfoButton(observedDialogContent: observedData)
-                        if !appArguments.timerBar.present {
+                        if !observedData.args.timerBar.present {
                             Spacer()
                         }
                     }
-                    if appArguments.timerBar.present {
-                        timerBarView(progressSteps: progressSteps, visible: !appArguments.hideTimerBar.present, observedDialogContent : observedData)
+                    if observedData.args.timerBar.present {
+                        timerBarView(progressSteps: progressSteps, visible: !observedData.args.hideTimerBar.present, observedDialogContent : observedData)
                             .frame(alignment: .bottom)
                     }
-                    if (appArguments.timerBar.present && appArguments.button1TextOption.present) || !appArguments.timerBar.present || appArguments.hideTimerBar.present  {
+                    if (observedData.args.timerBar.present && observedData.args.button1TextOption.present) || !observedData.args.timerBar.present || observedData.args.hideTimerBar.present  {
                         ButtonView(observedDialogContent: observedData) // contains both button 1 and button 2
                     }
                 }
