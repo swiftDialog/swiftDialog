@@ -12,20 +12,16 @@ struct TitleView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
     
-    var TitleViewOption: String = appArguments.titleOption.value// CLOptionText(OptionName: appArguments.titleOption, DefaultValue: appvars.titleDefault)
-    //var TitleViewOption: String
-        
     var body: some View {
-        if appvars.titleFontName == "" {
-            //Text(TitleViewOption)
+        if observedData.appProperties.titleFontName == "" {
             Text(observedData.args.titleOption.value)
-                .font(.system(size: observedData.titleFontSize, weight: appvars.titleFontWeight))
-                .foregroundColor(observedData.titleFontColour)
+                .font(.system(size: observedData.appProperties.titleFontSize, weight: observedData.appProperties.titleFontWeight))
+                .foregroundColor(observedData.appProperties.titleFontColour)
         } else {
             Text(observedData.args.titleOption.value)
-                .font(.custom(appvars.titleFontName, size: observedData.titleFontSize))
-                .fontWeight(appvars.titleFontWeight)
-                .foregroundColor(observedData.titleFontColour)
+                .font(.custom(observedData.appProperties.titleFontName, size: observedData.appProperties.titleFontSize))
+                .fontWeight(observedData.appProperties.titleFontWeight)
+                .foregroundColor(observedData.appProperties.titleFontColour)
         }
     }
 }

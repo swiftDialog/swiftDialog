@@ -43,13 +43,19 @@ struct ListView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
     
-    var rowHeight: CGFloat = appvars.messageFontSize + 14
-    var rowStatusHeight: CGFloat = appvars.messageFontSize + 5
-    var rowFontSize: CGFloat = appvars.messageFontSize
-    var proportionalListHeight: CGFloat = 0
+    var rowHeight: CGFloat
+    var rowStatusHeight: CGFloat
+    var rowFontSize: CGFloat
+    var proportionalListHeight: CGFloat
     
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent
+        
+        rowHeight = observedDialogContent.appProperties.messageFontSize + 14
+        rowStatusHeight = observedDialogContent.appProperties.messageFontSize + 5
+        rowFontSize = observedDialogContent.appProperties.messageFontSize
+        proportionalListHeight = 0
+        
         if appArguments.listStyle.present {
             switch appArguments.listStyle.value {
             case "expanded":

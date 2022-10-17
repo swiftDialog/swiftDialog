@@ -41,7 +41,7 @@ struct ButtonView: View {
             if observedData.args.button2Option.present || observedData.args.button2TextOption.present {
                 let button2Text: String = observedData.args.button2TextOption.value
                 Button(action: {
-                    quitDialog(exitCode: appvars.exit2.code, observedObject: observedData)
+                    quitDialog(exitCode: observedData.appProperties.exit2.code, observedObject: observedData)
                 }, label: {
                     Text(button2Text)
                         .frame(minWidth: 40, alignment: .center)
@@ -73,10 +73,7 @@ struct ButtonView: View {
     }
 }
 
-struct MoreInfoButton: View {
-    //let buttonInfoAction: String = observedDialogContent.args.buttonInfoActionOption.value
-    //var buttonInfoText : String = appArguments.buttonInfoTextOption.value
-    
+struct MoreInfoButton: View {    
     @ObservedObject var observedData : DialogUpdatableContent
     
     init(observedDialogContent : DialogUpdatableContent) {

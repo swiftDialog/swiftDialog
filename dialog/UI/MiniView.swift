@@ -45,7 +45,7 @@ struct MiniView: View {
                 if observedData.args.titleOption.value != "none" {
                     Text(observedData.args.titleOption.value)
                         .font(.system(size: 18, weight: .semibold))
-                        .border(appvars.debugBorderColour, width: 2)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
                         .padding(.top, 5)
                         .lineLimit(1)
                     
@@ -87,7 +87,7 @@ struct MiniView: View {
             }
         }
         .edgesIgnoringSafeArea(.all)
-        .border(appvars.debugBorderColour, width: 2)
+        .border(observedData.appProperties.debugBorderColour, width: 2)
     }
 }
 
