@@ -61,10 +61,14 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--icon /Applications/Phocus.app"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--bannerimage /Users/rea094/Documents/csiro\ resources/22-00140_RecruitmentProjectDorothy_MyCSIROBanner.png"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-- height 700 --width 900"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

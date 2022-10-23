@@ -81,7 +81,6 @@
 		41A5A6A728E546A000BD3D5E /* WebContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A5A6A528E546A000BD3D5E /* WebContentView.swift */; };
 		41A5A6A928E66D0C00BD3D5E /* CKMediaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A5A6A828E66D0C00BD3D5E /* CKMediaView.swift */; };
 		41A5A6AA28E66D0C00BD3D5E /* CKMediaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A5A6A828E66D0C00BD3D5E /* CKMediaView.swift */; };
-		41A5A6E928EBE36100BD3D5E /* SFSMonitor in Frameworks */ = {isa = PBXBuildFile; productRef = 41A5A6E828EBE36100BD3D5E /* SFSMonitor */; };
 		41AD75B626AA81760023EBD8 /* TextEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AD75B526AA81760023EBD8 /* TextEntryView.swift */; };
 		41D6FE8526DB11BA0083BE61 /* jamfHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D6FE8426DB11BA0083BE61 /* jamfHelper.swift */; };
 		41D81E5725F7929800D1F7E1 /* DialogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E5625F7929800D1F7E1 /* DialogView.swift */; };
@@ -211,7 +210,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				41005AAA27CEF8250065F323 /* AVKit.framework in Frameworks */,
-				41A5A6E928EBE36100BD3D5E /* SFSMonitor in Frameworks */,
 				41005AA927CEF81A0065F323 /* SwiftyJSON in Frameworks */,
 				418A7B5D275994BB00E4D6F1 /* MarkdownUI in Frameworks */,
 				41A5A6A428E5468100BD3D5E /* WebViewKit in Frameworks */,
@@ -411,7 +409,6 @@
 				418A7B5C275994BB00E4D6F1 /* MarkdownUI */,
 				41005AA827CEF81A0065F323 /* SwiftyJSON */,
 				41A5A6A328E5468100BD3D5E /* WebViewKit */,
-				41A5A6E828EBE36100BD3D5E /* SFSMonitor */,
 			);
 			productName = dialog;
 			productReference = 4154C2DA25F76BDB00A3D373 /* Dialog.app */;
@@ -518,7 +515,6 @@
 				41E4BC9526AEDB130042A0A3 /* XCRemoteSwiftPackageReference "MarkdownUI" */,
 				414CBAE9278913BA00A1A980 /* XCRemoteSwiftPackageReference "SwiftyJSON" */,
 				41A5A6A228E5468100BD3D5E /* XCRemoteSwiftPackageReference "WebViewKit" */,
-				41A5A6E728EBE36100BD3D5E /* XCRemoteSwiftPackageReference "SFSMonitor" */,
 			);
 			productRefGroup = 4154C2DB25F76BDB00A3D373 /* Products */;
 			projectDirPath = "";
@@ -1100,14 +1096,6 @@
 				kind = branch;
 			};
 		};
-		41A5A6E728EBE36100BD3D5E /* XCRemoteSwiftPackageReference "SFSMonitor" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ClassicalDude/SFSMonitor.git";
-			requirement = {
-				branch = master;
-				kind = branch;
-			};
-		};
 		41E4BC9526AEDB130042A0A3 /* XCRemoteSwiftPackageReference "MarkdownUI" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/gonzalezreal/MarkdownUI";
@@ -1148,11 +1136,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 41A5A6A228E5468100BD3D5E /* XCRemoteSwiftPackageReference "WebViewKit" */;
 			productName = WebViewKit;
-		};
-		41A5A6E828EBE36100BD3D5E /* SFSMonitor */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 41A5A6E728EBE36100BD3D5E /* XCRemoteSwiftPackageReference "SFSMonitor" */;
-			productName = SFSMonitor;
 		};
 		41E4BC9626AEDB130042A0A3 /* MarkdownUI */ = {
 			isa = XCSwiftPackageProductDependency;

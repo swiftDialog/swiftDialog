@@ -37,15 +37,6 @@
       }
     },
     {
-      "identity" : "sfsmonitor",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/ClassicalDude/SFSMonitor.git",
-      "state" : {
-        "branch" : "master",
-        "revision" : "b221b6a8ea7d521b0b35da60b60c67ac3f6c08cd"
-      }
-    },
-    {
       "identity" : "swiftcommonmark",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/gonzalezreal/SwiftCommonMark",
