@@ -53,7 +53,7 @@ struct JSONView: View {
         observedDialogContent.args.iconSize.value = "\(observedDialogContent.iconSize)"
         observedDialogContent.args.windowWidth.value = "\(observedDialogContent.windowWidth)"
         observedDialogContent.args.windowHeight.value = "\(observedDialogContent.windowHeight)"
-
+        
         let mirrored_appArguments = Mirror(reflecting: observedDialogContent.args)
         for (_, attr) in mirrored_appArguments.children.enumerated() {
             if let propertyValue = attr.value as? CLArgument {

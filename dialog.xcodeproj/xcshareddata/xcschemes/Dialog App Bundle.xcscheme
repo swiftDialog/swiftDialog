@@ -69,6 +69,10 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-- height 700 --width 900"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--builder"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

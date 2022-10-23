@@ -16,7 +16,7 @@ struct MessageContent: View {
     
     var fieldPadding: CGFloat = 15
     
-    var messageColour : NSColor
+    var messageColour : Color
         
     var iconDisplayWidth : CGFloat
         
@@ -25,9 +25,9 @@ struct MessageContent: View {
     
     var markdownStyle: MarkdownStyle {
         if observedData.appProperties.messageFontName == "" {
-            return MarkdownStyle(font: .system(size: appvars.messageFontSize, weight: appvars.messageFontWeight), foregroundColor: appvars.messageFontColour)
+            return MarkdownStyle(font: .system(size: appvars.messageFontSize, weight: appvars.messageFontWeight), foregroundColor: messageColour)
         } else {
-            return MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.messageFontSize), foregroundColor: appvars.messageFontColour)
+            return MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.messageFontSize), foregroundColor: messageColour)
         }
     }
             
@@ -42,7 +42,7 @@ struct MessageContent: View {
             fieldPadding = 20
             iconDisplayWidth = observedDialogContent.iconSize
         }
-        messageColour = NSColor(observedDialogContent.appProperties.messageFontColour)
+        messageColour = observedDialogContent.appProperties.messageFontColour
 
     }
     
@@ -95,7 +95,7 @@ struct MessageContent: View {
                     .border(observedData.appProperties.debugBorderColour, width: 2)
                     //.padding(.trailing, 30)
                     .padding(.bottom, observedData.appProperties.bottomPadding)
-                CheckboxView()
+                CheckboxView(observedDialogContent: observedData)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
                     //.padding(.trailing, 30)
                 

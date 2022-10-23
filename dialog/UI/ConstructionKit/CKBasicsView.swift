@@ -23,15 +23,15 @@ struct CKBasicsView: View {
             LabelView(label: "Title")
             HStack {
                 TextField("", text: $observedData.args.titleOption.value)
-                ColorPicker("Colour",selection: $observedData.titleFontColour)
+                ColorPicker("Colour",selection: $observedData.appProperties.titleFontColour)
                 Button("Reset") {
-                    observedData.titleFontColour = .primary
+                    observedData.appProperties.titleFontColour = .primary
                 }
             }
             HStack {
                 Text("Font Size: ")
-                Slider(value: $observedData.titleFontSize, in: 10...80)
-                TextField("value:", value: $observedData.titleFontSize, formatter: NumberFormatter())
+                Slider(value: $observedData.appProperties.titleFontSize, in: 10...80)
+                TextField("value:", value: $observedData.appProperties.titleFontSize, formatter: NumberFormatter())
                     .frame(width: 50)
             }
             
