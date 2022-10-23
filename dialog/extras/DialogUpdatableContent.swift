@@ -46,7 +46,13 @@ class FileReader {
                 self.parseAndPrint(data: data)
                 self.fileHandle?.waitForDataInBackgroundAndNotify()
             } else {
+                // something weird happened. let's re-load the file
                 NotificationCenter.default.removeObserver(self.dataAvailable as Any)
+                do {
+                    try self.monitorFile()
+                } catch {
+                    print("Error: \(error.localizedDescription)")
+                }
             }
         }
         
@@ -64,7 +70,6 @@ class FileReader {
                 if command == "" {
                     continue
                 }
-                print("[[\(command)]]")
                 processCommands(commands: command)
             }
         }
