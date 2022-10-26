@@ -728,12 +728,12 @@ func processCLOptionValues() {
             appArguments.video.value = youtubeURL
         case "vimeoid":
             let vimeoID = appArguments.video.value.replacingOccurrences(of: "vimeoid=", with: "")
-            let vimeoURL = "https://player.vimeo.com/video/\(vimeoID)\(vimeoID.contains("?") ? "&" : "?")autoplay=\(appArguments.autoPlay.present ? 1 : 0)&controls=0"
+            let vimeoURL = "https://player.vimeo.com/video/\(vimeoID)\(vimeoID.contains("?") ? "&" : "?")autoplay=\(appArguments.autoPlay.present ? 1 : 0)&controls=\(appArguments.autoPlay.present ? 0 : 1)"
             appArguments.video.value = vimeoURL
         default:
             break
         }
-
+        print(appArguments.video.value)
         // set a larger window size. 900x600 will fit a standard 16:9 video
         appvars.windowWidth = appvars.videoWindowWidth
         appvars.windowHeight = appvars.videoWindowHeight
