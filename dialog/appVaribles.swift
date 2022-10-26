@@ -60,6 +60,12 @@ struct DropDownItems {
     var selectedValue   : String = ""
 }
 
+struct CheckBoxes {
+    var title           : String
+    var value           : Bool = false
+    var disabled        : Bool = false
+}
+
 struct ListItems: Codable {
     var title           : String
     var icon            : String = ""

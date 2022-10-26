@@ -16,11 +16,11 @@ struct VideoView: View {
     var playerURL : URL
     var autoPlay : Bool
     var videoCaption : String
-    var youtubeContent : Bool = false
+    var embeddedContent : Bool = false
     
     init(videourl : String = "", autoplay : Bool = false, caption : String = "") {
-        if videourl.contains("youtube") {
-            youtubeContent = true
+        if videourl.contains("youtube") || videourl.contains("vimeo") {
+            embeddedContent = true
         }
         if videourl.hasPrefix("http") {
             playerURL = URL(string: videourl)!
@@ -33,7 +33,7 @@ struct VideoView: View {
         
     var body: some View {
         VStack {
-            if youtubeContent {
+            if embeddedContent {
                 WebView(url: playerURL) { webView in
                 }
             } else {
