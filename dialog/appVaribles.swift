@@ -107,7 +107,7 @@ struct CLArgument {
 
 struct AppVariables {
     
-    var cliversion                      = "2.0 Preview"
+    var cliversion                      = "2.0"
     
     // message default strings
     var titleDefault                    = String("default-title".localized)
