@@ -222,17 +222,17 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
         //build output array
         var outputArray : Array = [String]()
         
-        if appArguments.dropdownValues.present {
-            if appvars.dropdownItems.count == 1 {
-                outputArray.append("\"SelectedOption\" : \"\(appvars.dropdownItems[0].selectedValue)\"")
-                json["SelectedOption"].string = appvars.dropdownItems[0].selectedValue
-                outputArray.append("\"SelectedIndex\" : \(appvars.dropdownItems[0].values.firstIndex(of: appvars.dropdownItems[0].selectedValue) ?? -1)")
-                json["SelectedIndex"].int = appvars.dropdownItems[0].values.firstIndex(of: appvars.dropdownItems[0].selectedValue) ?? -1
+        if ((observedObject?.args.dropdownValues.present) != nil) {
+            if observedObject?.appProperties.dropdownItems.count == 1 {
+                outputArray.append("\"SelectedOption\" : \"\(observedObject?.appProperties.dropdownItems[0].selectedValue ?? "")\"")
+                json["SelectedOption"].string = observedObject?.appProperties.dropdownItems[0].selectedValue
+                outputArray.append("\"SelectedIndex\" : \(observedObject?.appProperties.dropdownItems[0].values.firstIndex(of: (observedObject?.appProperties.dropdownItems[0].selectedValue)!) ?? -1)")
+                json["SelectedIndex"].int = observedObject?.appProperties.dropdownItems[0].values.firstIndex(of: observedObject?.appProperties.dropdownItems[0].selectedValue ?? "") ?? -1
             }
-            for i in 0..<appvars.dropdownItems.count {
-                outputArray.append("\"\(appvars.dropdownItems[i].title)\" : \"\(appvars.dropdownItems[i].selectedValue)\"")
-                outputArray.append("\"\(appvars.dropdownItems[i].title)\" index : \"\(appvars.dropdownItems[i].values.firstIndex(of: appvars.dropdownItems[i].selectedValue) ?? -1)\"")
-                json[appvars.dropdownItems[i].title] = ["selectedValue" : appvars.dropdownItems[i].selectedValue, "selectedIndex" : appvars.dropdownItems[i].values.firstIndex(of: appvars.dropdownItems[i].selectedValue) ?? -1]
+            for i in 0..<(observedObject?.appProperties.dropdownItems.count ?? 0) {
+                outputArray.append("\"\(observedObject?.appProperties.dropdownItems[i].title ?? "")\" : \"\(observedObject?.appProperties.dropdownItems[i].selectedValue ?? "")\"")
+                outputArray.append("\"\(observedObject?.appProperties.dropdownItems[i].title ?? "")\" index : \"\(observedObject?.appProperties.dropdownItems[i].values.firstIndex(of: observedObject?.appProperties.dropdownItems[i].selectedValue ?? "") ?? -1)\"")
+                json[observedObject?.appProperties.dropdownItems[i].title ?? ""] = ["selectedValue" : observedObject?.appProperties.dropdownItems[i].selectedValue ?? "", "selectedIndex" : observedObject?.appProperties.dropdownItems[i].values.firstIndex(of: observedObject?.appProperties.dropdownItems[i].selectedValue ?? "") ?? -1]
             }
         }
         

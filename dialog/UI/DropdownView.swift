@@ -39,14 +39,12 @@ struct DropdownView: View {
                     HStack {
                         // we could print the title as part of the picker control but then we don't get easy access to swiftui text formatting
                         // so we print it seperatly and use a blank value in the picker
-                        //Spacer()
                         Text(observedData.appProperties.dropdownItems[index].title)
                             .bold()
                             .font(.system(size: 15))
                             .frame(idealWidth: fieldwidth*0.20, alignment: .leading)
                         Spacer()
-                        //    .frame(width: 20)
-                        Picker("", selection: $selectedOption[index])
+                        Picker("", selection: $observedData.appProperties.dropdownItems[index].selectedValue)
                         {
                             ForEach(observedData.appProperties.dropdownItems[index].values, id: \.self) {
                                 Text($0).tag($0)
@@ -54,11 +52,6 @@ struct DropdownView: View {
                         }
                         .pickerStyle(DefaultPickerStyle())
                         .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
-                        .onChange(of: selectedOption[index]) { _ in
-                            //update observedData.args.dropdownItems with the option that was selected. this will be printed to stdout on exit
-                            observedData.appProperties.dropdownItems[index].selectedValue = selectedOption[index]
-                        }
-                        //Spacer()
                     }
                 }
             }
