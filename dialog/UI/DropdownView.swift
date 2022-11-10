@@ -46,6 +46,12 @@ struct DropdownView: View {
                         Spacer()
                         Picker("", selection: $observedData.appProperties.dropdownItems[index].selectedValue)
                         {
+                            if observedData.appProperties.dropdownItems[index].defaultValue.isEmpty {
+                                // prevents "Picker: the selection "" is invalid and does not have an associated tag" errors on stdout
+                                // this does mean we are creating a blank selection but it will still be index -1
+                                // previous indexing schemes (first entry being index 0 etc) should still apply.
+                                Text("").tag("")
+                            }
                             ForEach(observedData.appProperties.dropdownItems[index].values, id: \.self) {
                                 Text($0).tag($0)
                             }
