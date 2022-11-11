@@ -55,6 +55,7 @@ struct CKListView: View {
                     TextField("Status Text", text: $observedData.listItemsArray[item].statusText)
                     Picker("Status", selection: $observedData.listItemsArray[item].statusIcon)
                     {
+                        Text("").tag("")
                         ForEach(statusTypeArray, id: \.self) {
                             Text($0)
                         }

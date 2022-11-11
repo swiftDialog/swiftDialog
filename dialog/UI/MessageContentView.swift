@@ -118,7 +118,7 @@ struct MessageContent: View {
         }
         .padding(.leading, observedData.appProperties.sidePadding)
         .padding(.trailing, observedData.appProperties.sidePadding)
-        //.padding(.top, observedData.appProperties.topPadding)
+        .padding(.top, observedData.appProperties.topPadding)
     }
 }
 

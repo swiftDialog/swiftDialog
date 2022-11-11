@@ -146,6 +146,7 @@ struct CKWindowProperties: View {
             VStack {
                 Picker("Fill", selection: $observedData.args.watermarkFill.value)
                 {
+                    Text("").tag("")
                     ForEach(fillScaleArray, id: \.self) {
                         Text($0)
                     }
@@ -159,12 +160,14 @@ struct CKWindowProperties: View {
                 }
                 Picker("Scale", selection: $observedData.args.watermarkScale.value)
                 {
+                    Text("").tag("")
                     ForEach(fillScaleArray, id: \.self) {
                         Text($0)
                     }
                 }
                 Picker("Position", selection: $observedData.args.watermarkPosition.value)
                 {
+                    Text("").tag("")
                     ForEach(positionArray, id: \.self) {
                         Text($0)
                     }

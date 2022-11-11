@@ -39,6 +39,7 @@ struct CKBasicsView: View {
             HStack {
                 Picker("Text Alignment", selection: $observedData.args.messageAlignment.value)
                 {
+                    Text("").tag("")
                     ForEach(observedData.appProperties.allignmentStates.keys.sorted(), id: \.self) {
                         Text($0)
                     }

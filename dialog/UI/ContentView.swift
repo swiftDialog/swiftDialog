@@ -85,6 +85,9 @@ struct ContentView: View {
                         .padding(.leading, observedData.appProperties.sidePadding)
                         .padding(.trailing, observedData.appProperties.sidePadding)
                         .frame(height: 2)
+                } else {
+                    Spacer()
+                        .frame(height: observedData.appProperties.sidePadding)
                 }
                 
                 if observedData.args.video.present {
