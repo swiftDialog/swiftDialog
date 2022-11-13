@@ -19,6 +19,17 @@ public extension Color {
     static let tertiaryBackground = Color(NSColor.controlBackgroundColor)
 }
 
+public extension Scene {
+    // Solution for maintaining fixed window size in macOS 13 https://developer.apple.com/forums/thread/719389
+    func windowResizabilityContentSize() -> some Scene {
+        if #available(macOS 13.0, *) {
+            return windowResizability(.contentSize)
+        } else {
+            return self
+        }
+    }
+}
+
 func logger(logType: String = "", logMessage: String) {
     let defaultLog = Logger(subsystem: "au.bartreardon.dialog", category: "main")
     switch logType {
