@@ -70,7 +70,7 @@ struct MessageContent: View {
                     if observedData.args.messageVerticalAlignment.present {
                         Spacer()
                     }
-                    if observedData.args.webcontent.present || observedData.args.listItem.present {
+                    if observedData.args.webcontent.present || observedData.args.listItem.present || observedData.args.messageVerticalAlignment.present {
                         Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
                             .multilineTextAlignment(observedData.appProperties.messageAlignment)
                             .markdownStyle(markdownStyle)
