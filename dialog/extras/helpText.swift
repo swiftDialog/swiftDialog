@@ -13,14 +13,17 @@ var helpText = """
     OPTIONS:
 
     ** Basic Options - - - - - - - - - - - - - - - -
-
-        -\(cloptions.titleOption.short), --\(cloptions.titleOption.long) <text>
+    
+        -\(appArguments.titleOption.short), --\(appArguments.titleOption.long) <text>
                     Set the Dialog title
                     Text beyond the length of the title area will get truncated
                     Default Title is "\(appvars.titleDefault)"
                     Use keyword "none" to disable the title area entirely
+    
+        --\(appArguments.subTitleOption.long) <text>
+                    Text to use as subtitle when sending a system notification (see --\(appArguments.notification.long))
 
-        --\(cloptions.titleFont.long) <text>
+        --\(appArguments.titleFont.long) <text>
                     Lets you modify the title text of the dialog.
 
                     Can accept up to three parameters, in a comma seperated list, to modify font properties.
@@ -33,26 +36,31 @@ var helpText = """
                         size=<float>              - accepts any float value.
 
                         name=<fontname>           - accepts a font name or family
-                                                    list of available names can be determined with --\(cloptions.listFonts.long)
+                                                    list of available names can be determined with --\(appArguments.listFonts.long)
 
                         weight=[thin | light | regular | medium | heavy | bold]
                             default is bold
 
                     Example1: \"colour=#00A4C7,weight=light,size=60\"
                     Example2: \"name=Chalkboard,colour=#FFD012,size=40\"
-
-        -\(cloptions.messageOption.short), --\(cloptions.messageOption.long) <text>
+        
+        -\(appArguments.messageOption.short), --\(appArguments.messageOption.long) <text>
                     Set the dialog message
                     Messages can be plain text or can include Markdown
                     Markdown follows the CommonMark Spec https://spec.commonmark.org/current/
                     The message can be of any length. If it is larger than the viewable area
                     The message contents will be presented in  scrolable area.
-
-        --\(cloptions.messageAlignment.long) [left | centre | center | right]
+    
+        --\(appArguments.messageAlignment.long) [left | centre | center | right]
                     Set the message alignment.
                     Default is 'left'
-
-        --\(cloptions.messageFont.long) <text>
+    
+        --\(appArguments.messageVerticalAlignment.long) [top* | centre | center | bottom*]
+                    Set the message position.
+                    
+                    * the only supported option at this time is [center]
+                    
+        --\(appArguments.messageFont.long) <text>
                     Lets you modify the message text of the dialog.
 
                     Can accept up to three parameters, in a comma seperated list, to modify font properties.
@@ -65,7 +73,7 @@ var helpText = """
                         size=<float>              - accepts any float value.
 
                         name=<fontname>           - accepts a font name or family
-                                                    list of available names can be determined with --\(cloptions.listFonts.long)
+                                                    list of available names can be determined with --\(appArguments.listFonts.long)
 
                         weight=[thin | light | regular | medium | heavy | bold]
                             default is regular
@@ -74,27 +82,40 @@ var helpText = """
                     Example2: \"name=Chalkboard,colour=#FFD012,size=40\"
 
                     ## CAUTION : Results may be unexpected when mixing font names and weights with markdown
-
-        -\(cloptions.mainImage.short), --\(cloptions.mainImage.long)  <file> | <url>
+    
+        --\(appArguments.notification.long)
+                    Send a system notification
+                    Accepts the following arguments:
+                      --\(appArguments.titleOption.long) <text>
+                      --\(appArguments.subTitleOption.long) <text>
+                      --\(appArguments.messageOption.long) <text> (as plain text. newlines supported as \\n)
+                      --\(appArguments.iconOption.long) <image> *
+    
+                    * <image> must refer to a local file or app bundle. remote images sources are not supported.
+    
+        --\(appArguments.webcontent.long)
+                    Display a web page
+        
+        -\(appArguments.mainImage.short), --\(appArguments.mainImage.long)  <file> | <url>
                     Display an image instead of a message.
                     Images will be resized to fit the available display area
-
-                    --\(cloptions.mainImageCaption.long) <text>
+    
+                    --\(appArguments.mainImageCaption.long) <text>
                         Text that will appear underneath the displayed image.
-
-        --\(cloptions.video.long)  <file> | <url>
+    
+        --\(appArguments.video.long)  <file> | <url>
                     Display a video instead of a message.
                     Videos will be resized to fit the available display area without clipping the video
                     Default dialog window size is changed to \(appvars.videoWindowWidth) x \(appvars.videoWindowHeight)
-
-
-                    --\(cloptions.videoCaption.long) <text>
+                    
+    
+                    --\(appArguments.videoCaption.long) <text>
                         Text that will appear underneath the displayed video.
-
-                    --\(cloptions.autoPlay.long)
+    
+                    --\(appArguments.autoPlay.long)
                         Will force the video to start playing automatically.
-
-        -\(cloptions.iconOption.short), --\(cloptions.iconOption.long) <file> | <url>
+        
+        -\(appArguments.iconOption.short), --\(appArguments.iconOption.long) <file> | <url>
                     Set the icon to display
                     Acceptable Values:
                     file path to png or jpg           -  "/file/path/image.[png|jpg]"
@@ -105,17 +126,17 @@ var helpText = """
 
                     if not specified, default icon will be used
                     Images from either file or URL are displayed as roundrect if no transparancy
-
-                    "none" can also be specified to not display an icon but maintain layout (see also --\(cloptions.hideIcon.long))
-
-        --\(cloptions.iconSize.long)
+    
+                    "none" can also be specified to not display an icon but maintain layout (see also --\(appArguments.hideIcon.long))
+    
+        --\(appArguments.iconSize.long)
                     Will render the icon with the specified size.
-                    Default size is 170
-
-        --\(cloptions.centreIcon.long)
+                    Default size is 150
+    
+        --\(appArguments.centreIcon.long)
                     re-positions the icon to be in the centre, between the title and message areas
-
-        -\(cloptions.overlayIconOption.short), --\(cloptions.overlayIconOption.long) <file> | <url>
+    
+        -\(appArguments.overlayIconOption.short), --\(appArguments.overlayIconOption.long) <file> | <url>
                     Set an image to display as an overlay to --icon
                     image is displayed at 1/2 resolution to the main image and positioned to the bottom right
                     Acceptable Values:
@@ -155,102 +176,102 @@ var helpText = """
 
                     weight=<text>                     - accepts any of the following values:
                                                        thin (default), light, regular, medium, heavy, bold
-
-        -\(cloptions.hideIcon.short), --\(cloptions.hideIcon.long)
+    
+        -\(appArguments.hideIcon.short), --\(appArguments.hideIcon.long)
                     Hides the icon from view
                     Doing so increases the space available for message text
-
-        --\(cloptions.button1TextOption.long) <text>
+        
+        --\(appArguments.button1TextOption.long) <text>
                     Set the label for Button1
                     Default label is "\(appvars.button1Default)"
                     Bound to <Enter> key
 
-        --\(cloptions.button1ActionOption.long) <url>
+        --\(appArguments.button1ActionOption.long) <url>
                     Set the action to take.
                     Accepts URL
                     Default action if not specified is no action
                     Return code when actioned is 0
-
-        --\(cloptions.button1ShellActionOption.long) <command>
+    
+        --\(appArguments.button1ShellActionOption.long) <command>
                     << EXPERIMENTAL >>
                     Runs the specified shell command using zsh
                     Command input and output is not sanitised or checked.
                     If your command fails, Dialog still exits 0
-
-        --\(cloptions.button1Disabled.long)
+    
+        --\(appArguments.button1Disabled.long)
                     Launches dialig with button1 disabled
                     To re-enable, send `buton1: enable` to the dialog command file.
 
-        -\(cloptions.button2Option.short), --\(cloptions.button2Option.long)
+        -\(appArguments.button2Option.short), --\(appArguments.button2Option.long)
                     Displays button2 with default label of "\(appvars.button2Default)"
             OR
 
-        --\(cloptions.button2TextOption.long) <text>
+        --\(appArguments.button2TextOption.long) <text>
                     Set the label for Button1
                     Bound to <ESC> key
 
-        --\(cloptions.button2ActionOption.long) <url>
+        --\(appArguments.button2ActionOption.long) <url>
                     Return code when actioned is 2
                     -- Setting Custon Actions For Button 2 Is Not Implemented at this time --
 
-        -\(cloptions.infoButtonOption.short), --\(cloptions.infoButtonOption.long)
+        -\(appArguments.infoButtonOption.short), --\(appArguments.infoButtonOption.long)
                     Displays info button with default label of "\(appvars.buttonInfoDefault)"
 
             OR
 
-        --\(cloptions.buttonInfoTextOption.long) <text>
+        --\(appArguments.buttonInfoTextOption.long) <text>
                     Set the label for Information Button
                     If not specified, Info button will not be displayed
-
-        --\(cloptions.buttonInfoActionOption.long)  <url>
-                    Set the action to take when clicking \(cloptions.infoButtonOption.long). Setting this option prevents the info
+    
+        --\(appArguments.buttonInfoActionOption.long)  <url>
+                    Set the action to take when clicking \(appArguments.infoButtonOption.long). Setting this option prevents the info
                     button from triggering a dialog exit
                     Default action if not specified is to exit with return code 3
-
-        --\(cloptions.infoText.long) (<text>)
+    
+        --\(appArguments.infoText.long) (<text>)
                     Will display the specified text in place of the info button
                     If no text is supplied, will display the current swiftDialog version
-
-        --\(cloptions.quitOnInfo.long)
+    
+        --\(appArguments.quitOnInfo.long)
                     Will tell Dialog to quit when the info button is selected
                     Return code when actioned is 3
 
     ** Advanced Options - - - - - - - - - - - - - - - -
-
-        -\(cloptions.fullScreenWindow.short), --\(cloptions.fullScreenWindow.long)
+        
+        -\(appArguments.fullScreenWindow.short), --\(appArguments.fullScreenWindow.long)
                     Uses full screen view.
                     In this view, only banner, title, icon and the message area are visible.
-
-        --\(cloptions.blurScreen.long)
+    
+        --\(appArguments.blurScreen.long)
                     Will blur the background of the display while dialog is showing
-
-        --\(cloptions.progressBar.long) <int>
+    
+        --\(appArguments.progressBar.long) <int>
                     Makes an interactive progress bar visible with <int> steps.
                     To increment the progress bar send "progress: <int>" command to the dialog command file
-
-        --\(cloptions.progressText.long) <text>
+    
+        --\(appArguments.progressText.long) <text>
                     Initiate the progress text are with some useful content.
                     To update progress text send "progresstext: <text>" command to the dialog command file
-
-        --\(cloptions.statusLogFile.long) <file>
+    
+        --\(appArguments.statusLogFile.long) <file>
                     Sets the path to the command file Dialog will read from to receive updates
                     Default file is /var/tmp/dialog.log
 
-        -\(cloptions.bannerImage.short), --\(cloptions.bannerImage.long) <file> | <url>
+        -\(appArguments.bannerImage.short), --\(appArguments.bannerImage.long) <file> | <url>
                     Shows a banner image at the top of the dialog
                     Banners images fill the entire top width of the window and are resized to fill, positioned from
                     the top left corner of the image.
-                    Specifying this option will imply --\(cloptions.hideIcon.long)
+                    Specifying this option will imply --\(appArguments.hideIcon.long)
                     Recommended Banner Image size is 850x150.
-
-        --\(cloptions.dropdownTitle.long) <text>
+    
+        --\(appArguments.dropdownTitle.long) <text>
                     Title for dropdown selection
-
-        --\(cloptions.dropdownValues.long) <text><csv>
+    
+        --\(appArguments.dropdownValues.long) <text><csv>
                     List of values to be displayed in the dropdown, specivied in CSV format
                     e.g. "Option 1,Option 2,Option 3"
-
-        --\(cloptions.dropdownDefault.long) <text>
+    
+        --\(appArguments.dropdownDefault.long) <text>
                     Default option to be selected (must match one of the items in the list)
 
                     If specified, the selected option will be sent to stdout in two forms:
@@ -275,37 +296,36 @@ var helpText = """
                     When using multiple dropdown lists, output will be in the form:
                     <title> : <value>
                     <title> index : <index_value>
-
-        --\(cloptions.textField.long) <text>(,required,secure,prompt="<text>")
+    
+        --\(appArguments.textField.long) <text>(,required,secure,prompt="<text>")
                     Present a textfield with the specified label
                     When Dialog exits the contents of the textfield will be presented as <text> : <user_input>
-                    in plain or as json using [-\(cloptions.jsonOutPut.short), --\(cloptions.jsonOutPut.long)] option
+                    in plain or as json using [-\(appArguments.jsonOutPut.short), --\(appArguments.jsonOutPut.long)] option
                     Multiple textfields can be specified as required.
 
                     Modifiers available to text fields are:
-                        secure       - Presends a secure input area. Contents of the textfield will not be shown on screen
-                        required     - Dialog will not exit until the field is populated
-                        passwordfill - Use the `.password` modifier to use the built in macOS password manager to create or fill passwords
-                        prompt       - Pre-fill the field with some prompt text (prompt text will not be returned, macOS 12+ only, macOS 11 safe)
-                        regex        - Specify a regular expression that the field must satisfy for the content to be accepted.
-                        regexerror   - Specify a custom error to display if regex conditions are not met
-
-                    modifiers can be combined e.g. --\(cloptions.textField.long) <text>,secure,required
-                                                   --\(cloptions.textField.long) <text>,required,prompt="<text>"
-                                                   --\(cloptions.textField.long) <text>,regex="\\d{6}",prompt="000000",regexerror="Enter 6 digits"
+                        secure     - Presends a secure input area. Contents of the textfield will not be shown on screen
+                        required   - Dialog will not exit until the field is populated
+                        prompt     - Pre-fill the field with some prompt text (prompt text will not be returned, macOS 12+ only, macOS 11 safe)
+                        regex      - Specify a regular expression that the field must satisfy for the content to be accepted.
+                        regexerror - Specify a custom error to display if regex conditions are not met
+    
+                    modifiers can be combined e.g. --\(appArguments.textField.long) <text>,secure,required
+                                                   --\(appArguments.textField.long) <text>,required,prompt="<text>"
+                                                   --\(appArguments.textField.long) <text>,regex="\\d{6}",prompt="000000",regexerror="Enter 6 digits"
                     (secure fields cannot have the prompt modifier applied)
-
-        --\(cloptions.checkbox.long) <text>
+    
+        --\(appArguments.checkbox.long) <text>
                     Present a checkbox with the specified label
                     When Dialog exits the status of the checkbox will be presented as <text> : [true|false]
-                    in plain or as json using [-\(cloptions.jsonOutPut.short), --\(cloptions.jsonOutPut.long)] option
+                    in plain or as json using [-\(appArguments.jsonOutPut.short), --\(appArguments.jsonOutPut.long)] option
                     Multiple checkboxes can be specified as required.
-
-        --\(cloptions.listItem.long) <text>
+    
+        --\(appArguments.listItem.long) <text>
                     Creates a list item with the specified text as the item title.
-                    Multiple items can be added by specifying --\(cloptions.listItem.long) multiple times
-
-                    Alternatly, specify a list item with either of the follwoing JSON formats (in conjunction with --\(cloptions.jsonFile.long) or \(cloptions.jsonString.long):
+                    Multiple items can be added by specifying --\(appArguments.listItem.long) multiple times
+    
+                    Alternatly, specify a list item with either of the follwoing JSON formats (in conjunction with --\(appArguments.jsonFile.long) or \(appArguments.jsonString.long):
                     Simple:
                     {
                       "listitem" : ["Item One", "Item Two", "Item Three", "Item Four", "Item Five"]
@@ -321,8 +341,8 @@ var helpText = """
 
                     <status> can be one of "wait", "success", "fail", "error" or "pending"
                     and will display an apropriate icon in the status area.
-
-                    Updates to items in the list can be sent to the command file specified by --\(cloptions.statusLogFile.long):
+    
+                    Updates to items in the list can be sent to the command file specified by --\(appArguments.statusLogFile.long):
                     Clear an existing list:
                         list: clear
                     Create a new list:
@@ -332,90 +352,90 @@ var helpText = """
                     Update a list item (advanced):
                         listitem: [title: <title>|index: <index>], status: <status>, statustext: <text>
                     Add an item to the end of the current list:
-                        listitem: add: title: <text>, status: <status>, statustext: <text>
+                        listitem: add: , title: <text>, status: <status>, statustext: <text>
                     Delete an item (one of):
                         listitem: index: <index>, delete:
                         listitem: title: <text>, delete:
 
                     <index> starts at 0
-
-        -\(cloptions.watermarkImage.short), --\(cloptions.watermarkImage.long) <file>
+    
+        -\(appArguments.watermarkImage.short), --\(appArguments.watermarkImage.long) <file>
                     Displays the selected file as a background image.
                     If the image is larger than the default dialog size (820x380) and no window size options are given (specifically window height),
-                    the dialog window height will be adjusted so the image fills the entire window width, 820 by default or if specified using --\(cloptions.windowWidth.long)
-
-        -\(cloptions.watermarkAlpha.short), --\(cloptions.watermarkAlpha.long) <number>
+                    the dialog window height will be adjusted so the image fills the entire window width, 820 by default or if specified using --\(appArguments.windowWidth.long)
+    
+        -\(appArguments.watermarkAlpha.short), --\(appArguments.watermarkAlpha.long) <number>
                     Number between 0 and 1
                     0 is fully transparant
                     1 is fully opaque
                     Default is 0.5
-
-        -\(cloptions.watermarkPosition.short), --\(cloptions.watermarkPosition.long) [topleft | left | bottomleft | top | center/cetre | bottom | topright | right | bottomright]
+                    
+        -\(appArguments.watermarkPosition.short), --\(appArguments.watermarkPosition.long) [topleft | left | bottomleft | top | center/cetre | bottom | topright | right | bottomright]
                     Positions the background image in the window.
                     Default is center
-
-        -\(cloptions.watermarkFill.short), --\(cloptions.watermarkFill.long) [fill | fit]
-        -\(cloptions.watermarkScale.short), --\(cloptions.watermarkScale.long) [fill | fit]
+    
+        -\(appArguments.watermarkFill.short), --\(appArguments.watermarkFill.long) [fill | fit]
+        -\(appArguments.watermarkScale.short), --\(appArguments.watermarkScale.long) [fill | fit]
                     fill - resizes the image to fill the entire window. Image will be truncated if necessary
                     fit  - resizes the image to fit the window but will not truncate
                     Default is none which will display the image at its native resolution
-
-
-        --\(cloptions.windowWidth.long) <number>
+    
+    
+        --\(appArguments.windowWidth.long) <number>
                     Sets the width of the dialog window to the specified width in points
-
-        --\(cloptions.windowHeight.long) <number>
+    
+        --\(appArguments.windowHeight.long) <number>
                     Sets the height of the dialog window to the specified height in points
-
-        --\(cloptions.position.long) [topleft | left | bottomleft | top | center/centre | bottom | topright | right | bottomright]
+    
+        --\(appArguments.position.long) [topleft | left | bottomleft | top | center/centre | bottom | topright | right | bottomright]
                     Poitions the dialog window a the the defined location on the screen
-
-        --\(cloptions.timerBar.long) (<seconds>)
+    
+        --\(appArguments.timerBar.long) (<seconds>)
                     Replaces default button with a timer countdown after which dialog will close with exit code 4
                     Default timer value is 10 seconds
                     Optional value <seconds> can be specified to the desired value
-
-                    If used in conjuction with --\(cloptions.button1TextOption.long) the default button
+    
+                    If used in conjuction with --\(appArguments.button1TextOption.long) the default button
                     will be displayed but will be disabled for the first 3 seconds of the timer, after which it
                     becomes active and can be used to dismiss dialog with the standard button 1 exit code of 0
-
-        --\(cloptions.hideTimerBar.long)
-                    Will hide the timer bar. Dialog will close after time specified by --\(cloptions.timerBar.long)
+    
+        --\(appArguments.hideTimerBar.long)
+                    Will hide the timer bar. Dialog will close after time specified by --\(appArguments.timerBar.long)
                     Default OK button is displayed. This is to prevent persistant or unclosable dialogs of unknown duration.
-
-        -\(cloptions.lockWindow.short), --\(cloptions.lockWindow.long)
+    
+        -\(appArguments.movableWindow.short), --\(appArguments.movableWindow.long)
                     Let window me moved around the screen. Default is not moveable
 
-        -\(cloptions.forceOnTop.short), --\(cloptions.forceOnTop.long)
+        -\(appArguments.forceOnTop.short), --\(appArguments.forceOnTop.long)
                     Make the window appear above all other windows even when not active
 
-        -\(cloptions.bigWindow.short), --\(cloptions.bigWindow.long)
+        -\(appArguments.bigWindow.short), --\(appArguments.bigWindow.long)
                     Makes the dialog 25% bigger than normal. More room for message text
 
-        -\(cloptions.smallWindow.short), --\(cloptions.smallWindow.long)
+        -\(appArguments.smallWindow.short), --\(appArguments.smallWindow.long)
                     Makes the dialog 25% smaller. Less room for message text.
-
-        -\(cloptions.miniMode.long),
+    
+        --\(appArguments.miniMode.long)
                     Presents a mini mode dialog of fixed size, presenting title, icon and message, limited to two lines.
                     Button 1 and 2 with modofocations are available.
-                    When used with --\(cloptions.progressBar.long), buttons are replaced by progress bar and progress text.
+                    When used with --progress, buttons are replaced by progress bar and progress text.
                         * In this presentation, quitting the dialog is acheived with use of the command file.
-
-        -\(cloptions.jsonOutPut.short), --\(cloptions.jsonOutPut.long)
+    
+        -\(appArguments.jsonOutPut.short), --\(appArguments.jsonOutPut.long)
                     Outputs any results in json format for easier processing
                     (for dropdown item selections and textfield responses)
-
-        --\(cloptions.jsonFile.long) <file>
+    
+        --\(appArguments.jsonFile.long) <file>
                     Use JSON formatted data file as input instead of command line paramaters
 
                     Uses the same naming convention as the long form command line options
                     e.g.
                     {
-                        "\(cloptions.titleOption.long)" : "Title here",
-                        "\(cloptions.messageOption.long)" : "Message here"
+                        "\(appArguments.titleOption.long)" : "Title here",
+                        "\(appArguments.messageOption.long)" : "Message here"
                     }
-
-                    "\(cloptions.mainImage.long)" and "\(cloptions.checkbox.long)" can accept an array of multiple values
+    
+                    "\(appArguments.mainImage.long)" and "\(appArguments.checkbox.long)" can accept an array of multiple values
                     e.g.
                     {
                         "checkbox" : [{
@@ -430,31 +450,31 @@ var helpText = """
                         },
                         ...]
                     }
-
-                    "\(cloptions.textField.long)" can specify multiple valuse as a simple array:
+    
+                    "\(appArguments.textField.long)" can specify multiple valuse as a simple array:
                     e.g.
                     {
                         "textfield": ["Text Entry 1", "Text Entry 2", "Text Entry 3"]
                     }
-
-        --\(cloptions.jsonString.long) <text>
-                    Same data format as --\(cloptions.jsonFile.long) but passed in as a string on the command line without
+    
+        --\(appArguments.jsonString.long) <text>
+                    Same data format as --\(appArguments.jsonFile.long) but passed in as a string on the command line without
                     requiring an intermediate file.
-
-        --\(cloptions.quitKey.long) <char>
+    
+        --\(appArguments.quitKey.long) <char>
                     Use the specified character as the command+ key combination for quitting instead of "q".
                     Capitol letters can be used in which case command+shift+<key> will be required
 
 
-        -\(cloptions.ignoreDND.short), --\(cloptions.ignoreDND.long)
+        -\(appArguments.ignoreDND.short), --\(appArguments.ignoreDND.long)
                     Will ignore user Do Not Disturb setting
                         (Do Not Disturb detection only works in macOS 11)
-
-
-        -\(cloptions.jamfHelperMode.short), --\(cloptions.jamfHelperMode.long)
+    
+    
+        -\(appArguments.jamfHelperMode.short), --\(appArguments.jamfHelperMode.long)
                     Switches all command line options to accept jamfHelper style options
                     Useful for using as a drop in replacement for jamfHelper in existing scripts
-                        replace "/path/to/jamfHelper" with \"/path/to/dialog -\(cloptions.jamfHelperMode.short)\"
+                        replace "/path/to/jamfHelper" with \"/path/to/dialog -\(appArguments.jamfHelperMode.short)\"
                     Does not (yet) support the following:
                         -windowType hud
                         -showDelayOptions
@@ -462,13 +482,13 @@ var helpText = """
                         -iconSize
                     Dialog will do its best to display jamfHelper content in a dialog-esque way.
                     Any unsupported display options will be ignored.
-
-        -\(cloptions.getVersion.short), --\(cloptions.getVersion.long)
+                        
+        -\(appArguments.getVersion.short), --\(appArguments.getVersion.long)
                     Prints the app version
 
-        -\(cloptions.showLicense.short), --\(cloptions.showLicense.long)
+        -\(appArguments.showLicense.short), --\(appArguments.showLicense.long)
                     Display the Software License Agreement for Dialog
 
-        --\(cloptions.helpOption.long)
+        --\(appArguments.helpOption.long)
                     Prints this text
     """

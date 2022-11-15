@@ -10,12 +10,12 @@ import SwiftUI
 struct ErrorView: View {
     
     //@Binding var showingSheet : Bool
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
     //var sheetMessage : String
     
     init(observedContent : DialogUpdatableContent) {
         //sheetMessage = text
-        self.observedDialogContent = observedContent
+        self.observedData = observedContent
         //self._showingSheet = sheet
     }
     
@@ -30,20 +30,20 @@ struct ErrorView: View {
                     .foregroundColor(.yellow)
             }
             .frame(width: 64, height: 64)
-            .padding(20)
+            .padding(observedData.appProperties.sidePadding)
             Text("invalid-input").bold()
                 .padding()
-            Text(observedDialogContent.sheetErrorMessage)
-                .padding(.leading, 10)
-                .padding(.trailing, 10)
+            Text(observedData.sheetErrorMessage)
+                .padding(.leading, observedData.appProperties.sidePadding)
+                .padding(.trailing, observedData.appProperties.sidePadding)
             Spacer()
             Button(action: {
-                observedDialogContent.showSheet = false
-                observedDialogContent.sheetErrorMessage = ""
+                observedData.showSheet = false
+                observedData.sheetErrorMessage = ""
             }) {
                 Text("button-ok".localized)
             }
-            .padding()
+            .padding(observedData.appProperties.sidePadding)
         }
         .frame(width: 400, height: 350)
     }

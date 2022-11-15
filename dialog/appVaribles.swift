@@ -14,9 +14,15 @@ var iconVisible: Bool = true
 
 // declare our app var in case we want to update values - e.g. future use, multiple dialog sizes
 var appvars = AppVariables()
-var cloptions = CLOptions()
-var textFields = [TextFieldState]()
-var dropdownItems = [DropDownItems]()
+var appArguments = CommandLineArguments()
+
+let formatter: NumberFormatter = {
+    let formatter = NumberFormatter()
+    //formatter.usesSignificantDigits = false
+    formatter.maximumFractionDigits = 0
+    formatter.numberStyle = .decimal
+    return formatter
+}()
 
 struct TextFieldState {
     var editor          : Bool      = false
@@ -28,9 +34,23 @@ struct TextFieldState {
     var regexError      : String    = ""
     var required        : Bool      = false
     var secure          : Bool      = false
-    var selectLabel     : String    = ""
+    //var selectLabel     : String    = ""
     var title           : String
     var value           : String    = ""
+    var requiredTextfieldHighlight : Color = .clear
+    var dictionary: [String: Any] {
+            return ["title": title,
+                    "required": required,
+                    "secure": secure,
+                    "prompt": prompt,
+                    "regex":regex,
+                    "regexerror":regexError,
+                    "value":value
+            ]
+        }
+    var nsDictionary: NSDictionary {
+            return dictionary as NSDictionary
+        }
 }
 
 struct DropDownItems {
@@ -38,6 +58,12 @@ struct DropDownItems {
     var values          : [String]
     var defaultValue    : String
     var selectedValue   : String = ""
+}
+
+struct CheckBoxes {
+    var title           : String
+    var value           : Bool = false
+    var disabled        : Bool = false
 }
 
 struct ListItems: Codable {
@@ -57,15 +83,40 @@ struct ListItems: Codable {
         }
 }
 
+struct MainImage {
+    var title           : String = ""
+    var path            : String
+    var caption         : String = ""
+    var dictionary: [String: Any] {
+        return ["imagename": "\(path)",
+                    "caption": caption]
+        }
+    var nsDictionary: NSDictionary {
+            return dictionary as NSDictionary
+        }
+}
+
+struct CLArgument {
+    var long: String
+    var short: String = ""
+    var value : String = ""
+    var present : Bool = false
+    var isbool : Bool = false
+}
+
+
 struct AppVariables {
     
-    var cliversion                      = "1.11.2"
+    var cliversion                      = "2.0"
     
     // message default strings
     var titleDefault                    = String("default-title".localized)
     var messageDefault                  = String("default-message".localized)
     var messageAlignment : TextAlignment = .leading
     var messageAlignmentTextRepresentation = String("left")
+    var allignmentStates : [String: TextAlignment] = ["left" : .leading,
+                                                      "right" : .trailing,
+                                                      "centre" : .center]
 
     // button default strings
     // work out how to define a default width button that does what you tell it to. in the meantime, diry hack with spaces
@@ -82,6 +133,11 @@ struct AppVariables {
     // Window Sizes
     var windowWidth                     = CGFloat(820)      // set default dialog width
     var windowHeight                    = CGFloat(380)      // set default dialog height
+    
+    // Content padding
+    var sidePadding                     = CGFloat(15)
+    var topPadding                      = CGFloat(10)
+    var bottomPadding                   = CGFloat(15)
 
     // Screen Size
     var screenWidth                     = CGFloat(0)
@@ -93,7 +149,7 @@ struct AppVariables {
     var windowPositionVertical          = NSWindow.Position.Vertical.center
     var windowPositionHorozontal        = NSWindow.Position.Horizontal.center
 
-    var iconWidth                      = CGFloat(170)      // set default image area width
+    var iconWidth                      = CGFloat(150)      // set default image area width
     var iconHeight                     = CGFloat(260)      // set default image area height
     var titleHeight                     = CGFloat(50)
     var bannerHeight                    = CGFloat(-10)
@@ -125,18 +181,17 @@ struct AppVariables {
 
     var willDisturb                     = Bool(false)
 
-    var textOptionsArray                = [String]()
-    var textFieldText                   = Array(repeating: "", count: 64)
-
     var checkboxOptionsArray            = [String]()
     var checkboxText                    = Array(repeating: "", count: 64)
     var checkboxValue                   = Array(repeating: false, count: 64)
     var checkboxDisabled                = Array(repeating: false, count: 64)
 
-    var imageArray                      = [String]()
+    var imageArray                      = [MainImage]()
     var imageCaptionArray               = [String]()
 
     var listItems = [ListItems]()
+    var textFields = [TextFieldState]()
+    var dropdownItems = [DropDownItems]()
 
     var annimationSmoothing             = Double(20)
 
@@ -172,85 +227,89 @@ struct AppVariables {
     var debugBorderColour               = Color.clear
 }
 
-struct CLOptions {
+struct CommandLineArguments {
     // command line options that take string parameters
-    var titleOption              = (long: String("title"),             short: String("t"),   value : String(""), present : Bool(false))  // -t
-    var messageOption            = (long: String("message"),           short: String("m"),   value : String(""), present : Bool(false))  // -m
-    var messageAlignment         = (long: String("alignment"),         short: String(""),    value : String(""), present : Bool(false))
-    var iconOption               = (long: String("icon"),              short: String("i"),   value : String(""), present : Bool(false))  // -i
-    var iconSize                 = (long: String("iconsize"),          short: String(""),    value : String(""), present : Bool(false))
-  //var iconHeight               = (long: String("iconheight"),        short: String(""),    value : String(""), present : Bool(false))
-    var overlayIconOption        = (long: String("overlayicon"),       short: String("y"),   value : String(""), present : Bool(false))  // -y
-    var bannerImage              = (long: String("bannerimage"),       short: String("n"),   value : String(""), present : Bool(false))  // -n
-    var button1TextOption        = (long: String("button1text"),       short: String(""),    value : String(""), present : Bool(false))
-    var button1ActionOption      = (long: String("button1action"),     short: String(""),    value : String(""), present : Bool(false))
-    var button1ShellActionOption = (long: String("button1shellaction"),short: String(""),    value : String(""), present : Bool(false))
-    var button2TextOption        = (long: String("button2text"),       short: String(""),    value : String(""), present : Bool(false))
-    var button2ActionOption      = (long: String("button2action"),     short: String(""),    value : String(""), present : Bool(false))
-    var buttonInfoTextOption     = (long: String("infobuttontext"),    short: String(""),    value : String(""), present : Bool(false))
-    var buttonInfoActionOption   = (long: String("infobuttonaction"),  short: String(""),    value : String(""), present : Bool(false))
-    var dropdownTitle            = (long: String("selecttitle"),       short: String(""),    value : String(""), present : Bool(false))
-    var dropdownValues           = (long: String("selectvalues"),      short: String(""),    value : String(""), present : Bool(false))
-    var dropdownDefault          = (long: String("selectdefault"),     short: String(""),    value : String(""), present : Bool(false))
-    var titleFont                = (long: String("titlefont"),         short: String(""),    value : String(""), present : Bool(false))
-    var messageFont              = (long: String("messagefont"),       short: String(""),    value : String(""), present : Bool(false))
-    var textField                = (long: String("textfield"),         short: String(""),    value : String(""), present : Bool(false))
-    var checkbox                 = (long: String("checkbox"),          short: String(""),    value : String(""), present : Bool(false))
-    var timerBar                 = (long: String("timer"),             short: String(""),    value : String(""), present : Bool(false))
-    var progressBar              = (long: String("progress"),          short: String(""),    value : String(""), present : Bool(false))
-    var progressText             = (long: String("progresstext"),      short: String(""),    value : String(""), present : Bool(false))
-    var mainImage                = (long: String("image"),             short: String("g"),   value : String(""), present : Bool(false))
-    var mainImageCaption         = (long: String("imagecaption"),      short: String(""),    value : String(""), present : Bool(false))
-    var windowWidth              = (long: String("width"),             short: String(""),    value : String(""), present : Bool(false))
-    var windowHeight             = (long: String("height"),            short: String(""),    value : String(""), present : Bool(false))
-    var watermarkImage           = (long: String("background"),        short: String("bg"),  value : String(""), present : Bool(false)) // -bg
-    var watermarkAlpha           = (long: String("bgalpha"),           short: String("ba"),  value : String(""), present : Bool(false)) // -ba
-    var watermarkPosition        = (long: String("bgposition"),        short: String("bp"),  value : String(""), present : Bool(false)) // -bp
-    var watermarkFill            = (long: String("bgfill"),            short: String("bf"),  value : String(""), present : Bool(false)) // -bf
-    var watermarkScale           = (long: String("bgscale"),           short: String("bs"),  value : String(""), present : Bool(false)) // -bs
-    var position                 = (long: String("position"),          short: String(""),    value : String(""), present : Bool(false))
-    var video                    = (long: String("video"),             short: String(""),    value : String(""), present : Bool(false))
-    var videoCaption             = (long: String("videocaption"),      short: String(""),    value : String(""), present : Bool(false))
-    var debug                    = (long: String("debug"),             short: String(""),    value : String(""), present : Bool(false))
-    var jsonFile                 = (long: String("jsonfile"),          short: String(""),    value : String(""), present : Bool(false))
-    var jsonString               = (long: String("jsonstring"),        short: String(""),    value : String(""), present : Bool(false))
-    var statusLogFile            = (long: String("commandfile"),       short: String(""),    value : String(""), present : Bool(false))
-    var listItem                 = (long: String("listitem"),          short: String(""),    value : String(""), present : Bool(false))
-    var listStyle                = (long: String("liststyle"),         short: String(""),    value : String(""), present : Bool(false))
-    var quitKey                  = (long: String("quitkey"),           short: String(""),    value : String(""), present : Bool(false))
-    var infoText                 = (long: String("infotext"),          short: String(""),    value : String(""), present : Bool(false))
+    var titleOption              = CLArgument(long: "title", short: "t")
+    var subTitleOption           = CLArgument(long: "subtitle")
+    var messageOption            = CLArgument(long: "message", short: "m")
+    var messageAlignment         = CLArgument(long: "messagealignment")
+    var messageAlignmentOld      = CLArgument(long: "alignment")
+    var messageVerticalAlignment = CLArgument(long: "messageposition")
+    var iconOption               = CLArgument(long: "icon", short: "i")
+    var iconSize                 = CLArgument(long: "iconsize")
+  //var iconHeight               = CLArgument(long: "iconheight")
+    var overlayIconOption        = CLArgument(long: "overlayicon", short: "y")
+    var bannerImage              = CLArgument(long: "bannerimage", short: "n")
+    var button1TextOption        = CLArgument(long: "button1text")
+    var button1ActionOption      = CLArgument(long: "button1action")
+    var button1ShellActionOption = CLArgument(long: "button1shellaction",short: "")
+    var button2TextOption        = CLArgument(long: "button2text")
+    var button2ActionOption      = CLArgument(long: "button2action")
+    var buttonInfoTextOption     = CLArgument(long: "infobuttontext")
+    var buttonInfoActionOption   = CLArgument(long: "infobuttonaction")
+    var dropdownTitle            = CLArgument(long: "selecttitle")
+    var dropdownValues           = CLArgument(long: "selectvalues")
+    var dropdownDefault          = CLArgument(long: "selectdefault")
+    var titleFont                = CLArgument(long: "titlefont")
+    var messageFont              = CLArgument(long: "messagefont")
+    var textField                = CLArgument(long: "textfield")
+    var checkbox                 = CLArgument(long: "checkbox")
+    var timerBar                 = CLArgument(long: "timer")
+    var progressBar              = CLArgument(long: "progress")
+    var progressText             = CLArgument(long: "progresstext")
+    var mainImage                = CLArgument(long: "image", short: "g")
+    var mainImageCaption         = CLArgument(long: "imagecaption")
+    var windowWidth              = CLArgument(long: "width")
+    var windowHeight             = CLArgument(long: "height")
+    var watermarkImage           = CLArgument(long: "background", short: "bg")
+    var watermarkAlpha           = CLArgument(long: "bgalpha", short: "ba")
+    var watermarkPosition        = CLArgument(long: "bgposition", short: "bp")
+    var watermarkFill            = CLArgument(long: "bgfill", short: "bf")
+    var watermarkScale           = CLArgument(long: "bgscale", short: "bs")
+    var position                 = CLArgument(long: "position")
+    var video                    = CLArgument(long: "video")
+    var videoCaption             = CLArgument(long: "videocaption")
+    var debug                    = CLArgument(long: "debug")
+    var jsonFile                 = CLArgument(long: "jsonfile")
+    var jsonString               = CLArgument(long: "jsonstring")
+    var statusLogFile            = CLArgument(long: "commandfile")
+    var listItem                 = CLArgument(long: "listitem")
+    var listStyle                = CLArgument(long: "liststyle")
+    var infoText                 = CLArgument(long: "infotext")
+    var quitKey                  = CLArgument(long: "quitkey")
+    var webcontent               = CLArgument(long: "webcontent")
 
     // command line options that take no additional parameters
-    var button1Disabled          = (long: String("button1disabled"),   short: String(""),    value : String(""), present : Bool(false))
-    var button2Option            = (long: String("button2"),           short: String("2"),   value : String(""), present : Bool(false)) // -2
-    var infoButtonOption         = (long: String("infobutton"),        short: String("3"),   value : String(""), present : Bool(false)) // -3
-    var getVersion               = (long: String("version"),           short: String("v"),   value : String(""), present : Bool(false)) // -v
-    var hideIcon                 = (long: String("hideicon"),          short: String("h"),   value : String(""), present : Bool(false)) // -h
-    var centreIcon               = (long: String("centreicon"),        short: String(""),    value : String(""), present : Bool(false))
-    var centreIconSE             = (long: String("centericon"),        short: String(""),    value : String(""), present : Bool(false))
-    var helpOption               = (long: String("help"),              short: String(""),    value : String(""), present : Bool(false))
-    var demoOption               = (long: String("demo"),              short: String(""),    value : String(""), present : Bool(false))
-    var buyCoffee                = (long: String("coffee"),            short: String("☕️"),  value : String(""), present : Bool(false))
-    var showLicense              = (long: String("showlicense"),       short: String("l"),   value : String(""), present : Bool(false)) // -l
-    var warningIcon              = (long: String("warningicon"),       short: String(""),    value : String(""), present : Bool(false)) // Deprecated
-    var infoIcon                 = (long: String("infoicon"),          short: String(""),    value : String(""), present : Bool(false)) // Deprecated
-    var cautionIcon              = (long: String("cautionicon"),       short: String(""),    value : String(""), present : Bool(false)) // Deprecated
-    var hideTimerBar             = (long: String("hidetimerbar"),      short: String(""),    value : String(""), present : Bool(false))
-    var autoPlay                 = (long: String("autoplay"),          short: String(""),    value : String(""), present : Bool(false))
-    var blurScreen               = (long: String("blurscreen"),        short: String(""),    value : String(""), present : Bool(false))
-
-    var lockWindow               = (long: String("moveable"),          short: String("o"),   value : String(""), present : Bool(false)) // -o
-    var forceOnTop               = (long: String("ontop"),             short: String("p"),   value : String(""), present : Bool(false)) // -p
-    var smallWindow              = (long: String("small"),             short: String("s"),   value : String(""), present : Bool(false)) // -s
-    var bigWindow                = (long: String("big"),               short: String("b"),   value : String(""), present : Bool(false)) // -b
-    var fullScreenWindow         = (long: String("fullscreen"),        short: String("f"),   value : String(""), present : Bool(false)) // -f
-    var quitOnInfo               = (long: String("quitoninfo"),        short: String(""),    value : String(""), present : Bool(false))
-    var listFonts                = (long: String("listfonts"),         short: String(""),    value : String(""), present : Bool(false))
-
-    var jsonOutPut               = (long: String("json"),              short: String("j"),   value : String(""), present : Bool(false)) // -j
-    var ignoreDND                = (long: String("ignorednd"),         short: String("d"),   value : String(""), present : Bool(false)) // -j
-    // civhmtsb
-
-    var jamfHelperMode           = (long: String("jh"),                short: String("jh"),  value : String(""), present : Bool(false))
-    var miniMode                 = (long: String("mini"),              short: String(""),    value : String(""), present : Bool(false))
+    var button1Disabled          = CLArgument(long: "button1disabled", isbool: true)
+    var button2Option            = CLArgument(long: "button2", short: "2", isbool: true)
+    var infoButtonOption         = CLArgument(long: "infobutton", short: "3", isbool: true)
+    var getVersion               = CLArgument(long: "version", short: "v")
+    var hideIcon                 = CLArgument(long: "hideicon", short: "h")
+    var centreIcon               = CLArgument(long: "centreicon", isbool: true)
+    var centreIconSE             = CLArgument(long: "centericon", isbool: true) // the other way of spelling
+    var helpOption               = CLArgument(long: "help")
+    var demoOption               = CLArgument(long: "demo")
+    var buyCoffee                = CLArgument(long: "coffee", short: "☕️")
+    var showLicense              = CLArgument(long: "showlicense", short: "l")
+    var warningIcon              = CLArgument(long: "warningicon") // Deprecated
+    var infoIcon                 = CLArgument(long: "infoicon") // Deprecated
+    var cautionIcon              = CLArgument(long: "cautionicon") // Deprecated
+    var hideTimerBar             = CLArgument(long: "hidetimerbar")
+    var autoPlay                 = CLArgument(long: "autoplay")
+    var blurScreen               = CLArgument(long: "blurscreen", isbool: true)
+    var notification             = CLArgument(long: "notification", isbool: true)
+    
+    //var lockWindow               = CLArgument(long: "moveable", short: "o")
+    var constructionKit          = CLArgument(long: "builder", isbool: true)
+    var movableWindow            = CLArgument(long: "moveable", short: "o", isbool: true)
+    var forceOnTop               = CLArgument(long: "ontop", short: "p", isbool: true)
+    var smallWindow              = CLArgument(long: "small", short: "s", isbool: true)
+    var bigWindow                = CLArgument(long: "big", short: "b", isbool: true)
+    var fullScreenWindow         = CLArgument(long: "fullscreen", short: "f", isbool: true)
+    var quitOnInfo               = CLArgument(long: "quitoninfo", isbool: true)
+    var listFonts                = CLArgument(long: "listfonts")
+    var jsonOutPut               = CLArgument(long: "json", short: "j", isbool: true)
+    var ignoreDND                = CLArgument(long: "ignorednd", short: "d", isbool: true)
+    var jamfHelperMode           = CLArgument(long: "jh", short: "jh", isbool: true)
+    var miniMode                 = CLArgument(long: "mini")
 }

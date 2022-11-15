@@ -12,38 +12,39 @@ import AppKit
 
 struct DialogView: View {
     
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
     
     var iconDisplayWidth : CGFloat
     
     init(observedDialogContent : DialogUpdatableContent) {
-        if !observedDialogContent.iconPresent { //} appvars.iconIsHidden {
+        if !observedDialogContent.args.iconOption.present { //} appvars.iconIsHidden {
             iconDisplayWidth = 0
         } else {
             iconDisplayWidth = observedDialogContent.iconSize
         }
-        self.observedDialogContent = observedDialogContent
+        self.observedData = observedDialogContent
     }
     
     
     var body: some View {
         VStack { //}(alignment: .top, spacing: nil) {
             HStack {
-                if (observedDialogContent.iconPresent && !observedDialogContent.centreIconPresent && !(observedDialogContent.iconImage == "none")) {
+                if (observedData.args.iconOption.present && !observedData.args.centreIcon.present && observedData.args.iconOption.value != "none") {
                     VStack {
-                        IconView(image: observedDialogContent.iconImage, overlay: observedDialogContent.overlayIconImage)
+                        IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
                             .frame(width: iconDisplayWidth, alignment: .top)
                             .border(appvars.debugBorderColour, width: 2)
-                            .padding(.top, 20)
-                            .padding(.leading, 30)
+                            .padding(.top, observedData.appProperties.topPadding)
+                            .padding(.leading, observedData.appProperties.sidePadding+10)
+                            .padding(.trailing, observedData.appProperties.sidePadding+10)
                         Spacer()
                     }
                 }
                 
-                MessageContent(observedDialogContent: observedDialogContent)
-                    .border(appvars.debugBorderColour, width: 2)
+                MessageContent(observedDialogContent: observedData)
+                    .border(observedData.appProperties.debugBorderColour, width: 2)
             }
-            TaskProgressView(observedDialogContent: observedDialogContent)
+            TaskProgressView(observedData: observedData)
         }
     }
 }

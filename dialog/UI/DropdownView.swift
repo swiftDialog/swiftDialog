@@ -12,54 +12,52 @@ import Combine
 
 struct DropdownView: View {
     
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
     @State var selectedOption : [String]
 
-    var showDropdown: Bool = cloptions.dropdownValues.present
     var fieldwidth: CGFloat = 0
     
     init(observedDialogContent : DialogUpdatableContent) {
-        self.observedDialogContent = observedDialogContent
-        if !observedDialogContent.iconPresent { //} cloptions.hideIcon.present {
-            fieldwidth = appvars.windowWidth
+        self.observedData = observedDialogContent
+        if !observedDialogContent.args.hideIcon.present {
+            fieldwidth = observedDialogContent.windowWidth
         } else {
-            fieldwidth = appvars.windowWidth - appvars.iconWidth
+            fieldwidth = observedDialogContent.windowWidth - observedDialogContent.appProperties.iconWidth
         }
         
         var defaultOptions : [String] = []
-        for i in 0..<dropdownItems.count {
-            defaultOptions.append(dropdownItems[i].defaultValue)
+        for i in 0..<observedDialogContent.appProperties.dropdownItems.count {
+            defaultOptions.append(observedDialogContent.appProperties.dropdownItems[i].defaultValue)
         }
         _selectedOption = State(initialValue: defaultOptions)
     }
         
     var body: some View {
-        if showDropdown {
+        if observedData.args.dropdownValues.present {
             VStack {
-                ForEach(0..<dropdownItems.count, id: \.self) {index in
+                ForEach(0..<observedData.appProperties.dropdownItems.count, id: \.self) {index in
                     HStack {
                         // we could print the title as part of the picker control but then we don't get easy access to swiftui text formatting
                         // so we print it seperatly and use a blank value in the picker
-                        //Spacer()
-                        Text(dropdownItems[index].title)
+                        Text(observedData.appProperties.dropdownItems[index].title)
                             .bold()
                             .font(.system(size: 15))
                             .frame(idealWidth: fieldwidth*0.20, alignment: .leading)
                         Spacer()
-                        //    .frame(width: 20)
-                        Picker("", selection: $selectedOption[index])
+                        Picker("", selection: $observedData.appProperties.dropdownItems[index].selectedValue)
                         {
-                            ForEach(dropdownItems[index].values, id: \.self) {
+                            if observedData.appProperties.dropdownItems[index].defaultValue.isEmpty {
+                                // prevents "Picker: the selection "" is invalid and does not have an associated tag" errors on stdout
+                                // this does mean we are creating a blank selection but it will still be index -1
+                                // previous indexing schemes (first entry being index 0 etc) should still apply.
+                                Text("").tag("")
+                            }
+                            ForEach(observedData.appProperties.dropdownItems[index].values, id: \.self) {
                                 Text($0).tag($0)
                             }
                         }
                         .pickerStyle(DefaultPickerStyle())
-                        .frame(idealWidth: fieldwidth*0.50, maxWidth: 250, alignment: .trailing)
-                        .onChange(of: selectedOption[index]) { _ in
-                            //update dropdownItems with the option that was selected. this will be printed to stdout on exit
-                            dropdownItems[index].selectedValue = selectedOption[index]
-                        }
-                        //Spacer()
+                        .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
                     }
                 }
             }

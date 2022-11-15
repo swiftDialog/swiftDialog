@@ -9,25 +9,25 @@ import Foundation
 import SwiftUI
 
 struct JHOptions {
-    static let windowType         = (long: String("windowType"),       short: String("windowType"),         value : String(""), present : Bool(false)) // -windowType [hud | utility | fs]
-    static let windowPosition     = (long: String("windowPosition"),   short: String("windowPosition"),     value : String(""), present : Bool(false)) // -windowPosition [ul | ll | ur | lr]
-    static let title              = (long: String("title"),            short: String("title"),              value : String(""), present : Bool(false)) // -title "string"
-    static let heading            = (long: String("heading"),          short: String("heading"),            value : String(""), present : Bool(false)) // -heading "string"
-    static let description        = (long: String("description"),      short: String("description"),        value : String(""), present : Bool(false)) // -description "string"
-    static let icon               = (long: String("icon"),             short: String("icon"),               value : String(""), present : Bool(false)) // -icon path
-    static let button1            = (long: String("button1"),          short: String("button1"),            value : String(""), present : Bool(false)) // -button1 "string"
-    static let button2            = (long: String("button2"),          short: String("button2"),            value : String(""), present : Bool(false)) // -button2 "string"
-    static let defaultButton      = (long: String("defaultButton"),    short: String("defaultButton"),      value : String(""), present : Bool(false)) // -defaultButton [1 | 2]
-    static let cancelButton       = (long: String("cancelButton"),     short: String("cancelButton"),       value : String(""), present : Bool(false)) // -cancelButton [1 | 2]
-    static let showDelayOptions   = (long: String("showDelayOptions"), short: String("showDelayOptions"),   value : String(""), present : Bool(false)) // -showDelayOptions "int, int, int,..."
-    static let alignDescription   = (long: String("alignDescription"), short: String("alignDescription"),   value : String(""), present : Bool(false)) // -alignDescription [right | left | center | justified | natural]
-    static let alignHeading       = (long: String("alignHeading"),     short: String("alignHeading"),       value : String(""), present : Bool(false)) // -alignHeading [right | left | center | justified | natural]
-    static let alignCountdown     = (long: String("alignCountdown"),   short: String("alignCountdown"),     value : String(""), present : Bool(false)) // -alignCountdown [right | left | center | justified | natural]
-    static let timeout            = (long: String("timeout"),          short: String("timeout"),            value : String(""), present : Bool(false)) // -timeout int
-    static let countdown          = (long: String("countdown"),        short: String("countdown"),          value : String(""), present : Bool(false)) // -countdown
-    static let iconSize           = (long: String("iconSize"),         short: String("iconSize"),           value : String(""), present : Bool(false)) // -iconSize pixels
-    static let lockHUD            = (long: String("lockHUD"),          short: String("lockHUD"),            value : String(""), present : Bool(false)) // -lockHUD
-    static let fullScreenIcon     = (long: String("fullScreenIcon"),   short: String("fullScreenIcon"),     value : String(""), present : Bool(false)) // -fullScreenIcon
+    static let windowType         = CLArgument(long: "windowType",       short: "windowType")       // -windowType [hud | utility | fs]
+    static let windowPosition     = CLArgument(long: "windowPosition",   short: "windowPosition")   // -windowPosition [ul | ll | ur | lr]
+    static let title              = CLArgument(long: "title",            short: "title")            // -title "string"
+    static let heading            = CLArgument(long: "heading",          short: "heading")          // -heading "string"
+    static let description        = CLArgument(long: "description",      short: "description")      // -description "string"
+    static let icon               = CLArgument(long: "icon",             short: "icon")             // -icon path
+    static let button1            = CLArgument(long: "button1",          short: "button1")          // -button1 "string"
+    static let button2            = CLArgument(long: "button2",          short: "button2")          // -button2 "string"
+    static let defaultButton      = CLArgument(long: "defaultButton",    short: "defaultButton")    // -defaultButton [1 | 2]
+    static let cancelButton       = CLArgument(long: "cancelButton",     short: "cancelButton")     // -cancelButton [1 | 2]
+    static let showDelayOptions   = CLArgument(long: "showDelayOptions", short: "showDelayOptions") // -showDelayOptions "int, int, int,..."
+    static let alignDescription   = CLArgument(long: "alignDescription", short: "alignDescription") // -alignDescription [right | left | center | justified | natural]
+    static let alignHeading       = CLArgument(long: "alignHeading",     short: "alignHeading")     // -alignHeading [right | left | center | justified | natural]
+    static let alignCountdown     = CLArgument(long: "alignCountdown",   short: "alignCountdown")   // -alignCountdown [right | left | center | justified | natural]
+    static let timeout            = CLArgument(long: "timeout",          short: "timeout")          // -timeout int
+    static let countdown          = CLArgument(long: "countdown",        short: "countdown")        // -countdown
+    static let iconSize           = CLArgument(long: "iconSize",         short: "iconSize")         // -iconSize pixels
+    static let lockHUD            = CLArgument(long: "lockHUD",          short: "lockHUD")          // -lockHUD
+    static let fullScreenIcon     = CLArgument(long: "fullScreenIcon",   short: "fullScreenIcon")   // -fullScreenIcon
     
     public func return_jh_value() {
         
@@ -37,30 +37,30 @@ struct JHOptions {
 
 public func convertFromJamfHelperSyntax() {
     // read the jamfhelper syntax from the command line and populate the appropriate dialog values
-    //cloptions.smallWindow.present = true
+    //appArguments.smallWindow.present = true
     
     //fullscreen
     if CLOptionPresent(OptionName: JHOptions.windowType) && CLOptionText(OptionName: JHOptions.windowType) == "fs" {
-        cloptions.fullScreenWindow.present = true
+        appArguments.fullScreenWindow.present = true
     }
     
     // title
-    cloptions.titleOption.present = CLOptionPresent(OptionName: JHOptions.title)
-    cloptions.titleOption.value = CLOptionText(OptionName: JHOptions.title)
+    appArguments.titleOption.present = CLOptionPresent(OptionName: JHOptions.title)
+    appArguments.titleOption.value = CLOptionText(OptionName: JHOptions.title)
     
     // message
-    cloptions.messageOption.present = CLOptionPresent(OptionName: JHOptions.description)
-    if !cloptions.fullScreenWindow.present {
-        cloptions.messageOption.value = "#### \(CLOptionText(OptionName: JHOptions.heading))\n\n\(CLOptionText(OptionName: JHOptions.description))"
+    appArguments.messageOption.present = CLOptionPresent(OptionName: JHOptions.description)
+    if !appArguments.fullScreenWindow.present {
+        appArguments.messageOption.value = "#### \(CLOptionText(OptionName: JHOptions.heading))\n\n\(CLOptionText(OptionName: JHOptions.description))"
     } else {
-        cloptions.messageOption.value = "\(CLOptionText(OptionName: JHOptions.heading))\n\n\(CLOptionText(OptionName: JHOptions.description))"
+        appArguments.messageOption.value = "\(CLOptionText(OptionName: JHOptions.heading))\n\n\(CLOptionText(OptionName: JHOptions.description))"
     }
     
     // message alignment
-    cloptions.messageAlignment.present = CLOptionPresent(OptionName: JHOptions.alignDescription)
-    cloptions.messageAlignment.value = CLOptionText(OptionName: JHOptions.alignDescription)
-    if cloptions.messageAlignment.present {
-        switch cloptions.messageAlignment.value {
+    appArguments.messageAlignment.present = CLOptionPresent(OptionName: JHOptions.alignDescription)
+    appArguments.messageAlignment.value = CLOptionText(OptionName: JHOptions.alignDescription)
+    if appArguments.messageAlignment.present {
+        switch appArguments.messageAlignment.value {
         case "left":
             appvars.messageAlignment = .leading
         case "centre", "center":
@@ -73,31 +73,28 @@ public func convertFromJamfHelperSyntax() {
     }
     
     //icon
-    cloptions.iconOption.present         = CLOptionPresent(OptionName: JHOptions.icon)
-    cloptions.iconOption.value = CLOptionText(OptionName: JHOptions.icon)
-    if !cloptions.iconOption.present {
-        appvars.iconIsHidden = true
-    }
+    appArguments.iconOption.present         = CLOptionPresent(OptionName: JHOptions.icon)
+    appArguments.iconOption.value = CLOptionText(OptionName: JHOptions.icon)
     
     //icon size
-    cloptions.iconSize.present = CLOptionPresent(OptionName: JHOptions.iconSize)
-    cloptions.iconSize.value = CLOptionText(OptionName: JHOptions.iconSize, DefaultValue: "\(appvars.iconWidth)")
+    appArguments.iconSize.present = CLOptionPresent(OptionName: JHOptions.iconSize)
+    appArguments.iconSize.value = CLOptionText(OptionName: JHOptions.iconSize, DefaultValue: "\(appvars.iconWidth)")
 
     
     //button 1
-    cloptions.button1TextOption.present = CLOptionPresent(OptionName: JHOptions.button1)
-    cloptions.button1TextOption.value = CLOptionText(OptionName: JHOptions.button1)
-    if !cloptions.button1TextOption.present {
-        cloptions.button1TextOption.value = "OK"
+    appArguments.button1TextOption.present = CLOptionPresent(OptionName: JHOptions.button1)
+    appArguments.button1TextOption.value = CLOptionText(OptionName: JHOptions.button1)
+    if !appArguments.button1TextOption.present {
+        appArguments.button1TextOption.value = "OK"
     }
     
     //button 2
-    cloptions.button2TextOption.present = CLOptionPresent(OptionName: JHOptions.button2)
-    cloptions.button2TextOption.value = CLOptionText(OptionName: JHOptions.button2)
+    appArguments.button2TextOption.present = CLOptionPresent(OptionName: JHOptions.button2)
+    appArguments.button2TextOption.value = CLOptionText(OptionName: JHOptions.button2)
     
     //countdown or timer
-    cloptions.timerBar.present = CLOptionPresent(OptionName: JHOptions.timeout)
-    cloptions.timerBar.value = CLOptionText(OptionName: JHOptions.timeout)
+    appArguments.timerBar.present = CLOptionPresent(OptionName: JHOptions.timeout)
+    appArguments.timerBar.value = CLOptionText(OptionName: JHOptions.timeout)
     
     // window location on screen
     if CLOptionPresent(OptionName: JHOptions.windowPosition) {

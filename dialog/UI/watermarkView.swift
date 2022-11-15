@@ -8,21 +8,22 @@
 import SwiftUI
 
 struct watermarkView: View {
-    var imagePath: String = ""
+    //var imagePath: String = ""
     var mainImage: NSImage
     var imageOpacity: Double
     var imagePosition : Alignment = .leading
     var imageAlignmentGuite : Alignment = .center
-    var imageScaleFill : String
+    //var imageScaleFill : String
     
-    init(imagePath: String?, opacity: Double?, position: String? = "center", scale: String? = "") {
-        mainImage = getImageFromPath(fileImagePath: imagePath ?? "")
-        imageOpacity = opacity ??  0.5
-        imageScaleFill = scale ?? ""
+    @ObservedObject var observedData : DialogUpdatableContent
+    
+    init(observedContent : DialogUpdatableContent) {
+        self.observedData = observedContent
+
+        mainImage = getImageFromPath(fileImagePath: observedContent.args.watermarkImage.value)
+        imageOpacity = Double(observedContent.args.watermarkAlpha.value) ??  0.5
         
-        //print("scale = \(imageScaleFill)")
-        
-        switch position {
+        switch observedData.args.watermarkPosition.value {
         case "left":
             imagePosition = .leading
         case "topleft":
@@ -49,12 +50,12 @@ struct watermarkView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                if imageScaleFill == "fill" {
+                if observedData.args.watermarkFill.value == "fill" {
                     Image(nsImage: mainImage)
                         .resizable()
                         .scaledToFill()
                         .opacity(imageOpacity)
-                } else if imageScaleFill == "fit" {
+                } else if observedData.args.watermarkFill.value == "fit" {
                     Image(nsImage: mainImage)
                         .resizable()
                         .scaledToFit()

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1310"
+   LastUpgradeVersion = "1400"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -52,7 +52,31 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "--message &quot;this is a test&quot; --mini"
+            argument = "--position bottom"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--notification --title &quot;swiftDialog Notifications&quot; --subtitle &quot;Test Subtitle&quot; --message &quot;Line 1\nLine 2\nLine 3\nLine 4&quot; --icon /etc/csiro/logo.png"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--icon /Applications/Phocus.app"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--bannerimage /Users/rea094/Documents/csiro\ resources/22-00140_RecruitmentProjectDorothy_MyCSIROBanner.png"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-- height 700 --width 900"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--builder"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--title &quot;xcode test window&quot;"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

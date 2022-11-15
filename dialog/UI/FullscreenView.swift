@@ -23,27 +23,22 @@ extension Color {
 
 struct FullscreenView: View {
             
-    @ObservedObject var observedDialogContent = DialogUpdatableContent()
+    @ObservedObject var observedData : DialogUpdatableContent
         
-    var TitleViewOption: String = cloptions.titleOption.value // CLOptionText(OptionName: cloptions.titleOption, DefaultValue: appvars.titleDefault)
-    var messageContentOption: String = cloptions.messageOption.value // CLOptionText(OptionName: cloptions.messageOption, DefaultValue: appvars.messageDefault)
-    
     let displayDetails:CGRect = NSScreen.main!.frame
     var windowHeight:CGFloat = 0
     var windowWidth:CGFloat = 0
     
     // setup element sizes
-    var titleContentFontSize:CGFloat = appvars.titleFontSize*3
-    var messageContentFontSize:CGFloat = 70 //need to add to appvars
-    var iconImageScaleFactor:CGFloat = 1.5
-    var emptyStackPadding:CGFloat = 70
-    var bannerPadding:CGFloat = 25
+    var titleContentFontSize:CGFloat
+    var messageContentFontSize:CGFloat
+    var iconImageScaleFactor:CGFloat
+    var emptyStackPadding:CGFloat
+    var bannerPadding:CGFloat
     var maxBannerHeight:CGFloat = 120
     var maxBannerWidth:CGFloat = 0
     var minScreenHeightToDisplayBanner:CGFloat = 1000
     var messageTextLineSpacing:CGFloat = 20
-    
-    var BannerImageOption: String = cloptions.bannerImage.value // CLOptionText(OptionName: cloptions.bannerImage)
     
     var useDefaultStyle = true
     var defaultStyle: MarkdownStyle {
@@ -54,13 +49,21 @@ struct FullscreenView: View {
                                foregroundColor: .white)
     }
      
-    init () {
+    init (observedData : DialogUpdatableContent) {
+        self.observedData = observedData
         // Ensure the singleton NSApplication exists.
         // required for correct determination of screen dimentions for the screen in use in multi screen scenarios
         _ = NSApplication.shared
         
         windowHeight = displayDetails.size.height
         windowWidth = displayDetails.size.width
+        
+        messageContentFontSize = 70
+        emptyStackPadding = 70
+        titleContentFontSize = observedData.appProperties.titleFontSize*3
+        iconImageScaleFactor = 1.5
+        bannerPadding = 25
+        messageTextLineSpacing = 15
         
         // adjust element sizes - standard display is 27"
         // bigger displays we scale up
@@ -72,20 +75,20 @@ struct FullscreenView: View {
         if windowHeight <= 1440 {
             messageContentFontSize = 40
             emptyStackPadding = 50
-            titleContentFontSize = appvars.titleFontSize*2
+            titleContentFontSize = observedData.appProperties.titleFontSize*2
             iconImageScaleFactor = 0.8
             bannerPadding = 20
             messageTextLineSpacing = 15
         } else if windowHeight > 1440 {
             messageContentFontSize = 60
-            titleContentFontSize = appvars.titleFontSize*4
+            titleContentFontSize = observedData.appProperties.titleFontSize*4
             iconImageScaleFactor = 1.8
             emptyStackPadding = 90
             messageTextLineSpacing = 30
         }
                 
-        if appvars.titleFontColour == Color.primary {
-            appvars.titleFontColour = Color.white
+        if observedData.appProperties.titleFontColour == Color.primary {
+            observedData.appProperties.titleFontColour = Color.white
         }
         
     }
@@ -100,7 +103,7 @@ struct FullscreenView: View {
         window.makeKeyAndOrderFront(self)
         window.isReleasedWhenClosed = false
         window.center()
-        window.contentView = NSHostingView(rootView: FullscreenView())
+        window.contentView = NSHostingView(rootView: FullscreenView(observedData: observedData))
 
         // open fullScreen mode
         let mainScreen: NSScreen = NSScreen.main!
@@ -111,13 +114,13 @@ struct FullscreenView: View {
         
         VStack{
             // banner image vstack
-            if cloptions.bannerImage.present {
-                Image(nsImage: getImageFromPath(fileImagePath: BannerImageOption))
+            if observedData.args.bannerImage.present {
+                Image(nsImage: getImageFromPath(fileImagePath: observedData.args.bannerImage.value))
                     .resizable()
                     .clipShape(RoundedRectangle(cornerRadius: 15))
                     .scaledToFit()
                     .frame(maxWidth: maxBannerWidth, maxHeight: maxBannerHeight)
-                    .border(appvars.debugBorderColour, width: 2)
+                    .border(observedData.appProperties.debugBorderColour, width: 2)
                 // Horozontal Line
                 VStack{
                     Rectangle()
@@ -129,45 +132,45 @@ struct FullscreenView: View {
             }
             
             // title vstack
-            if observedDialogContent.titleText != "none" {
+            if observedData.args.titleOption.value != "none" {
                 HStack {
                     // the spacers in this section push the title and thus the full screen area across the width of the display
                     Spacer()
-                    Text(observedDialogContent.titleText)
-                        .foregroundColor(appvars.titleFontColour)
+                    Text(observedData.args.titleOption.value)
+                        .foregroundColor(observedData.appProperties.titleFontColour)
                         .bold()
-                        .font(.system(size: titleContentFontSize, weight: appvars.titleFontWeight))
+                        .font(.system(size: titleContentFontSize, weight: observedData.appProperties.titleFontWeight))
                         .multilineTextAlignment(.center)
-                        .border(appvars.debugBorderColour, width: 2)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
                     Spacer()
                 }
             }
             
             // icon and message vstack group
             VStack {
-                if cloptions.mainImage.present {
+                if observedData.args.mainImage.present {
                     // print image and caption
                     VStack {
-                        ImageView(imageArray: appvars.imageArray, captionArray: appvars.imageCaptionArray, autoPlaySeconds: string2float(string: cloptions.autoPlay.value))
-                            .border(appvars.debugBorderColour, width: 2)
+                        ImageView(imageArray: observedData.appProperties.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: string2float(string: observedData.args.autoPlay.value))
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
                     }
                 } else {
                     // icon vstack
                     VStack {
-                        if cloptions.iconOption.present {
-                            IconView(image: observedDialogContent.iconImage, overlay: observedDialogContent.overlayIconImage)
+                        if observedData.args.iconOption.present {
+                            IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
                         } else {
                             VStack{}.padding(emptyStackPadding)
                         }
                     }
                     .padding(40)
                     .frame(minHeight: 200, maxHeight: (NSScreen.main?.frame.height)!/3)
-                    .border(appvars.debugBorderColour, width: 2)
+                    .border(observedData.appProperties.debugBorderColour, width: 2)
                 
                     // message vstack
                     VStack() {
-                        Markdown(observedDialogContent.messageText)
-                            //.multilineTextAlignment(appvars.messageAlignment)
+                        Markdown(observedData.messageText)
+                            //.multilineTextAlignment(observedData.appProperties.messageAlignment)
                             .markdownStyle(defaultStyle)
                             .multilineTextAlignment(.center)
                         
@@ -175,8 +178,8 @@ struct FullscreenView: View {
                         
                         //TaskProgressView(observedDialogContent: observedDialogContent)  // future feature
                         
-                        if cloptions.timerBar.present {
-                            timerBarView(progressSteps: string2float(string: cloptions.timerBar.value), visible: cloptions.timerBar.present, observedDialogContent: observedDialogContent)
+                        if observedData.args.timerBar.present {
+                            timerBarView(progressSteps: string2float(string: observedData.args.timerBar.value), visible: observedData.args.timerBar.present, observedDialogContent: observedData)
                         }
                     }
                     .padding(10)

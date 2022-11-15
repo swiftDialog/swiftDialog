@@ -10,15 +10,19 @@ import SwiftUI
 
 struct BannerImageView: View {
     
+    @ObservedObject var observedData : DialogUpdatableContent
+    
     var bannerImage     : NSImage
     var bannerHeight    : CGFloat = 0
     var bannerWidth     : CGFloat = 0
     let maxBannerHeight : CGFloat = 150
         
-    init(imagePath: String) {
-        bannerImage = getImageFromPath(fileImagePath: imagePath)
-        bannerWidth = appvars.windowWidth
-        bannerHeight = bannerImage.size.height*(appvars.windowWidth / bannerImage.size.width)
+    init(observedDialogContent : DialogUpdatableContent) {
+        self.observedData = observedDialogContent
+        
+        bannerImage = getImageFromPath(fileImagePath: observedDialogContent.args.bannerImage.value)
+        bannerWidth = observedDialogContent.windowWidth // appvars.windowWidth
+        bannerHeight = bannerImage.size.height*(bannerWidth / bannerImage.size.width)
         if bannerHeight > maxBannerHeight {
             bannerHeight = maxBannerHeight
         }

@@ -9,13 +9,13 @@ import SwiftUI
 
 struct MiniProgressView: View {
     
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
     
     var body: some View {
-        if cloptions.progressBar.present {
+        if appArguments.progressBar.present {
             VStack {
-                ProgressView(value: observedDialogContent.progressValue, total: observedDialogContent.progressTotal)
-                Text(observedDialogContent.statusText)
+                ProgressView(value: observedData.progressValue, total: observedData.progressTotal)
+                Text(observedData.statusText)
                     .lineLimit(1)
             }
         }
@@ -23,29 +23,29 @@ struct MiniProgressView: View {
 }
 
 struct MiniView: View {
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
     
     init(observedContent : DialogUpdatableContent) {
-        self.observedDialogContent = observedContent
+        self.observedData = observedContent
     }
     
     var body: some View {
         ZStack {
-            if !cloptions.progressBar.present {
+            if !appArguments.progressBar.present {
                 VStack {
                     Spacer() //push button bar to the bottom of the window
                     HStack {
-                        ButtonView(observedDialogContent: observedDialogContent)
-                            .padding(.bottom, 10)
-                            .padding(.trailing, 10)
+                        ButtonView(observedDialogContent: observedData)
+                            .padding(.bottom, observedData.appProperties.bottomPadding)
+                            .padding(.trailing, observedData.appProperties.sidePadding)
                     }
                 }
             }
             VStack {
-                if observedDialogContent.titleText != "none" {
-                    Text(observedDialogContent.titleText)
+                if observedData.args.titleOption.value != "none" {
+                    Text(observedData.args.titleOption.value)
                         .font(.system(size: 18, weight: .semibold))
-                        .border(appvars.debugBorderColour, width: 2)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
                         .padding(.top, 5)
                         .lineLimit(1)
                     
@@ -60,35 +60,34 @@ struct MiniView: View {
 
                 HStack {
                     VStack{
-                        if (observedDialogContent.iconPresent && observedDialogContent.iconImage != "none") {
-                            IconView(image: observedDialogContent.iconImage, overlay: observedDialogContent.overlayIconImage)
+                        if (observedData.args.iconOption.present && observedData.args.iconOption.value != "none") {
+                            IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
                                 .frame( maxHeight: 90)
-                                .padding(.leading, 25)
+                                .padding(.leading, observedData.appProperties.sidePadding)
                             Spacer()
                         }
                     }
                     VStack {
                         HStack {
-                            Text(observedDialogContent.messageText)
+                            Text(observedData.args.messageOption.value)
                                 .lineLimit(4)
                                 .font(.system(size: 15))
                                 .frame(maxWidth: .infinity, alignment: .topLeading)
                         }
                         Spacer()
-                        if cloptions.progressBar.present {
+                        if appArguments.progressBar.present {
                             
-                            MiniProgressView(observedDialogContent: observedDialogContent)
+                            MiniProgressView(observedData: observedData)
                         }
                     }
-                    .padding(.leading,20)
-                    .padding(.trailing,20)
-                    .padding(.bottom, 15)
+                    .padding(.leading,observedData.appProperties.sidePadding)
+                    .padding(.trailing,observedData.appProperties.sidePadding)
+                    .padding(.bottom, observedData.appProperties.bottomPadding)
                 }
             }
         }
         .edgesIgnoringSafeArea(.all)
-        .border(appvars.debugBorderColour, width: 2)
-        .hostingWindowPosition(vertical: appvars.windowPositionVertical, horizontal: appvars.windowPositionHorozontal)
+        .border(observedData.appProperties.debugBorderColour, width: 2)
     }
 }
 

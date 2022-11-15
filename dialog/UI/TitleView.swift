@@ -10,22 +10,18 @@ import SwiftUI
 
 struct TitleView: View {
     
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedData : DialogUpdatableContent
     
-    var TitleViewOption: String = cloptions.titleOption.value// CLOptionText(OptionName: cloptions.titleOption, DefaultValue: appvars.titleDefault)
-    //var TitleViewOption: String
-        
     var body: some View {
-        if appvars.titleFontName == "" {
-            //Text(TitleViewOption)
-            Text(observedDialogContent.titleText)
-                .font(.system(size: appvars.titleFontSize, weight: appvars.titleFontWeight))
-                .foregroundColor(appvars.titleFontColour)
+        if observedData.appProperties.titleFontName == "" {
+            Text(observedData.args.titleOption.value)
+                .font(.system(size: observedData.appProperties.titleFontSize, weight: observedData.appProperties.titleFontWeight))
+                .foregroundColor(observedData.appProperties.titleFontColour)
         } else {
-            Text(observedDialogContent.titleText)
-                .font(.custom(appvars.titleFontName, size: appvars.titleFontSize))
-                .fontWeight(appvars.titleFontWeight)
-                .foregroundColor(appvars.titleFontColour)
+            Text(observedData.args.titleOption.value)
+                .font(.custom(observedData.appProperties.titleFontName, size: observedData.appProperties.titleFontSize))
+                .fontWeight(observedData.appProperties.titleFontWeight)
+                .foregroundColor(observedData.appProperties.titleFontColour)
         }
     }
 }

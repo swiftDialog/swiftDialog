@@ -8,41 +8,29 @@
 import SwiftUI
 
 struct CheckboxView: View {
-    @State var checkboxValues = appvars.checkboxValue //Array(repeating: false, count: 64)
-    //@State var textFieldValue = ""
-    //var textFieldLabel = CLOptionText(OptionName: cloptions.textField)
-    let checkboxLabels = appvars.checkboxOptionsArray
-    let checkboxDisabled = appvars.checkboxDisabled
-    var checkboxPresent: Bool = cloptions.checkbox.present
     
-    init() {
-        /*
-        if cloptions..present {
-            checkboxPresent = true
-            for _ in checkboxLabels {
-                checkboxValues.append(" ")
-            }
-        }
-         */
-        //checkboxValues = appvars.checkboxValue
-        //print(checkboxValues)
+    @ObservedObject var observedData : DialogUpdatableContent
+    
+    //@State var checkboxValues = appvars.checkboxValue
+    // @State var textFieldValue = ""
+    // var textFieldLabel = CLOptionText(OptionName: appArguments.textField)
+    //let checkboxLabels = appvars.checkboxOptionsArray
+    //let checkboxDisabled = appvars.checkboxDisabled
+    //var checkboxPresent: Bool = appArguments.checkbox.present
+
+    init(observedDialogContent : DialogUpdatableContent) {
+        self.observedData = observedDialogContent
     }
-    
+
     var body: some View {
-        if checkboxPresent {
+        if observedData.args.checkbox.present {
             VStack {
-                ForEach(0..<checkboxLabels.count, id: \.self) {i in
+                ForEach(0..<observedData.appProperties.checkboxOptionsArray.count, id: \.self) {index in
                     HStack {
-                        Toggle(" \(checkboxLabels[i])", isOn: $checkboxValues[i])
+                        Toggle(observedData.appProperties.checkboxOptionsArray[index], isOn: $observedData.appProperties.checkboxValue[index])
                             .toggleStyle(.checkbox)
-                            .onChange(of: checkboxValues[i], perform: { value in
-                                //update appvars with the text that was entered. this will be printed to stdout on exit
-                                appvars.checkboxValue[i] = checkboxValues[i]
-                            })
-                            .disabled(appvars.checkboxDisabled[i])
-                            
-                        //Text(checkboxLabels[i])
-                        
+                            .disabled(observedData.appProperties.checkboxDisabled[index])
+                        // Text(checkboxLabels[i])
                         Spacer()
                     }
                     .font(.system(size: 16))
@@ -53,8 +41,4 @@ struct CheckboxView: View {
     }
 }
 
-struct CheckboxView_Previews: PreviewProvider {
-    static var previews: some View {
-        CheckboxView()
-    }
-}
+
