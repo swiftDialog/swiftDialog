@@ -107,7 +107,7 @@ struct CLArgument {
 
 struct AppVariables {
     
-    var cliversion                      = "2.0"
+    var cliversion                      = "2.0.1"
     
     // message default strings
     var titleDefault                    = String("default-title".localized)
@@ -116,7 +116,8 @@ struct AppVariables {
     var messageAlignmentTextRepresentation = String("left")
     var allignmentStates : [String: TextAlignment] = ["left" : .leading,
                                                       "right" : .trailing,
-                                                      "centre" : .center]
+                                                      "centre" : .center,
+                                                      "center" : .center]
 
     // button default strings
     // work out how to define a default width button that does what you tell it to. in the meantime, diry hack with spaces
