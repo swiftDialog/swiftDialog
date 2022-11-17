@@ -733,7 +733,6 @@ func processCLOptionValues() {
         default:
             break
         }
-        print(appArguments.video.value)
         // set a larger window size. 900x600 will fit a standard 16:9 video
         appvars.windowWidth = appvars.videoWindowWidth
         appvars.windowHeight = appvars.videoWindowHeight
