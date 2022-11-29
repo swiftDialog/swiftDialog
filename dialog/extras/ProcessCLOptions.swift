@@ -601,6 +601,9 @@ func processCLOptionValues() {
     appArguments.iconSize.value                = json[appArguments.iconSize.long].string ?? CLOptionText(OptionName: appArguments.iconSize, DefaultValue: "\(appvars.iconWidth)")
     appArguments.iconSize.present              = json[appArguments.iconSize.long].exists() || CLOptionPresent(OptionName: appArguments.iconSize)
     
+    appArguments.iconAccessabilityLabel.value  = json[appArguments.iconAccessabilityLabel.long].string ?? CLOptionText(OptionName: appArguments.iconAccessabilityLabel, DefaultValue: "Dialog Icon")
+    appArguments.iconAccessabilityLabel.present = json[appArguments.iconAccessabilityLabel.long].exists() || CLOptionPresent(OptionName: appArguments.iconAccessabilityLabel)
+    
     //appArguments.iconHeight.value              = CLOptionText(OptionName: appArguments.iconHeight)
     //appArguments.iconHeight.present            = CLOptionPresent(OptionName: appArguments.iconHeight)
 

@@ -37,6 +37,7 @@ struct DialogView: View {
                             .padding(.top, observedData.appProperties.topPadding)
                             .padding(.leading, observedData.appProperties.sidePadding+10)
                             .padding(.trailing, observedData.appProperties.sidePadding+10)
+                            .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
                         Spacer()
                     }
                 }
