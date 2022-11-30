@@ -244,6 +244,7 @@ struct CommandLineArguments {
     var overlayIconOption        = CLArgument(long: "overlayicon", short: "y")
     var bannerImage              = CLArgument(long: "bannerimage", short: "n")
     var bannerTitle              = CLArgument(long: "bannertitle")
+    var bannerText               = CLArgument(long: "bannertext")
     var button1TextOption        = CLArgument(long: "button1text")
     var button1ActionOption      = CLArgument(long: "button1action")
     var button1ShellActionOption = CLArgument(long: "button1shellaction",short: "")

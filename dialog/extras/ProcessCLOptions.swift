@@ -624,6 +624,14 @@ func processCLOptionValues() {
     appArguments.bannerTitle.value             = json[appArguments.bannerTitle.long].string ?? CLOptionText(OptionName: appArguments.bannerTitle, DefaultValue: appArguments.titleOption.value)
     appArguments.bannerTitle.present           = json[appArguments.bannerTitle.long].exists() || CLOptionPresent(OptionName: appArguments.bannerTitle)
     
+    appArguments.bannerText.value             = json[appArguments.bannerText.long].string ?? CLOptionText(OptionName: appArguments.bannerText, DefaultValue: appArguments.titleOption.value)
+    appArguments.bannerText.present           = json[appArguments.bannerText.long].exists() || CLOptionPresent(OptionName: appArguments.bannerText)
+    
+    if appArguments.bannerText.present {
+        appArguments.bannerTitle.value = appArguments.bannerText.value
+        appArguments.bannerTitle.present = true
+    }
+    
     if appArguments.bannerTitle.present {
         appArguments.titleOption.value = appArguments.bannerTitle.value
     }
