@@ -30,6 +30,11 @@ public extension Scene {
     }
 }
 
+public extension String {
+var boolValue: Bool {
+    return (self as NSString).boolValue
+}}
+
 func logger(logType: String = "", logMessage: String) {
     let defaultLog = Logger(subsystem: "au.bartreardon.dialog", category: "main")
     switch logType {

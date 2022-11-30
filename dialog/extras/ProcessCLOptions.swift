@@ -375,6 +375,10 @@ func processCLOptions(json : JSON = getJSON()) {
     let app = NSApplication.shared
     //app.setActivationPolicy(.regular)
     app.setActivationPolicy(.accessory)
+    
+    if appArguments.bannerTitle.present {
+        appvars.titleFontColour = Color.white
+    }
 
     if appArguments.titleFont.present {
 
@@ -400,26 +404,30 @@ func processCLOptions(json : JSON = getJSON()) {
             for value in fontValues {
                 // split by =
                 let item = value.components(separatedBy: "=")
-                if item[0] == "size" {
-                    appvars.titleFontSize = string2float(string: item[1], defaultValue: appvars.titleFontSize)
-                    logger(logMessage: "titleFontSize : \(appvars.titleFontSize)")
-                }
-                if item[0] == "weight" {
-                    appvars.titleFontWeight = textToFontWeight(item[1])
-                    logger(logMessage: "titleFontWeight : \(appvars.titleFontWeight)")
-                }
-                if item[0] == "colour" || item[0] == "color" {
-                    appvars.titleFontColour = stringToColour(item[1])
-                    logger(logMessage: "titleFontColour : \(appvars.titleFontColour)")
-                }
-                if item[0] == "name" {
-                    appvars.titleFontName = item[1]
-                    logger(logMessage: "titleFontName : \(appvars.titleFontName)")
+                switch item[0] {
+                    case  "size":
+                        appvars.titleFontSize = string2float(string: item[1], defaultValue: appvars.titleFontSize)
+                        logger(logMessage: "titleFontSize : \(appvars.titleFontSize)")
+                    case  "weight":
+                        appvars.titleFontWeight = textToFontWeight(item[1])
+                        logger(logMessage: "titleFontWeight : \(appvars.titleFontWeight)")
+                    case  "colour","color":
+                        appvars.titleFontColour = stringToColour(item[1])
+                        logger(logMessage: "titleFontColour : \(appvars.titleFontColour)")
+                    case  "name":
+                        appvars.titleFontName = item[1]
+                        logger(logMessage: "titleFontName : \(appvars.titleFontName)")
+                    case  "shadow":
+                        appvars.titleFontShadow = item[1].boolValue
+                        logger(logMessage: "titleFontShadow : \(appvars.titleFontShadow)")
+                    default:
+                        logger(logMessage: "Unknown paramater \(item[0])")
                 }
 
             }
         }
     }
+    
     
     if appArguments.messageFont.present {
         
@@ -445,21 +453,21 @@ func processCLOptions(json : JSON = getJSON()) {
             for value in fontValues {
                 // split by =
                 let item = value.components(separatedBy: "=")
-                if item[0] == "size" {
-                    appvars.messageFontSize = string2float(string: item[1], defaultValue: appvars.messageFontSize)
-                    logger(logMessage: "messageFontSize : \(appvars.messageFontSize)")
-                }
-                if item[0] == "weight" {
-                    appvars.messageFontWeight = textToFontWeight(item[1])
-                    logger(logMessage: "messageFontWeight : \(appvars.messageFontWeight)")
-                }
-                if item[0] == "colour" || item[0] == "color" {
-                    appvars.messageFontColour = stringToColour(item[1])
-                    logger(logMessage: "messageFontColour : \(appvars.messageFontColour)")
-                }
-                if item[0] == "name" {
-                    appvars.messageFontName = item[1]
-                    logger(logMessage: "messageFontName : \(appvars.messageFontName)")
+                switch item[0] {
+                    case "size":
+                        appvars.messageFontSize = string2float(string: item[1], defaultValue: appvars.messageFontSize)
+                        logger(logMessage: "messageFontSize : \(appvars.messageFontSize)")
+                    case "weight":
+                        appvars.messageFontWeight = textToFontWeight(item[1])
+                        logger(logMessage: "messageFontWeight : \(appvars.messageFontWeight)")
+                    case "colour","color":
+                        appvars.messageFontColour = stringToColour(item[1])
+                        logger(logMessage: "messageFontColour : \(appvars.messageFontColour)")
+                    case "name":
+                        appvars.messageFontName = item[1]
+                        logger(logMessage: "messageFontName : \(appvars.messageFontName)")
+                    default:
+                        logger(logMessage: "Unknown paramater \(item[0])")
                 }
             }
         }
@@ -612,7 +620,14 @@ func processCLOptionValues() {
 
     appArguments.bannerImage.value             = json[appArguments.bannerImage.long].string ?? CLOptionText(OptionName: appArguments.bannerImage)
     appArguments.bannerImage.present           = json[appArguments.bannerImage.long].exists() || CLOptionPresent(OptionName: appArguments.bannerImage)
-
+    
+    appArguments.bannerTitle.value             = json[appArguments.bannerTitle.long].string ?? CLOptionText(OptionName: appArguments.bannerTitle, DefaultValue: appArguments.titleOption.value)
+    appArguments.bannerTitle.present           = json[appArguments.bannerTitle.long].exists() || CLOptionPresent(OptionName: appArguments.bannerTitle)
+    
+    if appArguments.bannerTitle.present {
+        appArguments.titleOption.value = appArguments.bannerTitle.value
+    }
+    
     appArguments.button1TextOption.value       = json[appArguments.button1TextOption.long].string ?? CLOptionText(OptionName: appArguments.button1TextOption, DefaultValue: appvars.button1Default)
     appArguments.button1TextOption.present     = json[appArguments.button1TextOption.long].exists() || CLOptionPresent(OptionName: appArguments.button1TextOption)
 
