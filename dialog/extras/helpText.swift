@@ -264,6 +264,13 @@ var helpText = """
                     Specifying this option will imply --\(appArguments.hideIcon.long)
                     Recommended Banner Image size is 850x150.
     
+        --\(appArguments.bannerTitle.long) (<text>)
+                    Title is displayed on top of the banner image.
+                    Title font color is set to "white" by default.
+                    
+                    Additional --\(appArguments.titleFont.long) paramater "shadow=<bool>". When set to true,
+                    displays a drop shadow underneath the text
+    
         --\(appArguments.dropdownTitle.long) <text>
                     Title for dropdown selection
     
