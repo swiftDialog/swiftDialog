@@ -297,7 +297,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
             print(json)
         } else  {
             for i in 0..<outputArray.count {
-                print(outputArray[i].replacingOccurrences(of: "\"", with: ""))
+                print(outputArray[i])
             }
         }
     }
