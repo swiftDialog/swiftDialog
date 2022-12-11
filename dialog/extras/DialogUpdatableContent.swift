@@ -100,9 +100,9 @@ class FileReader {
             // Message
             case "\(observedData.args.messageOption.long):" :
                 observedData.args.messageOption.value = line.replacingOccurrences(of: "\(observedData.args.messageOption.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n")
-                //imagePresent = false
-                //imageCaptionPresent = false
-                //listItemPresent = false
+                observedData.args.mainImage.present = false
+                observedData.args.mainImageCaption.present = false
+                observedData.args.listItem.present = false
                 
             // Message Position
             case "alignment:" :
@@ -220,12 +220,19 @@ class FileReader {
             // image
             case "\(observedData.args.mainImage.long):" :
                 //appvars.imageArray = [line.replacingOccurrences(of: "\(observedData.args.mainImage.long): ", with: "")]
-                appvars.imageArray.append(MainImage(path: line.replacingOccurrences(of: "\(observedData.args.mainImage.long): ", with: "")))
+                let argument = line.replacingOccurrences(of: "\(observedData.args.mainImage.long): ", with: "")
+                if argument.lowercased() == "show" {
+                    observedData.args.mainImage.present = true
+                } else {
+                    observedData.imageArray.append(MainImage(path: argument))
+                }
+                observedData.args.mainImage.present = true
                 //imagePresent = true
                 
             // image Caption
             case "\(observedData.args.mainImageCaption.long):" :
                 appvars.imageCaptionArray = [line.replacingOccurrences(of: "\(observedData.args.mainImageCaption.long): ", with: "")]
+                observedData.args.mainImageCaption.present = true
                 //imageCaptionPresent = true
                 
             // list items
