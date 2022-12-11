@@ -199,7 +199,7 @@ var helpText = """
                     If your command fails, Dialog still exits 0
     
         --\(appArguments.button1Disabled.long)
-                    Launches dialig with button1 disabled
+                    Launches dialog with button1 disabled
                     To re-enable, send `buton1: enable` to the dialog command file.
 
         -\(appArguments.button2Option.short), --\(appArguments.button2Option.long)
@@ -213,6 +213,10 @@ var helpText = """
         --\(appArguments.button2ActionOption.long) <url>
                     Return code when actioned is 2
                     -- Setting Custon Actions For Button 2 Is Not Implemented at this time --
+    
+        --\(appArguments.button2Disabled.long)
+                    Launches dialog with button2 disabled
+                    To re-enable, send `buton2: enable` to the dialog command file.
 
         -\(appArguments.infoButtonOption.short), --\(appArguments.infoButtonOption.long)
                     Displays info button with default label of "\(appvars.buttonInfoDefault)"
@@ -232,6 +236,11 @@ var helpText = """
                     Will display the specified text in place of the info button
                     If no text is supplied, will display the current swiftDialog version
     
+        --\(appArguments.helpMessage.long) (<text>)
+                    Will display a help icon to the right of the the default button
+                    When clicked, contents of the help message will be displayed as a popover
+                    Supports markdown for formatting.
+
         --\(appArguments.quitOnInfo.long)
                     Will tell Dialog to quit when the info button is selected
                     Return code when actioned is 3

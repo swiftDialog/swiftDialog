@@ -28,6 +28,8 @@
 		4116923F2893A24300A88700 /* CKDataEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116923D2893A24300A88700 /* CKDataEntryView.swift */; };
 		411FC34628E2DDFD003EA2C2 /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411FC34528E2DDFD003EA2C2 /* Notifications.swift */; };
 		411FC34728E2DDFD003EA2C2 /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411FC34528E2DDFD003EA2C2 /* Notifications.swift */; };
+		4124EFD229455861003B00F4 /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4124EFD129455861003B00F4 /* HelpView.swift */; };
+		4124EFD329455861003B00F4 /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4124EFD129455861003B00F4 /* HelpView.swift */; };
 		412B26AF289CE02100493EFF /* MiniView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412B26AE289CE02100493EFF /* MiniView.swift */; };
 		412B26B0289CE02100493EFF /* MiniView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412B26AE289CE02100493EFF /* MiniView.swift */; };
 		414550AA27C799D000D756E3 /* BackgroundBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414550A927C799D000D756E3 /* BackgroundBlur.swift */; };
@@ -150,6 +152,7 @@
 		4116923A2893A22300A88700 /* CKListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKListView.swift; sourceTree = "<group>"; };
 		4116923D2893A24300A88700 /* CKDataEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKDataEntryView.swift; sourceTree = "<group>"; };
 		411FC34528E2DDFD003EA2C2 /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Notifications.swift; path = dialog/extras/Notifications.swift; sourceTree = SOURCE_ROOT; };
+		4124EFD129455861003B00F4 /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
 		412B26AE289CE02100493EFF /* MiniView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniView.swift; sourceTree = "<group>"; };
 		414550A927C799D000D756E3 /* BackgroundBlur.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundBlur.swift; sourceTree = "<group>"; };
 		41512CC1286C77F200F22B86 /* ConstructionKitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstructionKitView.swift; sourceTree = "<group>"; };
@@ -376,6 +379,7 @@
 				41832B6D2843143C0062AA1F /* ErrorView.swift */,
 				412B26AE289CE02100493EFF /* MiniView.swift */,
 				41A5A6A528E546A000BD3D5E /* WebContentView.swift */,
+				4124EFD129455861003B00F4 /* HelpView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -623,6 +627,7 @@
 				41D81E6C25F8209F00D1F7E1 /* Options.swift in Sources */,
 				41D81E7125F845D200D1F7E1 /* appVaribles.swift in Sources */,
 				412B26AF289CE02100493EFF /* MiniView.swift in Sources */,
+				4124EFD229455861003B00F4 /* HelpView.swift in Sources */,
 				41D81E7925F870A500D1F7E1 /* Functions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -690,6 +695,7 @@
 				41FB64952680855300A54C3E /* dialogApp.swift in Sources */,
 				41FB64962680855300A54C3E /* appVaribles.swift in Sources */,
 				412B26B0289CE02100493EFF /* MiniView.swift in Sources */,
+				4124EFD329455861003B00F4 /* HelpView.swift in Sources */,
 				41AD75B626AA81760023EBD8 /* TextEntryView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
