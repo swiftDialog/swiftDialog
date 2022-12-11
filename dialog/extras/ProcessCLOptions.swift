@@ -655,6 +655,8 @@ func processCLOptionValues() {
 
     appArguments.button2ActionOption.value     = json[appArguments.button2ActionOption.long].string ?? CLOptionText(OptionName: appArguments.button2ActionOption)
     appArguments.button2ActionOption.present   = json[appArguments.button2ActionOption.long].exists() || CLOptionPresent(OptionName: appArguments.button2ActionOption)
+    
+    appArguments.button2Disabled.present       = json[appArguments.button2Disabled.long].exists() || CLOptionPresent(OptionName: appArguments.button2Disabled)
 
     appArguments.buttonInfoTextOption.value    = json[appArguments.buttonInfoTextOption.long].string ?? CLOptionText(OptionName: appArguments.buttonInfoTextOption, DefaultValue: appvars.buttonInfoDefault)
     appArguments.buttonInfoTextOption.present  = json[appArguments.buttonInfoTextOption.long].exists() || CLOptionPresent(OptionName: appArguments.buttonInfoTextOption)

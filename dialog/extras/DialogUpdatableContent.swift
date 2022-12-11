@@ -164,6 +164,18 @@ class FileReader {
             // Button 2 label
             case "\(observedData.args.button2TextOption.long):" :
                 observedData.args.button2TextOption.value = line.replacingOccurrences(of: "\(observedData.args.button2TextOption.long): ", with: "")
+                
+            // Button 2 status
+            case "button2:" :
+                let buttonCMD = line.replacingOccurrences(of: "button2: ", with: "")
+                switch buttonCMD {
+                case "disable" :
+                    observedData.args.button2Disabled.present = true
+                case "enable" :
+                    observedData.args.button2Disabled.present = false
+                default :
+                    observedData.args.button2Disabled.present = false
+                }
             
             // Info Button label
             case "\(observedData.args.infoButtonOption.long):" :

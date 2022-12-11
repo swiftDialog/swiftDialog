@@ -48,6 +48,7 @@ struct ButtonView: View {
                     }
                 )
                 .keyboardShortcut(.cancelAction)
+                .disabled(observedData.args.button2Disabled.present)
             }
         }
         // default button aka button 1

@@ -292,6 +292,7 @@ struct CommandLineArguments {
 
     // command line options that take no additional parameters
     var button1Disabled          = CLArgument(long: "button1disabled", isbool: true)
+    var button2Disabled          = CLArgument(long: "button2disabled", isbool: true)
     var button2Option            = CLArgument(long: "button2", short: "2", isbool: true)
     var infoButtonOption         = CLArgument(long: "infobutton", short: "3", isbool: true)
     var getVersion               = CLArgument(long: "version", short: "v")
