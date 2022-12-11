@@ -125,6 +125,9 @@ struct AppVariables {
     var button2Default                  = String("button-cancel".localized)
     var buttonInfoDefault               = String("button-more-info".localized)
     var buttonInfoActionDefault         = String("")
+    var button1DefaultAction            = KeyboardShortcut.defaultAction
+    
+    var helpButtonHoverText             = String("help-hover".localized)
 
     var windowIsMoveable                = Bool(false)
     var windowOnTop                     = Bool(false)
@@ -178,6 +181,8 @@ struct AppVariables {
     var overlayOffsetX                  = CGFloat(40)
     var overlayOffsetY                  = CGFloat(50)
     var overlayShadow                   = CGFloat(3)
+    
+    var showHelpMessage                 = Bool(false)
 
     var jsonOut                         = Bool(false)
 
@@ -237,6 +242,7 @@ struct CommandLineArguments {
     var messageAlignment         = CLArgument(long: "messagealignment")
     var messageAlignmentOld      = CLArgument(long: "alignment")
     var messageVerticalAlignment = CLArgument(long: "messageposition")
+    var helpMessage              = CLArgument(long: "helpmessage")
     var iconOption               = CLArgument(long: "icon", short: "i")
     var iconSize                 = CLArgument(long: "iconsize")
     var iconAccessabilityLabel   = CLArgument(long: "iconalttext")

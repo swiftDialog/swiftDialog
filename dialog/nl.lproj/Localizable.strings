@@ -24,3 +24,4 @@
 //default text
 "default-title" = "Een belangrijk bericht";
 "default-message" = "Dit bevat een belangrijk bericht\n\n Lees dit alsjeblieft";
+"help-hover" = "Klik voor aanvullende informatie";

@@ -23,3 +23,4 @@
 //default text
 "default-title" = "An Important Message";
 "default-message" = "This contains important message content\n\nPlease read";
+"help-hover" = "Click for additional information";

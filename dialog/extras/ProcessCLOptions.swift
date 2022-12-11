@@ -547,7 +547,7 @@ func processCLOptionValues() {
     appArguments.subTitleOption.present        = json[appArguments.subTitleOption.long].exists() || CLOptionPresent(OptionName: appArguments.subTitleOption)
 
     appArguments.messageOption.value           = json[appArguments.messageOption.long].string ?? CLOptionText(OptionName: appArguments.messageOption, DefaultValue: appvars.messageDefault)
-    appArguments.messageOption.present         = json[appArguments.titleOption.long].exists() || CLOptionPresent(OptionName: appArguments.messageOption)
+    appArguments.messageOption.present         = json[appArguments.messageOption.long].exists() || CLOptionPresent(OptionName: appArguments.messageOption)
     
     appArguments.messageAlignment.value        = json[appArguments.messageAlignment.long].string ?? CLOptionText(OptionName: appArguments.messageAlignment, DefaultValue: appvars.messageAlignmentTextRepresentation)
     appArguments.messageAlignment.present      = json[appArguments.messageAlignment.long].exists() || CLOptionPresent(OptionName: appArguments.messageAlignment)
@@ -567,6 +567,9 @@ func processCLOptionValues() {
     appArguments.messageVerticalAlignment.value = json[appArguments.messageVerticalAlignment.long].string ?? CLOptionText(OptionName: appArguments.messageVerticalAlignment)
     appArguments.messageVerticalAlignment.present = json[appArguments.messageVerticalAlignment.long].exists() || CLOptionPresent(OptionName: appArguments.messageVerticalAlignment)
 
+    appArguments.helpMessage.value           = json[appArguments.helpMessage.long].string ?? CLOptionText(OptionName: appArguments.helpMessage)
+    appArguments.helpMessage.present         = json[appArguments.helpMessage.long].exists() || CLOptionPresent(OptionName: appArguments.helpMessage)
+    
     // window location on screen
     if CLOptionPresent(OptionName: appArguments.position) {
         switch CLOptionText(OptionName: appArguments.position) {

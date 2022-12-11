@@ -61,7 +61,8 @@ struct ButtonView: View {
                 .frame(minWidth: 40, alignment: .center)
             }
         )
-        .keyboardShortcut(.defaultAction)
+        //.keyboardShortcut(.defaultAction)
+        .keyboardShortcut(observedData.appProperties.button1DefaultAction)
         .disabled(observedData.args.button1Disabled.present)
         .onReceive(timer) { _ in
             if observedData.args.timerBar.present && !observedData.args.hideTimerBar.present {
@@ -69,7 +70,55 @@ struct ButtonView: View {
             }
             //button1disabled = false
         }
+        HelpButton(observedDialogContent: observedData)
+    }
+}
 
+struct HelpButton: View {
+    @ObservedObject var observedData : DialogUpdatableContent
+    
+    init(observedDialogContent : DialogUpdatableContent) {
+        self.observedData = observedDialogContent
+    }
+    
+    var body: some View {
+        if observedData.args.helpMessage.present {
+            Button(action: {
+                observedData.appProperties.showHelpMessage.toggle()
+            }) {
+                ZStack {
+                    Circle()
+                        .foregroundColor(.white)
+                    Circle()
+                        .stroke(lineWidth: 2)
+                        .foregroundColor(.secondaryBackground)
+                    Text("?")
+                        .font(.system(size: 16))
+                        .foregroundColor(.accentColor)
+                }
+                .frame(width: 22, height: 22)
+            }
+            .buttonStyle(HelpButtonStyle())
+            .sheet(isPresented: $observedData.appProperties.showHelpMessage) {
+                HelpView(observedContent: observedData)
+            }
+        }
+    }
+    
+}
+
+struct HelpButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .focusable(false)
+            .help(String("help-hover".localized))
+            .onHover { inside in
+                if inside {
+                    NSCursor.pointingHand.push()
+                } else {
+                    NSCursor.pop()
+                }
+            }
     }
 }
 

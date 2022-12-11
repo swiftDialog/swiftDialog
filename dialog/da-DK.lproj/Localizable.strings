@@ -24,4 +24,4 @@
 //default text
 "default-title" = "En vigtig besked";
 "default-message" = "Dette er en vigtigt besked\n\nLæs venligst";
-
+"help-hover" = "Klik for yderligere information";

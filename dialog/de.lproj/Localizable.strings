@@ -24,3 +24,4 @@
 //default text
 "default-title" = "Eine wichtige Nachricht";
 "default-message" = "Diese ist eine wichtige Nachrichten\n\n Bitte lesen Sie diese";
+"help-hover" = "Klicken Sie für weitere Informationen";
