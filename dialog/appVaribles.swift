@@ -107,7 +107,7 @@ struct CLArgument {
 
 struct AppVariables {
     
-    var cliversion                      = "2.0.2"
+    var cliversion                      = "2.1.0"
     
     // message default strings
     var titleDefault                    = String("default-title".localized)
@@ -287,6 +287,7 @@ struct CommandLineArguments {
     var listItem                 = CLArgument(long: "listitem")
     var listStyle                = CLArgument(long: "liststyle")
     var infoText                 = CLArgument(long: "infotext")
+    var infoBox                  = CLArgument(long: "infobox")
     var quitKey                  = CLArgument(long: "quitkey")
     var webcontent               = CLArgument(long: "webcontent")
 

@@ -32,14 +32,16 @@ struct DialogView: View {
                 if (observedData.args.iconOption.present && !observedData.args.centreIcon.present && observedData.args.iconOption.value != "none") {
                     VStack {
                         IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
-                            .frame(width: iconDisplayWidth, alignment: .top)
-                            .border(appvars.debugBorderColour, width: 2)
-                            .padding(.top, observedData.appProperties.topPadding)
-                            .padding(.leading, observedData.appProperties.sidePadding+10)
-                            .padding(.trailing, observedData.appProperties.sidePadding+10)
                             .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
+                        InfoBoxView(observedData: observedData)
+                            .padding(.top, observedData.appProperties.topPadding)
                         Spacer()
                     }
+                    .frame(width: iconDisplayWidth, alignment: .top)
+                    .border(appvars.debugBorderColour, width: 2)
+                    .padding(.top, observedData.appProperties.topPadding)
+                    .padding(.leading, observedData.appProperties.sidePadding+10)
+                    .padding(.trailing, observedData.appProperties.sidePadding+10)
                 }
                 
                 MessageContent(observedDialogContent: observedData)

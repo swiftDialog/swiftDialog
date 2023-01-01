@@ -83,6 +83,8 @@
 		41A5A6A728E546A000BD3D5E /* WebContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A5A6A528E546A000BD3D5E /* WebContentView.swift */; };
 		41A5A6A928E66D0C00BD3D5E /* CKMediaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A5A6A828E66D0C00BD3D5E /* CKMediaView.swift */; };
 		41A5A6AA28E66D0C00BD3D5E /* CKMediaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A5A6A828E66D0C00BD3D5E /* CKMediaView.swift */; };
+		41A679D32962494B000BFFCE /* InfoBoxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A679D22962494B000BFFCE /* InfoBoxView.swift */; };
+		41A679D42962494B000BFFCE /* InfoBoxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A679D22962494B000BFFCE /* InfoBoxView.swift */; };
 		41AD75B626AA81760023EBD8 /* TextEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AD75B526AA81760023EBD8 /* TextEntryView.swift */; };
 		41D6FE8526DB11BA0083BE61 /* jamfHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D6FE8426DB11BA0083BE61 /* jamfHelper.swift */; };
 		41D81E5725F7929800D1F7E1 /* DialogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E5625F7929800D1F7E1 /* DialogView.swift */; };
@@ -195,6 +197,7 @@
 		41A44EB126F4C43A00FEE1AC /* helpText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = helpText.swift; sourceTree = "<group>"; };
 		41A5A6A528E546A000BD3D5E /* WebContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebContentView.swift; sourceTree = "<group>"; };
 		41A5A6A828E66D0C00BD3D5E /* CKMediaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKMediaView.swift; sourceTree = "<group>"; };
+		41A679D22962494B000BFFCE /* InfoBoxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoBoxView.swift; sourceTree = "<group>"; };
 		41AD75B526AA81760023EBD8 /* TextEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEntryView.swift; sourceTree = "<group>"; };
 		41D6FE8426DB11BA0083BE61 /* jamfHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = jamfHelper.swift; sourceTree = "<group>"; };
 		41D81E5625F7929800D1F7E1 /* DialogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogView.swift; sourceTree = "<group>"; };
@@ -361,6 +364,7 @@
 				4114E1EA27154B2200388274 /* VideoView.swift */,
 				41A44EAF26F2F25200FEE1AC /* watermarkView.swift */,
 				41D81E5625F7929800D1F7E1 /* DialogView.swift */,
+				41A679D22962494B000BFFCE /* InfoBoxView.swift */,
 				4153786B2604BF1A00AA0E76 /* MessageContentView.swift */,
 				4153785D2604B81300AA0E76 /* IconView.swift */,
 				4153784D2604B71800AA0E76 /* TitleView.swift */,
@@ -606,6 +610,7 @@
 				417BD471279CB658009AE34A /* CheckboxView.swift in Sources */,
 				4116923228939DEB00A88700 /* CKIconView.swift in Sources */,
 				4116923E2893A24300A88700 /* CKDataEntryView.swift in Sources */,
+				41A679D32962494B000BFFCE /* InfoBoxView.swift in Sources */,
 				4153784E2604B71800AA0E76 /* TitleView.swift in Sources */,
 				41832B6E2843143C0062AA1F /* ErrorView.swift in Sources */,
 				41A5A6A628E546A000BD3D5E /* WebContentView.swift in Sources */,
@@ -674,6 +679,7 @@
 				417BD472279CB658009AE34A /* CheckboxView.swift in Sources */,
 				4116923328939DEB00A88700 /* CKIconView.swift in Sources */,
 				4116923F2893A24300A88700 /* CKDataEntryView.swift in Sources */,
+				41A679D42962494B000BFFCE /* InfoBoxView.swift in Sources */,
 				41876683275D87C70023A6A1 /* ImageSlider.swift in Sources */,
 				41832B6F2843143C0062AA1F /* ErrorView.swift in Sources */,
 				41A5A6A728E546A000BD3D5E /* WebContentView.swift in Sources */,
@@ -880,7 +886,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 2.0.2;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -908,7 +914,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 2.0.2;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -1009,7 +1015,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/dialog/Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 2.0.2;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialogcli;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1027,7 +1033,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/dialog/Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 2.0.2;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialogcli;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

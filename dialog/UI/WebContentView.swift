@@ -7,6 +7,7 @@
 
 import SwiftUI
 import WebViewKit
+import WebKit
 
 struct WebContentView: View {
     
@@ -31,6 +32,7 @@ private extension WebContentView {
         
     var webView: some View {
         WebView(url: URL(string: url)) { webView in
+            webView.configuration.websiteDataStore = WKWebsiteDataStore.nonPersistent()
         }
         .clipShape(RoundedRectangle(cornerRadius: 5))
         .overlay(RoundedRectangle(cornerRadius: 5)
