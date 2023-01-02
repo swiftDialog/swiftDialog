@@ -31,10 +31,10 @@ struct WelcomeView: View {
                 .resizable()
                 .frame(width: 150, height: 150)
 
-            Text("Welcome to the swiftDialog builder")
+            Text("ck-welcome")
                 .font(.largeTitle)
             Divider()
-            Text("Select properties on the left to modify. swiftDialog will update to show the changes in realtime")
+            Text("ck-welcomeinfo")
                 .foregroundColor(.secondary)
         }
     }
@@ -170,38 +170,38 @@ struct ConstructionKitView: View {
 
         NavigationView {
             List {
-                Section(header: Text("Basic")) {
+                Section(header: Text("ck-basic".localized)) {
                     NavigationLink(destination: CKBasicsView(observedDialogContent: observedData)) {
-                        Text("Content")
+                        Text("ck-content".localized)
                     }
                     NavigationLink(destination: CKWindowProperties(observedDialogContent: observedData)) {
-                        Text("Window")
+                        Text("ck-window".localized)
                     }
-                    NavigationLink(destination: CKIconView(observedDialogContent: observedData)) {
-                        Text("Icon")
+                    NavigationLink(destination: CKSidebarView(observedDialogContent: observedData)) {
+                        Text("ck-sidebar".localized)
                     }
                     NavigationLink(destination: CKDataEntryView(observedDialogContent: observedData)) {
-                        Text("Data Entry")
+                        Text("ck-dataentry".localized)
                     }
                     NavigationLink(destination: CKButtonView(observedDialogContent: observedData)) {
-                        Text("Buttons")
+                        Text("ck-buttons".localized)
                     }
                 }
-                Section(header: Text("Advanced")) {
+                Section(header: Text("ck-advanced".localized)) {
                     NavigationLink(destination: CKListView(observedDialogContent: observedData)) {
-                        Text("List Items")
+                        Text("ck-listitems".localized)
                     }
                     NavigationLink(destination: CKImageView(observedDialogContent: observedData)) {
-                        Text("Images")
+                        Text("ck-images".localized)
                     }
                     NavigationLink(destination: CKMediaView(observedDialogContent: observedData)) {
-                        Text("Media")
+                        Text("ck-media".localized)
                     }
                 }
                 Spacer()
-                Section(header: Text("Output")) {
+                Section(header: Text("ck-output".localized)) {
                     NavigationLink(destination: JSONView(observedDialogContent: observedData) ) {
-                        Text("JSON Output")
+                        Text("ck-jsonoutput".localized)
                     }
                 }
             }
@@ -215,12 +215,12 @@ struct ConstructionKitView: View {
         ZStack {
             Spacer()
             HStack {
-                Button("Quit") {
+                Button("ck-quit".localized) {
                     quitDialog(exitCode: observedData.appProperties.exit0.code)
                 }
                 Spacer()
                 .disabled(false)
-                Button("Export Command") {}
+                Button("ck-exportcommand".localized) {}
                     .disabled(true)
             }
         }

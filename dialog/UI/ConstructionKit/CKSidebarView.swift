@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct CKIconView: View {
+struct CKSidebarView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
     
@@ -62,6 +62,25 @@ struct CKIconView: View {
                     TextField("", text: $observedData.args.overlayIconOption.value)
                 }
             }
+            VStack {
+                LabelView(label: "Infobox")
+                HStack {
+                    Toggle("Visible", isOn: $observedData.args.infoBox.present)
+                        .toggleStyle(.switch)
+                    TextEditor(text: $observedData.args.infoBox.value)
+                        .frame(height: 50)
+                        .background(Color("editorBackgroundColour"))
+                }
+            }
+            VStack {
+                LabelView(label: "Infotext")
+                HStack {
+                    Toggle("Visible", isOn: $observedData.args.infoText.present)
+                        .toggleStyle(.switch)
+                    TextField("Info Text", text: $observedData.args.infoText.value)
+                }
+            }
+            
         }
         .padding(20)
         Spacer()

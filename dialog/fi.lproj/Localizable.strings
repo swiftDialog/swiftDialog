@@ -1,0 +1,109 @@
+/* 
+  Localizable.strings
+  dialog
+
+  Created by Bart Reardon on 29/5/2022.
+  
+*/
+
+// error sheet
+"invalid-input" = "Yksi tai useampi syöttökenttä on virheellinen";
+"is-required" = "on pakollinen";
+"no-pattern" = "ei vastaa vaadittua muotoa";
+
+// required fields text
+"required-note" = "* Pakolliset kentät";
+
+//buttons
+"button-cancel" = "Peruuta";
+"button-more-info" = "Lisätietoja";
+"button-ok" = "OK";
+"button-select" = "Valitse";
+
+//default text
+"default-title" = "Tärkeä viesti";
+"default-message" = "Tämä sisältää tärkeän viestin sisältöä\n\nLue";
+"help-hover" = "Napsauta saadaksesi lisätietoja";
+
+//constructor kit labels
+"ck-welcome"            = "Tervetuloa swiftDialog builderiin";
+"ck-welcomeinfo"        = "Valitse muokattavat ominaisuudet vasemmalta. swiftDialog päivittyy ja näyttää muutokset reaaliajassa";
+"ck-basic"              = "Perus";
+"ck-content"            = "Sisältö";
+"ck-window"             = "Ikkuna";
+"ck-sidebar"            = "Sivupalkki";
+"ck-dataentry"          = "Tiedon syöttö";
+"ck-buttons"            = "Painikkeet";
+"ck-advanced"           = "Pitkälle kehittynyt";
+"ck-listitems"          = "Luettelon kohteet";
+"ck-images"             = "Kuvat";
+"ck-media"              = "Media";
+"ck-output"             = "lähtö";
+"ck-jsonoutput"         = "JSON-lähtö";
+"ck-quit"               = "Lopettaa";
+"ck-exportcommand"      = "Vientikomento";
+"ck-title"              = "Otsikko";
+"ck-colour"             = "Väri";
+"ck-reset"              = "Palauta";
+"ck-fontsize"           = "Fonttikoko: ";
+"ck-value"              = "arvo:";
+"ck-message"            = "Viesti";
+"ck-textalignmnet"      = "Tekstin tasaus";
+"ck-verticalposition"   = "Pysty asento";
+"ck-windowheight"       = "Ikkunan korkeus";
+"ck-heightvalue"        = "Korkeusarvo:";
+"ck-windowwidth"        = "Ikkunan leveys";
+"ck-widthvalue"         = "Leveyden arvo:";
+"ck-windowproperties"   = "Ikkunan ominaisuudet";
+"ck-presetsizes"        = "Esiasetetut koot";
+"ck-small"              = "Pieni";
+"ck-big"                = "Iso";
+"ck-screenblur"         = "Näytön taustan hämärtyminen";
+"ck-movable"            = "Liikkuva";
+"ck-forceontop"         = "Voima päällä";
+"ck-progressbar"        = "Edistymispalkki";
+"ck-progressvalue"      = "Edistyksen arvo:";
+"ck-progresstext"       = "Edistysteksti:";
+"ck-bannerimage"        = "Bannerikuva";
+"ck-select"             = "Valitse";
+"ck-watermark"          = "Vesileima";
+"ck-fill"               = "Täyttää";
+"ck-alpha"              = "Alfa";
+"ck-scale"              = "Skaala";
+"ck-position"           = "Sijainti";
+"ck-icon"               = "Ikoni";
+"ck-visible"            = "näkyvä";
+"ck-centred"            = "keskitetty";
+"ck-select"             = "Valitse";
+"ck-iconsize"           = "Ikonin koko";
+"ck-sizevalue"          = "Koon arvo:";
+"ck-overlay"            = "Peittokuva";
+"ck-infobox"            = "Infobox";
+"ck-infotext"           = "Infoteksti";
+"ck-infotextlabel"      = "Tietoksti";
+"ck-button1"            = "Button1";
+"ck-button2"            = "Button2";
+"ck-infobuttonlabel"    = "Info-painike";
+"ck-quitoninfo"         = "Lopeta tiedosta";
+"ck-label"              = "Etiketti:";
+"ck-infobuttonaction"   = "Info-painikkeen toiminto:";
+"ck-autoplay"           = "Automaattinen toisto";
+"ck-autoplayseconds"    = "Autoplay Seconds";
+"ck-path"               = "Polku";
+"ck-caption"            = "Tekstitys";
+"ck-statustext"         = "Tilateksti";
+"ck-status"             = "Tila";
+"ck-formatjson"         = "Alusta tuloste JSON-muodossa";
+"ck-textfields"         = "Tekstikentät";
+"ck-show"               = "Näytä";
+"ck-required"           = "Edellytetään";
+"ck-secure"             = "Turvallinen";
+"ck-prompt"             = "Kehote";
+"ck-regex"              = "Regex";
+"ck-regexerror"         = "Regex-virhe";
+"ck-select"             = "Valitse";
+"ck-checkbox"           = "Valintaruutu";
+"ck-video"              = "Video";
+"ck-filename"           = "Tiedoston nimi";
+"ck-web"                = "Web";
+"ck-url"                = "URL";

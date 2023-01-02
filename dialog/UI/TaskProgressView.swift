@@ -14,9 +14,9 @@ struct TaskProgressView: View {
     var body: some View {
         if observedData.args.progressBar.present {
             VStack {
-                ProgressView(value: observedData.progressValue, total: observedData.progressTotal)
+                ProgressView(value: observedData.progressValue, total: Double(observedData.args.progressBar.value) ?? 100)
                     .progressViewStyle(.linear)
-                Text(observedData.statusText)
+                Text(observedData.args.progressText.value)
             }
             .padding(.leading,observedData.appProperties.sidePadding)
             .padding(.trailing,observedData.appProperties.sidePadding)

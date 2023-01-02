@@ -16,8 +16,8 @@
 		4116922D28939B4500A88700 /* CKBasicsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116922B28939B4500A88700 /* CKBasicsView.swift */; };
 		4116922F28939C2A00A88700 /* CKWindowProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116922E28939C2A00A88700 /* CKWindowProperties.swift */; };
 		4116923028939C2A00A88700 /* CKWindowProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116922E28939C2A00A88700 /* CKWindowProperties.swift */; };
-		4116923228939DEB00A88700 /* CKIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116923128939DEB00A88700 /* CKIconView.swift */; };
-		4116923328939DEB00A88700 /* CKIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116923128939DEB00A88700 /* CKIconView.swift */; };
+		4116923228939DEB00A88700 /* CKSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116923128939DEB00A88700 /* CKSidebarView.swift */; };
+		4116923328939DEB00A88700 /* CKSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116923128939DEB00A88700 /* CKSidebarView.swift */; };
 		4116923528939E4D00A88700 /* CKButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116923428939E4D00A88700 /* CKButtonView.swift */; };
 		4116923628939E4D00A88700 /* CKButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116923428939E4D00A88700 /* CKButtonView.swift */; };
 		411692382893A21500A88700 /* CKImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411692372893A21500A88700 /* CKImageView.swift */; };
@@ -148,7 +148,7 @@
 		4114E1EA27154B2200388274 /* VideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoView.swift; sourceTree = "<group>"; };
 		4116922B28939B4500A88700 /* CKBasicsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKBasicsView.swift; sourceTree = "<group>"; };
 		4116922E28939C2A00A88700 /* CKWindowProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKWindowProperties.swift; sourceTree = "<group>"; };
-		4116923128939DEB00A88700 /* CKIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKIconView.swift; sourceTree = "<group>"; };
+		4116923128939DEB00A88700 /* CKSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKSidebarView.swift; sourceTree = "<group>"; };
 		4116923428939E4D00A88700 /* CKButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKButtonView.swift; sourceTree = "<group>"; };
 		411692372893A21500A88700 /* CKImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKImageView.swift; sourceTree = "<group>"; };
 		4116923A2893A22300A88700 /* CKListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKListView.swift; sourceTree = "<group>"; };
@@ -198,6 +198,8 @@
 		41A5A6A528E546A000BD3D5E /* WebContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebContentView.swift; sourceTree = "<group>"; };
 		41A5A6A828E66D0C00BD3D5E /* CKMediaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKMediaView.swift; sourceTree = "<group>"; };
 		41A679D22962494B000BFFCE /* InfoBoxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoBoxView.swift; sourceTree = "<group>"; };
+		41A679D5296275BB000BFFCE /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
+		41A679D6296275CB000BFFCE /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fi; path = fi.lproj/Localizable.strings; sourceTree = "<group>"; };
 		41AD75B526AA81760023EBD8 /* TextEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEntryView.swift; sourceTree = "<group>"; };
 		41D6FE8426DB11BA0083BE61 /* jamfHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = jamfHelper.swift; sourceTree = "<group>"; };
 		41D81E5625F7929800D1F7E1 /* DialogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogView.swift; sourceTree = "<group>"; };
@@ -263,7 +265,7 @@
 				41512CC1286C77F200F22B86 /* ConstructionKitView.swift */,
 				4116922B28939B4500A88700 /* CKBasicsView.swift */,
 				4116922E28939C2A00A88700 /* CKWindowProperties.swift */,
-				4116923128939DEB00A88700 /* CKIconView.swift */,
+				4116923128939DEB00A88700 /* CKSidebarView.swift */,
 				4116923428939E4D00A88700 /* CKButtonView.swift */,
 				411692372893A21500A88700 /* CKImageView.swift */,
 				4116923A2893A22300A88700 /* CKListView.swift */,
@@ -517,6 +519,8 @@
 				de,
 				nl,
 				"da-DK",
+				es,
+				fi,
 			);
 			mainGroup = 4154C2D125F76BDB00A3D373;
 			packageReferences = (
@@ -608,7 +612,7 @@
 				418A7B592759949B00E4D6F1 /* helpText.swift in Sources */,
 				4116923528939E4D00A88700 /* CKButtonView.swift in Sources */,
 				417BD471279CB658009AE34A /* CheckboxView.swift in Sources */,
-				4116923228939DEB00A88700 /* CKIconView.swift in Sources */,
+				4116923228939DEB00A88700 /* CKSidebarView.swift in Sources */,
 				4116923E2893A24300A88700 /* CKDataEntryView.swift in Sources */,
 				41A679D32962494B000BFFCE /* InfoBoxView.swift in Sources */,
 				4153784E2604B71800AA0E76 /* TitleView.swift in Sources */,
@@ -677,7 +681,7 @@
 				41FB648D2680855300A54C3E /* ButtonView.swift in Sources */,
 				4116923628939E4D00A88700 /* CKButtonView.swift in Sources */,
 				417BD472279CB658009AE34A /* CheckboxView.swift in Sources */,
-				4116923328939DEB00A88700 /* CKIconView.swift in Sources */,
+				4116923328939DEB00A88700 /* CKSidebarView.swift in Sources */,
 				4116923F2893A24300A88700 /* CKDataEntryView.swift in Sources */,
 				41A679D42962494B000BFFCE /* InfoBoxView.swift in Sources */,
 				41876683275D87C70023A6A1 /* ImageSlider.swift in Sources */,
@@ -739,6 +743,8 @@
 				41832B782843968F0062AA1F /* de */,
 				41832B792843A3340062AA1F /* nl */,
 				41832B7A284436E50062AA1F /* da-DK */,
+				41A679D5296275BB000BFFCE /* es */,
+				41A679D6296275CB000BFFCE /* fi */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";

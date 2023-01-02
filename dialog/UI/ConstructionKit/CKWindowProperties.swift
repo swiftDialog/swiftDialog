@@ -21,24 +21,24 @@ struct CKWindowProperties: View {
     var body: some View {
         
         VStack {
-            LabelView(label: "Window Height")
+            LabelView(label: "ck-windowheight".localized)
             HStack {
-                TextField("Height value:", value: $observedData.windowHeight, formatter: formatter )
+                TextField("ck-heightvalue", value: $observedData.windowHeight, formatter: formatter )
                     .frame(width: 50)
                 Slider(value: $observedData.windowHeight, in: 200...2000)
                     .frame(width: 200)
                 Spacer()
             }
-            LabelView(label: "Window Width")
+            LabelView(label: "ck-windowwidth".localized)
             HStack {
-                TextField("Width value:", value: $observedData.windowWidth, formatter: formatter)
+                TextField("ck-widthvalue", value: $observedData.windowWidth, formatter: formatter)
                     .frame(width: 50)
                 Slider(value: $observedData.windowWidth, in: 200...2000)
                     .frame(width: 200)
                 Spacer()
             }
             Group {
-                LabelView(label: "Window Properties")
+                LabelView(label: "ck-windowproperties".localized)
                 //HStack {
                 //    Text("Mini view")
                 //        .frame(width: 100, alignment: .leading)
@@ -47,9 +47,9 @@ struct CKWindowProperties: View {
                 //    Spacer()
                 //}
                 HStack {
-                    Text("Preset Sizes")
+                    Text("ck-presetsizes".localized)
                         .frame(width: 100, alignment: .leading)
-                    Toggle("Small", isOn: $observedData.args.smallWindow.present)
+                    Toggle("ck-small", isOn: $observedData.args.smallWindow.present)
                         .toggleStyle(.switch)
                         .onChange(of: observedData.args.smallWindow.present, perform: { _ in
                             observedData.appProperties.scaleFactor = 0.75
@@ -58,7 +58,7 @@ struct CKWindowProperties: View {
                                 observedData.args.bigWindow.present = false
                             }
                         })
-                    Toggle("Big", isOn: $observedData.args.bigWindow.present)
+                    Toggle("ck-big".localized, isOn: $observedData.args.bigWindow.present)
                         .toggleStyle(.switch)
                         .onChange(of: observedData.args.bigWindow.present, perform: { _ in
                             observedData.appProperties.scaleFactor = 1.25
@@ -69,21 +69,21 @@ struct CKWindowProperties: View {
                     Spacer()
                 }
                 HStack {
-                    Text("Screen Background Blur")
+                    Text("ck-screenblur".localized)
                         .frame(width: 100, alignment: .leading)
                     Toggle("", isOn: $observedData.args.blurScreen.present)
                         .toggleStyle(.switch)
                     Spacer()
                 }
                 HStack {
-                    Text("Movable")
+                    Text("ck-movable".localized)
                         .frame(width: 100, alignment: .leading)
                     Toggle("", isOn: $observedData.args.movableWindow.present)
                         .toggleStyle(.switch)
                     Spacer()
                 }
                 HStack {
-                    Text("Force on Top")
+                    Text("ck-forceontop".localized)
                         .frame(width: 100, alignment: .leading)
                     Toggle("", isOn: $observedData.args.forceOnTop.present)
                         .toggleStyle(.switch)
@@ -96,10 +96,10 @@ struct CKWindowProperties: View {
                         .toggleStyle(.switch)
                     TextField("Progress value:", value: $observedData.args.progressBar.value, formatter: formatter)
                         .frame(width: 50)
-                    TextField("Progress Text:", value: $observedData.args.progressText.value, formatter: formatter)
+                    TextField("Progress Text:", text: $observedData.args.progressText.value)
                         .frame(width: 150)
                         .onChange(of: observedData.args.progressText.value, perform: { _ in
-                            observedData.args.progressText.present = true                            
+                            observedData.args.progressText.present = true
                         })
                     Spacer()
                 }
