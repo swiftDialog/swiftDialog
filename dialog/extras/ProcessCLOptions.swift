@@ -115,7 +115,8 @@ func processCLOptions(json : JSON = getJSON()) {
                         regexError: String(json[appArguments.textField.long][i]["regexerror"].stringValue),
                         required: Bool(json[appArguments.textField.long][i]["required"].boolValue),
                         secure: Bool(json[appArguments.textField.long][i]["secure"].boolValue),
-                        title: String(json[appArguments.textField.long][i]["title"].stringValue))
+                        title: String(json[appArguments.textField.long][i]["title"].stringValue),
+                        value: String(json[appArguments.textField.long][i]["value"].stringValue))
                     )
                 }
             }
@@ -132,6 +133,7 @@ func processCLOptions(json : JSON = getJSON()) {
                 var fieldSecure : Bool = false
                 var fieldSelectType : String = ""
                 var fieldTitle : String = ""
+                var fieldValue : String = ""
                 if items.count > 0 {
                     fieldTitle = items[0]
                     if items.count > 1 {
@@ -159,21 +161,25 @@ func processCLOptions(json : JSON = getJSON()) {
                                 fieldRequire = true
                             case "secure":
                                 fieldSecure = true
+                            case "value":
+                                fieldValue = items[index+1]
                             default: ()
                             }
                         }
                     }
                 }
-                appvars.textFields.append(TextFieldState(editor: fieldEditor,
-                                                 fileSelect: fieldFileSelect,
-                                                 fileType: fieldSelectType,
-                                                 passwordFill: fieldPasswordFill,
-                                                 prompt: fieldPrompt,
-                                                 regex: fieldRegex,
-                                                 regexError: fieldRegexError,
-                                                 required: fieldRequire,
-                                                 secure: fieldSecure,
-                                                 title: fieldTitle))
+                appvars.textFields.append(TextFieldState(
+                            editor: fieldEditor,
+                            fileSelect: fieldFileSelect,
+                            fileType: fieldSelectType,
+                            passwordFill: fieldPasswordFill,
+                            prompt: fieldPrompt,
+                            regex: fieldRegex,
+                            regexError: fieldRegexError,
+                            required: fieldRequire,
+                            secure: fieldSecure,
+                            title: fieldTitle,
+                            value: fieldValue))
             }
         }
         logger(logMessage: "textOptionsArray : \(appvars.textFields)")
