@@ -108,3 +108,5 @@
 "ck-filename"           = "Filnavn";
 "ck-web"                = "Web";
 "ck-url"                = "URL";
+"ck-disabled"           = "handicappet";
+"ck-enabled"            = "Aktiveret";

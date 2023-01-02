@@ -86,6 +86,15 @@ struct JSONView: View {
                 json[appArguments.mainImage.long][i].dictionaryObject = observedDialogContent.imageArray[i].dictionary
             }
         }
+        
+        // message font stuff
+        if observedDialogContent.appProperties.messageFontColour != .primary {
+            json[appArguments.messageFont.long].dictionaryObject = ["colour":colourToString(color: observedDialogContent.appProperties.messageFontColour)]
+        }
+        
+        if observedDialogContent.appProperties.titleFontColour != .primary {
+            json[appArguments.titleFont.long].dictionaryObject = ["colour":colourToString(color: observedDialogContent.appProperties.titleFontColour)]
+        }
 
         // print("Generated JSON")
         // convert the JSON to a raw String

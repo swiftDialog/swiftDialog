@@ -21,13 +21,13 @@ struct CKMediaView: View {
             VStack {
                 LabelView(label: "Video")
                 HStack {
-                    Toggle("Enable", isOn: $observedData.args.video.present)
+                    Toggle("ck-enable".localized, isOn: $observedData.args.video.present)
                         .toggleStyle(.switch)
-                    Toggle("Autoplay", isOn: $observedData.args.autoPlay.present)
+                    Toggle("ck-autoplay".localized, isOn: $observedData.args.autoPlay.present)
                         .toggleStyle(.switch)
                     Spacer()
                 }
-                Button("Select")
+                Button("ck-select".localized)
                       {
                         let panel = NSOpenPanel()
                         panel.allowsMultipleSelection = false
@@ -37,18 +37,18 @@ struct CKMediaView: View {
                             observedData.args.video.value = panel.url?.path ?? "<none>"
                         }
                       }
-                TextField("Filename", text: $observedData.args.video.value)
-                TextField("Caption", text: $observedData.args.videoCaption.value)
+                TextField("ck-filename".localized, text: $observedData.args.video.value)
+                TextField("ck-caption".localized, text: $observedData.args.videoCaption.value)
                 
             }
             VStack {
-                LabelView(label: "Web")
+                LabelView(label: "ck-web".localized)
                 HStack {
-                    Toggle("Disabled", isOn: $observedData.args.webcontent.present)
+                    Toggle("ck-disabled".localized, isOn: $observedData.args.webcontent.present)
                         .toggleStyle(.switch)
                     Spacer()
                 }
-                TextField("URL", text: $observedData.args.webcontent.value)
+                TextField("ck-url".localized, text: $observedData.args.webcontent.value)
             }
         }
     }

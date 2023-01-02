@@ -107,3 +107,5 @@
 "ck-filename"           = "Filename";
 "ck-web"                = "Web";
 "ck-url"                = "URL";
+"ck-disabled"           = "Disabled";
+"ck-enabled"            = "Enabled";

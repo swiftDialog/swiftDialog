@@ -107,4 +107,5 @@
 "ck-filename"           = "Nom de fichier";
 "ck-web"                = "La toile";
 "ck-url"                = "URL";
-
+"ck-disabled"           = "Désactivée";
+"ck-enabled"            = "Autorisé";

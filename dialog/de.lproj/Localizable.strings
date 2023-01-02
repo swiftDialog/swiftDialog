@@ -108,3 +108,5 @@
 "ck-filename"           = "Dateiname";
 "ck-web"                = "Netz";
 "ck-url"                = "URL";
+"ck-disabled"           = "Deaktiviert";
+"ck-enabled"            = "Ermöglicht";

@@ -18,13 +18,13 @@ struct CKSidebarView: View {
     var body: some View {
         VStack { // icon and icon overlay
             VStack {
-                LabelView(label: "Icon")
+                LabelView(label: "ck-icon".localized)
                 HStack {
-                    Toggle("Visible", isOn: $observedData.args.iconOption.present)
+                    Toggle("ck-visible".localized, isOn: $observedData.args.iconOption.present)
                         .toggleStyle(.switch)
-                    Toggle("Centred", isOn: $observedData.args.centreIcon.present)
+                    Toggle("ck-centred".localized, isOn: $observedData.args.centreIcon.present)
                         .toggleStyle(.switch)
-                    Button("Select")
+                    Button("ck-select".localized)
                           {
                             let panel = NSOpenPanel()
                             panel.allowsMultipleSelection = false
@@ -36,7 +36,7 @@ struct CKSidebarView: View {
                           }
                     TextField("", text: $observedData.args.iconOption.value)
                 }
-                LabelView(label: "Icon Size")
+                LabelView(label: "ck-iconsize".localized)
                 HStack {
                     Slider(value: $observedData.iconSize, in: 0...400)
                     //Text("Current value: \(observedDialogContent.iconSize, specifier: "%.0f")")
@@ -45,11 +45,11 @@ struct CKSidebarView: View {
                 }
             }
             VStack {
-                LabelView(label: "Overlay")
+                LabelView(label: "ck-overlay".localized)
                 HStack {
-                    Toggle("Visible", isOn: $observedData.args.overlayIconOption.present)
+                    Toggle("ck-visible".localized, isOn: $observedData.args.overlayIconOption.present)
                         .toggleStyle(.switch)
-                    Button("Select")
+                    Button("ck-select".localized)
                           {
                             let panel = NSOpenPanel()
                             panel.allowsMultipleSelection = false
@@ -63,21 +63,21 @@ struct CKSidebarView: View {
                 }
             }
             VStack {
-                LabelView(label: "Infobox")
+                LabelView(label: "ck-infobox".localized)
                 HStack {
-                    Toggle("Visible", isOn: $observedData.args.infoBox.present)
+                    Toggle("ck-visible".localized, isOn: $observedData.args.infoBox.present)
                         .toggleStyle(.switch)
                     TextEditor(text: $observedData.args.infoBox.value)
-                        .frame(height: 50)
+                        .frame(height: 100)
                         .background(Color("editorBackgroundColour"))
                 }
             }
             VStack {
-                LabelView(label: "Infotext")
+                LabelView(label: "ck-infotext".localized)
                 HStack {
-                    Toggle("Visible", isOn: $observedData.args.infoText.present)
+                    Toggle("ck-visible".localized, isOn: $observedData.args.infoText.present)
                         .toggleStyle(.switch)
-                    TextField("Info Text", text: $observedData.args.infoText.value)
+                    TextField("ck-infotext".localized, text: $observedData.args.infoText.value)
                 }
             }
             

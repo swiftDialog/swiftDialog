@@ -90,13 +90,13 @@ struct CKWindowProperties: View {
                     Spacer()
                 }
                 HStack {
-                    Text("Progress Bar")
+                    Text("ck-progressbar".localized)
                         .frame(width: 100, alignment: .leading)
                     Toggle("", isOn: $observedData.args.progressBar.present)
                         .toggleStyle(.switch)
-                    TextField("Progress value:", value: $observedData.args.progressBar.value, formatter: formatter)
+                    TextField("ck-progressvalue".localized, value: $observedData.args.progressBar.value, formatter: formatter)
                         .frame(width: 50)
-                    TextField("Progress Text:", text: $observedData.args.progressText.value)
+                    TextField("ck-progresstext".localized, text: $observedData.args.progressText.value)
                         .frame(width: 150)
                         .onChange(of: observedData.args.progressText.value, perform: { _ in
                             observedData.args.progressText.present = true
@@ -105,7 +105,7 @@ struct CKWindowProperties: View {
                 }
             }
             HStack {
-                Text("Banner Image")
+                Text("ck-bannerimage".localized)
                     .frame(width: 100, alignment: .leading)
                 Toggle("", isOn: $observedData.args.bannerImage.present)
                     .toggleStyle(.switch)
@@ -113,7 +113,7 @@ struct CKWindowProperties: View {
                     .onChange(of: observedData.args.bannerImage.present, perform: { _ in
                         observedData.args.iconOption.present.toggle()
                     })
-                Button("Select")
+                Button("ck-select".localized)
                       {
                         let panel = NSOpenPanel()
                         panel.allowsMultipleSelection = false
@@ -126,12 +126,12 @@ struct CKWindowProperties: View {
                 TextField("", text: $observedData.args.bannerImage.value)
             }
             HStack {
-                Text("Watermark")
+                Text("ck-watermark".localized)
                     .frame(width: 100, alignment: .leading)
                 Toggle("", isOn: $observedData.args.watermarkImage.present)
                     .toggleStyle(.switch)
                     .disabled(observedData.args.watermarkImage.value == "")
-                Button("Select")
+                Button("ck-select".localized)
                 {
                     let panel = NSOpenPanel()
                     panel.allowsMultipleSelection = false
@@ -144,7 +144,7 @@ struct CKWindowProperties: View {
                 TextField("", text: $observedData.args.watermarkImage.value)
             }
             VStack {
-                Picker("Fill", selection: $observedData.args.watermarkFill.value)
+                Picker("ck-fill".localized, selection: $observedData.args.watermarkFill.value)
                 {
                     Text("").tag("")
                     ForEach(fillScaleArray, id: \.self) {
@@ -152,20 +152,20 @@ struct CKWindowProperties: View {
                     }
                 }
                 HStack {
-                    Text("Alpha")
+                    Text("ck-alpha".localized)
                     Slider(value: $bgAlpha, in: 0.0...1.0, step: 0.1)
                         .onChange(of: bgAlpha, perform: { _ in
                             observedData.args.watermarkAlpha.value = String(format: "%.1f", bgAlpha)
                         })
                 }
-                Picker("Scale", selection: $observedData.args.watermarkScale.value)
+                Picker("ck-scale".localized, selection: $observedData.args.watermarkScale.value)
                 {
                     Text("").tag("")
                     ForEach(fillScaleArray, id: \.self) {
                         Text($0)
                     }
                 }
-                Picker("Position", selection: $observedData.args.watermarkPosition.value)
+                Picker("ck-positoin".localized, selection: $observedData.args.watermarkPosition.value)
                 {
                     Text("").tag("")
                     ForEach(positionArray, id: \.self) {

@@ -107,3 +107,5 @@
 "ck-filename"           = "Tiedoston nimi";
 "ck-web"                = "Web";
 "ck-url"                = "URL";
+"ck-disabled"           = "Liikuntarajoitteinen";
+"ck-enabled"            = "Käytössä";

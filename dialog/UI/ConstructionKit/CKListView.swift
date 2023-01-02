@@ -30,7 +30,7 @@ struct CKListView: View {
                 }, label: {
                     Image(systemName: "plus")
                 })
-                Toggle("Show", isOn: $observedData.args.listItem.present)
+                Toggle("ck-show".localized, isOn: $observedData.args.listItem.present)
                     .toggleStyle(.switch)
                 
                 //Button("Clear All") {
@@ -51,9 +51,9 @@ struct CKListView: View {
                         Image(systemName: "trash")
                     })
                     .disabled(true) // MARK: disabled until I can work out how to delete from the array without causing a crash
-                    TextField("Title", text: $observedData.listItemsArray[item].title)
-                    TextField("Status Text", text: $observedData.listItemsArray[item].statusText)
-                    Picker("Status", selection: $observedData.listItemsArray[item].statusIcon)
+                    TextField("ck-title".localized, text: $observedData.listItemsArray[item].title)
+                    TextField("ck-statustext".localized, text: $observedData.listItemsArray[item].statusText)
+                    Picker("ck-status".localized, selection: $observedData.listItemsArray[item].statusIcon)
                     {
                         Text("").tag("")
                         ForEach(statusTypeArray, id: \.self) {

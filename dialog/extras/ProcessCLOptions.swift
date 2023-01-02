@@ -391,14 +391,21 @@ func processCLOptions(json : JSON = getJSON()) {
         if appArguments.titleFont.value == "" {
             logger(logMessage: "titleFont.object : \(json[appArguments.titleFont.long].object)")
 
-            appvars.titleFontSize = string2float(string: json[appArguments.titleFont.long]["size"].stringValue, defaultValue: appvars.titleFontSize)
-            appvars.titleFontWeight = textToFontWeight(json[appArguments.titleFont.long]["weight"].stringValue)
-            if json[appArguments.messageFont.long]["colour"].exists() {
+            if json[appArguments.titleFont.long]["size"].exists() {
+                appvars.titleFontSize = string2float(string: json[appArguments.titleFont.long]["size"].stringValue, defaultValue: appvars.titleFontSize)
+            }
+            if json[appArguments.titleFont.long]["weight"].exists() {
+                appvars.titleFontWeight = textToFontWeight(json[appArguments.titleFont.long]["weight"].stringValue)
+            }
+            if json[appArguments.titleFont.long]["colour"].exists() {
                 appvars.titleFontColour = stringToColour(json[appArguments.titleFont.long]["colour"].stringValue)
-            } else {
+                print("found a colour of \(json[appArguments.titleFont.long]["colour"].stringValue)")
+            } else if json[appArguments.titleFont.long]["color"].exists() {
                 appvars.titleFontColour = stringToColour(json[appArguments.titleFont.long]["color"].stringValue)
             }
-            appvars.titleFontName = json[appArguments.titleFont.long]["name"].stringValue
+            if json[appArguments.titleFont.long]["name"].exists() {
+                appvars.titleFontName = json[appArguments.titleFont.long]["name"].stringValue
+            }
         } else {
         
             logger(logMessage: "titleFont.value : \(appArguments.titleFont.value)")
@@ -439,15 +446,20 @@ func processCLOptions(json : JSON = getJSON()) {
         
         if appArguments.messageFont.value == "" {
             logger(logMessage: "messageFont.object : \(json[appArguments.messageFont.long].object)")
-            
-            appvars.messageFontSize = string2float(string: json[appArguments.messageFont.long]["size"].stringValue, defaultValue: appvars.messageFontSize)
-            appvars.messageFontWeight = textToFontWeight(json[appArguments.messageFont.long]["weight"].stringValue)
+            if json[appArguments.messageFont.long]["size"].exists() {
+                appvars.messageFontSize = string2float(string: json[appArguments.messageFont.long]["size"].stringValue, defaultValue: appvars.messageFontSize)
+            }
+            if json[appArguments.messageFont.long]["weight"].exists(){
+                appvars.messageFontWeight = textToFontWeight(json[appArguments.messageFont.long]["weight"].stringValue)
+            }
             if json[appArguments.messageFont.long]["colour"].exists() {
                 appvars.messageFontColour = stringToColour(json[appArguments.messageFont.long]["colour"].stringValue)
-            } else {
+            } else if json[appArguments.messageFont.long]["color"].exists() {
                 appvars.messageFontColour = stringToColour(json[appArguments.messageFont.long]["color"].stringValue)
             }
-            appvars.messageFontName = json[appArguments.messageFont.long]["name"].stringValue
+            if json[appArguments.messageFont.long]["name"].exists() {
+                appvars.messageFontName = json[appArguments.messageFont.long]["name"].stringValue
+            }
         } else {
         
             logger(logMessage: "messageFont.value : \(appArguments.messageFont.value)")
@@ -739,13 +751,13 @@ func processCLOptionValues() {
     
     appArguments.infoText.value                = json[appArguments.infoText.long].string ?? CLOptionText(OptionName: appArguments.infoText, DefaultValue: "swiftDialog \(getVersionString())")
     appArguments.infoText.present              = json[appArguments.infoText.long].exists() || CLOptionPresent(OptionName: appArguments.infoText)
-    
-    appArguments.infoBox.value                = json[appArguments.infoBox.long].string ?? CLOptionText(OptionName: appArguments.infoBox)
-    appArguments.infoBox.present              = json[appArguments.infoBox.long].exists() || CLOptionPresent(OptionName: appArguments.infoBox)
-    
+        
     if (getVersionString().starts(with: "Alpha") || getVersionString().starts(with: "Beta")) && !appArguments.constructionKit.present {
         appArguments.infoText.present = true
     }
+    
+    appArguments.infoBox.value                = json[appArguments.infoBox.long].string ?? CLOptionText(OptionName: appArguments.infoBox)
+    appArguments.infoBox.present              = json[appArguments.infoBox.long].exists() || CLOptionPresent(OptionName: appArguments.infoBox)
     
     appArguments.quitKey.value                 = json[appArguments.quitKey.long].string ?? CLOptionText(OptionName: appArguments.quitKey, DefaultValue: appvars.quitKeyCharacter)
     

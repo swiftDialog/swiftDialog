@@ -108,3 +108,5 @@
 "ck-filename"           = "Bestandsnaam";
 "ck-web"                = "Web";
 "ck-url"                = "URL";
+"ck-disabled"           = "Gehandicapt";
+"ck-enabled"            = "Ingeschakeld";

@@ -22,7 +22,7 @@ struct CKDataEntryView: View {
                 .toggleStyle(.switch)
                 Spacer()
             }
-            LabelView(label: "Textfields")
+            LabelView(label: "ck-textfields".localized)
             HStack {
                 Button(action: {
                     observedData.appProperties.textFields.append(TextFieldState(title: ""))
@@ -31,7 +31,7 @@ struct CKDataEntryView: View {
                 }, label: {
                     Image(systemName: "plus")
                 })
-                Toggle("Show", isOn: $observedData.args.textField.present)
+                Toggle("ck-show".localized, isOn: $observedData.args.textField.present)
                     .toggleStyle(.switch)
                 
                 //Button("Clear All") {
@@ -50,31 +50,31 @@ struct CKDataEntryView: View {
                         Image(systemName: "trash")
                     })
                     .disabled(true) // MARK: disabled until I can work out how to delete from the array without causing a crash
-                    Toggle("Required", isOn: $observedData.appProperties.textFields[item].required)
+                    Toggle("ck-required".localized, isOn: $observedData.appProperties.textFields[item].required)
                         .onChange(of: observedData.appProperties.textFields[item].required, perform: { _ in
                             observedData.requiredFieldsPresent.toggle()
                         })
                         .toggleStyle(.switch)
-                    Toggle("Secure", isOn: $observedData.appProperties.textFields[item].secure)
+                    Toggle("ck-secure".localized, isOn: $observedData.appProperties.textFields[item].secure)
                         .toggleStyle(.switch)
                     Spacer()
                 }
                 HStack {
-                    TextField("Title", text: $observedData.appProperties.textFields[item].title)
-                    TextField("Value", text: $observedData.appProperties.textFields[item].value)
-                    TextField("Prompt", text: $observedData.appProperties.textFields[item].prompt)
+                    TextField("ck-title".localized, text: $observedData.appProperties.textFields[item].title)
+                    TextField("ck-value".localized, text: $observedData.appProperties.textFields[item].value)
+                    TextField("ck-prompt".localized, text: $observedData.appProperties.textFields[item].prompt)
                 }
                 .padding(.leading, 20)
                 HStack {
-                    TextField("Regex", text: $observedData.appProperties.textFields[item].regex)
-                    TextField("Regex Error", text: $observedData.appProperties.textFields[item].regexError)
+                    TextField("ck-regex".localized, text: $observedData.appProperties.textFields[item].regex)
+                    TextField("ck-regexerror".localized, text: $observedData.appProperties.textFields[item].regexError)
                 }
                 .padding(.leading, 20)
                 Divider()
             }
-            LabelView(label: "Select")
+            LabelView(label: "ck-select".localized)
             
-            LabelView(label: "Checkbox")
+            LabelView(label: "ck-checkbox".localized)
             Spacer()
         }
         .padding(20)

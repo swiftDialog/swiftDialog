@@ -33,8 +33,10 @@ struct DialogView: View {
                     VStack {
                         IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
                             .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
-                        InfoBoxView(observedData: observedData)
-                            .padding(.top, observedData.appProperties.topPadding)
+                        if observedData.args.infoBox.present {
+                            InfoBoxView(observedData: observedData)
+                                .padding(.top, observedData.appProperties.topPadding)
+                        }
                         Spacer()
                     }
                     .frame(width: iconDisplayWidth, alignment: .top)
