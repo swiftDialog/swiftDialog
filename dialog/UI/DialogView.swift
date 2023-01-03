@@ -33,13 +33,14 @@ struct DialogView: View {
                     VStack {
                         IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
                             .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
+                            .frame(width: iconDisplayWidth, alignment: .top)
                         if observedData.args.infoBox.present {
                             InfoBoxView(observedData: observedData)
                                 .padding(.top, observedData.appProperties.topPadding)
+                                .frame(width: 150)
                         }
                         Spacer()
                     }
-                    .frame(width: iconDisplayWidth, alignment: .top)
                     .border(appvars.debugBorderColour, width: 2)
                     .padding(.top, observedData.appProperties.topPadding)
                     .padding(.leading, observedData.appProperties.sidePadding+10)

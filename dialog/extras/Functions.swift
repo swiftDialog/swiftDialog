@@ -79,6 +79,10 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
     var urlPath = NSURL(string: "")!
     var imageData = NSData()
     
+    let errorImageConfig = NSImage.SymbolConfiguration(pointSize: 200, weight: .thin)
+    let errorImage = NSImage(systemSymbolName: "questionmark.square.dashed", accessibilityDescription: nil)!
+        .withSymbolConfiguration(errorImageConfig)!
+    
     // check if it's base64 image data
     if fileImagePath.hasPrefix("base64") {
         return getImageFromBase64(base64String: fileImagePath.replacingOccurrences(of: "base64=", with: ""))
@@ -96,9 +100,6 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
         imageData = try NSData(contentsOf: urlPath as URL)
     } catch {
         if returnErrorImage! {
-            let errorImageConfig = NSImage.SymbolConfiguration(pointSize: 200, weight: .thin)
-            let errorImage = NSImage(systemSymbolName: "questionmark.square.dashed", accessibilityDescription: nil)!
-                .withSymbolConfiguration(errorImageConfig)!
             return errorImage
         } else {
         
@@ -106,9 +107,9 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
         }
     }
   
-    let image : NSImage = NSImage(data: imageData as Data)!
+    let image : NSImage = NSImage(data: imageData as Data) ?? errorImage
     
-    if let rep = NSImage(data: imageData as Data)!
+    if let rep = NSImage(data: imageData as Data)?
         .bestRepresentation(for: NSRect(x: 0, y: 0, width: imgWidth!, height: imgHeight!), context: nil, hints: nil) {
         image.size = rep.size
         image.addRepresentation(rep)
