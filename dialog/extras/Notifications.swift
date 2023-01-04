@@ -25,6 +25,7 @@ func sendNotification(title: String = "", subtitle: String = "", message: String
     notification.requestAuthorization(options: [.alert, .sound]) { granted, error in
         if let error = error {
             print("Notifications are not available: \(error.localizedDescription as Any)")
+            print("Check to see if Notifications for Dialog.app are enabled in notification center")
         }
     }
     
