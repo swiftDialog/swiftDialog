@@ -138,13 +138,9 @@ class FileReader {
                 }
                 
             //Progress Bar Label
-            case "\(observedData.args.progressBar.long)text:" :
-                observedData.statusText = line.replacingOccurrences(of: "\(observedData.args.progressBar.long)text: ", with: "")
-                
-            //Progress Bar Label (typo version with capital T)
-            case "\(observedData.args.progressBar.long)Text:" :
-                observedData.statusText = line.replacingOccurrences(of: "\(observedData.args.progressBar.long)Text: ", with: "")
-            
+            case "\(observedData.args.progressText.long):".lowercased() :
+                observedData.args.progressText.value = line.replacingOccurrences(of: "\(observedData.args.progressText.long): ", with: "", options: .caseInsensitive)
+                            
             // Button 1 label
             case "\(observedData.args.button1TextOption.long):" :
                 observedData.args.button1TextOption.value = line.replacingOccurrences(of: "\(observedData.args.button1TextOption.long): ", with: "")
@@ -231,15 +227,18 @@ class FileReader {
                 
             // image
             case "\(observedData.args.mainImage.long):" :
-                //appvars.imageArray = [line.replacingOccurrences(of: "\(observedData.args.mainImage.long): ", with: "")]
                 let argument = line.replacingOccurrences(of: "\(observedData.args.mainImage.long): ", with: "")
-                if argument.lowercased() == "show" {
+                switch argument.lowercased() {
+                case "show":
                     observedData.args.mainImage.present = true
-                } else {
+                case "hide":
+                    observedData.args.mainImage.present = false
+                case "clear":
+                    observedData.imageArray.removeAll()
+                default:
                     observedData.imageArray.append(MainImage(path: argument))
+                    observedData.args.mainImage.present = true
                 }
-                observedData.args.mainImage.present = true
-                //imagePresent = true
                 
             // image Caption
             case "\(observedData.args.mainImageCaption.long):" :
