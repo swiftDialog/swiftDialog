@@ -54,7 +54,7 @@ struct IconOverlayView: View {
             imgFromAPP = true
         }
         
-        if overlayImagePath.hasPrefix("SF=") {
+        if overlayImagePath.lowercased().hasPrefix("sf=") {
             sfSymbolPresent = true
             builtInIconPresent = true
             
@@ -71,13 +71,14 @@ struct IconOverlayView: View {
                         .replacingOccurrences(of: ",", with: "")
                         .replacingOccurrences(of: "=", with: "")
                         .trimmingCharacters(in: .whitespaces)
+                        .lowercased()
                     
                     if index < SFValues.count-1 {
                         SFArgValue = SFValues[index+1]
                     }
                     
                     switch SFArg {
-                    case "SF":
+                    case "sf":
                         builtInIconName = SFArgValue
                     case "weight":
                         builtInIconWeight = textToFontWeight(SFArgValue)

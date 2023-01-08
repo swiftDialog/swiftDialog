@@ -88,7 +88,7 @@ struct IconView: View {
             builtInIconPresent = true
         }
         
-        if messageUserImagePath.hasPrefix("SF=") {
+        if messageUserImagePath.lowercased().hasPrefix("sf=") {
             sfSymbolPresent = true
             builtInIconPresent = true
             
@@ -105,13 +105,14 @@ struct IconView: View {
                         .replacingOccurrences(of: ",", with: "")
                         .replacingOccurrences(of: "=", with: "")
                         .trimmingCharacters(in: .whitespaces)
+                        .lowercased()
                     
                     if index < SFValues.count-1 {
                         SFArgValue = SFValues[index+1]
                     }
                     
                     switch SFArg {
-                    case "SF":
+                    case "sf":
                         builtInIconName = SFArgValue
                     case "weight":
                         builtInIconWeight = textToFontWeight(SFArgValue)
@@ -203,7 +204,7 @@ struct IconView: View {
                             // macOS 11 doesn't support foregroundStyle so we'll do it the long way
                             // we need to add this twice - once as a clear version to force the right aspect ratio
                             // and again with the gradiet colour we want
-                            // the reason for this is gradient by itself is greedy and will consume the entire height and witch of the display area
+                            // the reason for this is gradient by itself is greedy and will consume the entire height and width of the display area
                             // this causes some SF Symbols like applelogo and applescript to look distorted
                             Image(systemName: builtInIconName)
                                 .renderingMode(iconRenderingMode)
