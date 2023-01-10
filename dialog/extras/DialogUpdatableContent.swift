@@ -179,12 +179,18 @@ class FileReader {
                 
             // Info text
             case "\(observedData.args.infoText.long):" :
-                observedData.args.infoText.value = line.replacingOccurrences(of: "\(observedData.args.infoText.long): ", with: "")
-                if observedData.args.infoText.value == "disable" {
+                let infoText = line.replacingOccurrences(of: "\(observedData.args.infoText.long): ", with: "")
+                if infoText == "disable" {
                     observedData.args.infoText.present = false
                 } else {
+                    observedData.args.infoText.value = infoText
                     observedData.args.infoText.present = true
                 }
+                
+            // Info Box
+            case "\(observedData.args.infoBox.long):" :
+                observedData.args.infoBox.value = line.replacingOccurrences(of: "\(observedData.args.infoBox.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n")
+                observedData.args.infoBox.present = true
                 
             // icon image
             case "\(observedData.args.iconOption.long):" :
