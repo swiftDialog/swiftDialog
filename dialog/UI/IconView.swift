@@ -31,6 +31,8 @@ struct IconView: View {
     var builtInIconPresent: Bool = false
     var builtInIconWeight = Font.Weight.thin
     
+    var framePadding : CGFloat = 0
+    
     var iconRenderingMode = Image.TemplateRenderingMode.original
     
     var sfSymbolName: String = ""
@@ -79,7 +81,9 @@ struct IconView: View {
             imgFromBase64 = true
         }
         
-        if messageUserImagePath.hasSuffix(".app") || messageUserImagePath.hasSuffix("prefPane") {
+        if ["app", "prefPane", "framework"].contains(messageUserImagePath.split(separator: ".").last) {
+        
+        //if messageUserImagePath.hasSuffix(".app") || messageUserImagePath.hasSuffix("prefPane") {
             imgFromAPP = true
         }
         
@@ -91,6 +95,8 @@ struct IconView: View {
         if messageUserImagePath.lowercased().hasPrefix("sf=") {
             sfSymbolPresent = true
             builtInIconPresent = true
+            
+            framePadding = 15
             
             //var SFValues = messageUserImagePath.components(separatedBy: ",")
             var SFValues = messageUserImagePath.split(usingRegex: appvars.argRegex)
@@ -277,6 +283,7 @@ struct IconView: View {
                 .scaleEffect(overlayImageScale, anchor:.bottomTrailing)
 
         }
+        .padding(framePadding)
         
     }
 }
