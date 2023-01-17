@@ -277,6 +277,9 @@ func processCLOptions(json : JSON = getJSON()) {
                 appvars.listItems.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon))
             }
         }
+        if appvars.listItems.isEmpty {
+            appArguments.listItem.present = false
+        }
     }
     
     if !json[appArguments.autoPlay.long].exists() && !appArguments.autoPlay.present {
