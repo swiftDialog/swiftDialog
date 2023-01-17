@@ -407,7 +407,7 @@
 				4154C2D625F76BDB00A3D373 /* Sources */,
 				4154C2D725F76BDB00A3D373 /* Frameworks */,
 				4154C2D825F76BDB00A3D373 /* Resources */,
-				41C8258525F996760042DC50 /* ShellScript */,
+				41C8258525F996760042DC50 /* Increment Build Number */,
 			);
 			buildRules = (
 			);
@@ -568,7 +568,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		41C8258525F996760042DC50 /* ShellScript */ = {
+		41C8258525F996760042DC50 /* Increment Build Number */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -577,6 +577,7 @@
 			);
 			inputPaths = (
 			);
+			name = "Increment Build Number";
 			outputFileListPaths = (
 			);
 			outputPaths = (
