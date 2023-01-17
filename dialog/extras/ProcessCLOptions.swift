@@ -588,9 +588,12 @@ func processCLOptionValues() {
     appArguments.helpMessage.value           = json[appArguments.helpMessage.long].string ?? CLOptionText(OptionName: appArguments.helpMessage)
     appArguments.helpMessage.present         = json[appArguments.helpMessage.long].exists() || CLOptionPresent(OptionName: appArguments.helpMessage)
     
+    appArguments.position.value           = json[appArguments.position.long].string ?? CLOptionText(OptionName: appArguments.position)
+    appArguments.position.present         = json[appArguments.position.long].exists() || CLOptionPresent(OptionName: appArguments.position)
+    
     // window location on screen
-    if CLOptionPresent(OptionName: appArguments.position) {
-        switch CLOptionText(OptionName: appArguments.position) {
+    if appArguments.position.present {
+        switch appArguments.position.value {
         case "topleft":
             appvars.windowPositionVertical = NSWindow.Position.Vertical.top
             appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.left
