@@ -53,6 +53,7 @@
 		415E1FCA27A2694B00DE971B /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415E1FC927A2694B00DE971B /* ListView.swift */; };
 		415E1FCB27A2B0A000DE971B /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415E1FC927A2694B00DE971B /* ListView.swift */; };
 		416DED42261C5FE00049B6B5 /* FullscreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416DED41261C5FE00049B6B5 /* FullscreenView.swift */; };
+		417BBA77297A161B00E13A45 /* dialog in Resources */ = {isa = PBXBuildFile; fileRef = 417BBA76297A161B00E13A45 /* dialog */; };
 		417BD4352798FE39009AE34A /* DialogUpdatableContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD4342798FE38009AE34A /* DialogUpdatableContent.swift */; };
 		417BD4362798FE48009AE34A /* DialogUpdatableContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD4342798FE38009AE34A /* DialogUpdatableContent.swift */; };
 		417BD43827992EDB009AE34A /* TaskProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD43727992EDB009AE34A /* TaskProgressView.swift */; };
@@ -180,6 +181,7 @@
 		415934D926DB7604009C9C3A /* WindowPositioning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowPositioning.swift; sourceTree = "<group>"; };
 		415E1FC927A2694B00DE971B /* ListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
 		416DED41261C5FE00049B6B5 /* FullscreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullscreenView.swift; sourceTree = "<group>"; };
+		417BBA76297A161B00E13A45 /* dialog */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = dialog; sourceTree = "<group>"; };
 		417BD4342798FE38009AE34A /* DialogUpdatableContent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DialogUpdatableContent.swift; sourceTree = "<group>"; };
 		417BD43727992EDB009AE34A /* TaskProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskProgressView.swift; sourceTree = "<group>"; };
 		417BD470279CB658009AE34A /* CheckboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckboxView.swift; sourceTree = "<group>"; };
@@ -301,6 +303,7 @@
 		4154C2DC25F76BDB00A3D373 /* dialog */ = {
 			isa = PBXGroup;
 			children = (
+				417BBA6F297A15A600E13A45 /* Package */,
 				41C8259825F99AF90042DC50 /* UI */,
 				4154C30C25F782E900A3D373 /* extras */,
 				4154C2DD25F76BDB00A3D373 /* dialogApp.swift */,
@@ -355,6 +358,38 @@
 				41A44EB126F4C43A00FEE1AC /* helpText.swift */,
 			);
 			path = extras;
+			sourceTree = "<group>";
+		};
+		417BBA6F297A15A600E13A45 /* Package */ = {
+			isa = PBXGroup;
+			children = (
+				417BBA73297A161B00E13A45 /* usr */,
+			);
+			path = Package;
+			sourceTree = "<group>";
+		};
+		417BBA73297A161B00E13A45 /* usr */ = {
+			isa = PBXGroup;
+			children = (
+				417BBA74297A161B00E13A45 /* local */,
+			);
+			path = usr;
+			sourceTree = "<group>";
+		};
+		417BBA74297A161B00E13A45 /* local */ = {
+			isa = PBXGroup;
+			children = (
+				417BBA75297A161B00E13A45 /* bin */,
+			);
+			path = local;
+			sourceTree = "<group>";
+		};
+		417BBA75297A161B00E13A45 /* bin */ = {
+			isa = PBXGroup;
+			children = (
+				417BBA76297A161B00E13A45 /* dialog */,
+			);
+			path = bin;
 			sourceTree = "<group>";
 		};
 		41C8259825F99AF90042DC50 /* UI */ = {
@@ -547,6 +582,7 @@
 			files = (
 				4154C2E525F76BDC00A3D373 /* Preview Assets.xcassets in Resources */,
 				41832B7228436B430062AA1F /* Localizable.strings in Resources */,
+				417BBA77297A161B00E13A45 /* dialog in Resources */,
 				4154C2E225F76BDC00A3D373 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

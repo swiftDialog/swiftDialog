@@ -1,0 +1,29 @@
+#!/bin/sh
+currentUser=$(echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { print $3 }')
+dialogpath="/Library/Application Support/Dialog/Dialog.app"
+dialogbin="$dialogpath/Contents/MacOS/Dialog"
+commandfile=$(echo "$@" | awk -v pattern="--commandfile" '{for (i=0;i<=NF;i++) {if ($i==pattern) print $(i+1) }}')
+
+# Check to make sure we have a binary to run
+if [ ! -e "$dialogbin" ]; then
+    echo "Cannot find swiftDialog binary at $dialogbin"
+    exit 255
+fi
+
+# check we have a valid console user
+if [ "$currentUser" = "loginwindow" ] || [ -z $currentUser ]; then
+    echo "Cannot run. No console user, or at loginwindow."
+    exit 255
+fi
+
+# If we're running as root, launch swiftDialog as the user.
+if [ $(id -u) -eq 0 ]; then
+    if [ ! -z $commandfile ]; then
+        # a command file is being used - make sure the console user has read access to it.
+        /usr/bin/touch "$commandfile"
+        /bin/chmod 644 "$commandfile"
+    fi
+    /usr/bin/sudo -u $currentUser "$dialogbin" "$@"
+else
+    "$dialogbin" "$@"
+fi
