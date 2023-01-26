@@ -110,31 +110,25 @@ class FileReader {
                 
             //Progress Bar
             case "\(observedData.args.progressBar.long):" :
-                let incrementValue = line.replacingOccurrences(of: "\(observedData.args.progressBar.long): ", with: "")
-                switch incrementValue {
+                let progressCommand = line.replacingOccurrences(of: "\(observedData.args.progressBar.long): ", with: "")
+                switch progressCommand.split(separator: " ").first {
                 case "increment" :
-                    if observedData.progressTotal == 0 {
-                        observedData.progressTotal = Double(observedData.args.progressBar.value) ?? 100
-                    }
-                    observedData.progressValue = observedData.progressValue + 1
-                case "reset" :
-                    observedData.progressValue = 0
+                    let incrementValue = progressCommand.components(separatedBy: " ").last!
+                    observedData.progressValue = (observedData.progressValue ?? 0) + (Double(incrementValue) ?? 1)
+                case "reset", "indeterminate" :
+                    observedData.progressValue = nil
                 case "complete" :
-                    observedData.progressValue = Double(observedData.args.progressBar.value) ?? 1000
-                case "indeterminate" :
-                //    progressTotal = 0
-                    observedData.progressValue = Double(-1)
-                case "remove" :
+                    observedData.progressValue = observedData.progressTotal
+                case "delete", "remove", "hide" :
                     observedData.args.progressBar.present = false
-                case "create" :
+                case "create", "show" :
                     observedData.args.progressBar.present = true
-                //case "determinate" :
-                //    progressValue = 0
                 default :
-                    if observedData.progressTotal == 0 {
-                        observedData.progressTotal = Double(observedData.args.progressBar.value) ?? 100
+                    if progressCommand == "0" {
+                        observedData.progressValue = nil
+                    } else {
+                        observedData.progressValue = Double(progressCommand) ?? observedData.progressValue
                     }
-                    observedData.progressValue = Double(incrementValue) ?? 0
                 }
                 
             //Progress Bar Label
@@ -404,7 +398,7 @@ class DialogUpdatableContent : ObservableObject {
     
     @Published var messageText: String
     @Published var statusText: String
-    @Published var progressValue: Double
+    @Published var progressValue: Double?
     @Published var progressTotal: Double
     @Published var iconSize: CGFloat
     
@@ -455,8 +449,8 @@ class DialogUpdatableContent : ObservableObject {
         
         messageText = appArguments.messageOption.value
         statusText = appArguments.progressText.value
-        progressValue = 0
-        progressTotal = 0
+        //progressValue = 0
+        progressTotal = Double(appArguments.progressBar.value) ?? 100
         listItemUpdateRow = 0
         
         iconSize = string2float(string: appArguments.iconSize.value)
