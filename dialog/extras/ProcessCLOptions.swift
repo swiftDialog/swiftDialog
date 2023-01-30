@@ -312,7 +312,7 @@ func processCLOptions(json : JSON = getJSON()) {
         quitDialog(exitCode: appvars.exitNow.code)
         //exit(0)
     }
-    if appArguments.showLicense.present {
+    if appArguments.licence.present {
         print(licenseText)
         quitDialog(exitCode: appvars.exitNow.code)
         //exit(0)
@@ -847,7 +847,7 @@ func processCLOptionValues() {
     appArguments.helpOption.present            = CLOptionPresent(OptionName: appArguments.helpOption)
     appArguments.demoOption.present            = CLOptionPresent(OptionName: appArguments.demoOption)
     appArguments.buyCoffee.present             = CLOptionPresent(OptionName: appArguments.buyCoffee)
-    appArguments.showLicense.present           = CLOptionPresent(OptionName: appArguments.showLicense)
+    appArguments.licence.present           = CLOptionPresent(OptionName: appArguments.licence)
     appArguments.jamfHelperMode.present        = CLOptionPresent(OptionName: appArguments.jamfHelperMode)
     appArguments.debug.present                 = CLOptionPresent(OptionName: appArguments.debug)
     appArguments.getVersion.present            = CLOptionPresent(OptionName: appArguments.getVersion)

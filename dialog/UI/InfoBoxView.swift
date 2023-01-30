@@ -15,13 +15,14 @@ struct InfoBoxView: View {
     var markdownStyle = MarkdownStyle(foregroundColor: .secondary)
     
     var body: some View {
-        HStack {
-            Markdown(observedData.args.infoBox.value, baseURL: URL(string: "http://"))
-                .multilineTextAlignment(.leading)
-                .markdownStyle(markdownStyle)
-                .focusable(false)
-                .lineLimit(10)
-        }
+        Markdown(observedData.args.infoBox.value, baseURL: URL(string: "http://"))
+            .multilineTextAlignment(.leading)
+            .markdownStyle(markdownStyle)
+            .focusable(false)
+            .lineLimit(nil)
+            .frame(width: 150, alignment: .top)
+            .frame(minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
+            .padding(.top, observedData.appProperties.topPadding)
     }
 }
 

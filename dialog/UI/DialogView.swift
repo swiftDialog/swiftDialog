@@ -30,19 +30,19 @@ struct DialogView: View {
         VStack { //}(alignment: .top, spacing: nil) {
             HStack {
                 if (observedData.args.iconOption.present && !observedData.args.centreIcon.present && observedData.args.iconOption.value != "none") {
-                    VStack {
+                    VStack(alignment: .leading) {
                         IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
                             .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
                             .frame(width: iconDisplayWidth, alignment: .top)
                         if observedData.args.infoBox.present {
                             InfoBoxView(observedData: observedData)
-                                .padding(.top, observedData.appProperties.topPadding)
-                                .frame(width: 150)
                         }
                         Spacer()
                     }
                     .border(appvars.debugBorderColour, width: 2)
+                    //.fixedSize(horizontal: false, vertical: true)
                     .padding(.top, observedData.appProperties.topPadding)
+                    .padding(.bottom, observedData.appProperties.bottomPadding)
                     .padding(.leading, observedData.appProperties.sidePadding+10)
                     .padding(.trailing, observedData.appProperties.sidePadding+10)
                 }

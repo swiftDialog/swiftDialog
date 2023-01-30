@@ -100,6 +100,7 @@ struct CLArgument {
     var long: String
     var short: String = ""
     var value : String = ""
+    var help : String = ""
     var present : Bool = false
     var isbool : Bool = false
 }
@@ -303,7 +304,7 @@ struct CommandLineArguments {
     var helpOption               = CLArgument(long: "help")
     var demoOption               = CLArgument(long: "demo")
     var buyCoffee                = CLArgument(long: "coffee", short: "☕️")
-    var showLicense              = CLArgument(long: "showlicense", short: "l")
+    var licence              = CLArgument(long: "licence", short: "l")
     var warningIcon              = CLArgument(long: "warningicon") // Deprecated
     var infoIcon                 = CLArgument(long: "infoicon") // Deprecated
     var cautionIcon              = CLArgument(long: "cautionicon") // Deprecated
