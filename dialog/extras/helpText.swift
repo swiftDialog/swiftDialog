@@ -7,8 +7,11 @@
 
 //import Foundation
 
+
+
+
 var helpText = """
-    Dialog version \(getVersionString()) ©2022 Bart Reardon
+    swiftDialog version \(getVersionString()) ©2022 Bart Reardon
 
     OPTIONS:
 
@@ -196,10 +199,10 @@ var helpText = """
                     << EXPERIMENTAL >>
                     Runs the specified shell command using zsh
                     Command input and output is not sanitised or checked.
-                    If your command fails, Dialog still exits 0
+                    If your command fails, swiftDialog still exits 0
     
         --\(appArguments.button1Disabled.long)
-                    Launches dialig with button1 disabled
+                    Launches swiftDialog with button1 disabled
                     To re-enable, send `buton1: enable` to the dialog command file.
 
         -\(appArguments.button2Option.short), --\(appArguments.button2Option.long)
@@ -213,6 +216,10 @@ var helpText = """
         --\(appArguments.button2ActionOption.long) <url>
                     Return code when actioned is 2
                     -- Setting Custon Actions For Button 2 Is Not Implemented at this time --
+    
+        --\(appArguments.button2Disabled.long)
+                    Launches swiftDialog with button2 disabled
+                    To re-enable, send `buton2: enable` to the dialog command file.
 
         -\(appArguments.infoButtonOption.short), --\(appArguments.infoButtonOption.long)
                     Displays info button with default label of "\(appvars.buttonInfoDefault)"
@@ -232,8 +239,18 @@ var helpText = """
                     Will display the specified text in place of the info button
                     If no text is supplied, will display the current swiftDialog version
     
+        --\(appArguments.infoBox.long) (<text>)
+                    Will display the specified text in the area underneath the icon when icon is being displayed on the left.
+                    If icon is hidden or displayed centered, \(appArguments.infoBox.long) will not show
+                    Markdown is supported
+    
+        --\(appArguments.helpMessage.long) (<text>)
+                    Will display a help icon to the right of the the default button
+                    When clicked, contents of the help message will be displayed as a popover
+                    Supports markdown for formatting.
+
         --\(appArguments.quitOnInfo.long)
-                    Will tell Dialog to quit when the info button is selected
+                    Will tell swiftDialog to quit when the info button is selected
                     Return code when actioned is 3
 
     ** Advanced Options - - - - - - - - - - - - - - - -
@@ -243,7 +260,7 @@ var helpText = """
                     In this view, only banner, title, icon and the message area are visible.
     
         --\(appArguments.blurScreen.long)
-                    Will blur the background of the display while dialog is showing
+                    Will blur the background of the display while swiftDialog is showing
     
         --\(appArguments.progressBar.long) <int>
                     Makes an interactive progress bar visible with <int> steps.
@@ -254,7 +271,7 @@ var helpText = """
                     To update progress text send "progresstext: <text>" command to the dialog command file
     
         --\(appArguments.statusLogFile.long) <file>
-                    Sets the path to the command file Dialog will read from to receive updates
+                    Sets the path to the command file swiftDialog will read from to receive updates
                     Default file is /var/tmp/dialog.log
 
         -\(appArguments.bannerImage.short), --\(appArguments.bannerImage.long) <file> | <url>
@@ -263,6 +280,13 @@ var helpText = """
                     the top left corner of the image.
                     Specifying this option will imply --\(appArguments.hideIcon.long)
                     Recommended Banner Image size is 850x150.
+    
+        --\(appArguments.bannerTitle.long) (<text>)
+                    Title is displayed on top of the banner image.
+                    Title font color is set to "white" by default.
+                    
+                    Additional --\(appArguments.titleFont.long) paramater "shadow=<bool>". When set to true,
+                    displays a drop shadow underneath the text
     
         --\(appArguments.dropdownTitle.long) <text>
                     Title for dropdown selection
@@ -282,7 +306,7 @@ var helpText = """
                         SelectedOption: Option 1
                         SelectedIndex: 0
 
-                    Output of select items is only shown if Dialog's exit code is 0
+                    Output of select items is only shown if swiftDialog's exit code is 0
 
                     Multiple dropdown caluse, titles and default selections can be specified as required.
                     Associations are made in the order they are presented on the command line
@@ -299,13 +323,13 @@ var helpText = """
     
         --\(appArguments.textField.long) <text>(,required,secure,prompt="<text>")
                     Present a textfield with the specified label
-                    When Dialog exits the contents of the textfield will be presented as <text> : <user_input>
+                    When swiftDialog exits the contents of the textfield will be presented as <text> : <user_input>
                     in plain or as json using [-\(appArguments.jsonOutPut.short), --\(appArguments.jsonOutPut.long)] option
                     Multiple textfields can be specified as required.
 
                     Modifiers available to text fields are:
                         secure     - Presends a secure input area. Contents of the textfield will not be shown on screen
-                        required   - Dialog will not exit until the field is populated
+                        required   - swiftDialog will not exit until the field is populated
                         prompt     - Pre-fill the field with some prompt text (prompt text will not be returned, macOS 12+ only, macOS 11 safe)
                         regex      - Specify a regular expression that the field must satisfy for the content to be accepted.
                         regexerror - Specify a custom error to display if regex conditions are not met
@@ -317,7 +341,7 @@ var helpText = """
     
         --\(appArguments.checkbox.long) <text>
                     Present a checkbox with the specified label
-                    When Dialog exits the status of the checkbox will be presented as <text> : [true|false]
+                    When swiftDialog exits the status of the checkbox will be presented as <text> : [true|false]
                     in plain or as json using [-\(appArguments.jsonOutPut.short), --\(appArguments.jsonOutPut.long)] option
                     Multiple checkboxes can be specified as required.
     
@@ -391,16 +415,16 @@ var helpText = """
                     Poitions the dialog window a the the defined location on the screen
     
         --\(appArguments.timerBar.long) (<seconds>)
-                    Replaces default button with a timer countdown after which dialog will close with exit code 4
+                    Replaces default button with a timer countdown after which swiftDialog will close with exit code 4
                     Default timer value is 10 seconds
                     Optional value <seconds> can be specified to the desired value
     
                     If used in conjuction with --\(appArguments.button1TextOption.long) the default button
                     will be displayed but will be disabled for the first 3 seconds of the timer, after which it
-                    becomes active and can be used to dismiss dialog with the standard button 1 exit code of 0
+                    becomes active and can be used to dismiss swiftDialog with the standard button 1 exit code of 0
     
         --\(appArguments.hideTimerBar.long)
-                    Will hide the timer bar. Dialog will close after time specified by --\(appArguments.timerBar.long)
+                    Will hide the timer bar. swiftDialog will close after time specified by --\(appArguments.timerBar.long)
                     Default OK button is displayed. This is to prevent persistant or unclosable dialogs of unknown duration.
     
         -\(appArguments.movableWindow.short), --\(appArguments.movableWindow.long)
@@ -480,14 +504,14 @@ var helpText = """
                         -showDelayOptions
                         -alignDescription, -alignHeading, -alignCountdown
                         -iconSize
-                    Dialog will do its best to display jamfHelper content in a dialog-esque way.
+                    swiftDialog will do its best to display jamfHelper content in a swiftDialog-esque way.
                     Any unsupported display options will be ignored.
                         
         -\(appArguments.getVersion.short), --\(appArguments.getVersion.long)
                     Prints the app version
 
-        -\(appArguments.showLicense.short), --\(appArguments.showLicense.long)
-                    Display the Software License Agreement for Dialog
+        -\(appArguments.licence.short), --\(appArguments.licence.long)
+                    Display the Software Licence Agreement for swiftDialog
 
         --\(appArguments.helpOption.long)
                     Prints this text

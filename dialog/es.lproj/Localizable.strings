@@ -1,0 +1,111 @@
+/* 
+  Localizable.strings
+  dialog
+
+  Created by Bart Reardon on 29/5/2022.
+  
+*/
+
+// error sheet
+"invalid-input" = "Uno o más campos de entrada son incorrectos";
+"is-required" = "es requerido";
+"no-pattern" = "no coincide con el formato requerido";
+
+// required fields text
+"required-note" = "* Campos obligatorios";
+
+//buttons
+"button-cancel" = "Cancelar";
+"button-more-info" = "Más información";
+"button-ok" = "OK";
+"button-select" = "Seleccionar";
+
+//default text
+"default-title" = "Un mensaje importante";
+"default-message" = "Este mensaje contiene contenido importante\n\nLea";
+"help-hover" = "Haga clic para obtener información adicional";
+
+//constructor kit labels
+"ck-welcome"            = "Bienvenido al constructor swiftDialog";
+"ck-welcomeinfo"        = "Seleccione las propiedades a la izquierda para modificar. swiftDialog se actualizará para mostrar los cambios en tiempo real";
+"ck-basic"              = "Básico";
+"ck-content"            = "Contenido";
+"ck-window"             = "Ventana";
+"ck-sidebar"            = "Barra lateral";
+"ck-dataentry"          = "Entrada de datos";
+"ck-buttons"            = "Botones";
+"ck-advanced"           = "Avanzado";
+"ck-listitems"          = "Artículos de la lista";
+"ck-images"             = "Imágenes";
+"ck-media"              = "Medios de comunicación";
+"ck-output"             = "Producción";
+"ck-jsonoutput"         = "Salida JSON";
+"ck-quit"               = "Dejar";
+"ck-exportcommand"      = "Comando de exportación";
+"ck-title"              = "Título";
+"ck-colour"             = "Color";
+"ck-reset"              = "Reiniciar";
+"ck-fontsize"           = "Tamaño de fuente: ";
+"ck-value"              = "valor:";
+"ck-message"            = "Mensaje";
+"ck-textalignmnet"      = "Alineación del texto";
+"ck-verticalposition"   = "Posición vertical";
+"ck-windowheight"       = "Altura de la ventana";
+"ck-heightvalue"        = "Valor de altura:";
+"ck-windowwidth"        = "Ancho de ventana";
+"ck-widthvalue"         = "Valor de ancho:";
+"ck-windowproperties"   = "Propiedades de la ventana";
+"ck-presetsizes"        = "Tamaños preestablecidos";
+"ck-small"              = "Pequeña";
+"ck-big"                = "Grande";
+"ck-screenblur"         = "Desenfoque de fondo de pantalla";
+"ck-movable"            = "Móvil";
+"ck-forceontop"         = "Fuerza en la cima";
+"ck-progressbar"        = "Barra de progreso";
+"ck-progressvalue"      = "Valor de progreso:";
+"ck-progresstext"       = "Texto de progreso:";
+"ck-bannerimage"        = "Imagen de la bandera";
+"ck-select"             = "Seleccione";
+"ck-watermark"          = "Filigrana";
+"ck-fill"               = "Llenar";
+"ck-alpha"              = "Alfa";
+"ck-scale"              = "Escala";
+"ck-position"           = "Posición";
+"ck-icon"               = "Icono";
+"ck-visible"            = "Visible";
+"ck-centred"            = "Centrado";
+"ck-select"             = "Seleccione";
+"ck-iconsize"           = "Tamaño de ícono";
+"ck-sizevalue"          = "Valor del tamaño:";
+"ck-overlay"            = "Cubrir";
+"ck-infobox"            = "Caja de información";
+"ck-infotext"           = "Infotexto";
+"ck-infotextlabel"      = "Texto de información";
+"ck-button1"            = "Botón 1";
+"ck-button2"            = "Botón2";
+"ck-infobuttonlabel"    = "Botón de información";
+"ck-quitoninfo"         = "Salir en Información";
+"ck-label"              = "Etiqueta: ";
+"ck-infobuttonaction"   = "Acción del botón de información:";
+"ck-autoplay"           = "Auto-reproducción";
+"ck-autoplayseconds"    = "Segundos de reproducción automática";
+"ck-path"               = "Camino";
+"ck-caption"            = "Subtítulo";
+"ck-statustext"         = "Texto de estado";
+"ck-status"             = "Estado";
+"ck-formatjson"         = "Formato de salida como JSON";
+"ck-textfields"         = "Campos de texto";
+"ck-show"               = "Show";
+"ck-required"           = "Requerido";
+"ck-secure"             = "Seguro";
+"ck-prompt"             = "Oportuno";
+"ck-regex"              = "regex";
+"ck-regexerror"         = "Error de expresión regular";
+"ck-select"             = "Seleccione";
+"ck-checkbox"           = "Caja";
+"ck-video"              = "Video";
+"ck-filename"           = "Nombre del archivo";
+"ck-web"                = "Web";
+"ck-url"                = "URL";
+"ck-disabled"           = "Discapacitado";
+"ck-enabled"            = "Activado";

@@ -20,24 +20,24 @@ struct CKBasicsView: View {
     var body: some View {
         
         VStack {
-            LabelView(label: "Title")
+            LabelView(label: "ck-title".localized)
             HStack {
                 TextField("", text: $observedData.args.titleOption.value)
-                ColorPicker("Colour",selection: $observedData.appProperties.titleFontColour)
-                Button("Reset") {
+                ColorPicker("ck-colour".localized,selection: $observedData.appProperties.titleFontColour)
+                Button("ck-reset".localized) {
                     observedData.appProperties.titleFontColour = .primary
                 }
             }
             HStack {
-                Text("Font Size: ")
+                Text("ck-fontsize".localized)
                 Slider(value: $observedData.appProperties.titleFontSize, in: 10...80)
-                TextField("value:", value: $observedData.appProperties.titleFontSize, formatter: NumberFormatter())
+                TextField("ck-value", value: $observedData.appProperties.titleFontSize, formatter: NumberFormatter())
                     .frame(width: 50)
             }
             
-            LabelView(label: "Message")
+            LabelView(label: "ck-message".localized)
             HStack {
-                Picker("Text Alignment", selection: $observedData.args.messageAlignment.value)
+                Picker("ck-textalignment".localized, selection: $observedData.args.messageAlignment.value)
                 {
                     Text("").tag("")
                     ForEach(observedData.appProperties.allignmentStates.keys.sorted(), id: \.self) {
@@ -48,10 +48,10 @@ struct CKBasicsView: View {
                     observedData.appProperties.messageAlignment = observedData.appProperties.allignmentStates[$0] ?? .leading
                     observedData.args.messageAlignment.present = true
                 }
-                Toggle("Vertical Position", isOn: $observedData.args.messageVerticalAlignment.present)
+                Toggle("ck-verticalposition".localized, isOn: $observedData.args.messageVerticalAlignment.present)
                     .toggleStyle(.switch)
-                ColorPicker("Colour",selection: $observedData.appProperties.messageFontColour)
-                Button("Reset") {
+                ColorPicker("ck-colour".localized,selection: $observedData.appProperties.messageFontColour)
+                Button("ck-reset".localized) {
                     observedData.appProperties.messageFontColour = .primary
                 }
             }

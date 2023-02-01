@@ -100,6 +100,7 @@ struct CLArgument {
     var long: String
     var short: String = ""
     var value : String = ""
+    var help : String = ""
     var present : Bool = false
     var isbool : Bool = false
 }
@@ -107,7 +108,7 @@ struct CLArgument {
 
 struct AppVariables {
     
-    var cliversion                      = "2.0.1"
+    var cliversion                      = "2.1.0"
     
     // message default strings
     var titleDefault                    = String("default-title".localized)
@@ -125,6 +126,9 @@ struct AppVariables {
     var button2Default                  = String("button-cancel".localized)
     var buttonInfoDefault               = String("button-more-info".localized)
     var buttonInfoActionDefault         = String("")
+    var button1DefaultAction            = KeyboardShortcut.defaultAction
+    
+    var helpButtonHoverText             = String("help-hover".localized)
 
     var windowIsMoveable                = Bool(false)
     var windowOnTop                     = Bool(false)
@@ -169,6 +173,7 @@ struct AppVariables {
     var titleFontColour                 = Color.primary
     var titleFontWeight                 = Font.Weight.bold
     var titleFontName                   = ""
+    var titleFontShadow                 = Bool(false)
     var messageFontSize                 = CGFloat(20)
     var messageFontColour               = Color.primary
     var messageFontWeight               = Font.Weight.regular
@@ -177,6 +182,8 @@ struct AppVariables {
     var overlayOffsetX                  = CGFloat(40)
     var overlayOffsetY                  = CGFloat(50)
     var overlayShadow                   = CGFloat(3)
+    
+    var showHelpMessage                 = Bool(false)
 
     var jsonOut                         = Bool(false)
 
@@ -236,11 +243,15 @@ struct CommandLineArguments {
     var messageAlignment         = CLArgument(long: "messagealignment")
     var messageAlignmentOld      = CLArgument(long: "alignment")
     var messageVerticalAlignment = CLArgument(long: "messageposition")
+    var helpMessage              = CLArgument(long: "helpmessage")
     var iconOption               = CLArgument(long: "icon", short: "i")
     var iconSize                 = CLArgument(long: "iconsize")
+    var iconAccessabilityLabel   = CLArgument(long: "iconalttext")
   //var iconHeight               = CLArgument(long: "iconheight")
     var overlayIconOption        = CLArgument(long: "overlayicon", short: "y")
     var bannerImage              = CLArgument(long: "bannerimage", short: "n")
+    var bannerTitle              = CLArgument(long: "bannertitle")
+    var bannerText               = CLArgument(long: "bannertext")
     var button1TextOption        = CLArgument(long: "button1text")
     var button1ActionOption      = CLArgument(long: "button1action")
     var button1ShellActionOption = CLArgument(long: "button1shellaction",short: "")
@@ -277,11 +288,13 @@ struct CommandLineArguments {
     var listItem                 = CLArgument(long: "listitem")
     var listStyle                = CLArgument(long: "liststyle")
     var infoText                 = CLArgument(long: "infotext")
+    var infoBox                  = CLArgument(long: "infobox")
     var quitKey                  = CLArgument(long: "quitkey")
     var webcontent               = CLArgument(long: "webcontent")
 
     // command line options that take no additional parameters
     var button1Disabled          = CLArgument(long: "button1disabled", isbool: true)
+    var button2Disabled          = CLArgument(long: "button2disabled", isbool: true)
     var button2Option            = CLArgument(long: "button2", short: "2", isbool: true)
     var infoButtonOption         = CLArgument(long: "infobutton", short: "3", isbool: true)
     var getVersion               = CLArgument(long: "version", short: "v")
@@ -291,7 +304,7 @@ struct CommandLineArguments {
     var helpOption               = CLArgument(long: "help")
     var demoOption               = CLArgument(long: "demo")
     var buyCoffee                = CLArgument(long: "coffee", short: "☕️")
-    var showLicense              = CLArgument(long: "showlicense", short: "l")
+    var licence              = CLArgument(long: "licence", short: "l")
     var warningIcon              = CLArgument(long: "warningicon") // Deprecated
     var infoIcon                 = CLArgument(long: "infoicon") // Deprecated
     var cautionIcon              = CLArgument(long: "cautionicon") // Deprecated

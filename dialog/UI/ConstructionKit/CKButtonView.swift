@@ -18,17 +18,17 @@ struct CKButtonView: View {
     var body: some View {
         VStack { //buttons
             VStack {
-                LabelView(label: "Button1")
+                LabelView(label: "ck-button1".localized)
                 HStack {
-                    Toggle("Disabled", isOn: $observedData.args.button1Disabled.present)
+                    Toggle("ck-disabled".localized, isOn: $observedData.args.button1Disabled.present)
                         .toggleStyle(.switch)
                     TextField("", text: $observedData.args.button1TextOption.value)
                 }
             }
             VStack {
-                LabelView(label: "Button2")
+                LabelView(label: "ck-button2".localized)
                 HStack {
-                    Toggle("Visible", isOn: $observedData.args.button2Option.present)
+                    Toggle("ck-visible".localized, isOn: $observedData.args.button2Option.present)
                         .onChange(of: observedData.args.button2Option.present, perform: { _ in
                             observedData.args.button2TextOption.present.toggle()
                         })
@@ -37,24 +37,24 @@ struct CKButtonView: View {
                 }
             }
             VStack {
-                LabelView(label: "Info Button")
+                LabelView(label: "ck-infobuttonlabel".localized)
                 HStack {
-                    Toggle("Visible", isOn: $observedData.args.infoButtonOption.present)
+                    Toggle("ck-visible".localized, isOn: $observedData.args.infoButtonOption.present)
                         .onChange(of: observedData.args.infoButtonOption.present, perform: { _ in
                             observedData.args.infoText.present = !observedData.args.infoButtonOption.present
                             //observedData.args.buttonInfoTextOption.present = true
                         })
                         .toggleStyle(.switch)
-                    Toggle("Quit on Info", isOn: $observedData.args.quitOnInfo.present)
+                    Toggle("ck-quitoninfo".localized, isOn: $observedData.args.quitOnInfo.present)
                         .toggleStyle(.switch)
                     Spacer()
                 }
                 HStack {
-                    Text("Label: ")
+                    Text("ck-label".localized)
                     TextField("", text: $observedData.args.buttonInfoTextOption.value)
                 }
                 HStack {
-                    Text("Info Button Action: ")
+                    Text("ck-infobuttonaction".localized)
                     TextField("", text: $observedData.args.buttonInfoActionOption.value)
                         .onChange(of: observedData.args.buttonInfoActionOption.value, perform: { _ in
                             observedData.args.buttonInfoActionOption.present = true

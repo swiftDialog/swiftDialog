@@ -56,6 +56,10 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "--icon &quot;https://www.dropbox.com/s/4batk8v5outfxo5/install.png?dl=0&quot;"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "--notification --title &quot;swiftDialog Notifications&quot; --subtitle &quot;Test Subtitle&quot; --message &quot;Line 1\nLine 2\nLine 3\nLine 4&quot; --icon /etc/csiro/logo.png"
             isEnabled = "NO">
          </CommandLineArgument>
@@ -73,7 +77,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--builder"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--title &quot;xcode test window&quot;"

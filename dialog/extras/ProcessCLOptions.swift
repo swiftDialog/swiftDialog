@@ -115,7 +115,8 @@ func processCLOptions(json : JSON = getJSON()) {
                         regexError: String(json[appArguments.textField.long][i]["regexerror"].stringValue),
                         required: Bool(json[appArguments.textField.long][i]["required"].boolValue),
                         secure: Bool(json[appArguments.textField.long][i]["secure"].boolValue),
-                        title: String(json[appArguments.textField.long][i]["title"].stringValue))
+                        title: String(json[appArguments.textField.long][i]["title"].stringValue),
+                        value: String(json[appArguments.textField.long][i]["value"].stringValue))
                     )
                 }
             }
@@ -132,6 +133,7 @@ func processCLOptions(json : JSON = getJSON()) {
                 var fieldSecure : Bool = false
                 var fieldSelectType : String = ""
                 var fieldTitle : String = ""
+                var fieldValue : String = ""
                 if items.count > 0 {
                     fieldTitle = items[0]
                     if items.count > 1 {
@@ -159,21 +161,25 @@ func processCLOptions(json : JSON = getJSON()) {
                                 fieldRequire = true
                             case "secure":
                                 fieldSecure = true
+                            case "value":
+                                fieldValue = items[index+1]
                             default: ()
                             }
                         }
                     }
                 }
-                appvars.textFields.append(TextFieldState(editor: fieldEditor,
-                                                 fileSelect: fieldFileSelect,
-                                                 fileType: fieldSelectType,
-                                                 passwordFill: fieldPasswordFill,
-                                                 prompt: fieldPrompt,
-                                                 regex: fieldRegex,
-                                                 regexError: fieldRegexError,
-                                                 required: fieldRequire,
-                                                 secure: fieldSecure,
-                                                 title: fieldTitle))
+                appvars.textFields.append(TextFieldState(
+                            editor: fieldEditor,
+                            fileSelect: fieldFileSelect,
+                            fileType: fieldSelectType,
+                            passwordFill: fieldPasswordFill,
+                            prompt: fieldPrompt,
+                            regex: fieldRegex,
+                            regexError: fieldRegexError,
+                            required: fieldRequire,
+                            secure: fieldSecure,
+                            title: fieldTitle,
+                            value: fieldValue))
             }
         }
         logger(logMessage: "textOptionsArray : \(appvars.textFields)")
@@ -271,6 +277,9 @@ func processCLOptions(json : JSON = getJSON()) {
                 appvars.listItems.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon))
             }
         }
+        if appvars.listItems.isEmpty {
+            appArguments.listItem.present = false
+        }
     }
     
     if !json[appArguments.autoPlay.long].exists() && !appArguments.autoPlay.present {
@@ -303,7 +312,7 @@ func processCLOptions(json : JSON = getJSON()) {
         quitDialog(exitCode: appvars.exitNow.code)
         //exit(0)
     }
-    if appArguments.showLicense.present {
+    if appArguments.licence.present {
         print(licenseText)
         quitDialog(exitCode: appvars.exitNow.code)
         //exit(0)
@@ -375,20 +384,31 @@ func processCLOptions(json : JSON = getJSON()) {
     let app = NSApplication.shared
     //app.setActivationPolicy(.regular)
     app.setActivationPolicy(.accessory)
+    
+    if appArguments.bannerTitle.present {
+        appvars.titleFontColour = Color.white
+    }
 
     if appArguments.titleFont.present {
 
         if appArguments.titleFont.value == "" {
             logger(logMessage: "titleFont.object : \(json[appArguments.titleFont.long].object)")
 
-            appvars.titleFontSize = string2float(string: json[appArguments.titleFont.long]["size"].stringValue, defaultValue: appvars.titleFontSize)
-            appvars.titleFontWeight = textToFontWeight(json[appArguments.titleFont.long]["weight"].stringValue)
-            if json[appArguments.messageFont.long]["colour"].exists() {
+            if json[appArguments.titleFont.long]["size"].exists() {
+                appvars.titleFontSize = string2float(string: json[appArguments.titleFont.long]["size"].stringValue, defaultValue: appvars.titleFontSize)
+            }
+            if json[appArguments.titleFont.long]["weight"].exists() {
+                appvars.titleFontWeight = textToFontWeight(json[appArguments.titleFont.long]["weight"].stringValue)
+            }
+            if json[appArguments.titleFont.long]["colour"].exists() {
                 appvars.titleFontColour = stringToColour(json[appArguments.titleFont.long]["colour"].stringValue)
-            } else {
+                print("found a colour of \(json[appArguments.titleFont.long]["colour"].stringValue)")
+            } else if json[appArguments.titleFont.long]["color"].exists() {
                 appvars.titleFontColour = stringToColour(json[appArguments.titleFont.long]["color"].stringValue)
             }
-            appvars.titleFontName = json[appArguments.titleFont.long]["name"].stringValue
+            if json[appArguments.titleFont.long]["name"].exists() {
+                appvars.titleFontName = json[appArguments.titleFont.long]["name"].stringValue
+            }
         } else {
         
             logger(logMessage: "titleFont.value : \(appArguments.titleFont.value)")
@@ -400,40 +420,49 @@ func processCLOptions(json : JSON = getJSON()) {
             for value in fontValues {
                 // split by =
                 let item = value.components(separatedBy: "=")
-                if item[0] == "size" {
-                    appvars.titleFontSize = string2float(string: item[1], defaultValue: appvars.titleFontSize)
-                    logger(logMessage: "titleFontSize : \(appvars.titleFontSize)")
-                }
-                if item[0] == "weight" {
-                    appvars.titleFontWeight = textToFontWeight(item[1])
-                    logger(logMessage: "titleFontWeight : \(appvars.titleFontWeight)")
-                }
-                if item[0] == "colour" || item[0] == "color" {
-                    appvars.titleFontColour = stringToColour(item[1])
-                    logger(logMessage: "titleFontColour : \(appvars.titleFontColour)")
-                }
-                if item[0] == "name" {
-                    appvars.titleFontName = item[1]
-                    logger(logMessage: "titleFontName : \(appvars.titleFontName)")
+                switch item[0] {
+                    case  "size":
+                        appvars.titleFontSize = string2float(string: item[1], defaultValue: appvars.titleFontSize)
+                        logger(logMessage: "titleFontSize : \(appvars.titleFontSize)")
+                    case  "weight":
+                        appvars.titleFontWeight = textToFontWeight(item[1])
+                        logger(logMessage: "titleFontWeight : \(appvars.titleFontWeight)")
+                    case  "colour","color":
+                        appvars.titleFontColour = stringToColour(item[1])
+                        logger(logMessage: "titleFontColour : \(appvars.titleFontColour)")
+                    case  "name":
+                        appvars.titleFontName = item[1]
+                        logger(logMessage: "titleFontName : \(appvars.titleFontName)")
+                    case  "shadow":
+                        appvars.titleFontShadow = item[1].boolValue
+                        logger(logMessage: "titleFontShadow : \(appvars.titleFontShadow)")
+                    default:
+                        logger(logMessage: "Unknown paramater \(item[0])")
                 }
 
             }
         }
     }
     
+    
     if appArguments.messageFont.present {
         
         if appArguments.messageFont.value == "" {
             logger(logMessage: "messageFont.object : \(json[appArguments.messageFont.long].object)")
-            
-            appvars.messageFontSize = string2float(string: json[appArguments.messageFont.long]["size"].stringValue, defaultValue: appvars.messageFontSize)
-            appvars.messageFontWeight = textToFontWeight(json[appArguments.messageFont.long]["weight"].stringValue)
+            if json[appArguments.messageFont.long]["size"].exists() {
+                appvars.messageFontSize = string2float(string: json[appArguments.messageFont.long]["size"].stringValue, defaultValue: appvars.messageFontSize)
+            }
+            if json[appArguments.messageFont.long]["weight"].exists(){
+                appvars.messageFontWeight = textToFontWeight(json[appArguments.messageFont.long]["weight"].stringValue)
+            }
             if json[appArguments.messageFont.long]["colour"].exists() {
                 appvars.messageFontColour = stringToColour(json[appArguments.messageFont.long]["colour"].stringValue)
-            } else {
+            } else if json[appArguments.messageFont.long]["color"].exists() {
                 appvars.messageFontColour = stringToColour(json[appArguments.messageFont.long]["color"].stringValue)
             }
-            appvars.messageFontName = json[appArguments.messageFont.long]["name"].stringValue
+            if json[appArguments.messageFont.long]["name"].exists() {
+                appvars.messageFontName = json[appArguments.messageFont.long]["name"].stringValue
+            }
         } else {
         
             logger(logMessage: "messageFont.value : \(appArguments.messageFont.value)")
@@ -445,21 +474,21 @@ func processCLOptions(json : JSON = getJSON()) {
             for value in fontValues {
                 // split by =
                 let item = value.components(separatedBy: "=")
-                if item[0] == "size" {
-                    appvars.messageFontSize = string2float(string: item[1], defaultValue: appvars.messageFontSize)
-                    logger(logMessage: "messageFontSize : \(appvars.messageFontSize)")
-                }
-                if item[0] == "weight" {
-                    appvars.messageFontWeight = textToFontWeight(item[1])
-                    logger(logMessage: "messageFontWeight : \(appvars.messageFontWeight)")
-                }
-                if item[0] == "colour" || item[0] == "color" {
-                    appvars.messageFontColour = stringToColour(item[1])
-                    logger(logMessage: "messageFontColour : \(appvars.messageFontColour)")
-                }
-                if item[0] == "name" {
-                    appvars.messageFontName = item[1]
-                    logger(logMessage: "messageFontName : \(appvars.messageFontName)")
+                switch item[0] {
+                    case "size":
+                        appvars.messageFontSize = string2float(string: item[1], defaultValue: appvars.messageFontSize)
+                        logger(logMessage: "messageFontSize : \(appvars.messageFontSize)")
+                    case "weight":
+                        appvars.messageFontWeight = textToFontWeight(item[1])
+                        logger(logMessage: "messageFontWeight : \(appvars.messageFontWeight)")
+                    case "colour","color":
+                        appvars.messageFontColour = stringToColour(item[1])
+                        logger(logMessage: "messageFontColour : \(appvars.messageFontColour)")
+                    case "name":
+                        appvars.messageFontName = item[1]
+                        logger(logMessage: "messageFontName : \(appvars.messageFontName)")
+                    default:
+                        logger(logMessage: "Unknown paramater \(item[0])")
                 }
             }
         }
@@ -539,7 +568,7 @@ func processCLOptionValues() {
     appArguments.subTitleOption.present        = json[appArguments.subTitleOption.long].exists() || CLOptionPresent(OptionName: appArguments.subTitleOption)
 
     appArguments.messageOption.value           = json[appArguments.messageOption.long].string ?? CLOptionText(OptionName: appArguments.messageOption, DefaultValue: appvars.messageDefault)
-    appArguments.messageOption.present         = json[appArguments.titleOption.long].exists() || CLOptionPresent(OptionName: appArguments.messageOption)
+    appArguments.messageOption.present         = json[appArguments.messageOption.long].exists() || CLOptionPresent(OptionName: appArguments.messageOption)
     
     appArguments.messageAlignment.value        = json[appArguments.messageAlignment.long].string ?? CLOptionText(OptionName: appArguments.messageAlignment, DefaultValue: appvars.messageAlignmentTextRepresentation)
     appArguments.messageAlignment.present      = json[appArguments.messageAlignment.long].exists() || CLOptionPresent(OptionName: appArguments.messageAlignment)
@@ -559,9 +588,15 @@ func processCLOptionValues() {
     appArguments.messageVerticalAlignment.value = json[appArguments.messageVerticalAlignment.long].string ?? CLOptionText(OptionName: appArguments.messageVerticalAlignment)
     appArguments.messageVerticalAlignment.present = json[appArguments.messageVerticalAlignment.long].exists() || CLOptionPresent(OptionName: appArguments.messageVerticalAlignment)
 
+    appArguments.helpMessage.value           = json[appArguments.helpMessage.long].string ?? CLOptionText(OptionName: appArguments.helpMessage)
+    appArguments.helpMessage.present         = json[appArguments.helpMessage.long].exists() || CLOptionPresent(OptionName: appArguments.helpMessage)
+    
+    appArguments.position.value           = json[appArguments.position.long].string ?? CLOptionText(OptionName: appArguments.position)
+    appArguments.position.present         = json[appArguments.position.long].exists() || CLOptionPresent(OptionName: appArguments.position)
+    
     // window location on screen
-    if CLOptionPresent(OptionName: appArguments.position) {
-        switch CLOptionText(OptionName: appArguments.position) {
+    if appArguments.position.present {
+        switch appArguments.position.value {
         case "topleft":
             appvars.windowPositionVertical = NSWindow.Position.Vertical.top
             appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.left
@@ -601,6 +636,9 @@ func processCLOptionValues() {
     appArguments.iconSize.value                = json[appArguments.iconSize.long].string ?? CLOptionText(OptionName: appArguments.iconSize, DefaultValue: "\(appvars.iconWidth)")
     appArguments.iconSize.present              = json[appArguments.iconSize.long].exists() || CLOptionPresent(OptionName: appArguments.iconSize)
     
+    appArguments.iconAccessabilityLabel.value  = json[appArguments.iconAccessabilityLabel.long].string ?? CLOptionText(OptionName: appArguments.iconAccessabilityLabel, DefaultValue: "Dialog Icon")
+    appArguments.iconAccessabilityLabel.present = json[appArguments.iconAccessabilityLabel.long].exists() || CLOptionPresent(OptionName: appArguments.iconAccessabilityLabel)
+    
     //appArguments.iconHeight.value              = CLOptionText(OptionName: appArguments.iconHeight)
     //appArguments.iconHeight.present            = CLOptionPresent(OptionName: appArguments.iconHeight)
 
@@ -609,7 +647,22 @@ func processCLOptionValues() {
 
     appArguments.bannerImage.value             = json[appArguments.bannerImage.long].string ?? CLOptionText(OptionName: appArguments.bannerImage)
     appArguments.bannerImage.present           = json[appArguments.bannerImage.long].exists() || CLOptionPresent(OptionName: appArguments.bannerImage)
-
+    
+    appArguments.bannerTitle.value             = json[appArguments.bannerTitle.long].string ?? CLOptionText(OptionName: appArguments.bannerTitle, DefaultValue: appArguments.titleOption.value)
+    appArguments.bannerTitle.present           = json[appArguments.bannerTitle.long].exists() || CLOptionPresent(OptionName: appArguments.bannerTitle)
+    
+    appArguments.bannerText.value             = json[appArguments.bannerText.long].string ?? CLOptionText(OptionName: appArguments.bannerText, DefaultValue: appArguments.titleOption.value)
+    appArguments.bannerText.present           = json[appArguments.bannerText.long].exists() || CLOptionPresent(OptionName: appArguments.bannerText)
+    
+    if appArguments.bannerText.present {
+        appArguments.bannerTitle.value = appArguments.bannerText.value
+        appArguments.bannerTitle.present = true
+    }
+    
+    if appArguments.bannerTitle.present {
+        appArguments.titleOption.value = appArguments.bannerTitle.value
+    }
+    
     appArguments.button1TextOption.value       = json[appArguments.button1TextOption.long].string ?? CLOptionText(OptionName: appArguments.button1TextOption, DefaultValue: appvars.button1Default)
     appArguments.button1TextOption.present     = json[appArguments.button1TextOption.long].exists() || CLOptionPresent(OptionName: appArguments.button1TextOption)
 
@@ -626,6 +679,8 @@ func processCLOptionValues() {
 
     appArguments.button2ActionOption.value     = json[appArguments.button2ActionOption.long].string ?? CLOptionText(OptionName: appArguments.button2ActionOption)
     appArguments.button2ActionOption.present   = json[appArguments.button2ActionOption.long].exists() || CLOptionPresent(OptionName: appArguments.button2ActionOption)
+    
+    appArguments.button2Disabled.present       = json[appArguments.button2Disabled.long].exists() || CLOptionPresent(OptionName: appArguments.button2Disabled)
 
     appArguments.buttonInfoTextOption.value    = json[appArguments.buttonInfoTextOption.long].string ?? CLOptionText(OptionName: appArguments.buttonInfoTextOption, DefaultValue: appvars.buttonInfoDefault)
     appArguments.buttonInfoTextOption.present  = json[appArguments.buttonInfoTextOption.long].exists() || CLOptionPresent(OptionName: appArguments.buttonInfoTextOption)
@@ -702,10 +757,13 @@ func processCLOptionValues() {
     
     appArguments.infoText.value                = json[appArguments.infoText.long].string ?? CLOptionText(OptionName: appArguments.infoText, DefaultValue: "swiftDialog \(getVersionString())")
     appArguments.infoText.present              = json[appArguments.infoText.long].exists() || CLOptionPresent(OptionName: appArguments.infoText)
-    
+        
     if (getVersionString().starts(with: "Alpha") || getVersionString().starts(with: "Beta")) && !appArguments.constructionKit.present {
         appArguments.infoText.present = true
     }
+    
+    appArguments.infoBox.value                = json[appArguments.infoBox.long].string ?? CLOptionText(OptionName: appArguments.infoBox)
+    appArguments.infoBox.present              = json[appArguments.infoBox.long].exists() || CLOptionPresent(OptionName: appArguments.infoBox)
     
     appArguments.quitKey.value                 = json[appArguments.quitKey.long].string ?? CLOptionText(OptionName: appArguments.quitKey, DefaultValue: appvars.quitKeyCharacter)
     
@@ -789,7 +847,7 @@ func processCLOptionValues() {
     appArguments.helpOption.present            = CLOptionPresent(OptionName: appArguments.helpOption)
     appArguments.demoOption.present            = CLOptionPresent(OptionName: appArguments.demoOption)
     appArguments.buyCoffee.present             = CLOptionPresent(OptionName: appArguments.buyCoffee)
-    appArguments.showLicense.present           = CLOptionPresent(OptionName: appArguments.showLicense)
+    appArguments.licence.present           = CLOptionPresent(OptionName: appArguments.licence)
     appArguments.jamfHelperMode.present        = CLOptionPresent(OptionName: appArguments.jamfHelperMode)
     appArguments.debug.present                 = CLOptionPresent(OptionName: appArguments.debug)
     appArguments.getVersion.present            = CLOptionPresent(OptionName: appArguments.getVersion)

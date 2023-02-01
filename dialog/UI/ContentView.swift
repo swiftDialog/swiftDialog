@@ -73,7 +73,7 @@ struct ContentView: View {
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                 }
 
-                if observedData.args.titleOption.value != "none" {
+                if observedData.args.titleOption.value != "none" && !appArguments.bannerTitle.present {
                     // Dialog title
                     TitleView(observedData: observedData)
                         .border(appvars.debugBorderColour, width: 2)

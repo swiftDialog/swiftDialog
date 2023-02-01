@@ -31,6 +31,8 @@ struct IconView: View {
     var builtInIconPresent: Bool = false
     var builtInIconWeight = Font.Weight.thin
     
+    var framePadding : CGFloat = 0
+    
     var iconRenderingMode = Image.TemplateRenderingMode.original
     
     var sfSymbolName: String = ""
@@ -79,7 +81,9 @@ struct IconView: View {
             imgFromBase64 = true
         }
         
-        if messageUserImagePath.hasSuffix(".app") || messageUserImagePath.hasSuffix("prefPane") {
+        if ["app", "prefPane", "framework"].contains(messageUserImagePath.split(separator: ".").last) {
+        
+        //if messageUserImagePath.hasSuffix(".app") || messageUserImagePath.hasSuffix("prefPane") {
             imgFromAPP = true
         }
         
@@ -88,9 +92,11 @@ struct IconView: View {
             builtInIconPresent = true
         }
         
-        if messageUserImagePath.hasPrefix("SF=") {
+        if messageUserImagePath.lowercased().hasPrefix("sf=") {
             sfSymbolPresent = true
             builtInIconPresent = true
+            
+            framePadding = 15
             
             //var SFValues = messageUserImagePath.components(separatedBy: ",")
             var SFValues = messageUserImagePath.split(usingRegex: appvars.argRegex)
@@ -105,13 +111,14 @@ struct IconView: View {
                         .replacingOccurrences(of: ",", with: "")
                         .replacingOccurrences(of: "=", with: "")
                         .trimmingCharacters(in: .whitespaces)
+                        .lowercased()
                     
                     if index < SFValues.count-1 {
                         SFArgValue = SFValues[index+1]
                     }
                     
                     switch SFArg {
-                    case "SF":
+                    case "sf":
                         builtInIconName = SFArgValue
                     case "weight":
                         builtInIconWeight = textToFontWeight(SFArgValue)
@@ -203,7 +210,7 @@ struct IconView: View {
                             // macOS 11 doesn't support foregroundStyle so we'll do it the long way
                             // we need to add this twice - once as a clear version to force the right aspect ratio
                             // and again with the gradiet colour we want
-                            // the reason for this is gradient by itself is greedy and will consume the entire height and witch of the display area
+                            // the reason for this is gradient by itself is greedy and will consume the entire height and width of the display area
                             // this causes some SF Symbols like applelogo and applescript to look distorted
                             Image(systemName: builtInIconName)
                                 .renderingMode(iconRenderingMode)
@@ -276,6 +283,7 @@ struct IconView: View {
                 .scaleEffect(overlayImageScale, anchor:.bottomTrailing)
 
         }
+        .padding(framePadding)
         
     }
 }

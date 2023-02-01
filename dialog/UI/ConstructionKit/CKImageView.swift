@@ -24,11 +24,11 @@ struct CKImageView: View {
                 }, label: {
                     Image(systemName: "plus")
                 })
-                Toggle("Show", isOn: $observedData.args.mainImage.present)
+                Toggle("ck-show".localized, isOn: $observedData.args.mainImage.present)
                     .toggleStyle(.switch)
-                Toggle("AutoPlay", isOn: $observedData.args.autoPlay.present)
+                Toggle("ck-autoplay".localized, isOn: $observedData.args.autoPlay.present)
                     .toggleStyle(.switch)
-                TextField("Autoplay Seconds", text: $observedData.args.autoPlay.value)
+                TextField("ck-autoplayseconds".localized, text: $observedData.args.autoPlay.value)
                 Spacer()
             }
             
@@ -42,7 +42,7 @@ struct CKImageView: View {
                         Image(systemName: "trash")
                     })
                     .disabled(true) // MARK: disabled until I can work out how to delete from the array without causing a crash
-                    Button("Select")
+                    Button("ck-select".localized)
                           {
                             let panel = NSOpenPanel()
                             panel.allowsMultipleSelection = false
@@ -52,8 +52,8 @@ struct CKImageView: View {
                                 observedData.imageArray[item].path = panel.url?.path ?? "<none>"
                             }
                           }
-                    TextField("Path", text: $observedData.imageArray[item].path)
-                    TextField("Caption", text: $observedData.imageArray[item].caption)
+                    TextField("ck-path".localized, text: $observedData.imageArray[item].path)
+                    TextField("ck-caption".localized, text: $observedData.imageArray[item].caption)
                 }
             }
             Spacer()

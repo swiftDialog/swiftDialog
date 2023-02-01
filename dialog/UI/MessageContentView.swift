@@ -56,6 +56,7 @@ struct MessageContent: View {
                         //.padding(.top, 15)
                         .padding(.bottom, observedData.appProperties.bottomPadding)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
+                        .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
                 }
                 ImageView(imageArray: observedData.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: string2float(string: observedData.args.autoPlay.value))
             } else {
@@ -65,6 +66,7 @@ struct MessageContent: View {
                         //.padding(.top, 15)
                         .padding(.bottom, observedData.appProperties.bottomPadding)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
+                        .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
                 }
                 if observedData.args.messageOption.value != "" && observedData.args.messageOption.value != "none" {
                     if observedData.args.messageVerticalAlignment.present {
@@ -75,12 +77,16 @@ struct MessageContent: View {
                             .multilineTextAlignment(observedData.appProperties.messageAlignment)
                             .markdownStyle(markdownStyle)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .accessibilityHint(observedData.args.messageOption.value)
+                            .focusable(false)
                     } else {
                         ScrollView() {
                             Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
                                 .multilineTextAlignment(observedData.appProperties.messageAlignment)
                                 .markdownStyle(markdownStyle)
                                 .border(observedData.appProperties.debugBorderColour, width: 2)
+                                .accessibilityHint(observedData.args.messageOption.value)
+                                .focusable(false)
                         }
                     }
                     Spacer()

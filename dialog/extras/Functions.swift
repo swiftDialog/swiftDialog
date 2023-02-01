@@ -30,6 +30,11 @@ public extension Scene {
     }
 }
 
+public extension String {
+var boolValue: Bool {
+    return (self as NSString).boolValue
+}}
+
 func logger(logType: String = "", logMessage: String) {
     let defaultLog = Logger(subsystem: "au.bartreardon.dialog", category: "main")
     switch logType {
@@ -74,6 +79,10 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
     var urlPath = NSURL(string: "")!
     var imageData = NSData()
     
+    let errorImageConfig = NSImage.SymbolConfiguration(pointSize: 200, weight: .thin)
+    let errorImage = NSImage(systemSymbolName: "questionmark.square.dashed", accessibilityDescription: nil)!
+        .withSymbolConfiguration(errorImageConfig)!
+    
     // check if it's base64 image data
     if fileImagePath.hasPrefix("base64") {
         return getImageFromBase64(base64String: fileImagePath.replacingOccurrences(of: "base64=", with: ""))
@@ -91,9 +100,6 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
         imageData = try NSData(contentsOf: urlPath as URL)
     } catch {
         if returnErrorImage! {
-            let errorImageConfig = NSImage.SymbolConfiguration(pointSize: 200, weight: .thin)
-            let errorImage = NSImage(systemSymbolName: "questionmark.square.dashed", accessibilityDescription: nil)!
-                .withSymbolConfiguration(errorImageConfig)!
             return errorImage
         } else {
         
@@ -101,9 +107,9 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
         }
     }
   
-    let image : NSImage = NSImage(data: imageData as Data)!
+    let image : NSImage = NSImage(data: imageData as Data) ?? errorImage
     
-    if let rep = NSImage(data: imageData as Data)!
+    if let rep = NSImage(data: imageData as Data)?
         .bestRepresentation(for: NSRect(x: 0, y: 0, width: imgWidth!, height: imgHeight!), context: nil, hints: nil) {
         image.size = rep.size
         image.addRepresentation(rep)
@@ -292,7 +298,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
             print(json)
         } else  {
             for i in 0..<outputArray.count {
-                print(outputArray[i].replacingOccurrences(of: "\"", with: ""))
+                print(outputArray[i])
             }
         }
     }
@@ -424,6 +430,16 @@ func stringToColour(_ colourValue: String) -> Color {
     return returnColor
     
 }
+
+func colourToString(color: Color) -> String {
+    let components = color.cgColor?.components
+    let r: CGFloat = components?[0] ?? 0.0
+    let g: CGFloat = components?[1] ?? 0.0
+    let b: CGFloat = components?[2] ?? 0.0
+
+    let hexString = String.init(format: "#%02lX%02lX%02lX", lroundf(Float(r * 255)), lroundf(Float(g * 255)), lroundf(Float(b * 255)))
+    return hexString
+ }
 
 func plistFromData(_ data: Data) throws -> [String:Any] {
     try PropertyListSerialization.propertyList(

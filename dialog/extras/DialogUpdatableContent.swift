@@ -100,9 +100,9 @@ class FileReader {
             // Message
             case "\(observedData.args.messageOption.long):" :
                 observedData.args.messageOption.value = line.replacingOccurrences(of: "\(observedData.args.messageOption.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n")
-                //imagePresent = false
-                //imageCaptionPresent = false
-                //listItemPresent = false
+                observedData.args.mainImage.present = false
+                observedData.args.mainImageCaption.present = false
+                observedData.args.listItem.present = false
                 
             // Message Position
             case "alignment:" :
@@ -110,41 +110,31 @@ class FileReader {
                 
             //Progress Bar
             case "\(observedData.args.progressBar.long):" :
-                let incrementValue = line.replacingOccurrences(of: "\(observedData.args.progressBar.long): ", with: "")
-                switch incrementValue {
+                let progressCommand = line.replacingOccurrences(of: "\(observedData.args.progressBar.long): ", with: "")
+                switch progressCommand.split(separator: " ").first {
                 case "increment" :
-                    if observedData.progressTotal == 0 {
-                        observedData.progressTotal = Double(observedData.args.progressBar.value) ?? 100
-                    }
-                    observedData.progressValue = observedData.progressValue + 1
-                case "reset" :
-                    observedData.progressValue = 0
+                    let incrementValue = progressCommand.components(separatedBy: " ").last!
+                    observedData.progressValue = (observedData.progressValue ?? 0) + (Double(incrementValue) ?? 1)
+                case "reset", "indeterminate" :
+                    observedData.progressValue = nil
                 case "complete" :
-                    observedData.progressValue = Double(observedData.args.progressBar.value) ?? 1000
-                case "indeterminate" :
-                //    progressTotal = 0
-                    observedData.progressValue = Double(-1)
-                case "remove" :
+                    observedData.progressValue = observedData.progressTotal
+                case "delete", "remove", "hide" :
                     observedData.args.progressBar.present = false
-                case "create" :
+                case "create", "show" :
                     observedData.args.progressBar.present = true
-                //case "determinate" :
-                //    progressValue = 0
                 default :
-                    if observedData.progressTotal == 0 {
-                        observedData.progressTotal = Double(observedData.args.progressBar.value) ?? 100
+                    if progressCommand == "0" {
+                        observedData.progressValue = nil
+                    } else {
+                        observedData.progressValue = Double(progressCommand) ?? observedData.progressValue
                     }
-                    observedData.progressValue = Double(incrementValue) ?? 0
                 }
                 
             //Progress Bar Label
-            case "\(observedData.args.progressBar.long)text:" :
-                observedData.statusText = line.replacingOccurrences(of: "\(observedData.args.progressBar.long)text: ", with: "")
-                
-            //Progress Bar Label (typo version with capital T)
-            case "\(observedData.args.progressBar.long)Text:" :
-                observedData.statusText = line.replacingOccurrences(of: "\(observedData.args.progressBar.long)Text: ", with: "")
-            
+            case "\(observedData.args.progressText.long):".lowercased() :
+                observedData.args.progressText.value = line.replacingOccurrences(of: "\(observedData.args.progressText.long): ", with: "", options: .caseInsensitive)
+                            
             // Button 1 label
             case "\(observedData.args.button1TextOption.long):" :
                 observedData.args.button1TextOption.value = line.replacingOccurrences(of: "\(observedData.args.button1TextOption.long): ", with: "")
@@ -164,6 +154,18 @@ class FileReader {
             // Button 2 label
             case "\(observedData.args.button2TextOption.long):" :
                 observedData.args.button2TextOption.value = line.replacingOccurrences(of: "\(observedData.args.button2TextOption.long): ", with: "")
+                
+            // Button 2 status
+            case "button2:" :
+                let buttonCMD = line.replacingOccurrences(of: "button2: ", with: "")
+                switch buttonCMD {
+                case "disable" :
+                    observedData.args.button2Disabled.present = true
+                case "enable" :
+                    observedData.args.button2Disabled.present = false
+                default :
+                    observedData.args.button2Disabled.present = false
+                }
             
             // Info Button label
             case "\(observedData.args.infoButtonOption.long):" :
@@ -171,12 +173,18 @@ class FileReader {
                 
             // Info text
             case "\(observedData.args.infoText.long):" :
-                observedData.args.infoText.value = line.replacingOccurrences(of: "\(observedData.args.infoText.long): ", with: "")
-                if observedData.args.infoText.value == "disable" {
+                let infoText = line.replacingOccurrences(of: "\(observedData.args.infoText.long): ", with: "")
+                if infoText == "disable" {
                     observedData.args.infoText.present = false
                 } else {
+                    observedData.args.infoText.value = infoText
                     observedData.args.infoText.present = true
                 }
+                
+            // Info Box
+            case "\(observedData.args.infoBox.long):" :
+                observedData.args.infoBox.value = line.replacingOccurrences(of: "\(observedData.args.infoBox.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n")
+                observedData.args.infoBox.present = true
                 
             // icon image
             case "\(observedData.args.iconOption.long):" :
@@ -219,13 +227,23 @@ class FileReader {
                 
             // image
             case "\(observedData.args.mainImage.long):" :
-                //appvars.imageArray = [line.replacingOccurrences(of: "\(observedData.args.mainImage.long): ", with: "")]
-                appvars.imageArray.append(MainImage(path: line.replacingOccurrences(of: "\(observedData.args.mainImage.long): ", with: "")))
-                //imagePresent = true
+                let argument = line.replacingOccurrences(of: "\(observedData.args.mainImage.long): ", with: "")
+                switch argument.lowercased() {
+                case "show":
+                    observedData.args.mainImage.present = true
+                case "hide":
+                    observedData.args.mainImage.present = false
+                case "clear":
+                    observedData.imageArray.removeAll()
+                default:
+                    observedData.imageArray.append(MainImage(path: argument))
+                    observedData.args.mainImage.present = true
+                }
                 
             // image Caption
             case "\(observedData.args.mainImageCaption.long):" :
                 appvars.imageCaptionArray = [line.replacingOccurrences(of: "\(observedData.args.mainImageCaption.long): ", with: "")]
+                observedData.args.mainImageCaption.present = true
                 //imageCaptionPresent = true
                 
             // list items
@@ -380,7 +398,7 @@ class DialogUpdatableContent : ObservableObject {
     
     @Published var messageText: String
     @Published var statusText: String
-    @Published var progressValue: Double
+    @Published var progressValue: Double?
     @Published var progressTotal: Double
     @Published var iconSize: CGFloat
     
@@ -431,8 +449,8 @@ class DialogUpdatableContent : ObservableObject {
         
         messageText = appArguments.messageOption.value
         statusText = appArguments.progressText.value
-        progressValue = 0
-        progressTotal = 0
+        //progressValue = 0
+        progressTotal = Double(appArguments.progressBar.value) ?? 100
         listItemUpdateRow = 0
         
         iconSize = string2float(string: appArguments.iconSize.value)

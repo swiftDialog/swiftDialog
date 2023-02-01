@@ -25,6 +25,7 @@ func sendNotification(title: String = "", subtitle: String = "", message: String
     notification.requestAuthorization(options: [.alert, .sound]) { granted, error in
         if let error = error {
             print("Notifications are not available: \(error.localizedDescription as Any)")
+            print("Check to see if Notifications for Dialog.app are enabled in notification center")
         }
     }
     
@@ -46,6 +47,10 @@ func sendNotification(title: String = "", subtitle: String = "", message: String
 
                     if image.hasSuffix(".app") || image.hasSuffix("prefPane") {
                         importedImage = getAppIcon(appPath: image)
+                    } else if image.lowercased().hasPrefix("sf=") {
+                        let imageConfig = NSImage.SymbolConfiguration(pointSize: 128, weight: .thin)
+                        importedImage = NSImage(systemSymbolName: String(image.dropFirst(3)), accessibilityDescription: "SF Symbol")!
+                            .withSymbolConfiguration(imageConfig)!
                     } else {
                         importedImage = getImageFromPath(fileImagePath: image)
                     }

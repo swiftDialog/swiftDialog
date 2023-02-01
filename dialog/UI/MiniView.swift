@@ -15,7 +15,8 @@ struct MiniProgressView: View {
         if appArguments.progressBar.present {
             VStack {
                 ProgressView(value: observedData.progressValue, total: observedData.progressTotal)
-                Text(observedData.statusText)
+                    .progressViewStyle(TaskProgressViewStyle())
+                Text(observedData.args.progressText.value)
                     .lineLimit(1)
             }
         }
