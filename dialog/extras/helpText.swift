@@ -13,32 +13,34 @@ struct swiftDialogHelp {
     public func printHelpShort() {
         print("swiftDialog v\(getVersionString())")
         print("©2023 Bart Reardon\n")
+        print("\n use --help <option> for more details\n")
         let mirror = Mirror(reflecting: argument)
         for child in mirror.children {
             if let arg = child.value as? CLArgument {
+                var helpArgs = " --\(arg.long) \(arg.helpUsage)"
+                if arg.short != "" {
+                    helpArgs = " -\(arg.short), \(helpArgs)"
+                }
                 if arg.helpShort != "" {
-                    if arg.short != "" {
-                        print("  -\(arg.short), --\(arg.long) \(arg.helpUsage)")
-                    } else {
-                        print("  --\(arg.long) \(arg.helpUsage)")
-                    }
-                    print("      \(arg.helpShort)\n")
+                    print("  \(helpArgs)\n")
+                    print("\t\(arg.helpShort)\n")
                 }
             }
         }
     }
     
     public func printHelpLong(for selectedArg: String) {
-        print("swiftDialog v\(getVersionString())\n")
         let mirror = Mirror(reflecting: argument)
         for child in mirror.children {
-            if let arg = child.value as? CLArgument, arg.long == selectedArg {
+            if let arg = child.value as? CLArgument, (arg.long == selectedArg || arg.short == selectedArg) {
+                var helpArgs = " --\(arg.long) \(arg.helpUsage)"
                 if arg.short != "" {
-                    print("  -\(arg.short), --\(arg.long) \(arg.helpUsage)")
-                } else {
-                    print("  --\(arg.long) \(arg.helpUsage)")
+                    helpArgs = " -\(arg.short), \(helpArgs)"
                 }
-                print("      \(arg.helpShort)\n")
+                if arg.helpShort != "" {
+                    print("\n  \(helpArgs)\n")
+                }
+                print("\t\(arg.helpShort)\n")
                 print("\(arg.helpLong)\n")
                 return
             }
