@@ -303,7 +303,13 @@ func processCLOptions(json : JSON = getJSON()) {
 
     // process command line options that just display info and exit before we show the main window
     if (appArguments.helpOption.present || CommandLine.arguments.count == 1) {
-        print(helpText)
+        //print(helpText)
+        let sdHelp = swiftDialogHelp(arguments: appArguments)
+        if appArguments.helpOption.value != "" {
+            sdHelp.printHelpLong(for: appArguments.helpOption.value)
+        } else {
+            sdHelp.printHelpShort()
+        }
         quitDialog(exitCode: appvars.exitNow.code)
         //exit(0)
     }
@@ -819,6 +825,9 @@ func processCLOptionValues() {
             }
         }
     }
+    
+    appArguments.helpOption.present            = CLOptionPresent(OptionName: appArguments.helpOption)
+    appArguments.helpOption.value              = CLOptionText(OptionName: appArguments.helpOption)
 
     // anthing that is an option only with no value
     appArguments.button2Option.present         = json[appArguments.button2Option.long].boolValue || CLOptionPresent(OptionName: appArguments.button2Option)
@@ -844,7 +853,6 @@ func processCLOptionValues() {
     
     // command line only options
     appArguments.listFonts.present             = CLOptionPresent(OptionName: appArguments.listFonts)
-    appArguments.helpOption.present            = CLOptionPresent(OptionName: appArguments.helpOption)
     appArguments.demoOption.present            = CLOptionPresent(OptionName: appArguments.demoOption)
     appArguments.buyCoffee.present             = CLOptionPresent(OptionName: appArguments.buyCoffee)
     appArguments.licence.present           = CLOptionPresent(OptionName: appArguments.licence)

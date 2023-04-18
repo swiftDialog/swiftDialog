@@ -100,7 +100,9 @@ struct CLArgument {
     var long: String
     var short: String = ""
     var value : String = ""
-    var help : String = ""
+    var helpShort : String = ""
+    var helpLong : String = ""
+    var helpUsage : String = "<text>"
     var present : Bool = false
     var isbool : Bool = false
 }

@@ -7,7 +7,298 @@
 
 //import Foundation
 
+struct swiftDialogHelp {
+    var argument : CommandLineArguments
+    
+    public func printHelpShort() {
+        print("swiftDialog v\(getVersionString())")
+        print("©2023 Bart Reardon\n")
+        let mirror = Mirror(reflecting: argument)
+        for child in mirror.children {
+            if let arg = child.value as? CLArgument {
+                if arg.helpShort != "" {
+                    if arg.short != "" {
+                        print("  -\(arg.short), --\(arg.long) \(arg.helpUsage)")
+                    } else {
+                        print("  --\(arg.long) \(arg.helpUsage)")
+                    }
+                    print("      \(arg.helpShort)\n")
+                }
+            }
+        }
+    }
+    
+    public func printHelpLong(for selectedArg: String) {
+        print("swiftDialog v\(getVersionString())\n")
+        let mirror = Mirror(reflecting: argument)
+        for child in mirror.children {
+            if let arg = child.value as? CLArgument, arg.long == selectedArg {
+                if arg.short != "" {
+                    print("  -\(arg.short), --\(arg.long) \(arg.helpUsage)")
+                } else {
+                    print("  --\(arg.long) \(arg.helpUsage)")
+                }
+                print("      \(arg.helpShort)\n")
+                print("\(arg.helpLong)\n")
+                return
+            }
+        }
+        print("No argument found with the given name: \(selectedArg)")
+    }
+    
+    init(arguments: CommandLineArguments) {
+        argument = arguments
+        
+        argument.titleOption.helpShort = "Set the Dialog title"
+        argument.titleOption.helpLong = """
+        Text beyond the length of the title area will get truncated
+        Default Title is \"\(appvars.titleDefault)\"
+        Use keyword "none" to disable the title area entirely
+"""
+        
+        argument.subTitleOption.helpShort = "Text to use as subtitle when sending a system notification"
+        argument.subTitleOption.helpLong = "\tFor additional information see --\(appArguments.notification.long))"
+        
+        argument.titleFont.helpShort = "Lets you modify the title text of the dialog"
+        argument.titleFont.helpLong = """
+        Can accept up to three parameters, in a comma seperated list, to modify font properties.
 
+            color,colour=<text><hex>  - specified in hex format, e.g. #00A4C7
+                                        Also accepts any of the standard Apple colours
+                                        black, blue, gray, green, orange, pink, purple, red, white, yellow
+                                        default if option is invalid is system primary colour
+
+            size=<float>              - accepts any float value.
+
+            name=<fontname>           - accepts a font name or family
+                                        list of available names can be determined with --\(appArguments.listFonts.long)
+
+            weight=[thin | light | regular | medium | heavy | bold]
+                default is bold
+
+        Example1: \"colour=#00A4C7,weight=light,size=60\"
+        Example2: \"name=Chalkboard,colour=#FFD012,size=40\"
+"""
+        
+        argument.messageOption.helpShort = "Set the dialog message"
+        argument.messageOption.helpLong = """
+        Messages can be plain text or can include Markdown
+        Markdown follows the CommonMark Spec https://spec.commonmark.org/current/
+        The message can be of any length. If it is larger than the viewable area
+        The message contents will be presented in  scrolable area.
+"""
+        
+        argument.messageAlignment.helpShort = "Set the message alignment"
+        argument.messageAlignment.helpUsage = "[left | centre | center | right]"
+        argument.messageAlignment.helpLong = """
+        Positions the message within the dialog window
+        Default is 'left' aligned
+"""
+        
+        argument.messageVerticalAlignment.helpShort = "Set the message position"
+        argument.messageVerticalAlignment.helpLong = ""
+        
+        argument.messageFont.helpShort = "Set the message font of the dialog"
+        argument.messageFont.helpLong = ""
+        
+        argument.notification.helpShort = "Send a system notification"
+        argument.notification.helpLong = ""
+        
+        argument.webcontent.helpShort = "Display a web page"
+        argument.webcontent.helpLong = ""
+        
+        argument.mainImage.helpShort = "Display an image"
+        argument.mainImage.helpLong = ""
+        
+        argument.mainImageCaption.helpShort = "Display a caption underneath an image"
+        argument.mainImageCaption.helpLong = ""
+        
+        argument.video.helpShort = "Display a video"
+        argument.video.helpLong = ""
+        
+        argument.videoCaption.helpShort = "Display a caption underneath a video"
+        argument.videoCaption.helpLong = ""
+        
+        argument.autoPlay.helpShort = "Enable video autoplay"
+        argument.autoPlay.helpLong = ""
+        
+        argument.iconOption.helpShort = "Set the dialog icon"
+        argument.iconOption.helpLong = ""
+        
+        argument.iconSize.helpShort = "Set the dialog icon size"
+        argument.iconSize.helpLong = ""
+        
+        argument.centreIcon.helpShort = "Set icon to be in the centre"
+        argument.centreIcon.helpLong = ""
+        
+        argument.overlayIconOption.helpShort = "Set an image to display as an overlay to --icon"
+        argument.overlayIconOption.helpLong = ""
+        
+        argument.hideIcon.helpShort = "Hides the icon from view"
+        argument.hideIcon.helpLong = ""
+        
+        argument.button1TextOption.helpShort = "Set the label for Button1"
+        argument.button1TextOption.helpLong = ""
+        
+        argument.button1ActionOption.helpShort = "Set the Button1 action"
+        argument.button1ActionOption.helpLong = ""
+        
+        argument.button1Disabled.helpShort = "Disable Button1"
+        argument.button1Disabled.helpLong = ""
+        
+        argument.button2Option.helpShort = "Displays Button2 (with optional <text>)"
+        argument.button2Option.helpLong = ""
+        
+        argument.button2TextOption.helpShort = "Displays Button2 with <text>"
+        argument.button2TextOption.helpLong = ""
+        
+        argument.button2ActionOption.helpShort = "Custom Actions For Button 2 Is Not Implemented"
+        argument.button2ActionOption.helpLong = ""
+        
+        argument.button2Disabled.helpShort = "Disable Button2"
+        argument.button2Disabled.helpLong = ""
+        
+        argument.infoButtonOption.helpShort = "Displays info button"
+        argument.infoButtonOption.helpLong = ""
+        
+        argument.buttonInfoTextOption.helpShort = "Displays info button with <text>"
+        argument.buttonInfoTextOption.helpLong = ""
+        
+        argument.buttonInfoActionOption.helpShort = "Set the info button action"
+        argument.buttonInfoActionOption.helpLong = ""
+        
+        
+        argument.infoText.helpShort = "Display <text> in place of info button"
+        argument.infoText.helpLong = ""
+        
+        argument.infoBox.helpShort = "Display <text> in info box"
+        argument.infoBox.helpLong = ""
+        
+        argument.helpMessage.helpShort = "Enable help button with contect <text>"
+        argument.helpMessage.helpLong = ""
+        
+        argument.quitOnInfo.helpShort = "Quit when info button is selected"
+        argument.quitOnInfo.helpLong = ""
+        
+        argument.fullScreenWindow.helpShort = "Enable full screen view"
+        argument.fullScreenWindow.helpLong = ""
+        
+        argument.blurScreen.helpShort = "Blur screen content behind dialog window"
+        argument.blurScreen.helpLong = ""
+        
+        argument.progressBar.helpShort = "Enable interactive progress bar"
+        argument.progressBar.helpLong = ""
+        
+        argument.progressText.helpShort = "Enable the progress text with <text>"
+        argument.progressText.helpLong = ""
+        
+        argument.statusLogFile.helpShort = "Set command file path"
+        argument.statusLogFile.helpLong = ""
+        
+        argument.bannerImage.helpShort = "Enable banner image"
+        argument.bannerImage.helpLong = ""
+        
+        argument.bannerTitle.helpShort = "Enable title within banner area"
+        argument.bannerTitle.helpLong = ""
+        
+        argument.bannerText.helpShort = "Set text to display in banner area (implies \(argument.bannerTitle.long) and \(argument.titleOption.long)"
+        argument.bannerText.helpLong = ""
+        
+        argument.dropdownTitle.helpShort = "Select list name"
+        argument.dropdownTitle.helpLong = ""
+        
+        argument.dropdownValues.helpShort = "Select list values"
+        argument.dropdownValues.helpLong = ""
+        
+        argument.dropdownDefault.helpShort = "Default select list value"
+        argument.dropdownDefault.helpLong = ""
+        
+        argument.textField.helpShort = "Enable a textfield with the specified label"
+        argument.textField.helpLong = ""
+        
+        argument.checkbox.helpShort = "Enable a checkbox with the specified label"
+        argument.checkbox.helpLong = ""
+        
+        argument.listItem.helpShort = "Enable a list item with the specified label"
+        argument.listItem.helpLong = ""
+        
+        argument.listStyle.helpShort = "Set list style [expanded|compact]"
+        argument.listStyle.helpLong = ""
+        
+        argument.watermarkImage.helpShort = "Set <file> as dialog background image"
+        argument.watermarkImage.helpLong = ""
+        
+        argument.watermarkAlpha.helpShort = "Set background image transparancy"
+        argument.watermarkAlpha.helpLong = ""
+        
+        argument.watermarkPosition.helpShort = "Set background image position"
+        argument.watermarkPosition.helpLong = ""
+        
+        argument.watermarkFill.helpShort = "Set background image fill type"
+        argument.watermarkFill.helpLong = ""
+        
+        argument.watermarkScale.helpShort = "Enable background image scaling"
+        argument.watermarkScale.helpLong = ""
+        
+        argument.windowWidth.helpShort = "Set dialog window width"
+        argument.windowWidth.helpLong = ""
+        
+        argument.windowHeight.helpShort = "Set dialog window width"
+        argument.windowHeight.helpLong = ""
+        
+        argument.position.helpShort = "Set dialog window position"
+        argument.position.helpLong = ""
+        
+        argument.timerBar.helpShort = "Enable countdown timer (with <seconds>)"
+        argument.timerBar.helpLong = ""
+        
+        argument.hideTimerBar.helpShort = "Hide countdown timer if enabled"
+        argument.hideTimerBar.helpLong = ""
+        
+        argument.movableWindow.helpShort = "Enable dialog to be moveable"
+        argument.movableWindow.helpLong = ""
+        
+        argument.forceOnTop.helpShort = "Enable dialog to be always positioned on top of other windows"
+        argument.forceOnTop.helpLong = ""
+        
+        argument.bigWindow.helpShort = "Enable 25% increase in default window size"
+        argument.bigWindow.helpLong = ""
+        
+        argument.smallWindow.helpShort = "Enable 25% decrease in default window size"
+        argument.smallWindow.helpLong = ""
+        
+        argument.miniMode.helpShort = "Enable mini mode"
+        argument.miniMode.helpLong = ""
+        
+        argument.jsonOutPut.helpShort = "Enable JSON output"
+        argument.jsonOutPut.helpLong = ""
+        
+        argument.jsonFile.helpShort = "Read dialog settings from JSON formatted <file>"
+        argument.jsonFile.helpLong = ""
+        
+        argument.jsonString.helpShort = "Read dialog settings from JSON formatted <string>"
+        argument.jsonString.helpLong = ""
+        
+        argument.quitKey.helpShort = "Set dialog quit key"
+        argument.quitKey.helpLong = ""
+        
+        argument.ignoreDND.helpShort = "Ignore user do-not-disturb settings"
+        argument.ignoreDND.helpLong = ""
+        
+        argument.jamfHelperMode.helpShort = "Enable jamfHelper mode"
+        argument.jamfHelperMode.helpLong = ""
+        
+        argument.getVersion.helpShort = "Print version string"
+        argument.getVersion.helpLong = ""
+        
+        argument.licence.helpShort = "Print license"
+        argument.licence.helpLong = ""
+        
+        argument.helpOption.helpShort = "Print help"
+        argument.helpOption.helpLong = ""
+    }
+    
+}
 
 
 var helpText = """
