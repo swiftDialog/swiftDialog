@@ -22,7 +22,7 @@ struct ImageView: View {
         //for imagePath in imageArray {
         for i in 0..<imageArray.count {
                 if imageArray[i].path != "" {
-                    images.append(getImageFromPath(fileImagePath: imageArray[i].path))
+                    images.append(getImageFromPath(fileImagePath: imageArray[i].path, returnErrorImage: true))
                     captions.append(imageArray[i].caption)
                 }
                 //if imageArray[i].caption != "" {

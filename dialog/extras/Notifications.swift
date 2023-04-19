@@ -52,7 +52,7 @@ func sendNotification(title: String = "", subtitle: String = "", message: String
                         importedImage = NSImage(systemSymbolName: String(image.dropFirst(3)), accessibilityDescription: "SF Symbol")!
                             .withSymbolConfiguration(imageConfig)!
                     } else {
-                        importedImage = getImageFromPath(fileImagePath: image)
+                        importedImage = getImageFromPath(fileImagePath: image, returnErrorImage: true)
                     }
                     
                     // need to save a temp version of the image for the notification to be able to load it
