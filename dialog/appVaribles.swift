@@ -58,6 +58,8 @@ struct DropDownItems {
     var values          : [String]
     var defaultValue    : String
     var selectedValue   : String = ""
+    var required        : Bool   = false
+    var requiredfieldHighlight : Color = .clear
 }
 
 struct CheckBoxes {

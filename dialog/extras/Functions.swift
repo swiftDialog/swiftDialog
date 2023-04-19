@@ -280,11 +280,26 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
                 outputArray.append("\"SelectedIndex\" : \(observedObject?.appProperties.dropdownItems[0].values.firstIndex(of: (observedObject?.appProperties.dropdownItems[0].selectedValue)!) ?? -1)")
                 json["SelectedIndex"].int = observedObject?.appProperties.dropdownItems[0].values.firstIndex(of: observedObject?.appProperties.dropdownItems[0].selectedValue ?? "") ?? -1
             }
+            // check to see if fields marked as required have content before allowing the app to exit
+            // if there is an empty field, update the highlight colour
+            var dontQuit = false
             for i in 0..<(observedObject?.appProperties.dropdownItems.count ?? 0) {
-                outputArray.append("\"\(observedObject?.appProperties.dropdownItems[i].title ?? "")\" : \"\(observedObject?.appProperties.dropdownItems[i].selectedValue ?? "")\"")
-                outputArray.append("\"\(observedObject?.appProperties.dropdownItems[i].title ?? "")\" index : \"\(observedObject?.appProperties.dropdownItems[i].values.firstIndex(of: observedObject?.appProperties.dropdownItems[i].selectedValue ?? "") ?? -1)\"")
-                json[observedObject?.appProperties.dropdownItems[i].title ?? ""] = ["selectedValue" : observedObject?.appProperties.dropdownItems[i].selectedValue ?? "", "selectedIndex" : observedObject?.appProperties.dropdownItems[i].values.firstIndex(of: observedObject?.appProperties.dropdownItems[i].selectedValue ?? "") ?? -1]
+                if observedObject?.appProperties.dropdownItems[i].required ?? false && observedObject?.appProperties.dropdownItems[i].selectedValue == "" {
+                    NSSound.beep()
+                    let requiredString = (observedObject?.appProperties.dropdownItems[i].selectedValue ?? "")+" "+"is-required".localized
+                    observedObject?.appProperties.dropdownItems[i].requiredfieldHighlight = Color.red
+                    if !(observedObject?.sheetErrorMessage.contains(requiredString) ?? false) {
+                        observedObject?.sheetErrorMessage += "• "+(observedObject?.appProperties.dropdownItems[i].title ?? "")+" "+"is-required".localized+"\n"
+                    }
+                    dontQuit = true
+                    observedObject?.showSheet = true
+                } else {
+                    outputArray.append("\"\(observedObject?.appProperties.dropdownItems[i].title ?? "")\" : \"\(observedObject?.appProperties.dropdownItems[i].selectedValue ?? "")\"")
+                    outputArray.append("\"\(observedObject?.appProperties.dropdownItems[i].title ?? "")\" index : \"\(observedObject?.appProperties.dropdownItems[i].values.firstIndex(of: observedObject?.appProperties.dropdownItems[i].selectedValue ?? "") ?? -1)\"")
+                    json[observedObject?.appProperties.dropdownItems[i].title ?? ""] = ["selectedValue" : observedObject?.appProperties.dropdownItems[i].selectedValue ?? "", "selectedIndex" : observedObject?.appProperties.dropdownItems[i].values.firstIndex(of: observedObject?.appProperties.dropdownItems[i].selectedValue ?? "") ?? -1]
+                }
             }
+            if dontQuit { return }
         }
         
         if appArguments.textField.present {

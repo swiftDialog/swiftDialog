@@ -14,6 +14,7 @@ struct DropdownView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
     @State var selectedOption : [String]
+    @State private var showingSheet = false
 
     var fieldwidth: CGFloat = 0
     
@@ -39,7 +40,7 @@ struct DropdownView: View {
                     HStack {
                         // we could print the title as part of the picker control but then we don't get easy access to swiftui text formatting
                         // so we print it seperatly and use a blank value in the picker
-                        Text(observedData.appProperties.dropdownItems[index].title)
+                        Text(observedData.appProperties.dropdownItems[index].title + (observedData.appProperties.dropdownItems[index].required ? " *":""))
                             .bold()
                             .font(.system(size: 15))
                             .frame(idealWidth: fieldwidth*0.20, alignment: .leading)
@@ -58,6 +59,13 @@ struct DropdownView: View {
                         }
                         .pickerStyle(DefaultPickerStyle())
                         .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
+                        .overlay(RoundedRectangle(cornerRadius: 5)
+                                    .stroke(observedData.appProperties.dropdownItems[index].requiredfieldHighlight, lineWidth: 2)
+                                    .animation(
+                                        .easeIn(duration: 0.2)
+                                        .repeatCount(3, autoreverses: true)
+                                    )
+                                 )
                     }
                 }
             }

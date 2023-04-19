@@ -444,6 +444,12 @@ struct swiftDialogHelp {
             {"title" : "Select 1", "values" : ["one","two","three"]},
             {"title" : "Select 2", "values" : ["red","green","blue"], "default" : "red"}
         ]
+
+        Use the additional option "required" to make that item a required input:
+            on the command line
+                --\(argument.dropdownTitle.long) "<name>",required
+            in JSON
+                "selectitems" : [{"title" : "Select 1", "values" : ["one","two","three"], "required" : true}]
 """
         
         argument.dropdownValues.helpShort = "Select list values"

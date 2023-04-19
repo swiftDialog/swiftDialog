@@ -71,30 +71,39 @@ func processCLOptions(json : JSON = getJSON()) {
         }
 
         if json["selectitems"].exists() {
-            for i in 0..<json["selectitems"].count {
-
-                let selectTitle = json["selectitems"][i]["title"].stringValue
-                let selectValues = (json["selectitems"][i]["values"].arrayValue.map {$0.stringValue}).map { $0.trimmingCharacters(in: .whitespaces) }
-                let selectDefault = json["selectitems"][i]["default"].stringValue
-                
-                appvars.dropdownItems.append(DropDownItems(title: selectTitle, values: selectValues, defaultValue: selectDefault, selectedValue: selectDefault))
+            for i in 0..<json["selectitems"].count {                
+                appvars.dropdownItems.append(DropDownItems(
+                        title: json["selectitems"][i]["title"].stringValue,
+                        values: (json["selectitems"][i]["values"].arrayValue.map {$0.stringValue}).map { $0.trimmingCharacters(in: .whitespaces) },
+                        defaultValue: json["selectitems"][i]["default"].stringValue,
+                        selectedValue: json["selectitems"][i]["default"].stringValue,
+                        required: json["selectitems"][i]["required"].boolValue
+                ))
             }
 
         } else {
             let dropdownValues = CLOptionMultiOptions(optionName: appArguments.dropdownValues.long)
-            var selectValues = CLOptionMultiOptions(optionName: appArguments.dropdownTitle.long)
+            var dropdownLabels = CLOptionMultiOptions(optionName: appArguments.dropdownTitle.long)
             var dropdownDefaults = CLOptionMultiOptions(optionName: appArguments.dropdownDefault.long)
             
             // need to make sure the title and default value arrays are the same size
-            for _ in selectValues.count..<dropdownValues.count {
-                selectValues.append("")
+            for _ in dropdownLabels.count..<dropdownValues.count {
+                dropdownLabels.append("")
             }
             for _ in dropdownDefaults.count..<dropdownValues.count {
                 dropdownDefaults.append("")
             }
 
             for i in 0..<(dropdownValues.count) {
-                appvars.dropdownItems.append(DropDownItems(title: selectValues[i], values: dropdownValues[i].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[i], selectedValue: dropdownDefaults[i]))
+                let labelItems = dropdownLabels[i].components(separatedBy: ",")
+                var dropdownRequired : Bool = false
+                var dropdownTitle : String = labelItems[0]
+                if labelItems.count > 1 {
+                    if labelItems[1] == "required" {
+                        dropdownRequired = true
+                    }
+                }
+                appvars.dropdownItems.append(DropDownItems(title: dropdownTitle, values: dropdownValues[i].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[i], selectedValue: dropdownDefaults[i], required: dropdownRequired))
             }
         }
     }
@@ -715,6 +724,7 @@ func processCLOptionValues() {
     appArguments.checkbox.present             = json[appArguments.checkbox.long].exists() || CLOptionPresent(OptionName: appArguments.checkbox)
     
     appArguments.checkboxStyle.present        = json[appArguments.checkboxStyle.long].exists() || CLOptionPresent(OptionName: appArguments.checkboxStyle)
+    appArguments.checkboxStyle.value          = json[appArguments.checkboxStyle.long].string ?? CLOptionText(OptionName: appArguments.checkboxStyle)
     appArguments.checkboxStyle.value          = json[appArguments.checkboxStyle.long].string ?? CLOptionText(OptionName: appArguments.checkboxStyle)
 
     appArguments.timerBar.value                = json[appArguments.timerBar.long].string ?? CLOptionText(OptionName: appArguments.timerBar, DefaultValue: "\(appvars.timerDefaultSeconds)")
