@@ -11,12 +11,7 @@ struct CheckboxView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
     
-    //@State var checkboxValues = appvars.checkboxValue
-    // @State var textFieldValue = ""
-    // var textFieldLabel = CLOptionText(OptionName: appArguments.textField)
-    //let checkboxLabels = appvars.checkboxOptionsArray
-    //let checkboxDisabled = appvars.checkboxDisabled
-    //var checkboxPresent: Bool = appArguments.checkbox.present
+    var toggleStyle : any ToggleStyle = .checkbox
 
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent
@@ -27,14 +22,23 @@ struct CheckboxView: View {
             VStack {
                 ForEach(0..<observedData.appProperties.checkboxOptionsArray.count, id: \.self) {index in
                     HStack {
-                        Toggle(observedData.appProperties.checkboxOptionsArray[index], isOn: $observedData.appProperties.checkboxValue[index])
-                            .toggleStyle(.checkbox)
-                            .disabled(observedData.appProperties.checkboxDisabled[index])
-                        // Text(checkboxLabels[i])
-                        Spacer()
+                        if observedData.args.checkboxStyle.value == "switch" {
+                            Text(observedData.appProperties.checkboxOptionsArray[index])
+                                //.frame(minWidth: 120, alignment: .leading)
+                            Spacer()
+                            Toggle("", isOn: $observedData.appProperties.checkboxValue[index])
+                                .toggleStyle(.switch)
+                                .disabled(observedData.appProperties.checkboxDisabled[index])
+                        } else {
+                            Toggle(observedData.appProperties.checkboxOptionsArray[index], isOn: $observedData.appProperties.checkboxValue[index])
+                                .toggleStyle(.checkbox)
+                                .disabled(observedData.appProperties.checkboxDisabled[index])
+                            Spacer()
+                        }
                     }
                     .font(.system(size: 16))
                     .frame(alignment: .center)
+                    .frame(width: .infinity)
                 }
             }
         }

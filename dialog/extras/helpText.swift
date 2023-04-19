@@ -98,9 +98,17 @@ struct swiftDialogHelp {
 """
         
         argument.messageVerticalAlignment.helpShort = "Set the message position"
-        argument.messageVerticalAlignment.helpUsage = "[top* | centre | center | bottom*]"
+        argument.messageVerticalAlignment.helpUsage = "[top | centre | center | bottom]"
         argument.messageVerticalAlignment.helpLong = """
-        * the only supported option at this time is [center]
+        Positions the message content with the specified vertical positioning.
+
+        Content is affected as a block, and include any items present in the content area, including:
+            Message
+            Web Content
+            Lists
+            Checkboxs
+            Text entry fields
+            Dropdown lists
 """
         
         argument.messageFont.helpShort = "Set the message font of the dialog"
@@ -479,6 +487,21 @@ struct swiftDialogHelp {
         When swiftDialog exits the status of the checkbox will be presented as <text> : [true|false]
         in plain or as json using [-\(appArguments.jsonOutPut.short), --\(appArguments.jsonOutPut.long)] option
         Multiple checkboxes can be specified as required.
+
+        Use --\(appArguments.checkboxStyle.long) to change appearance
+"""
+        
+        argument.checkboxStyle.helpShort = "Change the appearance of checkboxes"
+        argument.checkboxStyle.helpUsage = "default|checkbox|switch"
+        argument.checkboxStyle.helpLong = """
+        Changes the appearance of checkboxes to be either checkbox style or switch style.
+
+        Argument is one of:
+            checkbox
+            switch
+
+        Default is "checkbox"
+        
 """
         
         argument.listItem.helpShort = "Enable a list item with the specified label"

@@ -268,6 +268,7 @@ struct CommandLineArguments {
     var messageFont              = CLArgument(long: "messagefont")
     var textField                = CLArgument(long: "textfield")
     var checkbox                 = CLArgument(long: "checkbox")
+    var checkboxStyle            = CLArgument(long: "checkboxstyle")
     var timerBar                 = CLArgument(long: "timer")
     var progressBar              = CLArgument(long: "progress")
     var progressText             = CLArgument(long: "progresstext")
