@@ -181,7 +181,7 @@ struct dialogApp: App {
                 .frame(width: 0, height: 0) //ensures WindowAccessor isn't taking up any real estate
                 if !appArguments.notification.present {
                     if appArguments.miniMode.present {
-                        MiniView(observedContent: observedData)
+                        MiniView(observedDialogContent: observedData)
                             .frame(width: observedData.windowWidth, height: observedData.windowHeight)
                     } else {
                         ContentView(observedDialogContent: observedData)
