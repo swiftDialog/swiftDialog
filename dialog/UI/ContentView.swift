@@ -90,11 +90,7 @@ struct ContentView: View {
                         .frame(height: observedData.appProperties.sidePadding)
                 }
                 
-                if observedData.args.video.present {
-                    VideoView(videourl: observedData.args.video.value, autoplay: observedData.args.autoPlay.present, caption: observedData.args.videoCaption.value)
-                } else {
-                    DialogView(observedDialogContent: observedData)
-                }
+                DialogView(observedDialogContent: observedData)
                 
                 Spacer()
                 
