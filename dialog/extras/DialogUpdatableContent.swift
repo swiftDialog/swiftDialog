@@ -371,7 +371,11 @@ class FileReader {
             case "\(observedData.args.helpMessage.long):" :
                 observedData.args.helpMessage.value = line.replacingOccurrences(of: "\(observedData.args.helpMessage.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n")
                 observedData.args.helpMessage.present = true
-                
+            
+            // activate
+            case "activate:" :
+                NSApp.activate(ignoringOtherApps: true)
+            
             // quit
             case "quit:" :
                 quitDialog(exitCode: appvars.exit5.code)
