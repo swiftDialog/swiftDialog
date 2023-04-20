@@ -97,7 +97,7 @@ func processCLOptions(json : JSON = getJSON()) {
             for i in 0..<(dropdownValues.count) {
                 let labelItems = dropdownLabels[i].components(separatedBy: ",")
                 var dropdownRequired : Bool = false
-                var dropdownTitle : String = labelItems[0]
+                let dropdownTitle : String = labelItems[0]
                 if labelItems.count > 1 {
                     if labelItems[1] == "required" {
                         dropdownRequired = true
@@ -196,13 +196,68 @@ func processCLOptions(json : JSON = getJSON()) {
     
     if appArguments.checkbox.present {
         if json[appArguments.checkbox.long].exists() {
-            appvars.checkboxOptionsArray = json[appArguments.checkbox.long].arrayValue.map {$0["label"].stringValue}
-            appvars.checkboxValue = json[appArguments.checkbox.long].arrayValue.map {$0["checked"].boolValue}
-            appvars.checkboxDisabled = json[appArguments.checkbox.long].arrayValue.map {$0["disabled"].boolValue}
+            for i in 0..<json[appArguments.checkbox.long].arrayValue.count {
+                let cbLabel = json[appArguments.checkbox.long][i]["label"].stringValue
+                let cbChecked = json[appArguments.checkbox.long][i]["checked"].boolValue
+                let cbDisabled = json[appArguments.checkbox.long][i]["disabled"].boolValue
+                let cbIcon = json[appArguments.checkbox.long][i]["icon"].stringValue
+                
+                appvars.checkboxArray.append(CheckBoxes(label: cbLabel, icon: cbIcon, checked: cbChecked, disabled: cbDisabled))
+            }
         } else {
-            appvars.checkboxOptionsArray =  CLOptionMultiOptions(optionName: appArguments.checkbox.long)
+            for checkboxes in CLOptionMultiOptions(optionName: appArguments.checkbox.long) {
+                let items = checkboxes.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                var label : String = ""
+                var icon : String = ""
+                var checked : Bool = false
+                var disabled : Bool = false
+                for item in items {
+                    var itemKeyValuePair = item.split(separator: "=", maxSplits: 1)
+                    for _ in itemKeyValuePair.count...2 {
+                        itemKeyValuePair.append("")
+                    }
+                    let itemName = String(itemKeyValuePair[0])
+                    let itemValue = String(itemKeyValuePair[1])
+                    switch itemName.lowercased() {
+                    case "label":
+                        label = itemValue
+                    case "icon":
+                        icon = itemValue
+                    case "checked":
+                        checked = true
+                    case "disabled":
+                        disabled = true
+                    default:
+                        label = itemName
+                    }
+                }
+                appvars.checkboxArray.append(CheckBoxes(label: label, icon: icon, checked: checked, disabled: disabled))
+            }
         }
-        logger(logMessage: "checkboxOptionsArray : \(appvars.checkboxOptionsArray)")
+        logger(logMessage: "checkboxOptionsArray : \(appvars.checkboxArray)")
+    }
+    
+    if appArguments.checkboxStyle.present {
+        var controlSize = ""
+        if json[appArguments.checkboxStyle.long].exists() {
+            appvars.checkboxControlStyle = json[appArguments.checkboxStyle.long]["style"].stringValue
+            controlSize = json[appArguments.checkboxStyle.long]["size"].stringValue
+        } else {
+            appvars.checkboxControlStyle = appArguments.checkboxStyle.value.components(separatedBy: ",").first ?? "checkbox"
+            controlSize = appArguments.checkboxStyle.value.components(separatedBy: ",").last ?? ""
+        }
+        switch controlSize {
+        case "regular":
+            appvars.checkboxControlSize = .regular
+        case "small":
+            appvars.checkboxControlSize = .small
+        case "large":
+            appvars.checkboxControlSize = .large
+        case "mini":
+            appvars.checkboxControlSize = .mini
+        default:
+            appvars.checkboxControlSize = .mini
+        }
     }
     
     if appArguments.mainImage.present {
@@ -724,7 +779,6 @@ func processCLOptionValues() {
     appArguments.checkbox.present             = json[appArguments.checkbox.long].exists() || CLOptionPresent(OptionName: appArguments.checkbox)
     
     appArguments.checkboxStyle.present        = json[appArguments.checkboxStyle.long].exists() || CLOptionPresent(OptionName: appArguments.checkboxStyle)
-    appArguments.checkboxStyle.value          = json[appArguments.checkboxStyle.long].string ?? CLOptionText(OptionName: appArguments.checkboxStyle)
     appArguments.checkboxStyle.value          = json[appArguments.checkboxStyle.long].string ?? CLOptionText(OptionName: appArguments.checkboxStyle)
 
     appArguments.timerBar.value                = json[appArguments.timerBar.long].string ?? CLOptionText(OptionName: appArguments.timerBar, DefaultValue: "\(appvars.timerDefaultSeconds)")

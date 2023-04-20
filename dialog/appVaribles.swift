@@ -63,8 +63,9 @@ struct DropDownItems {
 }
 
 struct CheckBoxes {
-    var title           : String
-    var value           : Bool = false
+    var label           : String
+    var icon            : String = ""
+    var checked         : Bool = false
     var disabled        : Bool = false
 }
 
@@ -192,11 +193,10 @@ struct AppVariables {
     var jsonOut                         = Bool(false)
 
     var willDisturb                     = Bool(false)
-
-    var checkboxOptionsArray            = [String]()
-    var checkboxText                    = Array(repeating: "", count: 64)
-    var checkboxValue                   = Array(repeating: false, count: 64)
-    var checkboxDisabled                = Array(repeating: false, count: 64)
+    
+    var checkboxArray                   = [CheckBoxes]()
+    var checkboxControlSize             = ControlSize.mini
+    var checkboxControlStyle            = ""
 
     var imageArray                      = [MainImage]()
     var imageCaptionArray               = [String]()

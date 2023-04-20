@@ -336,9 +336,9 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
             if dontQuit { return }
         }
         if ((observedObject?.args.checkbox.present) != nil) {
-            for i in 0..<(observedObject?.appProperties.checkboxOptionsArray.count ?? 0) {
-                outputArray.append("\"\(observedObject?.appProperties.checkboxOptionsArray[i] ?? "checkbox \(i)")\" : \"\(observedObject?.appProperties.checkboxValue[i] ?? false)\"")
-                json[observedObject?.appProperties.checkboxOptionsArray[i] ?? 0].boolValue = observedObject?.appProperties.checkboxValue[i] ?? false
+            for i in 0..<(observedObject?.appProperties.checkboxArray.count ?? 0) {
+                outputArray.append("\"\(observedObject?.appProperties.checkboxArray[i].label ?? "checkbox \(i)")\" : \"\(observedObject?.appProperties.checkboxArray[i].checked ?? false)\"")
+                json[observedObject?.appProperties.checkboxArray[i].label ?? 0].boolValue = observedObject?.appProperties.checkboxArray[i].checked ?? false
             }
         }
                  

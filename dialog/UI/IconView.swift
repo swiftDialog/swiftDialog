@@ -88,8 +88,9 @@ struct IconView: View {
         }
         
         if messageUserImagePath == "none" {
-            builtInIconName = "" 
+            builtInIconName = "circle.fill"
             builtInIconPresent = true
+            builtInIconColour = .clear
         }
         
         if messageUserImagePath.lowercased().hasPrefix("sf=") {

@@ -107,8 +107,8 @@ struct MessageContent: View {
                 
                 CheckboxView(observedDialogContent: observedData)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .padding(.bottom, observedData.appProperties.bottomPadding)
-                    .frame(maxWidth: 600)
+                    //.padding(.bottom, observedData.appProperties.bottomPadding)
+                    //.frame(maxWidth: 600)
                 
                 TextEntryView(observedDialogContent: observedData)
                     .padding(.bottom, observedData.appProperties.bottomPadding)

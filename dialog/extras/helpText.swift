@@ -498,16 +498,23 @@ struct swiftDialogHelp {
 """
         
         argument.checkboxStyle.helpShort = "Change the appearance of checkboxes"
-        argument.checkboxStyle.helpUsage = "default|checkbox|switch"
+        argument.checkboxStyle.helpUsage = "default|checkbox|switch[,<size>]"
         argument.checkboxStyle.helpLong = """
         Changes the appearance of checkboxes to be either checkbox style or switch style.
 
         Argument is one of:
-            checkbox
+            checkbox (default)
             switch
 
-        Default is "checkbox"
-        
+        switch style allows the following properties to set the size:
+            mini
+            small
+            regular
+            large
+
+        Additionally in switch style, you can specify an image on (appArguments.checkboxStyle.long):
+            --\(appArguments.checkboxStyle.long) "<text>",icon=<path>
+    
 """
         
         argument.listItem.helpShort = "Enable a list item with the specified label"
