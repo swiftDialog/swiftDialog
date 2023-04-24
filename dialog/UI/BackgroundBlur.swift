@@ -27,6 +27,7 @@ class BlurWindowController: NSWindowController {
         self.window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
         self.window?.standardWindowButton(.zoomButton)?.isHidden = true //this removes the green zoom button
         self.window?.setFrame((NSScreen.main?.frame)!, display: true)
+        self.window?.collectionBehavior = [.canJoinAllSpaces]
     }
 }
 
