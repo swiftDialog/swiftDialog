@@ -1,0 +1,11 @@
+#!/bin/bash
+
+base_dir="${PWD}"
+iconupdater="${base_dir}/fileicon"
+
+iconfile="/Library/Application Support/Dialog/Dialog.png"
+dialogbundle="/Library/Application Support/Dialog/Dialog.app"
+
+if [[ -e "${iconfile}" ]] && [[ -e "${dialogbundle}" ]]; then
+    ${iconupdater} set "${dialogbundle}" "${iconfile}"
+fi

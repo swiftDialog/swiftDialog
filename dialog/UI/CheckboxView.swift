@@ -15,6 +15,8 @@ struct CheckboxView: View {
 
     var rowHeight : CGFloat = 10
     
+    var iconPresent : Bool = false
+    
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent
         
@@ -24,6 +26,8 @@ struct CheckboxView: View {
             rowHeight = observedData.appProperties.messageFontSize + 14
         }
         
+        iconPresent = observedData.appProperties.checkboxArray.contains { $0.icon != "" }
+        
     }
 
     var body: some View {
@@ -32,12 +36,14 @@ struct CheckboxView: View {
                 ForEach(0..<observedData.appProperties.checkboxArray.count, id: \.self) {index in
                     HStack {
                         if observedData.appProperties.checkboxControlStyle == "switch" {
-                            if observedData.appProperties.checkboxArray[index].icon != "" {
-                                IconView(image: observedData.appProperties.checkboxArray[index].icon, overlay: "")
-                                    .frame(height: rowHeight)
-                            } else {
-                                IconView(image: "none", overlay: "")
-                                    .frame(height: rowHeight)
+                            if iconPresent {
+                                if observedData.appProperties.checkboxArray[index].icon != "" {
+                                    IconView(image: observedData.appProperties.checkboxArray[index].icon, overlay: "")
+                                        .frame(height: rowHeight)
+                                } else {
+                                    IconView(image: "none", overlay: "")
+                                        .frame(height: rowHeight)
+                                }
                             }
                             Text(observedData.appProperties.checkboxArray[index].label)
                                 //.frame(minWidth: 120, alignment: .leading)
@@ -66,9 +72,6 @@ struct CheckboxView: View {
             .padding(10)
             .background(Color.background.opacity(0.5))
             .cornerRadius(8)
-            //.border(.red)
-            //.padding(.leading, observedData.appProperties.sidePadding)
-            //.padding(.trailing, observedData.appProperties.sidePadding)
         }
     }
 }

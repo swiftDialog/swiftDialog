@@ -52,7 +52,7 @@ struct TextEntryView: View {
                         VStack {
                             HStack {
                                 Text(observedData.appProperties.textFields[index].title + (observedData.appProperties.textFields[index].required ? " *":""))
-                                    .bold()
+                                    //.bold()
                                     .font(.system(size: 15))
                                     .frame(alignment: .leading)
                                 Spacer()
@@ -132,7 +132,9 @@ struct TextEntryView: View {
                     }
                 }
             }
-                    
+            .padding(10)
+            .background(Color.background.opacity(0.5))
+            .cornerRadius(8)
         }
     }
 }
