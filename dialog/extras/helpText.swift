@@ -201,7 +201,18 @@ struct swiftDialogHelp {
 """
         
         argument.iconSize.helpShort = "Set the dialog icon size"
+        argument.iconSize.helpUsage = "<num>"
         argument.iconSize.helpLong = "Default size is 150"
+        
+        argument.iconAlpha.helpShort = "Set the dialog icon transparancy"
+        argument.iconAlpha.helpUsage = "<num>"
+        argument.iconAlpha.helpLong = """
+        Accepts values from 0.0 to 1.0
+        Where 0.0 is completly transparant and 1.0 is completly opaque
+
+        The default value is 1.0
+        
+"""
         
         argument.centreIcon.helpShort = "Set icon to be in the centre"
         argument.centreIcon.helpLong = """

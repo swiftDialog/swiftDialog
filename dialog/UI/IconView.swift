@@ -45,13 +45,16 @@ struct IconView: View {
     var sfPalettePresent: Bool = false
     
     var mainImageScale: CGFloat = 1
+    var mainImageAlpha: Double
+    
     let mainImageWithOverlayScale: CGFloat = 0.88
     let overlayImageScale: CGFloat = 0.4
     
   
-    init(image : String = "", overlay : String = "") {
+    init(image : String = "", overlay : String = "", alpha : Double = 1.0) {
         //self.observedDialogContent = observedDialogContent
         
+        mainImageAlpha = alpha
         //if image != "" {
         messageUserImagePath = image
         iconOverlay = overlay
@@ -264,12 +267,14 @@ struct IconView: View {
                 .aspectRatio(contentMode: .fit)
                 .scaledToFit()
                 .scaleEffect(mainImageScale)
+                .opacity(mainImageAlpha)
             } else if imgFromAPP {
                 Image(nsImage: getAppIcon(appPath: messageUserImagePath))
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .scaledToFit()
                         .scaleEffect(mainImageScale)
+                        .opacity(mainImageAlpha)
             } else {
                 let diskImage: NSImage = getImageFromPath(fileImagePath: messageUserImagePath, returnErrorImage: true)
                 Image(nsImage: diskImage)
@@ -278,6 +283,7 @@ struct IconView: View {
                     .scaledToFit()
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .scaleEffect(mainImageScale)
+                    .opacity(mainImageAlpha)
             }
 
             IconOverlayView(image: iconOverlay)

@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftUI
+import Combine
 
 enum StatusState {
     case start
@@ -375,13 +376,16 @@ class FileReader {
             // activate
             case "activate:" :
                 NSApp.activate(ignoringOtherApps: true)
+                
+            // icon alpha
+            case "\(observedData.args.iconAlpha.long):" :
+                observedData.iconAlpha = Double(line.replacingOccurrences(of: "\(observedData.args.iconAlpha.long): ", with: "")) ?? 1.0
             
             // quit
             case "quit:" :
                 quitDialog(exitCode: appvars.exit5.code)
 
             default:
-
                 break
             }
         }
@@ -410,6 +414,7 @@ class DialogUpdatableContent : ObservableObject {
     @Published var progressValue: Double?
     @Published var progressTotal: Double
     @Published var iconSize: CGFloat
+    @Published var iconAlpha : Double
     
     @Published var imageArray : [MainImage]
     //@Published var imagePresent: Bool
@@ -465,6 +470,7 @@ class DialogUpdatableContent : ObservableObject {
         listItemUpdateRow = 0
         
         iconSize = string2float(string: appArguments.iconSize.value)
+        iconAlpha = Double(appArguments.iconAlpha.value) ?? 1.0
         
         imageArray = appvars.imageArray
         //imagePresent = appArguments.mainImage.present

@@ -16,10 +16,16 @@ var iconVisible: Bool = true
 var appvars = AppVariables()
 var appArguments = CommandLineArguments()
 
-let formatter: NumberFormatter = {
+let displayAsInt: NumberFormatter = {
     let formatter = NumberFormatter()
-    //formatter.usesSignificantDigits = false
     formatter.maximumFractionDigits = 0
+    formatter.numberStyle = .decimal
+    return formatter
+}()
+
+let displayAsDouble: NumberFormatter = {
+    let formatter = NumberFormatter()
+    formatter.maximumFractionDigits = 1
     formatter.numberStyle = .decimal
     return formatter
 }()
@@ -250,6 +256,7 @@ struct CommandLineArguments {
     var helpMessage              = CLArgument(long: "helpmessage")
     var iconOption               = CLArgument(long: "icon", short: "i")
     var iconSize                 = CLArgument(long: "iconsize")
+    var iconAlpha                = CLArgument(long: "iconalpha")
     var iconAccessabilityLabel   = CLArgument(long: "iconalttext")
   //var iconHeight               = CLArgument(long: "iconheight")
     var overlayIconOption        = CLArgument(long: "overlayicon", short: "y")

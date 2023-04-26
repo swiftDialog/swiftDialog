@@ -34,7 +34,9 @@ struct DialogView: View {
                 HStack {
                     if (observedData.args.iconOption.present && !observedData.args.centreIcon.present && observedData.args.iconOption.value != "none") {
                         VStack(alignment: .leading) {
-                            IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
+                            IconView(image: observedData.args.iconOption.value,
+                                     overlay: observedData.args.overlayIconOption.value,
+                                     alpha: observedData.iconAlpha)
                                 .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
                                 .frame(width: iconDisplayWidth, alignment: .top)
                             if observedData.args.infoBox.present {

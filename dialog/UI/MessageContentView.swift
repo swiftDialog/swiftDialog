@@ -43,7 +43,6 @@ struct MessageContent: View {
             iconDisplayWidth = observedDialogContent.iconSize
         }
         messageColour = observedDialogContent.appProperties.messageFontColour
-
     }
     
     var body: some View {
@@ -51,7 +50,9 @@ struct MessageContent: View {
             if observedData.args.mainImage.present {
             
                 if observedData.args.iconOption.present && observedData.args.centreIcon.present { //}&& observedData.args.iconOption.value != "none" {
-                    IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
+                    IconView(image: observedData.args.iconOption.value,
+                             overlay: observedData.args.overlayIconOption.value,
+                             alpha: observedData.iconAlpha)
                         .frame(width: iconDisplayWidth, alignment: .top)
                         //.padding(.top, 15)
                         .padding(.bottom, observedData.appProperties.bottomPadding)
@@ -64,7 +65,9 @@ struct MessageContent: View {
                     Spacer()
                 }
                 if observedData.args.centreIcon.present && observedData.args.iconOption.present {
-                    IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
+                    IconView(image: observedData.args.iconOption.value,
+                             overlay: observedData.args.overlayIconOption.value,
+                             alpha: observedData.iconAlpha)
                         .frame(width: iconDisplayWidth, alignment: .top)
                         //.padding(.top, 15)
                         .padding(.bottom, observedData.appProperties.bottomPadding)
