@@ -24,6 +24,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         UNUserNotificationCenter.current().delegate = self
     }
+    
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        return true
+    }
 }
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
@@ -36,6 +40,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 @available(OSX 11.0, *)
 @main
 struct dialogApp: App {
+    
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     @ObservedObject var observedData : DialogUpdatableContent
     //@ObservedObject var notificationManager = LocalNotificationManager()
@@ -162,14 +168,19 @@ struct dialogApp: App {
                     } else {
                         window?.level = .normal
                     }
-
-                    if observedData.args.blurScreen.present && !appArguments.fullScreenWindow.present { //blur background
-                        background.showWindow(self)
-                        for i in 0..<NSApp.windows.count {
-                            if NSApp.windows[i].identifier != NSUserInterfaceItemIdentifier("blur") {
-                                NSApp.windows[i].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow)))
-                            }
+                    
+                    window?.collectionBehavior = [.canJoinAllSpaces]
+                    
+                    if observedData.args.blurScreen.present && !appArguments.fullScreenWindow.present {
+                        let screens = NSScreen.screens
+                        for (index, screen) in screens.enumerated() {
+                            observedData.blurredScreen.append(BlurWindowController())
+                            allScreens = screen
+                            observedData.blurredScreen[index].close()
+                            observedData.blurredScreen[index].loadWindow()
+                            observedData.blurredScreen[index].showWindow(self)
                         }
+                        NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
                     } else {
                         background.close()
                     }

@@ -426,6 +426,8 @@ class DialogUpdatableContent : ObservableObject {
     @Published var showSheet: Bool
     @Published var sheetErrorMessage: String
     
+    @Published var blurredScreen = [BlurWindowController]()
+    
     var status: StatusState
     
     let commandFilePermissions: [FileAttributeKey: Any] = [FileAttributeKey.posixPermissions: 0o666]

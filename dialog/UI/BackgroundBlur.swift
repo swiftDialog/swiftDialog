@@ -7,6 +7,8 @@
 import Foundation
 import Cocoa
 
+var allScreens = NSScreen()
+
 class BlurWindow: NSWindow {
     override init(contentRect: NSRect, styleMask style: NSWindow.StyleMask, backing backingStoreType: NSWindow.BackingStoreType, defer flag: Bool) {
         super.init(contentRect: contentRect, styleMask: [.fullSizeContentView],  backing: .buffered, defer: true)
@@ -16,17 +18,13 @@ class BlurWindow: NSWindow {
 class BlurWindowController: NSWindowController {
     
     convenience init() {
-        self.init(windowNibName: "")
+        self.init(windowNibName: "BlurScreen")
     }
         
     override func loadWindow() {
         window = BlurWindow(contentRect: NSMakeRect(0, 0, 100, 100), styleMask: [], backing: .buffered, defer: true)
-        self.window?.identifier = NSUserInterfaceItemIdentifier("blur")
         self.window?.contentViewController = BlurViewController()
-        self.window?.standardWindowButton(.closeButton)?.isHidden = true //hides the red close button
-        self.window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
-        self.window?.standardWindowButton(.zoomButton)?.isHidden = true //this removes the green zoom button
-        self.window?.setFrame((NSScreen.main?.frame)!, display: true)
+        self.window?.setFrame((allScreens.frame), display: true)
         self.window?.collectionBehavior = [.canJoinAllSpaces]
     }
 }
@@ -53,9 +51,14 @@ class BlurViewController: NSViewController {
         
         let blurView = NSVisualEffectView(frame: view.bounds)
         blurView.blendingMode = .behindWindow
-        blurView.material = .hudWindow
+        blurView.material = .fullScreenUI
         blurView.state = .active
         view.window?.contentView?.addSubview(blurView)
+    }
+    
+    override func viewWillDisappear() {
+        super.viewWillDisappear()
+        view.window?.contentView?.removeFromSuperview()
     }
     
 }
