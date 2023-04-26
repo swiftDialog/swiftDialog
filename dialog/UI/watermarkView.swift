@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct watermarkView: View {
+struct WatermarkView: View {
     //var imagePath: String = ""
     var mainImage: NSImage
     var imageOpacity: Double

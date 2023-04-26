@@ -179,7 +179,7 @@ struct FullscreenView: View {
                         //TaskProgressView(observedDialogContent: observedDialogContent)  // future feature
                         
                         if observedData.args.timerBar.present {
-                            timerBarView(progressSteps: string2float(string: observedData.args.timerBar.value), visible: observedData.args.timerBar.present, observedDialogContent: observedData)
+                            TimerView(progressSteps: string2float(string: observedData.args.timerBar.value), visible: observedData.args.timerBar.present, observedDialogContent: observedData)
                         }
                     }
                     .padding(10)

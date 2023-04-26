@@ -74,6 +74,7 @@ struct MessageContent: View {
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
                 }
+                
                 if !["", "none"].contains(observedData.args.messageOption.value) {
                     if ["centre", "center"].contains(observedData.args.messageVerticalAlignment.value) {
                         Spacer()
@@ -122,6 +123,7 @@ struct MessageContent: View {
                     .padding(.bottom, observedData.appProperties.bottomPadding)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
                     .frame(maxWidth: 600)
+                
                 if ["top"].contains(observedData.args.messageVerticalAlignment.value) {
                     Spacer()
                 }
@@ -133,3 +135,18 @@ struct MessageContent: View {
     }
 }
 
+struct PriorityView<Content: View>: View {
+    private var content: () -> Content
+    private var priority: Int
+    
+    init(priority: Int, @ViewBuilder content: @escaping () -> Content) {
+        self.content = content
+        self.priority = priority
+    }
+    
+    var body: some View {
+        EmptyView()
+            .overlay(content())
+            .zIndex(Double(priority))
+    }
+}

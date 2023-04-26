@@ -7,7 +7,7 @@
 
 //import Foundation
 
-struct swiftDialogHelp {
+struct SDHelp {
     var argument : CommandLineArguments
     
     public func printHelpShort() {

@@ -8,7 +8,7 @@
 import SwiftUI
 import Foundation
 
-struct timerBarView: View {
+struct TimerView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
     

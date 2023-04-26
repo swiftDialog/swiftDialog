@@ -63,7 +63,7 @@ struct ContentView: View {
                         
         ZStack {            
             if observedData.args.watermarkImage.present {
-                    watermarkView(observedContent: observedData)
+                    WatermarkView(observedContent: observedData)
             }
         
             // this stack controls the main view. Consists of a VStack containing all the content, and a HStack positioned at the bottom of the display area
@@ -107,7 +107,7 @@ struct ContentView: View {
                         }
                     }
                     if observedData.args.timerBar.present {
-                        timerBarView(progressSteps: progressSteps, visible: !observedData.args.hideTimerBar.present, observedDialogContent : observedData)
+                        TimerView(progressSteps: progressSteps, visible: !observedData.args.hideTimerBar.present, observedDialogContent : observedData)
                             .frame(alignment: .bottom)
                     }
                     if (observedData.args.timerBar.present && observedData.args.button1TextOption.present) || !observedData.args.timerBar.present || observedData.args.hideTimerBar.present  {

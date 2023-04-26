@@ -46,14 +46,14 @@
 		41832B7228436B430062AA1F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 41832B7428436B430062AA1F /* Localizable.strings */; };
 		41876684275D88D60023A6A1 /* ImageSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41876682275D87C70023A6A1 /* ImageSlider.swift */; };
 		418A7B512759949A00E4D6F1 /* VideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4114E1EA27154B2200388274 /* VideoView.swift */; };
-		418A7B522759949A00E4D6F1 /* watermarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A44EAF26F2F25200FEE1AC /* watermarkView.swift */; };
+		418A7B522759949A00E4D6F1 /* WatermarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A44EAF26F2F25200FEE1AC /* WatermarkView.swift */; };
 		418A7B532759949A00E4D6F1 /* TextEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41AD75B526AA81760023EBD8 /* TextEntryView.swift */; };
-		418A7B542759949A00E4D6F1 /* timerBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FD45FD26C40366006976FC /* timerBarView.swift */; };
+		418A7B542759949A00E4D6F1 /* TimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FD45FD26C40366006976FC /* TimerView.swift */; };
 		418A7B552759949B00E4D6F1 /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FD45FF26C8DC5D006976FC /* ImageView.swift */; };
 		418A7B562759949B00E4D6F1 /* jamfHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D6FE8426DB11BA0083BE61 /* jamfHelper.swift */; };
 		418A7B572759949B00E4D6F1 /* ProcessCLOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415934D726DB1B44009C9C3A /* ProcessCLOptions.swift */; };
 		418A7B582759949B00E4D6F1 /* WindowPositioning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415934D926DB7604009C9C3A /* WindowPositioning.swift */; };
-		418A7B592759949B00E4D6F1 /* helpText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A44EB126F4C43A00FEE1AC /* helpText.swift */; };
+		418A7B592759949B00E4D6F1 /* HelpText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A44EB126F4C43A00FEE1AC /* HelpText.swift */; };
 		418A7B5D275994BB00E4D6F1 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 418A7B5C275994BB00E4D6F1 /* MarkdownUI */; };
 		418AE4232667A17A001E3423 /* DropdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418AE4222667A17A001E3423 /* DropdownView.swift */; };
 		41A5A6A428E5468100BD3D5E /* WebViewKit in Frameworks */ = {isa = PBXBuildFile; productRef = 41A5A6A328E5468100BD3D5E /* WebViewKit */; };
@@ -139,8 +139,8 @@
 		41832B7A284436E50062AA1F /* da-DK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "da-DK"; path = "da-DK.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		41876682275D87C70023A6A1 /* ImageSlider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageSlider.swift; sourceTree = "<group>"; };
 		418AE4222667A17A001E3423 /* DropdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropdownView.swift; sourceTree = "<group>"; };
-		41A44EAF26F2F25200FEE1AC /* watermarkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = watermarkView.swift; sourceTree = "<group>"; };
-		41A44EB126F4C43A00FEE1AC /* helpText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = helpText.swift; sourceTree = "<group>"; };
+		41A44EAF26F2F25200FEE1AC /* WatermarkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatermarkView.swift; sourceTree = "<group>"; };
+		41A44EB126F4C43A00FEE1AC /* HelpText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpText.swift; sourceTree = "<group>"; };
 		41A5A6A528E546A000BD3D5E /* WebContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebContentView.swift; sourceTree = "<group>"; };
 		41A5A6A828E66D0C00BD3D5E /* CKMediaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKMediaView.swift; sourceTree = "<group>"; };
 		41A679D22962494B000BFFCE /* InfoBoxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoBoxView.swift; sourceTree = "<group>"; };
@@ -153,7 +153,7 @@
 		41D81E6B25F8209F00D1F7E1 /* Options.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Options.swift; sourceTree = "<group>"; };
 		41D81E7025F845D200D1F7E1 /* appVaribles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = appVaribles.swift; sourceTree = "<group>"; };
 		41D81E7825F870A500D1F7E1 /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
-		41FD45FD26C40366006976FC /* timerBarView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = timerBarView.swift; sourceTree = "<group>"; };
+		41FD45FD26C40366006976FC /* TimerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimerView.swift; sourceTree = "<group>"; };
 		41FD45FF26C8DC5D006976FC /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -288,7 +288,7 @@
 				41D6FE8426DB11BA0083BE61 /* jamfHelper.swift */,
 				415934D726DB1B44009C9C3A /* ProcessCLOptions.swift */,
 				415934D926DB7604009C9C3A /* WindowPositioning.swift */,
-				41A44EB126F4C43A00FEE1AC /* helpText.swift */,
+				41A44EB126F4C43A00FEE1AC /* HelpText.swift */,
 			);
 			path = extras;
 			sourceTree = "<group>";
@@ -350,7 +350,7 @@
 				414550A927C799D000D756E3 /* BackgroundBlur.swift */,
 				4154C2DF25F76BDB00A3D373 /* ContentView.swift */,
 				4114E1EA27154B2200388274 /* VideoView.swift */,
-				41A44EAF26F2F25200FEE1AC /* watermarkView.swift */,
+				41A44EAF26F2F25200FEE1AC /* WatermarkView.swift */,
 				41D81E5625F7929800D1F7E1 /* DialogView.swift */,
 				41A679D22962494B000BFFCE /* InfoBoxView.swift */,
 				4153786B2604BF1A00AA0E76 /* MessageContentView.swift */,
@@ -362,7 +362,7 @@
 				415378522604B79E00AA0E76 /* IconOverlayView.swift */,
 				416DED41261C5FE00049B6B5 /* FullscreenView.swift */,
 				41AD75B526AA81760023EBD8 /* TextEntryView.swift */,
-				41FD45FD26C40366006976FC /* timerBarView.swift */,
+				41FD45FD26C40366006976FC /* TimerView.swift */,
 				41FD45FF26C8DC5D006976FC /* ImageView.swift */,
 				41876682275D87C70023A6A1 /* ImageSlider.swift */,
 				417BD43727992EDB009AE34A /* TaskProgressView.swift */,
@@ -564,16 +564,16 @@
 				41876684275D88D60023A6A1 /* ImageSlider.swift in Sources */,
 				414550AA27C799D000D756E3 /* BackgroundBlur.swift in Sources */,
 				418A7B512759949A00E4D6F1 /* VideoView.swift in Sources */,
-				418A7B522759949A00E4D6F1 /* watermarkView.swift in Sources */,
+				418A7B522759949A00E4D6F1 /* WatermarkView.swift in Sources */,
 				418A7B532759949A00E4D6F1 /* TextEntryView.swift in Sources */,
-				418A7B542759949A00E4D6F1 /* timerBarView.swift in Sources */,
+				418A7B542759949A00E4D6F1 /* TimerView.swift in Sources */,
 				4116923B2893A22300A88700 /* CKListView.swift in Sources */,
 				418A7B552759949B00E4D6F1 /* ImageView.swift in Sources */,
 				418A7B562759949B00E4D6F1 /* jamfHelper.swift in Sources */,
 				418A7B572759949B00E4D6F1 /* ProcessCLOptions.swift in Sources */,
 				411692382893A21500A88700 /* CKImageView.swift in Sources */,
 				418A7B582759949B00E4D6F1 /* WindowPositioning.swift in Sources */,
-				418A7B592759949B00E4D6F1 /* helpText.swift in Sources */,
+				418A7B592759949B00E4D6F1 /* HelpText.swift in Sources */,
 				4116923528939E4D00A88700 /* CKButtonView.swift in Sources */,
 				417BD471279CB658009AE34A /* CheckboxView.swift in Sources */,
 				4116923228939DEB00A88700 /* CKSidebarView.swift in Sources */,
