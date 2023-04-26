@@ -162,15 +162,17 @@ struct dialogApp: App {
                     window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
                     window?.standardWindowButton(.zoomButton)?.isHidden = true //this removes the green zoom button
                     window?.isMovable = observedData.args.movableWindow.present
-
-                    if observedData.args.forceOnTop.present {
+                    window?.isMovableByWindowBackground = true
+                    window?.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
+                    
+                    // Set window level
+                    if observedData.args.forceOnTop.present || observedData.args.blurScreen.present {
                         window?.level = .floating
                     } else {
                         window?.level = .normal
                     }
                     
-                    window?.collectionBehavior = [.canJoinAllSpaces]
-                    
+                    // display a blur screen window on all screens.
                     if observedData.args.blurScreen.present && !appArguments.fullScreenWindow.present {
                         let screens = NSScreen.screens
                         for (index, screen) in screens.enumerated() {
