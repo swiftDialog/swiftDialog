@@ -20,10 +20,11 @@ struct DropdownView: View {
     
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent
-        if !observedDialogContent.args.hideIcon.present {
-            fieldwidth = observedDialogContent.windowWidth
+        
+        if !observedDialogContent.args.hideIcon.present { 
+            fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value)
         } else {
-            fieldwidth = observedDialogContent.windowWidth - observedDialogContent.appProperties.iconWidth
+            fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value) - string2float(string: observedDialogContent.args.iconSize.value)
         }
         
         var defaultOptions : [String] = []
@@ -41,8 +42,7 @@ struct DropdownView: View {
                         // we could print the title as part of the picker control but then we don't get easy access to swiftui text formatting
                         // so we print it seperatly and use a blank value in the picker
                         Text(observedData.appProperties.dropdownItems[index].title + (observedData.appProperties.dropdownItems[index].required ? " *":""))
-                            .bold()
-                            .font(.system(size: 15))
+                            //.bold()
                             .frame(idealWidth: fieldwidth*0.20, alignment: .leading)
                         Spacer()
                         Picker("", selection: $observedData.appProperties.dropdownItems[index].selectedValue)
@@ -54,10 +54,15 @@ struct DropdownView: View {
                                 Text("").tag("")
                             }
                             ForEach(observedData.appProperties.dropdownItems[index].values, id: \.self) {
-                                Text($0).tag($0)
+                                if $0.hasPrefix("---") {
+                                    Divider()
+                                } else {
+                                    Text($0).tag($0)
+                                        .font(.system(size: observedData.appProperties.labelFontSize))
+                                }
                             }
                         }
-                        .pickerStyle(DefaultPickerStyle())
+                        .pickerStyle(MenuPickerStyle())
                         .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
                         .overlay(RoundedRectangle(cornerRadius: 5)
                                     .stroke(observedData.appProperties.dropdownItems[index].requiredfieldHighlight, lineWidth: 2)
@@ -69,6 +74,10 @@ struct DropdownView: View {
                     }
                 }
             }
+            .font(.system(size: observedData.appProperties.labelFontSize))
+            .padding(10)
+            .background(Color.background.opacity(0.5))
+            .cornerRadius(8)
         
         }
     }

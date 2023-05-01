@@ -189,6 +189,7 @@ struct AppVariables {
     var messageFontColour               = Color.primary
     var messageFontWeight               = Font.Weight.regular
     var messageFontName                 = ""
+    var labelFontSize                   = CGFloat(16)
     var overlayIconScale                = CGFloat(0.40)
     var overlayOffsetX                  = CGFloat(40)
     var overlayOffsetY                  = CGFloat(50)

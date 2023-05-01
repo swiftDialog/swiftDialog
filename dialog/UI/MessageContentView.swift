@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import MarkdownUI
+import ScrollViewIfNeeded
 
 struct MessageContent: View {
     
@@ -15,6 +16,7 @@ struct MessageContent: View {
     @State private var contentHeight: CGFloat = 40
     
     var fieldPadding: CGFloat = 15
+    var dataEntryMaxWidth : CGFloat = 700
     
     var messageColour : Color
         
@@ -112,17 +114,17 @@ struct MessageContent: View {
                 CheckboxView(observedDialogContent: observedData)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
                     //.padding(.bottom, observedData.appProperties.bottomPadding)
-                    //.frame(maxWidth: 600)
+                    .frame(maxWidth: dataEntryMaxWidth)
                 
                 TextEntryView(observedDialogContent: observedData)
                     .padding(.bottom, observedData.appProperties.bottomPadding)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .frame(maxWidth: 600)
+                    .frame(maxWidth: dataEntryMaxWidth)
                 
                 DropdownView(observedDialogContent: observedData)
                     .padding(.bottom, observedData.appProperties.bottomPadding)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .frame(maxWidth: 600)
+                    .frame(maxWidth: dataEntryMaxWidth)
                 
                 if ["top"].contains(observedData.args.messageVerticalAlignment.value) {
                     Spacer()

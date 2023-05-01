@@ -63,8 +63,9 @@
 		41D81E5725F7929800D1F7E1 /* DialogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E5625F7929800D1F7E1 /* DialogView.swift */; };
 		41D81E5C25F817BF00D1F7E1 /* ButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E5B25F817BF00D1F7E1 /* ButtonView.swift */; };
 		41D81E6C25F8209F00D1F7E1 /* Options.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E6B25F8209F00D1F7E1 /* Options.swift */; };
-		41D81E7125F845D200D1F7E1 /* appVaribles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E7025F845D200D1F7E1 /* appVaribles.swift */; };
+		41D81E7125F845D200D1F7E1 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E7025F845D200D1F7E1 /* AppState.swift */; };
 		41D81E7925F870A500D1F7E1 /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E7825F870A500D1F7E1 /* Functions.swift */; };
+		CCCF163D29FFA590003BEA40 /* ScrollViewIfNeeded in Frameworks */ = {isa = PBXBuildFile; productRef = CCCF163C29FFA590003BEA40 /* ScrollViewIfNeeded */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -151,7 +152,7 @@
 		41D81E5625F7929800D1F7E1 /* DialogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogView.swift; sourceTree = "<group>"; };
 		41D81E5B25F817BF00D1F7E1 /* ButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonView.swift; sourceTree = "<group>"; };
 		41D81E6B25F8209F00D1F7E1 /* Options.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Options.swift; sourceTree = "<group>"; };
-		41D81E7025F845D200D1F7E1 /* appVaribles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = appVaribles.swift; sourceTree = "<group>"; };
+		41D81E7025F845D200D1F7E1 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		41D81E7825F870A500D1F7E1 /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
 		41FD45FD26C40366006976FC /* TimerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimerView.swift; sourceTree = "<group>"; };
 		41FD45FF26C8DC5D006976FC /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
@@ -164,6 +165,7 @@
 			files = (
 				41005AAA27CEF8250065F323 /* AVKit.framework in Frameworks */,
 				41005AA927CEF81A0065F323 /* SwiftyJSON in Frameworks */,
+				CCCF163D29FFA590003BEA40 /* ScrollViewIfNeeded in Frameworks */,
 				418A7B5D275994BB00E4D6F1 /* MarkdownUI in Frameworks */,
 				41A5A6A428E5468100BD3D5E /* WebViewKit in Frameworks */,
 			);
@@ -240,7 +242,6 @@
 				41C8259825F99AF90042DC50 /* UI */,
 				4154C30C25F782E900A3D373 /* extras */,
 				4154C2DD25F76BDB00A3D373 /* dialogApp.swift */,
-				41D81E7025F845D200D1F7E1 /* appVaribles.swift */,
 				4154C2E125F76BDC00A3D373 /* Assets.xcassets */,
 				41832B7428436B430062AA1F /* Localizable.strings */,
 				4154C2E625F76BDC00A3D373 /* Info.plist */,
@@ -279,6 +280,7 @@
 		4154C30C25F782E900A3D373 /* extras */ = {
 			isa = PBXGroup;
 			children = (
+				41D81E7025F845D200D1F7E1 /* AppState.swift */,
 				411FC34528E2DDFD003EA2C2 /* Notifications.swift */,
 				417BD4342798FE38009AE34A /* DialogUpdatableContent.swift */,
 				41D81E6B25F8209F00D1F7E1 /* Options.swift */,
@@ -405,6 +407,7 @@
 				418A7B5C275994BB00E4D6F1 /* MarkdownUI */,
 				41005AA827CEF81A0065F323 /* SwiftyJSON */,
 				41A5A6A328E5468100BD3D5E /* WebViewKit */,
+				CCCF163C29FFA590003BEA40 /* ScrollViewIfNeeded */,
 			);
 			productName = dialog;
 			productReference = 4154C2DA25F76BDB00A3D373 /* Dialog.app */;
@@ -488,6 +491,7 @@
 				41E4BC9526AEDB130042A0A3 /* XCRemoteSwiftPackageReference "MarkdownUI" */,
 				414CBAE9278913BA00A1A980 /* XCRemoteSwiftPackageReference "SwiftyJSON" */,
 				41A5A6A228E5468100BD3D5E /* XCRemoteSwiftPackageReference "WebViewKit" */,
+				CCCF163B29FFA590003BEA40 /* XCRemoteSwiftPackageReference "ScrollViewIfNeeded" */,
 			);
 			productRefGroup = 4154C2DB25F76BDB00A3D373 /* Products */;
 			projectDirPath = "";
@@ -598,7 +602,7 @@
 				411FC34628E2DDFD003EA2C2 /* Notifications.swift in Sources */,
 				4154C2DE25F76BDB00A3D373 /* dialogApp.swift in Sources */,
 				41D81E6C25F8209F00D1F7E1 /* Options.swift in Sources */,
-				41D81E7125F845D200D1F7E1 /* appVaribles.swift in Sources */,
+				41D81E7125F845D200D1F7E1 /* AppState.swift in Sources */,
 				412B26AF289CE02100493EFF /* MiniView.swift in Sources */,
 				4124EFD229455861003B00F4 /* HelpView.swift in Sources */,
 				41D81E7925F870A500D1F7E1 /* Functions.swift in Sources */,
@@ -984,6 +988,14 @@
 				minimumVersion = 1.1.0;
 			};
 		};
+		CCCF163B29FFA590003BEA40 /* XCRemoteSwiftPackageReference "ScrollViewIfNeeded" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/dkk/ScrollViewIfNeeded";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1006,6 +1018,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 41A5A6A228E5468100BD3D5E /* XCRemoteSwiftPackageReference "WebViewKit" */;
 			productName = WebViewKit;
+		};
+		CCCF163C29FFA590003BEA40 /* ScrollViewIfNeeded */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CCCF163B29FFA590003BEA40 /* XCRemoteSwiftPackageReference "ScrollViewIfNeeded" */;
+			productName = ScrollViewIfNeeded;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

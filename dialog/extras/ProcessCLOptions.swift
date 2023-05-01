@@ -562,6 +562,7 @@ func processCLOptions(json : JSON = getJSON()) {
                 }
             }
         }
+        appvars.labelFontSize = appvars.messageFontSize - 4
     }
     
     if appArguments.iconOption.value != "" {

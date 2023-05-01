@@ -53,7 +53,7 @@ struct TextEntryView: View {
                             HStack {
                                 Text(observedData.appProperties.textFields[index].title + (observedData.appProperties.textFields[index].required ? " *":""))
                                     //.bold()
-                                    .font(.system(size: 15))
+                                    //.font(.system(size: 15))
                                     .frame(alignment: .leading)
                                 Spacer()
                             }
@@ -75,8 +75,8 @@ struct TextEntryView: View {
                         HStack {
 
                             Text(observedData.appProperties.textFields[index].title + (observedData.appProperties.textFields[index].required ? " *":""))
-                                .bold()
-                                .font(.system(size: 15))
+                                //.bold()
+                                //.font(.system(size: 15))
                                 .frame(idealWidth: fieldwidth*0.20, alignment: .leading)
                             Spacer()
 
@@ -119,7 +119,7 @@ struct TextEntryView: View {
                                         )
                                      )
                         }
-                        .frame(maxWidth: 600)
+                        //.frame(maxWidth: 600)
                     }
                 }
                 if self.requiredFieldsPresent {
@@ -132,6 +132,7 @@ struct TextEntryView: View {
                     }
                 }
             }
+            .font(.system(size: observedData.appProperties.labelFontSize))
             .padding(10)
             .background(Color.background.opacity(0.5))
             .cornerRadius(8)
