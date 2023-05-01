@@ -9,25 +9,25 @@ import Foundation
 import SwiftUI
 
 struct JHOptions {
-    static let windowType         = CLArgument(long: "windowType",       short: "windowType")       // -windowType [hud | utility | fs]
-    static let windowPosition     = CLArgument(long: "windowPosition",   short: "windowPosition")   // -windowPosition [ul | ll | ur | lr]
-    static let title              = CLArgument(long: "title",            short: "title")            // -title "string"
-    static let heading            = CLArgument(long: "heading",          short: "heading")          // -heading "string"
-    static let description        = CLArgument(long: "description",      short: "description")      // -description "string"
-    static let icon               = CLArgument(long: "icon",             short: "icon")             // -icon path
-    static let button1            = CLArgument(long: "button1",          short: "button1")          // -button1 "string"
-    static let button2            = CLArgument(long: "button2",          short: "button2")          // -button2 "string"
-    static let defaultButton      = CLArgument(long: "defaultButton",    short: "defaultButton")    // -defaultButton [1 | 2]
-    static let cancelButton       = CLArgument(long: "cancelButton",     short: "cancelButton")     // -cancelButton [1 | 2]
-    static let showDelayOptions   = CLArgument(long: "showDelayOptions", short: "showDelayOptions") // -showDelayOptions "int, int, int,..."
-    static let alignDescription   = CLArgument(long: "alignDescription", short: "alignDescription") // -alignDescription [right | left | center | justified | natural]
-    static let alignHeading       = CLArgument(long: "alignHeading",     short: "alignHeading")     // -alignHeading [right | left | center | justified | natural]
-    static let alignCountdown     = CLArgument(long: "alignCountdown",   short: "alignCountdown")   // -alignCountdown [right | left | center | justified | natural]
-    static let timeout            = CLArgument(long: "timeout",          short: "timeout")          // -timeout int
-    static let countdown          = CLArgument(long: "countdown",        short: "countdown")        // -countdown
-    static let iconSize           = CLArgument(long: "iconSize",         short: "iconSize")         // -iconSize pixels
-    static let lockHUD            = CLArgument(long: "lockHUD",          short: "lockHUD")          // -lockHUD
-    static let fullScreenIcon     = CLArgument(long: "fullScreenIcon",   short: "fullScreenIcon")   // -fullScreenIcon
+    static let windowType         = CommandlineArgument(long: "windowType",       short: "windowType")       // -windowType [hud | utility | fs]
+    static let windowPosition     = CommandlineArgument(long: "windowPosition",   short: "windowPosition")   // -windowPosition [ul | ll | ur | lr]
+    static let title              = CommandlineArgument(long: "title",            short: "title")            // -title "string"
+    static let heading            = CommandlineArgument(long: "heading",          short: "heading")          // -heading "string"
+    static let description        = CommandlineArgument(long: "description",      short: "description")      // -description "string"
+    static let icon               = CommandlineArgument(long: "icon",             short: "icon")             // -icon path
+    static let button1            = CommandlineArgument(long: "button1",          short: "button1")          // -button1 "string"
+    static let button2            = CommandlineArgument(long: "button2",          short: "button2")          // -button2 "string"
+    static let defaultButton      = CommandlineArgument(long: "defaultButton",    short: "defaultButton")    // -defaultButton [1 | 2]
+    static let cancelButton       = CommandlineArgument(long: "cancelButton",     short: "cancelButton")     // -cancelButton [1 | 2]
+    static let showDelayOptions   = CommandlineArgument(long: "showDelayOptions", short: "showDelayOptions") // -showDelayOptions "int, int, int,..."
+    static let alignDescription   = CommandlineArgument(long: "alignDescription", short: "alignDescription") // -alignDescription [right | left | center | justified | natural]
+    static let alignHeading       = CommandlineArgument(long: "alignHeading",     short: "alignHeading")     // -alignHeading [right | left | center | justified | natural]
+    static let alignCountdown     = CommandlineArgument(long: "alignCountdown",   short: "alignCountdown")   // -alignCountdown [right | left | center | justified | natural]
+    static let timeout            = CommandlineArgument(long: "timeout",          short: "timeout")          // -timeout int
+    static let countdown          = CommandlineArgument(long: "countdown",        short: "countdown")        // -countdown
+    static let iconSize           = CommandlineArgument(long: "iconSize",         short: "iconSize")         // -iconSize pixels
+    static let lockHUD            = CommandlineArgument(long: "lockHUD",          short: "lockHUD")          // -lockHUD
+    static let fullScreenIcon     = CommandlineArgument(long: "fullScreenIcon",   short: "fullScreenIcon")   // -fullScreenIcon
     
     public func return_jh_value() {
         

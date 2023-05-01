@@ -272,69 +272,81 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
         
         //build output array
         var outputArray : Array = [String]()
-        
-        if ((observedObject?.args.dropdownValues.present) != nil) {
-            if observedObject?.appProperties.dropdownItems.count == 1 {
-                outputArray.append("\"SelectedOption\" : \"\(observedObject?.appProperties.dropdownItems[0].selectedValue ?? "")\"")
-                json["SelectedOption"].string = observedObject?.appProperties.dropdownItems[0].selectedValue
-                outputArray.append("\"SelectedIndex\" : \(observedObject?.appProperties.dropdownItems[0].values.firstIndex(of: (observedObject?.appProperties.dropdownItems[0].selectedValue)!) ?? -1)")
-                json["SelectedIndex"].int = observedObject?.appProperties.dropdownItems[0].values.firstIndex(of: observedObject?.appProperties.dropdownItems[0].selectedValue ?? "") ?? -1
-            }
-            // check to see if fields marked as required have content before allowing the app to exit
-            // if there is an empty field, update the highlight colour
-            var dontQuit = false
-            for i in 0..<(observedObject?.appProperties.dropdownItems.count ?? 0) {
-                if observedObject?.appProperties.dropdownItems[i].required ?? false && observedObject?.appProperties.dropdownItems[i].selectedValue == "" {
-                    NSSound.beep()
-                    let requiredString = (observedObject?.appProperties.dropdownItems[i].selectedValue ?? "")+" "+"is-required".localized
-                    observedObject?.appProperties.dropdownItems[i].requiredfieldHighlight = Color.red
-                    if !(observedObject?.sheetErrorMessage.contains(requiredString) ?? false) {
-                        observedObject?.sheetErrorMessage += "• "+(observedObject?.appProperties.dropdownItems[i].title ?? "")+" "+"is-required".localized+"\n"
-                    }
-                    dontQuit = true
-                    observedObject?.showSheet = true
-                } else {
-                    outputArray.append("\"\(observedObject?.appProperties.dropdownItems[i].title ?? "")\" : \"\(observedObject?.appProperties.dropdownItems[i].selectedValue ?? "")\"")
-                    outputArray.append("\"\(observedObject?.appProperties.dropdownItems[i].title ?? "")\" index : \"\(observedObject?.appProperties.dropdownItems[i].values.firstIndex(of: observedObject?.appProperties.dropdownItems[i].selectedValue ?? "") ?? -1)\"")
-                    json[observedObject?.appProperties.dropdownItems[i].title ?? ""] = ["selectedValue" : observedObject?.appProperties.dropdownItems[i].selectedValue ?? "", "selectedIndex" : observedObject?.appProperties.dropdownItems[i].values.firstIndex(of: observedObject?.appProperties.dropdownItems[i].selectedValue ?? "") ?? -1]
-                }
-            }
-            if dontQuit { return }
-        }
+        var dontQuit = false
+        var requiredString = ""
         
         if appArguments.textField.present {
             // check to see if fields marked as required have content before allowing the app to exit
             // if there is an empty field, update the highlight colour
-            var dontQuit = false
+            
             for i in 0..<(observedObject?.appProperties.textFields.count ?? 0) {
                 //check for required fields
-                if observedObject?.appProperties.textFields[i].required ?? false && observedObject?.appProperties.textFields[i].value == "" { // && textFields[i].regex.isEmpty {
+                let textField = observedObject?.appProperties.textFields[i]
+                let textfieldValue = textField?.value ?? ""
+                let textfieldTitle = textField?.title ?? ""
+                let textfieldRequired = textField?.required ?? false
+                
+                if textfieldRequired && textfieldValue == "" { // && textFields[i].regex.isEmpty {
                     NSSound.beep()
-                    let requiredString = (observedObject?.appProperties.textFields[i].value ?? "")+" "+"is-required".localized
+                    requiredString += "• \"\(textfieldTitle)\" \("is-required".localized) \n"
                     observedObject?.appProperties.textFields[i].requiredTextfieldHighlight = Color.red
-                    if !(observedObject?.sheetErrorMessage.contains(requiredString) ?? false) {
-                        observedObject?.sheetErrorMessage += "• "+(observedObject?.appProperties.textFields[i].value ?? "")+" "+"is-required".localized+"\n"
-                    }
                     dontQuit = true
                 
                 //check for regex requirements
-                } else if !(observedObject?.appProperties.textFields[i].value.isEmpty ?? false)
-                            && !(observedObject?.appProperties.textFields[i].regex.isEmpty ?? false)
-                            && !checkRegexPattern(regexPattern: observedObject?.appProperties.textFields[i].regex ?? "", textToValidate: observedObject?.appProperties.textFields[i].value ?? "") {
+                } else if !(textfieldValue.isEmpty)
+                            && !(textField?.regex.isEmpty ?? false)
+                            && !checkRegexPattern(regexPattern: textField?.regex ?? "", textToValidate: textfieldValue) {
                     NSSound.beep()
                     observedObject?.appProperties.textFields[i].requiredTextfieldHighlight = Color.green
-                    observedObject?.showSheet = true
-                    observedObject?.sheetErrorMessage += "• "+(observedObject?.appProperties.textFields[i].regexError ?? "Regex Check Failed\n")
+                    requiredString += "• "+(textField?.regexError ?? "Regex Check Failed  \n")
                     dontQuit = true
                 } else {
                     observedObject?.appProperties.textFields[i].requiredTextfieldHighlight = Color.clear
                 }
                 
-                outputArray.append("\(observedObject?.appProperties.textFields[i].title ?? "field \(i)") : \(observedObject?.appProperties.textFields[i].value ?? "")")
-                json[observedObject?.appProperties.textFields[i].title ?? "Field \(i)"].string = observedObject?.appProperties.textFields[i].value
+                outputArray.append("\(textfieldTitle) : \(textfieldValue)")
+                json[textfieldTitle].string = textfieldValue
             }
-            if dontQuit { return }
         }
+        
+        if ((observedObject?.args.dropdownValues.present) != nil) {
+            if observedObject?.appProperties.dropdownItems.count == 1 {
+                let selectedValue = observedObject?.appProperties.dropdownItems[0].selectedValue
+                let selectedIndex = observedObject?.appProperties.dropdownItems[0].values
+                
+                outputArray.append("\"SelectedOption\" : \"\(selectedValue ?? "")\"")
+                json["SelectedOption"].string = selectedValue
+                outputArray.append("\"SelectedIndex\" : \(selectedIndex?.firstIndex(of: (selectedValue)!) ?? -1)")
+                json["SelectedIndex"].int = selectedIndex?.firstIndex(of: selectedValue ?? "") ?? -1
+            }
+            // check to see if fields marked as required have content before allowing the app to exit
+            // if there is an empty field, update the highlight colour
+            for i in 0..<(observedObject?.appProperties.dropdownItems.count ?? 0) {
+                let dropdownItem = observedObject?.appProperties.dropdownItems[i]
+                let dropdownItemValues = dropdownItem?.values ?? [""]
+                let dropdownItemSelectedValue = dropdownItem?.selectedValue ?? ""
+                let dropdownItemTitle = dropdownItem?.title ?? ""
+                let dropdownItemRequired = dropdownItem?.required ?? false
+                
+                if dropdownItemRequired && dropdownItemSelectedValue == "" {
+                    NSSound.beep()
+                    requiredString += "• \"\(dropdownItemTitle)\" \("is-required".localized) \n"
+                    observedObject?.appProperties.dropdownItems[i].requiredfieldHighlight = Color.red
+                    dontQuit = true
+                } else {
+                    outputArray.append("\"\(dropdownItemTitle)\" : \"\(dropdownItemSelectedValue)\"")
+                    outputArray.append("\"\(dropdownItemTitle)\" index : \"\(dropdownItemValues.firstIndex(of: dropdownItemSelectedValue) ?? -1)\"")
+                    json[dropdownItemTitle] = ["selectedValue" : dropdownItemSelectedValue, "selectedIndex" : dropdownItemValues.firstIndex(of: dropdownItemSelectedValue) ?? -1]
+                }
+            }
+        }
+        
+        if dontQuit {
+            observedObject?.sheetErrorMessage = requiredString
+            observedObject?.showSheet = true
+            return
+        }
+        
         if ((observedObject?.args.checkbox.present) != nil) {
             for i in 0..<(observedObject?.appProperties.checkboxArray.count ?? 0) {
                 outputArray.append("\"\(observedObject?.appProperties.checkboxArray[i].label ?? "checkbox \(i)")\" : \"\(observedObject?.appProperties.checkboxArray[i].checked ?? false)\"")

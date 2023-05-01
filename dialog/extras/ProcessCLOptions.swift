@@ -106,6 +106,11 @@ func processCLOptions(json : JSON = getJSON()) {
                 appvars.dropdownItems.append(DropDownItems(title: dropdownTitle, values: dropdownValues[i].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[i], selectedValue: dropdownDefaults[i], required: dropdownRequired))
             }
         }
+        for i in 0..<appvars.dropdownItems.count {
+            if appvars.dropdownItems[i].required {
+                appvars.userInputRequired = true
+            }
+        }
     }
     
     if appArguments.textField.present {
@@ -189,6 +194,11 @@ func processCLOptions(json : JSON = getJSON()) {
                             secure: fieldSecure,
                             title: fieldTitle,
                             value: fieldValue))
+            }
+        }
+        for i in 0..<appvars.textFields.count {
+            if appvars.textFields[i].required {
+                appvars.userInputRequired = true
             }
         }
         logger(logMessage: "textOptionsArray : \(appvars.textFields)")
@@ -562,7 +572,11 @@ func processCLOptions(json : JSON = getJSON()) {
                 }
             }
         }
-        appvars.labelFontSize = appvars.messageFontSize - 4
+        if appvars.messageFontSize < 20 {
+            appvars.labelFontSize = appvars.messageFontSize
+        } else {
+            appvars.labelFontSize = appvars.messageFontSize - 4
+        }
     }
     
     if appArguments.iconOption.value != "" {

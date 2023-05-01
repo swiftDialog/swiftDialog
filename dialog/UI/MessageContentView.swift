@@ -129,6 +129,14 @@ struct MessageContent: View {
                 if ["top"].contains(observedData.args.messageVerticalAlignment.value) {
                     Spacer()
                 }
+                if observedData.appProperties.userInputRequired {
+                    HStack {
+                        Spacer()
+                        Text("required-note")
+                            .font(.system(size: 10)
+                                    .weight(.light))
+                    }
+                }
             }
         }
         .padding(.leading, observedData.appProperties.sidePadding)

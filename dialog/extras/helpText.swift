@@ -16,7 +16,7 @@ struct SDHelp {
         print("\n use --help <option> for more details\n")
         let mirror = Mirror(reflecting: argument)
         for child in mirror.children {
-            if let arg = child.value as? CLArgument {
+            if let arg = child.value as? CommandlineArgument {
                 var helpArgs = " --\(arg.long) \(arg.helpUsage)"
                 if arg.short != "" {
                     helpArgs = " -\(arg.short), \(helpArgs)"
@@ -32,7 +32,7 @@ struct SDHelp {
     public func printHelpLong(for selectedArg: String) {
         let mirror = Mirror(reflecting: argument)
         for child in mirror.children {
-            if let arg = child.value as? CLArgument, (arg.long == selectedArg || arg.short == selectedArg) {
+            if let arg = child.value as? CommandlineArgument, (arg.long == selectedArg || arg.short == selectedArg) {
                 var helpArgs = " --\(arg.long) \(arg.helpUsage)"
                 if arg.short != "" {
                     helpArgs = " -\(arg.short), \(helpArgs)"

@@ -14,7 +14,7 @@ struct DropdownView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
     @State var selectedOption : [String]
-    @State private var showingSheet = false
+    //@State private var showingSheet = false
 
     var fieldwidth: CGFloat = 0
     
@@ -26,7 +26,7 @@ struct DropdownView: View {
         } else {
             fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value) - string2float(string: observedDialogContent.args.iconSize.value)
         }
-        
+                
         var defaultOptions : [String] = []
         for i in 0..<observedDialogContent.appProperties.dropdownItems.count {
             defaultOptions.append(observedDialogContent.appProperties.dropdownItems[i].defaultValue)

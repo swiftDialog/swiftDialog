@@ -23,7 +23,7 @@ func CLOptionMultiOptions (optionName : String) -> Array<String> {
 }
 
 // Returns the option text for a given command line option
-func CLOptionText(OptionName: CLArgument, DefaultValue: String? = "") -> String {
+func CLOptionText(OptionName: CommandlineArgument, DefaultValue: String? = "") -> String {
     // Determine if argument is present.
     var CLOptionTextValue = ""
     
@@ -58,7 +58,7 @@ func CLOptionText(OptionName: CLArgument, DefaultValue: String? = "") -> String 
 
 // returns true if the specified oprion is present.
 
-func CLOptionPresent(OptionName: CLArgument) -> Bool {
+func CLOptionPresent(OptionName: CommandlineArgument) -> Bool {
     // Determine if option is present.
     var optionPresent = false
     if let commandIndex = [CommandLine.arguments.firstIndex(of: "--\(OptionName.long)"), CommandLine.arguments.firstIndex(of: "-\(OptionName.short)")].compactMap({$0}).first {
