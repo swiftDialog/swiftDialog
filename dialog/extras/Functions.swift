@@ -285,6 +285,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
                 let textfieldValue = textField?.value ?? ""
                 let textfieldTitle = textField?.title ?? ""
                 let textfieldRequired = textField?.required ?? false
+                observedObject?.appProperties.textFields[i].requiredTextfieldHighlight = Color.clear
                 
                 if textfieldRequired && textfieldValue == "" { // && textFields[i].regex.isEmpty {
                     NSSound.beep()
@@ -300,8 +301,6 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
                     observedObject?.appProperties.textFields[i].requiredTextfieldHighlight = Color.green
                     requiredString += "• "+(textField?.regexError ?? "Regex Check Failed  \n")
                     dontQuit = true
-                } else {
-                    observedObject?.appProperties.textFields[i].requiredTextfieldHighlight = Color.clear
                 }
                 
                 outputArray.append("\(textfieldTitle) : \(textfieldValue)")
@@ -327,6 +326,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
                 let dropdownItemSelectedValue = dropdownItem?.selectedValue ?? ""
                 let dropdownItemTitle = dropdownItem?.title ?? ""
                 let dropdownItemRequired = dropdownItem?.required ?? false
+                observedObject?.appProperties.dropdownItems[i].requiredfieldHighlight = Color.clear
                 
                 if dropdownItemRequired && dropdownItemSelectedValue == "" {
                     NSSound.beep()
