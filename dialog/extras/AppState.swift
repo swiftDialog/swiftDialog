@@ -65,6 +65,7 @@ struct DropDownItems {
     var defaultValue    : String
     var selectedValue   : String = ""
     var required        : Bool   = false
+    var style           : String = "list"
     var requiredfieldHighlight : Color = .clear
 }
 
@@ -277,6 +278,7 @@ struct CommandLineArguments {
     var dropdownTitle            = CommandlineArgument(long: "selecttitle")
     var dropdownValues           = CommandlineArgument(long: "selectvalues")
     var dropdownDefault          = CommandlineArgument(long: "selectdefault")
+    var dropdownStyle            = CommandlineArgument(long: "selectstyle")
     var titleFont                = CommandlineArgument(long: "titlefont")
     var messageFont              = CommandlineArgument(long: "messagefont")
     var textField                = CommandlineArgument(long: "textfield")

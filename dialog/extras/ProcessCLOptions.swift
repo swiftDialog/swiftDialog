@@ -77,7 +77,8 @@ func processCLOptions(json : JSON = getJSON()) {
                         values: (json["selectitems"][i]["values"].arrayValue.map {$0.stringValue}).map { $0.trimmingCharacters(in: .whitespaces) },
                         defaultValue: json["selectitems"][i]["default"].stringValue,
                         selectedValue: json["selectitems"][i]["default"].stringValue,
-                        required: json["selectitems"][i]["required"].boolValue
+                        required: json["selectitems"][i]["required"].boolValue,
+                        style: json["selectitems"][i]["style"].stringValue
                 ))
             }
 
@@ -97,13 +98,17 @@ func processCLOptions(json : JSON = getJSON()) {
             for i in 0..<(dropdownValues.count) {
                 let labelItems = dropdownLabels[i].components(separatedBy: ",")
                 var dropdownRequired : Bool = false
+                var dropdownStyle : String = "list"
                 let dropdownTitle : String = labelItems[0]
                 if labelItems.count > 1 {
                     if labelItems[1] == "required" {
                         dropdownRequired = true
                     }
+                    if labelItems[1] == "radio" {
+                        dropdownStyle = labelItems[1]
+                    }
                 }
-                appvars.dropdownItems.append(DropDownItems(title: dropdownTitle, values: dropdownValues[i].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[i], selectedValue: dropdownDefaults[i], required: dropdownRequired))
+                appvars.dropdownItems.append(DropDownItems(title: dropdownTitle, values: dropdownValues[i].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[i], selectedValue: dropdownDefaults[i], required: dropdownRequired, style: dropdownStyle))
             }
         }
         for i in 0..<appvars.dropdownItems.count {

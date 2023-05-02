@@ -103,28 +103,35 @@ struct MessageContent: View {
                     }
                 }
                 
-                WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .padding(.bottom, observedData.appProperties.bottomPadding)
-
-                ListView(observedDialogContent: observedData)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .padding(.bottom, observedData.appProperties.bottomPadding)
-                
-                CheckboxView(observedDialogContent: observedData)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
+                Group {
+                    WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
+                        .padding(.bottom, observedData.appProperties.bottomPadding)
+                    
+                    ListView(observedDialogContent: observedData)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
+                        .padding(.bottom, observedData.appProperties.bottomPadding)
+                    
+                    CheckboxView(observedDialogContent: observedData)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
                     //.padding(.bottom, observedData.appProperties.bottomPadding)
-                    .frame(maxWidth: dataEntryMaxWidth)
-                
-                TextEntryView(observedDialogContent: observedData)
-                    .padding(.bottom, observedData.appProperties.bottomPadding)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .frame(maxWidth: dataEntryMaxWidth)
-                
-                DropdownView(observedDialogContent: observedData)
-                    .padding(.bottom, observedData.appProperties.bottomPadding)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .frame(maxWidth: dataEntryMaxWidth)
+                        .frame(maxWidth: dataEntryMaxWidth)
+                    
+                    TextEntryView(observedDialogContent: observedData)
+                        .padding(.bottom, observedData.appProperties.bottomPadding)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
+                        .frame(maxWidth: dataEntryMaxWidth)
+                    
+                    RadioView(observedDialogContent: observedData)
+                        .padding(.bottom, observedData.appProperties.bottomPadding)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
+                        .frame(maxWidth: dataEntryMaxWidth)
+
+                    DropdownView(observedDialogContent: observedData)
+                        .padding(.bottom, observedData.appProperties.bottomPadding)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
+                        .frame(maxWidth: dataEntryMaxWidth, alignment: .leading)
+                }
                 
                 if ["top"].contains(observedData.args.messageVerticalAlignment.value) {
                     Spacer()
