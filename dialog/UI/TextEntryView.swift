@@ -21,21 +21,10 @@ struct TextEntryView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
     
-    //@State private var showingSheet = false
-
-    //var textFieldPresent: Bool = false
-    var fieldwidth: CGFloat = 0
-    //var requiredFieldsPresent : Bool = false
+    var fieldwidth: CGFloat = 0se
 
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent
-        //if appArguments.textField.present {
-        //    for i in 0..<observedDialogContent.appProperties.textFields.count {
-        //        if observedDialogContent.appProperties.textFields[i].required {
-        //            observedDialogContent.appProperties.requiredFieldsPresent = true
-        //        }
-        //    }
-        //}
         if !observedDialogContent.args.hideIcon.present { //} appArguments.hideIcon.present {
             fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value)
         } else {
@@ -52,8 +41,6 @@ struct TextEntryView: View {
                         VStack {
                             HStack {
                                 Text(observedData.appProperties.textFields[index].title + (observedData.appProperties.textFields[index].required ? " *":""))
-                                    //.bold()
-                                    //.font(.system(size: 15))
                                     .frame(alignment: .leading)
                                 Spacer()
                             }
@@ -75,8 +62,6 @@ struct TextEntryView: View {
                         HStack {
 
                             Text(observedData.appProperties.textFields[index].title + (observedData.appProperties.textFields[index].required ? " *":""))
-                                //.bold()
-                                //.font(.system(size: 15))
                                 .frame(idealWidth: fieldwidth*0.20, alignment: .leading)
                             Spacer()
 
@@ -119,20 +104,8 @@ struct TextEntryView: View {
                                         )
                                      )
                         }
-                        //.frame(maxWidth: 600)
                     }
                 }
-                /*
-                if self.requiredFieldsPresent {
-                    HStack {
-                        Spacer()
-                        Text("required-note")
-                            .font(.system(size: 10)
-                                    .weight(.light))
-                            //.padding(.trailing, observedData.appProperties.sidePadding)
-                    }
-                }
-                 */
             }
             .font(.system(size: observedData.appProperties.labelFontSize))
             .padding(10)

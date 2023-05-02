@@ -45,7 +45,6 @@ struct DialogView: View {
                             Spacer()
                         }
                         .border(appvars.debugBorderColour, width: 2)
-                        //.fixedSize(horizontal: false, vertical: true)
                         .padding(.top, observedData.appProperties.topPadding)
                         .padding(.bottom, observedData.appProperties.bottomPadding)
                         .padding(.leading, observedData.appProperties.sidePadding+10)

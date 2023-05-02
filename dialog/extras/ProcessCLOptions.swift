@@ -58,8 +58,6 @@ func getJSON() -> JSON {
 func processCLOptions(json : JSON = getJSON()) {
 
     //this method goes through the arguments that are present and performs any processing required before use
-
-    //let json : JSON = getJSON()
     
     if appArguments.dropdownValues.present {
         // checking for the pre 1.10 way of defining a select list
@@ -382,7 +380,6 @@ func processCLOptions(json : JSON = getJSON()) {
 
     // process command line options that just display info and exit before we show the main window
     if (appArguments.helpOption.present || CommandLine.arguments.count == 1) {
-        //print(helpText)
         let sdHelp = SDHelp(arguments: appArguments)
         if appArguments.helpOption.value != "" {
             sdHelp.printHelpLong(for: appArguments.helpOption.value)
@@ -390,23 +387,19 @@ func processCLOptions(json : JSON = getJSON()) {
             sdHelp.printHelpShort()
         }
         quitDialog(exitCode: appvars.exitNow.code)
-        //exit(0)
     }
     if appArguments.getVersion.present {
         printVersionString()
         quitDialog(exitCode: appvars.exitNow.code)
-        //exit(0)
     }
     if appArguments.licence.present {
         print(licenseText)
         quitDialog(exitCode: appvars.exitNow.code)
-        //exit(0)
     }
     if appArguments.buyCoffee.present {
         //I'm a teapot
         print("If you like this app and want to buy me a coffee https://www.buymeacoffee.com/bartreardon")
         quitDialog(exitCode: appvars.exitNow.code)
-        //exit(418)
     }
     if appArguments.ignoreDND.present {
         appvars.willDisturb = true
@@ -428,11 +421,6 @@ func processCLOptions(json : JSON = getJSON()) {
         }
         quitDialog(exitCode: appvars.exit0.code)
     }
-
-    //check for DND and exit if it's on
-    //if isDNDEnabled() && !appvars.willDisturb {
-    //    quitDialog(exitCode: 20, exitMessage: "Do Not Disturb is enabled. Exiting")
-    //}
         
     if appArguments.windowWidth.present {
         //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: appArguments.windowWidth)
@@ -458,16 +446,9 @@ func processCLOptions(json : JSON = getJSON()) {
         appvars.iconWidth = string2float(string: appArguments.iconSize.value)
         logger(logMessage: "iconWidth : \(appvars.iconWidth)")
     }
-    /*
-    if appArguments.iconHeight.present {
-        //appvars.windowHeight = CGFloat() //CLOptionText(OptionName: appArguments.windowHeight)
-        appvars.iconHeight = NumberFormatter().number(from: appArguments.iconHeight.value) as! CGFloat
-    }
-    */
     // Correct feng shui so the app accepts keyboard input
     // from https://stackoverflow.com/questions/58872398/what-is-the-minimally-viable-gui-for-command-line-swift-scripts
     let app = NSApplication.shared
-    //app.setActivationPolicy(.regular)
     app.setActivationPolicy(.accessory)
     
     if appArguments.bannerTitle.present {
@@ -731,9 +712,6 @@ func processCLOptionValues() {
     
     appArguments.iconAccessabilityLabel.value  = json[appArguments.iconAccessabilityLabel.long].string ?? CLOptionText(OptionName: appArguments.iconAccessabilityLabel, DefaultValue: "Dialog Icon")
     appArguments.iconAccessabilityLabel.present = json[appArguments.iconAccessabilityLabel.long].exists() || CLOptionPresent(OptionName: appArguments.iconAccessabilityLabel)
-    
-    //appArguments.iconHeight.value              = CLOptionText(OptionName: appArguments.iconHeight)
-    //appArguments.iconHeight.present            = CLOptionPresent(OptionName: appArguments.iconHeight)
 
     appArguments.overlayIconOption.value       = json[appArguments.overlayIconOption.long].string ?? CLOptionText(OptionName: appArguments.overlayIconOption)
     appArguments.overlayIconOption.present     = json[appArguments.overlayIconOption.long].exists() || CLOptionPresent(OptionName: appArguments.overlayIconOption)
@@ -781,13 +759,10 @@ func processCLOptionValues() {
     appArguments.buttonInfoActionOption.value  = json[appArguments.buttonInfoActionOption.long].string ?? CLOptionText(OptionName: appArguments.buttonInfoActionOption)
     appArguments.buttonInfoActionOption.present = json[appArguments.buttonInfoActionOption.long].exists() || CLOptionPresent(OptionName: appArguments.buttonInfoActionOption)
 
-    //appArguments.dropdownTitle.value           = json[appArguments.dropdownTitle.long].string ?? CLOptionText(OptionName: appArguments.dropdownTitle)
     appArguments.dropdownTitle.present         = json[appArguments.dropdownTitle.long].exists() || CLOptionPresent(OptionName: appArguments.dropdownTitle)
 
-    //appArguments.dropdownValues.value          = json[appArguments.dropdownValues.long].string ?? CLOptionText(OptionName: appArguments.dropdownValues)
     appArguments.dropdownValues.present        = json["selectitems"].exists() || json[appArguments.dropdownValues.long].exists() || CLOptionPresent(OptionName: appArguments.dropdownValues)
 
-    //appArguments.dropdownDefault.value         = json[appArguments.dropdownDefault.long].string ?? CLOptionText(OptionName: appArguments.dropdownDefault)
     appArguments.dropdownDefault.present       = json[appArguments.dropdownDefault.long].exists() || CLOptionPresent(OptionName: appArguments.dropdownDefault)
 
     appArguments.titleFont.value               = json[appArguments.titleFont.long].string ?? CLOptionText(OptionName: appArguments.titleFont)
@@ -796,7 +771,6 @@ func processCLOptionValues() {
     appArguments.messageFont.value             = json[appArguments.messageFont.long].string ?? CLOptionText(OptionName: appArguments.messageFont)
     appArguments.messageFont.present           = json[appArguments.messageFont.long].exists() || CLOptionPresent(OptionName: appArguments.messageFont)
 
-    //appArguments.textField.value               = CLOptionText(OptionName: appArguments.textField)
     appArguments.textField.present             = json[appArguments.textField.long].exists() || CLOptionPresent(OptionName: appArguments.textField)
     
     appArguments.checkbox.present             = json[appArguments.checkbox.long].exists() || CLOptionPresent(OptionName: appArguments.checkbox)
@@ -813,10 +787,8 @@ func processCLOptionValues() {
     appArguments.progressText.value             = json[appArguments.progressText.long].string ?? CLOptionText(OptionName: appArguments.progressText, DefaultValue: " ")
     appArguments.progressText.present           = json[appArguments.progressText.long].exists() || CLOptionPresent(OptionName: appArguments.progressText)
     
-    //appArguments.mainImage.value               = CLOptionText(OptionName: appArguments.mainImage)
     appArguments.mainImage.present             = json[appArguments.mainImage.long].exists() || CLOptionPresent(OptionName: appArguments.mainImage)
     
-    //appArguments.mainImageCaption.value        = CLOptionText(OptionName: appArguments.mainImageCaption)
     appArguments.mainImageCaption.present      = json[appArguments.mainImageCaption.long].exists() || CLOptionPresent(OptionName: appArguments.mainImageCaption)
     
     appArguments.listItem.present              = json[appArguments.listItem.long].exists() || CLOptionPresent(OptionName: appArguments.listItem)
@@ -874,7 +846,6 @@ func processCLOptionValues() {
     appArguments.video.present                 = json[appArguments.video.long].exists() || CLOptionPresent(OptionName: appArguments.video)
     if appArguments.video.present || appArguments.webcontent.present {
         // check if it's a youtube id
-        //switch appArguments.video.value.
         switch appArguments.video.value.components(separatedBy: "=").first!.lowercased() {
         case "youtubeid":
             let youTubeID = appArguments.video.value.replacingOccurrences(of: "youtubeid=", with: "")

@@ -14,7 +14,6 @@ struct ContentView: View {
     var waterMarkFill          = String("")
     var progressSteps : CGFloat = appvars.timerDefaultSeconds
     
-    //@ObservedObject var observedDialogContent = DialogUpdatableContent()
     @ObservedObject var observedData : DialogUpdatableContent
     
     init (observedDialogContent : DialogUpdatableContent) {
@@ -44,16 +43,6 @@ struct ContentView: View {
             }
             return event
         }
-        /*
-        // TODO: monitor for global events like minimise all app windows while the app isfocused and write to the log
-        NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { event in
-            switch event.modifierFlags.intersection(.deviceIndependentFlagsMask) {
-            case [.command, .option] where event.characters == "m":
-                print("app Minimised")
-            default: () //do nothing
-            }
-        }
-        */
     }
 //
 //    // set up timer to read data from temp file
@@ -99,7 +88,6 @@ struct ContentView: View {
                     if observedData.args.infoText.present {
                         Text(observedData.args.infoText.value)
                             .foregroundColor(.secondary.opacity(0.7))
-                            //.font(.system(size: 10))
                     } else if observedData.args.infoButtonOption.present || observedData.args.buttonInfoTextOption.present {
                         MoreInfoButton(observedDialogContent: observedData)
                         if !observedData.args.timerBar.present {
@@ -114,7 +102,6 @@ struct ContentView: View {
                         ButtonView(observedDialogContent: observedData) // contains both button 1 and button 2
                     }
                 }
-                //.frame(alignment: .bottom)
                 .padding(.leading, observedData.appProperties.sidePadding)
                 .padding(.trailing, observedData.appProperties.sidePadding)
                 .padding(.bottom, observedData.appProperties.bottomPadding)

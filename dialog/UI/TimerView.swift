@@ -17,9 +17,9 @@ struct TimerView: View {
     
     let barheight: CGFloat = 16
     var barRadius: CGFloat
-    var barColour = Color.accentColor//.opacity(0.8)
+    var barColour = Color.accentColor
     
-    var steps: CGFloat// = 10 // how many steps are there in the width of the progress bar
+    var steps: CGFloat // how many steps are there in the width of the progress bar
     var timerSteps: CGFloat
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect() // tick every 1 second
     

@@ -91,7 +91,6 @@ func calculateWindowYPos(screenHeight: CGFloat, position: NSWindow.Position.Vert
     switch position {
     case .top: return screenHeight - padding
     case .center:
-        //let screenheight = screenRange.upperBound - screenRange.lowerBound
         return (screenHeight / 2) + (screenHeight * 0.15)
     case .deadcenter: return screenHeight / 2
     case .bottom: return padding
@@ -117,7 +116,6 @@ func placeWindow(_ window: NSWindow, size : CGSize? = nil) {
     } else {
         windowSize = size ?? window.frame.size
     }
-    //print(windowSize)
     
     let windowX = calculateWindowXPos(screenWidth: visibleFrame.width - windowSize.width, position: appvars.windowPositionHorozontal)
     let windowY = calculateWindowYPos(screenHeight: visibleFrame.height - windowSize.height, position: appvars.windowPositionVertical)

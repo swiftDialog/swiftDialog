@@ -44,17 +44,14 @@ struct dialogApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     @ObservedObject var observedData : DialogUpdatableContent
-    //@ObservedObject var notificationManager = LocalNotificationManager()
     
     @State private var cancellables = Set<AnyCancellable>()
-    //@State var window : NSWindow?
     
     func monitorVisibility(window: NSWindow) {
         window.publisher(for: \.isVisible)
             .dropFirst()  // we know: the first value is not interesting
             .sink(receiveValue: { isVisible in
                 if isVisible {
-                    //observedData.mainWindow = window
                     placeWindow(window)
                 }
             })
@@ -108,7 +105,6 @@ struct dialogApp: App {
         appvars.iconHeight = appvars.iconHeight * appvars.scaleFactor
         
         if appArguments.miniMode.present {
-            //print("mini mode")
             appvars.windowWidth = 540
             appvars.windowHeight = 128
         }

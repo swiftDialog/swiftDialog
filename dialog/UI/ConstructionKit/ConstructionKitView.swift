@@ -96,7 +96,6 @@ struct JSONView: View {
             json[appArguments.titleFont.long].dictionaryObject = ["colour":colourToString(color: observedDialogContent.appProperties.titleFontColour)]
         }
 
-        // print("Generated JSON")
         // convert the JSON to a raw String
         jsonFormattedOutout = json.rawString() ?? "json is nil"
 
@@ -139,10 +138,6 @@ struct JSONView: View {
 struct ConstructionKitView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
-
-    // @State var titleColour: Color
-    // values being updated
-    // @State var dialogTitle: String
 
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent

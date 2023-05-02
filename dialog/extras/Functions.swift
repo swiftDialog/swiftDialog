@@ -206,8 +206,6 @@ func checkRegexPattern(regexPattern: String, textToValidate: String) -> Bool {
 }
 
 func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQuit: Bool = true, observedObject: DialogUpdatableContent) {
-    //let action: String = CLOptionText(OptionName: appArguments.button1ActionOption, DefaultValue: "")
-    
     if (action != "") {
         if executeShell {
             print(shell(action))
@@ -218,7 +216,6 @@ func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQui
     if shouldQuit {
         quitDialog(exitCode: exitCode, observedObject: observedObject)
     }
-    //exit(0)
 }
 
 func getAppIcon(appPath: String, withSize: CGFloat? = 300) -> NSImage {
@@ -253,9 +250,7 @@ func getVersionString() -> String {
 }
 
 func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : DialogUpdatableContent? = nil) {
-    //var userOutput: Bool = false
     if exitMessage != "" {
-        //print(exitCode)
         print("\(exitMessage!)")
     }
     
@@ -420,10 +415,7 @@ func stringToColour(_ colourValue: String) -> Color {
     
     var returnColor: Color
     
-    //let colourHash = String(item[1])
     if isValidColourHex(colourValue) {
-        
-        // valid hex = #000000 format
     
         let colourRedValue = "\(colourValue[1])\(colourValue[2])"
         let colourRed = Double(Int(colourRedValue, radix: 16)!)/255

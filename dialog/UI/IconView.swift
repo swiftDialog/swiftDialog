@@ -12,9 +12,7 @@ import SwiftUI
 struct IconView: View {
     @Environment(\.colorScheme) var colorScheme
     
-    //@ObservedObject var observedDialogContent : DialogUpdatableContent
-    
-    var messageUserImagePath: String //= cloptions.iconOption.value // CLOptionText(OptionName: cloptions.iconOption, DefaultValue: "default")
+    var messageUserImagePath: String
     
     var iconOverlay : String
     var logoWidth: CGFloat = appvars.iconWidth
@@ -52,15 +50,10 @@ struct IconView: View {
     
   
     init(image : String = "", overlay : String = "", alpha : Double = 1.0) {
-        //self.observedDialogContent = observedDialogContent
         
         mainImageAlpha = alpha
-        //if image != "" {
         messageUserImagePath = image
         iconOverlay = overlay
-        //} else {
-        //    messageUserImagePath = observedDialogContent.iconImage
-        //}
         
         logoWidth = appvars.iconWidth
         logoHeight = appvars.iconHeight
@@ -85,8 +78,6 @@ struct IconView: View {
         }
         
         if ["app", "prefPane", "framework"].contains(messageUserImagePath.split(separator: ".").last) {
-        
-        //if messageUserImagePath.hasSuffix(".app") || messageUserImagePath.hasSuffix("prefPane") {
             imgFromAPP = true
         }
         
@@ -102,7 +93,6 @@ struct IconView: View {
             
             framePadding = 15
             
-            //var SFValues = messageUserImagePath.components(separatedBy: ",")
             var SFValues = messageUserImagePath.split(usingRegex: appvars.argRegex)
             SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
             

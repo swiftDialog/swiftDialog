@@ -170,7 +170,6 @@ struct FullscreenView: View {
                     // message vstack
                     VStack() {
                         Markdown(observedData.messageText)
-                            //.multilineTextAlignment(observedData.appProperties.messageAlignment)
                             .markdownStyle(defaultStyle)
                             .multilineTextAlignment(.center)
                         
@@ -186,7 +185,6 @@ struct FullscreenView: View {
                 }
             }
             .padding(.horizontal, 20) // total padding for the icon/message group
-            //.padding(.vertical, 50)
         }
         .background(
                 //LinearGradient(gradient: Gradient(colors: [Color(hex: 0x0e539a), .black]), startPoint: .top, endPoint: .bottom)

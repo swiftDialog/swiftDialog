@@ -193,8 +193,6 @@ class FileReader {
                 let iconState = line.replacingOccurrences(of: "\(observedData.args.iconOption.long): ", with: "")
                 
                 if iconState.components(separatedBy: ": ").first == "size" {
-                    //print(iconState)
-                    //if let readIconSize = iconState.replacingOccurrences(of: "size: ", with: "") {
                     if iconState.replacingOccurrences(of: "size:", with: "").trimmingCharacters(in: .whitespaces) != "" {
                         observedData.iconSize = string2float(string: iconState.replacingOccurrences(of: "size: ", with: ""))
                     } else {
@@ -215,8 +213,6 @@ class FileReader {
                         observedData.args.iconOption.value = iconState
                     }
                 }
-                //print("centre icon is \(centreIconPresent)")
-                //iconImage = line.replacingOccurrences(of: "\(observedData.args.iconOption.long): ", with: "")
                 
             // overlay icon
             case "\(observedData.args.overlayIconOption.long):":
@@ -417,8 +413,6 @@ class DialogUpdatableContent : ObservableObject {
     @Published var iconAlpha : Double
     
     @Published var imageArray : [MainImage]
-    //@Published var imagePresent: Bool
-    //@Published var imageCaptionPresent: Bool
     
     @Published var listItemsArray : [ListItems]
     @Published var listItemUpdateRow: Int

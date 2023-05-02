@@ -21,9 +21,6 @@ struct MessageContent: View {
     var messageColour : Color
         
     var iconDisplayWidth : CGFloat
-        
-    //var defaultStyle: MarkdownStyle
-    //var customStyle: MarkdownStyle
     
     var markdownStyle: MarkdownStyle {
         if observedData.appProperties.messageFontName == "" {
@@ -56,7 +53,6 @@ struct MessageContent: View {
                              overlay: observedData.args.overlayIconOption.value,
                              alpha: observedData.iconAlpha)
                         .frame(width: iconDisplayWidth, alignment: .top)
-                        //.padding(.top, 15)
                         .padding(.bottom, observedData.appProperties.bottomPadding)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
@@ -71,7 +67,6 @@ struct MessageContent: View {
                              overlay: observedData.args.overlayIconOption.value,
                              alpha: observedData.iconAlpha)
                         .frame(width: iconDisplayWidth, alignment: .top)
-                        //.padding(.top, 15)
                         .padding(.bottom, observedData.appProperties.bottomPadding)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
@@ -114,7 +109,6 @@ struct MessageContent: View {
                     
                     CheckboxView(observedDialogContent: observedData)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
-                    //.padding(.bottom, observedData.appProperties.bottomPadding)
                         .frame(maxWidth: dataEntryMaxWidth)
                     
                     TextEntryView(observedDialogContent: observedData)

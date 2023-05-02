@@ -8,12 +8,10 @@
 import SwiftUI
 
 struct WatermarkView: View {
-    //var imagePath: String = ""
     var mainImage: NSImage
     var imageOpacity: Double
     var imagePosition : Alignment = .leading
     var imageAlignmentGuite : Alignment = .center
-    //var imageScaleFill : String
     
     @ObservedObject var observedData : DialogUpdatableContent
     

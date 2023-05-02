@@ -40,7 +40,6 @@ struct TextFieldState {
     var regexError      : String    = ""
     var required        : Bool      = false
     var secure          : Bool      = false
-    //var selectLabel     : String    = ""
     var title           : String
     var value           : String    = ""
     var requiredTextfieldHighlight : Color = .clear
@@ -263,7 +262,6 @@ struct CommandLineArguments {
     var iconSize                 = CommandlineArgument(long: "iconsize")
     var iconAlpha                = CommandlineArgument(long: "iconalpha")
     var iconAccessabilityLabel   = CommandlineArgument(long: "iconalttext")
-  //var iconHeight               = CLArgument(long: "iconheight")
     var overlayIconOption        = CommandlineArgument(long: "overlayicon", short: "y")
     var bannerImage              = CommandlineArgument(long: "bannerimage", short: "n")
     var bannerTitle              = CommandlineArgument(long: "bannertitle")
@@ -331,7 +329,6 @@ struct CommandLineArguments {
     var blurScreen               = CommandlineArgument(long: "blurscreen", isbool: true)
     var notification             = CommandlineArgument(long: "notification", isbool: true)
     
-    //var lockWindow               = CLArgument(long: "moveable", short: "o")
     var constructionKit          = CommandlineArgument(long: "builder", isbool: true)
     var movableWindow            = CommandlineArgument(long: "moveable", short: "o", isbool: true)
     var forceOnTop               = CommandlineArgument(long: "ontop", short: "p", isbool: true)

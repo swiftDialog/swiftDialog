@@ -34,7 +34,6 @@ struct StatusImage: View {
             .foregroundColor(colour)
             .scaledToFit()
             .frame(width: statusSize, height: statusSize)
-            //.border(.red)
             .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
     }
 }
@@ -119,13 +118,10 @@ struct ListView: View {
                                             EmptyView()
                                         }
                                     }
-                                    //.animation(.easeInOut(duration: 5))
-                                    //.transition(.opacity)
                                 }
                                 .frame(height: rowHeight+listHeightPadding)
                                 Divider()
                             }
-                            //.frame(height: rowHeight+listHeightPadding)
                         }
                         .background(Color("editorBackgroundColour"))
                     }
@@ -158,7 +154,6 @@ struct CirclerPercentageProgressViewStyle : ProgressViewStyle {
                 .stroke(style: StrokeStyle(lineWidth: stroke, lineCap: .round, lineJoin: .round))
                 .foregroundColor(Color.accentColor)
                 .rotationEffect(.degrees(-90))
-                //.animation(.linear)
             }
             .animation(.linear)
             .padding(.trailing, padding)

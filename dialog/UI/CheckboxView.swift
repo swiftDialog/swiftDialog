@@ -40,7 +40,6 @@ struct renderToggles : View {
                             }
                         }
                         Text(observedData.appProperties.checkboxArray[index].label)
-                        //.frame(minWidth: 120, alignment: .leading)
                         Spacer()
                         Toggle("", isOn: $observedData.appProperties.checkboxArray[index].checked)
                             .toggleStyle(.switch)

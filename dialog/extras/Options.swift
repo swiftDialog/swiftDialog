@@ -39,20 +39,16 @@ func CLOptionText(OptionName: CommandlineArgument, DefaultValue: String? = "") -
         if valueIndex >= CommandLine.arguments.startIndex
             && valueIndex < CommandLine.arguments.endIndex
         {
-            //if CommandLine.arguments[commandIndex] != "--\(appArguments.timerBar.long)" {
-                CLOptionTextValue = CommandLine.arguments[valueIndex]
-                if (CLOptionTextValue.starts(with: "-")) {
-                    //print("Argument \(CommandLine.arguments[commandIndex]) was not passed a value.")
-                    CLOptionTextValue = DefaultValue ?? ""
-                } else {
-                    CLOptionTextValue = CLOptionTextValue.replacingOccurrences(of:"\\n", with:"\n")
-                }
-            //}
+            CLOptionTextValue = CommandLine.arguments[valueIndex]
+            if (CLOptionTextValue.starts(with: "-")) {
+                CLOptionTextValue = DefaultValue ?? ""
+            } else {
+                CLOptionTextValue = CLOptionTextValue.replacingOccurrences(of:"\\n", with:"\n")
+            }
         }
     } else {
         CLOptionTextValue = DefaultValue ?? ""
     }
-    //print("\(OptionName) - \(CLOptionTextValue)")
     return CLOptionTextValue
 }
 
