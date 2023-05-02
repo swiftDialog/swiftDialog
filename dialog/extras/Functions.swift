@@ -12,29 +12,6 @@ import SwiftUI
 import OSLog
 import SwiftyJSON
 
-public extension Color {
-
-    static let background = Color(NSColor.windowBackgroundColor)
-    static let secondaryBackground = Color(NSColor.underPageBackgroundColor)
-    static let tertiaryBackground = Color(NSColor.controlBackgroundColor)
-}
-
-public extension Scene {
-    // Solution for maintaining fixed window size in macOS 13 https://developer.apple.com/forums/thread/719389
-    func windowResizabilityContentSize() -> some Scene {
-        if #available(macOS 13.0, *) {
-            return windowResizability(.contentSize)
-        } else {
-            return self
-        }
-    }
-}
-
-public extension String {
-var boolValue: Bool {
-    return (self as NSString).boolValue
-}}
-
 func logger(logType: String = "", logMessage: String) {
     let defaultLog = Logger(subsystem: "au.bartreardon.dialog", category: "main")
     switch logType {
@@ -48,6 +25,27 @@ func logger(logType: String = "", logMessage: String) {
         defaultLog.fault("\(logMessage, privacy: .public)")
     default:
         defaultLog.log("\(logMessage, privacy: .public)")
+    }
+}
+
+func writeLog(_ message: String, logLevel: OSLogType = .info, log: OSLog = osLog) {
+    let logMessage = "\(message)"
+
+    os_log("%{public}@", log: log, type: logLevel, logMessage)
+    if logLevel == .error || logLevel == .info || logLevel == .debug {
+        // print info, errors and debug to stdout
+        print("\(oslogTypeToString(logLevel).uppercased()): \(message)")
+    }
+}
+
+func oslogTypeToString(_ type: OSLogType) -> String {
+    switch type {
+    case OSLogType.default: return "default"
+    case OSLogType.info: return "info"
+    case OSLogType.debug: return "debug"
+    case OSLogType.error: return "error"
+    case OSLogType.fault: return "fault"
+    default: return "unknown"
     }
 }
 
@@ -383,31 +381,6 @@ func textToFontWeight(_ weight: String) -> Font.Weight {
             return Font.Weight.thin
         default:
             return Font.Weight.thin
-    }
-}
-
-extension String {
-    var localized: String {
-      return NSLocalizedString(self, comment: "\(self)_comment")
-    }
-
-    func localized(_ args: CVarArg...) -> String {
-        return String(format: localized, arguments: args)
-    }
-}
-
-extension String {
-    func split(usingRegex pattern: String) -> [String] {
-        let regex = try! NSRegularExpression(pattern: pattern)
-        let matches = regex.matches(in: self, range: NSRange(startIndex..., in: self))
-        let splits = [startIndex]
-            + matches
-                .map { Range($0.range, in: self)! }
-                .flatMap { [ $0.lowerBound, $0.upperBound ] }
-            + [endIndex]
-
-        return zip(splits, splits.dropFirst())
-            .map { String(self[$0 ..< $1])}
     }
 }
 

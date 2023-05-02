@@ -7,21 +7,11 @@
 
 import SwiftUI
 
-extension NSTextView {
-    open override var frame: CGRect {
-        didSet {
-            backgroundColor = .clear
-            drawsBackground = true
-        }
-
-    }
-}
-
 struct TextEntryView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
     
-    var fieldwidth: CGFloat = 0se
+    var fieldwidth: CGFloat = 0
 
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent

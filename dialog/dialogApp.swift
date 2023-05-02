@@ -8,16 +8,15 @@
 import SwiftUI
 import Combine
 import UserNotifications
+import OSLog
 
 import SystemConfiguration
 
-extension StringProtocol {
-    subscript(offset: Int) -> Character {
-        self[index(startIndex, offsetBy: offset)]
-    }
-}
-
 var background = BlurWindowController()
+
+// Log Stuff
+let bundleID = Bundle.main.bundleIdentifier ?? "au.bartreardon.dialog"
+let osLog = OSLog(subsystem: bundleID, category: "main")
 
 // AppDelegate and extension used for notifications
 class AppDelegate: NSObject, NSApplicationDelegate {

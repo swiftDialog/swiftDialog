@@ -7,15 +7,6 @@
 
 import SwiftUI
 
-extension NSTableView {
-  open override func viewDidMoveToWindow() {
-    super.viewDidMoveToWindow()
-
-    backgroundColor = NSColor.clear
-    enclosingScrollView!.drawsBackground = false
-  }
-}
-
 struct StatusImage: View {
     
     var name: String
