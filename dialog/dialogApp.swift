@@ -59,7 +59,7 @@ struct dialogApp: App {
     
     init () {
         
-        logger(logMessage: "Dialog Launched")
+                                writeLog("Dialog Launched")
         
         // Ensure the singleton NSApplication exists.
         // required for correct determination of screen dimentions for the screen in use in multi screen scenarios
@@ -88,7 +88,7 @@ struct dialogApp: App {
         
         // check for jamfhelper mode
         if appArguments.jamfHelperMode.present {
-            logger(logMessage: "converting jh to dialog")
+                                    writeLog("converting jh to dialog")
             convertFromJamfHelperSyntax()
         }
         
@@ -110,7 +110,7 @@ struct dialogApp: App {
                 
         //check debug mode and print info
         if appArguments.debug.present {
-            logger(logMessage: "debug options presented. dialog state sent to stdout")
+                                    writeLog("debug options presented. dialog state sent to stdout")
             appvars.debugMode = true
             appvars.debugBorderColour = Color.green
             
@@ -131,7 +131,7 @@ struct dialogApp: App {
               }
             }
         }
-        logger(logMessage: "width: \(appvars.windowWidth), height: \(appvars.windowHeight)")
+                                writeLog("width: \(appvars.windowWidth), height: \(appvars.windowHeight)")
         
         observedData = DialogUpdatableContent()
         

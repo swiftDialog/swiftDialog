@@ -346,7 +346,7 @@ class FileReader {
                     if let row = observedData.listItemsArray.firstIndex(where: {$0.title == title}) {
                         if deleteRow {
                             observedData.listItemsArray.remove(at: row)
-                            logger(logMessage: "deleted row at index \(row)")
+                            writeLog("deleted row at index \(row)")
                         } else {
                             if iconIsSet { observedData.listItemsArray[row].icon = icon }
                             if statusIsSet { observedData.listItemsArray[row].statusIcon = statusIcon }
@@ -359,7 +359,7 @@ class FileReader {
                     // add to the list items array
                     if addRow {
                         observedData.listItemsArray.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon, progress: listProgressValue))
-                        logger(logMessage: "row added with \(title) \(icon) \(statusText) \(statusIcon)")
+                                                writeLog("row added with \(title) \(icon) \(statusText) \(statusIcon)")
                     }
                     
                 }
@@ -506,16 +506,16 @@ class DialogUpdatableContent : ObservableObject {
         
         // check to make sure the file exists
         if fm.fileExists(atPath: commandFilePath) {
-            logger(logMessage: "Existing file at \(commandFilePath). Cleaning")
+                                    writeLog("Existing file at \(commandFilePath). Cleaning")
             let text = ""
             do {
                 try text.write(toFile: path, atomically: false, encoding: String.Encoding.utf8)
             } catch {
-                logger(logMessage: "Existing file at \(commandFilePath) but couldn't clean. ")
-                logger(logMessage: "Error info: \(error)")
+                                        writeLog("Existing file at \(commandFilePath) but couldn't clean. ")
+                                        writeLog("Error info: \(error)")
             }
         } else {
-            logger(logMessage: "Creating file at \(commandFilePath)")
+                                    writeLog("Creating file at \(commandFilePath)")
             fm.createFile(atPath: path, contents: nil, attributes: commandFilePermissions)
         }
     }
@@ -532,7 +532,7 @@ class DialogUpdatableContent : ObservableObject {
                 try fs.removeItem(atPath: path)
                 //NSLog("Deleted Dialog command file")
             } catch {
-                logger(logMessage: "Unable to delete command file")
+                                        writeLog("Unable to delete command file")
             }
         }
     }

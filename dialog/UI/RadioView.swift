@@ -42,7 +42,7 @@ struct RadioView: View {
     }
         
     var body: some View {
-        if observedData.args.dropdownValues.present {
+        if observedData.args.dropdownValues.present && radioCount > 0 {
             VStack {
                 ForEach(0..<observedData.appProperties.dropdownItems.count, id: \.self) {index in
                     if observedData.appProperties.dropdownItems[index].style == "radio" {

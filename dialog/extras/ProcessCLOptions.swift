@@ -204,7 +204,7 @@ func processCLOptions(json : JSON = getJSON()) {
                 appvars.userInputRequired = true
             }
         }
-        logger(logMessage: "textOptionsArray : \(appvars.textFields)")
+                                writeLog("textOptionsArray : \(appvars.textFields)")
     }
     
     if appArguments.checkbox.present {
@@ -247,7 +247,7 @@ func processCLOptions(json : JSON = getJSON()) {
                 appvars.checkboxArray.append(CheckBoxes(label: label, icon: icon, checked: checked, disabled: disabled))
             }
         }
-        logger(logMessage: "checkboxOptionsArray : \(appvars.checkboxArray)")
+                                writeLog("checkboxOptionsArray : \(appvars.checkboxArray)")
     }
     
     if appArguments.checkboxStyle.present {
@@ -291,7 +291,7 @@ func processCLOptions(json : JSON = getJSON()) {
                 appvars.imageArray.append(MainImage(path: imgArray[i]))
             }
         }
-        logger(logMessage: "imageArray : \(appvars.imageArray)")
+                                writeLog("imageArray : \(appvars.imageArray)")
     }
 
     if json[appArguments.mainImageCaption.long].exists() || appArguments.mainImageCaption.present {
@@ -300,7 +300,7 @@ func processCLOptions(json : JSON = getJSON()) {
         } else {
             appvars.imageCaptionArray = CLOptionMultiOptions(optionName: appArguments.mainImageCaption.long)
         }
-        logger(logMessage: "imageCaptionArray : \(appvars.imageCaptionArray)")
+                                writeLog("imageCaptionArray : \(appvars.imageCaptionArray)")
         for i in 0..<appvars.imageCaptionArray.count {
             if i < appvars.imageArray.count {
                 appvars.imageArray[i].caption = appvars.imageCaptionArray[i]
@@ -361,7 +361,7 @@ func processCLOptions(json : JSON = getJSON()) {
     
     if !json[appArguments.autoPlay.long].exists() && !appArguments.autoPlay.present {
         appArguments.autoPlay.value = "0"
-        logger(logMessage: "autoPlay.value : \(appArguments.autoPlay.value)")
+                                writeLog("autoPlay.value : \(appArguments.autoPlay.value)")
     }
 
     if json[appArguments.mainImageCaption.long].exists() || appArguments.mainImageCaption.present {
@@ -370,12 +370,12 @@ func processCLOptions(json : JSON = getJSON()) {
         } else {
             appvars.imageCaptionArray = CLOptionMultiOptions(optionName: appArguments.mainImageCaption.long)
         }
-        logger(logMessage: "imageCaptionArray : \(appvars.imageCaptionArray)")
+                                writeLog("imageCaptionArray : \(appvars.imageCaptionArray)")
     }
 
     if !json[appArguments.autoPlay.long].exists() && !appArguments.autoPlay.present {
         appArguments.autoPlay.value = "0"
-        logger(logMessage: "autoPlay.value : \(appArguments.autoPlay.value)")
+                                writeLog("autoPlay.value : \(appArguments.autoPlay.value)")
     }
 
     // process command line options that just display info and exit before we show the main window
@@ -429,7 +429,7 @@ func processCLOptions(json : JSON = getJSON()) {
         } else {
             appvars.windowWidth = string2float(string: appArguments.windowWidth.value)
         }
-        logger(logMessage: "windowWidth : \(appvars.windowWidth)")
+                                writeLog("windowWidth : \(appvars.windowWidth)")
     }
     if appArguments.windowHeight.present {
         //appvars.windowHeight = CGFloat() //CLOptionText(OptionName: appArguments.windowHeight)
@@ -438,13 +438,13 @@ func processCLOptions(json : JSON = getJSON()) {
         } else {
             appvars.windowHeight = string2float(string: appArguments.windowHeight.value)
         }
-        logger(logMessage: "windowHeight : \(appvars.windowHeight)")
+                                writeLog("windowHeight : \(appvars.windowHeight)")
     }
     
     if appArguments.iconSize.present {
         //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: appArguments.windowWidth)
         appvars.iconWidth = string2float(string: appArguments.iconSize.value)
-        logger(logMessage: "iconWidth : \(appvars.iconWidth)")
+                                writeLog("iconWidth : \(appvars.iconWidth)")
     }
     // Correct feng shui so the app accepts keyboard input
     // from https://stackoverflow.com/questions/58872398/what-is-the-minimally-viable-gui-for-command-line-swift-scripts
@@ -458,7 +458,7 @@ func processCLOptions(json : JSON = getJSON()) {
     if appArguments.titleFont.present {
 
         if appArguments.titleFont.value == "" {
-            logger(logMessage: "titleFont.object : \(json[appArguments.titleFont.long].object)")
+                                    writeLog("titleFont.object : \(json[appArguments.titleFont.long].object)")
 
             if json[appArguments.titleFont.long]["size"].exists() {
                 appvars.titleFontSize = string2float(string: json[appArguments.titleFont.long]["size"].stringValue, defaultValue: appvars.titleFontSize)
@@ -477,7 +477,7 @@ func processCLOptions(json : JSON = getJSON()) {
             }
         } else {
         
-            logger(logMessage: "titleFont.value : \(appArguments.titleFont.value)")
+                                    writeLog("titleFont.value : \(appArguments.titleFont.value)")
             let fontCLValues = appArguments.titleFont.value
             var fontValues = [""]
             //split by ,
@@ -489,21 +489,21 @@ func processCLOptions(json : JSON = getJSON()) {
                 switch item[0] {
                     case  "size":
                         appvars.titleFontSize = string2float(string: item[1], defaultValue: appvars.titleFontSize)
-                        logger(logMessage: "titleFontSize : \(appvars.titleFontSize)")
+                                                writeLog("titleFontSize : \(appvars.titleFontSize)")
                     case  "weight":
                         appvars.titleFontWeight = textToFontWeight(item[1])
-                        logger(logMessage: "titleFontWeight : \(appvars.titleFontWeight)")
+                                                writeLog("titleFontWeight : \(appvars.titleFontWeight)")
                     case  "colour","color":
                         appvars.titleFontColour = stringToColour(item[1])
-                        logger(logMessage: "titleFontColour : \(appvars.titleFontColour)")
+                                                writeLog("titleFontColour : \(appvars.titleFontColour)")
                     case  "name":
                         appvars.titleFontName = item[1]
-                        logger(logMessage: "titleFontName : \(appvars.titleFontName)")
+                                                writeLog("titleFontName : \(appvars.titleFontName)")
                     case  "shadow":
                         appvars.titleFontShadow = item[1].boolValue
-                        logger(logMessage: "titleFontShadow : \(appvars.titleFontShadow)")
+                                                writeLog("titleFontShadow : \(appvars.titleFontShadow)")
                     default:
-                        logger(logMessage: "Unknown paramater \(item[0])")
+                                                writeLog("Unknown paramater \(item[0])")
                 }
 
             }
@@ -514,7 +514,7 @@ func processCLOptions(json : JSON = getJSON()) {
     if appArguments.messageFont.present {
         
         if appArguments.messageFont.value == "" {
-            logger(logMessage: "messageFont.object : \(json[appArguments.messageFont.long].object)")
+                                    writeLog("messageFont.object : \(json[appArguments.messageFont.long].object)")
             if json[appArguments.messageFont.long]["size"].exists() {
                 appvars.messageFontSize = string2float(string: json[appArguments.messageFont.long]["size"].stringValue, defaultValue: appvars.messageFontSize)
             }
@@ -531,7 +531,7 @@ func processCLOptions(json : JSON = getJSON()) {
             }
         } else {
         
-            logger(logMessage: "messageFont.value : \(appArguments.messageFont.value)")
+                                    writeLog("messageFont.value : \(appArguments.messageFont.value)")
             let fontCLValues = appArguments.messageFont.value
             var fontValues = [""]
             //split by ,
@@ -543,18 +543,18 @@ func processCLOptions(json : JSON = getJSON()) {
                 switch item[0] {
                     case "size":
                         appvars.messageFontSize = string2float(string: item[1], defaultValue: appvars.messageFontSize)
-                        logger(logMessage: "messageFontSize : \(appvars.messageFontSize)")
+                                                writeLog("messageFontSize : \(appvars.messageFontSize)")
                     case "weight":
                         appvars.messageFontWeight = textToFontWeight(item[1])
-                        logger(logMessage: "messageFontWeight : \(appvars.messageFontWeight)")
+                                                writeLog("messageFontWeight : \(appvars.messageFontWeight)")
                     case "colour","color":
                         appvars.messageFontColour = stringToColour(item[1])
-                        logger(logMessage: "messageFontColour : \(appvars.messageFontColour)")
+                                                writeLog("messageFontColour : \(appvars.messageFontColour)")
                     case "name":
                         appvars.messageFontName = item[1]
-                        logger(logMessage: "messageFontName : \(appvars.messageFontName)")
+                                                writeLog("messageFontName : \(appvars.messageFontName)")
                     default:
-                        logger(logMessage: "Unknown paramater \(item[0])")
+                                                writeLog("Unknown paramater \(item[0])")
                 }
             }
         }
@@ -585,22 +585,22 @@ func processCLOptions(json : JSON = getJSON()) {
 
     if appArguments.centreIcon.present {
         appvars.iconIsCentred = true
-        logger(logMessage: "iconIsCentred = true")
+                                writeLog("iconIsCentred = true")
     }
 
     if appArguments.movableWindow.present {
         appvars.windowIsMoveable = true
-        logger(logMessage: "windowIsMoveable = true")
+                                writeLog("windowIsMoveable = true")
     }
     
     if appArguments.forceOnTop.present {
         appvars.windowOnTop = true
-        logger(logMessage: "windowOnTop = true")
+                                writeLog("windowOnTop = true")
     }
     
     if appArguments.jsonOutPut.present {
         appvars.jsonOut = true
-        logger(logMessage: "jsonOut = true")
+                                writeLog("jsonOut = true")
     }
 
     // we define this stuff here as we will use the info to draw the window.
@@ -611,12 +611,12 @@ func processCLOptions(json : JSON = getJSON()) {
         if !appArguments.iconSize.present {
             appArguments.iconSize.value = "120"
         }
-        logger(logMessage: "smallWindow.present")
+                                writeLog("smallWindow.present")
     } else if appArguments.bigWindow.present {
         // scale everything up a notch
         appvars.bigWindow = true
         appvars.scaleFactor = 1.25
-        logger(logMessage: "bigWindow.present")
+                                writeLog("bigWindow.present")
     }
 
     //if info button is present but no button action then default to quit on info

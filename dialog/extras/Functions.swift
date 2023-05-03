@@ -12,21 +12,6 @@ import SwiftUI
 import OSLog
 import SwiftyJSON
 
-func logger(logType: String = "", logMessage: String) {
-    let defaultLog = Logger(subsystem: "au.bartreardon.dialog", category: "main")
-    switch logType {
-    case "info":
-        defaultLog.info("\(logMessage, privacy: .public)")
-    case "debug":
-        defaultLog.debug("\(logMessage, privacy: .public)")
-    case "error":
-        defaultLog.error("\(logMessage, privacy: .public)")
-    case "fault":
-        defaultLog.fault("\(logMessage, privacy: .public)")
-    default:
-        defaultLog.log("\(logMessage, privacy: .public)")
-    }
-}
 
 func writeLog(_ message: String, logLevel: OSLogType = .info, log: OSLog = osLog) {
     let logMessage = "\(message)"
@@ -196,7 +181,7 @@ func checkRegexPattern(regexPattern: String, textToValidate: String) -> Bool {
         }
         
     } catch let error as NSError {
-        logger(logMessage: "invalid regex: \(error.localizedDescription)")
+        writeLog("invalid regex: \(error.localizedDescription)")
         returnValue = false
     }
     
