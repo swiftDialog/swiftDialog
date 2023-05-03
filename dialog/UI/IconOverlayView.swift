@@ -21,6 +21,7 @@ struct IconOverlayView: View {
         
         // enable if there is _anything_ specified as an overlay icon
         if overlayImagePath != "" {
+            writeLog("Displaying overlay icon \(overlayImagePath)")
             overlayIconPresent = true
         }
         
@@ -61,7 +62,8 @@ struct IconOverlayView: View {
         }
         
         // display an errror image if needed (only used here if it's a local file and it doesn't exist
-        if !sfSymbolPresent && !overlayImagePath.hasPrefix("http") && !FileManager.default.fileExists(atPath: overlayImagePath) {
+        if overlayIconPresent && !sfSymbolPresent && !overlayImagePath.hasPrefix("http") && !FileManager.default.fileExists(atPath: overlayImagePath) {
+            writeLog("Error with overlay icon. returning default error image")
             overlayImagePath = "sf=questionmark.square.dashed"
             sfSymbolPresent = true
         }

@@ -33,8 +33,10 @@ struct MessageContent: View {
     let theAllignment: Alignment = .topLeading
     
     init(observedDialogContent : DialogUpdatableContent) {
+        writeLog("Displaying main message content")
         self.observedData = observedDialogContent
         if !observedDialogContent.args.iconOption.present { //cloptions.hideIcon.present {
+            writeLog("Icon is hidden")
             fieldPadding = 30
             iconDisplayWidth = 0
         } else {

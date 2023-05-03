@@ -50,7 +50,10 @@ struct IconView: View {
     
   
     init(image : String = "", overlay : String = "", alpha : Double = 1.0) {
-        
+        writeLog("Displaying icon image \(image), alpha \(alpha)")
+        if !overlay.isEmpty {
+            writeLog("With overlay \(overlay)")
+        }
         mainImageAlpha = alpha
         messageUserImagePath = image
         iconOverlay = overlay
@@ -65,29 +68,35 @@ struct IconView: View {
         // fullscreen runs on a dark background so invert the default icon colour for info and default
         // also set the icon offset to 0
         if appArguments.fullScreenWindow.present {
+            writeLog("Adjusting icon colour for fullscreen display")
             // fullscreen background is dark, so we want to use white as the default colour
             builtInIconColour = Color.white
         }
         
         if messageUserImagePath.starts(with: "http") {
+            writeLog("Image is http source")
             imgFromURL = true
         }
         
         if messageUserImagePath.starts(with: "base64") {
+            writeLog("Image is base64 source")
             imgFromBase64 = true
         }
         
         if ["app", "prefPane", "framework"].contains(messageUserImagePath.split(separator: ".").last) {
+            writeLog("Image is app source")
             imgFromAPP = true
         }
         
         if messageUserImagePath == "none" {
+            writeLog("Icon is disabled")
             builtInIconName = "circle.fill"
             builtInIconPresent = true
             builtInIconColour = .clear
         }
         
         if messageUserImagePath.lowercased().hasPrefix("sf=") {
+            writeLog("Image is SF Symbol")
             sfSymbolPresent = true
             builtInIconPresent = true
             
@@ -158,18 +167,22 @@ struct IconView: View {
         }
             
         if appArguments.warningIcon.present || messageUserImagePath == "warning" {
+            writeLog("Using default warning icon")
             builtInIconName = "exclamationmark.octagon.fill"
             builtInIconFill = "octagon.fill" //does not have multicolour sf symbol so we have to make out own using a fill layer
             builtInIconColour = Color.red
             iconRenderingMode = Image.TemplateRenderingMode.original
             builtInIconPresent = true
         } else if appArguments.cautionIcon.present || messageUserImagePath == "caution" {
+            writeLog("Using default caution icon")
             builtInIconName = "exclamationmark.triangle.fill"  // yay multicolour sf symbol
             builtInIconPresent = true
         } else if appArguments.infoIcon.present || messageUserImagePath == "info" {
+            writeLog("Using default info icon")
             builtInIconName = "person.fill.questionmark"
             builtInIconPresent = true
         } else if messageUserImagePath == "default" || (!builtInIconPresent && !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL && !imgFromBase64) {
+            writeLog("Icon not specified - using default icon")
             builtInIconName = "bubble.left.circle.fill"
             iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
             builtInIconPresent = true

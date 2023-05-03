@@ -21,6 +21,8 @@ struct WatermarkView: View {
         mainImage = getImageFromPath(fileImagePath: observedContent.args.watermarkImage.value)
         imageOpacity = Double(observedContent.args.watermarkAlpha.value) ??  0.5
         
+        writeLog("Displaying background layer with image \(observedContent.args.watermarkImage.value) and alpha value \(observedContent.args.watermarkAlpha.value)")
+        
         switch observedData.args.watermarkPosition.value {
         case "left":
             imagePosition = .leading

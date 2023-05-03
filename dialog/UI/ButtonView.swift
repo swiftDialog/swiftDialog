@@ -25,9 +25,11 @@ struct ButtonView: View {
         self.observedData = observedDialogContent
         
         if observedDialogContent.args.button1ShellActionOption.present {
+            writeLog("Using button 1 shell action")
             button1action = observedDialogContent.args.button1ShellActionOption.value
             buttonShellAction = true
         } else if observedDialogContent.args.button1ActionOption.present {
+            writeLog("Using button 1 action \(observedDialogContent.args.button1ActionOption.value)")
             button1action = observedDialogContent.args.button1ActionOption.value
         }
     }

@@ -58,6 +58,8 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
     // origional implementation lifted from Nudge and modified
     // https://github.com/macadmins/nudge/blob/main/Nudge/Utilities/Utils.swift#L46
     
+    writeLog("Getting image from path \(fileImagePath)")
+    
     // need to declare literal empty string first otherwsie the runtime whinges about an NSURL instance with an empty URL string. I know!
     var urlPath = NSURL(string: "")!
     var imageData = NSData()
@@ -72,11 +74,13 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
     
     // check if it's base64 image data
     if fileImagePath.hasPrefix("base64") {
+        writeLog("Creating image from base64 data")
         return getImageFromBase64(base64String: fileImagePath.replacingOccurrences(of: "base64=", with: ""))
     }
     
     // checking for anything starting with http - crude but it works (for now)
     if fileImagePath.hasPrefix("http") {
+        writeLog("Getting image from http")
         urlPath = NSURL(string: fileImagePath)!
     } else {
         urlPath = NSURL(fileURLWithPath: fileImagePath)
@@ -87,9 +91,10 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
         imageData = try NSData(contentsOf: urlPath as URL)
     } catch {
         if returnErrorImage! {
+            writeLog("An error occured - returning error image")
             return errorImage
         } else {
-        
+            writeLog("An error occured - exiting")
             quitDialog(exitCode: appvars.exit201.code, exitMessage: "\(appvars.exit201.message) \(fileImagePath)", observedObject: DialogUpdatableContent())
         }
     }
@@ -101,6 +106,7 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
         image.size = rep.size
         image.addRepresentation(rep)
     }
+    writeLog("Returning image")
     return image
 }
 
@@ -144,13 +150,14 @@ func bannerErrorImage(size: NSSize) -> NSImage? {
 
 func openSpecifiedURL(urlToOpen: String) {
     // Open the selected URL (no checking is performed)
-    
+    writeLog("Opening URL \(urlToOpen)")
     if let url = URL(string: urlToOpen) {
         NSWorkspace.shared.open(url)
     }
 }
 
 func shell(_ command: String) -> String {
+    writeLog("Running shell command \(command)")
     let task = Process()
     let pipe = Pipe()
     
@@ -169,7 +176,7 @@ func shell(_ command: String) -> String {
 // taken wholesale from DEPNotify because Joel and team and jsut awesome so why re-invent the wheel?
 func checkRegexPattern(regexPattern: String, textToValidate: String) -> Bool {
     var returnValue = true
-    
+    writeLog("Checking regex")
     do {
         let regex = try NSRegularExpression(pattern: regexPattern)
         let nsString = textToValidate as NSString
@@ -189,6 +196,7 @@ func checkRegexPattern(regexPattern: String, textToValidate: String) -> Bool {
 }
 
 func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQuit: Bool = true, observedObject: DialogUpdatableContent) {
+    writeLog("processing button action \(action)")
     if (action != "") {
         if executeShell {
             print(shell(action))
@@ -205,7 +213,7 @@ func getAppIcon(appPath: String, withSize: CGFloat? = 300) -> NSImage {
     // take application path and extracts the application icon and returns is as NSImage
     // Swift implimentation of the ObjC code used in SAP's nice "Icons" utility for extracting application icons
     // https://github.com/SAP/macOS-icon-generator/blob/master/source/Icons/MTDragDropView.m#L66
-    
+    writeLog("Getting app icon image from \(appPath)")
     let image = NSImage()
     if let rep = NSWorkspace.shared.icon(forFile: appPath)
         .bestRepresentation(for: NSRect(x: 0, y: 0, width: withSize!, height: withSize!), context: nil, hints: nil) {
@@ -233,6 +241,7 @@ func getVersionString() -> String {
 }
 
 func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : DialogUpdatableContent? = nil) {
+    writeLog("About to quit with exit code \(exitCode)")
     if exitMessage != "" {
         print("\(exitMessage!)")
     }
@@ -254,6 +263,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
         var requiredString = ""
         
         if appArguments.textField.present {
+            writeLog("Textfield present - checking requirements are met")
             // check to see if fields marked as required have content before allowing the app to exit
             // if there is an empty field, update the highlight colour
             
@@ -270,6 +280,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
                     requiredString += "• \"\(textfieldTitle)\" \("is-required".localized) \n"
                     observedObject?.appProperties.textFields[i].requiredTextfieldHighlight = Color.red
                     dontQuit = true
+                    writeLog("Required text field \(textfieldTitle) has no value")
                 
                 //check for regex requirements
                 } else if !(textfieldValue.isEmpty)
@@ -279,6 +290,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
                     observedObject?.appProperties.textFields[i].requiredTextfieldHighlight = Color.green
                     requiredString += "• "+(textField?.regexError ?? "Regex Check Failed  \n")
                     dontQuit = true
+                    writeLog("Textfield \(textfieldTitle) value \(textfieldValue) does not meet regex requirements \(String(describing: textField?.regex))")
                 }
                 
                 outputArray.append("\(textfieldTitle) : \(textfieldValue)")
@@ -287,6 +299,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
         }
         
         if ((observedObject?.args.dropdownValues.present) != nil) {
+            writeLog("Select items present - checking require,ments are met")
             if observedObject?.appProperties.dropdownItems.count == 1 {
                 let selectedValue = observedObject?.appProperties.dropdownItems[0].selectedValue
                 let selectedIndex = observedObject?.appProperties.dropdownItems[0].values
@@ -311,6 +324,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
                     requiredString += "• \"\(dropdownItemTitle)\" \("is-required".localized) \n"
                     observedObject?.appProperties.dropdownItems[i].requiredfieldHighlight = Color.red
                     dontQuit = true
+                    writeLog("Required select item \(dropdownItemTitle) has no value")
                 } else {
                     outputArray.append("\"\(dropdownItemTitle)\" : \"\(dropdownItemSelectedValue)\"")
                     outputArray.append("\"\(dropdownItemTitle)\" index : \"\(dropdownItemValues.firstIndex(of: dropdownItemSelectedValue) ?? -1)\"")
@@ -320,6 +334,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
         }
         
         if dontQuit {
+            writeLog("Requirements were not met. Dialog will not quit at this time")
             observedObject?.sheetErrorMessage = requiredString
             observedObject?.showSheet = true
             return

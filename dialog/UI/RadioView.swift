@@ -39,6 +39,10 @@ struct RadioView: View {
         }
         _selectedOption = State(initialValue: defaultOptions)
         
+        if radioCount > 0 {
+            writeLog("Displaying radio button view")
+        }
+        
     }
         
     var body: some View {
