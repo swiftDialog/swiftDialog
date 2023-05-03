@@ -31,7 +31,7 @@ struct DropdownView: View {
         var defaultOptions : [String] = []
         for i in 0..<observedDialogContent.appProperties.dropdownItems.count {
             defaultOptions.append(observedDialogContent.appProperties.dropdownItems[i].defaultValue)
-            if observedDialogContent.appProperties.dropdownItems[i].style == "radio" {
+            if observedDialogContent.appProperties.dropdownItems[i].style != "radio" {
                 dropdownCount+=1
             }
         }
@@ -43,7 +43,7 @@ struct DropdownView: View {
     }
         
     var body: some View {
-        if observedData.args.dropdownValues.present {
+        if observedData.args.dropdownValues.present && dropdownCount > 0 {
             VStack {
                 ForEach(0..<observedData.appProperties.dropdownItems.count, id: \.self) {index in
                     if observedData.appProperties.dropdownItems[index].style != "radio" {
