@@ -17,8 +17,8 @@ func writeLog(_ message: String, logLevel: OSLogType = .info, log: OSLog = osLog
     let logMessage = "\(message)"
 
     os_log("%{public}@", log: log, type: logLevel, logMessage)
-    if logLevel == .error || logLevel == .info || logLevel == .debug {
-        // print info, errors and debug to stdout
+    if logLevel == .debug || appvars.debugMode {
+        // print debug to stdout
         print("\(oslogTypeToString(logLevel).uppercased()): \(message)")
     }
 }
