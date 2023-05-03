@@ -11,6 +11,7 @@ struct SDHelp {
     var argument : CommandLineArguments
     
     public func printHelpShort() {
+        writeLog("Printing short help")
         print("swiftDialog v\(getVersionString())")
         print("©2023 Bart Reardon\n")
         print("\n use --help <option> for more details\n")
@@ -30,6 +31,7 @@ struct SDHelp {
     }
     
     public func printHelpLong(for selectedArg: String) {
+        writeLog("Printing long help for \(selectedArg)")
         let mirror = Mirror(reflecting: argument)
         for child in mirror.children {
             if let arg = child.value as? CommandlineArgument, (arg.long == selectedArg || arg.short == selectedArg) {

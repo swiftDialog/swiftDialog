@@ -38,6 +38,7 @@ struct FullscreenView: View {
     }
      
     init (observedData : DialogUpdatableContent) {
+        writeLog("Entering full screen view")
         self.observedData = observedData
         // Ensure the singleton NSApplication exists.
         // required for correct determination of screen dimentions for the screen in use in multi screen scenarios
@@ -45,6 +46,8 @@ struct FullscreenView: View {
         
         windowHeight = displayDetails.size.height
         windowWidth = displayDetails.size.width
+        
+        writeLog("display width: \(windowWidth) height: \(windowHeight)")
         
         messageContentFontSize = 70
         emptyStackPadding = 70

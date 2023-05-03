@@ -27,6 +27,10 @@ struct ImageView: View {
         }
         
         self.autoPlaySeconds = autoPlaySeconds
+        if !imageArray.isEmpty {
+            writeLog("Displaying images")
+            writeLog("There are \(imageArray.count) images to display")
+        }
     }
     
     var body: some View {

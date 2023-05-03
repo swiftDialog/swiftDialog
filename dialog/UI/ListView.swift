@@ -63,6 +63,7 @@ struct ListView: View {
     
     var body: some View {
         if observedData.args.listItem.present {
+            let _ = writeLog("Displaying listitems")
             ScrollViewReader { proxy in
                 GeometryReader { geometry in
                     let listHeightPadding = ((geometry.size.height/CGFloat(observedData.listItemsArray.count)/2) * proportionalListHeight)
@@ -72,6 +73,7 @@ struct ListView: View {
                             VStack {
                                 HStack {
                                     if observedData.listItemsArray[i].icon != "" {
+                                        let _ = writeLog("Switch index \(i): Displaying icon \(observedData.listItemsArray[i].icon)")
                                         IconView(image: observedData.listItemsArray[i].icon, overlay: "")
                                             .frame(maxHeight: rowHeight)
                                     }

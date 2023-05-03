@@ -23,6 +23,9 @@ struct renderToggles : View {
         }
         
         iconPresent = observedData.appProperties.checkboxArray.contains { $0.icon != "" }
+        if iconPresent {
+            writeLog("One or more switches have an acssociated icon")
+        }
     }
     
     var body: some View {
@@ -30,11 +33,14 @@ struct renderToggles : View {
             ForEach(0..<observedData.appProperties.checkboxArray.count, id: \.self) {index in
                 HStack {
                     if observedData.appProperties.checkboxControlStyle == "switch" {
+                        let _ = writeLog("Displaying switches instead of checkboxes")
                         if iconPresent {
                             if observedData.appProperties.checkboxArray[index].icon != "" {
+                                let _ = writeLog("Switch index \(index): Displaying icon \(observedData.appProperties.checkboxArray[index].icon)")
                                 IconView(image: observedData.appProperties.checkboxArray[index].icon, overlay: "")
                                     .frame(height: rowHeight)
                             } else {
+                                let _ = writeLog("Switch index \(index) has no icon")
                                 IconView(image: "none", overlay: "")
                                     .frame(height: rowHeight)
                             }

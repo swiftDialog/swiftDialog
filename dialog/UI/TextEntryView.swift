@@ -20,7 +20,10 @@ struct TextEntryView: View {
         } else {
             fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value) - string2float(string: observedDialogContent.args.iconSize.value)
         }
-
+        if observedDialogContent.args.textField.present {
+            writeLog("Displaying text entry")
+            writeLog("\(observedDialogContent.appProperties.textFields.count) textfields detected")
+        }
     }
 
     var body: some View {

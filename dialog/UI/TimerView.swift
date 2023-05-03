@@ -62,6 +62,9 @@ struct TimerView: View {
         timerSteps = steps - 1
         barVisible = visible ?? true
         progressWidth = 0
+        if barVisible {
+            writeLog("Displaying timer with \(steps) seconds")
+        }
     }
         
     var body: some View {
@@ -127,6 +130,7 @@ struct TimerView: View {
                         progress += 1
                     }
                     if progress > timerSteps {
+                        writeLog("Timer expired - exiting")
                         quitDialog(exitCode: observedData.appProperties.exit4.code)
                     }
                 }
