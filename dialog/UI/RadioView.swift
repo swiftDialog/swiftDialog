@@ -28,7 +28,7 @@ struct RadioView: View {
                 
         var defaultOptions : [String] = []
         for i in 0..<observedDialogContent.appProperties.dropdownItems.count {
-            if observedDialogContent.appProperties.dropdownItems[i].defaultValue.isEmpty {
+            if observedDialogContent.appProperties.dropdownItems[i].defaultValue.isEmpty && observedDialogContent.appProperties.dropdownItems[i].style == "radio" {
                 observedDialogContent.appProperties.dropdownItems[i].defaultValue = observedDialogContent.appProperties.dropdownItems[i].values[0]
                 observedDialogContent.appProperties.dropdownItems[i].selectedValue = observedDialogContent.appProperties.dropdownItems[i].values[0]
             }
