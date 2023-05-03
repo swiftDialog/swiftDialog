@@ -34,6 +34,13 @@ struct DropdownView: View {
             if observedDialogContent.appProperties.dropdownItems[i].style != "radio" {
                 dropdownCount+=1
             }
+            for j in 0..<observedDialogContent.appProperties.dropdownItems[i].values.count {
+                let selectValue = observedDialogContent.appProperties.dropdownItems[i].values[j]
+                if selectValue.hasPrefix("---") && !selectValue.hasSuffix("<") {
+                    // We need to modify each `---` entry so it is unique and doesn't cause errors when building the menu
+                    observedDialogContent.appProperties.dropdownItems[i].values[j].append(String(repeating: "-", count: j).appending("<"))
+                }
+            }
         }
         _selectedOption = State(initialValue: defaultOptions)
         
