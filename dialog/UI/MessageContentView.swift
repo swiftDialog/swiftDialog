@@ -8,7 +8,6 @@
 import Foundation
 import SwiftUI
 import MarkdownUI
-import ScrollViewIfNeeded
 
 struct MessageContent: View {
     
@@ -78,23 +77,27 @@ struct MessageContent: View {
                     if ["centre", "center"].contains(observedData.args.messageVerticalAlignment.value) {
                         Spacer()
                     }
-                    if observedData.args.webcontent.present || observedData.args.listItem.present || observedData.args.messageVerticalAlignment.present {
-                        Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                            .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                            .markdownStyle(markdownStyle)
-                            .border(observedData.appProperties.debugBorderColour, width: 2)
-                            .accessibilityHint(observedData.args.messageOption.value)
-                            .focusable(false)
-                    } else {
-                        ScrollView() {
+                    //
+                    VStack {
+                        if observedData.args.webcontent.present || observedData.args.listItem.present || observedData.args.messageVerticalAlignment.present {
                             Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
                                 .multilineTextAlignment(observedData.appProperties.messageAlignment)
                                 .markdownStyle(markdownStyle)
                                 .border(observedData.appProperties.debugBorderColour, width: 2)
                                 .accessibilityHint(observedData.args.messageOption.value)
                                 .focusable(false)
+                        } else {
+                            ScrollView() {
+                                Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
+                                    .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                                    .markdownStyle(markdownStyle)
+                                    .border(observedData.appProperties.debugBorderColour, width: 2)
+                                    .accessibilityHint(observedData.args.messageOption.value)
+                                    .focusable(false)
+                            }
                         }
                     }
+                    //
                     if ["centre", "center"].contains(observedData.args.messageVerticalAlignment.value) {
                         Spacer()
                     }

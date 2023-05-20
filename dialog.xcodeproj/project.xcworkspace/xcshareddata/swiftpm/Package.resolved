@@ -37,15 +37,6 @@
       }
     },
     {
-      "identity" : "scrollviewifneeded",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/dkk/ScrollViewIfNeeded",
-      "state" : {
-        "revision" : "a14bb7355f317fd43e194021cbd813dbc0c298e6",
-        "version" : "1.0.1"
-      }
-    },
-    {
       "identity" : "swiftcommonmark",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/gonzalezreal/SwiftCommonMark",

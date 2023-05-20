@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import ScrollViewIfNeeded
 
 struct renderToggles : View {
     @ObservedObject var observedData : DialogUpdatableContent
@@ -89,15 +88,10 @@ struct CheckboxView: View {
     var body: some View {
         if observedData.args.checkbox.present {
             VStack {
-                if observedData.appProperties.checkboxControlStyle == "switch" {
-                    ScrollViewIfNeeded {
-                        Spacer()
-                        renderToggles(observedDialogContent: observedData)
-                    }
-                } else {
-                    renderToggles(observedDialogContent: observedData)
-                }
+                Spacer()
+                renderToggles(observedDialogContent: observedData)
             }
+            .scrollOnOverflow()
         }
     }
 }

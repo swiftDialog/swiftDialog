@@ -131,6 +131,7 @@ struct IconView: View {
                             // this is a bit of a workaround in that we let the user determine if they want the multicolour SF symbol
                             // or a standard template style. sefault is template. "auto" will use the built in SF Symbol colours
                             iconRenderingMode = Image.TemplateRenderingMode.original
+                            //builtInIconColour =
                         } else {
                             //check to see if it's in the right length and only contains the right characters
                             iconRenderingMode = Image.TemplateRenderingMode.template // switches to monochrome which allows us to tint the sf symbol
@@ -269,14 +270,14 @@ struct IconView: View {
                 }
                 .aspectRatio(contentMode: .fit)
                 .scaledToFit()
-                .scaleEffect(mainImageScale)
+                .scaleEffect(mainImageScale, anchor: .topLeading)
                 .opacity(mainImageAlpha)
             } else if imgFromAPP {
                 Image(nsImage: getAppIcon(appPath: messageUserImagePath))
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .scaledToFit()
-                        .scaleEffect(mainImageScale)
+                        .scaleEffect(mainImageScale, anchor: .topLeading)
                         .opacity(mainImageAlpha)
             } else {
                 let diskImage: NSImage = getImageFromPath(fileImagePath: messageUserImagePath, returnErrorImage: true)
@@ -285,7 +286,7 @@ struct IconView: View {
                     .aspectRatio(contentMode: .fit)
                     .scaledToFit()
                     .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .scaleEffect(mainImageScale)
+                    .scaleEffect(mainImageScale, anchor: .topLeading)
                     .opacity(mainImageAlpha)
             }
 
