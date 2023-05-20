@@ -65,7 +65,9 @@ struct TextEntryView: View {
                                     panel.allowsMultipleSelection = false
                                     panel.canChooseDirectories = false
                                     if observedData.appProperties.textFields[index].fileType != "" {
-                                        panel.allowedFileTypes = [observedData.appProperties.textFields[index].fileType]
+                                        let fileTypesArray = observedData.appProperties.textFields[index].fileType.components(separatedBy: " ")
+                                        //panel.allowedFileTypes = [observedData.appProperties.textFields[index].fileType]
+                                        panel.allowedFileTypes = fileTypesArray
                                     }
                                     if panel.runModal() == .OK {
                                         observedData.appProperties.textFields[index].value = panel.url?.path ?? "<none>"

@@ -503,9 +503,12 @@ struct SDHelp {
             prompt     - Pre-fill the field with some prompt text
             regex      - Specify a regular expression that the field must satisfy for the content to be accepted.
             regexerror - Specify a custom error to display if regex conditions are not met
+            fileselect - Adds a "Select" button and presents a file picker
+            filetype   - Limits fileselect to the named file extensions. Presented in space seperated values
 
         modifiers can be combined e.g. --\(appArguments.textField.long) <text>,secure,required
                                        --\(appArguments.textField.long) <text>,required,prompt="<text>"
+                                       --\(appArguments.textField.long) <text>,fileselect,filetype="jpeg jpg png"
                                        --\(appArguments.textField.long) <text>,regex="\\d{6}",prompt="000000",regexerror="Enter 6 digits"
         (secure fields cannot have the prompt modifier applied)
 """
