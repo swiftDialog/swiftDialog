@@ -7,15 +7,6 @@
 
 import SwiftUI
 
-extension NSTableView {
-  open override func viewDidMoveToWindow() {
-    super.viewDidMoveToWindow()
-
-    backgroundColor = NSColor.clear
-    enclosingScrollView!.drawsBackground = false
-  }
-}
-
 struct StatusImage: View {
     
     var name: String
@@ -34,7 +25,6 @@ struct StatusImage: View {
             .foregroundColor(colour)
             .scaledToFit()
             .frame(width: statusSize, height: statusSize)
-            //.border(.red)
             .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
     }
 }
@@ -73,6 +63,7 @@ struct ListView: View {
     
     var body: some View {
         if observedData.args.listItem.present {
+            let _ = writeLog("Displaying listitems")
             ScrollViewReader { proxy in
                 GeometryReader { geometry in
                     let listHeightPadding = ((geometry.size.height/CGFloat(observedData.listItemsArray.count)/2) * proportionalListHeight)
@@ -82,6 +73,7 @@ struct ListView: View {
                             VStack {
                                 HStack {
                                     if observedData.listItemsArray[i].icon != "" {
+                                        let _ = writeLog("Switch index \(i): Displaying icon \(observedData.listItemsArray[i].icon)")
                                         IconView(image: observedData.listItemsArray[i].icon, overlay: "")
                                             .frame(maxHeight: rowHeight)
                                     }
@@ -119,13 +111,10 @@ struct ListView: View {
                                             EmptyView()
                                         }
                                     }
-                                    //.animation(.easeInOut(duration: 5))
-                                    //.transition(.opacity)
                                 }
                                 .frame(height: rowHeight+listHeightPadding)
                                 Divider()
                             }
-                            //.frame(height: rowHeight+listHeightPadding)
                         }
                         .background(Color("editorBackgroundColour"))
                     }
@@ -158,7 +147,6 @@ struct CirclerPercentageProgressViewStyle : ProgressViewStyle {
                 .stroke(style: StrokeStyle(lineWidth: stroke, lineCap: .round, lineJoin: .round))
                 .foregroundColor(Color.accentColor)
                 .rotationEffect(.degrees(-90))
-                //.animation(.linear)
             }
             .animation(.linear)
             .padding(.trailing, padding)

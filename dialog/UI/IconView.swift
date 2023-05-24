@@ -12,9 +12,7 @@ import SwiftUI
 struct IconView: View {
     @Environment(\.colorScheme) var colorScheme
     
-    //@ObservedObject var observedDialogContent : DialogUpdatableContent
-    
-    var messageUserImagePath: String //= cloptions.iconOption.value // CLOptionText(OptionName: cloptions.iconOption, DefaultValue: "default")
+    var messageUserImagePath: String
     
     var iconOverlay : String
     var logoWidth: CGFloat = appvars.iconWidth
@@ -45,19 +43,20 @@ struct IconView: View {
     var sfPalettePresent: Bool = false
     
     var mainImageScale: CGFloat = 1
+    var mainImageAlpha: Double
+    
     let mainImageWithOverlayScale: CGFloat = 0.88
     let overlayImageScale: CGFloat = 0.4
     
   
-    init(image : String = "", overlay : String = "") {
-        //self.observedDialogContent = observedDialogContent
-        
-        //if image != "" {
+    init(image : String = "", overlay : String = "", alpha : Double = 1.0) {
+        writeLog("Displaying icon image \(image), alpha \(alpha)")
+        if !overlay.isEmpty {
+            writeLog("With overlay \(overlay)")
+        }
+        mainImageAlpha = alpha
         messageUserImagePath = image
         iconOverlay = overlay
-        //} else {
-        //    messageUserImagePath = observedDialogContent.iconImage
-        //}
         
         logoWidth = appvars.iconWidth
         logoHeight = appvars.iconHeight
@@ -69,36 +68,40 @@ struct IconView: View {
         // fullscreen runs on a dark background so invert the default icon colour for info and default
         // also set the icon offset to 0
         if appArguments.fullScreenWindow.present {
+            writeLog("Adjusting icon colour for fullscreen display")
             // fullscreen background is dark, so we want to use white as the default colour
             builtInIconColour = Color.white
         }
         
         if messageUserImagePath.starts(with: "http") {
+            writeLog("Image is http source")
             imgFromURL = true
         }
         
         if messageUserImagePath.starts(with: "base64") {
+            writeLog("Image is base64 source")
             imgFromBase64 = true
         }
         
         if ["app", "prefPane", "framework"].contains(messageUserImagePath.split(separator: ".").last) {
-        
-        //if messageUserImagePath.hasSuffix(".app") || messageUserImagePath.hasSuffix("prefPane") {
+            writeLog("Image is app source")
             imgFromAPP = true
         }
         
         if messageUserImagePath == "none" {
-            builtInIconName = "" 
+            writeLog("Icon is disabled")
+            builtInIconName = "circle.fill"
             builtInIconPresent = true
+            builtInIconColour = .clear
         }
         
         if messageUserImagePath.lowercased().hasPrefix("sf=") {
+            writeLog("Image is SF Symbol")
             sfSymbolPresent = true
             builtInIconPresent = true
             
             framePadding = 15
             
-            //var SFValues = messageUserImagePath.components(separatedBy: ",")
             var SFValues = messageUserImagePath.split(usingRegex: appvars.argRegex)
             SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
             
@@ -128,6 +131,7 @@ struct IconView: View {
                             // this is a bit of a workaround in that we let the user determine if they want the multicolour SF symbol
                             // or a standard template style. sefault is template. "auto" will use the built in SF Symbol colours
                             iconRenderingMode = Image.TemplateRenderingMode.original
+                            //builtInIconColour =
                         } else {
                             //check to see if it's in the right length and only contains the right characters
                             iconRenderingMode = Image.TemplateRenderingMode.template // switches to monochrome which allows us to tint the sf symbol
@@ -164,18 +168,22 @@ struct IconView: View {
         }
             
         if appArguments.warningIcon.present || messageUserImagePath == "warning" {
+            writeLog("Using default warning icon")
             builtInIconName = "exclamationmark.octagon.fill"
             builtInIconFill = "octagon.fill" //does not have multicolour sf symbol so we have to make out own using a fill layer
             builtInIconColour = Color.red
             iconRenderingMode = Image.TemplateRenderingMode.original
             builtInIconPresent = true
         } else if appArguments.cautionIcon.present || messageUserImagePath == "caution" {
+            writeLog("Using default caution icon")
             builtInIconName = "exclamationmark.triangle.fill"  // yay multicolour sf symbol
             builtInIconPresent = true
         } else if appArguments.infoIcon.present || messageUserImagePath == "info" {
+            writeLog("Using default info icon")
             builtInIconName = "person.fill.questionmark"
             builtInIconPresent = true
         } else if messageUserImagePath == "default" || (!builtInIconPresent && !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL && !imgFromBase64) {
+            writeLog("Icon not specified - using default icon")
             builtInIconName = "bubble.left.circle.fill"
             iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
             builtInIconPresent = true
@@ -262,13 +270,15 @@ struct IconView: View {
                 }
                 .aspectRatio(contentMode: .fit)
                 .scaledToFit()
-                .scaleEffect(mainImageScale)
+                .scaleEffect(mainImageScale, anchor: .topLeading)
+                .opacity(mainImageAlpha)
             } else if imgFromAPP {
                 Image(nsImage: getAppIcon(appPath: messageUserImagePath))
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .scaledToFit()
-                        .scaleEffect(mainImageScale)
+                        .scaleEffect(mainImageScale, anchor: .topLeading)
+                        .opacity(mainImageAlpha)
             } else {
                 let diskImage: NSImage = getImageFromPath(fileImagePath: messageUserImagePath, returnErrorImage: true)
                 Image(nsImage: diskImage)
@@ -276,7 +286,8 @@ struct IconView: View {
                     .aspectRatio(contentMode: .fit)
                     .scaledToFit()
                     .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .scaleEffect(mainImageScale)
+                    .scaleEffect(mainImageScale, anchor: .topLeading)
+                    .opacity(mainImageAlpha)
             }
 
             IconOverlayView(image: iconOverlay)

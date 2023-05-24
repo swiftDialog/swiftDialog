@@ -23,18 +23,24 @@ struct CKWindowProperties: View {
         VStack {
             LabelView(label: "ck-windowheight".localized)
             HStack {
-                TextField("ck-heightvalue", value: $observedData.windowHeight, formatter: formatter )
+                TextField("ck-heightvalue", value: $observedData.windowHeight, formatter: displayAsInt )
                     .frame(width: 50)
                 Slider(value: $observedData.windowHeight, in: 200...2000)
                     .frame(width: 200)
+                    .onChange(of: observedData.windowHeight) { height in
+                        observedData.windowHeight = height.rounded()
+                    }
                 Spacer()
             }
             LabelView(label: "ck-windowwidth".localized)
             HStack {
-                TextField("ck-widthvalue", value: $observedData.windowWidth, formatter: formatter)
+                TextField("ck-widthvalue", value: $observedData.windowWidth, formatter: displayAsInt)
                     .frame(width: 50)
                 Slider(value: $observedData.windowWidth, in: 200...2000)
                     .frame(width: 200)
+                    .onChange(of: observedData.windowWidth) { width in
+                        observedData.windowWidth = width.rounded()
+                    }
                 Spacer()
             }
             Group {
@@ -94,7 +100,7 @@ struct CKWindowProperties: View {
                         .frame(width: 100, alignment: .leading)
                     Toggle("", isOn: $observedData.args.progressBar.present)
                         .toggleStyle(.switch)
-                    TextField("ck-progressvalue".localized, value: $observedData.args.progressBar.value, formatter: formatter)
+                    TextField("ck-progressvalue".localized, value: $observedData.args.progressBar.value, formatter: displayAsInt)
                         .frame(width: 50)
                     TextField("ck-progresstext".localized, text: $observedData.args.progressText.value)
                         .frame(width: 150)
@@ -125,6 +131,12 @@ struct CKWindowProperties: View {
                       }
                 TextField("", text: $observedData.args.bannerImage.value)
             }
+            /*
+            VStack {
+                Toggle("banner title", isOn: $observedData.args.bannerTitle.present)
+                    .toggleStyle(.switch)
+            }
+             */
             HStack {
                 Text("ck-watermark".localized)
                     .frame(width: 100, alignment: .leading)

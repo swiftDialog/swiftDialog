@@ -9,14 +9,10 @@ import SwiftUI
 
 struct ErrorView: View {
     
-    //@Binding var showingSheet : Bool
     @ObservedObject var observedData : DialogUpdatableContent
-    //var sheetMessage : String
     
     init(observedContent : DialogUpdatableContent) {
-        //sheetMessage = text
         self.observedData = observedContent
-        //self._showingSheet = sheet
     }
     
     var body: some View {

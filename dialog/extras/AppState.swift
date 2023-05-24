@@ -16,10 +16,16 @@ var iconVisible: Bool = true
 var appvars = AppVariables()
 var appArguments = CommandLineArguments()
 
-let formatter: NumberFormatter = {
+let displayAsInt: NumberFormatter = {
     let formatter = NumberFormatter()
-    //formatter.usesSignificantDigits = false
     formatter.maximumFractionDigits = 0
+    formatter.numberStyle = .decimal
+    return formatter
+}()
+
+let displayAsDouble: NumberFormatter = {
+    let formatter = NumberFormatter()
+    formatter.maximumFractionDigits = 1
     formatter.numberStyle = .decimal
     return formatter
 }()
@@ -34,7 +40,6 @@ struct TextFieldState {
     var regexError      : String    = ""
     var required        : Bool      = false
     var secure          : Bool      = false
-    //var selectLabel     : String    = ""
     var title           : String
     var value           : String    = ""
     var requiredTextfieldHighlight : Color = .clear
@@ -58,11 +63,15 @@ struct DropDownItems {
     var values          : [String]
     var defaultValue    : String
     var selectedValue   : String = ""
+    var required        : Bool   = false
+    var style           : String = "list"
+    var requiredfieldHighlight : Color = .clear
 }
 
 struct CheckBoxes {
-    var title           : String
-    var value           : Bool = false
+    var label           : String
+    var icon            : String = ""
+    var checked         : Bool = false
     var disabled        : Bool = false
 }
 
@@ -96,11 +105,13 @@ struct MainImage {
         }
 }
 
-struct CLArgument {
+struct CommandlineArgument {
     var long: String
     var short: String = ""
     var value : String = ""
-    var help : String = ""
+    var helpShort : String = ""
+    var helpLong : String = ""
+    var helpUsage : String = "<text>"
     var present : Bool = false
     var isbool : Bool = false
 }
@@ -178,6 +189,10 @@ struct AppVariables {
     var messageFontColour               = Color.primary
     var messageFontWeight               = Font.Weight.regular
     var messageFontName                 = ""
+    var labelFontSize                   = CGFloat(16)
+    
+    var userInputRequired               = false
+    
     var overlayIconScale                = CGFloat(0.40)
     var overlayOffsetX                  = CGFloat(40)
     var overlayOffsetY                  = CGFloat(50)
@@ -188,11 +203,10 @@ struct AppVariables {
     var jsonOut                         = Bool(false)
 
     var willDisturb                     = Bool(false)
-
-    var checkboxOptionsArray            = [String]()
-    var checkboxText                    = Array(repeating: "", count: 64)
-    var checkboxValue                   = Array(repeating: false, count: 64)
-    var checkboxDisabled                = Array(repeating: false, count: 64)
+    
+    var checkboxArray                   = [CheckBoxes]()
+    var checkboxControlSize             = ControlSize.mini
+    var checkboxControlStyle            = ""
 
     var imageArray                      = [MainImage]()
     var imageCaptionArray               = [String]()
@@ -237,93 +251,94 @@ struct AppVariables {
 
 struct CommandLineArguments {
     // command line options that take string parameters
-    var titleOption              = CLArgument(long: "title", short: "t")
-    var subTitleOption           = CLArgument(long: "subtitle")
-    var messageOption            = CLArgument(long: "message", short: "m")
-    var messageAlignment         = CLArgument(long: "messagealignment")
-    var messageAlignmentOld      = CLArgument(long: "alignment")
-    var messageVerticalAlignment = CLArgument(long: "messageposition")
-    var helpMessage              = CLArgument(long: "helpmessage")
-    var iconOption               = CLArgument(long: "icon", short: "i")
-    var iconSize                 = CLArgument(long: "iconsize")
-    var iconAccessabilityLabel   = CLArgument(long: "iconalttext")
-  //var iconHeight               = CLArgument(long: "iconheight")
-    var overlayIconOption        = CLArgument(long: "overlayicon", short: "y")
-    var bannerImage              = CLArgument(long: "bannerimage", short: "n")
-    var bannerTitle              = CLArgument(long: "bannertitle")
-    var bannerText               = CLArgument(long: "bannertext")
-    var button1TextOption        = CLArgument(long: "button1text")
-    var button1ActionOption      = CLArgument(long: "button1action")
-    var button1ShellActionOption = CLArgument(long: "button1shellaction",short: "")
-    var button2TextOption        = CLArgument(long: "button2text")
-    var button2ActionOption      = CLArgument(long: "button2action")
-    var buttonInfoTextOption     = CLArgument(long: "infobuttontext")
-    var buttonInfoActionOption   = CLArgument(long: "infobuttonaction")
-    var dropdownTitle            = CLArgument(long: "selecttitle")
-    var dropdownValues           = CLArgument(long: "selectvalues")
-    var dropdownDefault          = CLArgument(long: "selectdefault")
-    var titleFont                = CLArgument(long: "titlefont")
-    var messageFont              = CLArgument(long: "messagefont")
-    var textField                = CLArgument(long: "textfield")
-    var checkbox                 = CLArgument(long: "checkbox")
-    var timerBar                 = CLArgument(long: "timer")
-    var progressBar              = CLArgument(long: "progress")
-    var progressText             = CLArgument(long: "progresstext")
-    var mainImage                = CLArgument(long: "image", short: "g")
-    var mainImageCaption         = CLArgument(long: "imagecaption")
-    var windowWidth              = CLArgument(long: "width")
-    var windowHeight             = CLArgument(long: "height")
-    var watermarkImage           = CLArgument(long: "background", short: "bg")
-    var watermarkAlpha           = CLArgument(long: "bgalpha", short: "ba")
-    var watermarkPosition        = CLArgument(long: "bgposition", short: "bp")
-    var watermarkFill            = CLArgument(long: "bgfill", short: "bf")
-    var watermarkScale           = CLArgument(long: "bgscale", short: "bs")
-    var position                 = CLArgument(long: "position")
-    var video                    = CLArgument(long: "video")
-    var videoCaption             = CLArgument(long: "videocaption")
-    var debug                    = CLArgument(long: "debug")
-    var jsonFile                 = CLArgument(long: "jsonfile")
-    var jsonString               = CLArgument(long: "jsonstring")
-    var statusLogFile            = CLArgument(long: "commandfile")
-    var listItem                 = CLArgument(long: "listitem")
-    var listStyle                = CLArgument(long: "liststyle")
-    var infoText                 = CLArgument(long: "infotext")
-    var infoBox                  = CLArgument(long: "infobox")
-    var quitKey                  = CLArgument(long: "quitkey")
-    var webcontent               = CLArgument(long: "webcontent")
+    var titleOption              = CommandlineArgument(long: "title", short: "t")
+    var subTitleOption           = CommandlineArgument(long: "subtitle")
+    var messageOption            = CommandlineArgument(long: "message", short: "m")
+    var messageAlignment         = CommandlineArgument(long: "messagealignment")
+    var messageAlignmentOld      = CommandlineArgument(long: "alignment")
+    var messageVerticalAlignment = CommandlineArgument(long: "messageposition")
+    var helpMessage              = CommandlineArgument(long: "helpmessage")
+    var iconOption               = CommandlineArgument(long: "icon", short: "i")
+    var iconSize                 = CommandlineArgument(long: "iconsize")
+    var iconAlpha                = CommandlineArgument(long: "iconalpha")
+    var iconAccessabilityLabel   = CommandlineArgument(long: "iconalttext")
+    var overlayIconOption        = CommandlineArgument(long: "overlayicon", short: "y")
+    var bannerImage              = CommandlineArgument(long: "bannerimage", short: "n")
+    var bannerTitle              = CommandlineArgument(long: "bannertitle")
+    var bannerText               = CommandlineArgument(long: "bannertext")
+    var button1TextOption        = CommandlineArgument(long: "button1text")
+    var button1ActionOption      = CommandlineArgument(long: "button1action")
+    var button1ShellActionOption = CommandlineArgument(long: "button1shellaction",short: "")
+    var button2TextOption        = CommandlineArgument(long: "button2text")
+    var button2ActionOption      = CommandlineArgument(long: "button2action")
+    var buttonInfoTextOption     = CommandlineArgument(long: "infobuttontext")
+    var buttonInfoActionOption   = CommandlineArgument(long: "infobuttonaction")
+    var dropdownTitle            = CommandlineArgument(long: "selecttitle")
+    var dropdownValues           = CommandlineArgument(long: "selectvalues")
+    var dropdownDefault          = CommandlineArgument(long: "selectdefault")
+    var dropdownStyle            = CommandlineArgument(long: "selectstyle")
+    var titleFont                = CommandlineArgument(long: "titlefont")
+    var messageFont              = CommandlineArgument(long: "messagefont")
+    var textField                = CommandlineArgument(long: "textfield")
+    var checkbox                 = CommandlineArgument(long: "checkbox")
+    var checkboxStyle            = CommandlineArgument(long: "checkboxstyle")
+    var timerBar                 = CommandlineArgument(long: "timer")
+    var progressBar              = CommandlineArgument(long: "progress")
+    var progressText             = CommandlineArgument(long: "progresstext")
+    var mainImage                = CommandlineArgument(long: "image", short: "g")
+    var mainImageCaption         = CommandlineArgument(long: "imagecaption")
+    var windowWidth              = CommandlineArgument(long: "width")
+    var windowHeight             = CommandlineArgument(long: "height")
+    var watermarkImage           = CommandlineArgument(long: "background", short: "bg")
+    var watermarkAlpha           = CommandlineArgument(long: "bgalpha", short: "ba")
+    var watermarkPosition        = CommandlineArgument(long: "bgposition", short: "bp")
+    var watermarkFill            = CommandlineArgument(long: "bgfill", short: "bf")
+    var watermarkScale           = CommandlineArgument(long: "bgscale", short: "bs")
+    var position                 = CommandlineArgument(long: "position")
+    var video                    = CommandlineArgument(long: "video")
+    var videoCaption             = CommandlineArgument(long: "videocaption")
+    var debug                    = CommandlineArgument(long: "debug")
+    var jsonFile                 = CommandlineArgument(long: "jsonfile")
+    var jsonString               = CommandlineArgument(long: "jsonstring")
+    var statusLogFile            = CommandlineArgument(long: "commandfile")
+    var listItem                 = CommandlineArgument(long: "listitem")
+    var listStyle                = CommandlineArgument(long: "liststyle")
+    var infoText                 = CommandlineArgument(long: "infotext")
+    var infoBox                  = CommandlineArgument(long: "infobox")
+    var quitKey                  = CommandlineArgument(long: "quitkey")
+    var webcontent               = CommandlineArgument(long: "webcontent")
 
     // command line options that take no additional parameters
-    var button1Disabled          = CLArgument(long: "button1disabled", isbool: true)
-    var button2Disabled          = CLArgument(long: "button2disabled", isbool: true)
-    var button2Option            = CLArgument(long: "button2", short: "2", isbool: true)
-    var infoButtonOption         = CLArgument(long: "infobutton", short: "3", isbool: true)
-    var getVersion               = CLArgument(long: "version", short: "v")
-    var hideIcon                 = CLArgument(long: "hideicon", short: "h")
-    var centreIcon               = CLArgument(long: "centreicon", isbool: true)
-    var centreIconSE             = CLArgument(long: "centericon", isbool: true) // the other way of spelling
-    var helpOption               = CLArgument(long: "help")
-    var demoOption               = CLArgument(long: "demo")
-    var buyCoffee                = CLArgument(long: "coffee", short: "☕️")
-    var licence              = CLArgument(long: "licence", short: "l")
-    var warningIcon              = CLArgument(long: "warningicon") // Deprecated
-    var infoIcon                 = CLArgument(long: "infoicon") // Deprecated
-    var cautionIcon              = CLArgument(long: "cautionicon") // Deprecated
-    var hideTimerBar             = CLArgument(long: "hidetimerbar")
-    var autoPlay                 = CLArgument(long: "autoplay")
-    var blurScreen               = CLArgument(long: "blurscreen", isbool: true)
-    var notification             = CLArgument(long: "notification", isbool: true)
+    var button1Disabled          = CommandlineArgument(long: "button1disabled", isbool: true)
+    var button2Disabled          = CommandlineArgument(long: "button2disabled", isbool: true)
+    var button2Option            = CommandlineArgument(long: "button2", short: "2", isbool: true)
+    var infoButtonOption         = CommandlineArgument(long: "infobutton", short: "3", isbool: true)
+    var getVersion               = CommandlineArgument(long: "version", short: "v")
+    var hideIcon                 = CommandlineArgument(long: "hideicon", short: "h")
+    var centreIcon               = CommandlineArgument(long: "centreicon", isbool: true)
+    var centreIconSE             = CommandlineArgument(long: "centericon", isbool: true) // the other way of spelling
+    var helpOption               = CommandlineArgument(long: "help")
+    var demoOption               = CommandlineArgument(long: "demo")
+    var buyCoffee                = CommandlineArgument(long: "coffee", short: "☕️")
+    var licence              = CommandlineArgument(long: "licence", short: "l")
+    var warningIcon              = CommandlineArgument(long: "warningicon") // Deprecated
+    var infoIcon                 = CommandlineArgument(long: "infoicon") // Deprecated
+    var cautionIcon              = CommandlineArgument(long: "cautionicon") // Deprecated
+    var hideTimerBar             = CommandlineArgument(long: "hidetimerbar")
+    var autoPlay                 = CommandlineArgument(long: "autoplay")
+    var blurScreen               = CommandlineArgument(long: "blurscreen", isbool: true)
+    var notification             = CommandlineArgument(long: "notification", isbool: true)
     
-    //var lockWindow               = CLArgument(long: "moveable", short: "o")
-    var constructionKit          = CLArgument(long: "builder", isbool: true)
-    var movableWindow            = CLArgument(long: "moveable", short: "o", isbool: true)
-    var forceOnTop               = CLArgument(long: "ontop", short: "p", isbool: true)
-    var smallWindow              = CLArgument(long: "small", short: "s", isbool: true)
-    var bigWindow                = CLArgument(long: "big", short: "b", isbool: true)
-    var fullScreenWindow         = CLArgument(long: "fullscreen", short: "f", isbool: true)
-    var quitOnInfo               = CLArgument(long: "quitoninfo", isbool: true)
-    var listFonts                = CLArgument(long: "listfonts")
-    var jsonOutPut               = CLArgument(long: "json", short: "j", isbool: true)
-    var ignoreDND                = CLArgument(long: "ignorednd", short: "d", isbool: true)
-    var jamfHelperMode           = CLArgument(long: "jh", short: "jh", isbool: true)
-    var miniMode                 = CLArgument(long: "mini")
+    var constructionKit          = CommandlineArgument(long: "builder", isbool: true)
+    var movableWindow            = CommandlineArgument(long: "moveable", short: "o", isbool: true)
+    var forceOnTop               = CommandlineArgument(long: "ontop", short: "p", isbool: true)
+    var smallWindow              = CommandlineArgument(long: "small", short: "s", isbool: true)
+    var bigWindow                = CommandlineArgument(long: "big", short: "b", isbool: true)
+    var fullScreenWindow         = CommandlineArgument(long: "fullscreen", short: "f", isbool: true)
+    var quitOnInfo               = CommandlineArgument(long: "quitoninfo", isbool: true)
+    var listFonts                = CommandlineArgument(long: "listfonts")
+    var jsonOutPut               = CommandlineArgument(long: "json", short: "j", isbool: true)
+    var ignoreDND                = CommandlineArgument(long: "ignorednd", short: "d", isbool: true)
+    var jamfHelperMode           = CommandlineArgument(long: "jh", short: "jh", isbool: true)
+    var miniMode                 = CommandlineArgument(long: "mini")
 }

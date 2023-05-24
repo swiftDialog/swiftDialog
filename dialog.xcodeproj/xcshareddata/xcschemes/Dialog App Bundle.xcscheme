@@ -56,8 +56,12 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--icon &quot;https://www.dropbox.com/s/4batk8v5outfxo5/install.png?dl=0&quot;"
+            argument = "--textfield &quot;Textfield Test&quot;,required --selecttitle &quot;Dropdown Test&quot;,required --selectvalues &quot;one, two, three&quot;"
             isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--icon &quot;https://www.dropbox.com/s/4batk8v5outfxo5/install.png?dl=0&quot;"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--notification --title &quot;swiftDialog Notifications&quot; --subtitle &quot;Test Subtitle&quot; --message &quot;Line 1\nLine 2\nLine 3\nLine 4&quot; --icon /etc/csiro/logo.png"

@@ -26,8 +26,27 @@ struct MiniProgressView: View {
 struct MiniView: View {
     @ObservedObject var observedData : DialogUpdatableContent
     
-    init(observedContent : DialogUpdatableContent) {
-        self.observedData = observedContent
+    init(observedDialogContent : DialogUpdatableContent) {
+        self.observedData = observedDialogContent
+        
+        // capture command+quitKey for quit
+        NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            switch event.modifierFlags.intersection(.deviceIndependentFlagsMask) {
+            case [.command] where "wnm".contains(event.characters ?? ""):
+                return nil
+            case [.command] where event.characters == "q":
+                if observedDialogContent.args.quitKey.value != "q" {
+                    return nil
+                } else {
+                    quitDialog(exitCode: observedDialogContent.appProperties.exit10.code)
+                }
+            case [.command] where event.characters == observedDialogContent.args.quitKey.value, [.command, .shift] where event.characters == observedDialogContent.args.quitKey.value.lowercased():
+                quitDialog(exitCode: observedDialogContent.appProperties.exit10.code)
+            default:
+                return event
+            }
+            return event
+        }
     }
     
     var body: some View {

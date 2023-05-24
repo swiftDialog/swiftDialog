@@ -40,7 +40,14 @@ struct CKSidebarView: View {
                 HStack {
                     Slider(value: $observedData.iconSize, in: 0...400)
                     //Text("Current value: \(observedDialogContent.iconSize, specifier: "%.0f")")
-                    TextField("Size value:", value: $observedData.iconSize, formatter: formatter)
+                    TextField("Size value:", value: $observedData.iconSize, formatter: displayAsInt)
+                        .frame(width: 50)
+                }
+                LabelView(label: "Icon Alpha")
+                HStack {
+                    Slider(value: $observedData.iconAlpha, in: 0.0...1.0)
+                    TextField("Alpha value:", value: $observedData.iconAlpha,
+                              formatter: displayAsDouble)
                         .frame(width: 50)
                 }
             }

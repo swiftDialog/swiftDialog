@@ -7,36 +7,91 @@
 
 import SwiftUI
 
+struct renderToggles : View {
+    @ObservedObject var observedData : DialogUpdatableContent
+    
+    var iconPresent : Bool = false
+    var rowHeight : CGFloat = 10
+    
+    init(observedDialogContent : DialogUpdatableContent) {
+        self.observedData = observedDialogContent
+        if observedData.appProperties.checkboxControlSize == .large {
+            rowHeight = observedData.appProperties.messageFontSize + 24
+        } else {
+            rowHeight = observedData.appProperties.messageFontSize + 14
+        }
+        
+        iconPresent = observedData.appProperties.checkboxArray.contains { $0.icon != "" }
+        if iconPresent {
+            writeLog("One or more switches have an acssociated icon")
+        }
+    }
+    
+    var body: some View {
+        VStack {
+            ForEach(0..<observedData.appProperties.checkboxArray.count, id: \.self) {index in
+                HStack {
+                    if observedData.appProperties.checkboxControlStyle == "switch" {
+                        let _ = writeLog("Displaying switches instead of checkboxes")
+                        if iconPresent {
+                            if observedData.appProperties.checkboxArray[index].icon != "" {
+                                let _ = writeLog("Switch index \(index): Displaying icon \(observedData.appProperties.checkboxArray[index].icon)")
+                                IconView(image: observedData.appProperties.checkboxArray[index].icon, overlay: "")
+                                    .frame(height: rowHeight)
+                            } else {
+                                let _ = writeLog("Switch index \(index) has no icon")
+                                IconView(image: "none", overlay: "")
+                                    .frame(height: rowHeight)
+                            }
+                        }
+                        Text(observedData.appProperties.checkboxArray[index].label)
+                        Spacer()
+                        Toggle("", isOn: $observedData.appProperties.checkboxArray[index].checked)
+                            .toggleStyle(.switch)
+                            .disabled(observedData.appProperties.checkboxArray[index].disabled)
+                            .controlSize(observedData.appProperties.checkboxControlSize)
+                    } else {
+                        Toggle(observedData.appProperties.checkboxArray[index].label, isOn: $observedData.appProperties.checkboxArray[index].checked)
+                            .toggleStyle(.checkbox)
+                            .disabled(observedData.appProperties.checkboxArray[index].disabled)
+                        Spacer()
+                    }
+                }
+                .frame(alignment: .center)
+                .frame(width: .infinity)
+                
+                // Horozontal Line
+                if index < observedData.appProperties.checkboxArray.count-1 {
+                    Divider().opacity(0.5)
+                }
+            }
+        }
+        .font(.system(size: observedData.appProperties.labelFontSize))
+        .padding(10)
+        .background(Color.background.opacity(0.5))
+        .cornerRadius(8)
+    }
+}
+
 struct CheckboxView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
+    @State private var contentSize: CGSize = .zero
     
-    //@State var checkboxValues = appvars.checkboxValue
-    // @State var textFieldValue = ""
-    // var textFieldLabel = CLOptionText(OptionName: appArguments.textField)
-    //let checkboxLabels = appvars.checkboxOptionsArray
-    //let checkboxDisabled = appvars.checkboxDisabled
-    //var checkboxPresent: Bool = appArguments.checkbox.present
-
+    var toggleStyle : any ToggleStyle = .checkbox
+    
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent
+        
     }
 
     var body: some View {
         if observedData.args.checkbox.present {
             VStack {
-                ForEach(0..<observedData.appProperties.checkboxOptionsArray.count, id: \.self) {index in
-                    HStack {
-                        Toggle(observedData.appProperties.checkboxOptionsArray[index], isOn: $observedData.appProperties.checkboxValue[index])
-                            .toggleStyle(.checkbox)
-                            .disabled(observedData.appProperties.checkboxDisabled[index])
-                        // Text(checkboxLabels[i])
-                        Spacer()
-                    }
-                    .font(.system(size: 16))
-                    .frame(alignment: .center)
-                }
+                Spacer()
+                renderToggles(observedDialogContent: observedData)
             }
+            .scrollOnOverflow()
         }
     }
 }

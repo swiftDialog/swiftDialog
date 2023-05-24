@@ -7,41 +7,23 @@
 
 import SwiftUI
 
-extension NSTextView {
-    open override var frame: CGRect {
-        didSet {
-            backgroundColor = .clear
-            drawsBackground = true
-        }
-
-    }
-}
-
 struct TextEntryView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
     
-    @State private var showingSheet = false
-
-    //var textFieldPresent: Bool = false
     var fieldwidth: CGFloat = 0
-    var requiredFieldsPresent : Bool = false
 
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent
-        if appArguments.textField.present {
-            for i in 0..<observedDialogContent.appProperties.textFields.count {
-                if observedDialogContent.appProperties.textFields[i].required {
-                    self.requiredFieldsPresent = true
-                }
-            }
-        }
         if !observedDialogContent.args.hideIcon.present { //} appArguments.hideIcon.present {
             fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value)
         } else {
             fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value) - string2float(string: observedDialogContent.args.iconSize.value)
         }
-
+        if observedDialogContent.args.textField.present {
+            writeLog("Displaying text entry")
+            writeLog("\(observedDialogContent.appProperties.textFields.count) textfields detected")
+        }
     }
 
     var body: some View {
@@ -52,8 +34,6 @@ struct TextEntryView: View {
                         VStack {
                             HStack {
                                 Text(observedData.appProperties.textFields[index].title + (observedData.appProperties.textFields[index].required ? " *":""))
-                                    .bold()
-                                    .font(.system(size: 15))
                                     .frame(alignment: .leading)
                                 Spacer()
                             }
@@ -75,8 +55,6 @@ struct TextEntryView: View {
                         HStack {
 
                             Text(observedData.appProperties.textFields[index].title + (observedData.appProperties.textFields[index].required ? " *":""))
-                                .bold()
-                                .font(.system(size: 15))
                                 .frame(idealWidth: fieldwidth*0.20, alignment: .leading)
                             Spacer()
 
@@ -87,7 +65,9 @@ struct TextEntryView: View {
                                     panel.allowsMultipleSelection = false
                                     panel.canChooseDirectories = false
                                     if observedData.appProperties.textFields[index].fileType != "" {
-                                        panel.allowedFileTypes = [observedData.appProperties.textFields[index].fileType]
+                                        let fileTypesArray = observedData.appProperties.textFields[index].fileType.components(separatedBy: " ")
+                                        //panel.allowedFileTypes = [observedData.appProperties.textFields[index].fileType]
+                                        panel.allowedFileTypes = fileTypesArray
                                     }
                                     if panel.runModal() == .OK {
                                         observedData.appProperties.textFields[index].value = panel.url?.path ?? "<none>"
@@ -119,20 +99,13 @@ struct TextEntryView: View {
                                         )
                                      )
                         }
-                        .frame(maxWidth: 600)
-                    }
-                }
-                if self.requiredFieldsPresent {
-                    HStack {
-                        Spacer()
-                        Text("required-note")
-                            .font(.system(size: 10)
-                                    .weight(.light))
-                            //.padding(.trailing, observedData.appProperties.sidePadding)
                     }
                 }
             }
-                    
+            .font(.system(size: observedData.appProperties.labelFontSize))
+            .padding(10)
+            .background(Color.background.opacity(0.5))
+            .cornerRadius(8)
         }
     }
 }

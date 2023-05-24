@@ -61,7 +61,7 @@ struct CKListView: View {
                         }
                     }
                     Slider(value: $observedData.listItemsArray[item].progress, in: 0...100)
-                    TextField("", value: $observedData.listItemsArray[item].progress, formatter: formatter)
+                    TextField("", value: $observedData.listItemsArray[item].progress, formatter: displayAsInt)
                         .frame(width: 30)
                 }
             }

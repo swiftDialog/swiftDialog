@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftUI
+import Combine
 
 enum StatusState {
     case start
@@ -192,8 +193,6 @@ class FileReader {
                 let iconState = line.replacingOccurrences(of: "\(observedData.args.iconOption.long): ", with: "")
                 
                 if iconState.components(separatedBy: ": ").first == "size" {
-                    //print(iconState)
-                    //if let readIconSize = iconState.replacingOccurrences(of: "size: ", with: "") {
                     if iconState.replacingOccurrences(of: "size:", with: "").trimmingCharacters(in: .whitespaces) != "" {
                         observedData.iconSize = string2float(string: iconState.replacingOccurrences(of: "size: ", with: ""))
                     } else {
@@ -214,8 +213,6 @@ class FileReader {
                         observedData.args.iconOption.value = iconState
                     }
                 }
-                //print("centre icon is \(centreIconPresent)")
-                //iconImage = line.replacingOccurrences(of: "\(observedData.args.iconOption.long): ", with: "")
                 
             // overlay icon
             case "\(observedData.args.overlayIconOption.long):":
@@ -349,7 +346,7 @@ class FileReader {
                     if let row = observedData.listItemsArray.firstIndex(where: {$0.title == title}) {
                         if deleteRow {
                             observedData.listItemsArray.remove(at: row)
-                            logger(logMessage: "deleted row at index \(row)")
+                            writeLog("deleted row at index \(row)")
                         } else {
                             if iconIsSet { observedData.listItemsArray[row].icon = icon }
                             if statusIsSet { observedData.listItemsArray[row].statusIcon = statusIcon }
@@ -362,17 +359,29 @@ class FileReader {
                     // add to the list items array
                     if addRow {
                         observedData.listItemsArray.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon, progress: listProgressValue))
-                        logger(logMessage: "row added with \(title) \(icon) \(statusText) \(statusIcon)")
+                                                writeLog("row added with \(title) \(icon) \(statusText) \(statusIcon)")
                     }
                     
                 }
                 
+            // help message
+            case "\(observedData.args.helpMessage.long):" :
+                observedData.args.helpMessage.value = line.replacingOccurrences(of: "\(observedData.args.helpMessage.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n")
+                observedData.args.helpMessage.present = true
+            
+            // activate
+            case "activate:" :
+                NSApp.activate(ignoringOtherApps: true)
+                
+            // icon alpha
+            case "\(observedData.args.iconAlpha.long):" :
+                observedData.iconAlpha = Double(line.replacingOccurrences(of: "\(observedData.args.iconAlpha.long): ", with: "")) ?? 1.0
+            
             // quit
             case "quit:" :
                 quitDialog(exitCode: appvars.exit5.code)
 
             default:
-
                 break
             }
         }
@@ -401,10 +410,9 @@ class DialogUpdatableContent : ObservableObject {
     @Published var progressValue: Double?
     @Published var progressTotal: Double
     @Published var iconSize: CGFloat
+    @Published var iconAlpha : Double
     
     @Published var imageArray : [MainImage]
-    //@Published var imagePresent: Bool
-    //@Published var imageCaptionPresent: Bool
     
     @Published var listItemsArray : [ListItems]
     @Published var listItemUpdateRow: Int
@@ -416,6 +424,8 @@ class DialogUpdatableContent : ObservableObject {
     
     @Published var showSheet: Bool
     @Published var sheetErrorMessage: String
+    
+    @Published var blurredScreen = [BlurWindowController]()
     
     var status: StatusState
     
@@ -454,6 +464,7 @@ class DialogUpdatableContent : ObservableObject {
         listItemUpdateRow = 0
         
         iconSize = string2float(string: appArguments.iconSize.value)
+        iconAlpha = Double(appArguments.iconAlpha.value) ?? 1.0
         
         imageArray = appvars.imageArray
         //imagePresent = appArguments.mainImage.present
@@ -495,16 +506,16 @@ class DialogUpdatableContent : ObservableObject {
         
         // check to make sure the file exists
         if fm.fileExists(atPath: commandFilePath) {
-            logger(logMessage: "Existing file at \(commandFilePath). Cleaning")
+                                    writeLog("Existing file at \(commandFilePath). Cleaning")
             let text = ""
             do {
                 try text.write(toFile: path, atomically: false, encoding: String.Encoding.utf8)
             } catch {
-                logger(logMessage: "Existing file at \(commandFilePath) but couldn't clean. ")
-                logger(logMessage: "Error info: \(error)")
+                                        writeLog("Existing file at \(commandFilePath) but couldn't clean. ")
+                                        writeLog("Error info: \(error)")
             }
         } else {
-            logger(logMessage: "Creating file at \(commandFilePath)")
+                                    writeLog("Creating file at \(commandFilePath)")
             fm.createFile(atPath: path, contents: nil, attributes: commandFilePermissions)
         }
     }
@@ -521,7 +532,7 @@ class DialogUpdatableContent : ObservableObject {
                 try fs.removeItem(atPath: path)
                 //NSLog("Deleted Dialog command file")
             } catch {
-                logger(logMessage: "Unable to delete command file")
+                                        writeLog("Unable to delete command file")
             }
         }
     }

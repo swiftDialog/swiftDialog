@@ -56,7 +56,7 @@ struct JSONView: View {
         
         let mirrored_appArguments = Mirror(reflecting: observedDialogContent.args)
         for (_, attr) in mirrored_appArguments.children.enumerated() {
-            if let propertyValue = attr.value as? CLArgument {
+            if let propertyValue = attr.value as? CommandlineArgument {
                 if propertyValue.present { //}&& propertyValue.value != "" {
                     if propertyValue.value != "" {
                         json[propertyValue.long].string = propertyValue.value
@@ -96,7 +96,6 @@ struct JSONView: View {
             json[appArguments.titleFont.long].dictionaryObject = ["colour":colourToString(color: observedDialogContent.appProperties.titleFontColour)]
         }
 
-        // print("Generated JSON")
         // convert the JSON to a raw String
         jsonFormattedOutout = json.rawString() ?? "json is nil"
 
@@ -139,10 +138,6 @@ struct JSONView: View {
 struct ConstructionKitView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
-
-    // @State var titleColour: Color
-    // values being updated
-    // @State var dialogTitle: String
 
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent

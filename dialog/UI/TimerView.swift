@@ -8,7 +8,7 @@
 import SwiftUI
 import Foundation
 
-struct timerBarView: View {
+struct TimerView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
     
@@ -17,9 +17,9 @@ struct timerBarView: View {
     
     let barheight: CGFloat = 16
     var barRadius: CGFloat
-    var barColour = Color.accentColor//.opacity(0.8)
+    var barColour = Color.accentColor
     
-    var steps: CGFloat// = 10 // how many steps are there in the width of the progress bar
+    var steps: CGFloat // how many steps are there in the width of the progress bar
     var timerSteps: CGFloat
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect() // tick every 1 second
     
@@ -62,6 +62,9 @@ struct timerBarView: View {
         timerSteps = steps - 1
         barVisible = visible ?? true
         progressWidth = 0
+        if barVisible {
+            writeLog("Displaying timer with \(steps) seconds")
+        }
     }
         
     var body: some View {
@@ -127,6 +130,7 @@ struct timerBarView: View {
                         progress += 1
                     }
                     if progress > timerSteps {
+                        writeLog("Timer expired - exiting")
                         quitDialog(exitCode: observedData.appProperties.exit4.code)
                     }
                 }

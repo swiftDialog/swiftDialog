@@ -9,18 +9,6 @@ import Foundation
 import SwiftUI
 import MarkdownUI
 
-extension Color {
-    init(hex: UInt, alpha: Double = 1) {
-        self.init(
-            .sRGB,
-            red: Double((hex >> 16) & 0xff) / 255,
-            green: Double((hex >> 08) & 0xff) / 255,
-            blue: Double((hex >> 00) & 0xff) / 255,
-            opacity: alpha
-        )
-    }
-}
-
 struct FullscreenView: View {
             
     @ObservedObject var observedData : DialogUpdatableContent
@@ -50,6 +38,7 @@ struct FullscreenView: View {
     }
      
     init (observedData : DialogUpdatableContent) {
+        writeLog("Entering full screen view")
         self.observedData = observedData
         // Ensure the singleton NSApplication exists.
         // required for correct determination of screen dimentions for the screen in use in multi screen scenarios
@@ -57,6 +46,8 @@ struct FullscreenView: View {
         
         windowHeight = displayDetails.size.height
         windowWidth = displayDetails.size.width
+        
+        writeLog("display width: \(windowWidth) height: \(windowHeight)")
         
         messageContentFontSize = 70
         emptyStackPadding = 70
@@ -170,7 +161,6 @@ struct FullscreenView: View {
                     // message vstack
                     VStack() {
                         Markdown(observedData.messageText)
-                            //.multilineTextAlignment(observedData.appProperties.messageAlignment)
                             .markdownStyle(defaultStyle)
                             .multilineTextAlignment(.center)
                         
@@ -179,14 +169,13 @@ struct FullscreenView: View {
                         //TaskProgressView(observedDialogContent: observedDialogContent)  // future feature
                         
                         if observedData.args.timerBar.present {
-                            timerBarView(progressSteps: string2float(string: observedData.args.timerBar.value), visible: observedData.args.timerBar.present, observedDialogContent: observedData)
+                            TimerView(progressSteps: string2float(string: observedData.args.timerBar.value), visible: observedData.args.timerBar.present, observedDialogContent: observedData)
                         }
                     }
                     .padding(10)
                 }
             }
             .padding(.horizontal, 20) // total padding for the icon/message group
-            //.padding(.vertical, 50)
         }
         .background(
                 //LinearGradient(gradient: Gradient(colors: [Color(hex: 0x0e539a), .black]), startPoint: .top, endPoint: .bottom)

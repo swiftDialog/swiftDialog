@@ -58,12 +58,12 @@ func getJSON() -> JSON {
 func processCLOptions(json : JSON = getJSON()) {
 
     //this method goes through the arguments that are present and performs any processing required before use
-
-    //let json : JSON = getJSON()
-    
+    writeLog("Processing Options")
     if appArguments.dropdownValues.present {
+        writeLog("\(appArguments.dropdownValues.long) present")
         // checking for the pre 1.10 way of defining a select list
         if json[appArguments.dropdownValues.long].exists() && !json["selectitems"].exists() {
+            writeLog("processing select list from json")
             let selectValues = json[appArguments.dropdownValues.long].arrayValue.map {$0.stringValue}
             let selectTitle = json[appArguments.dropdownTitle.long].stringValue
             let selectDefault = json[appArguments.dropdownDefault.long].stringValue
@@ -71,35 +71,58 @@ func processCLOptions(json : JSON = getJSON()) {
         }
 
         if json["selectitems"].exists() {
-            for i in 0..<json["selectitems"].count {
-
-                let selectTitle = json["selectitems"][i]["title"].stringValue
-                let selectValues = (json["selectitems"][i]["values"].arrayValue.map {$0.stringValue}).map { $0.trimmingCharacters(in: .whitespaces) }
-                let selectDefault = json["selectitems"][i]["default"].stringValue
-                
-                appvars.dropdownItems.append(DropDownItems(title: selectTitle, values: selectValues, defaultValue: selectDefault, selectedValue: selectDefault))
+            writeLog("processing select items from json")
+            for i in 0..<json["selectitems"].count {                
+                appvars.dropdownItems.append(DropDownItems(
+                        title: json["selectitems"][i]["title"].stringValue,
+                        values: (json["selectitems"][i]["values"].arrayValue.map {$0.stringValue}).map { $0.trimmingCharacters(in: .whitespaces) },
+                        defaultValue: json["selectitems"][i]["default"].stringValue,
+                        selectedValue: json["selectitems"][i]["default"].stringValue,
+                        required: json["selectitems"][i]["required"].boolValue,
+                        style: json["selectitems"][i]["style"].stringValue
+                ))
             }
 
         } else {
+            writeLog("processing select list from command line arguments")
             let dropdownValues = CLOptionMultiOptions(optionName: appArguments.dropdownValues.long)
-            var selectValues = CLOptionMultiOptions(optionName: appArguments.dropdownTitle.long)
+            var dropdownLabels = CLOptionMultiOptions(optionName: appArguments.dropdownTitle.long)
             var dropdownDefaults = CLOptionMultiOptions(optionName: appArguments.dropdownDefault.long)
             
             // need to make sure the title and default value arrays are the same size
-            for _ in selectValues.count..<dropdownValues.count {
-                selectValues.append("")
+            for _ in dropdownLabels.count..<dropdownValues.count {
+                dropdownLabels.append("")
             }
             for _ in dropdownDefaults.count..<dropdownValues.count {
                 dropdownDefaults.append("")
             }
 
             for i in 0..<(dropdownValues.count) {
-                appvars.dropdownItems.append(DropDownItems(title: selectValues[i], values: dropdownValues[i].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[i], selectedValue: dropdownDefaults[i]))
+                let labelItems = dropdownLabels[i].components(separatedBy: ",")
+                var dropdownRequired : Bool = false
+                var dropdownStyle : String = "list"
+                let dropdownTitle : String = labelItems[0]
+                if labelItems.count > 1 {
+                    if labelItems[1] == "required" {
+                        dropdownRequired = true
+                    }
+                    if labelItems[1] == "radio" {
+                        dropdownStyle = labelItems[1]
+                    }
+                }
+                appvars.dropdownItems.append(DropDownItems(title: dropdownTitle, values: dropdownValues[i].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[i], selectedValue: dropdownDefaults[i], required: dropdownRequired, style: dropdownStyle))
             }
         }
+        for i in 0..<appvars.dropdownItems.count {
+            if appvars.dropdownItems[i].required {
+                appvars.userInputRequired = true
+            }
+        }
+        writeLog("Processed \(appvars.dropdownItems.count) select items")
     }
     
     if appArguments.textField.present {
+        writeLog("\(appArguments.textField.long) present")
         if json[appArguments.textField.long].exists() {
             for i in 0..<json[appArguments.textField.long].arrayValue.count {
                 if json[appArguments.textField.long][i]["title"].stringValue == "" {
@@ -182,21 +205,84 @@ func processCLOptions(json : JSON = getJSON()) {
                             value: fieldValue))
             }
         }
-        logger(logMessage: "textOptionsArray : \(appvars.textFields)")
+        for i in 0..<appvars.textFields.count {
+            if appvars.textFields[i].required {
+                appvars.userInputRequired = true
+            }
+        }
+                                writeLog("textOptionsArray : \(appvars.textFields)")
     }
     
     if appArguments.checkbox.present {
+        writeLog("\(appArguments.checkbox.long) present")
         if json[appArguments.checkbox.long].exists() {
-            appvars.checkboxOptionsArray = json[appArguments.checkbox.long].arrayValue.map {$0["label"].stringValue}
-            appvars.checkboxValue = json[appArguments.checkbox.long].arrayValue.map {$0["checked"].boolValue}
-            appvars.checkboxDisabled = json[appArguments.checkbox.long].arrayValue.map {$0["disabled"].boolValue}
+            for i in 0..<json[appArguments.checkbox.long].arrayValue.count {
+                let cbLabel = json[appArguments.checkbox.long][i]["label"].stringValue
+                let cbChecked = json[appArguments.checkbox.long][i]["checked"].boolValue
+                let cbDisabled = json[appArguments.checkbox.long][i]["disabled"].boolValue
+                let cbIcon = json[appArguments.checkbox.long][i]["icon"].stringValue
+                
+                appvars.checkboxArray.append(CheckBoxes(label: cbLabel, icon: cbIcon, checked: cbChecked, disabled: cbDisabled))
+            }
         } else {
-            appvars.checkboxOptionsArray =  CLOptionMultiOptions(optionName: appArguments.checkbox.long)
+            for checkboxes in CLOptionMultiOptions(optionName: appArguments.checkbox.long) {
+                let items = checkboxes.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                var label : String = ""
+                var icon : String = ""
+                var checked : Bool = false
+                var disabled : Bool = false
+                for item in items {
+                    var itemKeyValuePair = item.split(separator: "=", maxSplits: 1)
+                    for _ in itemKeyValuePair.count...2 {
+                        itemKeyValuePair.append("")
+                    }
+                    let itemName = String(itemKeyValuePair[0])
+                    let itemValue = String(itemKeyValuePair[1])
+                    switch itemName.lowercased() {
+                    case "label":
+                        label = itemValue
+                    case "icon":
+                        icon = itemValue
+                    case "checked":
+                        checked = true
+                    case "disabled":
+                        disabled = true
+                    default:
+                        label = itemName
+                    }
+                }
+                appvars.checkboxArray.append(CheckBoxes(label: label, icon: icon, checked: checked, disabled: disabled))
+            }
         }
-        logger(logMessage: "checkboxOptionsArray : \(appvars.checkboxOptionsArray)")
+                                writeLog("checkboxOptionsArray : \(appvars.checkboxArray)")
+    }
+    
+    if appArguments.checkboxStyle.present {
+        writeLog("\(appArguments.checkboxStyle.long) present")
+        var controlSize = ""
+        if json[appArguments.checkboxStyle.long].exists() {
+            appvars.checkboxControlStyle = json[appArguments.checkboxStyle.long]["style"].stringValue
+            controlSize = json[appArguments.checkboxStyle.long]["size"].stringValue
+        } else {
+            appvars.checkboxControlStyle = appArguments.checkboxStyle.value.components(separatedBy: ",").first ?? "checkbox"
+            controlSize = appArguments.checkboxStyle.value.components(separatedBy: ",").last ?? ""
+        }
+        switch controlSize {
+        case "regular":
+            appvars.checkboxControlSize = .regular
+        case "small":
+            appvars.checkboxControlSize = .small
+        case "large":
+            appvars.checkboxControlSize = .large
+        case "mini":
+            appvars.checkboxControlSize = .mini
+        default:
+            appvars.checkboxControlSize = .mini
+        }
     }
     
     if appArguments.mainImage.present {
+        writeLog("\(appArguments.mainImage.long) present")
         if json[appArguments.mainImage.long].exists() {
             if json[appArguments.mainImage.long].array == nil {
                 // not an array so pull the single value
@@ -214,16 +300,17 @@ func processCLOptions(json : JSON = getJSON()) {
                 appvars.imageArray.append(MainImage(path: imgArray[i]))
             }
         }
-        logger(logMessage: "imageArray : \(appvars.imageArray)")
+                                writeLog("imageArray : \(appvars.imageArray)")
     }
 
     if json[appArguments.mainImageCaption.long].exists() || appArguments.mainImageCaption.present {
+        writeLog("\(appArguments.mainImageCaption.long) present")
         if json[appArguments.mainImageCaption.long].exists() {
             appvars.imageCaptionArray.append(json[appArguments.mainImageCaption.long].stringValue)
         } else {
             appvars.imageCaptionArray = CLOptionMultiOptions(optionName: appArguments.mainImageCaption.long)
         }
-        logger(logMessage: "imageCaptionArray : \(appvars.imageCaptionArray)")
+                                writeLog("imageCaptionArray : \(appvars.imageCaptionArray)")
         for i in 0..<appvars.imageCaptionArray.count {
             if i < appvars.imageArray.count {
                 appvars.imageArray[i].caption = appvars.imageCaptionArray[i]
@@ -232,6 +319,7 @@ func processCLOptions(json : JSON = getJSON()) {
     }
     
     if appArguments.listItem.present {
+        writeLog("\(appArguments.listItem.long) present")
         if json[appArguments.listItem.long].exists() {
             
             for i in 0..<json[appArguments.listItem.long].arrayValue.count {
@@ -283,51 +371,46 @@ func processCLOptions(json : JSON = getJSON()) {
     }
     
     if !json[appArguments.autoPlay.long].exists() && !appArguments.autoPlay.present {
+        writeLog("\(appArguments.autoPlay.long) present")
         appArguments.autoPlay.value = "0"
-        logger(logMessage: "autoPlay.value : \(appArguments.autoPlay.value)")
-    }
-
-    if json[appArguments.mainImageCaption.long].exists() || appArguments.mainImageCaption.present {
-        if json[appArguments.mainImageCaption.long].exists() {
-            appvars.imageCaptionArray.append(json[appArguments.mainImageCaption.long].stringValue)
-        } else {
-            appvars.imageCaptionArray = CLOptionMultiOptions(optionName: appArguments.mainImageCaption.long)
-        }
-        logger(logMessage: "imageCaptionArray : \(appvars.imageCaptionArray)")
-    }
-
-    if !json[appArguments.autoPlay.long].exists() && !appArguments.autoPlay.present {
-        appArguments.autoPlay.value = "0"
-        logger(logMessage: "autoPlay.value : \(appArguments.autoPlay.value)")
+                                writeLog("autoPlay.value : \(appArguments.autoPlay.value)")
     }
 
     // process command line options that just display info and exit before we show the main window
     if (appArguments.helpOption.present || CommandLine.arguments.count == 1) {
-        print(helpText)
+        writeLog("\(appArguments.helpOption.long) present")
+        let sdHelp = SDHelp(arguments: appArguments)
+        if appArguments.helpOption.value != "" {
+            writeLog("Printing help for \(appArguments.helpOption.value)")
+            sdHelp.printHelpLong(for: appArguments.helpOption.value)
+        } else {
+            sdHelp.printHelpShort()
+        }
         quitDialog(exitCode: appvars.exitNow.code)
-        //exit(0)
     }
     if appArguments.getVersion.present {
+        writeLog("\(appArguments.getVersion.long) called")
         printVersionString()
         quitDialog(exitCode: appvars.exitNow.code)
-        //exit(0)
     }
     if appArguments.licence.present {
+        writeLog("\(appArguments.licence.long) called")
         print(licenseText)
         quitDialog(exitCode: appvars.exitNow.code)
-        //exit(0)
     }
     if appArguments.buyCoffee.present {
+        writeLog("\(appArguments.buyCoffee.long) called :)")
         //I'm a teapot
         print("If you like this app and want to buy me a coffee https://www.buymeacoffee.com/bartreardon")
         quitDialog(exitCode: appvars.exitNow.code)
-        //exit(418)
     }
     if appArguments.ignoreDND.present {
+        writeLog("\(appArguments.ignoreDND.long) set")
         appvars.willDisturb = true
     }
     
     if appArguments.listFonts.present {
+        writeLog("\(appArguments.listFonts.long) called")
         //All font Families
         let fontfamilies = NSFontManager.shared.availableFontFamilies
         print("Available font families:")
@@ -343,56 +426,49 @@ func processCLOptions(json : JSON = getJSON()) {
         }
         quitDialog(exitCode: appvars.exit0.code)
     }
-
-    //check for DND and exit if it's on
-    //if isDNDEnabled() && !appvars.willDisturb {
-    //    quitDialog(exitCode: 20, exitMessage: "Do Not Disturb is enabled. Exiting")
-    //}
         
     if appArguments.windowWidth.present {
+        writeLog("\(appArguments.windowWidth.long) present")
         //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: appArguments.windowWidth)
         if appArguments.windowWidth.value.last == "%" {
             appvars.windowWidth = appvars.screenWidth * string2float(string: String(appArguments.windowWidth.value.dropLast()))/100
         } else {
             appvars.windowWidth = string2float(string: appArguments.windowWidth.value)
         }
-        logger(logMessage: "windowWidth : \(appvars.windowWidth)")
+                                writeLog("windowWidth : \(appvars.windowWidth)")
     }
     if appArguments.windowHeight.present {
+        writeLog("\(appArguments.windowHeight.long) present")
         //appvars.windowHeight = CGFloat() //CLOptionText(OptionName: appArguments.windowHeight)
         if appArguments.windowHeight.value.last == "%" {
             appvars.windowHeight = appvars.screenHeight * string2float(string: String(appArguments.windowHeight.value.dropLast()))/100
         } else {
             appvars.windowHeight = string2float(string: appArguments.windowHeight.value)
         }
-        logger(logMessage: "windowHeight : \(appvars.windowHeight)")
+                                writeLog("windowHeight : \(appvars.windowHeight)")
     }
     
     if appArguments.iconSize.present {
+        writeLog("\(appArguments.iconSize.long) present")
         //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: appArguments.windowWidth)
         appvars.iconWidth = string2float(string: appArguments.iconSize.value)
-        logger(logMessage: "iconWidth : \(appvars.iconWidth)")
+                                writeLog("iconWidth : \(appvars.iconWidth)")
     }
-    /*
-    if appArguments.iconHeight.present {
-        //appvars.windowHeight = CGFloat() //CLOptionText(OptionName: appArguments.windowHeight)
-        appvars.iconHeight = NumberFormatter().number(from: appArguments.iconHeight.value) as! CGFloat
-    }
-    */
     // Correct feng shui so the app accepts keyboard input
     // from https://stackoverflow.com/questions/58872398/what-is-the-minimally-viable-gui-for-command-line-swift-scripts
     let app = NSApplication.shared
-    //app.setActivationPolicy(.regular)
     app.setActivationPolicy(.accessory)
     
     if appArguments.bannerTitle.present {
+        writeLog("\(appArguments.bannerTitle.long) present")
         appvars.titleFontColour = Color.white
     }
 
     if appArguments.titleFont.present {
+        writeLog("\(appArguments.titleFont.long) present")
 
         if appArguments.titleFont.value == "" {
-            logger(logMessage: "titleFont.object : \(json[appArguments.titleFont.long].object)")
+                                    writeLog("titleFont.object : \(json[appArguments.titleFont.long].object)")
 
             if json[appArguments.titleFont.long]["size"].exists() {
                 appvars.titleFontSize = string2float(string: json[appArguments.titleFont.long]["size"].stringValue, defaultValue: appvars.titleFontSize)
@@ -411,7 +487,7 @@ func processCLOptions(json : JSON = getJSON()) {
             }
         } else {
         
-            logger(logMessage: "titleFont.value : \(appArguments.titleFont.value)")
+                                    writeLog("titleFont.value : \(appArguments.titleFont.value)")
             let fontCLValues = appArguments.titleFont.value
             var fontValues = [""]
             //split by ,
@@ -423,21 +499,21 @@ func processCLOptions(json : JSON = getJSON()) {
                 switch item[0] {
                     case  "size":
                         appvars.titleFontSize = string2float(string: item[1], defaultValue: appvars.titleFontSize)
-                        logger(logMessage: "titleFontSize : \(appvars.titleFontSize)")
+                                                writeLog("titleFontSize : \(appvars.titleFontSize)")
                     case  "weight":
                         appvars.titleFontWeight = textToFontWeight(item[1])
-                        logger(logMessage: "titleFontWeight : \(appvars.titleFontWeight)")
+                                                writeLog("titleFontWeight : \(appvars.titleFontWeight)")
                     case  "colour","color":
                         appvars.titleFontColour = stringToColour(item[1])
-                        logger(logMessage: "titleFontColour : \(appvars.titleFontColour)")
+                                                writeLog("titleFontColour : \(appvars.titleFontColour)")
                     case  "name":
                         appvars.titleFontName = item[1]
-                        logger(logMessage: "titleFontName : \(appvars.titleFontName)")
+                                                writeLog("titleFontName : \(appvars.titleFontName)")
                     case  "shadow":
                         appvars.titleFontShadow = item[1].boolValue
-                        logger(logMessage: "titleFontShadow : \(appvars.titleFontShadow)")
+                                                writeLog("titleFontShadow : \(appvars.titleFontShadow)")
                     default:
-                        logger(logMessage: "Unknown paramater \(item[0])")
+                                                writeLog("Unknown paramater \(item[0])")
                 }
 
             }
@@ -446,9 +522,10 @@ func processCLOptions(json : JSON = getJSON()) {
     
     
     if appArguments.messageFont.present {
+        writeLog("\(appArguments.messageFont.long) present")
         
         if appArguments.messageFont.value == "" {
-            logger(logMessage: "messageFont.object : \(json[appArguments.messageFont.long].object)")
+                                    writeLog("messageFont.object : \(json[appArguments.messageFont.long].object)")
             if json[appArguments.messageFont.long]["size"].exists() {
                 appvars.messageFontSize = string2float(string: json[appArguments.messageFont.long]["size"].stringValue, defaultValue: appvars.messageFontSize)
             }
@@ -465,7 +542,7 @@ func processCLOptions(json : JSON = getJSON()) {
             }
         } else {
         
-            logger(logMessage: "messageFont.value : \(appArguments.messageFont.value)")
+                                    writeLog("messageFont.value : \(appArguments.messageFont.value)")
             let fontCLValues = appArguments.messageFont.value
             var fontValues = [""]
             //split by ,
@@ -477,59 +554,68 @@ func processCLOptions(json : JSON = getJSON()) {
                 switch item[0] {
                     case "size":
                         appvars.messageFontSize = string2float(string: item[1], defaultValue: appvars.messageFontSize)
-                        logger(logMessage: "messageFontSize : \(appvars.messageFontSize)")
+                                                writeLog("messageFontSize : \(appvars.messageFontSize)")
                     case "weight":
                         appvars.messageFontWeight = textToFontWeight(item[1])
-                        logger(logMessage: "messageFontWeight : \(appvars.messageFontWeight)")
+                                                writeLog("messageFontWeight : \(appvars.messageFontWeight)")
                     case "colour","color":
                         appvars.messageFontColour = stringToColour(item[1])
-                        logger(logMessage: "messageFontColour : \(appvars.messageFontColour)")
+                                                writeLog("messageFontColour : \(appvars.messageFontColour)")
                     case "name":
                         appvars.messageFontName = item[1]
-                        logger(logMessage: "messageFontName : \(appvars.messageFontName)")
+                                                writeLog("messageFontName : \(appvars.messageFontName)")
                     default:
-                        logger(logMessage: "Unknown paramater \(item[0])")
+                                                writeLog("Unknown paramater \(item[0])")
                 }
             }
+        }
+        if appvars.messageFontSize < 20 {
+            appvars.labelFontSize = appvars.messageFontSize
+        } else {
+            appvars.labelFontSize = appvars.messageFontSize - 4
         }
     }
     
     if appArguments.iconOption.value != "" {
+        writeLog("\(appArguments.iconOption.long) present")
         appArguments.iconOption.present = true
     }
     
     // hide the icon if asked to or if banner image is present
     if appArguments.hideIcon.present || appArguments.iconOption.value == "none" || appArguments.bannerImage.present {
+        writeLog("\(appArguments.hideIcon.long) set")
         appArguments.iconOption.present = false
     }
 
     // of both banner image and icon are specified, re-enable the icon.
     if appArguments.bannerImage.present && appArguments.iconOption.value != "none" && appArguments.iconOption.value != "default" {
+        writeLog("both banner image and icon are specified, re-enable the icon")
         appArguments.iconOption.present = true
     }
         
     if appArguments.bannerImage.present && appArguments.iconOption.present {
+        writeLog("banner image and icon are specified, un-hide the icon")
         appvars.iconIsHidden = false
     }
 
     if appArguments.centreIcon.present {
         appvars.iconIsCentred = true
-        logger(logMessage: "iconIsCentred = true")
+        writeLog("iconIsCentred = true")
     }
 
     if appArguments.movableWindow.present {
         appvars.windowIsMoveable = true
-        logger(logMessage: "windowIsMoveable = true")
+        writeLog("windowIsMoveable = true")
     }
     
     if appArguments.forceOnTop.present {
         appvars.windowOnTop = true
-        logger(logMessage: "windowOnTop = true")
+        writeLog("windowOnTop = true")
     }
     
     if appArguments.jsonOutPut.present {
         appvars.jsonOut = true
-        logger(logMessage: "jsonOut = true")
+        writeLog("jsonOut = true")
     }
 
     // we define this stuff here as we will use the info to draw the window.
@@ -540,16 +626,17 @@ func processCLOptions(json : JSON = getJSON()) {
         if !appArguments.iconSize.present {
             appArguments.iconSize.value = "120"
         }
-        logger(logMessage: "smallWindow.present")
+        writeLog("smallWindow.present")
     } else if appArguments.bigWindow.present {
         // scale everything up a notch
         appvars.bigWindow = true
         appvars.scaleFactor = 1.25
-        logger(logMessage: "bigWindow.present")
+        writeLog("bigWindow.present")
     }
 
     //if info button is present but no button action then default to quit on info
     if !appArguments.buttonInfoActionOption.present {
+        writeLog("\(appArguments.quitOnInfo.long) enabled")
         appArguments.quitOnInfo.present = true
     }
 }
@@ -558,7 +645,7 @@ func processCLOptionValues() {
     
     // this method reads in arguments from either json file or from the command line and loads them into the appArguments object
     // also records whether an argument is present or not
-
+    writeLog("Checking command line options for arguments")
     let json : JSON = getJSON()
     
     appArguments.titleOption.value             = json[appArguments.titleOption.long].string ?? CLOptionText(OptionName: appArguments.titleOption, DefaultValue: appvars.titleDefault)
@@ -596,6 +683,7 @@ func processCLOptionValues() {
     
     // window location on screen
     if appArguments.position.present {
+        writeLog("Window position will be set to \(appArguments.position.value)")
         switch appArguments.position.value {
         case "topleft":
             appvars.windowPositionVertical = NSWindow.Position.Vertical.top
@@ -636,11 +724,11 @@ func processCLOptionValues() {
     appArguments.iconSize.value                = json[appArguments.iconSize.long].string ?? CLOptionText(OptionName: appArguments.iconSize, DefaultValue: "\(appvars.iconWidth)")
     appArguments.iconSize.present              = json[appArguments.iconSize.long].exists() || CLOptionPresent(OptionName: appArguments.iconSize)
     
+    appArguments.iconAlpha.value                = json[appArguments.iconAlpha.long].string ?? CLOptionText(OptionName: appArguments.iconAlpha, DefaultValue: "1.0")
+    appArguments.iconAlpha.present              = json[appArguments.iconAlpha.long].exists() || CLOptionPresent(OptionName: appArguments.iconAlpha)
+    
     appArguments.iconAccessabilityLabel.value  = json[appArguments.iconAccessabilityLabel.long].string ?? CLOptionText(OptionName: appArguments.iconAccessabilityLabel, DefaultValue: "Dialog Icon")
     appArguments.iconAccessabilityLabel.present = json[appArguments.iconAccessabilityLabel.long].exists() || CLOptionPresent(OptionName: appArguments.iconAccessabilityLabel)
-    
-    //appArguments.iconHeight.value              = CLOptionText(OptionName: appArguments.iconHeight)
-    //appArguments.iconHeight.present            = CLOptionPresent(OptionName: appArguments.iconHeight)
 
     appArguments.overlayIconOption.value       = json[appArguments.overlayIconOption.long].string ?? CLOptionText(OptionName: appArguments.overlayIconOption)
     appArguments.overlayIconOption.present     = json[appArguments.overlayIconOption.long].exists() || CLOptionPresent(OptionName: appArguments.overlayIconOption)
@@ -688,13 +776,10 @@ func processCLOptionValues() {
     appArguments.buttonInfoActionOption.value  = json[appArguments.buttonInfoActionOption.long].string ?? CLOptionText(OptionName: appArguments.buttonInfoActionOption)
     appArguments.buttonInfoActionOption.present = json[appArguments.buttonInfoActionOption.long].exists() || CLOptionPresent(OptionName: appArguments.buttonInfoActionOption)
 
-    //appArguments.dropdownTitle.value           = json[appArguments.dropdownTitle.long].string ?? CLOptionText(OptionName: appArguments.dropdownTitle)
     appArguments.dropdownTitle.present         = json[appArguments.dropdownTitle.long].exists() || CLOptionPresent(OptionName: appArguments.dropdownTitle)
 
-    //appArguments.dropdownValues.value          = json[appArguments.dropdownValues.long].string ?? CLOptionText(OptionName: appArguments.dropdownValues)
     appArguments.dropdownValues.present        = json["selectitems"].exists() || json[appArguments.dropdownValues.long].exists() || CLOptionPresent(OptionName: appArguments.dropdownValues)
 
-    //appArguments.dropdownDefault.value         = json[appArguments.dropdownDefault.long].string ?? CLOptionText(OptionName: appArguments.dropdownDefault)
     appArguments.dropdownDefault.present       = json[appArguments.dropdownDefault.long].exists() || CLOptionPresent(OptionName: appArguments.dropdownDefault)
 
     appArguments.titleFont.value               = json[appArguments.titleFont.long].string ?? CLOptionText(OptionName: appArguments.titleFont)
@@ -703,10 +788,12 @@ func processCLOptionValues() {
     appArguments.messageFont.value             = json[appArguments.messageFont.long].string ?? CLOptionText(OptionName: appArguments.messageFont)
     appArguments.messageFont.present           = json[appArguments.messageFont.long].exists() || CLOptionPresent(OptionName: appArguments.messageFont)
 
-    //appArguments.textField.value               = CLOptionText(OptionName: appArguments.textField)
     appArguments.textField.present             = json[appArguments.textField.long].exists() || CLOptionPresent(OptionName: appArguments.textField)
     
     appArguments.checkbox.present             = json[appArguments.checkbox.long].exists() || CLOptionPresent(OptionName: appArguments.checkbox)
+    
+    appArguments.checkboxStyle.present        = json[appArguments.checkboxStyle.long].exists() || CLOptionPresent(OptionName: appArguments.checkboxStyle)
+    appArguments.checkboxStyle.value          = json[appArguments.checkboxStyle.long].string ?? CLOptionText(OptionName: appArguments.checkboxStyle)
 
     appArguments.timerBar.value                = json[appArguments.timerBar.long].string ?? CLOptionText(OptionName: appArguments.timerBar, DefaultValue: "\(appvars.timerDefaultSeconds)")
     appArguments.timerBar.present              = json[appArguments.timerBar.long].exists() || CLOptionPresent(OptionName: appArguments.timerBar)
@@ -717,10 +804,8 @@ func processCLOptionValues() {
     appArguments.progressText.value             = json[appArguments.progressText.long].string ?? CLOptionText(OptionName: appArguments.progressText, DefaultValue: " ")
     appArguments.progressText.present           = json[appArguments.progressText.long].exists() || CLOptionPresent(OptionName: appArguments.progressText)
     
-    //appArguments.mainImage.value               = CLOptionText(OptionName: appArguments.mainImage)
     appArguments.mainImage.present             = json[appArguments.mainImage.long].exists() || CLOptionPresent(OptionName: appArguments.mainImage)
     
-    //appArguments.mainImageCaption.value        = CLOptionText(OptionName: appArguments.mainImageCaption)
     appArguments.mainImageCaption.present      = json[appArguments.mainImageCaption.long].exists() || CLOptionPresent(OptionName: appArguments.mainImageCaption)
     
     appArguments.listItem.present              = json[appArguments.listItem.long].exists() || CLOptionPresent(OptionName: appArguments.listItem)
@@ -778,9 +863,9 @@ func processCLOptionValues() {
     appArguments.video.present                 = json[appArguments.video.long].exists() || CLOptionPresent(OptionName: appArguments.video)
     if appArguments.video.present || appArguments.webcontent.present {
         // check if it's a youtube id
-        //switch appArguments.video.value.
         switch appArguments.video.value.components(separatedBy: "=").first!.lowercased() {
         case "youtubeid":
+            writeLog("Youtube ID detected")
             let youTubeID = appArguments.video.value.replacingOccurrences(of: "youtubeid=", with: "")
             let youtubeURL = "https://www.youtube.com/embed/\(youTubeID)?autoplay=\(appArguments.autoPlay.present ? 1 : 0)&controls=0&showinfo=0"
             appArguments.video.value = youtubeURL
@@ -791,7 +876,9 @@ func processCLOptionValues() {
         default:
             break
         }
+        writeLog("video url is \(appArguments.video.value)")
         // set a larger window size. 900x600 will fit a standard 16:9 video
+        writeLog("resetting default window size to 900x600")
         appvars.windowWidth = appvars.videoWindowWidth
         appvars.windowHeight = appvars.videoWindowHeight
     }
@@ -819,6 +906,9 @@ func processCLOptionValues() {
             }
         }
     }
+    
+    appArguments.helpOption.present            = CLOptionPresent(OptionName: appArguments.helpOption)
+    appArguments.helpOption.value              = CLOptionText(OptionName: appArguments.helpOption)
 
     // anthing that is an option only with no value
     appArguments.button2Option.present         = json[appArguments.button2Option.long].boolValue || CLOptionPresent(OptionName: appArguments.button2Option)
@@ -844,7 +934,6 @@ func processCLOptionValues() {
     
     // command line only options
     appArguments.listFonts.present             = CLOptionPresent(OptionName: appArguments.listFonts)
-    appArguments.helpOption.present            = CLOptionPresent(OptionName: appArguments.helpOption)
     appArguments.demoOption.present            = CLOptionPresent(OptionName: appArguments.demoOption)
     appArguments.buyCoffee.present             = CLOptionPresent(OptionName: appArguments.buyCoffee)
     appArguments.licence.present           = CLOptionPresent(OptionName: appArguments.licence)
