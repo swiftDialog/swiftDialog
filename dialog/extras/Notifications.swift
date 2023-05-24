@@ -78,6 +78,12 @@ func sendNotification(title: String = "", subtitle: String = "", message: String
                        print(error?.localizedDescription as Any)
                    }
                 }
+            case .provisional:
+                print("Notification authorisation is provisional")
+            case .denied:
+                print("Notification authorisation is denied")
+            case .notDetermined:
+                print("Notification authorisation cannot be determined")
             default:
                 print("Notifications aren't authorised")
         }

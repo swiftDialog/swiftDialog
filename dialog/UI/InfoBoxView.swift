@@ -14,6 +14,11 @@ struct InfoBoxView: View {
     
     var markdownStyle = MarkdownStyle(foregroundColor: .secondary)
     
+    init(observedData : DialogUpdatableContent) {
+        self.observedData = observedData
+        writeLog("Displaying InfoBox")
+    }
+    
     var body: some View {
         Markdown(observedData.args.infoBox.value, baseURL: URL(string: "http://"))
             .multilineTextAlignment(.leading)

@@ -15,13 +15,11 @@ struct MessageContent: View {
     @State private var contentHeight: CGFloat = 40
     
     var fieldPadding: CGFloat = 15
+    var dataEntryMaxWidth : CGFloat = 700
     
     var messageColour : Color
         
     var iconDisplayWidth : CGFloat
-        
-    //var defaultStyle: MarkdownStyle
-    //var customStyle: MarkdownStyle
     
     var markdownStyle: MarkdownStyle {
         if observedData.appProperties.messageFontName == "" {
@@ -34,8 +32,10 @@ struct MessageContent: View {
     let theAllignment: Alignment = .topLeading
     
     init(observedDialogContent : DialogUpdatableContent) {
+        writeLog("Displaying main message content")
         self.observedData = observedDialogContent
         if !observedDialogContent.args.iconOption.present { //cloptions.hideIcon.present {
+            writeLog("Icon is hidden")
             fieldPadding = 30
             iconDisplayWidth = 0
         } else {
@@ -54,7 +54,6 @@ struct MessageContent: View {
                              overlay: observedData.args.overlayIconOption.value,
                              alpha: observedData.iconAlpha)
                         .frame(width: iconDisplayWidth, alignment: .top)
-                        //.padding(.top, 15)
                         .padding(.bottom, observedData.appProperties.bottomPadding)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
@@ -69,7 +68,6 @@ struct MessageContent: View {
                              overlay: observedData.args.overlayIconOption.value,
                              alpha: observedData.iconAlpha)
                         .frame(width: iconDisplayWidth, alignment: .top)
-                        //.padding(.top, 15)
                         .padding(.bottom, observedData.appProperties.bottomPadding)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
@@ -79,53 +77,71 @@ struct MessageContent: View {
                     if ["centre", "center"].contains(observedData.args.messageVerticalAlignment.value) {
                         Spacer()
                     }
-                    if observedData.args.webcontent.present || observedData.args.listItem.present || observedData.args.messageVerticalAlignment.present {
-                        Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                            .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                            .markdownStyle(markdownStyle)
-                            .border(observedData.appProperties.debugBorderColour, width: 2)
-                            .accessibilityHint(observedData.args.messageOption.value)
-                            .focusable(false)
-                    } else {
-                        ScrollView() {
+                    //
+                    VStack {
+                        if observedData.args.webcontent.present || observedData.args.listItem.present || observedData.args.messageVerticalAlignment.present {
                             Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
                                 .multilineTextAlignment(observedData.appProperties.messageAlignment)
                                 .markdownStyle(markdownStyle)
                                 .border(observedData.appProperties.debugBorderColour, width: 2)
                                 .accessibilityHint(observedData.args.messageOption.value)
                                 .focusable(false)
+                        } else {
+                            ScrollView() {
+                                Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
+                                    .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                                    .markdownStyle(markdownStyle)
+                                    .border(observedData.appProperties.debugBorderColour, width: 2)
+                                    .accessibilityHint(observedData.args.messageOption.value)
+                                    .focusable(false)
+                            }
                         }
                     }
+                    //
                     if ["centre", "center"].contains(observedData.args.messageVerticalAlignment.value) {
                         Spacer()
                     }
                 }
                 
-                WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .padding(.bottom, observedData.appProperties.bottomPadding)
+                Group {
+                    WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
+                        .padding(.bottom, observedData.appProperties.bottomPadding)
+                    
+                    ListView(observedDialogContent: observedData)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
+                        .padding(.bottom, observedData.appProperties.bottomPadding)
+                    
+                    CheckboxView(observedDialogContent: observedData)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
+                        .frame(maxWidth: dataEntryMaxWidth)
+                    
+                    TextEntryView(observedDialogContent: observedData)
+                        .padding(.bottom, observedData.appProperties.bottomPadding)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
+                        .frame(maxWidth: dataEntryMaxWidth)
+                    
+                    RadioView(observedDialogContent: observedData)
+                        .padding(.bottom, observedData.appProperties.bottomPadding)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
+                        .frame(maxWidth: dataEntryMaxWidth)
 
-                ListView(observedDialogContent: observedData)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .padding(.bottom, observedData.appProperties.bottomPadding)
-                
-                CheckboxView(observedDialogContent: observedData)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    //.padding(.bottom, observedData.appProperties.bottomPadding)
-                    //.frame(maxWidth: 600)
-                
-                TextEntryView(observedDialogContent: observedData)
-                    .padding(.bottom, observedData.appProperties.bottomPadding)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .frame(maxWidth: 600)
-                
-                DropdownView(observedDialogContent: observedData)
-                    .padding(.bottom, observedData.appProperties.bottomPadding)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .frame(maxWidth: 600)
+                    DropdownView(observedDialogContent: observedData)
+                        .padding(.bottom, observedData.appProperties.bottomPadding)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
+                        .frame(maxWidth: dataEntryMaxWidth, alignment: .leading)
+                }
                 
                 if ["top"].contains(observedData.args.messageVerticalAlignment.value) {
                     Spacer()
+                }
+                if observedData.appProperties.userInputRequired {
+                    HStack {
+                        Spacer()
+                        Text("required-note")
+                            .font(.system(size: 10)
+                                    .weight(.light))
+                    }
                 }
             }
         }

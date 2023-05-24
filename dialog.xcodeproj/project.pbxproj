@@ -63,8 +63,10 @@
 		41D81E5725F7929800D1F7E1 /* DialogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E5625F7929800D1F7E1 /* DialogView.swift */; };
 		41D81E5C25F817BF00D1F7E1 /* ButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E5B25F817BF00D1F7E1 /* ButtonView.swift */; };
 		41D81E6C25F8209F00D1F7E1 /* Options.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E6B25F8209F00D1F7E1 /* Options.swift */; };
-		41D81E7125F845D200D1F7E1 /* appVaribles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E7025F845D200D1F7E1 /* appVaribles.swift */; };
+		41D81E7125F845D200D1F7E1 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E7025F845D200D1F7E1 /* AppState.swift */; };
 		41D81E7925F870A500D1F7E1 /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E7825F870A500D1F7E1 /* Functions.swift */; };
+		CC8D96302A01CCAB00CC84C6 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC8D962F2A01CCAB00CC84C6 /* Extensions.swift */; };
+		CCD8ACEC2A011C9500D98695 /* RadioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD8ACEB2A011C9500D98695 /* RadioView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -151,10 +153,12 @@
 		41D81E5625F7929800D1F7E1 /* DialogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogView.swift; sourceTree = "<group>"; };
 		41D81E5B25F817BF00D1F7E1 /* ButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonView.swift; sourceTree = "<group>"; };
 		41D81E6B25F8209F00D1F7E1 /* Options.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Options.swift; sourceTree = "<group>"; };
-		41D81E7025F845D200D1F7E1 /* appVaribles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = appVaribles.swift; sourceTree = "<group>"; };
+		41D81E7025F845D200D1F7E1 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		41D81E7825F870A500D1F7E1 /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
 		41FD45FD26C40366006976FC /* TimerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimerView.swift; sourceTree = "<group>"; };
 		41FD45FF26C8DC5D006976FC /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
+		CC8D962F2A01CCAB00CC84C6 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		CCD8ACEB2A011C9500D98695 /* RadioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -240,7 +244,6 @@
 				41C8259825F99AF90042DC50 /* UI */,
 				4154C30C25F782E900A3D373 /* extras */,
 				4154C2DD25F76BDB00A3D373 /* dialogApp.swift */,
-				41D81E7025F845D200D1F7E1 /* appVaribles.swift */,
 				4154C2E125F76BDC00A3D373 /* Assets.xcassets */,
 				41832B7428436B430062AA1F /* Localizable.strings */,
 				4154C2E625F76BDC00A3D373 /* Info.plist */,
@@ -279,6 +282,7 @@
 		4154C30C25F782E900A3D373 /* extras */ = {
 			isa = PBXGroup;
 			children = (
+				41D81E7025F845D200D1F7E1 /* AppState.swift */,
 				411FC34528E2DDFD003EA2C2 /* Notifications.swift */,
 				417BD4342798FE38009AE34A /* DialogUpdatableContent.swift */,
 				41D81E6B25F8209F00D1F7E1 /* Options.swift */,
@@ -289,6 +293,7 @@
 				415934D726DB1B44009C9C3A /* ProcessCLOptions.swift */,
 				415934D926DB7604009C9C3A /* WindowPositioning.swift */,
 				41A44EB126F4C43A00FEE1AC /* HelpText.swift */,
+				CC8D962F2A01CCAB00CC84C6 /* Extensions.swift */,
 			);
 			path = extras;
 			sourceTree = "<group>";
@@ -359,6 +364,7 @@
 				417BF0BA260F1726009AD252 /* BannerImageView.swift */,
 				41D81E5B25F817BF00D1F7E1 /* ButtonView.swift */,
 				418AE4222667A17A001E3423 /* DropdownView.swift */,
+				CCD8ACEB2A011C9500D98695 /* RadioView.swift */,
 				415378522604B79E00AA0E76 /* IconOverlayView.swift */,
 				416DED41261C5FE00049B6B5 /* FullscreenView.swift */,
 				41AD75B526AA81760023EBD8 /* TextEntryView.swift */,
@@ -568,6 +574,7 @@
 				418A7B532759949A00E4D6F1 /* TextEntryView.swift in Sources */,
 				418A7B542759949A00E4D6F1 /* TimerView.swift in Sources */,
 				4116923B2893A22300A88700 /* CKListView.swift in Sources */,
+				CCD8ACEC2A011C9500D98695 /* RadioView.swift in Sources */,
 				418A7B552759949B00E4D6F1 /* ImageView.swift in Sources */,
 				418A7B562759949B00E4D6F1 /* jamfHelper.swift in Sources */,
 				418A7B572759949B00E4D6F1 /* ProcessCLOptions.swift in Sources */,
@@ -598,7 +605,8 @@
 				411FC34628E2DDFD003EA2C2 /* Notifications.swift in Sources */,
 				4154C2DE25F76BDB00A3D373 /* dialogApp.swift in Sources */,
 				41D81E6C25F8209F00D1F7E1 /* Options.swift in Sources */,
-				41D81E7125F845D200D1F7E1 /* appVaribles.swift in Sources */,
+				CC8D96302A01CCAB00CC84C6 /* Extensions.swift in Sources */,
+				41D81E7125F845D200D1F7E1 /* AppState.swift in Sources */,
 				412B26AF289CE02100493EFF /* MiniView.swift in Sources */,
 				4124EFD229455861003B00F4 /* HelpView.swift in Sources */,
 				41D81E7925F870A500D1F7E1 /* Functions.swift in Sources */,
@@ -802,6 +810,7 @@
 				MARKETING_VERSION = 2.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -830,6 +839,7 @@
 				MARKETING_VERSION = 2.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.bartreardon.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;

@@ -12,7 +12,7 @@
 
 kTHIS_NAME=${BASH_SOURCE##*/}
 kTHIS_HOMEPAGE='https://github.com/mklement0/fileicon'
-kTHIS_VERSION='v0.3.1' # NOTE: This assignment is automatically updated by `make version VER=<newVer>` - DO keep the 'v' prefix.
+kTHIS_VERSION='v0.3.4' # NOTE: This assignment is automatically updated by `make version VER=<newVer>` - DO keep the 'v' prefix.
 
 unset CDPATH  # To prevent unpredictable `cd` behavior.
 
@@ -85,7 +85,7 @@ printUsage() {
 case $1 in
   --version)
     # Output version number and exit, if requested.
-    ver="v0.3.1"; echo "$kTHIS_NAME $kTHIS_VERSION"$'\nFor license information and more, visit '"$kTHIS_HOMEPAGE"; exit 0
+    ver="v0.3.4"; echo "$kTHIS_NAME $kTHIS_VERSION"$'\nFor license information and more, visit '"$kTHIS_HOMEPAGE"; exit 0
     ;;
   -h|--help)
     # Print usage information and exit.
@@ -116,7 +116,7 @@ esac
 # IMPORTANT: Hex. digits > 9 use UPPPERCASE characters.
 #   getAttribByteString <file> <attrib_name>
 getAttribByteString() {
-  xattr -px "$2" "$1" | tr -d ' \n'
+  /usr/bin/xattr -px "$2" "$1" | tr -d ' \n'
   return ${PIPESTATUS[0]}
 }
 
@@ -173,20 +173,83 @@ patchByteInByteString() {
 
 #  hasAttrib <fileOrFolder> <attrib_name>
 hasAttrib() {
-  xattr "$1" | /usr/bin/grep -Fqx "$2"
+  /usr/bin/xattr "$1" | /usr/bin/grep -Fqx "$2"
 }
 
-#  hasIconsResource <file>
-hasIconsResource() {
+#  hasIconData <file>
+# Test if the file has a resource fork with icon data in it, or,
+# in the case of a .VolumeIcon.icns file, has icon data *as the file contents*
+hasIconData() {
   local file=$1
-  getResourceByteString "$file" | /usr/bin/grep -Fq "$kMAGICBYTES_ICNS_RESOURCE"
+  if [[ $(basename "$file") == $kFILENAME_VOLUMECUSTOMICON ]]; then
+    # special file for any folder that is a *volume mountpoint*: has the icon data as the file's *content*
+    file "$file" | /usr/bin/grep -Fq ' Mac OS X icon'
+  else
+    # file itself or special helper file $'Icon\r' for a regular folder: has the icon data *in its resource fork*.
+    getResourceByteString "$file" | /usr/bin/grep -Fq "$kMAGICBYTES_ICNS_RESOURCE"
+  fi
+}
+
+#  isVolumeMountPoint <folder>
+isVolumeMountPoint() {
+  local folder=$1
+  # Must resolve to the physical underlying path, as that is what `mount` shows
+  folder=$(cd -P -- "$1"; pwd)
+  mount | grep -qF "on $folder (" # !! Is there a more robust way to test for mountpoints?
+}
+
+#  getFileWithIconData <fileOrFolder>
+# Returns the path of the file that contains the actual icon data, based on whether the target is
+#  * a file ... the file path itself
+#  * a folder:
+#     * regular folder: file $'Icon\r' inside that folder, with the icon data in its resource fork
+#     * volume mountpoint: file '.VolumeIcon.icns' inside that folder, with the icon data inside the file.
+getFileWithIconData() {
+  local fileOrFolder=$1
+  if [[ -f $fileOrFolder ]]; then # file
+    printf '%s' "$fileOrFolder"
+  elif isVolumeMountPoint "$fileOrFolder"; then # volume mountpoint
+    printf '%s' "$fileOrFolder/$kFILENAME_VOLUMECUSTOMICON"
+  else # regular folder
+    printf '%s' "$fileOrFolder/$kFILENAME_FOLDERCUSTOMICON"
+  fi
+}
+
+#  getTargetType <fileOrFolder>
+# Returns a descriptor for the specified target path:
+#  * a file ... 'file'
+#  * a folder:
+#     * regular folder: 'folder'
+#     * volume mountpoint: 'volume'
+getTargetType() {
+  local fileOrFolder=$1
+  if [[ -f $fileOrFolder ]]; then # file
+    printf 'file'
+  elif isVolumeMountPoint "$fileOrFolder"; then # volume mountpoint
+    printf 'volume'
+  else # regular folder
+    printf 'folder'
+  fi
 }
 
 
 #  setCustomIcon <fileOrFolder> <imgFile>
+# Tips for debugging:
+#  * To exercise this function, from the repo dir.:
+#      touch /tmp/tf; ./bin/fileicon set /tmp/tf ./test/.fixtures/img.png
+# !!??? VOLUME SUPPORT, as of macOS 13.1:
+# !!   * While targeting volume root folders is now supported *in principle*, 
+# !!     assigning the 'com.apple.FinderInfo' extended attribute to the mountpoint folder 
+# !!     typically (always??) fails, so the icon doesn't take effect.
+# !!     SetFile -a C <file> also fails - with or without `sudo` - with "ERROR: Unexpected Error. (-5000)  on file: <file>"
+# !!     (SetFile -a c <file> clears the custom-icon flag; note that SetFile isn't installed by default and is DEPRECATED: "Tools supporting Carbon development, including /usr/bin/SetFile, were deprecated with Xcode 6.")
+# !!     ?? It feels like at *some point* on 13.1 our NFS mount from our NAS seemed to support it, but inexplicably no longer.
+# !!   * SOME volumes, even if *network* volumes, support custom icons for their files and folders,
+# !!     such as a SMB mount.
+# !!     ?? Our NFS mount from our NAS seemed to support that *for a while* on 13.1, but inexplicably no longer.
 setCustomIcon() {
 
-  local fileOrFolder=$1 imgFile=$2
+  local fileOrFolder=$1 imgFile=$2 fileWithIconData
 
   [[ (-f $fileOrFolder || -d $fileOrFolder) && -r $fileOrFolder && -w $fileOrFolder ]] || return 3
   [[ -f $imgFile ]] || return 3
@@ -200,10 +263,6 @@ setCustomIcon() {
   # !!  * @scriptingosx (https://github.com/mklement0/fileicon/issues/32#issuecomment-1074124748) (AppleScript-ObjC version)
   # !! Note: We moved from Python to AppleScript when the system Python was removed in macOS 12.3
 
-  # Tips for debugging:
-  #  * To exercise this function, from the repo dir.:
-  #      touch /tmp/tf; ./bin/fileicon set /tmp/tf ./test/.fixtures/img.png
-
   # !! Note: The setIcon method seemingly always indicates True, even with invalid image files, so
   # !!       we attempt no error handling in the AppleScript code, and instead verify success explicitly later.
   osascript <<EOF >/dev/null || die
@@ -216,45 +275,69 @@ setCustomIcon() {
     (current application's NSWorkspace's sharedWorkspace()'s setIcon:imageData forFile:destPath options:2)
 EOF
 
-  # Verify that a resource fork with icons was actually created.
-  # For *files*, the resource fork is embedded in the file itself.
-  # For *folders* a hidden file named $'Icon\r' is created *inside the folder*.
-  [[ -d $fileOrFolder ]] && fileWithResourceFork=${fileOrFolder}/$kFILENAME_FOLDERCUSTOMICON || fileWithResourceFork=$fileOrFolder
-  hasIconsResource "$fileWithResourceFork" || { 
+  # Fully verify that everything worked as intended.
+  # Unfortunately, several things can go wrong.
+  testForCustomIcon "$targetFileOrFolder" 2>/dev/null && return 0
+  ec=$?
+
+  if (( ec == 1 )); then
     cat >&2 <<EOF
-Failed to create resource fork with icons. Typically, this means that the specified image file is not supported or corrupt: $imgFile
+Failed to assign a custom icon.
+Typically, this means that the specified image file is not supported or corrupt: $imgFile
 Supported image formats: jpeg | tiff | png | gif | jp2 | pict | bmp | qtif| psd | sgi | tga
 EOF
-    return 1
+  elif ((ec == 2 )); then
+    cat >&2 <<EOF
+Failed to set the custom-icon flag in the 'com.apple.FinderInfo' extended attribute of: $targetFileOrFolder
+Typically, this means that you're targeting a volume itself or a file or folder on a volume that doesn't support custom icons.
+Rerun with "rm" to clean up.
+EOF
+  elif ((ec == 3 )); then
+    cat >&2 <<EOF
+The custom-icon flag in the 'com.apple.FinderInfo' extended attribute of: $imgFile
+was successfully set, but, unexpectedly, the associated icon data was not.
+Rerun with "rm" to clean up.
+EOF
+  fi
 
-  }
+  return $ec
 
-  return 0
 }
 
 #  getCustomIcon <fileOrFolder> <icnsOutFile>
 getCustomIcon() {
 
-  local fileOrFolder=$1 icnsOutFile=$2 byteStr fileWithResourceFork byteOffset byteCount
+  local fileOrFolder=$1 icnsOutFile=$2 byteStr fileWithIconData byteOffset byteCount
 
   [[ (-f $fileOrFolder || -d $fileOrFolder) && -r $fileOrFolder ]] || return 3
 
   # Determine what file to extract the resource fork from.
   if [[ -d $fileOrFolder ]]; then
-    fileWithResourceFork=${fileOrFolder}/$kFILENAME_FOLDERCUSTOMICON
-    [[ -f $fileWithResourceFork ]] || { echo "Custom-icon file does not exist: '${fileWithResourceFork/$'\r'/\\r}'" >&2; return 1; }
+
+    fileWithIconData=$(getFileWithIconData "$fileOrFolder")
+    [[ -f $fileWithIconData ]] || { echo "Custom-icon file does not exist: '${fileWithIconData/$'\r'/\\r}'" >&2; return 1; }
+
+    if [[ $(basename "$fileWithIconData") == $kFILENAME_VOLUMECUSTOMICON ]]; then
+      # !! Volume mount points are an exception: their helper file contains the icon data as the file's *content*
+      # !! rather than in a *resource fork*; therefore, simply *copying* the file's content is enough.
+      # !! However, we use `cat` rather than `cp`, so as not to also copy the extended attributes.
+      cat "$fileWithIconData" > "$icnsOutFile" || die
+      return 0
+    fi
+    # Otherwise: proceed below to extract the data from the resource fork.
+
   else
-    fileWithResourceFork=$fileOrFolder
+    fileWithIconData=$fileOrFolder
   fi
 
   # Determine (based on format description at https://en.wikipedia.org/wiki/Apple_Icon_Image_format):
   # - the byte offset at which the icns resource begins, via the magic literal identifying an icns resource
   # - the length of the resource, which is encoded in the 4 bytes right after the magic literal.
-  read -r byteOffset byteCount < <(getResourceByteString "$fileWithResourceFork" | /usr/bin/awk -F "$kMAGICBYTES_ICNS_RESOURCE" '{ printf "%s %d", (length($1) + 2) / 2, "0x" substr($2, 0, 8) }')
-  (( byteOffset > 0 && byteCount > 0 )) || { echo "Custom-icon file contains no icons resource: '${fileWithResourceFork/$'\r'/\\r}'" >&2; return 1; }
+  read -r byteOffset byteCount < <(getResourceByteString "$fileWithIconData" | /usr/bin/awk -F "$kMAGICBYTES_ICNS_RESOURCE" '{ printf "%s %d", (length($1) + 2) / 2, "0x" substr($2, 0, 8) }')
+  (( byteOffset > 0 && byteCount > 0 )) || { echo "Custom-icon file contains no icons resource: '${fileWithIconData/$'\r'/\\r}'" >&2; return 1; }
 
   # Extract the actual bytes using tail and head and save them to the output file.
-  tail -c "+${byteOffset}" "$fileWithResourceFork/..namedfork/rsrc" | head -c $byteCount > "$icnsOutFile" || return
+  tail -c "+${byteOffset}" "$fileWithIconData/..namedfork/rsrc" | head -c $byteCount > "$icnsOutFile" || return
 
   return 0
 }
@@ -267,21 +350,22 @@ removeCustomIcon() {
   [[ (-f $fileOrFolder || -d $fileOrFolder) && -r $fileOrFolder && -w $fileOrFolder ]] || return 1
 
   # Step 1: Turn off the custom-icon flag in the com.apple.FinderInfo extended attribute.
+  #         Note: Using SetFile -a c <file> is tempting, but SetFile doesn't come with macOS by default (part of XCode CLI package)
   if hasAttrib "$fileOrFolder" com.apple.FinderInfo; then
     byteStr=$(getAttribByteString "$fileOrFolder" com.apple.FinderInfo | patchByteInByteString $kFI_BYTEOFFSET_CUSTOMICON '~'$kFI_VAL_CUSTOMICON) || return
     if [[ $byteStr == "$kFI_BYTES_BLANK" ]]; then # All bytes cleared? Remove the entire attribute.
-      xattr -d com.apple.FinderInfo "$fileOrFolder"
+      /usr/bin/xattr -d com.apple.FinderInfo "$fileOrFolder"
     else # Update the attribute.
-      xattr -wx com.apple.FinderInfo "$byteStr" "$fileOrFolder" || return
+      /usr/bin/xattr -wx com.apple.FinderInfo "$byteStr" "$fileOrFolder" || return
     fi
   fi
 
   # Step 2: Remove the resource fork (if target is a file) / hidden file with custom icon (if target is a folder)
-  if [[ -d $fileOrFolder ]]; then
-    rm -f "${fileOrFolder}/${kFILENAME_FOLDERCUSTOMICON}"
-  else
-    if hasIconsResource "$fileOrFolder"; then
-      xattr -d com.apple.ResourceFork "$fileOrFolder"
+  if [[ -d $fileOrFolder ]]; then # folder or volume -> remove the special file inside it.
+    rm -f "$(getFileWithIconData "$fileOrFolder")"
+  else # file -> remove the resource fork
+    if hasIconData "$fileOrFolder"; then
+      /usr/bin/xattr -d com.apple.ResourceFork "$fileOrFolder"
     fi
   fi
 
@@ -291,40 +375,54 @@ removeCustomIcon() {
 #  testForCustomIcon <fileOrFolder>
 testForCustomIcon() {
 
-  local fileOrFolder=$1 byteStr byteVal fileWithResourceFork
+  local fileOrFolder=$1 byteStr byteVal fileWithIconData hasCustomIconFlag hasIconData 
 
   [[ (-f $fileOrFolder || -d $fileOrFolder) && -r $fileOrFolder ]] || return 3
 
   # Step 1: Check if the com.apple.FinderInfo extended attribute has the custom-icon
-  #         flag set.
-  byteStr=$(getAttribByteString "$fileOrFolder" com.apple.FinderInfo 2>/dev/null) || return 1
-
+  #         flag set. This applies to *all* target types.
+  byteStr=$(getAttribByteString "$fileOrFolder" com.apple.FinderInfo 2>/dev/null) #  || return 1
   byteVal=${byteStr:2*kFI_BYTEOFFSET_CUSTOMICON:2}
+  hasCustomIconFlag=$(( byteVal & kFI_VAL_CUSTOMICON ))
 
-  (( byteVal & kFI_VAL_CUSTOMICON )) || return 1
+  fileWithIconData=$(getFileWithIconData "$fileOrFolder")
+  # Step 2: Check if there's actual icon data present,
+  #         via the resource fork of the file or the folder's helper file or the file content of a
+  #         volume mountpoint's helper file (./.VolumeIcon.icns)
+  hasIconData "$fileWithIconData" 2>/dev/null && hasIconData=1 || hasIconData=0
 
-  # Step 2: Check if the resource fork of the relevant file contains an icns resource
-  if [[ -d $fileOrFolder ]]; then
-    fileWithResourceFork=${fileOrFolder}/${kFILENAME_FOLDERCUSTOMICON}
-  else
-    fileWithResourceFork=$fileOrFolder
+  # Provide a specific exit code reflecting the state.
+  # !! This is used by setCustomIcon()
+  if (( hasCustomIconFlag && hasIconData )); then
+    return 0   # has custom icon
+  elif (( ! hasCustomIconFlag && ! hasIconData  )); then
+    return 1   # typical case of file/folder NOT having a custom icon
+  elif (( ! hasCustomIconFlag )); then
+    echo "WARNING: Custom-icon data is present, but the 'com.apple.FinderInfo' extended attribute isn't set for $(getTargetType "$fileOrFolder") '$fileOrFolder'"  >&2
+    return 2   # broken state: has icons, but no custom flag
+  else # (( ! hasIconData )) 
+    echo "WARNING: While the 'com.apple.FinderInfo' extended attribute is set for $(getTargetType "$fileOrFolder") '$fileOrFolder', associated icon data is missing."  >&2
+    return 3   # broken state: has custom flag, but no icons
   fi
 
-  hasIconsResource "$fileWithResourceFork" || return 1
-
-  return 0
 }
 
 # --- End: SPECIFIC HELPER FUNCTIONS
 
 # --- Begin: SPECIFIC SCRIPT-GLOBAL CONSTANTS
 
-kFILENAME_FOLDERCUSTOMICON=$'Icon\r'
+kFILENAME_FOLDERCUSTOMICON=$'Icon\r' # the helper file for regular folders, with the actual icon image data in its *resource fork*
+kFILENAME_VOLUMECUSTOMICON='.VolumeIcon.icns' # the helper file for volume mountpoints, with the actual icon image data in the file's *content*.
 
 # The blank hex dump form (single string of pairs of hex digits) of the 32-byte data structure stored in extended attribute
 # com.apple.FinderInfo
 kFI_BYTES_BLANK='0000000000000000000000000000000000000000000000000000000000000000'
 
+# [UPDATE]
+#  * THIS CONSTANT ISN'T USED ANYMORE.
+#  * Also, on macOS 13 (Ventura): seemingly, the Icon\r file's com.apple.FinderInfo extended attribute is now 
+#    SIMPLER: where the folder itself has 0x4 in its 9th byte, Icon\r now has 0x40
+# [ORIGINAL COMMENT]
 # The hex dump form of the full 32 bytes that Finder assigns to the hidden $'Icon\r'
 # file whose com.apple.ResourceFork extended attribute contains the icon image data for the enclosing folder.
 # The first 8 bytes spell out the magic literal 'iconMACS'; they are followed by the invisibility flag, '40' in the 9th byte, and '10' (?? specifying what?)
@@ -332,7 +430,7 @@ kFI_BYTES_BLANK='000000000000000000000000000000000000000000000000000000000000000
 # NOTE: Since file $'Icon\r' serves no other purpose than to store the icon, it is
 #       safe to simply assign all 32 bytes blindly, without having to worry about
 #       preserving existing values.
-kFI_BYTES_CUSTOMICONFILEFORFOLDER='69636F6E4D414353401000000000000000000000000000000000000000000000'
+# kFI_BYTES_CUSTOMICONFILEFORFOLDER='69636F6E4D414353401000000000000000000000000000000000000000000000'
 
 # The hex dump form of the magic literal inside a resource fork that marks the
 # start of an icns (icons) resource.
@@ -459,11 +557,11 @@ esac
 case $cmd in
   'set')
     setCustomIcon "$targetFileOrFolder" "$imgFile" || die
-    (( quiet )) || echo "Custom icon assigned to '$targetFileOrFolder' based on '$imgFile'."
+    (( quiet )) || echo "Custom icon assigned to $(getTargetType "$targetFileOrFolder") '$targetFileOrFolder' based on '$imgFile'."
     ;;
   'rm')
     removeCustomIcon "$targetFileOrFolder" || die
-    (( quiet )) || echo "Custom icon removed from '$targetFileOrFolder'."
+    (( quiet )) || echo "Custom icon (if any) removed from $(getTargetType "$targetFileOrFolder") '$targetFileOrFolder'."
     ;;
   'get')
     getCustomIcon "$targetFileOrFolder" "$outFile" || die
@@ -471,11 +569,14 @@ case $cmd in
     exit 0
     ;;
   'test')
-    testForCustomIcon "$targetFileOrFolder"
+    if (( quiet )); then
+      testForCustomIcon "$targetFileOrFolder" 2>/dev/null
+    else
+      testForCustomIcon "$targetFileOrFolder" # This may issue warnings.
+    fi
     ec=$?
-    (( ec <= 1 )) || die
     if (( ! quiet )); then
-      (( ec == 0 )) && echo "HAS custom icon: '$targetFileOrFolder'" || echo "Has NO custom icon: '$targetFileOrFolder'"
+      echo "$( (( ec == 0 )) && printf 'HAS' || printf 'Has NO' ) custom icon: $(getTargetType "$targetFileOrFolder") '$targetFileOrFolder'"
     fi
     exit $ec
     ;;

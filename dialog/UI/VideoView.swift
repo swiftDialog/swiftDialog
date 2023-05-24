@@ -19,7 +19,9 @@ struct VideoView: View {
     var embeddedContent : Bool = false
     
     init(videourl : String = "", autoplay : Bool = false, caption : String = "") {
+        writeLog("Showing video player for \(videourl). Autoplay is \(autoplay), caption is \(caption)")
         if videourl.contains("youtube") || videourl.contains("vimeo") {
+            writeLog("Displaying youtube or vimeo video. embedded content is enabled")
             embeddedContent = true
         }
         if videourl.hasPrefix("http") {

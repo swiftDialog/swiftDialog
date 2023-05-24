@@ -8,16 +8,15 @@
 import SwiftUI
 import Combine
 import UserNotifications
+import OSLog
 
 import SystemConfiguration
 
-extension StringProtocol {
-    subscript(offset: Int) -> Character {
-        self[index(startIndex, offsetBy: offset)]
-    }
-}
-
 var background = BlurWindowController()
+
+// Log Stuff
+let bundleID = Bundle.main.bundleIdentifier ?? "au.bartreardon.dialog"
+let osLog = OSLog(subsystem: bundleID, category: "main")
 
 // AppDelegate and extension used for notifications
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -44,17 +43,14 @@ struct dialogApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     @ObservedObject var observedData : DialogUpdatableContent
-    //@ObservedObject var notificationManager = LocalNotificationManager()
     
     @State private var cancellables = Set<AnyCancellable>()
-    //@State var window : NSWindow?
     
     func monitorVisibility(window: NSWindow) {
         window.publisher(for: \.isVisible)
             .dropFirst()  // we know: the first value is not interesting
             .sink(receiveValue: { isVisible in
                 if isVisible {
-                    //observedData.mainWindow = window
                     placeWindow(window)
                 }
             })
@@ -63,7 +59,7 @@ struct dialogApp: App {
     
     init () {
         
-        logger(logMessage: "Dialog Launched")
+        writeLog("Dialog Launched")
         
         // Ensure the singleton NSApplication exists.
         // required for correct determination of screen dimentions for the screen in use in multi screen scenarios
@@ -80,11 +76,13 @@ struct dialogApp: App {
                 
         // check for notification
         if appArguments.notification.present {
+            writeLog("Sending a notification")
             var notificationIcon = ""
             if appArguments.iconOption.present {
                 notificationIcon = appArguments.iconOption.value
             }
             sendNotification(title: appArguments.titleOption.value, subtitle: appArguments.subTitleOption.value, message: appArguments.messageOption.value, image: notificationIcon)
+            writeLog("Notification sent")
             usleep(100000)
             quitDialog(exitCode: 0)
         }
@@ -92,7 +90,7 @@ struct dialogApp: App {
         
         // check for jamfhelper mode
         if appArguments.jamfHelperMode.present {
-            logger(logMessage: "converting jh to dialog")
+            writeLog("converting jh to dialog")
             convertFromJamfHelperSyntax()
         }
         
@@ -108,19 +106,18 @@ struct dialogApp: App {
         appvars.iconHeight = appvars.iconHeight * appvars.scaleFactor
         
         if appArguments.miniMode.present {
-            //print("mini mode")
             appvars.windowWidth = 540
             appvars.windowHeight = 128
         }
                 
         //check debug mode and print info
         if appArguments.debug.present {
-            logger(logMessage: "debug options presented. dialog state sent to stdout")
+            writeLog("debug options presented. dialog state sent to stdout")
             appvars.debugMode = true
             appvars.debugBorderColour = Color.green
             
-            print("Window Height = \(appvars.windowHeight): Window Width = \(appvars.windowWidth)")
-            
+            writeLog("Window Height = \(appvars.windowHeight): Window Width = \(appvars.windowWidth)")
+            /*
             print("\nApplication State Variables")
             let mirrored_appvars = Mirror(reflecting: appvars)
             for (_, attr) in mirrored_appvars.children.enumerated() {
@@ -135,8 +132,9 @@ struct dialogApp: App {
                 print("  \(propertyName) = \(attr.value)")
               }
             }
+            */
         }
-        logger(logMessage: "width: \(appvars.windowWidth), height: \(appvars.windowHeight)")
+        writeLog("width: \(appvars.windowWidth), height: \(appvars.windowHeight)")
         
         observedData = DialogUpdatableContent()
         
@@ -150,6 +148,7 @@ struct dialogApp: App {
         }
         
         // bring to front on launch
+        writeLog("Activating")
         NSApp.activate(ignoringOtherApps: true)
     }
     
@@ -168,12 +167,14 @@ struct dialogApp: App {
                     // Set window level
                     if observedData.args.forceOnTop.present || observedData.args.blurScreen.present {
                         window?.level = .floating
+                        writeLog("Window is forceed on top")
                     } else {
                         window?.level = .normal
                     }
                     
                     // display a blur screen window on all screens.
                     if observedData.args.blurScreen.present && !appArguments.fullScreenWindow.present {
+                        writeLog("Blurscreen enabled")
                         let screens = NSScreen.screens
                         for (index, screen) in screens.enumerated() {
                             observedData.blurredScreen.append(BlurWindowController())
@@ -188,10 +189,12 @@ struct dialogApp: App {
                     }
                     
                     if observedData.args.forceOnTop.present || observedData.args.blurScreen.present {
+                        writeLog("Activating window")
                         NSApp.activate(ignoringOtherApps: true)
                     }
                 }
                 .frame(width: 0, height: 0) //ensures WindowAccessor isn't taking up any real estate
+                
                 if !appArguments.notification.present {
                     if appArguments.miniMode.present {
                         MiniView(observedDialogContent: observedData)

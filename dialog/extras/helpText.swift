@@ -11,12 +11,13 @@ struct SDHelp {
     var argument : CommandLineArguments
     
     public func printHelpShort() {
+        writeLog("Printing short help")
         print("swiftDialog v\(getVersionString())")
         print("©2023 Bart Reardon\n")
         print("\n use --help <option> for more details\n")
         let mirror = Mirror(reflecting: argument)
         for child in mirror.children {
-            if let arg = child.value as? CLArgument {
+            if let arg = child.value as? CommandlineArgument {
                 var helpArgs = " --\(arg.long) \(arg.helpUsage)"
                 if arg.short != "" {
                     helpArgs = " -\(arg.short), \(helpArgs)"
@@ -30,9 +31,10 @@ struct SDHelp {
     }
     
     public func printHelpLong(for selectedArg: String) {
+        writeLog("Printing long help for \(selectedArg)")
         let mirror = Mirror(reflecting: argument)
         for child in mirror.children {
-            if let arg = child.value as? CLArgument, (arg.long == selectedArg || arg.short == selectedArg) {
+            if let arg = child.value as? CommandlineArgument, (arg.long == selectedArg || arg.short == selectedArg) {
                 var helpArgs = " --\(arg.long) \(arg.helpUsage)"
                 if arg.short != "" {
                     helpArgs = " -\(arg.short), \(helpArgs)"
@@ -433,6 +435,7 @@ struct SDHelp {
 """
         
         argument.dropdownTitle.helpShort = "Select list name"
+        argument.dropdownTitle.helpUsage = "<text>(,radio|required)"
         argument.dropdownTitle.helpLong = """
         Sets the name for a dropdown select list.
 
@@ -461,6 +464,10 @@ struct SDHelp {
                 --\(argument.dropdownTitle.long) "<name>",required
             in JSON
                 "selectitems" : [{"title" : "Select 1", "values" : ["one","two","three"], "required" : true}]
+
+        Modifiers:
+        The ",radio" modifier will change the select list to display a group with radio buttons. When using radio with no default item specified, the first entry in the list will become the default selected item.
+        The ",required" modifier will make that particular list a required item that must have a value before swiftDialog will exit
 """
         
         argument.dropdownValues.helpShort = "Select list values"
@@ -470,6 +477,10 @@ struct SDHelp {
 
         Argument values are in CSV format
         e.g. "Option 1,Option 2,Option 3"
+
+        Add three or more hyphens "---" into your list to insert a divider in that location
+
+        NOTE: each "---" will count in the index even though the divider itself is not selectable
 
         see also --\(argument.dropdownTitle.long) and --\(argument.dropdownDefault.long)
 """
@@ -492,9 +503,12 @@ struct SDHelp {
             prompt     - Pre-fill the field with some prompt text
             regex      - Specify a regular expression that the field must satisfy for the content to be accepted.
             regexerror - Specify a custom error to display if regex conditions are not met
+            fileselect - Adds a "Select" button and presents a file picker
+            filetype   - Limits fileselect to the named file extensions. Presented in space seperated values
 
         modifiers can be combined e.g. --\(appArguments.textField.long) <text>,secure,required
                                        --\(appArguments.textField.long) <text>,required,prompt="<text>"
+                                       --\(appArguments.textField.long) <text>,fileselect,filetype="jpeg jpg png"
                                        --\(appArguments.textField.long) <text>,regex="\\d{6}",prompt="000000",regexerror="Enter 6 digits"
         (secure fields cannot have the prompt modifier applied)
 """

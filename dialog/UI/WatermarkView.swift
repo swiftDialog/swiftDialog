@@ -8,12 +8,10 @@
 import SwiftUI
 
 struct WatermarkView: View {
-    //var imagePath: String = ""
     var mainImage: NSImage
     var imageOpacity: Double
     var imagePosition : Alignment = .leading
     var imageAlignmentGuite : Alignment = .center
-    //var imageScaleFill : String
     
     @ObservedObject var observedData : DialogUpdatableContent
     
@@ -22,6 +20,8 @@ struct WatermarkView: View {
 
         mainImage = getImageFromPath(fileImagePath: observedContent.args.watermarkImage.value)
         imageOpacity = Double(observedContent.args.watermarkAlpha.value) ??  0.5
+        
+        writeLog("Displaying background layer with image \(observedContent.args.watermarkImage.value) and alpha value \(observedContent.args.watermarkAlpha.value)")
         
         switch observedData.args.watermarkPosition.value {
         case "left":

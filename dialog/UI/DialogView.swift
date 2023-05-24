@@ -18,6 +18,7 @@ struct DialogView: View {
     
     init(observedDialogContent : DialogUpdatableContent) {
         if !observedDialogContent.args.iconOption.present { //} appvars.iconIsHidden {
+            writeLog("Icon is hidden")
             iconDisplayWidth = 0
         } else {
             iconDisplayWidth = observedDialogContent.iconSize
@@ -45,7 +46,6 @@ struct DialogView: View {
                             Spacer()
                         }
                         .border(appvars.debugBorderColour, width: 2)
-                        //.fixedSize(horizontal: false, vertical: true)
                         .padding(.top, observedData.appProperties.topPadding)
                         .padding(.bottom, observedData.appProperties.bottomPadding)
                         .padding(.leading, observedData.appProperties.sidePadding+10)

@@ -48,7 +48,6 @@ struct ImageSlider<Content>: View where Content: View {
                     .frame(width: geometry.size.width, alignment: .leading)
                 }
                 .clipped()
-                //.border(Color.green)
                 if maxIndex > 0 {
                     PageControl(index: $index.animation(.easeInOut(duration: 0.5)), maxIndex: maxIndex, autoPlaySeconds: autoPlaySeconds)
                 }
@@ -116,9 +115,7 @@ struct PageControl: View {
                         
                         Rectangle()
                             .fill(Color.white.opacity(0.5))
-                            //.animation(.easeIn(duration: 0.1))
                             .frame(width: countDownTimerWidth, height: 8, alignment: .bottomLeading)
-                            //.offset(y:22)
                     }
                     .cornerRadius(10)
                     .frame(alignment: .bottom)
@@ -155,7 +152,6 @@ struct PageControl: View {
                         .foregroundColor(Color.primary)
                 }
             })
-            //.buttonStyle(.borderless)
             .frame(width: 20, height: 20)
             
         
@@ -181,19 +177,13 @@ struct PageControl: View {
                         .resizable()
                         .foregroundColor(Color.primary)
                 }
-                //.frame(width: 25, height: 25)
-                //.opacity(0.80)
                     
             })
             .frame(width: 20, height: 20)
-            //.padding()
-            //.opacity(0.80)
         }
         .opacity(0.80)
         .buttonStyle(.borderless)
         .padding(15)
-        //.frame(height: 50)
-        //.border(.green)
         // increment the image index. reset to 0 when we reach the end
         .onReceive(autoPlayTimer) { _ in
             if autoPlaySeconds > 0 {

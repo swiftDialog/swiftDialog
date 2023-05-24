@@ -3,9 +3,51 @@
 base_dir="${PWD}"
 iconupdater="${base_dir}/fileicon"
 
-iconfile="/Library/Application Support/Dialog/Dialog.png"
-dialogbundle="/Library/Application Support/Dialog/Dialog.app"
+dialog_root="/Library/Application Support/Dialog"
+iconfile="${dialog_root}/Dialog.png"
+dialogbundle="${dialog_root}/Dialog.app"
+enrolmentScript="${dialog_root}/swiftDialogEnrolment.sh"
+log_file="${dialog_root}/postinstall.log"
+
+write_to_log() {
+    local message="$1"
+    local date="$(date +'%Y-%m-%d %H:%M:%S')"
+    echo "[${date}] ${message}" >> "${log_file}"
+}
+
+write_to_log "swiftDialog postinstall started"
 
 if [[ -e "${iconfile}" ]] && [[ -e "${dialogbundle}" ]]; then
-    ${iconupdater} set "${dialogbundle}" "${iconfile}"
+    write_to_log "Icon file detected. Updating dialog icon"
+    ${iconupdater} set "${dialogbundle}" "${iconfile}" >> "${log_file}"
+    if [[ $? == 0 ]]; then
+        write_to_log "Icon update success"
+    else
+        write_to_log "Icon update failed"
+    fi
 fi
+
+# Experiment: running MDM policies or enrolment scripts at the setup assistant
+
+currentUser=$(echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { print $3 }')
+jamfbinary="/usr/local/bin/jamf"
+
+write_to_log "Checking for Setup Assistant"
+write_to_log "Current user is ${currentUser}"
+# check we have a valid console user
+if [ "$currentUser" = "_mbsetupuser" ]; then
+    write_to_log "Setup Assistant detected"
+    if [ -e "$jamfbinary" ]; then
+        write_to_log "Jamf enrolled system detected at the setup assistant - triggering swiftDialogEnrolment policy"
+        $jamfbinary policy -event swiftDialogEnrolment
+    fi
+    # We are running at the setup assistant - trigger a script
+    if [[ -e "${enrolmentScript}" ]]; then
+        write_to_log "${enrolmentScript} detected at the setup assistant - running ${enrolmentScript} in the blind"
+        "${enrolmentScript}" &
+        PID=$!
+        write_to_log "${enrolmentScript} initiated with pid $PID. postinstall will continue"
+    fi
+fi
+
+write_to_log "swiftDialog postinstall complete"

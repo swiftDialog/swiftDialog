@@ -12,42 +12,25 @@ import SwiftUI
 import OSLog
 import SwiftyJSON
 
-public extension Color {
 
-    static let background = Color(NSColor.windowBackgroundColor)
-    static let secondaryBackground = Color(NSColor.underPageBackgroundColor)
-    static let tertiaryBackground = Color(NSColor.controlBackgroundColor)
-}
+func writeLog(_ message: String, logLevel: OSLogType = .info, log: OSLog = osLog) {
+    let logMessage = "\(message)"
 
-public extension Scene {
-    // Solution for maintaining fixed window size in macOS 13 https://developer.apple.com/forums/thread/719389
-    func windowResizabilityContentSize() -> some Scene {
-        if #available(macOS 13.0, *) {
-            return windowResizability(.contentSize)
-        } else {
-            return self
-        }
+    os_log("%{public}@", log: log, type: logLevel, logMessage)
+    if logLevel == .debug || appvars.debugMode {
+        // print debug to stdout
+        print("\(oslogTypeToString(logLevel).uppercased()): \(message)")
     }
 }
 
-public extension String {
-var boolValue: Bool {
-    return (self as NSString).boolValue
-}}
-
-func logger(logType: String = "", logMessage: String) {
-    let defaultLog = Logger(subsystem: "au.bartreardon.dialog", category: "main")
-    switch logType {
-    case "info":
-        defaultLog.info("\(logMessage, privacy: .public)")
-    case "debug":
-        defaultLog.debug("\(logMessage, privacy: .public)")
-    case "error":
-        defaultLog.error("\(logMessage, privacy: .public)")
-    case "fault":
-        defaultLog.fault("\(logMessage, privacy: .public)")
-    default:
-        defaultLog.log("\(logMessage, privacy: .public)")
+func oslogTypeToString(_ type: OSLogType) -> String {
+    switch type {
+    case OSLogType.default: return "default"
+    case OSLogType.info: return "info"
+    case OSLogType.debug: return "debug"
+    case OSLogType.error: return "error"
+    case OSLogType.fault: return "fault"
+    default: return "unknown"
     }
 }
 
@@ -75,6 +58,8 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
     // origional implementation lifted from Nudge and modified
     // https://github.com/macadmins/nudge/blob/main/Nudge/Utilities/Utils.swift#L46
     
+    writeLog("Getting image from path \(fileImagePath)")
+    
     // need to declare literal empty string first otherwsie the runtime whinges about an NSURL instance with an empty URL string. I know!
     var urlPath = NSURL(string: "")!
     var imageData = NSData()
@@ -89,11 +74,13 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
     
     // check if it's base64 image data
     if fileImagePath.hasPrefix("base64") {
+        writeLog("Creating image from base64 data")
         return getImageFromBase64(base64String: fileImagePath.replacingOccurrences(of: "base64=", with: ""))
     }
     
     // checking for anything starting with http - crude but it works (for now)
     if fileImagePath.hasPrefix("http") {
+        writeLog("Getting image from http")
         urlPath = NSURL(string: fileImagePath)!
     } else {
         urlPath = NSURL(fileURLWithPath: fileImagePath)
@@ -104,9 +91,10 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
         imageData = try NSData(contentsOf: urlPath as URL)
     } catch {
         if returnErrorImage! {
+            writeLog("An error occured - returning error image")
             return errorImage
         } else {
-        
+            writeLog("An error occured - exiting")
             quitDialog(exitCode: appvars.exit201.code, exitMessage: "\(appvars.exit201.message) \(fileImagePath)", observedObject: DialogUpdatableContent())
         }
     }
@@ -118,6 +106,7 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
         image.size = rep.size
         image.addRepresentation(rep)
     }
+    writeLog("Returning image")
     return image
 }
 
@@ -161,13 +150,14 @@ func bannerErrorImage(size: NSSize) -> NSImage? {
 
 func openSpecifiedURL(urlToOpen: String) {
     // Open the selected URL (no checking is performed)
-    
+    writeLog("Opening URL \(urlToOpen)")
     if let url = URL(string: urlToOpen) {
         NSWorkspace.shared.open(url)
     }
 }
 
 func shell(_ command: String) -> String {
+    writeLog("Running shell command \(command)")
     let task = Process()
     let pipe = Pipe()
     
@@ -186,7 +176,7 @@ func shell(_ command: String) -> String {
 // taken wholesale from DEPNotify because Joel and team and jsut awesome so why re-invent the wheel?
 func checkRegexPattern(regexPattern: String, textToValidate: String) -> Bool {
     var returnValue = true
-    
+    writeLog("Checking regex")
     do {
         let regex = try NSRegularExpression(pattern: regexPattern)
         let nsString = textToValidate as NSString
@@ -198,7 +188,7 @@ func checkRegexPattern(regexPattern: String, textToValidate: String) -> Bool {
         }
         
     } catch let error as NSError {
-        logger(logMessage: "invalid regex: \(error.localizedDescription)")
+        writeLog("invalid regex: \(error.localizedDescription)")
         returnValue = false
     }
     
@@ -206,8 +196,7 @@ func checkRegexPattern(regexPattern: String, textToValidate: String) -> Bool {
 }
 
 func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQuit: Bool = true, observedObject: DialogUpdatableContent) {
-    //let action: String = CLOptionText(OptionName: appArguments.button1ActionOption, DefaultValue: "")
-    
+    writeLog("processing button action \(action)")
     if (action != "") {
         if executeShell {
             print(shell(action))
@@ -218,14 +207,13 @@ func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQui
     if shouldQuit {
         quitDialog(exitCode: exitCode, observedObject: observedObject)
     }
-    //exit(0)
 }
 
 func getAppIcon(appPath: String, withSize: CGFloat? = 300) -> NSImage {
     // take application path and extracts the application icon and returns is as NSImage
     // Swift implimentation of the ObjC code used in SAP's nice "Icons" utility for extracting application icons
     // https://github.com/SAP/macOS-icon-generator/blob/master/source/Icons/MTDragDropView.m#L66
-    
+    writeLog("Getting app icon image from \(appPath)")
     let image = NSImage()
     if let rep = NSWorkspace.shared.icon(forFile: appPath)
         .bestRepresentation(for: NSRect(x: 0, y: 0, width: withSize!, height: withSize!), context: nil, hints: nil) {
@@ -253,9 +241,8 @@ func getVersionString() -> String {
 }
 
 func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : DialogUpdatableContent? = nil) {
-    //var userOutput: Bool = false
+    writeLog("About to quit with exit code \(exitCode)")
     if exitMessage != "" {
-        //print(exitCode)
         print("\(exitMessage!)")
     }
     
@@ -272,69 +259,87 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
         
         //build output array
         var outputArray : Array = [String]()
-        
-        if ((observedObject?.args.dropdownValues.present) != nil) {
-            if observedObject?.appProperties.dropdownItems.count == 1 {
-                outputArray.append("\"SelectedOption\" : \"\(observedObject?.appProperties.dropdownItems[0].selectedValue ?? "")\"")
-                json["SelectedOption"].string = observedObject?.appProperties.dropdownItems[0].selectedValue
-                outputArray.append("\"SelectedIndex\" : \(observedObject?.appProperties.dropdownItems[0].values.firstIndex(of: (observedObject?.appProperties.dropdownItems[0].selectedValue)!) ?? -1)")
-                json["SelectedIndex"].int = observedObject?.appProperties.dropdownItems[0].values.firstIndex(of: observedObject?.appProperties.dropdownItems[0].selectedValue ?? "") ?? -1
-            }
-            // check to see if fields marked as required have content before allowing the app to exit
-            // if there is an empty field, update the highlight colour
-            var dontQuit = false
-            for i in 0..<(observedObject?.appProperties.dropdownItems.count ?? 0) {
-                if observedObject?.appProperties.dropdownItems[i].required ?? false && observedObject?.appProperties.dropdownItems[i].selectedValue == "" {
-                    NSSound.beep()
-                    let requiredString = (observedObject?.appProperties.dropdownItems[i].selectedValue ?? "")+" "+"is-required".localized
-                    observedObject?.appProperties.dropdownItems[i].requiredfieldHighlight = Color.red
-                    if !(observedObject?.sheetErrorMessage.contains(requiredString) ?? false) {
-                        observedObject?.sheetErrorMessage += "• "+(observedObject?.appProperties.dropdownItems[i].title ?? "")+" "+"is-required".localized+"\n"
-                    }
-                    dontQuit = true
-                    observedObject?.showSheet = true
-                } else {
-                    outputArray.append("\"\(observedObject?.appProperties.dropdownItems[i].title ?? "")\" : \"\(observedObject?.appProperties.dropdownItems[i].selectedValue ?? "")\"")
-                    outputArray.append("\"\(observedObject?.appProperties.dropdownItems[i].title ?? "")\" index : \"\(observedObject?.appProperties.dropdownItems[i].values.firstIndex(of: observedObject?.appProperties.dropdownItems[i].selectedValue ?? "") ?? -1)\"")
-                    json[observedObject?.appProperties.dropdownItems[i].title ?? ""] = ["selectedValue" : observedObject?.appProperties.dropdownItems[i].selectedValue ?? "", "selectedIndex" : observedObject?.appProperties.dropdownItems[i].values.firstIndex(of: observedObject?.appProperties.dropdownItems[i].selectedValue ?? "") ?? -1]
-                }
-            }
-            if dontQuit { return }
-        }
+        var dontQuit = false
+        var requiredString = ""
         
         if appArguments.textField.present {
+            writeLog("Textfield present - checking requirements are met")
             // check to see if fields marked as required have content before allowing the app to exit
             // if there is an empty field, update the highlight colour
-            var dontQuit = false
+            
             for i in 0..<(observedObject?.appProperties.textFields.count ?? 0) {
                 //check for required fields
-                if observedObject?.appProperties.textFields[i].required ?? false && observedObject?.appProperties.textFields[i].value == "" { // && textFields[i].regex.isEmpty {
+                let textField = observedObject?.appProperties.textFields[i]
+                let textfieldValue = textField?.value ?? ""
+                let textfieldTitle = textField?.title ?? ""
+                let textfieldRequired = textField?.required ?? false
+                observedObject?.appProperties.textFields[i].requiredTextfieldHighlight = Color.clear
+                
+                if textfieldRequired && textfieldValue == "" { // && textFields[i].regex.isEmpty {
                     NSSound.beep()
-                    let requiredString = (observedObject?.appProperties.textFields[i].value ?? "")+" "+"is-required".localized
+                    requiredString += "• \"\(textfieldTitle)\" \("is-required".localized) \n"
                     observedObject?.appProperties.textFields[i].requiredTextfieldHighlight = Color.red
-                    if !(observedObject?.sheetErrorMessage.contains(requiredString) ?? false) {
-                        observedObject?.sheetErrorMessage += "• "+(observedObject?.appProperties.textFields[i].value ?? "")+" "+"is-required".localized+"\n"
-                    }
                     dontQuit = true
+                    writeLog("Required text field \(textfieldTitle) has no value")
                 
                 //check for regex requirements
-                } else if !(observedObject?.appProperties.textFields[i].value.isEmpty ?? false)
-                            && !(observedObject?.appProperties.textFields[i].regex.isEmpty ?? false)
-                            && !checkRegexPattern(regexPattern: observedObject?.appProperties.textFields[i].regex ?? "", textToValidate: observedObject?.appProperties.textFields[i].value ?? "") {
+                } else if !(textfieldValue.isEmpty)
+                            && !(textField?.regex.isEmpty ?? false)
+                            && !checkRegexPattern(regexPattern: textField?.regex ?? "", textToValidate: textfieldValue) {
                     NSSound.beep()
                     observedObject?.appProperties.textFields[i].requiredTextfieldHighlight = Color.green
-                    observedObject?.showSheet = true
-                    observedObject?.sheetErrorMessage += "• "+(observedObject?.appProperties.textFields[i].regexError ?? "Regex Check Failed\n")
+                    requiredString += "• "+(textField?.regexError ?? "Regex Check Failed  \n")
                     dontQuit = true
-                } else {
-                    observedObject?.appProperties.textFields[i].requiredTextfieldHighlight = Color.clear
+                    writeLog("Textfield \(textfieldTitle) value \(textfieldValue) does not meet regex requirements \(String(describing: textField?.regex))")
                 }
                 
-                outputArray.append("\(observedObject?.appProperties.textFields[i].title ?? "field \(i)") : \(observedObject?.appProperties.textFields[i].value ?? "")")
-                json[observedObject?.appProperties.textFields[i].title ?? "Field \(i)"].string = observedObject?.appProperties.textFields[i].value
+                outputArray.append("\(textfieldTitle) : \(textfieldValue)")
+                json[textfieldTitle].string = textfieldValue
             }
-            if dontQuit { return }
         }
+        
+        if ((observedObject?.args.dropdownValues.present) != nil) {
+            writeLog("Select items present - checking require,ments are met")
+            if observedObject?.appProperties.dropdownItems.count == 1 {
+                let selectedValue = observedObject?.appProperties.dropdownItems[0].selectedValue
+                let selectedIndex = observedObject?.appProperties.dropdownItems[0].values
+                
+                outputArray.append("\"SelectedOption\" : \"\(selectedValue ?? "")\"")
+                json["SelectedOption"].string = selectedValue
+                outputArray.append("\"SelectedIndex\" : \(selectedIndex?.firstIndex(of: (selectedValue)!) ?? -1)")
+                json["SelectedIndex"].int = selectedIndex?.firstIndex(of: selectedValue ?? "") ?? -1
+            }
+            // check to see if fields marked as required have content before allowing the app to exit
+            // if there is an empty field, update the highlight colour
+            for i in 0..<(observedObject?.appProperties.dropdownItems.count ?? 0) {
+                let dropdownItem = observedObject?.appProperties.dropdownItems[i]
+                let dropdownItemValues = dropdownItem?.values ?? [""]
+                let dropdownItemSelectedValue = dropdownItem?.selectedValue ?? ""
+                let dropdownItemTitle = dropdownItem?.title ?? ""
+                let dropdownItemRequired = dropdownItem?.required ?? false
+                observedObject?.appProperties.dropdownItems[i].requiredfieldHighlight = Color.clear
+                
+                if dropdownItemRequired && dropdownItemSelectedValue == "" {
+                    NSSound.beep()
+                    requiredString += "• \"\(dropdownItemTitle)\" \("is-required".localized) \n"
+                    observedObject?.appProperties.dropdownItems[i].requiredfieldHighlight = Color.red
+                    dontQuit = true
+                    writeLog("Required select item \(dropdownItemTitle) has no value")
+                } else {
+                    outputArray.append("\"\(dropdownItemTitle)\" : \"\(dropdownItemSelectedValue)\"")
+                    outputArray.append("\"\(dropdownItemTitle)\" index : \"\(dropdownItemValues.firstIndex(of: dropdownItemSelectedValue) ?? -1)\"")
+                    json[dropdownItemTitle] = ["selectedValue" : dropdownItemSelectedValue, "selectedIndex" : dropdownItemValues.firstIndex(of: dropdownItemSelectedValue) ?? -1]
+                }
+            }
+        }
+        
+        if dontQuit {
+            writeLog("Requirements were not met. Dialog will not quit at this time")
+            observedObject?.sheetErrorMessage = requiredString
+            observedObject?.showSheet = true
+            return
+        }
+        
         if ((observedObject?.args.checkbox.present) != nil) {
             for i in 0..<(observedObject?.appProperties.checkboxArray.count ?? 0) {
                 outputArray.append("\"\(observedObject?.appProperties.checkboxArray[i].label ?? "checkbox \(i)")\" : \"\(observedObject?.appProperties.checkboxArray[i].checked ?? false)\"")
@@ -379,39 +384,11 @@ func textToFontWeight(_ weight: String) -> Font.Weight {
     }
 }
 
-extension String {
-    var localized: String {
-      return NSLocalizedString(self, comment: "\(self)_comment")
-    }
-
-    func localized(_ args: CVarArg...) -> String {
-        return String(format: localized, arguments: args)
-    }
-}
-
-extension String {
-    func split(usingRegex pattern: String) -> [String] {
-        let regex = try! NSRegularExpression(pattern: pattern)
-        let matches = regex.matches(in: self, range: NSRange(startIndex..., in: self))
-        let splits = [startIndex]
-            + matches
-                .map { Range($0.range, in: self)! }
-                .flatMap { [ $0.lowerBound, $0.upperBound ] }
-            + [endIndex]
-
-        return zip(splits, splits.dropFirst())
-            .map { String(self[$0 ..< $1])}
-    }
-}
-
 func stringToColour(_ colourValue: String) -> Color {
     
     var returnColor: Color
     
-    //let colourHash = String(item[1])
     if isValidColourHex(colourValue) {
-        
-        // valid hex = #000000 format
     
         let colourRedValue = "\(colourValue[1])\(colourValue[2])"
         let colourRed = Double(Int(colourRedValue, radix: 16)!)/255

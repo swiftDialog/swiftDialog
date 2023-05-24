@@ -19,27 +19,18 @@ struct ImageView: View {
     
     
     init(imageArray: [MainImage], captionArray: Array<String>, autoPlaySeconds : CGFloat) {
-        //for imagePath in imageArray {
         for i in 0..<imageArray.count {
-                if imageArray[i].path != "" {
-                    images.append(getImageFromPath(fileImagePath: imageArray[i].path, returnErrorImage: true))
-                    captions.append(imageArray[i].caption)
-                }
-                //if imageArray[i].caption != "" {
-                //    captions.append(imageArray[i].caption)
-                //}
+            if imageArray[i].path != "" {
+                images.append(getImageFromPath(fileImagePath: imageArray[i].path, returnErrorImage: true))
+                captions.append(imageArray[i].caption)
             }
-        //}
-        /*
-        for imageCaption in captionArray {
-            captions.append(imageCaption)
         }
         
-        while captions.count < images.count {
-            captions.append("")
-        }
-        */
         self.autoPlaySeconds = autoPlaySeconds
+        if !imageArray.isEmpty {
+            writeLog("Displaying images")
+            writeLog("There are \(imageArray.count) images to display")
+        }
     }
     
     var body: some View {
@@ -68,7 +59,6 @@ struct ImageView: View {
             }
             .clipShape(RoundedRectangle(cornerRadius: 10))
         }
-        //.padding()
         .border(appvars.debugBorderColour, width: 2)
     }        
 }

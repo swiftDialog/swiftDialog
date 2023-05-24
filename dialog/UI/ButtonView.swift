@@ -19,17 +19,17 @@ struct ButtonView: View {
     var cancelExit  : Int32 = 2
     var infoExit    : Int32 = 3
     
-    //@State private var button1disabled = false
-    
     let timer = Timer.publish(every: 3.0, on: .main, in: .common).autoconnect() //trigger after 4 seconds
     
     init(observedDialogContent : DialogUpdatableContent) {
         self.observedData = observedDialogContent
         
         if observedDialogContent.args.button1ShellActionOption.present {
+            writeLog("Using button 1 shell action")
             button1action = observedDialogContent.args.button1ShellActionOption.value
             buttonShellAction = true
         } else if observedDialogContent.args.button1ActionOption.present {
+            writeLog("Using button 1 action \(observedDialogContent.args.button1ActionOption.value)")
             button1action = observedDialogContent.args.button1ActionOption.value
         }
     }
@@ -62,14 +62,12 @@ struct ButtonView: View {
                 .frame(minWidth: 40, alignment: .center)
             }
         )
-        //.keyboardShortcut(.defaultAction)
         .keyboardShortcut(observedData.appProperties.button1DefaultAction)
         .disabled(observedData.args.button1Disabled.present)
         .onReceive(timer) { _ in
             if observedData.args.timerBar.present && !observedData.args.hideTimerBar.present {
                 observedData.args.button1Disabled.present = false
             }
-            //button1disabled = false
         }
         HelpButton(observedDialogContent: observedData)
     }
