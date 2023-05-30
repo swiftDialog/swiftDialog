@@ -76,7 +76,6 @@ struct renderToggles : View {
 struct CheckboxView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
-    @State private var contentSize: CGSize = .zero
     
     var toggleStyle : any ToggleStyle = .checkbox
     
@@ -87,11 +86,15 @@ struct CheckboxView: View {
 
     var body: some View {
         if observedData.args.checkbox.present {
-            VStack {
-                Spacer()
+            if observedData.appProperties.checkboxControlStyle.lowercased() == "switch" {
+                VStack {
+                    Spacer()
+                    renderToggles(observedDialogContent: observedData)
+                }
+                .scrollOnOverflow()
+            } else {
                 renderToggles(observedDialogContent: observedData)
             }
-            .scrollOnOverflow()
         }
     }
 }
