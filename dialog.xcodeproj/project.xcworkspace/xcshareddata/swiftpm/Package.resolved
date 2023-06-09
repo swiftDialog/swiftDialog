@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/gonzalezreal/AttributedText",
       "state" : {
-        "revision" : "2dc2d7864e0fee4b524a5850d7d7cf9a7eeda0fc",
-        "version" : "1.0.0"
+        "revision" : "0e811cb14de367bbd58a94d12259687e5ee08bea",
+        "version" : "1.0.1"
       }
     },
     {
@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/combine-schedulers",
       "state" : {
-        "revision" : "4cf088c29a20f52be0f2ca54992b492c54e0076b",
-        "version" : "0.5.3"
+        "revision" : "0625932976b3ae23949f6b816d13bd97f3b40b7c",
+        "version" : "0.10.0"
       }
     },
     {
@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/gonzalezreal/MarkdownUI",
       "state" : {
-        "revision" : "4c164300337a35d002188a83a878346819b203c0",
-        "version" : "1.1.0"
+        "revision" : "6a33c60ad430772d69ac5278e35474d6b3e5d30a",
+        "version" : "1.1.1"
       }
     },
     {
@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/gonzalezreal/NetworkImage",
       "state" : {
-        "revision" : "f8b8ed0be39d2f4aa00a6e8d3b18a62a94eff8d8",
-        "version" : "4.0.0"
+        "revision" : "c97f83e771c95186af80ef6118f158852a9e54be",
+        "version" : "4.0.1"
       }
     },
     {
@@ -68,8 +68,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
       "state" : {
-        "revision" : "50a70a9d3583fe228ce672e8923010c8df2deddd",
-        "version" : "0.2.1"
+        "revision" : "4af50b38daf0037cfbab15514a241224c3f62f98",
+        "version" : "0.8.5"
       }
     }
   ],

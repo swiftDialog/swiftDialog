@@ -41,12 +41,15 @@ struct IconView: View {
     
     var sfGradientPresent: Bool = false
     var sfPalettePresent: Bool = false
+    var sfBackgroundIconColour: Color = Color.background
     
     var mainImageScale: CGFloat = 1
     var mainImageAlpha: Double
     
     let mainImageWithOverlayScale: CGFloat = 0.88
     let overlayImageScale: CGFloat = 0.4
+    var overlayImageBackgroundScale: CGFloat = 1.1
+    var overlayImageBackground: Bool = false
     
   
     init(image : String = "", overlay : String = "", alpha : Double = 1.0) {
@@ -63,6 +66,21 @@ struct IconView: View {
         
         if overlay != "" {
             mainImageScale = mainImageWithOverlayScale
+            if overlay.lowercased().hasPrefix("sf=") {
+                if overlay.range(of: "bgcolour=none") == nil && overlay.range(of: "bgcolor=none") == nil && !["info","warning","caution"].contains(overlay) {
+                    var SFValues = overlay.components(separatedBy: ",")
+                    SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) }
+                    for value in SFValues {
+                        if value.hasPrefix("bgcolo") {
+                            if let bgColour = value.components(separatedBy: "=").last {
+                                sfBackgroundIconColour = stringToColour(bgColour)
+                            }
+                        }
+                    }
+                    overlayImageBackground = true
+                    overlayImageBackgroundScale = 0.9
+                }
+            }
         }
         
         // fullscreen runs on a dark background so invert the default icon colour for info and default
@@ -290,8 +308,26 @@ struct IconView: View {
                     .opacity(mainImageAlpha)
             }
 
-            IconOverlayView(image: iconOverlay)
-                .scaleEffect(overlayImageScale, anchor:.bottomTrailing)
+            if !iconOverlay.isEmpty {
+                ZStack {
+                    if overlayImageBackground {
+                        //background square so the SF Symbol has something to render against
+                        Image(systemName: "square.fill")
+                            .resizable()
+                            .foregroundColor(sfBackgroundIconColour)
+                            .font(Font.title.weight(Font.Weight.thin))
+                            .opacity(0.90)
+                            .shadow(color: .secondaryBackground.opacity(0.50), radius: 4, x:2, y:2) // gives the sf background some pop especially in dark mode
+                            .aspectRatio(1, contentMode: .fit)
+                    }
+                    
+                    IconView(image: iconOverlay)
+                        //.shadow(color: Color.primary.opacity(0.70), radius: 3)
+                        .scaleEffect(overlayImageBackgroundScale)
+                }
+                .scaleEffect(overlayImageScale, anchor: .bottomTrailing)
+            }
+
 
         }
         .padding(framePadding)
