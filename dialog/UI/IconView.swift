@@ -322,7 +322,7 @@ struct IconView: View {
                     }
                     
                     IconView(image: iconOverlay)
-                        .shadow(color: Color.primary.opacity(0.70), radius: 3)
+                        //.shadow(color: Color.primary.opacity(0.70), radius: 3)
                         .scaleEffect(overlayImageBackgroundScale)
                 }
                 .scaleEffect(overlayImageScale, anchor: .bottomTrailing)
