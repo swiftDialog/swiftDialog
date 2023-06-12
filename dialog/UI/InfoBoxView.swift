@@ -12,7 +12,7 @@ struct InfoBoxView: View {
     
     @ObservedObject var observedData : DialogUpdatableContent
     
-    var markdownStyle = MarkdownStyle(foregroundColor: .secondary)
+    //var markdownStyle = MarkdownStyle(foregroundColor: .secondary)
     
     init(observedData : DialogUpdatableContent) {
         self.observedData = observedData
@@ -22,7 +22,9 @@ struct InfoBoxView: View {
     var body: some View {
         Markdown(observedData.args.infoBox.value, baseURL: URL(string: "http://"))
             .multilineTextAlignment(.leading)
-            .markdownStyle(markdownStyle)
+            .markdownTextStyle() {
+                ForegroundColor(.secondary)
+            }
             .focusable(false)
             .lineLimit(nil)
             .frame(width: 150, alignment: .top)

@@ -11,7 +11,7 @@ import MarkdownUI
 struct HelpView: View {
     @ObservedObject var observedData : DialogUpdatableContent
     
-    var markdownStyle: MarkdownStyle = MarkdownStyle(font: .system(size: appvars.messageFontSize, weight: appvars.messageFontWeight), foregroundColor: .primary)
+    //var markdownStyle: MarkdownStyle = MarkdownStyle(font: .system(size: appvars.messageFontSize, weight: appvars.messageFontWeight), foregroundColor: .primary)
     
     init(observedContent : DialogUpdatableContent) {
         self.observedData = observedContent
@@ -26,7 +26,10 @@ struct HelpView: View {
                 .padding(.top, observedData.appProperties.topPadding)
             Markdown(observedData.args.helpMessage.value, baseURL: URL(string: "http://"))
                 .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                .markdownStyle(markdownStyle)
+                .markdownTextStyle() {
+                    FontSize(appvars.messageFontSize)
+                    ForegroundColor(.primary)
+                }
                 .padding(32)
                 .focusable(false)
             Spacer()

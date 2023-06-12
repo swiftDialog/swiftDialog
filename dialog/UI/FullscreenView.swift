@@ -28,15 +28,6 @@ struct FullscreenView: View {
     var minScreenHeightToDisplayBanner:CGFloat = 1000
     var messageTextLineSpacing:CGFloat = 20
     
-    var useDefaultStyle = true
-    var defaultStyle: MarkdownStyle {
-        useDefaultStyle
-        ? MarkdownStyle(font: .system(size: messageContentFontSize),
-                               foregroundColor: .white)
-        : MarkdownStyle(font: .system(size: messageContentFontSize),
-                               foregroundColor: .white)
-    }
-     
     init (observedData : DialogUpdatableContent) {
         writeLog("Entering full screen view")
         self.observedData = observedData
@@ -160,9 +151,12 @@ struct FullscreenView: View {
                 
                     // message vstack
                     VStack() {
-                        Markdown(observedData.messageText)
-                            .markdownStyle(defaultStyle)
-                            .multilineTextAlignment(.center)
+                        ScrollView() {
+                            Text(.init(observedData.messageText))
+                                .foregroundColor(.white)
+                                .font(.system(size: messageContentFontSize))
+                                .multilineTextAlignment(.center)
+                        }
                         
                         Spacer()
                         
