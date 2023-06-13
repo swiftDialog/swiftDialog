@@ -86,6 +86,7 @@ struct MessageContent: View {
                             FontSize(appvars.messageFontSize)
                             ForegroundColor(messageColour)
                         }
+                        .markdownTheme(.sdMarkdown)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .accessibilityHint(observedData.args.messageOption.value)
                         .focusable(false)

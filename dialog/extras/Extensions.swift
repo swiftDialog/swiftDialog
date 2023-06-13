@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import MarkdownUI
 
 extension Color {
     init(hex: UInt, alpha: Double = 1) {
@@ -24,6 +25,30 @@ extension Color {
     static let background = Color(NSColor.windowBackgroundColor)
     static let secondaryBackground = Color(NSColor.underPageBackgroundColor)
     static let tertiaryBackground = Color(NSColor.controlBackgroundColor)
+    
+    static let code = Color(
+        light: Color(rgba: 0xdc1c_50ff), dark: Color(rgba: 0xdb58_7bff)
+    )
+    static let text = Color(
+        light: Color(rgba: 0x0606_06ff), dark: Color(rgba: 0xfbfb_fcff)
+    )
+    static let secondaryText = Color(
+        light: Color(rgba: 0x6b6e_7bff), dark: Color(rgba: 0x9294_a0ff)
+    )
+    static let tertiaryText = Color(
+        light: Color(rgba: 0x6b6e_7bff), dark: Color(rgba: 0x6d70_7dff)
+    )
+    static let link = Color(
+        light: Color(rgba: 0x2c65_cfff), dark: Color(rgba: 0x4c8e_f8ff)
+    )
+    static let border = Color(
+        light: Color(rgba: 0xe4e4_e8ff), dark: Color(rgba: 0x4244_4eff)
+    )
+    static let divider = Color(
+        light: Color(rgba: 0xd0d0_d3ff), dark: Color(rgba: 0x3334_38ff)
+    )
+    static let checkbox = Color(rgba: 0xb9b9_bbff)
+    static let checkboxBackground = Color(rgba: 0xeeee_efff)
 }
 
 extension NSTextView {
@@ -146,3 +171,56 @@ extension View {
         }
     }
 }
+
+extension Theme {
+  static let sdMarkdown = Theme()
+    .code {
+      FontFamilyVariant(.monospaced)
+      FontSize(.em(0.85))
+        ForegroundColor(.code)
+        BackgroundColor(.background)
+    }
+    .blockquote { configuration in
+      HStack(spacing: 0) {
+        RoundedRectangle(cornerRadius: 6)
+              .fill(Color.border)
+          .relativeFrame(width: .em(0.2))
+        configuration.label
+              .markdownTextStyle { ForegroundColor(.secondary) }
+          .relativePadding(.horizontal, length: .em(1))
+      }
+      .fixedSize(horizontal: false, vertical: true)
+    }
+    .codeBlock { configuration in
+      ScrollView(.horizontal) {
+        configuration.label
+          .relativeLineSpacing(.em(0.225))
+          .markdownTextStyle {
+            FontFamilyVariant(.monospaced)
+            FontSize(.em(0.85))
+          }
+          .padding(16)
+      }
+      .background(Color.secondaryBackground)
+      .clipShape(RoundedRectangle(cornerRadius: 6))
+      .markdownMargin(top: 0, bottom: 16)
+    }
+    .link {
+        ForegroundColor(.link)
+    }
+    .codeBlock { configuration in
+        ScrollView(.horizontal) {
+            configuration.label
+                .relativeLineSpacing(.em(0.225))
+                .markdownTextStyle {
+                    FontFamilyVariant(.monospaced)
+                    FontSize(.em(0.85))
+                }
+                .padding(16)
+        }
+        .background(Color.secondaryBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .markdownMargin(top: 0, bottom: 16)
+    }
+}
+
