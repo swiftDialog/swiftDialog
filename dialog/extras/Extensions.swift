@@ -175,8 +175,8 @@ extension View {
 extension Theme {
   static let sdMarkdown = Theme()
     .code {
-      FontFamilyVariant(.monospaced)
-      FontSize(.em(0.85))
+        FontFamilyVariant(.monospaced)
+        FontSize(.em(0.85))
         ForegroundColor(.code)
         BackgroundColor(.background)
     }

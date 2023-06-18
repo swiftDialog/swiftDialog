@@ -55,10 +55,35 @@ func getJSON() -> JSON {
     return json
 }
 
+func getMarkdown(mdFilePath : String) -> String {
+    //let fileURL = URL(fileURLWithPath: mdFilePath)
+    var urlPath = NSURL(string: "")!
+    
+    // checking for anything starting with http - crude but it works (for now)
+    if mdFilePath.hasPrefix("http") {
+        writeLog("Getting image from http")
+        urlPath = NSURL(string: mdFilePath)!
+    } else {
+        urlPath = NSURL(fileURLWithPath: mdFilePath)
+    }
+
+    do {
+        let fileContents = try String(contentsOf: urlPath as URL, encoding: .utf8)
+        return fileContents
+    } catch {
+        return error.localizedDescription
+    }
+    
+}
+
 func processCLOptions(json : JSON = getJSON()) {
 
     //this method goes through the arguments that are present and performs any processing required before use
     writeLog("Processing Options")
+    if appArguments.messageOption.present && appArguments.messageOption.value.lowercased().hasSuffix(".md") {
+        appArguments.messageOption.value = getMarkdown(mdFilePath: appArguments.messageOption.value)
+    }
+    
     if appArguments.dropdownValues.present {
         writeLog("\(appArguments.dropdownValues.long) present")
         // checking for the pre 1.10 way of defining a select list
