@@ -119,7 +119,7 @@ struct CommandlineArgument {
 
 struct AppVariables {
     
-    var cliversion                      = "2.2.1"
+    var cliversion                      = "2.3.0"
     
     // message default strings
     var titleDefault                    = String("default-title".localized)
