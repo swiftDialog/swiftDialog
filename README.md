@@ -25,7 +25,7 @@ Every aspect of swiftDialog's appearance can be modified.
 
 At the most simple level you need only give swiftDialog a [Title](https://github.com/bartreardon/Dialog/wiki/Customising-the-Title) and a [Message](https://github.com/bartreardon/Dialog/wiki/Customising-the-Message-area) to display but there is more utility in modifying other aspects of the appearance:
  * [Pass in an image resource](https://github.com/bartreardon/Dialog/wiki/Customising-the-Icon) to display as the swiftDialog icon, or use an app path or system preference bundle path and swiftDialog will extract the icon for display.
- * [Add extra buttons](https://github.com/bartreardon/Dialog/wiki/Buttons-and-button-behaviour). Change the text to say what you want. Wait for user input or autimatically time out.
+ * [Add extra buttons](https://github.com/bartreardon/Dialog/wiki/Buttons-and-button-behaviour). Change the text to say what you want. Wait for user input or automatically time out.
  * [Use markdown](https://github.com/bartreardon/Dialog/wiki/Customising-the-Message-area#markdown-support-new-from-v150) in the message to add **bold** or _italics_ or include URL links
  * Change the [colour, size or even the font](https://github.com/bartreardon/Dialog/wiki/Customising-the-Title#customising-title-font-properties) used in the Title and Message areas
  * [Change the size](https://github.com/bartreardon/Dialog/wiki/Window-Size-and-Behaviour) of the swiftDialog window
