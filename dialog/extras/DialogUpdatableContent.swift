@@ -351,7 +351,7 @@ class FileReader {
                             if iconIsSet { observedData.listItemsArray[row].icon = icon }
                             if statusIsSet { observedData.listItemsArray[row].statusIcon = statusIcon }
                             if statusTextIsSet { observedData.listItemsArray[row].statusText = statusText }
-                            if progressIsSet  {observedData.listItemsArray[row].progress = listProgressValue }
+                            if progressIsSet { observedData.listItemsArray[row].progress = listProgressValue }
                             observedData.listItemUpdateRow = row
                         }
                     }

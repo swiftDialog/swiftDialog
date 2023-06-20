@@ -182,8 +182,7 @@ func checkRegexPattern(regexPattern: String, textToValidate: String) -> Bool {
         let nsString = textToValidate as NSString
         let results = regex.matches(in: textToValidate, range: NSRange(location: 0, length: nsString.length))
         
-        if results.count == 0
-        {
+        if results.count == 0 {
             returnValue = false
         }
         
@@ -350,7 +349,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
         // print the output
         if observedObject?.args.jsonOutPut.present ?? false { //} appvars.jsonOut {
             print(json)
-        } else  {
+        } else {
             for i in 0..<outputArray.count {
                 print(outputArray[i])
             }

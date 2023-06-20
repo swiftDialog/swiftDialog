@@ -148,7 +148,7 @@ struct CirclerPercentageProgressViewStyle : ProgressViewStyle {
                 .foregroundColor(Color.accentColor)
                 .rotationEffect(.degrees(-90))
             }
-            .animation(.linear)
+            .animation(.linear, value: configuration.fractionCompleted)
             .padding(.trailing, padding)
         }
     }

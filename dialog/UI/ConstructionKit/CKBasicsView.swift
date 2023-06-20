@@ -37,8 +37,7 @@ struct CKBasicsView: View {
             
             LabelView(label: "ck-message".localized)
             HStack {
-                Picker("ck-textalignment".localized, selection: $observedData.args.messageAlignment.value)
-                {
+                Picker("ck-textalignment".localized, selection: $observedData.args.messageAlignment.value) {
                     Text("").tag("")
                     ForEach(observedData.appProperties.allignmentStates.keys.sorted(), id: \.self) {
                         Text($0)

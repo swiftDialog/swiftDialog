@@ -53,8 +53,7 @@ struct CKListView: View {
                     .disabled(true) // MARK: disabled until I can work out how to delete from the array without causing a crash
                     TextField("ck-title".localized, text: $observedData.listItemsArray[item].title)
                     TextField("ck-statustext".localized, text: $observedData.listItemsArray[item].statusText)
-                    Picker("ck-status".localized, selection: $observedData.listItemsArray[item].statusIcon)
-                    {
+                    Picker("ck-status".localized, selection: $observedData.listItemsArray[item].statusIcon) {
                         Text("").tag("")
                         ForEach(statusTypeArray, id: \.self) {
                             Text($0)

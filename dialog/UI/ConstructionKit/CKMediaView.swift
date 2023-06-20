@@ -27,8 +27,7 @@ struct CKMediaView: View {
                         .toggleStyle(.switch)
                     Spacer()
                 }
-                Button("ck-select".localized)
-                      {
+                Button("ck-select".localized) {
                         let panel = NSOpenPanel()
                         panel.allowsMultipleSelection = false
                         panel.canChooseDirectories = false

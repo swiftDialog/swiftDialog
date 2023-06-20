@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct TextEntryView: View {
     
@@ -46,7 +47,8 @@ struct TextEntryView: View {
                                             .stroke(observedData.appProperties.textFields[index].requiredTextfieldHighlight, lineWidth: 2)
                                             .animation(
                                                 .easeIn(duration: 0.2)
-                                                .repeatCount(3, autoreverses: true)
+                                                .repeatCount(3, autoreverses: true),
+                                                value: observedData.showSheet
                                             )
                                          )
                         }
@@ -59,15 +61,20 @@ struct TextEntryView: View {
                             Spacer()
 
                             if observedData.appProperties.textFields[index].fileSelect {
-                                Button("button-select".localized)
-                                {
+                                Button("button-select".localized) {
                                     let panel = NSOpenPanel()
                                     panel.allowsMultipleSelection = false
                                     panel.canChooseDirectories = false
                                     if observedData.appProperties.textFields[index].fileType != "" {
-                                        let fileTypesArray = observedData.appProperties.textFields[index].fileType.components(separatedBy: " ")
-                                        //panel.allowedFileTypes = [observedData.appProperties.textFields[index].fileType]
-                                        panel.allowedFileTypes = fileTypesArray
+                                        var fileTypesArray : [UTType] = []
+                                        for type in observedData.appProperties.textFields[index].fileType.components(separatedBy: " ") {
+                                            if type == "folder" {
+                                                panel.canChooseDirectories = true
+                                            } else {
+                                                fileTypesArray.append(UTType(filenameExtension: type) ?? .text)
+                                            }
+                                        }
+                                        panel.allowedContentTypes = fileTypesArray
                                     }
                                     if panel.runModal() == .OK {
                                         observedData.appProperties.textFields[index].value = panel.url?.path ?? "<none>"
@@ -95,7 +102,8 @@ struct TextEntryView: View {
                                         .stroke(observedData.appProperties.textFields[index].requiredTextfieldHighlight, lineWidth: 2)
                                         .animation(
                                             .easeIn(duration: 0.2)
-                                            .repeatCount(3, autoreverses: true)
+                                            .repeatCount(3, autoreverses: true),
+                                            value: observedData.showSheet
                                         )
                                      )
                         }

@@ -60,8 +60,7 @@ struct DropdownView: View {
                             Text(observedData.appProperties.dropdownItems[index].title + (observedData.appProperties.dropdownItems[index].required ? " *":""))
                                 .frame(idealWidth: fieldwidth*0.20, alignment: .leading)
                             Spacer()
-                            Picker("", selection: $observedData.appProperties.dropdownItems[index].selectedValue)
-                            {
+                            Picker("", selection: $observedData.appProperties.dropdownItems[index].selectedValue) {
                                 if observedData.appProperties.dropdownItems[index].defaultValue.isEmpty {
                                     // prevents "Picker: the selection "" is invalid and does not have an associated tag" errors on stdout
                                     // this does mean we are creating a blank selection but it will still be index -1
@@ -82,8 +81,8 @@ struct DropdownView: View {
                             .overlay(RoundedRectangle(cornerRadius: 5)
                                 .stroke(observedData.appProperties.dropdownItems[index].requiredfieldHighlight, lineWidth: 2)
                                 .animation(
-                                    .easeIn(duration: 0.2)
-                                    .repeatCount(3, autoreverses: true)
+                                    .easeIn(duration: 0.2).repeatCount(3, autoreverses: true),
+                                    value: observedData.showSheet
                                 )
                             )
                         }

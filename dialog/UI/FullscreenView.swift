@@ -94,7 +94,7 @@ struct FullscreenView: View {
     
     var body: some View {
         
-        VStack{
+        VStack {
             // banner image vstack
             if observedData.args.bannerImage.present {
                 Image(nsImage: getImageFromPath(fileImagePath: observedData.args.bannerImage.value))
@@ -104,7 +104,7 @@ struct FullscreenView: View {
                     .frame(maxWidth: maxBannerWidth, maxHeight: maxBannerHeight)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
                 // Horozontal Line
-                VStack{
+                VStack {
                     Rectangle()
                         .fill(Color.gray.opacity(0.5))
                         .frame(height: 2)
@@ -142,7 +142,7 @@ struct FullscreenView: View {
                         if observedData.args.iconOption.present {
                             IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
                         } else {
-                            VStack{}.padding(emptyStackPadding)
+                            VStack {}.padding(emptyStackPadding)
                         }
                     }
                     .padding(40)

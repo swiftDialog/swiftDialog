@@ -103,7 +103,7 @@ struct TimerView: View {
                             // this gives the impression of a continiously moving progress
                             .frame(width: progressWidth, height: barheight)
                             // linear animation with duration set to the same as timer tick of 1 sec makes a continuious bar animation
-                            .animation(.linear(duration: 1))
+                            .animation(.linear(duration: 1), value: progress)
 
                             // Countdown timer area
                             // White text with black "outline"

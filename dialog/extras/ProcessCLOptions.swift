@@ -554,7 +554,7 @@ func processCLOptions(json : JSON = getJSON()) {
             if json[appArguments.messageFont.long]["size"].exists() {
                 appvars.messageFontSize = string2float(string: json[appArguments.messageFont.long]["size"].stringValue, defaultValue: appvars.messageFontSize)
             }
-            if json[appArguments.messageFont.long]["weight"].exists(){
+            if json[appArguments.messageFont.long]["weight"].exists() {
                 appvars.messageFontWeight = textToFontWeight(json[appArguments.messageFont.long]["weight"].stringValue)
             }
             if json[appArguments.messageFont.long]["colour"].exists() {

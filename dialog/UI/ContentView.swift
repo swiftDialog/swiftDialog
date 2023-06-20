@@ -103,7 +103,7 @@ struct ContentView: View {
                         TimerView(progressSteps: progressSteps, visible: !observedData.args.hideTimerBar.present, observedDialogContent : observedData)
                             .frame(alignment: .bottom)
                     }
-                    if (observedData.args.timerBar.present && observedData.args.button1TextOption.present) || !observedData.args.timerBar.present || observedData.args.hideTimerBar.present  {
+                    if (observedData.args.timerBar.present && observedData.args.button1TextOption.present) || !observedData.args.timerBar.present || observedData.args.hideTimerBar.present {
                         ButtonView(observedDialogContent: observedData) // contains both button 1 and button 2
                     }
                 }

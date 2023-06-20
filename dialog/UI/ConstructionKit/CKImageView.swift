@@ -42,8 +42,7 @@ struct CKImageView: View {
                         Image(systemName: "trash")
                     })
                     .disabled(true) // MARK: disabled until I can work out how to delete from the array without causing a crash
-                    Button("ck-select".localized)
-                          {
+                    Button("ck-select".localized) {
                             let panel = NSOpenPanel()
                             panel.allowsMultipleSelection = false
                             panel.canChooseDirectories = false

@@ -37,8 +37,7 @@ func CLOptionText(OptionName: CommandlineArgument, DefaultValue: String? = "") -
  
         let valueIndex = CommandLine.arguments.index(after: commandIndex)
         if valueIndex >= CommandLine.arguments.startIndex
-            && valueIndex < CommandLine.arguments.endIndex
-        {
+            && valueIndex < CommandLine.arguments.endIndex {
             CLOptionTextValue = CommandLine.arguments[valueIndex]
             if (CLOptionTextValue.starts(with: "-")) {
                 CLOptionTextValue = DefaultValue ?? ""

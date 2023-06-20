@@ -24,8 +24,7 @@ struct CKSidebarView: View {
                         .toggleStyle(.switch)
                     Toggle("ck-centred".localized, isOn: $observedData.args.centreIcon.present)
                         .toggleStyle(.switch)
-                    Button("ck-select".localized)
-                          {
+                    Button("ck-select".localized) {
                             let panel = NSOpenPanel()
                             panel.allowsMultipleSelection = false
                             panel.canChooseDirectories = false
@@ -56,8 +55,7 @@ struct CKSidebarView: View {
                 HStack {
                     Toggle("ck-visible".localized, isOn: $observedData.args.overlayIconOption.present)
                         .toggleStyle(.switch)
-                    Button("ck-select".localized)
-                          {
+                    Button("ck-select".localized) {
                             let panel = NSOpenPanel()
                             panel.allowsMultipleSelection = false
                             panel.canChooseDirectories = false

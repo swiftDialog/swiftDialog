@@ -119,8 +119,7 @@ struct CKWindowProperties: View {
                     .onChange(of: observedData.args.bannerImage.present, perform: { _ in
                         observedData.args.iconOption.present.toggle()
                     })
-                Button("ck-select".localized)
-                      {
+                Button("ck-select".localized) {
                         let panel = NSOpenPanel()
                         panel.allowsMultipleSelection = false
                         panel.canChooseDirectories = false
@@ -143,8 +142,7 @@ struct CKWindowProperties: View {
                 Toggle("", isOn: $observedData.args.watermarkImage.present)
                     .toggleStyle(.switch)
                     .disabled(observedData.args.watermarkImage.value == "")
-                Button("ck-select".localized)
-                {
+                Button("ck-select".localized) {
                     let panel = NSOpenPanel()
                     panel.allowsMultipleSelection = false
                     panel.canChooseDirectories = false
@@ -156,8 +154,7 @@ struct CKWindowProperties: View {
                 TextField("", text: $observedData.args.watermarkImage.value)
             }
             VStack {
-                Picker("ck-fill".localized, selection: $observedData.args.watermarkFill.value)
-                {
+                Picker("ck-fill".localized, selection: $observedData.args.watermarkFill.value) {
                     Text("").tag("")
                     ForEach(fillScaleArray, id: \.self) {
                         Text($0)
@@ -170,15 +167,13 @@ struct CKWindowProperties: View {
                             observedData.args.watermarkAlpha.value = String(format: "%.1f", bgAlpha)
                         })
                 }
-                Picker("ck-scale".localized, selection: $observedData.args.watermarkScale.value)
-                {
+                Picker("ck-scale".localized, selection: $observedData.args.watermarkScale.value) {
                     Text("").tag("")
                     ForEach(fillScaleArray, id: \.self) {
                         Text($0)
                     }
                 }
-                Picker("ck-positoin".localized, selection: $observedData.args.watermarkPosition.value)
-                {
+                Picker("ck-positoin".localized, selection: $observedData.args.watermarkPosition.value) {
                     Text("").tag("")
                     ForEach(positionArray, id: \.self) {
                         Text($0)

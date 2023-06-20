@@ -57,8 +57,7 @@ struct RadioView: View {
                                 Spacer()
                             }
                             HStack {
-                                Picker("", selection: $observedData.appProperties.dropdownItems[index].selectedValue)
-                                {
+                                Picker("", selection: $observedData.appProperties.dropdownItems[index].selectedValue) {
                                     ForEach(observedData.appProperties.dropdownItems[index].values, id: \.self) {
                                         Text($0).tag($0)
                                             .font(.system(size: observedData.appProperties.labelFontSize))
