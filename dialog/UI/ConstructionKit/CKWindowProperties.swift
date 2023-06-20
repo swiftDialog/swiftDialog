@@ -9,12 +9,12 @@ import SwiftUI
 
 struct CKWindowProperties: View {
     
-    @ObservedObject var observedData : DialogUpdatableContent
-    @State var bgAlpha : Double = 0.5
+    @ObservedObject var observedData: DialogUpdatableContent
+    @State var bgAlpha: Double = 0.5
     let positionArray = ["topleft", "left", "bottomleft", "top", "center", "bottom", "topright", "right", "bottomright"]
     let fillScaleArray = ["fill", "fit"]
     
-    init(observedDialogContent : DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
     }
 

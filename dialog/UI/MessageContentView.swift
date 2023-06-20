@@ -11,15 +11,15 @@ import MarkdownUI
 
 struct MessageContent: View {
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
     @State private var contentHeight: CGFloat = 40
     
     var fieldPadding: CGFloat = 15
-    var dataEntryMaxWidth : CGFloat = 700
+    var dataEntryMaxWidth: CGFloat = 700
     
-    var messageColour : Color
+    var messageColour: Color
         
-    var iconDisplayWidth : CGFloat
+    var iconDisplayWidth: CGFloat
     
     /*
     var markdownStyle: MarkdownStyle {
@@ -33,7 +33,7 @@ struct MessageContent: View {
     
     let theAllignment: Alignment = .topLeading
     
-    init(observedDialogContent : DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent) {
         writeLog("Displaying main message content")
         self.observedData = observedDialogContent
         if !observedDialogContent.args.iconOption.present { //cloptions.hideIcon.present {

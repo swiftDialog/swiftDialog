@@ -9,9 +9,9 @@ import SwiftUI
 
 struct CKImageView: View {
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
     
-    init(observedDialogContent : DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
     }
     

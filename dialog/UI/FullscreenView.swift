@@ -11,24 +11,24 @@ import MarkdownUI
 
 struct FullscreenView: View {
             
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
         
-    let displayDetails:CGRect = NSScreen.main!.frame
-    var windowHeight:CGFloat = 0
-    var windowWidth:CGFloat = 0
+    let displayDetails: CGRect = NSScreen.main!.frame
+    var windowHeight: CGFloat = 0
+    var windowWidth: CGFloat = 0
     
     // setup element sizes
-    var titleContentFontSize:CGFloat
-    var messageContentFontSize:CGFloat
-    var iconImageScaleFactor:CGFloat
-    var emptyStackPadding:CGFloat
-    var bannerPadding:CGFloat
-    var maxBannerHeight:CGFloat = 120
-    var maxBannerWidth:CGFloat = 0
-    var minScreenHeightToDisplayBanner:CGFloat = 1000
-    var messageTextLineSpacing:CGFloat = 20
+    var titleContentFontSize: CGFloat
+    var messageContentFontSize: CGFloat
+    var iconImageScaleFactor: CGFloat
+    var emptyStackPadding: CGFloat
+    var bannerPadding: CGFloat
+    var maxBannerHeight: CGFloat = 120
+    var maxBannerWidth: CGFloat = 0
+    var minScreenHeightToDisplayBanner: CGFloat = 1000
+    var messageTextLineSpacing: CGFloat = 20
     
-    init (observedData : DialogUpdatableContent) {
+    init (observedData: DialogUpdatableContent) {
         writeLog("Entering full screen view")
         self.observedData = observedData
         // Ensure the singleton NSApplication exists.

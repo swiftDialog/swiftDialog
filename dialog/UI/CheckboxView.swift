@@ -7,13 +7,13 @@
 
 import SwiftUI
 
-struct renderToggles : View {
-    @ObservedObject var observedData : DialogUpdatableContent
+struct renderToggles: View {
+    @ObservedObject var observedData: DialogUpdatableContent
     
-    var iconPresent : Bool = false
-    var rowHeight : CGFloat = 10
+    var iconPresent: Bool = false
+    var rowHeight: CGFloat = 10
     
-    init(observedDialogContent : DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
         if observedData.appProperties.checkboxControlSize == .large {
             rowHeight = observedData.appProperties.messageFontSize + 24
@@ -75,11 +75,11 @@ struct renderToggles : View {
 
 struct CheckboxView: View {
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
     
-    var toggleStyle : any ToggleStyle = .checkbox
+    var toggleStyle: any ToggleStyle = .checkbox
     
-    init(observedDialogContent : DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
         
     }

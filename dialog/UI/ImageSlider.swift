@@ -69,7 +69,7 @@ struct PageControl: View {
     let maxIndex: Int
     let autoPlaySeconds: Double
     
-    @State private var timerTicks : Double = 0
+    @State private var timerTicks: Double = 0
     @State private var timerDisplay = 0.0
         
     func moveimage(direction: String) {
@@ -100,7 +100,7 @@ struct PageControl: View {
     // change image every 4 seconds (TODO: remove and make this a configurable paramater)
     var autoPlayTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     var countDownTimer = Timer.publish(every: 0.01, on: .main, in: .common).autoconnect()
-    @State private var countDownTimerWidth : CGFloat = 0
+    @State private var countDownTimerWidth: CGFloat = 0
     
     var body: some View {
         // display our own progress timer
@@ -160,7 +160,7 @@ struct PageControl: View {
             // Centre dots
             ForEach(0...maxIndex, id: \.self) { index in
                 Circle()
-                    .fill(index == self.index ? Color.primary : Color.secondary)
+                    .fill(index == self.index ? Color.primary: Color.secondary)
                     .frame(width: 8, height: 8)
             }
             

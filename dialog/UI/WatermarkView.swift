@@ -10,12 +10,12 @@ import SwiftUI
 struct WatermarkView: View {
     var mainImage: NSImage
     var imageOpacity: Double
-    var imagePosition : Alignment = .leading
-    var imageAlignmentGuite : Alignment = .center
+    var imagePosition: Alignment = .leading
+    var imageAlignmentGuite: Alignment = .center
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
     
-    init(observedContent : DialogUpdatableContent) {
+    init(observedContent: DialogUpdatableContent) {
         self.observedData = observedContent
 
         mainImage = getImageFromPath(fileImagePath: observedContent.args.watermarkImage.value)

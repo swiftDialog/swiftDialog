@@ -9,9 +9,9 @@ import SwiftUI
 
 struct ErrorView: View {
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
     
-    init(observedContent : DialogUpdatableContent) {
+    init(observedContent: DialogUpdatableContent) {
         self.observedData = observedContent
     }
     

@@ -19,7 +19,7 @@ func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent noti
 func sendNotification(title: String = "", subtitle: String = "", message: String = "", image: String = "") {
     
     
-    let tempImagePath : String = "/var/tmp/sdnotification.png"
+    let tempImagePath: String = "/var/tmp/sdnotification.png"
     
     let notification = UNUserNotificationCenter.current()
     notification.requestAuthorization(options: [.alert, .sound]) { granted, error in
@@ -43,7 +43,7 @@ func sendNotification(title: String = "", subtitle: String = "", message: String
 
                 if image != "" {
                     // default image just in case
-                    var importedImage : NSImage = NSImage(systemSymbolName: "applelogo", accessibilityDescription: "Apple logo")!
+                    var importedImage: NSImage = NSImage(systemSymbolName: "applelogo", accessibilityDescription: "Apple logo")!
 
                     if image.hasSuffix(".app") || image.hasSuffix("prefPane") {
                         importedImage = getAppIcon(appPath: image)

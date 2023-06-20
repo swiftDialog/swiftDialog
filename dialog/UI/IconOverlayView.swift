@@ -12,11 +12,11 @@ struct IconOverlayView: View {
         
     var overlayImagePath: String
     var overlayIconPresent: Bool = false
-    var overlayScaleFactor : CGFloat = 1
+    var overlayScaleFactor: CGFloat = 1
     var sfSymbolPresent: Bool = false
     var sfBackgroundIconColour: Color = Color.background
         
-    init (image : String = "") {
+    init (image: String = "") {
         overlayImagePath = image
         
         // enable if there is _anything_ specified as an overlay icon
@@ -34,8 +34,8 @@ struct IconOverlayView: View {
             var SFValues = overlayImagePath.split(usingRegex: appvars.argRegex)
             SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
             
-            var SFArg : String = ""
-            var SFArgValue : String = ""
+            var SFArg: String = ""
+            var SFArgValue: String = ""
                 
             if SFValues.count > 0 {
                 for index in 0...SFValues.count-1 {
@@ -79,7 +79,7 @@ struct IconOverlayView: View {
                         .foregroundColor(sfBackgroundIconColour)
                         .font(Font.title.weight(Font.Weight.thin))
                         .opacity(0.90)
-                        .shadow(color: .secondaryBackground.opacity(0.50), radius: 4, x:2, y:2) // gives the sf background some pop especially in dark mode
+                        .shadow(color: .secondaryBackground.opacity(0.50), radius: 4, x: 2, y: 2) // gives the sf background some pop especially in dark mode
                         .aspectRatio(1, contentMode: .fit)
                 }
                 IconView(image: overlayImagePath)

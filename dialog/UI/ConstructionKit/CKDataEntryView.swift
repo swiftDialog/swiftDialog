@@ -9,9 +9,9 @@ import SwiftUI
 
 struct CKDataEntryView: View {
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
     
-    init(observedDialogContent : DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
     }
     

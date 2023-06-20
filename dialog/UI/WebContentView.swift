@@ -11,11 +11,11 @@ import WebKit
 
 struct WebContentView: View {
     
-    @ObservedObject var observedDialogContent : DialogUpdatableContent
+    @ObservedObject var observedDialogContent: DialogUpdatableContent
     
-    var url : String //(string: observedDialogContent.args.webcontent.value)
+    var url: String //(string: observedDialogContent.args.webcontent.value)
     
-    init(observedDialogContent : DialogUpdatableContent, url : String) {
+    init(observedDialogContent: DialogUpdatableContent, url: String) {
         self.observedDialogContent = observedDialogContent
         self.url = url
     }

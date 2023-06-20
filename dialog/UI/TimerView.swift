@@ -10,10 +10,10 @@ import Foundation
 
 struct TimerView: View {
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
     
     @State var progress: CGFloat = 0
-    @State var progressWidth : CGFloat
+    @State var progressWidth: CGFloat
     
     let barheight: CGFloat = 16
     var barRadius: CGFloat
@@ -24,7 +24,7 @@ struct TimerView: View {
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect() // tick every 1 second
     
     func numToHHMMSS(seconds: Int) -> String {
-        var returnTime : String = "0"
+        var returnTime: String = "0"
         
         if seconds != 0 {
             let hours = (seconds / 3600) % 3600
@@ -55,7 +55,7 @@ struct TimerView: View {
     
     var barVisible: Bool
     
-    init(progressSteps : CGFloat?, visible : Bool?, observedDialogContent : DialogUpdatableContent) {
+    init(progressSteps: CGFloat?, visible: Bool?, observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
         barRadius = barheight/2 // adjusting this affects "roundness"
         steps = progressSteps ?? 10

@@ -10,11 +10,11 @@ import UniformTypeIdentifiers
 
 struct TextEntryView: View {
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
     
     var fieldwidth: CGFloat = 0
 
-    init(observedDialogContent : DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
         if !observedDialogContent.args.hideIcon.present { //} appArguments.hideIcon.present {
             fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value)
@@ -66,7 +66,7 @@ struct TextEntryView: View {
                                     panel.allowsMultipleSelection = false
                                     panel.canChooseDirectories = false
                                     if observedData.appProperties.textFields[index].fileType != "" {
-                                        var fileTypesArray : [UTType] = []
+                                        var fileTypesArray: [UTType] = []
                                         for type in observedData.appProperties.textFields[index].fileType.components(separatedBy: " ") {
                                             if type == "folder" {
                                                 panel.canChooseDirectories = true
@@ -86,7 +86,7 @@ struct TextEntryView: View {
                                     ZStack() {
                                         SecureField("", text: $observedData.appProperties.textFields[index].value)
                                             .disableAutocorrection(true)
-                                            .textContentType(observedData.appProperties.textFields[index].passwordFill ? .password : .none)
+                                            .textContentType(observedData.appProperties.textFields[index].passwordFill ? .password: .none)
                                         Image(systemName: "lock.fill")
                                             .foregroundColor(stringToColour("#008815")).opacity(0.5)
                                             .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)

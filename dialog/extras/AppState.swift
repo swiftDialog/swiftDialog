@@ -31,26 +31,26 @@ let displayAsDouble: NumberFormatter = {
 }()
 
 struct TextFieldState {
-    var editor          : Bool      = false
-    var fileSelect      : Bool      = false
-    var fileType        : String    = ""
-    var passwordFill    : Bool      = false
-    var prompt          : String    = ""
-    var regex           : String    = ""
-    var regexError      : String    = ""
-    var required        : Bool      = false
-    var secure          : Bool      = false
-    var title           : String
-    var value           : String    = ""
-    var requiredTextfieldHighlight : Color = .clear
+    var editor: Bool       = false
+    var fileSelect: Bool   = false
+    var fileType: String   = ""
+    var passwordFill: Bool = false
+    var prompt: String     = ""
+    var regex: String      = ""
+    var regexError: String = ""
+    var required: Bool     = false
+    var secure: Bool       = false
+    var title: String
+    var value: String      = ""
+    var requiredTextfieldHighlight: Color = .clear
     var dictionary: [String: Any] {
             return ["title": title,
                     "required": required,
                     "secure": secure,
                     "prompt": prompt,
-                    "regex":regex,
-                    "regexerror":regexError,
-                    "value":value
+                    "regex": regex,
+                    "regexerror": regexError,
+                    "value": value
             ]
         }
     var nsDictionary: NSDictionary {
@@ -59,28 +59,28 @@ struct TextFieldState {
 }
 
 struct DropDownItems {
-    var title           : String
-    var values          : [String]
-    var defaultValue    : String
-    var selectedValue   : String = ""
-    var required        : Bool   = false
-    var style           : String = "list"
-    var requiredfieldHighlight : Color = .clear
+    var title: String
+    var values: [String]
+    var defaultValue: String
+    var selectedValue: String = ""
+    var required: Bool   = false
+    var style: String = "list"
+    var requiredfieldHighlight: Color = .clear
 }
 
 struct CheckBoxes {
-    var label           : String
-    var icon            : String = ""
-    var checked         : Bool = false
-    var disabled        : Bool = false
+    var label: String
+    var icon: String = ""
+    var checked: Bool = false
+    var disabled: Bool = false
 }
 
 struct ListItems: Codable {
-    var title           : String
-    var icon            : String = ""
-    var statusText      : String = ""
-    var statusIcon      : String = ""
-    var progress        : CGFloat = 0
+    var title: String
+    var icon: String = ""
+    var statusText: String = ""
+    var statusIcon: String = ""
+    var progress: CGFloat = 0
     var dictionary: [String: Any] {
             return ["title": title,
                     "statustext": statusText,
@@ -93,9 +93,9 @@ struct ListItems: Codable {
 }
 
 struct MainImage {
-    var title           : String = ""
-    var path            : String
-    var caption         : String = ""
+    var title: String = ""
+    var path: String
+    var caption: String = ""
     var dictionary: [String: Any] {
         return ["imagename": "\(path)",
                     "caption": caption]
@@ -108,12 +108,12 @@ struct MainImage {
 struct CommandlineArgument {
     var long: String
     var short: String = ""
-    var value : String = ""
-    var helpShort : String = ""
-    var helpLong : String = ""
-    var helpUsage : String = "<text>"
-    var present : Bool = false
-    var isbool : Bool = false
+    var value: String = ""
+    var helpShort: String = ""
+    var helpLong: String = ""
+    var helpUsage: String = "<text>"
+    var present: Bool = false
+    var isbool: Bool = false
 }
 
 
@@ -124,12 +124,12 @@ struct AppVariables {
     // message default strings
     var titleDefault                    = String("default-title".localized)
     var messageDefault                  = String("default-message".localized)
-    var messageAlignment : TextAlignment = .leading
+    var messageAlignment: TextAlignment = .leading
     var messageAlignmentTextRepresentation = String("left")
-    var allignmentStates : [String: TextAlignment] = ["left" : .leading,
-                                                      "right" : .trailing,
-                                                      "centre" : .center,
-                                                      "center" : .center]
+    var allignmentStates: [String: TextAlignment] = ["left": .leading,
+                                                      "right": .trailing,
+                                                      "centre": .center,
+                                                      "center": .center]
 
     // button default strings
     // work out how to define a default width button that does what you tell it to. in the meantime, diry hack with spaces

@@ -10,7 +10,7 @@ import SwiftUI
 
 struct TitleView: View {
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
     
     var body: some View {
         if observedData.appProperties.titleFontName == "" {

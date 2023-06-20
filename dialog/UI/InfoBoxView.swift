@@ -10,11 +10,11 @@ import MarkdownUI
 
 struct InfoBoxView: View {
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
     
     //var markdownStyle = MarkdownStyle(foregroundColor: .secondary)
     
-    init(observedData : DialogUpdatableContent) {
+    init(observedData: DialogUpdatableContent) {
         self.observedData = observedData
         writeLog("Displaying InfoBox")
     }

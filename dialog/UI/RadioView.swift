@@ -10,14 +10,14 @@
 import SwiftUI
 
 struct RadioView: View {
-    @ObservedObject var observedData : DialogUpdatableContent
-    @State var selectedOption : [String]
+    @ObservedObject var observedData: DialogUpdatableContent
+    @State var selectedOption: [String]
 
     var fieldwidth: CGFloat = 0
     
     var radioCount = 0
     
-    init(observedDialogContent : DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
         
         if !observedDialogContent.args.hideIcon.present {
@@ -26,7 +26,7 @@ struct RadioView: View {
             fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value) - string2float(string: observedDialogContent.args.iconSize.value)
         }
                 
-        var defaultOptions : [String] = []
+        var defaultOptions: [String] = []
         for i in 0..<observedDialogContent.appProperties.dropdownItems.count {
             if observedDialogContent.appProperties.dropdownItems[i].defaultValue.isEmpty && observedDialogContent.appProperties.dropdownItems[i].style == "radio" {
                 observedDialogContent.appProperties.dropdownItems[i].defaultValue = observedDialogContent.appProperties.dropdownItems[i].values[0]

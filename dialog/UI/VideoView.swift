@@ -13,12 +13,12 @@ import WebViewKit
 struct VideoView: View {
     
     @State var player = AVPlayer()
-    var playerURL : URL
-    var autoPlay : Bool
-    var videoCaption : String
-    var embeddedContent : Bool = false
+    var playerURL: URL
+    var autoPlay: Bool
+    var videoCaption: String
+    var embeddedContent: Bool = false
     
-    init(videourl : String = "", autoplay : Bool = false, caption : String = "") {
+    init(videourl: String = "", autoplay: Bool = false, caption: String = "") {
         writeLog("Showing video player for \(videourl). Autoplay is \(autoplay), caption is \(caption)")
         if videourl.contains("youtube") || videourl.contains("vimeo") {
             writeLog("Displaying youtube or vimeo video. embedded content is enabled")

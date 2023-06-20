@@ -13,12 +13,12 @@ struct ImageView: View {
     
     @State var index = 0
     
-    var images : Array = [NSImage]()
-    var captions : Array = [String]()
-    var autoPlaySeconds : CGFloat
+    var images: Array = [NSImage]()
+    var captions: Array = [String]()
+    var autoPlaySeconds: CGFloat
     
     
-    init(imageArray: [MainImage], captionArray: Array<String>, autoPlaySeconds : CGFloat) {
+    init(imageArray: [MainImage], captionArray: Array<String>, autoPlaySeconds: CGFloat) {
         for i in 0..<imageArray.count {
             if imageArray[i].path != "" {
                 images.append(getImageFromPath(fileImagePath: imageArray[i].path, returnErrorImage: true))

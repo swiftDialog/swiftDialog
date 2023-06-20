@@ -8,7 +8,7 @@
 import Foundation
 
 // returns array of multiple option values
-func CLOptionMultiOptions (optionName : String) -> Array<String> {
+func CLOptionMultiOptions (optionName: String) -> Array<String> {
     // return an array that contains of all the --textfield options that are passed in
     var optionsArray: Array = [String]()
     var argIndex = 0
@@ -42,7 +42,7 @@ func CLOptionText(OptionName: CommandlineArgument, DefaultValue: String? = "") -
             if (CLOptionTextValue.starts(with: "-")) {
                 CLOptionTextValue = DefaultValue ?? ""
             } else {
-                CLOptionTextValue = CLOptionTextValue.replacingOccurrences(of:"\\n", with:"\n")
+                CLOptionTextValue = CLOptionTextValue.replacingOccurrences(of: "\\n", with: "\n")
             }
         }
     } else {

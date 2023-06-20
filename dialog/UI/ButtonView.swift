@@ -10,18 +10,18 @@ import SwiftUI
 
 struct ButtonView: View {
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
 
     var button1action: String = ""
     var buttonShellAction: Bool = false
     
-    var defaultExit : Int32 = 0
-    var cancelExit  : Int32 = 2
-    var infoExit    : Int32 = 3
+    var defaultExit: Int32 = 0
+    var cancelExit: Int32 = 2
+    var infoExit: Int32 = 3
     
     let timer = Timer.publish(every: 3.0, on: .main, in: .common).autoconnect() //trigger after 4 seconds
     
-    init(observedDialogContent : DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
         
         if observedDialogContent.args.button1ShellActionOption.present {
@@ -74,9 +74,9 @@ struct ButtonView: View {
 }
 
 struct HelpButton: View {
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
     
-    init(observedDialogContent : DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
     }
     
@@ -122,9 +122,9 @@ struct HelpButtonStyle: ButtonStyle {
 }
 
 struct MoreInfoButton: View {    
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
     
-    init(observedDialogContent : DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
     }
     

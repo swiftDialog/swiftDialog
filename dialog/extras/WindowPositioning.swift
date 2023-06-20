@@ -87,7 +87,7 @@ struct WindowAccessor: NSViewRepresentable {
 }
 
 func calculateWindowYPos(screenHeight: CGFloat, position: NSWindow.Position.Vertical) -> CGFloat {
-    let padding : CGFloat = 16
+    let padding: CGFloat = 16
     switch position {
     case .top: return screenHeight - padding
     case .center:
@@ -98,7 +98,7 @@ func calculateWindowYPos(screenHeight: CGFloat, position: NSWindow.Position.Vert
 }
 
 func calculateWindowXPos(screenWidth: CGFloat, position: NSWindow.Position.Horizontal) -> CGFloat {
-    let padding : CGFloat = 16
+    let padding: CGFloat = 16
     switch position {
     case .left: return padding
     case .center: return screenWidth / 2
@@ -107,10 +107,10 @@ func calculateWindowXPos(screenWidth: CGFloat, position: NSWindow.Position.Horiz
 }
 
 
-func placeWindow(_ window: NSWindow, size : CGSize? = nil) {
+func placeWindow(_ window: NSWindow, size: CGSize? = nil) {
     let main = NSScreen.main!
     let visibleFrame = main.visibleFrame
-    var windowSize : CGSize
+    var windowSize: CGSize
     if size == nil {
         windowSize = window.frame.size
     } else {

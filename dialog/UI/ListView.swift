@@ -25,20 +25,20 @@ struct StatusImage: View {
             .foregroundColor(colour)
             .scaledToFit()
             .frame(width: statusSize, height: statusSize)
-            .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
+            .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
     }
 }
 
 struct ListView: View {
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
     
     var rowHeight: CGFloat
     var rowStatusHeight: CGFloat
     var rowFontSize: CGFloat
     var proportionalListHeight: CGFloat
     
-    init(observedDialogContent : DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
         
         rowHeight = observedDialogContent.appProperties.messageFontSize + 14
@@ -85,27 +85,27 @@ struct ListView: View {
                                         if observedData.listItemsArray[i].statusText != "" {
                                             Text(observedData.listItemsArray[i].statusText)
                                                 .font(.system(size: rowFontSize))
-                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
+                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
                                         }
                                         switch observedData.listItemsArray[i].statusIcon {
-                                        case "progress" :
+                                        case "progress":
                                             ProgressView("", value: observedData.listItemsArray[i].progress, total: 100)
                                                 .progressViewStyle(CirclerPercentageProgressViewStyle())
                                                 .frame(width: rowStatusHeight, height: rowStatusHeight-5)
-                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
-                                        case "wait" :
+                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
+                                        case "wait":
                                             ProgressView()
                                                 .progressViewStyle(.circular)
                                                 .scaleEffect(0.8, anchor: .trailing)
                                                 .frame(height: rowStatusHeight)
-                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration:0.2)))
-                                        case "success" :
+                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
+                                        case "success":
                                             StatusImage(name: "checkmark.circle.fill", colour: .green, size: rowStatusHeight)
-                                        case "fail" :
+                                        case "fail":
                                             StatusImage(name: "xmark.circle.fill", colour: .red, size: rowStatusHeight)
-                                        case "pending" :
+                                        case "pending":
                                             StatusImage(name: "ellipsis.circle.fill", colour: .gray, size: rowStatusHeight)
-                                        case "error" :
+                                        case "error":
                                             StatusImage(name: "exclamationmark.circle.fill", colour: .yellow, size: rowStatusHeight)
                                         default:
                                             EmptyView()
@@ -132,10 +132,10 @@ struct ListView: View {
     }
 }
 
-struct CirclerPercentageProgressViewStyle : ProgressViewStyle {
+struct CirclerPercentageProgressViewStyle: ProgressViewStyle {
     public func makeBody(configuration: LinearProgressViewStyle.Configuration) -> some View {
-        let stroke : CGFloat = 5
-        let padding : CGFloat = stroke / 2
+        let stroke: CGFloat = 5
+        let padding: CGFloat = stroke / 2
         VStack() {
             ZStack {
                 Circle()

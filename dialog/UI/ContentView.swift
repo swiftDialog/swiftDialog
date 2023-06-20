@@ -12,11 +12,11 @@ struct ContentView: View {
 
     var titlePadding       = CGFloat(10)
     var waterMarkFill          = String("")
-    var progressSteps : CGFloat = appvars.timerDefaultSeconds
+    var progressSteps: CGFloat = appvars.timerDefaultSeconds
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
     
-    init (observedDialogContent : DialogUpdatableContent) {
+    init (observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
         if observedDialogContent.args.timerBar.present {
             progressSteps = string2float(string: observedDialogContent.args.timerBar.value)
@@ -100,7 +100,7 @@ struct ContentView: View {
                         }
                     }
                     if observedData.args.timerBar.present {
-                        TimerView(progressSteps: progressSteps, visible: !observedData.args.hideTimerBar.present, observedDialogContent : observedData)
+                        TimerView(progressSteps: progressSteps, visible: !observedData.args.hideTimerBar.present, observedDialogContent: observedData)
                             .frame(alignment: .bottom)
                     }
                     if (observedData.args.timerBar.present && observedData.args.button1TextOption.present) || !observedData.args.timerBar.present || observedData.args.hideTimerBar.present {

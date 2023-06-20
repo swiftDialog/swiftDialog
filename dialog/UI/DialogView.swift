@@ -12,11 +12,11 @@ import AppKit
 
 struct DialogView: View {
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
     
-    var iconDisplayWidth : CGFloat
+    var iconDisplayWidth: CGFloat
     
-    init(observedDialogContent : DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent) {
         if !observedDialogContent.args.iconOption.present { //} appvars.iconIsHidden {
             writeLog("Icon is hidden")
             iconDisplayWidth = 0

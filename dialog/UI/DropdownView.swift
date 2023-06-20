@@ -12,14 +12,14 @@ import Combine
 
 struct DropdownView: View {
     
-    @ObservedObject var observedData : DialogUpdatableContent
-    @State var selectedOption : [String]
+    @ObservedObject var observedData: DialogUpdatableContent
+    @State var selectedOption: [String]
 
     var fieldwidth: CGFloat = 0
     
     var dropdownCount = 0
     
-    init(observedDialogContent : DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
         
         if !observedDialogContent.args.hideIcon.present {
@@ -28,7 +28,7 @@ struct DropdownView: View {
             fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value) - string2float(string: observedDialogContent.args.iconSize.value)
         }
                 
-        var defaultOptions : [String] = []
+        var defaultOptions: [String] = []
         for i in 0..<observedDialogContent.appProperties.dropdownItems.count {
             defaultOptions.append(observedDialogContent.appProperties.dropdownItems[i].defaultValue)
             if observedDialogContent.appProperties.dropdownItems[i].style != "radio" {

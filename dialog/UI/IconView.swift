@@ -14,7 +14,7 @@ struct IconView: View {
     
     var messageUserImagePath: String
     
-    var iconOverlay : String
+    var iconOverlay: String
     var logoWidth: CGFloat = appvars.iconWidth
     var logoHeight: CGFloat  = appvars.iconHeight
     var imgFromURL: Bool = false
@@ -29,7 +29,7 @@ struct IconView: View {
     var builtInIconPresent: Bool = false
     var builtInIconWeight = Font.Weight.thin
     
-    var framePadding : CGFloat = 0
+    var framePadding: CGFloat = 0
     
     var iconRenderingMode = Image.TemplateRenderingMode.original
     
@@ -52,7 +52,7 @@ struct IconView: View {
     var overlayImageBackground: Bool = false
     
   
-    init(image : String = "", overlay : String = "", alpha : Double = 1.0) {
+    init(image: String = "", overlay: String = "", alpha: Double = 1.0) {
         writeLog("Displaying icon image \(image), alpha \(alpha)")
         if !overlay.isEmpty {
             writeLog("With overlay \(overlay)")
@@ -123,8 +123,8 @@ struct IconView: View {
             var SFValues = messageUserImagePath.split(usingRegex: appvars.argRegex)
             SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
             
-            var SFArg : String = ""
-            var SFArgValue : String = ""
+            var SFArg: String = ""
+            var SFArgValue: String = ""
                 
             if SFValues.count > 0 {
                 for index in 0...SFValues.count-1 {
@@ -317,7 +317,7 @@ struct IconView: View {
                             .foregroundColor(sfBackgroundIconColour)
                             .font(Font.title.weight(Font.Weight.thin))
                             .opacity(0.90)
-                            .shadow(color: .secondaryBackground.opacity(0.50), radius: 4, x:2, y:2) // gives the sf background some pop especially in dark mode
+                            .shadow(color: .secondaryBackground.opacity(0.50), radius: 4, x: 2, y: 2) // gives the sf background some pop especially in dark mode
                             .aspectRatio(1, contentMode: .fit)
                     }
                     

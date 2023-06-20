@@ -99,7 +99,7 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
         }
     }
   
-    let image : NSImage = NSImage(data: imageData as Data) ?? errorImage
+    let image: NSImage = NSImage(data: imageData as Data) ?? errorImage
     
     if let rep = NSImage(data: imageData as Data)?
         .bestRepresentation(for: NSRect(x: 0, y: 0, width: imgWidth!, height: imgHeight!), context: nil, hints: nil) {
@@ -239,7 +239,7 @@ func getVersionString() -> String {
     return appVersion
 }
 
-func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : DialogUpdatableContent? = nil) {
+func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: DialogUpdatableContent? = nil) {
     writeLog("About to quit with exit code \(exitCode)")
     if exitMessage != "" {
         print("\(exitMessage!)")
@@ -257,7 +257,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
         var json = JSON()
         
         //build output array
-        var outputArray : Array = [String]()
+        var outputArray: Array = [String]()
         var dontQuit = false
         var requiredString = ""
         
@@ -327,7 +327,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
                 } else {
                     outputArray.append("\"\(dropdownItemTitle)\" : \"\(dropdownItemSelectedValue)\"")
                     outputArray.append("\"\(dropdownItemTitle)\" index : \"\(dropdownItemValues.firstIndex(of: dropdownItemSelectedValue) ?? -1)\"")
-                    json[dropdownItemTitle] = ["selectedValue" : dropdownItemSelectedValue, "selectedIndex" : dropdownItemValues.firstIndex(of: dropdownItemSelectedValue) ?? -1]
+                    json[dropdownItemTitle] = ["selectedValue": dropdownItemSelectedValue, "selectedIndex": dropdownItemValues.firstIndex(of: dropdownItemSelectedValue) ?? -1]
                 }
             }
         }
@@ -360,7 +360,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject : Dia
 
 func isValidColourHex(_ hexvalue: String) -> Bool {
     let hexRegEx = "^#([a-fA-F0-9]{6})$"
-    let hexPred = NSPredicate(format:"SELF MATCHES %@", hexRegEx)
+    let hexPred = NSPredicate(format: "SELF MATCHES %@", hexRegEx)
     return hexPred.evaluate(with: hexvalue)
 }
 
@@ -466,11 +466,11 @@ func colourToString(color: Color) -> String {
     return hexString
  }
 
-func plistFromData(_ data: Data) throws -> [String:Any] {
+func plistFromData(_ data: Data) throws -> [String: Any] {
     try PropertyListSerialization.propertyList(
         from: data,
         format: nil
-    ) as! [String:Any]
+    ) as! [String: Any]
 }
 
 func isDNDEnabled() -> Bool {
@@ -488,7 +488,7 @@ func isDNDEnabled() -> Bool {
         let dndPrefsData = prefsList["dnd_prefs"] as! Data
         let dndPrefsList = try plistFromData(dndPrefsData)
         
-        if let userPref = dndPrefsList["userPref"] as? [String:Any] {
+        if let userPref = dndPrefsList["userPref"] as? [String: Any] {
             return userPref["enabled"] as! Bool
         }
     } catch {
@@ -498,7 +498,7 @@ func isDNDEnabled() -> Bool {
 }
 
 
-func savePNG(image: NSImage, path:String) {
+func savePNG(image: NSImage, path: String) {
     // from https://gist.github.com/WilliamD47/e0a2a02b5e32018139a47f5e53ff3bb4
     let imageRep = NSBitmapImageRep(data: image.tiffRepresentation!)
     let pngData = imageRep?.representation(using: .png, properties: [:])

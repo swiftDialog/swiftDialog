@@ -42,7 +42,7 @@ struct dialogApp: App {
     
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
     
     @State private var cancellables = Set<AnyCancellable>()
     

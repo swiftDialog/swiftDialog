@@ -8,7 +8,7 @@
 //import Foundation
 
 struct SDHelp {
-    var argument : CommandLineArguments
+    var argument: CommandLineArguments
     
     public func printHelpShort() {
         writeLog("Printing short help")

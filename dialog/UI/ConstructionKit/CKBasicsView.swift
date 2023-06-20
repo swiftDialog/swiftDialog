@@ -9,11 +9,11 @@ import SwiftUI
 
 struct CKBasicsView: View {
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
     
     let alignmentArray = ["left", "centre", "right"]
     
-    init(observedDialogContent : DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
     }
     

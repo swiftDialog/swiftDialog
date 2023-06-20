@@ -55,7 +55,7 @@ func getJSON() -> JSON {
     return json
 }
 
-func getMarkdown(mdFilePath : String) -> String {
+func getMarkdown(mdFilePath: String) -> String {
     //let fileURL = URL(fileURLWithPath: mdFilePath)
     var urlPath = NSURL(string: "")!
     
@@ -76,7 +76,7 @@ func getMarkdown(mdFilePath : String) -> String {
     
 }
 
-func processCLOptions(json : JSON = getJSON()) {
+func processCLOptions(json: JSON = getJSON()) {
 
     //this method goes through the arguments that are present and performs any processing required before use
     writeLog("Processing Options")
@@ -124,9 +124,9 @@ func processCLOptions(json : JSON = getJSON()) {
 
             for i in 0..<(dropdownValues.count) {
                 let labelItems = dropdownLabels[i].components(separatedBy: ",")
-                var dropdownRequired : Bool = false
-                var dropdownStyle : String = "list"
-                let dropdownTitle : String = labelItems[0]
+                var dropdownRequired: Bool = false
+                var dropdownStyle: String = "list"
+                let dropdownTitle: String = labelItems[0]
                 if labelItems.count > 1 {
                     if labelItems[1] == "required" {
                         dropdownRequired = true
@@ -171,17 +171,17 @@ func processCLOptions(json : JSON = getJSON()) {
         } else {
             for textFieldOption in CLOptionMultiOptions(optionName: appArguments.textField.long) {
                 let items = textFieldOption.split(usingRegex: appvars.argRegex)
-                var fieldEditor : Bool = false
-                var fieldFileSelect : Bool = false
-                var fieldPasswordFill : Bool = false
-                var fieldPrompt : String = ""
-                var fieldRegex : String = ""
-                var fieldRegexError : String = ""
-                var fieldRequire : Bool = false
-                var fieldSecure : Bool = false
-                var fieldSelectType : String = ""
-                var fieldTitle : String = ""
-                var fieldValue : String = ""
+                var fieldEditor: Bool = false
+                var fieldFileSelect: Bool = false
+                var fieldPasswordFill: Bool = false
+                var fieldPrompt: String = ""
+                var fieldRegex: String = ""
+                var fieldRegexError: String = ""
+                var fieldRequire: Bool = false
+                var fieldSecure: Bool = false
+                var fieldSelectType: String = ""
+                var fieldTitle: String = ""
+                var fieldValue: String = ""
                 if items.count > 0 {
                     fieldTitle = items[0]
                     if items.count > 1 {
@@ -252,10 +252,10 @@ func processCLOptions(json : JSON = getJSON()) {
         } else {
             for checkboxes in CLOptionMultiOptions(optionName: appArguments.checkbox.long) {
                 let items = checkboxes.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-                var label : String = ""
-                var icon : String = ""
-                var checked : Bool = false
-                var disabled : Bool = false
+                var label: String = ""
+                var icon: String = ""
+                var checked: Bool = false
+                var disabled: Bool = false
                 for item in items {
                     var itemKeyValuePair = item.split(separator: "=", maxSplits: 1)
                     for _ in itemKeyValuePair.count...2 {
@@ -363,10 +363,10 @@ func processCLOptions(json : JSON = getJSON()) {
             
             for listItem in CLOptionMultiOptions(optionName: appArguments.listItem.long) {
                 let items = listItem.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-                var title : String = ""
-                var icon : String = ""
-                var statusText : String = ""
-                var statusIcon : String = ""
+                var title: String = ""
+                var icon: String = ""
+                var statusText: String = ""
+                var statusIcon: String = ""
                 for item in items {
                     var itemKeyValuePair = item.split(separator: "=", maxSplits: 1)
                     for _ in itemKeyValuePair.count...2 {
@@ -671,7 +671,7 @@ func processCLOptionValues() {
     // this method reads in arguments from either json file or from the command line and loads them into the appArguments object
     // also records whether an argument is present or not
     writeLog("Checking command line options for arguments")
-    let json : JSON = getJSON()
+    let json: JSON = getJSON()
     
     appArguments.titleOption.value             = json[appArguments.titleOption.long].string ?? CLOptionText(OptionName: appArguments.titleOption, DefaultValue: appvars.titleDefault)
     appArguments.titleOption.present           = json[appArguments.titleOption.long].exists() || CLOptionPresent(OptionName: appArguments.titleOption)

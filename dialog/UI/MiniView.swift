@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MiniProgressView: View {
     
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
     
     var body: some View {
         if appArguments.progressBar.present {
@@ -24,9 +24,9 @@ struct MiniProgressView: View {
 }
 
 struct MiniView: View {
-    @ObservedObject var observedData : DialogUpdatableContent
+    @ObservedObject var observedData: DialogUpdatableContent
     
-    init(observedDialogContent : DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
         
         // capture command+quitKey for quit
