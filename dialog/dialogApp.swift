@@ -99,11 +99,11 @@ struct dialogApp: App {
                         
         appvars.overlayShadow = 1
                 
-        appvars.titleHeight = appvars.titleHeight * appvars.scaleFactor
-        appvars.windowWidth = appvars.windowWidth * appvars.scaleFactor
-        appvars.windowHeight = appvars.windowHeight * appvars.scaleFactor
-        appvars.iconWidth = appvars.iconWidth * appvars.scaleFactor
-        appvars.iconHeight = appvars.iconHeight * appvars.scaleFactor
+        appvars.titleHeight *= appvars.scaleFactor
+        appvars.windowWidth *= appvars.scaleFactor
+        appvars.windowHeight *= appvars.scaleFactor
+        appvars.iconWidth *= appvars.scaleFactor
+        appvars.iconHeight *= appvars.scaleFactor
         
         if appArguments.miniMode.present {
             appvars.windowWidth = 540

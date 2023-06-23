@@ -49,9 +49,9 @@ struct ListView: View {
         if appArguments.listStyle.present {
             switch appArguments.listStyle.value {
             case "expanded":
-                rowHeight = rowHeight + 15
+                rowHeight += 15
             case "compact":
-                rowHeight = rowHeight - 10
+                rowHeight -= 10
             //case "proportional":
             //    rowHeight = 0
             //    proportionalListHeight = 1
