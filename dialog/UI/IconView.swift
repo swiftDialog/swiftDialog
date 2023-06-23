@@ -165,14 +165,14 @@ struct IconView: View {
                         if paletteColours.count > 1 {
                             sfPalettePresent = true
                         }
-                        for i in 0...paletteColours.count-1 {
-                            switch i {
+                        for index in 0...paletteColours.count-1 {
+                            switch index {
                             case 0:
-                                builtInIconColour = stringToColour(paletteColours[i])
+                                builtInIconColour = stringToColour(paletteColours[index])
                             case 1:
-                                builtInIconSecondaryColour = stringToColour(paletteColours[i])
+                                builtInIconSecondaryColour = stringToColour(paletteColours[index])
                             case 2:
-                                builtInIconTertiaryColour = stringToColour(paletteColours[i])
+                                builtInIconTertiaryColour = stringToColour(paletteColours[index])
                             default: ()
                             }
                         }

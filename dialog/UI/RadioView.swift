@@ -27,13 +27,13 @@ struct RadioView: View {
         }
                 
         var defaultOptions: [String] = []
-        for i in 0..<observedDialogContent.appProperties.dropdownItems.count {
-            if observedDialogContent.appProperties.dropdownItems[i].defaultValue.isEmpty && observedDialogContent.appProperties.dropdownItems[i].style == "radio" {
-                observedDialogContent.appProperties.dropdownItems[i].defaultValue = observedDialogContent.appProperties.dropdownItems[i].values[0]
-                observedDialogContent.appProperties.dropdownItems[i].selectedValue = observedDialogContent.appProperties.dropdownItems[i].values[0]
+        for index in 0..<observedDialogContent.appProperties.dropdownItems.count {
+            if observedDialogContent.appProperties.dropdownItems[index].defaultValue.isEmpty && observedDialogContent.appProperties.dropdownItems[index].style == "radio" {
+                observedDialogContent.appProperties.dropdownItems[index].defaultValue = observedDialogContent.appProperties.dropdownItems[index].values[0]
+                observedDialogContent.appProperties.dropdownItems[index].selectedValue = observedDialogContent.appProperties.dropdownItems[index].values[0]
             }
-            defaultOptions.append(observedDialogContent.appProperties.dropdownItems[i].defaultValue)
-            if observedDialogContent.appProperties.dropdownItems[i].style == "radio" {
+            defaultOptions.append(observedDialogContent.appProperties.dropdownItems[index].defaultValue)
+            if observedDialogContent.appProperties.dropdownItems[index].style == "radio" {
                 radioCount+=1
             }
         }

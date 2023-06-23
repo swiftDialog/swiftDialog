@@ -266,18 +266,18 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
             // check to see if fields marked as required have content before allowing the app to exit
             // if there is an empty field, update the highlight colour
             
-            for i in 0..<(observedObject?.appProperties.textFields.count ?? 0) {
+            for index in 0..<(observedObject?.appProperties.textFields.count ?? 0) {
                 //check for required fields
-                let textField = observedObject?.appProperties.textFields[i]
+                let textField = observedObject?.appProperties.textFields[index]
                 let textfieldValue = textField?.value ?? ""
                 let textfieldTitle = textField?.title ?? ""
                 let textfieldRequired = textField?.required ?? false
-                observedObject?.appProperties.textFields[i].requiredTextfieldHighlight = Color.clear
+                observedObject?.appProperties.textFields[index].requiredTextfieldHighlight = Color.clear
                 
-                if textfieldRequired && textfieldValue == "" { // && textFields[i].regex.isEmpty {
+                if textfieldRequired && textfieldValue == "" { // && textFields[index].regex.isEmpty {
                     NSSound.beep()
                     requiredString += "• \"\(textfieldTitle)\" \("is-required".localized) \n"
-                    observedObject?.appProperties.textFields[i].requiredTextfieldHighlight = Color.red
+                    observedObject?.appProperties.textFields[index].requiredTextfieldHighlight = Color.red
                     dontQuit = true
                     writeLog("Required text field \(textfieldTitle) has no value")
                 
@@ -286,7 +286,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                             && !(textField?.regex.isEmpty ?? false)
                             && !checkRegexPattern(regexPattern: textField?.regex ?? "", textToValidate: textfieldValue) {
                     NSSound.beep()
-                    observedObject?.appProperties.textFields[i].requiredTextfieldHighlight = Color.green
+                    observedObject?.appProperties.textFields[index].requiredTextfieldHighlight = Color.green
                     requiredString += "• "+(textField?.regexError ?? "Regex Check Failed  \n")
                     dontQuit = true
                     writeLog("Textfield \(textfieldTitle) value \(textfieldValue) does not meet regex requirements \(String(describing: textField?.regex))")
@@ -310,18 +310,18 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
             }
             // check to see if fields marked as required have content before allowing the app to exit
             // if there is an empty field, update the highlight colour
-            for i in 0..<(observedObject?.appProperties.dropdownItems.count ?? 0) {
-                let dropdownItem = observedObject?.appProperties.dropdownItems[i]
+            for index in 0..<(observedObject?.appProperties.dropdownItems.count ?? 0) {
+                let dropdownItem = observedObject?.appProperties.dropdownItems[index]
                 let dropdownItemValues = dropdownItem?.values ?? [""]
                 let dropdownItemSelectedValue = dropdownItem?.selectedValue ?? ""
                 let dropdownItemTitle = dropdownItem?.title ?? ""
                 let dropdownItemRequired = dropdownItem?.required ?? false
-                observedObject?.appProperties.dropdownItems[i].requiredfieldHighlight = Color.clear
+                observedObject?.appProperties.dropdownItems[index].requiredfieldHighlight = Color.clear
                 
                 if dropdownItemRequired && dropdownItemSelectedValue == "" {
                     NSSound.beep()
                     requiredString += "• \"\(dropdownItemTitle)\" \("is-required".localized) \n"
-                    observedObject?.appProperties.dropdownItems[i].requiredfieldHighlight = Color.red
+                    observedObject?.appProperties.dropdownItems[index].requiredfieldHighlight = Color.red
                     dontQuit = true
                     writeLog("Required select item \(dropdownItemTitle) has no value")
                 } else {
@@ -340,9 +340,9 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
         }
         
         if observedObject?.args.checkbox.present != nil {
-            for i in 0..<(observedObject?.appProperties.checkboxArray.count ?? 0) {
-                outputArray.append("\"\(observedObject?.appProperties.checkboxArray[i].label ?? "checkbox \(i)")\" : \"\(observedObject?.appProperties.checkboxArray[i].checked ?? false)\"")
-                json[observedObject?.appProperties.checkboxArray[i].label ?? 0].boolValue = observedObject?.appProperties.checkboxArray[i].checked ?? false
+            for index in 0..<(observedObject?.appProperties.checkboxArray.count ?? 0) {
+                outputArray.append("\"\(observedObject?.appProperties.checkboxArray[index].label ?? "checkbox \(index)")\" : \"\(observedObject?.appProperties.checkboxArray[index].checked ?? false)\"")
+                json[observedObject?.appProperties.checkboxArray[index].label ?? 0].boolValue = observedObject?.appProperties.checkboxArray[index].checked ?? false
             }
         }
                  
@@ -350,8 +350,8 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
         if observedObject?.args.jsonOutPut.present ?? false { //} appvars.jsonOut {
             print(json)
         } else {
-            for i in 0..<outputArray.count {
-                print(outputArray[i])
+            for index in 0..<outputArray.count {
+                print(outputArray[index])
             }
         }
     }
@@ -458,11 +458,11 @@ func stringToColour(_ colourValue: String) -> Color {
 
 func colourToString(color: Color) -> String {
     let components = color.cgColor?.components
-    let r: CGFloat = components?[0] ?? 0.0
-    let g: CGFloat = components?[1] ?? 0.0
-    let b: CGFloat = components?[2] ?? 0.0
+    let red: CGFloat = components?[0] ?? 0.0
+    let green: CGFloat = components?[1] ?? 0.0
+    let blue: CGFloat = components?[2] ?? 0.0
 
-    let hexString = String.init(format: "#%02lX%02lX%02lX", lroundf(Float(r * 255)), lroundf(Float(g * 255)), lroundf(Float(b * 255)))
+    let hexString = String.init(format: "#%02lX%02lX%02lX", lroundf(Float(red * 255)), lroundf(Float(green * 255)), lroundf(Float(blue * 255)))
     return hexString
  }
 

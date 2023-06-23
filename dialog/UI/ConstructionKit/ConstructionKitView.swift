@@ -54,8 +54,8 @@ struct JSONView: View {
         observedDialogContent.args.windowWidth.value = "\(observedDialogContent.windowWidth)"
         observedDialogContent.args.windowHeight.value = "\(observedDialogContent.windowHeight)"
         
-        let mirrored_appArguments = Mirror(reflecting: observedDialogContent.args)
-        for (_, attr) in mirrored_appArguments.children.enumerated() {
+        let mirroredAppArguments = Mirror(reflecting: observedDialogContent.args)
+        for (_, attr) in mirroredAppArguments.children.enumerated() {
             if let propertyValue = attr.value as? CommandlineArgument {
                 if propertyValue.present { //}&& propertyValue.value != "" {
                     if propertyValue.value != "" {
@@ -71,19 +71,19 @@ struct JSONView: View {
 
         if observedDialogContent.listItemsArray.count > 0 {
             json[appArguments.listItem.long].arrayObject = Array(repeating: 0, count: observedDialogContent.listItemsArray.count)
-            for i in 0..<observedDialogContent.listItemsArray.count {
-                if observedDialogContent.listItemsArray[i].title.isEmpty {
-                    observedDialogContent.listItemsArray[i].title = "Item \(i)"
+            for index in 0..<observedDialogContent.listItemsArray.count {
+                if observedDialogContent.listItemsArray[index].title.isEmpty {
+                    observedDialogContent.listItemsArray[index].title = "Item \(index)"
                 }
                 // print(observedDialogContent.listItemsArray[i].dictionary)
-                json[appArguments.listItem.long][i].dictionaryObject = observedDialogContent.listItemsArray[i].dictionary
+                json[appArguments.listItem.long][index].dictionaryObject = observedDialogContent.listItemsArray[index].dictionary
             }
         }
 
         if observedDialogContent.imageArray.count > 0 {
             json[appArguments.mainImage.long].arrayObject = Array(repeating: 0, count: observedDialogContent.imageArray.count)
-            for i in 0..<observedDialogContent.imageArray.count {
-                json[appArguments.mainImage.long][i].dictionaryObject = observedDialogContent.imageArray[i].dictionary
+            for index in 0..<observedDialogContent.imageArray.count {
+                json[appArguments.mainImage.long][index].dictionaryObject = observedDialogContent.imageArray[index].dictionary
             }
         }
         

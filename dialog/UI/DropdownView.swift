@@ -29,16 +29,16 @@ struct DropdownView: View {
         }
                 
         var defaultOptions: [String] = []
-        for i in 0..<observedDialogContent.appProperties.dropdownItems.count {
-            defaultOptions.append(observedDialogContent.appProperties.dropdownItems[i].defaultValue)
-            if observedDialogContent.appProperties.dropdownItems[i].style != "radio" {
+        for index in 0..<observedDialogContent.appProperties.dropdownItems.count {
+            defaultOptions.append(observedDialogContent.appProperties.dropdownItems[index].defaultValue)
+            if observedDialogContent.appProperties.dropdownItems[index].style != "radio" {
                 dropdownCount+=1
             }
-            for j in 0..<observedDialogContent.appProperties.dropdownItems[i].values.count {
-                let selectValue = observedDialogContent.appProperties.dropdownItems[i].values[j]
+            for subIndex in 0..<observedDialogContent.appProperties.dropdownItems[index].values.count {
+                let selectValue = observedDialogContent.appProperties.dropdownItems[index].values[subIndex]
                 if selectValue.hasPrefix("---") && !selectValue.hasSuffix("<") {
                     // We need to modify each `---` entry so it is unique and doesn't cause errors when building the menu
-                    observedDialogContent.appProperties.dropdownItems[i].values[j].append(String(repeating: "-", count: j).appending("<"))
+                    observedDialogContent.appProperties.dropdownItems[index].values[subIndex].append(String(repeating: "-", count: subIndex).appending("<"))
                 }
             }
         }

@@ -318,9 +318,9 @@ class FileReader {
                         let action = command.components(separatedBy: ": ")
                         switch action[0].lowercased().trimmingCharacters(in: .whitespaces) {
                             case "index":
-                                if let i = Int(action[1].trimmingCharacters(in: .whitespaces)) {
-                                    if i >= 0 && i < observedData.listItemsArray.count {
-                                        title = observedData.listItemsArray[i].title
+                                if let index = Int(action[1].trimmingCharacters(in: .whitespaces)) {
+                                    if index >= 0 && index < observedData.listItemsArray.count {
+                                        title = observedData.listItemsArray[index].title
                                     }
                                 }
                             case "title":
@@ -497,9 +497,9 @@ class DialogUpdatableContent: ObservableObject {
         
         // start the background process to monotor the command file
         if let url = URL(string: path) {
-            let fr = FileReader(observedData: self, fileURL: url)
+            let reader = FileReader(observedData: self, fileURL: url)
             do {
-                try fr.monitorFile()
+                try reader.monitorFile()
             } catch {
                 print("Error: \(error.localizedDescription)")
             }
@@ -508,10 +508,10 @@ class DialogUpdatableContent: ObservableObject {
     }
     
     func createCommandFile(commandFilePath: String) {
-        let fm = FileManager()
+        let manager = FileManager()
         
         // check to make sure the file exists
-        if fm.fileExists(atPath: commandFilePath) {
+        if manager.fileExists(atPath: commandFilePath) {
                                     writeLog("Existing file at \(commandFilePath). Cleaning")
             let text = ""
             do {
@@ -522,7 +522,7 @@ class DialogUpdatableContent: ObservableObject {
             }
         } else {
                                     writeLog("Creating file at \(commandFilePath)")
-            fm.createFile(atPath: path, contents: nil, attributes: commandFilePermissions)
+            manager.createFile(atPath: path, contents: nil, attributes: commandFilePermissions)
         }
     }
             
@@ -531,11 +531,11 @@ class DialogUpdatableContent: ObservableObject {
     func killCommandFile() {
         // delete the command file
         
-        let fs = FileManager.init()
+        let manager = FileManager.init()
         
-        if fs.isDeletableFile(atPath: path) {
+        if manager.isDeletableFile(atPath: path) {
             do {
-                try fs.removeItem(atPath: path)
+                try manager.removeItem(atPath: path)
                 //NSLog("Deleted Dialog command file")
             } catch {
                                         writeLog("Unable to delete command file")

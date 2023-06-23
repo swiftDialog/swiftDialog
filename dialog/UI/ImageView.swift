@@ -19,9 +19,9 @@ struct ImageView: View {
     
     
     init(imageArray: [MainImage], captionArray: Array<String>, autoPlaySeconds: CGFloat) {
-        for i in 0..<imageArray.count where imageArray[i].path != "" {
-            images.append(getImageFromPath(fileImagePath: imageArray[i].path, returnErrorImage: true))
-            captions.append(imageArray[i].caption)
+        for index in 0..<imageArray.count where imageArray[index].path != "" {
+            images.append(getImageFromPath(fileImagePath: imageArray[index].path, returnErrorImage: true))
+            captions.append(imageArray[index].caption)
         }
         
         self.autoPlaySeconds = autoPlaySeconds
