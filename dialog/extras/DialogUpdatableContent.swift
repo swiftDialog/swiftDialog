@@ -87,12 +87,18 @@ class FileReader {
             switch command {
             
             case "width:":
-                observedData.windowWidth = NumberFormatter().number(from: line.replacingOccurrences(of: "width: ", with: "")) as! CGFloat
-                placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.windowWidth, height: observedData.windowHeight+28))
+                let tempWidth = line.replacingOccurrences(of: "width: ", with: "")
+                if tempWidth.isNumeric {
+                    observedData.windowWidth = CGFloat((tempWidth as NSString).floatValue)
+                    placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.windowWidth, height: observedData.windowHeight+28))
+                }
                 
             case "height:":
-                observedData.windowHeight = NumberFormatter().number(from: line.replacingOccurrences(of: "height: ", with: "")) as! CGFloat
-                placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.windowWidth, height: observedData.windowHeight+28))
+                let tempHeight = line.replacingOccurrences(of: "height: ", with: "")
+                if tempHeight.isNumeric {
+                    observedData.windowHeight = CGFloat((tempHeight as NSString).floatValue)
+                    placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.windowWidth, height: observedData.windowHeight+28))
+                }
             
             // Title
             case "\(observedData.args.titleOption.long):":
