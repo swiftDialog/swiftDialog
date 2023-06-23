@@ -84,7 +84,7 @@ struct HelpButton: View {
         if observedData.args.helpMessage.present {
             Button(action: {
                 observedData.appProperties.showHelpMessage.toggle()
-            }) {
+            }, label: {
                 ZStack {
                     Circle()
                         .foregroundColor(.white)
@@ -96,7 +96,7 @@ struct HelpButton: View {
                         .foregroundColor(.accentColor)
                 }
                 .frame(width: 22, height: 22)
-            }
+            })
             .buttonStyle(HelpButtonStyle())
             .sheet(isPresented: $observedData.appProperties.showHelpMessage) {
                 HelpView(observedContent: observedData)

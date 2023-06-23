@@ -36,9 +36,9 @@ struct ErrorView: View {
             Button(action: {
                 observedData.showSheet = false
                 observedData.sheetErrorMessage = ""
-            }) {
+            }, label: {
                 Text("button-ok".localized)
-            }
+            })
             .padding(observedData.appProperties.sidePadding)
         }
         .frame(width: 400, height: 350)

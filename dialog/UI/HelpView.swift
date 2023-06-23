@@ -35,9 +35,9 @@ struct HelpView: View {
             Spacer()
             Button(action: {
                 observedData.appProperties.showHelpMessage = false
-            }) {
+            }, label: {
                 Text("button-ok".localized)
-            }
+            })
             .padding(observedData.appProperties.sidePadding)
             .keyboardShortcut(.defaultAction)
         }
