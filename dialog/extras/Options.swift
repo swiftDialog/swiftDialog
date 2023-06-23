@@ -30,7 +30,7 @@ func CLOptionText(OptionName: CommandlineArgument, DefaultValue: String? = "") -
     if let commandIndex = [CommandLine.arguments.firstIndex(of: "--\(OptionName.long)"), CommandLine.arguments.firstIndex(of: "-\(OptionName.short)")].compactMap({$0}).first {
         // Get next index and ensure it's not out of bounds.
         
-        if (commandIndex == CommandLine.arguments.count-1) {
+        if commandIndex == CommandLine.arguments.count-1 {
             // the command being passed in is the last item so just return the default value
             CLOptionTextValue = DefaultValue ?? ""
         }
@@ -39,7 +39,7 @@ func CLOptionText(OptionName: CommandlineArgument, DefaultValue: String? = "") -
         if valueIndex >= CommandLine.arguments.startIndex
             && valueIndex < CommandLine.arguments.endIndex {
             CLOptionTextValue = CommandLine.arguments[valueIndex]
-            if (CLOptionTextValue.starts(with: "-")) {
+            if CLOptionTextValue.starts(with: "-") {
                 CLOptionTextValue = DefaultValue ?? ""
             } else {
                 CLOptionTextValue = CLOptionTextValue.replacingOccurrences(of: "\\n", with: "\n")

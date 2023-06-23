@@ -196,7 +196,7 @@ func checkRegexPattern(regexPattern: String, textToValidate: String) -> Bool {
 
 func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQuit: Bool = true, observedObject: DialogUpdatableContent) {
     writeLog("processing button action \(action)")
-    if (action != "") {
+    if action != "" {
         if executeShell {
             print(shell(action))
         } else {
@@ -297,7 +297,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
             }
         }
         
-        if ((observedObject?.args.dropdownValues.present) != nil) {
+        if observedObject?.args.dropdownValues.present != nil {
             writeLog("Select items present - checking require,ments are met")
             if observedObject?.appProperties.dropdownItems.count == 1 {
                 let selectedValue = observedObject?.appProperties.dropdownItems[0].selectedValue
@@ -339,7 +339,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
             return
         }
         
-        if ((observedObject?.args.checkbox.present) != nil) {
+        if observedObject?.args.checkbox.present != nil {
             for i in 0..<(observedObject?.appProperties.checkboxArray.count ?? 0) {
                 outputArray.append("\"\(observedObject?.appProperties.checkboxArray[i].label ?? "checkbox \(i)")\" : \"\(observedObject?.appProperties.checkboxArray[i].checked ?? false)\"")
                 json[observedObject?.appProperties.checkboxArray[i].label ?? 0].boolValue = observedObject?.appProperties.checkboxArray[i].checked ?? false

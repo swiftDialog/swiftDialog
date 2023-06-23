@@ -396,7 +396,7 @@ func processCLOptions(json: JSON = getJSON()) {
     }
 
     // process command line options that just display info and exit before we show the main window
-    if (appArguments.helpOption.present || CommandLine.arguments.count == 1) {
+    if appArguments.helpOption.present || CommandLine.arguments.count == 1 {
         writeLog("\(appArguments.helpOption.long) present")
         let sdHelp = SDHelp(arguments: appArguments)
         if appArguments.helpOption.value != "" {

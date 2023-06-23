@@ -33,7 +33,7 @@ struct DialogView: View {
                 VideoView(videourl: observedData.args.video.value, autoplay: observedData.args.autoPlay.present, caption: observedData.args.videoCaption.value)
             } else {
                 HStack {
-                    if (observedData.args.iconOption.present && !observedData.args.centreIcon.present && observedData.args.iconOption.value != "none") {
+                    if observedData.args.iconOption.present && !observedData.args.centreIcon.present && observedData.args.iconOption.value != "none" {
                         VStack(alignment: .leading) {
                             IconView(image: observedData.args.iconOption.value,
                                      overlay: observedData.args.overlayIconOption.value,
