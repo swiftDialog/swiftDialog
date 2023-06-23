@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct renderToggles: View {
+struct RenderToggles: View {
     @ObservedObject var observedData: DialogUpdatableContent
     
     var iconPresent: Bool = false
@@ -89,11 +89,11 @@ struct CheckboxView: View {
             if observedData.appProperties.checkboxControlStyle.lowercased() == "switch" {
                 VStack {
                     Spacer()
-                    renderToggles(observedDialogContent: observedData)
+                    RenderToggles(observedDialogContent: observedData)
                 }
                 .scrollOnOverflow()
             } else {
-                renderToggles(observedDialogContent: observedData)
+                RenderToggles(observedDialogContent: observedData)
             }
         }
     }
