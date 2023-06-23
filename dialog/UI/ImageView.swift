@@ -38,7 +38,7 @@ struct ImageView: View {
         VStack(spacing: 20) {
             ImageSlider(index: $index.animation(), maxIndex: images.count - 1, autoPlaySeconds: autoPlaySeconds) {
                 ForEach(Array(self.images.enumerated()), id: \.offset) { imageIndex, imageName in
-                    VStack() {
+                    VStack {
                         Image(nsImage: imageName)
                             .resizable()
                             .scaledToFit()

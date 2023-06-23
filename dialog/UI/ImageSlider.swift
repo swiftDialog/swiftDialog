@@ -34,7 +34,7 @@ struct ImageSlider<Content>: View where Content: View {
     }
     
     var body: some View {
-        HStack() {
+        HStack {
             ZStack(alignment: .bottomTrailing) {
                 GeometryReader { geometry in
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -106,7 +106,7 @@ struct PageControl: View {
         // display our own progress timer
         if autoPlaySeconds > 0 {
             GeometryReader { barWidth in
-                VStack() {
+                VStack {
                     Spacer()
                     ZStack(alignment: .leading) {
                         Rectangle() // background of the progress bar
@@ -142,7 +142,7 @@ struct PageControl: View {
             // move image left chevron
             
             Button(action: {moveimage(direction: "left")}, label: {
-                ZStack() {
+                ZStack {
                     Image(systemName: "circle.fill")
                         .resizable()
                         .foregroundColor(Color.tertiaryBackground)
@@ -168,7 +168,7 @@ struct PageControl: View {
             
             // move image right chevron
             Button(action: {moveimage(direction: "right")}, label: {
-                ZStack() {
+                ZStack {
                     Image(systemName: "circle.fill")
                         .resizable()
                         .foregroundColor(Color.tertiaryBackground)

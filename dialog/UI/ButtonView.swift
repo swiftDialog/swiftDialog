@@ -129,7 +129,7 @@ struct MoreInfoButton: View {
     }
     
     var body: some View {
-        HStack() {
+        HStack {
             Button(action: {
                     buttonAction(
                     action: observedData.args.buttonInfoActionOption.value,

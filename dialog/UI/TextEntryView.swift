@@ -83,7 +83,7 @@ struct TextEntryView: View {
                             }
                             HStack {
                                 if observedData.appProperties.textFields[index].secure {
-                                    ZStack() {
+                                    ZStack {
                                         SecureField("", text: $observedData.appProperties.textFields[index].value)
                                             .disableAutocorrection(true)
                                             .textContentType(observedData.appProperties.textFields[index].passwordFill ? .password: .none)

@@ -26,7 +26,7 @@ struct HelpView: View {
                 .padding(.top, observedData.appProperties.topPadding)
             Markdown(observedData.args.helpMessage.value, baseURL: URL(string: "http://"))
                 .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                .markdownTextStyle() {
+                .markdownTextStyle {
                     FontSize(appvars.messageFontSize)
                     ForegroundColor(.primary)
                 }

@@ -89,7 +89,7 @@ struct ContentView: View {
                 Spacer()
                 
                 // Buttons
-                HStack() {
+                HStack {
                     if observedData.args.infoText.present {
                         Text(observedData.args.infoText.value)
                             .foregroundColor(.secondary.opacity(0.7))

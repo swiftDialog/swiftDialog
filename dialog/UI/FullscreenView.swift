@@ -150,8 +150,8 @@ struct FullscreenView: View {
                     .border(observedData.appProperties.debugBorderColour, width: 2)
                 
                     // message vstack
-                    VStack() {
-                        ScrollView() {
+                    VStack {
+                        ScrollView {
                             Text(.init(observedData.messageText))
                                 .foregroundColor(.white)
                                 .font(.system(size: messageContentFontSize))

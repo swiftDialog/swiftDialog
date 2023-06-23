@@ -68,7 +68,7 @@ struct ListView: View {
                 GeometryReader { geometry in
                     let listHeightPadding = ((geometry.size.height/CGFloat(observedData.listItemsArray.count)/2) * proportionalListHeight)
                 //withAnimation(.default) {
-                    VStack() {
+                    VStack {
                         List(0..<observedData.listItemsArray.count, id: \.self) {i in
                             VStack {
                                 HStack {
@@ -136,7 +136,7 @@ struct CirclerPercentageProgressViewStyle: ProgressViewStyle {
     public func makeBody(configuration: LinearProgressViewStyle.Configuration) -> some View {
         let stroke: CGFloat = 5
         let padding: CGFloat = stroke / 2
-        VStack() {
+        VStack {
             ZStack {
                 Circle()
                     .stroke(lineWidth: stroke)

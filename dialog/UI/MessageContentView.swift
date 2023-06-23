@@ -82,7 +82,7 @@ struct MessageContent: View {
 
                     Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
                         .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                        .markdownTextStyle() {
+                        .markdownTextStyle {
                             FontSize(appvars.messageFontSize)
                             ForegroundColor(messageColour)
                         }

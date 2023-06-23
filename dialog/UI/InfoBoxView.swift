@@ -22,7 +22,7 @@ struct InfoBoxView: View {
     var body: some View {
         Markdown(observedData.args.infoBox.value, baseURL: URL(string: "http://"))
             .multilineTextAlignment(.leading)
-            .markdownTextStyle() {
+            .markdownTextStyle {
                 ForegroundColor(.secondary)
             }
             .focusable(false)
