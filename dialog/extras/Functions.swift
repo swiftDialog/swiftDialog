@@ -54,30 +54,30 @@ func string2float(string: String, defaultValue: CGFloat = 0) -> CGFloat {
 func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, imgHeight: CGFloat? = .infinity, returnErrorImage: Bool? = false, errorImageName: String? = "questionmark.square.dashed") -> NSImage {
     // accept image as local file path or as URL and return NSImage
     // can pass in width and height as optional values otherwsie return the image as is.
-    
+
     // origional implementation lifted from Nudge and modified
     // https://github.com/macadmins/nudge/blob/main/Nudge/Utilities/Utils.swift#L46
-    
+
     writeLog("Getting image from path \(fileImagePath)")
-    
+
     // need to declare literal empty string first otherwsie the runtime whinges about an NSURL instance with an empty URL string. I know!
     var urlPath = NSURL(string: "")!
     var imageData = NSData()
-    
+
     let errorImageConfig = NSImage.SymbolConfiguration(pointSize: 200, weight: .thin)
     var errorImage = NSImage(systemSymbolName: "questionmark.square.dashed", accessibilityDescription: nil)!
         .withSymbolConfiguration(errorImageConfig)!
-    
+
     if errorImageName == "banner" {
         errorImage = bannerErrorImage(size: NSSize(width: 800, height: 100))!
     }
-    
+
     // check if it's base64 image data
     if fileImagePath.hasPrefix("base64") {
         writeLog("Creating image from base64 data")
         return getImageFromBase64(base64String: fileImagePath.replacingOccurrences(of: "base64=", with: ""))
     }
-    
+
     // checking for anything starting with http - crude but it works (for now)
     if fileImagePath.hasPrefix("http") {
         writeLog("Getting image from http")
@@ -85,7 +85,7 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
     } else {
         urlPath = NSURL(fileURLWithPath: fileImagePath)
     }
-      
+
     // wrap everything in a try block.IF the URL or filepath is unreadable then return a default wtf image
     do {
         imageData = try NSData(contentsOf: urlPath as URL)
@@ -98,9 +98,9 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
             quitDialog(exitCode: appvars.exit201.code, exitMessage: "\(appvars.exit201.message) \(fileImagePath)", observedObject: DialogUpdatableContent())
         }
     }
-  
+
     let image: NSImage = NSImage(data: imageData as Data) ?? errorImage
-    
+
     if let rep = NSImage(data: imageData as Data)?
         .bestRepresentation(for: NSRect(x: 0, y: 0, width: imgWidth!, height: imgHeight!), context: nil, hints: nil) {
         image.size = rep.size
@@ -121,20 +121,20 @@ func getImageFromBase64(base64String: String) -> NSImage {
 func bannerErrorImage(size: NSSize) -> NSImage? {
     // Create a yellow-to-orange gradient
         let gradient = NSGradient(starting: NSColor.red, ending: NSColor.orange)
-        
+
         // Create an NSImage with the specified size and add a bitmap representation
         let image = NSImage(size: size)
         let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int(size.width), pixelsHigh: Int(size.height), bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false, colorSpaceName: .calibratedRGB, bytesPerRow: 0, bitsPerPixel: 0)
         image.addRepresentation(rep!)
-        
+
         // Create a new graphics context and set it as the current context
         let graphicsContext = NSGraphicsContext(bitmapImageRep: rep!)
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.current = graphicsContext
-        
+
         // Draw the gradient background in the image
         gradient?.draw(in: NSRect(origin: .zero, size: size), angle: 30.0)
-        
+
         // Draw the "questionmark.square.dashed" system symbol in the image
         if let symbolImage = NSImage(systemSymbolName: "questionmark.square.dashed", accessibilityDescription: nil) {
             symbolImage.isTemplate = true // Set the template mode to draw in black
@@ -142,7 +142,7 @@ func bannerErrorImage(size: NSSize) -> NSImage? {
             let symbolOrigin = NSPoint(x: (size.width - symbolSize.width) / 2, y: (size.height - symbolSize.height) / 2)
             symbolImage.draw(in: NSRect(origin: symbolOrigin, size: symbolSize))
         }
-        
+
         // Restore the previous graphics state and return the image
         NSGraphicsContext.restoreGraphicsState()
         return image
@@ -160,16 +160,16 @@ func shell(_ command: String) -> String {
     writeLog("Running shell command \(command)")
     let task = Process()
     let pipe = Pipe()
-    
+
     task.standardOutput = pipe
     task.standardError = pipe
     task.arguments = ["-c", command]
     task.launchPath = "/bin/zsh"
     task.launch()
-    
+
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
     let output = String(data: data, encoding: .utf8)!
-    
+
     return output
 }
 
@@ -181,16 +181,16 @@ func checkRegexPattern(regexPattern: String, textToValidate: String) -> Bool {
         let regex = try NSRegularExpression(pattern: regexPattern)
         let nsString = textToValidate as NSString
         let results = regex.matches(in: textToValidate, range: NSRange(location: 0, length: nsString.length))
-        
+
         if results.count == 0 {
             returnValue = false
         }
-        
+
     } catch let error as NSError {
         writeLog("invalid regex: \(error.localizedDescription)")
         returnValue = false
     }
-    
+
     return  returnValue
 }
 
@@ -244,28 +244,28 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
     if exitMessage != "" {
         print("\(exitMessage!)")
     }
-    
+
     // force quit
     if exitCode == 255 {
         exit(0)
     }
-        
+
     // only print if exit code os 0
     if exitCode == 0 {
-        
+
         // build json using SwiftyJSON
         var json = JSON()
-        
+
         //build output array
         var outputArray: Array = [String]()
         var dontQuit = false
         var requiredString = ""
-        
+
         if appArguments.textField.present {
             writeLog("Textfield present - checking requirements are met")
             // check to see if fields marked as required have content before allowing the app to exit
             // if there is an empty field, update the highlight colour
-            
+
             for index in 0..<(observedObject?.appProperties.textFields.count ?? 0) {
                 //check for required fields
                 let textField = observedObject?.appProperties.textFields[index]
@@ -273,14 +273,14 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                 let textfieldTitle = textField?.title ?? ""
                 let textfieldRequired = textField?.required ?? false
                 observedObject?.appProperties.textFields[index].requiredTextfieldHighlight = Color.clear
-                
+
                 if textfieldRequired && textfieldValue == "" { // && textFields[index].regex.isEmpty {
                     NSSound.beep()
                     requiredString += "• \"\(textfieldTitle)\" \("is-required".localized) \n"
                     observedObject?.appProperties.textFields[index].requiredTextfieldHighlight = Color.red
                     dontQuit = true
                     writeLog("Required text field \(textfieldTitle) has no value")
-                
+
                 //check for regex requirements
                 } else if !(textfieldValue.isEmpty)
                             && !(textField?.regex.isEmpty ?? false)
@@ -291,18 +291,18 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                     dontQuit = true
                     writeLog("Textfield \(textfieldTitle) value \(textfieldValue) does not meet regex requirements \(String(describing: textField?.regex))")
                 }
-                
+
                 outputArray.append("\(textfieldTitle) : \(textfieldValue)")
                 json[textfieldTitle].string = textfieldValue
             }
         }
-        
+
         if observedObject?.args.dropdownValues.present != nil {
             writeLog("Select items present - checking require,ments are met")
             if observedObject?.appProperties.dropdownItems.count == 1 {
                 let selectedValue = observedObject?.appProperties.dropdownItems[0].selectedValue
                 let selectedIndex = observedObject?.appProperties.dropdownItems[0].values
-                
+
                 outputArray.append("\"SelectedOption\" : \"\(selectedValue ?? "")\"")
                 json["SelectedOption"].string = selectedValue
                 outputArray.append("\"SelectedIndex\" : \(selectedIndex?.firstIndex(of: (selectedValue)!) ?? -1)")
@@ -317,7 +317,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                 let dropdownItemTitle = dropdownItem?.title ?? ""
                 let dropdownItemRequired = dropdownItem?.required ?? false
                 observedObject?.appProperties.dropdownItems[index].requiredfieldHighlight = Color.clear
-                
+
                 if dropdownItemRequired && dropdownItemSelectedValue == "" {
                     NSSound.beep()
                     requiredString += "• \"\(dropdownItemTitle)\" \("is-required".localized) \n"
@@ -331,21 +331,21 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                 }
             }
         }
-        
+
         if dontQuit {
             writeLog("Requirements were not met. Dialog will not quit at this time")
             observedObject?.sheetErrorMessage = requiredString
             observedObject?.showSheet = true
             return
         }
-        
+
         if observedObject?.args.checkbox.present != nil {
             for index in 0..<(observedObject?.appProperties.checkboxArray.count ?? 0) {
                 outputArray.append("\"\(observedObject?.appProperties.checkboxArray[index].label ?? "checkbox \(index)")\" : \"\(observedObject?.appProperties.checkboxArray[index].checked ?? false)\"")
                 json[observedObject?.appProperties.checkboxArray[index].label ?? 0].boolValue = observedObject?.appProperties.checkboxArray[index].checked ?? false
             }
         }
-                 
+
         // print the output
         if observedObject?.args.jsonOutPut.present ?? false { //} appvars.jsonOut {
             print(json)
@@ -384,25 +384,25 @@ func textToFontWeight(_ weight: String) -> Font.Weight {
 }
 
 func stringToColour(_ colourValue: String) -> Color {
-    
+
     var returnColor: Color
-    
+
     if isValidColourHex(colourValue) {
-    
+
         let colourRedValue = "\(colourValue[1])\(colourValue[2])"
         let colourRed = Double(Int(colourRedValue, radix: 16)!)/255
-        
+
         let colourGreenValue = "\(colourValue[3])\(colourValue[4])"
         let colourGreen = Double(Int(colourGreenValue, radix: 16)!)/255
-        
+
         let colourBlueValue = "\(colourValue[5])\(colourValue[6])"
         let colourBlue = Double(Int(colourBlueValue, radix: 16)!)/255
-        
+
         returnColor = Color(red: colourRed, green: colourGreen, blue: colourBlue)
-        
+
     } else {
         switch colourValue {
-            
+
         case "black":
             returnColor = Color.black
         case "blue":
@@ -451,9 +451,9 @@ func stringToColour(_ colourValue: String) -> Color {
             returnColor = Color.primary
         }
     }
-    
+
     return returnColor
-    
+
 }
 
 func colourToString(color: Color) -> String {
@@ -478,16 +478,16 @@ func isDNDEnabled() -> Bool {
     // ** This function will not work under macOS 12 as at July 2021
     let consoleUser = SCDynamicStoreCopyConsoleUser(nil, nil , nil)
     let consoleUserHomeDir = FileManager.default.homeDirectory(forUser: consoleUser! as String)?.path ?? ""
-    
+
     let ncprefsUrl = URL(
         fileURLWithPath: String("\(consoleUserHomeDir)/Library/Preferences/com.apple.ncprefs.plist")
     )
-    
+
     do {
         let prefsList = try plistFromData(try Data(contentsOf: ncprefsUrl))
         let dndPrefsData = prefsList["dnd_prefs"] as! Data
         let dndPrefsList = try plistFromData(dndPrefsData)
-        
+
         if let userPref = dndPrefsList["userPref"] as? [String: Any] {
             return userPref["enabled"] as! Bool
         }

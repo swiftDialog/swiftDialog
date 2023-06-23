@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct CKDataEntryView: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
     }
-    
+
     var body: some View {
         VStack {
             HStack {
@@ -33,15 +33,15 @@ struct CKDataEntryView: View {
                 })
                 Toggle("ck-show".localized, isOn: $observedData.args.textField.present)
                     .toggleStyle(.switch)
-                
+
                 //Button("Clear All") {
                 //    observedData.listItemPresent = false
                 //    observedData.listItemsArray = [ListItems]()
                 //}
-                
+
                 Spacer()
             }
-            
+
             ForEach(0..<observedData.appProperties.textFields.count, id: \.self) { item in
                 HStack {
                     Button(action: {
@@ -73,7 +73,7 @@ struct CKDataEntryView: View {
                 Divider()
             }
             LabelView(label: "ck-select".localized)
-            
+
             LabelView(label: "ck-checkbox".localized)
             Spacer()
         }

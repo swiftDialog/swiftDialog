@@ -16,11 +16,11 @@ class BlurWindow: NSWindow {
 }
 
 class BlurWindowController: NSWindowController {
-    
+
     convenience init() {
         self.init(windowNibName: "BlurScreen")
     }
-        
+
     override func loadWindow() {
         window = BlurWindow(contentRect: CGRect(x: 0, y: 0, width: 100, height: 100), styleMask: [], backing: .buffered, defer: true)
         self.window?.contentViewController = BlurViewController()
@@ -30,35 +30,35 @@ class BlurWindowController: NSWindowController {
 }
 
 class BlurViewController: NSViewController {
-    
+
     init() {
          super.init(nibName: nil, bundle: nil)
      }
-     
+
     required init?(coder: NSCoder) {
          fatalError()
      }
-    
+
     override func loadView() {
         super.viewDidLoad()
         self.view = NSView()
     }
-    
+
     override func viewWillAppear() {
         super.viewWillAppear()
         view.window?.isOpaque = false
         view.window?.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) - 1 ))
-        
+
         let blurView = NSVisualEffectView(frame: view.bounds)
         blurView.blendingMode = .behindWindow
         blurView.material = .fullScreenUI
         blurView.state = .active
         view.window?.contentView?.addSubview(blurView)
     }
-    
+
     override func viewWillDisappear() {
         super.viewWillDisappear()
         view.window?.contentView?.removeFromSuperview()
     }
-    
+
 }

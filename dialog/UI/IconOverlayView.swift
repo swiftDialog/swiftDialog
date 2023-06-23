@@ -9,34 +9,34 @@ import Foundation
 import SwiftUI
 
 struct IconOverlayView: View {
-        
+
     var overlayImagePath: String
     var overlayIconPresent: Bool = false
     var overlayScaleFactor: CGFloat = 1
     var sfSymbolPresent: Bool = false
     var sfBackgroundIconColour: Color = Color.background
-        
+
     init (image: String = "") {
         overlayImagePath = image
-        
+
         // enable if there is _anything_ specified as an overlay icon
         if overlayImagePath != "" {
             writeLog("Displaying overlay icon \(overlayImagePath)")
             overlayIconPresent = true
         }
-        
+
         // check if it's an SF symbol. That enables the background layer and applies a scale to the symbol
         if overlayImagePath.lowercased().hasPrefix("sf=") {
             sfSymbolPresent = true
             overlayScaleFactor = 0.85
-            
+
             // check to see if we need to set a background colour
             var SFValues = overlayImagePath.split(usingRegex: appvars.argRegex)
             SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
-            
+
             var SFArg: String = ""
             var SFArgValue: String = ""
-                
+
             if SFValues.count > 0 {
                 for index in 0...SFValues.count-1 {
                     SFArg = SFValues[index]
@@ -44,11 +44,11 @@ struct IconOverlayView: View {
                         .replacingOccurrences(of: "=", with: "")
                         .trimmingCharacters(in: .whitespaces)
                         .lowercased()
-                    
+
                     if index < SFValues.count-1 {
                         SFArgValue = SFValues[index+1]
                     }
-                    
+
                     if SFArg.hasPrefix("bgcolo") {
                         if SFArgValue == "none" {
                             sfBackgroundIconColour = .clear
@@ -60,7 +60,7 @@ struct IconOverlayView: View {
                 }
             }
         }
-        
+
         // display an errror image if needed (only used here if it's a local file and it doesn't exist
         if overlayIconPresent && !sfSymbolPresent && !overlayImagePath.hasPrefix("http") && !FileManager.default.fileExists(atPath: overlayImagePath) {
             writeLog("Error with overlay icon. returning default error image")
@@ -68,7 +68,7 @@ struct IconOverlayView: View {
             sfSymbolPresent = true
         }
     }
-    
+
     var body: some View {
         if overlayIconPresent {
             ZStack {

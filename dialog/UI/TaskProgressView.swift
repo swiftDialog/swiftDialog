@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct TaskProgressView: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
-        
+
     var body: some View {
         if observedData.args.progressBar.present {
             VStack {
@@ -28,10 +28,10 @@ struct TaskProgressView: View {
 
 struct TaskProgressViewStyle: ProgressViewStyle {
     func makeBody(configuration: Configuration) -> some View {
-                
+
         let determinate = (configuration.fractionCompleted == nil) ? 0.0 : 1.0
         let indeterminate = (configuration.fractionCompleted == nil) ? 1.0 : 0.0
-                
+
         ZStack {
             ProgressView(value: configuration.fractionCompleted)
                 .opacity(determinate)

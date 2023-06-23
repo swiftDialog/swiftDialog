@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct CKImageView: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
     }
-    
+
     var body: some View {
         VStack {
             HStack {
@@ -31,9 +31,9 @@ struct CKImageView: View {
                 TextField("ck-autoplayseconds".localized, text: $observedData.args.autoPlay.value)
                 Spacer()
             }
-            
+
             //ForEach(observedData.listItemsArray, id: \.self)
-            
+
             ForEach(0..<observedData.imageArray.count, id: \.self) { item in
                 HStack {
                     Button(action: {

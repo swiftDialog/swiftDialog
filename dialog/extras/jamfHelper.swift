@@ -28,26 +28,26 @@ struct JHOptions {
     static let iconSize           = CommandlineArgument(long: "iconSize",         short: "iconSize")         // -iconSize pixels
     static let lockHUD            = CommandlineArgument(long: "lockHUD",          short: "lockHUD")          // -lockHUD
     static let fullScreenIcon     = CommandlineArgument(long: "fullScreenIcon",   short: "fullScreenIcon")   // -fullScreenIcon
-    
+
     public func return_jh_value() {
-        
+
     }
-    
+
 }
 
 public func convertFromJamfHelperSyntax() {
     // read the jamfhelper syntax from the command line and populate the appropriate dialog values
     //appArguments.smallWindow.present = true
-    
+
     //fullscreen
     if CLOptionPresent(optionName: JHOptions.windowType) && CLOptionText(optionName: JHOptions.windowType) == "fs" {
         appArguments.fullScreenWindow.present = true
     }
-    
+
     // title
     appArguments.titleOption.present = CLOptionPresent(optionName: JHOptions.title)
     appArguments.titleOption.value = CLOptionText(optionName: JHOptions.title)
-    
+
     // message
     appArguments.messageOption.present = CLOptionPresent(optionName: JHOptions.description)
     if !appArguments.fullScreenWindow.present {
@@ -55,7 +55,7 @@ public func convertFromJamfHelperSyntax() {
     } else {
         appArguments.messageOption.value = "\(CLOptionText(optionName: JHOptions.heading))\n\n\(CLOptionText(optionName: JHOptions.description))"
     }
-    
+
     // message alignment
     appArguments.messageAlignment.present = CLOptionPresent(optionName: JHOptions.alignDescription)
     appArguments.messageAlignment.value = CLOptionText(optionName: JHOptions.alignDescription)
@@ -71,31 +71,31 @@ public func convertFromJamfHelperSyntax() {
             appvars.messageAlignment = .leading
         }
     }
-    
+
     //icon
     appArguments.iconOption.present         = CLOptionPresent(optionName: JHOptions.icon)
     appArguments.iconOption.value = CLOptionText(optionName: JHOptions.icon)
-    
+
     //icon size
     appArguments.iconSize.present = CLOptionPresent(optionName: JHOptions.iconSize)
     appArguments.iconSize.value = CLOptionText(optionName: JHOptions.iconSize, defaultValue: "\(appvars.iconWidth)")
 
-    
+
     //button 1
     appArguments.button1TextOption.present = CLOptionPresent(optionName: JHOptions.button1)
     appArguments.button1TextOption.value = CLOptionText(optionName: JHOptions.button1)
     if !appArguments.button1TextOption.present {
         appArguments.button1TextOption.value = "OK"
     }
-    
+
     //button 2
     appArguments.button2TextOption.present = CLOptionPresent(optionName: JHOptions.button2)
     appArguments.button2TextOption.value = CLOptionText(optionName: JHOptions.button2)
-    
+
     //countdown or timer
     appArguments.timerBar.present = CLOptionPresent(optionName: JHOptions.timeout)
     appArguments.timerBar.value = CLOptionText(optionName: JHOptions.timeout)
-    
+
     // window location on screen
     if CLOptionPresent(optionName: JHOptions.windowPosition) {
         switch CLOptionText(optionName: JHOptions.windowPosition) {

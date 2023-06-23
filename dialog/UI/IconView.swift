@@ -11,16 +11,16 @@ import SwiftUI
 
 struct IconView: View {
     @Environment(\.colorScheme) var colorScheme
-    
+
     var messageUserImagePath: String
-    
+
     var iconOverlay: String
     var logoWidth: CGFloat = appvars.iconWidth
     var logoHeight: CGFloat  = appvars.iconHeight
     var imgFromURL: Bool = false
     var imgFromAPP: Bool = false
     var imgFromBase64: Bool = false
-    
+
     var builtInIconName: String = ""
     var builtInIconColour: Color = Color.primary
     var builtInIconSecondaryColour: Color = Color.secondary
@@ -28,30 +28,30 @@ struct IconView: View {
     var builtInIconFill: String = ""
     var builtInIconPresent: Bool = false
     var builtInIconWeight = Font.Weight.thin
-    
+
     var framePadding: CGFloat = 0
-    
+
     var iconRenderingMode = Image.TemplateRenderingMode.original
-    
+
     var sfSymbolName: String = ""
     var sfSymbolWeight = Font.Weight.thin
     var sfSymbolColour1: Color = Color.primary
     var sfSymbolColour2: Color = Color.secondary
     var sfSymbolPresent: Bool = false
-    
+
     var sfGradientPresent: Bool = false
     var sfPalettePresent: Bool = false
     var sfBackgroundIconColour: Color = Color.background
-    
+
     var mainImageScale: CGFloat = 1
     var mainImageAlpha: Double
-    
+
     let mainImageWithOverlayScale: CGFloat = 0.88
     let overlayImageScale: CGFloat = 0.4
     var overlayImageBackgroundScale: CGFloat = 1.1
     var overlayImageBackground: Bool = false
-    
-  
+
+
     init(image: String = "", overlay: String = "", alpha: Double = 1.0) {
         writeLog("Displaying icon image \(image), alpha \(alpha)")
         if !overlay.isEmpty {
@@ -60,10 +60,10 @@ struct IconView: View {
         mainImageAlpha = alpha
         messageUserImagePath = image
         iconOverlay = overlay
-        
+
         logoWidth = appvars.iconWidth
         logoHeight = appvars.iconHeight
-        
+
         if overlay != "" {
             mainImageScale = mainImageWithOverlayScale
             if overlay.lowercased().hasPrefix("sf=") {
@@ -80,7 +80,7 @@ struct IconView: View {
                 }
             }
         }
-        
+
         // fullscreen runs on a dark background so invert the default icon colour for info and default
         // also set the icon offset to 0
         if appArguments.fullScreenWindow.present {
@@ -88,42 +88,42 @@ struct IconView: View {
             // fullscreen background is dark, so we want to use white as the default colour
             builtInIconColour = Color.white
         }
-        
+
         if messageUserImagePath.starts(with: "http") {
             writeLog("Image is http source")
             imgFromURL = true
         }
-        
+
         if messageUserImagePath.starts(with: "base64") {
             writeLog("Image is base64 source")
             imgFromBase64 = true
         }
-        
+
         if ["app", "prefPane", "framework"].contains(messageUserImagePath.split(separator: ".").last) {
             writeLog("Image is app source")
             imgFromAPP = true
         }
-        
+
         if messageUserImagePath == "none" {
             writeLog("Icon is disabled")
             builtInIconName = "circle.fill"
             builtInIconPresent = true
             builtInIconColour = .clear
         }
-        
+
         if messageUserImagePath.lowercased().hasPrefix("sf=") {
             writeLog("Image is SF Symbol")
             sfSymbolPresent = true
             builtInIconPresent = true
-            
+
             framePadding = 15
-            
+
             var SFValues = messageUserImagePath.split(usingRegex: appvars.argRegex)
             SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
-            
+
             var SFArg: String = ""
             var SFArgValue: String = ""
-                
+
             if SFValues.count > 0 {
                 for index in 0...SFValues.count-1 {
                     SFArg = SFValues[index]
@@ -131,11 +131,11 @@ struct IconView: View {
                         .replacingOccurrences(of: "=", with: "")
                         .trimmingCharacters(in: .whitespaces)
                         .lowercased()
-                    
+
                     if index < SFValues.count-1 {
                         SFArgValue = SFValues[index+1]
                     }
-                    
+
                     switch SFArg {
                     case "sf":
                         builtInIconName = SFArgValue
@@ -182,7 +182,7 @@ struct IconView: View {
                 }
             }
         }
-            
+
         if appArguments.warningIcon.present || messageUserImagePath == "warning" {
             writeLog("Using default warning icon")
             builtInIconName = "exclamationmark.octagon.fill"
@@ -205,13 +205,13 @@ struct IconView: View {
             builtInIconPresent = true
         }
     }
-    
+
     var body: some View {
         ZStack {
             if builtInIconPresent {
                 ZStack {
                     if sfGradientPresent || sfPalettePresent {
-                        
+
                         if #available(macOS 12.0, *) {
                             if sfPalettePresent {
                                 Image(systemName: builtInIconName)
@@ -229,7 +229,7 @@ struct IconView: View {
                                     )
                                     .font(Font.title.weight(builtInIconWeight))
                             }
-                                
+
                         } else {
                             // macOS 11 doesn't support foregroundStyle so we'll do it the long way
                             // we need to add this twice - once as a clear version to force the right aspect ratio
@@ -241,7 +241,7 @@ struct IconView: View {
                                 .resizable()
                                 .foregroundColor(.clear)
                                 .font(Font.title.weight(builtInIconWeight))
-                                
+
                             LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottomTrailing)
                                 .mask(
                                 Image(systemName: builtInIconName)
@@ -251,7 +251,7 @@ struct IconView: View {
                                     .font(Font.title.weight(builtInIconWeight))
                                 )
                         }
-                        
+
                     } else {
                         if builtInIconFill != "" {
                             Image(systemName: builtInIconFill)
@@ -318,7 +318,7 @@ struct IconView: View {
                             .shadow(color: .secondaryBackground.opacity(0.50), radius: 4, x: 2, y: 2) // gives the sf background some pop especially in dark mode
                             .aspectRatio(1, contentMode: .fit)
                     }
-                    
+
                     IconView(image: iconOverlay)
                         //.shadow(color: Color.primary.opacity(0.70), radius: 3)
                         .scaleEffect(overlayImageBackgroundScale)
@@ -329,7 +329,7 @@ struct IconView: View {
 
         }
         .padding(framePadding)
-        
+
     }
 }
 

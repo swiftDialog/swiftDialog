@@ -10,17 +10,17 @@ import SwiftUI
 import MarkdownUI
 
 struct MessageContent: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
     @State private var contentHeight: CGFloat = 40
-    
+
     var fieldPadding: CGFloat = 15
     var dataEntryMaxWidth: CGFloat = 700
-    
+
     var messageColour: Color
-        
+
     var iconDisplayWidth: CGFloat
-    
+
     /*
     var markdownStyle: MarkdownStyle {
         if observedData.appProperties.messageFontName == "" {
@@ -30,9 +30,9 @@ struct MessageContent: View {
         }
     }
     */
-    
+
     let theAllignment: Alignment = .topLeading
-    
+
     init(observedDialogContent: DialogUpdatableContent) {
         writeLog("Displaying main message content")
         self.observedData = observedDialogContent
@@ -46,11 +46,11 @@ struct MessageContent: View {
         }
         messageColour = observedDialogContent.appProperties.messageFontColour
     }
-    
+
     var body: some View {
         VStack {
             if observedData.args.mainImage.present {
-            
+
                 if observedData.args.iconOption.present && observedData.args.centreIcon.present { //}&& observedData.args.iconOption.value != "none" {
                     IconView(image: observedData.args.iconOption.value,
                              overlay: observedData.args.overlayIconOption.value,
@@ -74,7 +74,7 @@ struct MessageContent: View {
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
                 }
-                
+
                 if !["", "none"].contains(observedData.args.messageOption.value) {
                     if ["centre", "center"].contains(observedData.args.messageVerticalAlignment.value) {
                         Spacer()
@@ -98,25 +98,25 @@ struct MessageContent: View {
                 if ["centre", "center"].contains(observedData.args.messageVerticalAlignment.value) {
                     Spacer()
                 }
-                
+
                 Group {
                     WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .padding(.bottom, observedData.appProperties.bottomPadding)
-                    
+
                     ListView(observedDialogContent: observedData)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .padding(.bottom, observedData.appProperties.bottomPadding)
-                    
+
                     CheckboxView(observedDialogContent: observedData)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .frame(maxWidth: dataEntryMaxWidth)
-                    
+
                     TextEntryView(observedDialogContent: observedData)
                         .padding(.bottom, observedData.appProperties.bottomPadding)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .frame(maxWidth: dataEntryMaxWidth)
-                    
+
                     RadioView(observedDialogContent: observedData)
                         .padding(.bottom, observedData.appProperties.bottomPadding)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
@@ -127,7 +127,7 @@ struct MessageContent: View {
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .frame(maxWidth: dataEntryMaxWidth, alignment: .leading)
                 }
-                
+
                 if ["top"].contains(observedData.args.messageVerticalAlignment.value) {
                     Spacer()
                 }
@@ -151,12 +151,12 @@ struct MessageContent: View {
 struct PriorityView<Content: View>: View {
     private var content: () -> Content
     private var priority: Int
-    
+
     init(priority: Int, @ViewBuilder content: @escaping () -> Content) {
         self.content = content
         self.priority = priority
     }
-    
+
     var body: some View {
         EmptyView()
             .overlay(content())

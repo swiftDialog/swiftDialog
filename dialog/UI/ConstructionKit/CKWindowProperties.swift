@@ -8,18 +8,18 @@
 import SwiftUI
 
 struct CKWindowProperties: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
     @State var bgAlpha: Double = 0.5
     let positionArray = ["topleft", "left", "bottomleft", "top", "center", "bottom", "topright", "right", "bottomright"]
     let fillScaleArray = ["fill", "fit"]
-    
+
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
     }
 
     var body: some View {
-        
+
         VStack {
             LabelView(label: "ck-windowheight".localized)
             HStack {
@@ -181,7 +181,7 @@ struct CKWindowProperties: View {
                 }
             }
             .frame(width: 250)
-            
+
             Spacer()
         }
         .padding(20)

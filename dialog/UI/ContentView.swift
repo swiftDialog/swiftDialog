@@ -13,9 +13,9 @@ struct ContentView: View {
     var titlePadding       = CGFloat(10)
     var waterMarkFill          = String("")
     var progressSteps: CGFloat = appvars.timerDefaultSeconds
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     init (observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
         if observedDialogContent.args.timerBar.present {
@@ -25,7 +25,7 @@ struct ContentView: View {
             writeLog("Banner Image is present")
             titlePadding = 0
         }
-        
+
         // capture command+quitKey for quit
         NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             switch event.modifierFlags.intersection(.deviceIndependentFlagsMask) {
@@ -54,12 +54,12 @@ struct ContentView: View {
 //    let updateTimer = Timer.publish(every: 5, on: .main, in: .common).autoconnect() // tick every 1 second
 //
     var body: some View {
-                        
-        ZStack {            
+
+        ZStack {
             if observedData.args.watermarkImage.present {
                     WatermarkView(observedContent: observedData)
             }
-        
+
             // this stack controls the main view. Consists of a VStack containing all the content, and a HStack positioned at the bottom of the display area
             VStack {
                 if observedData.args.bannerImage.present {
@@ -73,7 +73,7 @@ struct ContentView: View {
                         .border(appvars.debugBorderColour, width: 2)
                         .padding(.top, titlePadding)
                         .frame(minWidth: string2float(string: observedData.args.windowWidth.value), minHeight: appvars.titleHeight, alignment: .center)
-                    
+
                     // Horozontal Line
                     Divider()
                         .padding(.leading, observedData.appProperties.sidePadding)
@@ -83,11 +83,11 @@ struct ContentView: View {
                     Spacer()
                         .frame(height: observedData.appProperties.sidePadding)
                 }
-                
+
                 DialogView(observedDialogContent: observedData)
-                
+
                 Spacer()
-                
+
                 // Buttons
                 HStack {
                     if observedData.args.infoText.present {
@@ -112,12 +112,12 @@ struct ContentView: View {
                 .padding(.bottom, observedData.appProperties.bottomPadding)
                 .border(appvars.debugBorderColour, width: 2)
             }
-        
+
         }
         .edgesIgnoringSafeArea(.all)
-         
+
     }
-    
+
 
 }
 

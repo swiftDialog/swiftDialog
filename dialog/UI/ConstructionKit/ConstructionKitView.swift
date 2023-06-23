@@ -53,7 +53,7 @@ struct JSONView: View {
         observedDialogContent.args.iconSize.value = "\(observedDialogContent.iconSize)"
         observedDialogContent.args.windowWidth.value = "\(observedDialogContent.windowWidth)"
         observedDialogContent.args.windowHeight.value = "\(observedDialogContent.windowHeight)"
-        
+
         let mirroredAppArguments = Mirror(reflecting: observedDialogContent.args)
         for (_, attr) in mirroredAppArguments.children.enumerated() {
             if let propertyValue = attr.value as? CommandlineArgument {
@@ -86,12 +86,12 @@ struct JSONView: View {
                 json[appArguments.mainImage.long][index].dictionaryObject = observedDialogContent.imageArray[index].dictionary
             }
         }
-        
+
         // message font stuff
         if observedDialogContent.appProperties.messageFontColour != .primary {
             json[appArguments.messageFont.long].dictionaryObject = ["colour": colourToString(color: observedDialogContent.appProperties.messageFontColour)]
         }
-        
+
         if observedDialogContent.appProperties.titleFontColour != .primary {
             json[appArguments.titleFont.long].dictionaryObject = ["colour": colourToString(color: observedDialogContent.appProperties.titleFontColour)]
         }

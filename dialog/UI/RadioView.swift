@@ -14,18 +14,18 @@ struct RadioView: View {
     @State var selectedOption: [String]
 
     var fieldwidth: CGFloat = 0
-    
+
     var radioCount = 0
-    
+
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
-        
+
         if !observedDialogContent.args.hideIcon.present {
             fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value)
         } else {
             fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value) - string2float(string: observedDialogContent.args.iconSize.value)
         }
-                
+
         var defaultOptions: [String] = []
         for index in 0..<observedDialogContent.appProperties.dropdownItems.count {
             if observedDialogContent.appProperties.dropdownItems[index].defaultValue.isEmpty && observedDialogContent.appProperties.dropdownItems[index].style == "radio" {
@@ -38,13 +38,13 @@ struct RadioView: View {
             }
         }
         _selectedOption = State(initialValue: defaultOptions)
-        
+
         if radioCount > 0 {
             writeLog("Displaying radio button view")
         }
-        
+
     }
-        
+
     var body: some View {
         if observedData.args.dropdownValues.present && radioCount > 0 {
             VStack {

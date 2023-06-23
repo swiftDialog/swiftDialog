@@ -9,7 +9,7 @@
 
 import SwiftUI
 
-    
+
 struct ImageSlider<Content>: View where Content: View {
 
     @Binding var index: Int
@@ -32,7 +32,7 @@ struct ImageSlider<Content>: View where Content: View {
             imageoffset = 0
         }
     }
-    
+
     var body: some View {
         HStack {
             ZStack(alignment: .bottomTrailing) {
@@ -68,10 +68,10 @@ struct PageControl: View {
     @Binding var index: Int
     let maxIndex: Int
     let autoPlaySeconds: Double
-    
+
     @State private var timerTicks: Double = 0
     @State private var timerDisplay = 0.0
-        
+
     func moveimage(direction: String) {
         switch direction {
         case "left":
@@ -89,19 +89,19 @@ struct PageControl: View {
         timerTicks = 0
         timerDisplay = 0
     }
-    
+
     func rotateIndex() {
         index += 1
         if index > maxIndex {
             index = 0
         }
     }
-    
+
     // change image every 4 seconds (TODO: remove and make this a configurable paramater)
     var autoPlayTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     var countDownTimer = Timer.publish(every: 0.01, on: .main, in: .common).autoconnect()
     @State private var countDownTimerWidth: CGFloat = 0
-    
+
     var body: some View {
         // display our own progress timer
         if autoPlaySeconds > 0 {
@@ -112,7 +112,7 @@ struct PageControl: View {
                         Rectangle() // background of the progress bar
                             .fill(Color.secondary.opacity(0.5))
                             .frame(height: 8)
-                        
+
                         Rectangle()
                             .fill(Color.white.opacity(0.5))
                             .frame(width: countDownTimerWidth, height: 8, alignment: .bottomLeading)
@@ -137,47 +137,47 @@ struct PageControl: View {
                 }
             }
         }
-        
+
         HStack(spacing: 8) {
             // move image left chevron
-            
+
             Button(action: {moveimage(direction: "left")}, label: {
                 ZStack {
                     Image(systemName: "circle.fill")
                         .resizable()
                         .foregroundColor(Color.tertiaryBackground)
-                    
+
                     Image(systemName: "chevron.left.circle.fill")
                         .resizable()
                         .foregroundColor(Color.primary)
                 }
             })
             .frame(width: 20, height: 20)
-            
-        
+
+
             Spacer()
-            
+
             // Centre dots
             ForEach(0...maxIndex, id: \.self) { index in
                 Circle()
                     .fill(index == self.index ? Color.primary: Color.secondary)
                     .frame(width: 8, height: 8)
             }
-            
+
             Spacer()
-            
+
             // move image right chevron
             Button(action: {moveimage(direction: "right")}, label: {
                 ZStack {
                     Image(systemName: "circle.fill")
                         .resizable()
                         .foregroundColor(Color.tertiaryBackground)
-                    
+
                     Image(systemName: "chevron.right.circle.fill")
                         .resizable()
                         .foregroundColor(Color.primary)
                 }
-                    
+
             })
             .frame(width: 20, height: 20)
         }

@@ -10,13 +10,13 @@ import SwiftUI
 import MarkdownUI
 
 struct FullscreenView: View {
-            
+
     @ObservedObject var observedData: DialogUpdatableContent
-        
+
     let displayDetails: CGRect = NSScreen.main!.frame
     var windowHeight: CGFloat = 0
     var windowWidth: CGFloat = 0
-    
+
     // setup element sizes
     var titleContentFontSize: CGFloat
     var messageContentFontSize: CGFloat
@@ -27,33 +27,33 @@ struct FullscreenView: View {
     var maxBannerWidth: CGFloat = 0
     var minScreenHeightToDisplayBanner: CGFloat = 1000
     var messageTextLineSpacing: CGFloat = 20
-    
+
     init (observedData: DialogUpdatableContent) {
         writeLog("Entering full screen view")
         self.observedData = observedData
         // Ensure the singleton NSApplication exists.
         // required for correct determination of screen dimentions for the screen in use in multi screen scenarios
         _ = NSApplication.shared
-        
+
         windowHeight = displayDetails.size.height
         windowWidth = displayDetails.size.width
-        
+
         writeLog("display width: \(windowWidth) height: \(windowHeight)")
-        
+
         messageContentFontSize = 70
         emptyStackPadding = 70
         titleContentFontSize = observedData.appProperties.titleFontSize*3
         iconImageScaleFactor = 1.5
         bannerPadding = 25
         messageTextLineSpacing = 15
-        
+
         // adjust element sizes - standard display is 27"
         // bigger displays we scale up
         // smaller display we scale down
-        
+
         maxBannerWidth = windowWidth * 0.95
         maxBannerHeight = windowHeight * 0.10
-        
+
         if windowHeight <= 1440 {
             messageContentFontSize = 40
             emptyStackPadding = 50
@@ -68,15 +68,15 @@ struct FullscreenView: View {
             emptyStackPadding = 90
             messageTextLineSpacing = 30
         }
-                
+
         if observedData.appProperties.titleFontColour == Color.primary {
             observedData.appProperties.titleFontColour = Color.white
         }
-        
+
     }
-            
+
     public func showFullScreen() {
-        
+
         var window: NSWindow!
         window = NSWindow(
                contentRect: NSRect(x: 0, y: 0, width: 480, height: 300),
@@ -91,9 +91,9 @@ struct FullscreenView: View {
         let mainScreen: NSScreen = NSScreen.main!
         window.contentView?.enterFullScreenMode(mainScreen)
     }
-    
+
     var body: some View {
-        
+
         VStack {
             // banner image vstack
             if observedData.args.bannerImage.present {
@@ -112,7 +112,7 @@ struct FullscreenView: View {
                 .frame(width: (maxBannerWidth))
                 .padding(.vertical,20)
             }
-            
+
             // title vstack
             if observedData.args.titleOption.value != "none" {
                 HStack {
@@ -127,7 +127,7 @@ struct FullscreenView: View {
                     Spacer()
                 }
             }
-            
+
             // icon and message vstack group
             VStack {
                 if observedData.args.mainImage.present {
@@ -148,7 +148,7 @@ struct FullscreenView: View {
                     .padding(40)
                     .frame(minHeight: 200, maxHeight: (NSScreen.main?.frame.height)!/3)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
-                
+
                     // message vstack
                     VStack {
                         ScrollView {
@@ -157,11 +157,11 @@ struct FullscreenView: View {
                                 .font(.system(size: messageContentFontSize))
                                 .multilineTextAlignment(.center)
                         }
-                        
+
                         Spacer()
-                        
+
                         //TaskProgressView(observedDialogContent: observedDialogContent)  // future feature
-                        
+
                         if observedData.args.timerBar.present {
                             TimerView(progressSteps: string2float(string: observedData.args.timerBar.value), visible: observedData.args.timerBar.present, observedDialogContent: observedData)
                         }
@@ -175,9 +175,9 @@ struct FullscreenView: View {
                 //LinearGradient(gradient: Gradient(colors: [Color(hex: 0x0e539a), .black]), startPoint: .top, endPoint: .bottom)
                 LinearGradient(gradient: Gradient(colors: [Color(hex: 0x252535), .black]), startPoint: .top, endPoint: .bottom)
             )
-        
+
     }
-    
+
 }
 
 

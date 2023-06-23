@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct MiniProgressView: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     var body: some View {
         if appArguments.progressBar.present {
             VStack {
@@ -25,10 +25,10 @@ struct MiniProgressView: View {
 
 struct MiniView: View {
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
-        
+
         // capture command+quitKey for quit
         NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             switch event.modifierFlags.intersection(.deviceIndependentFlagsMask) {
@@ -48,7 +48,7 @@ struct MiniView: View {
             return event
         }
     }
-    
+
     var body: some View {
         ZStack {
             if !appArguments.progressBar.present {
@@ -68,11 +68,11 @@ struct MiniView: View {
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .padding(.top, 5)
                         .lineLimit(1)
-                    
+
                     Divider()
                         .frame(height: 1)
                         .offset(y: -5)
-                    
+
                 } else {
                     Spacer()
                         .frame(height: 34)
@@ -96,7 +96,7 @@ struct MiniView: View {
                         }
                         Spacer()
                         if appArguments.progressBar.present {
-                            
+
                             MiniProgressView(observedData: observedData)
                         }
                     }

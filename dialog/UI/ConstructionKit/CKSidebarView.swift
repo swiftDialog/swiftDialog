@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct CKSidebarView: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
     }
-    
+
     var body: some View {
         VStack { // icon and icon overlay
             VStack {
@@ -85,7 +85,7 @@ struct CKSidebarView: View {
                     TextField("ck-infotext".localized, text: $observedData.args.infoText.value)
                 }
             }
-            
+
         }
         .padding(20)
         Spacer()

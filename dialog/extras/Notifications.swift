@@ -17,10 +17,10 @@ func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent noti
 }
 
 func sendNotification(title: String = "", subtitle: String = "", message: String = "", image: String = "") {
-    
-    
+
+
     let tempImagePath: String = "/var/tmp/sdnotification.png"
-    
+
     let notification = UNUserNotificationCenter.current()
     notification.requestAuthorization(options: [.alert, .sound]) { _, error in
         if let error = error {
@@ -28,11 +28,11 @@ func sendNotification(title: String = "", subtitle: String = "", message: String
             print("Check to see if Notifications for Dialog.app are enabled in notification center")
         }
     }
-    
+
     notification.getNotificationSettings { settings in
         guard (settings.authorizationStatus == .authorized) ||
                   (settings.authorizationStatus == .provisional) else { return }
-        
+
         switch settings.authorizationStatus {
             case .authorized:
                 let content = UNMutableNotificationContent()
@@ -54,7 +54,7 @@ func sendNotification(title: String = "", subtitle: String = "", message: String
                     } else {
                         importedImage = getImageFromPath(fileImagePath: image, returnErrorImage: true)
                     }
-                    
+
                     // need to save a temp version of the image for the notification to be able to load it
                     savePNG(image: importedImage, path: tempImagePath)
                     do {
@@ -64,14 +64,14 @@ func sendNotification(title: String = "", subtitle: String = "", message: String
                     } catch let error {
                         print(error.localizedDescription)
                     }
-                    
+
                 }
-                
+
                 // Create the request
                 let uuidString = UUID().uuidString
                 let request = UNNotificationRequest(identifier: uuidString,
                             content: content, trigger: nil)
-            
+
                 // Schedule the request with the system.
                 notification.add(request) { (error) in
                    if error != nil {

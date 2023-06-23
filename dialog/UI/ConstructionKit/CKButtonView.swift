@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct CKButtonView: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
     }
-    
+
     var body: some View {
         VStack { //buttons
             VStack {

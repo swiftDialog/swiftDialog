@@ -118,9 +118,9 @@ struct CommandlineArgument {
 
 
 struct AppVariables {
-    
+
     var cliversion                      = "2.3.0"
-    
+
     // message default strings
     var titleDefault                    = String("default-title".localized)
     var messageDefault                  = String("default-message".localized)
@@ -138,7 +138,7 @@ struct AppVariables {
     var buttonInfoDefault               = String("button-more-info".localized)
     var buttonInfoActionDefault         = String("")
     var button1DefaultAction            = KeyboardShortcut.defaultAction
-    
+
     var helpButtonHoverText             = String("help-hover".localized)
 
     var windowIsMoveable                = Bool(false)
@@ -149,7 +149,7 @@ struct AppVariables {
     // Window Sizes
     var windowWidth                     = CGFloat(820)      // set default dialog width
     var windowHeight                    = CGFloat(380)      // set default dialog height
-    
+
     // Content padding
     var sidePadding                     = CGFloat(15)
     var topPadding                      = CGFloat(10)
@@ -190,20 +190,20 @@ struct AppVariables {
     var messageFontWeight               = Font.Weight.regular
     var messageFontName                 = ""
     var labelFontSize                   = CGFloat(16)
-    
+
     var userInputRequired               = false
-    
+
     var overlayIconScale                = CGFloat(0.40)
     var overlayOffsetX                  = CGFloat(40)
     var overlayOffsetY                  = CGFloat(50)
     var overlayShadow                   = CGFloat(3)
-    
+
     var showHelpMessage                 = Bool(false)
 
     var jsonOut                         = Bool(false)
 
     var willDisturb                     = Bool(false)
-    
+
     var checkboxArray                   = [CheckBoxes]()
     var checkboxControlSize             = ControlSize.mini
     var checkboxControlStyle            = ""
@@ -328,7 +328,7 @@ struct CommandLineArguments {
     var autoPlay                 = CommandlineArgument(long: "autoplay")
     var blurScreen               = CommandlineArgument(long: "blurscreen", isbool: true)
     var notification             = CommandlineArgument(long: "notification", isbool: true)
-    
+
     var constructionKit          = CommandlineArgument(long: "builder", isbool: true)
     var movableWindow            = CommandlineArgument(long: "moveable", short: "o", isbool: true)
     var forceOnTop               = CommandlineArgument(long: "ontop", short: "p", isbool: true)

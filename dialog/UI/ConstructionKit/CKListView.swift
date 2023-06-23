@@ -8,19 +8,19 @@
 import SwiftUI
 
 struct CKListView: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
-        
+
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
     }
-    
+
     func removeItems(at offsets: IndexSet) {
         observedData.listItemsArray.remove(atOffsets: offsets)
     }
-    
+
     let statusTypeArray = ["wait","success","fail","error","pending","progress"]
-    
+
     var body: some View {
         VStack {
             HStack {
@@ -32,17 +32,17 @@ struct CKListView: View {
                 })
                 Toggle("ck-show".localized, isOn: $observedData.args.listItem.present)
                     .toggleStyle(.switch)
-                
+
                 //Button("Clear All") {
                 //    observedData.listItemPresent = false
                 //    observedData.listItemsArray = [ListItems]()
                 //}
-                
+
                 Spacer()
             }
-            
+
             //ForEach(observedData.listItemsArray, id: \.self)
-            
+
             ForEach(0..<observedData.listItemsArray.count, id: \.self) { item in
                 HStack {
                     Button(action: {

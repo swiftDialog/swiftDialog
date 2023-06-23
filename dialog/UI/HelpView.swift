@@ -10,13 +10,13 @@ import MarkdownUI
 
 struct HelpView: View {
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     //var markdownStyle: MarkdownStyle = MarkdownStyle(font: .system(size: appvars.messageFontSize, weight: appvars.messageFontWeight), foregroundColor: .primary)
-    
+
     init(observedContent: DialogUpdatableContent) {
         self.observedData = observedContent
     }
-    
+
     var body: some View {
         VStack {
             Image(systemName: "questionmark.circle.fill")

@@ -116,12 +116,12 @@ func placeWindow(_ window: NSWindow, size: CGSize? = nil) {
     } else {
         windowSize = size ?? window.frame.size
     }
-    
+
     let windowX = calculateWindowXPos(screenWidth: visibleFrame.width - windowSize.width, position: appvars.windowPositionHorozontal)
     let windowY = calculateWindowYPos(screenHeight: visibleFrame.height - windowSize.height, position: appvars.windowPositionVertical)
-    
+
     let desiredOrigin = CGPoint(x: visibleFrame.origin.x + windowX, y: visibleFrame.origin.y + windowY)
     window.setContentSize(windowSize)
     window.setFrameOrigin(desiredOrigin)
 }
- 
+

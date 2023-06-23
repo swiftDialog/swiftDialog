@@ -9,9 +9,9 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct TextEntryView: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     var fieldwidth: CGFloat = 0
 
     init(observedDialogContent: DialogUpdatableContent) {
@@ -93,11 +93,11 @@ struct TextEntryView: View {
                                     }
                                 } else {
                                     TextField(observedData.appProperties.textFields[index].prompt, text: $observedData.appProperties.textFields[index].value)
-                                        
+
                                 }
                             }
                             .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
-                            
+
                             .overlay(RoundedRectangle(cornerRadius: 5)
                                         .stroke(observedData.appProperties.textFields[index].requiredTextfieldHighlight, lineWidth: 2)
                                         .animation(

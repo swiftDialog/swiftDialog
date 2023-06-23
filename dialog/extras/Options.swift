@@ -13,7 +13,7 @@ func CLOptionMultiOptions (optionName: String) -> Array<String> {
     var optionsArray: Array = [String]()
     var argIndex = 0
     for argument in CommandLine.arguments {
-        
+
         if argument == "--\(optionName)" {
             optionsArray.append(CommandLine.arguments[argIndex+1])
         }
@@ -26,15 +26,15 @@ func CLOptionMultiOptions (optionName: String) -> Array<String> {
 func CLOptionText(optionName: CommandlineArgument, defaultValue: String? = "") -> String {
     // Determine if argument is present.
     var CLOptionTextValue = ""
-    
+
     if let commandIndex = [CommandLine.arguments.firstIndex(of: "--\(optionName.long)"), CommandLine.arguments.firstIndex(of: "-\(optionName.short)")].compactMap({$0}).first {
         // Get next index and ensure it's not out of bounds.
-        
+
         if commandIndex == CommandLine.arguments.count-1 {
             // the command being passed in is the last item so just return the default value
             CLOptionTextValue = defaultValue ?? ""
         }
- 
+
         let valueIndex = CommandLine.arguments.index(after: commandIndex)
         if valueIndex >= CommandLine.arguments.startIndex
             && valueIndex < CommandLine.arguments.endIndex {

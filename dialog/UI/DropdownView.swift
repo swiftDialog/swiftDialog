@@ -11,23 +11,23 @@ import Combine
 
 
 struct DropdownView: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
     @State var selectedOption: [String]
 
     var fieldwidth: CGFloat = 0
-    
+
     var dropdownCount = 0
-    
+
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
-        
+
         if !observedDialogContent.args.hideIcon.present {
             fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value)
         } else {
             fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value) - string2float(string: observedDialogContent.args.iconSize.value)
         }
-                
+
         var defaultOptions: [String] = []
         for index in 0..<observedDialogContent.appProperties.dropdownItems.count {
             defaultOptions.append(observedDialogContent.appProperties.dropdownItems[index].defaultValue)
@@ -43,12 +43,12 @@ struct DropdownView: View {
             }
         }
         _selectedOption = State(initialValue: defaultOptions)
-        
+
         if dropdownCount > 0 {
             writeLog("Displaying select list")
         }
     }
-        
+
     var body: some View {
         if observedData.args.dropdownValues.present && dropdownCount > 0 {
             VStack {
@@ -93,7 +93,7 @@ struct DropdownView: View {
             .padding(10)
             .background(Color.background.opacity(0.5))
             .cornerRadius(8)
-        
+
         }
     }
 }

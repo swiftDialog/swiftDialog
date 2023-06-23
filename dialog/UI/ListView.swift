@@ -8,17 +8,17 @@
 import SwiftUI
 
 struct StatusImage: View {
-    
+
     var name: String
     var colour: Color
     var statusSize: CGFloat
-    
+
     init(name: String, colour: Color, size: CGFloat) {
         self.name = name
         self.colour = colour
         self.statusSize = size
     }
-    
+
     var body: some View {
         Image(systemName: name)
             .resizable()
@@ -30,22 +30,22 @@ struct StatusImage: View {
 }
 
 struct ListView: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     var rowHeight: CGFloat
     var rowStatusHeight: CGFloat
     var rowFontSize: CGFloat
     var proportionalListHeight: CGFloat
-    
+
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
-        
+
         rowHeight = observedDialogContent.appProperties.messageFontSize + 14
         rowStatusHeight = observedDialogContent.appProperties.messageFontSize + 5
         rowFontSize = observedDialogContent.appProperties.messageFontSize
         proportionalListHeight = 0
-        
+
         if appArguments.listStyle.present {
             switch appArguments.listStyle.value {
             case "expanded":
@@ -59,8 +59,8 @@ struct ListView: View {
             }
         }
     }
-    
-    
+
+
     var body: some View {
         if observedData.args.listItem.present {
             let _ = writeLog("Displaying listitems")
@@ -159,7 +159,7 @@ public struct CircularProgressViewStyle: ProgressViewStyle {
     private let lineWidth: CGFloat = 3
     private let defaultProgress = 0.0
     private let gradient = LinearGradient(colors: [.purple, .blue], startPoint: .leading, endPoint: .trailing)
-    
+
     public func makeBody(configuration: ProgressViewStyleConfiguration) -> some View {
         ZStack {
             configuration.label
@@ -167,7 +167,7 @@ public struct CircularProgressViewStyle: ProgressViewStyle {
             configuration.currentValueLabel
         }
     }
-    
+
     private func progressCircleView(fractionCompleted: Double) -> some View {
         Circle()
             .stroke(gradient, lineWidth: lineWidth)
@@ -175,7 +175,7 @@ public struct CircularProgressViewStyle: ProgressViewStyle {
             .overlay(progressFill(fractionCompleted: fractionCompleted))
             .frame(width: size, height: size)
     }
-    
+
     private func progressFill(fractionCompleted: Double) -> some View {
         Circle()
             .trim(from: 0, to: CGFloat(fractionCompleted))

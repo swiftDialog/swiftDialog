@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct ErrorView: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     init(observedContent: DialogUpdatableContent) {
         self.observedData = observedContent
     }
-    
+
     var body: some View {
         VStack {
             ZStack {

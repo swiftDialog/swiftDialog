@@ -9,20 +9,20 @@ import Foundation
 import SwiftUI
 
 struct BannerImageView: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     var bannerImage: NSImage
     var bannerHeight: CGFloat = 0
     var bannerWidth: CGFloat = 0
     let maxBannerHeight: CGFloat = 150
-    
+
     let blurRadius: CGFloat = 3
     let opacity: CGFloat = 0.5
     let blurOffset: CGFloat = 2
-    
+
     let size: CGFloat
-        
+
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
         writeLog("Displaying banner image \(observedDialogContent.args.bannerImage.value)")
@@ -34,7 +34,7 @@ struct BannerImageView: View {
         }
         size = observedDialogContent.appProperties.titleFontSize
     }
-    
+
     var body: some View {
         ZStack {
             Image(nsImage: bannerImage)

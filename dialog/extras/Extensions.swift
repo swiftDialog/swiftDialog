@@ -25,7 +25,7 @@ extension Color {
     static let background = Color(NSColor.windowBackgroundColor)
     static let secondaryBackground = Color(NSColor.underPageBackgroundColor)
     static let tertiaryBackground = Color(NSColor.controlBackgroundColor)
-    
+
     static let code = Color(
         light: Color(rgba: 0xdc1c_50ff), dark: Color(rgba: 0xdb58_7bff)
     )
@@ -107,7 +107,7 @@ extension String {
                 .map { Range($0.range, in: self)! }
                 .flatMap { [ $0.lowerBound, $0.upperBound ] }
             + [endIndex]
-            
+
             return zip(splits, splits.dropFirst())
                 .map { String(self[$0 ..< $1])}
         } catch {
@@ -133,7 +133,7 @@ extension StringProtocol {
 
 struct OverflowContentViewModifier: ViewModifier {
     @State private var contentOverflow: Bool = false
-    
+
     func body(content: Content) -> some View {
         GeometryReader { geometry in
             content

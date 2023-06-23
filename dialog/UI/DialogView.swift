@@ -11,11 +11,11 @@ import SwiftUI
 import AppKit
 
 struct DialogView: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     var iconDisplayWidth: CGFloat
-    
+
     init(observedDialogContent: DialogUpdatableContent) {
         if !observedDialogContent.args.iconOption.present { //} appvars.iconIsHidden {
             writeLog("Icon is hidden")
@@ -25,8 +25,8 @@ struct DialogView: View {
         }
         self.observedData = observedDialogContent
     }
-    
-    
+
+
     var body: some View {
         VStack { //}(alignment: .top, spacing: nil) {
             if observedData.args.video.present {
@@ -51,7 +51,7 @@ struct DialogView: View {
                         .padding(.leading, observedData.appProperties.sidePadding+10)
                         .padding(.trailing, observedData.appProperties.sidePadding+10)
                     }
-                    
+
                     MessageContent(observedDialogContent: observedData)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                 }

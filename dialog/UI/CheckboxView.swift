@@ -9,10 +9,10 @@ import SwiftUI
 
 struct RenderToggles: View {
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     var iconPresent: Bool = false
     var rowHeight: CGFloat = 10
-    
+
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
         if observedData.appProperties.checkboxControlSize == .large {
@@ -20,13 +20,13 @@ struct RenderToggles: View {
         } else {
             rowHeight = observedData.appProperties.messageFontSize + 14
         }
-        
+
         iconPresent = observedData.appProperties.checkboxArray.contains { $0.icon != "" }
         if iconPresent {
             writeLog("One or more switches have an acssociated icon")
         }
     }
-    
+
     var body: some View {
         VStack {
             ForEach(0..<observedData.appProperties.checkboxArray.count, id: \.self) {index in
@@ -59,7 +59,7 @@ struct RenderToggles: View {
                 }
                 .frame(alignment: .center)
                 .frame(width: .infinity)
-                
+
                 // Horozontal Line
                 if index < observedData.appProperties.checkboxArray.count-1 {
                     Divider().opacity(0.5)
@@ -74,14 +74,14 @@ struct RenderToggles: View {
 }
 
 struct CheckboxView: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     var toggleStyle: any ToggleStyle = .checkbox
-    
+
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
-        
+
     }
 
     var body: some View {

@@ -8,17 +8,17 @@
 import SwiftUI
 
 struct CKBasicsView: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     let alignmentArray = ["left", "centre", "right"]
-    
+
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
     }
-    
+
     var body: some View {
-        
+
         VStack {
             LabelView(label: "ck-title".localized)
             HStack {
@@ -34,7 +34,7 @@ struct CKBasicsView: View {
                 TextField("ck-value", value: $observedData.appProperties.titleFontSize, formatter: NumberFormatter())
                     .frame(width: 50)
             }
-            
+
             LabelView(label: "ck-message".localized)
             HStack {
                 Picker("ck-textalignment".localized, selection: $observedData.args.messageAlignment.value) {

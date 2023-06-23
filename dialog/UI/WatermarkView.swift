@@ -12,17 +12,17 @@ struct WatermarkView: View {
     var imageOpacity: Double
     var imagePosition: Alignment = .leading
     var imageAlignmentGuite: Alignment = .center
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     init(observedContent: DialogUpdatableContent) {
         self.observedData = observedContent
 
         mainImage = getImageFromPath(fileImagePath: observedContent.args.watermarkImage.value)
         imageOpacity = Double(observedContent.args.watermarkAlpha.value) ??  0.5
-        
+
         writeLog("Displaying background layer with image \(observedContent.args.watermarkImage.value) and alpha value \(observedContent.args.watermarkAlpha.value)")
-        
+
         switch observedData.args.watermarkPosition.value {
         case "left":
             imagePosition = .leading
@@ -46,7 +46,7 @@ struct WatermarkView: View {
             imagePosition = .center
         }
     }
-    
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -64,7 +64,7 @@ struct WatermarkView: View {
                     Image(nsImage: mainImage)
                         .opacity(imageOpacity)
                 }
-                
+
             }
             .frame(maxWidth: geometry.size.width, maxHeight: geometry.size.height, alignment: imagePosition)
         }

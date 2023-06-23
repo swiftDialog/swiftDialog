@@ -9,21 +9,21 @@ import Foundation
 import SwiftUI
 
 struct ButtonView: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
 
     var button1action: String = ""
     var buttonShellAction: Bool = false
-    
+
     var defaultExit: Int32 = 0
     var cancelExit: Int32 = 2
     var infoExit: Int32 = 3
-    
+
     let timer = Timer.publish(every: 3.0, on: .main, in: .common).autoconnect() //trigger after 4 seconds
-    
+
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
-        
+
         if observedDialogContent.args.button1ShellActionOption.present {
             writeLog("Using button 1 shell action")
             button1action = observedDialogContent.args.button1ShellActionOption.value
@@ -33,7 +33,7 @@ struct ButtonView: View {
             button1action = observedDialogContent.args.button1ActionOption.value
         }
     }
-    
+
     var body: some View {
         //secondary button
         Spacer()
@@ -56,7 +56,7 @@ struct ButtonView: View {
 
         Button(action: {
             buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction, observedObject: observedData)
-            
+
         }, label: {
             Text(button1Text)
                 .frame(minWidth: 40, alignment: .center)
@@ -75,11 +75,11 @@ struct ButtonView: View {
 
 struct HelpButton: View {
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
     }
-    
+
     var body: some View {
         if observedData.args.helpMessage.present {
             Button(action: {
@@ -103,7 +103,7 @@ struct HelpButton: View {
             }
         }
     }
-    
+
 }
 
 struct HelpButtonStyle: ButtonStyle {
@@ -121,13 +121,13 @@ struct HelpButtonStyle: ButtonStyle {
     }
 }
 
-struct MoreInfoButton: View {    
+struct MoreInfoButton: View {
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
     }
-    
+
     var body: some View {
         HStack {
             Button(action: {
@@ -150,5 +150,5 @@ struct MoreInfoButton: View {
             }
         }
     }
-    
+
 }

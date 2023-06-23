@@ -9,7 +9,7 @@
 
 struct SDHelp {
     var argument: CommandLineArguments
-    
+
     public func printHelpShort() {
         writeLog("Printing short help")
         print("swiftDialog v\(getVersionString())")
@@ -29,7 +29,7 @@ struct SDHelp {
             }
         }
     }
-    
+
     public func printHelpLong(for selectedArg: String) {
         writeLog("Printing long help for \(selectedArg)")
         let mirror = Mirror(reflecting: argument)
@@ -49,20 +49,20 @@ struct SDHelp {
         }
         print("No argument found with the given name: \(selectedArg)")
     }
-    
+
     init(arguments: CommandLineArguments) {
         argument = arguments
-        
+
         argument.titleOption.helpShort = "Set the Dialog title"
         argument.titleOption.helpLong = """
         Text beyond the length of the title area will get truncated
         Default Title is \"\(appvars.titleDefault)\"
         Use keyword "none" to disable the title area entirely
 """
-        
+
         argument.subTitleOption.helpShort = "Text to use as subtitle when sending a system notification"
         argument.subTitleOption.helpLong = "\tFor additional information see --\(appArguments.notification.long))"
-        
+
         argument.titleFont.helpShort = "Lets you modify the title text of the dialog"
         argument.titleFont.helpLong = """
         Can accept up to three parameters, in a comma seperated list, to modify font properties.
@@ -83,7 +83,7 @@ struct SDHelp {
         Example1: \"colour=#00A4C7,weight=light,size=60\"
         Example2: \"name=Chalkboard,colour=#FFD012,size=40\"
 """
-        
+
         argument.messageOption.helpShort = "Set the dialog message"
         argument.messageOption.helpLong = """
         Messages can be plain text or can include Markdown
@@ -91,14 +91,14 @@ struct SDHelp {
         The message can be of any length. If it is larger than the viewable area
         The message contents will be presented in  scrolable area.
 """
-        
+
         argument.messageAlignment.helpShort = "Set the message alignment"
         argument.messageAlignment.helpUsage = "[left | centre | center | right]"
         argument.messageAlignment.helpLong = """
         Positions the message within the dialog window
         Default is 'left' aligned
 """
-        
+
         argument.messageVerticalAlignment.helpShort = "Set the message position"
         argument.messageVerticalAlignment.helpUsage = "[top | centre | center | bottom]"
         argument.messageVerticalAlignment.helpLong = """
@@ -112,7 +112,7 @@ struct SDHelp {
             Text entry fields
             Dropdown lists
 """
-        
+
         argument.messageFont.helpShort = "Set the message font of the dialog"
         argument.messageFont.helpLong = """
         Can accept up to three parameters, in a comma seperated list, to modify font properties.
@@ -135,7 +135,7 @@ struct SDHelp {
 
         ## CAUTION : Results may be unexpected when mixing font names and weights with markdown
 """
-        
+
         argument.notification.helpShort = "Send a system notification"
         argument.notification.helpLong = """
         Accepts the following arguments:
@@ -146,13 +146,13 @@ struct SDHelp {
 
         * <image> must refer to a local file or app bundle. remote images sources are not supported.
 """
-        
+
         argument.webcontent.helpShort = "Display a web page"
         argument.webcontent.helpUsage = "<url>"
         argument.webcontent.helpLong = """
         Will render a web view within the dialog message area
 """
-        
+
         argument.mainImage.helpShort = "Display an image"
         argument.mainImage.helpUsage = "<file> | <url>"
         argument.mainImage.helpLong = """
@@ -163,29 +163,29 @@ struct SDHelp {
 
         Multiple --\(appArguments.mainImage.long) arguments can be used which will display the images as a carosel in argument order
 """
-        
+
         argument.mainImageCaption.helpShort = "Display a caption underneath an image"
         argument.mainImageCaption.helpLong = ""
-        
+
         argument.video.helpShort = "Display a video"
         argument.video.helpUsage = "<file> | <url>"
         argument.video.helpLong = """
         Videos will be resized to fit the available display area without clipping the video
         Default dialog window size is changed to \(appvars.videoWindowWidth) x \(appvars.videoWindowHeight)
-        
+
         --\(appArguments.videoCaption.long) <text>
             Text that will appear underneath the displayed video.
 
         --\(appArguments.autoPlay.long)
             Will force the video to start playing automatically.
 """
-        
+
         argument.videoCaption.helpShort = "Display a caption underneath a video"
         argument.videoCaption.helpLong = ""
-        
+
         argument.autoPlay.helpShort = "Enable video autoplay"
         argument.autoPlay.helpLong = ""
-        
+
         argument.iconOption.helpShort = "Set the dialog icon"
         argument.iconOption.helpUsage = "<file> | <url>"
         argument.iconOption.helpLong = """
@@ -201,11 +201,11 @@ struct SDHelp {
 
         "none" can also be specified to not display an icon but maintain layout (see also --\(appArguments.hideIcon.long))
 """
-        
+
         argument.iconSize.helpShort = "Set the dialog icon size"
         argument.iconSize.helpUsage = "<num>"
         argument.iconSize.helpLong = "Default size is 150"
-        
+
         argument.iconAlpha.helpShort = "Set the dialog icon transparancy"
         argument.iconAlpha.helpUsage = "<num>"
         argument.iconAlpha.helpLong = """
@@ -213,19 +213,19 @@ struct SDHelp {
         Where 0.0 is completly transparant and 1.0 is completly opaque
 
         The default value is 1.0
-        
+
 """
-        
+
         argument.centreIcon.helpShort = "Set icon to be in the centre"
         argument.centreIcon.helpLong = """
         re-positions the icon to be in the centre, between the title and message areas
 """
-        
+
         argument.overlayIconOption.helpShort = "Set an image to display as an overlay to --icon"
         argument.overlayIconOption.helpUsage = "<file> | <url>"
         argument.overlayIconOption.helpLong = """
         Icon overlays are displayed at 1/2 resolution to the main icon and positioned to the bottom right
-        
+
         Acceptable Values:
             file path to png or jpg           -  "/file/path/image.[png|jpg]"
             file path to Application          -  "/Applications/Chess.app"
@@ -264,18 +264,18 @@ struct SDHelp {
         weight=<text>                     - accepts any of the following values:
                                            thin (default), light, regular, medium, heavy, bold
 """
-        
+
         argument.hideIcon.helpShort = "Hides the icon from view"
         argument.hideIcon.helpLong = """
         Doing so increases the space available for message text
 """
-        
+
         argument.button1TextOption.helpShort = "Set the label for Button1"
         argument.button1TextOption.helpLong = """
         Default label is "\(appvars.button1Default)"
         Bound to <Enter> key
 """
-        
+
         argument.button1ActionOption.helpShort = "Set the Button1 action"
         argument.button1ActionOption.helpUsage = "<url>"
         argument.button1ActionOption.helpLong = """
@@ -283,13 +283,13 @@ struct SDHelp {
         Default action if not specified is no action
         Return code when actioned is 0
 """
-        
+
         argument.button1Disabled.helpShort = "Disable Button1"
         argument.button1Disabled.helpLong = """
         Launches swiftDialog with button1 disabled
         To re-enable, send `buton1: enable` to the dialog command file.
 """
-        
+
         argument.button2Option.helpShort = "Displays Button2"
         argument.button2Option.helpUsage = ""
         argument.button2Option.helpLong = """
@@ -298,38 +298,38 @@ struct SDHelp {
         Bound to <ESC> key
         Return code when actioned is 2
 """
-        
+
         argument.button2TextOption.helpShort = "Displays Button2 with <text>"
         argument.button2TextOption.helpLong = """
         Set the label for Button2
         Bound to <ESC> key
         Return code when actioned is 2
 """
-        
+
         argument.button2ActionOption.helpShort = "Custom Actions For Button 2 Is Not Implemented"
         argument.button2ActionOption.helpLong = """
         -- Setting Custon Actions For Button 2 Is Not Implemented at this time --
 """
-        
+
         argument.button2Disabled.helpShort = "Disable Button2"
         argument.button2Disabled.helpLong = """
         Launches swiftDialog with button2 disabled
         To re-enable, send `buton2: enable` to the dialog command file.
 """
-        
+
         argument.infoButtonOption.helpShort = "Displays info button"
         argument.infoButtonOption.helpUsage = ""
         argument.infoButtonOption.helpLong = """
         Default label is "\(appvars.buttonInfoDefault)"
 """
-        
+
         argument.buttonInfoTextOption.helpShort = "Displays info button with <text>"
         argument.buttonInfoTextOption.helpLong = """
         Set the label for the info button
         If not specified, Info button will not be displayed
         Return code when actioned is 3
 """
-        
+
         argument.buttonInfoActionOption.helpShort = "Set the info button action"
         argument.buttonInfoActionOption.helpUsage = "<url>"
         argument.buttonInfoActionOption.helpLong = """
@@ -337,21 +337,21 @@ struct SDHelp {
         button from triggering a dialog exit
         Default action if not specified is to exit with return code 3
 """
-        
-        
+
+
         argument.infoText.helpShort = "Display <text> in place of info button"
         argument.infoText.helpLong = """
         Will display the specified text in place of the info button
         If no text is supplied, will display the current swiftDialog version
 """
-        
+
         argument.infoBox.helpShort = "Display <text> in info box"
         argument.infoBox.helpLong = """
         Will display the specified text in the area underneath the icon when icon is being displayed on the left.
         If icon is hidden or displayed centered, \(appArguments.infoBox.long) will not show
         Markdown is supported
 """
-        
+
         argument.helpMessage.helpShort = "Enable help button with contect <text>"
         argument.helpMessage.helpLong = """
         Will display a help icon to the right of the the default button
@@ -359,24 +359,24 @@ struct SDHelp {
         Supports markdown for formatting.
 
 """
-        
+
         argument.quitOnInfo.helpShort = "Quit when info button is selected"
         argument.quitOnInfo.helpUsage = ""
         argument.quitOnInfo.helpLong = """
         Will tell swiftDialog to quit when the info button is selected
         Return code when actioned is 3
 """
-        
+
         argument.fullScreenWindow.helpShort = "Enable full screen view"
         argument.fullScreenWindow.helpUsage = ""
         argument.fullScreenWindow.helpLong = """
         Full screen view takes up the entire display area
 
         In this view, only banner, title, icon and the message area are visible.
-        
+
         No buttons are available but swiftDialog will respond to [Enter], [Esc] and cmd+q keyboard events
 """
-        
+
         argument.blurScreen.helpShort = "Blur screen content behind dialog window"
         argument.blurScreen.helpUsage = ""
         argument.blurScreen.helpLong = """
@@ -384,7 +384,7 @@ struct SDHelp {
 
         All other functions are available but the user is prevented from interacting with any other app until swiftDialog is exited.
 """
-        
+
         argument.progressBar.helpShort = "Enable interactive progress bar"
         argument.progressBar.helpUsage = "[<int>]"
         argument.progressBar.helpLong = """
@@ -393,7 +393,7 @@ struct SDHelp {
 
         If no valid argument is passed, steps defaults to 10
 """
-        
+
         argument.progressText.helpShort = "Enable the progress text with <text>"
         argument.progressText.helpLong = """
         Initiate the progress text are with some useful content.
@@ -401,14 +401,14 @@ struct SDHelp {
 
         Progress text is displayed underneath the progress bar
 """
-        
+
         argument.statusLogFile.helpShort = "Set command file path"
         argument.statusLogFile.helpUsage = "[<file>]"
         argument.statusLogFile.helpLong = """
         Sets the path to the command file swiftDialog will read from to receive updates
         Default file is /var/tmp/dialog.log
 """
-        
+
         argument.bannerImage.helpShort = "Enable banner image"
         argument.bannerImage.helpUsage = "<file> | <url>"
         argument.bannerImage.helpLong = """
@@ -416,24 +416,24 @@ struct SDHelp {
         Banners images fill the entire top width of the window and are resized to fill, positioned from
         the top left corner of the image.
         Specifying this option will imply --\(appArguments.hideIcon.long)
-        
+
         An image size of 850x150 will suit the default dialog window size
 """
-        
+
         argument.bannerTitle.helpShort = "Enable title within banner area"
         argument.bannerTitle.helpLong = """
         Title is displayed on top of the banner image.
         Title font color is set to "white" by default.
-        
+
         Additional --\(appArguments.titleFont.long) paramater "shadow=<bool>". When set to true,
         displays a drop shadow underneath the text
 """
-        
+
         argument.bannerText.helpShort = "Set text to display in banner area"
         argument.bannerText.helpLong = """
         Using this argument is the equavelent of \(argument.bannerTitle.long) and \(argument.titleOption.long)
 """
-        
+
         argument.dropdownTitle.helpShort = "Select list name"
         argument.dropdownTitle.helpUsage = "<text>(,radio|required)"
         argument.dropdownTitle.helpLong = """
@@ -469,7 +469,7 @@ struct SDHelp {
         The ",radio" modifier will change the select list to display a group with radio buttons. When using radio with no default item specified, the first entry in the list will become the default selected item.
         The ",required" modifier will make that particular list a required item that must have a value before swiftDialog will exit
 """
-        
+
         argument.dropdownValues.helpShort = "Select list values"
         argument.dropdownValues.helpUsage = "<csv>"
         argument.dropdownValues.helpLong = """
@@ -484,12 +484,12 @@ struct SDHelp {
 
         see also --\(argument.dropdownTitle.long) and --\(argument.dropdownDefault.long)
 """
-        
+
         argument.dropdownDefault.helpShort = "Default select list value"
         argument.dropdownDefault.helpLong = """
         Default option to be selected (must match one of the items in the list)
 """
-        
+
         argument.textField.helpShort = "Enable a textfield with the specified label"
         argument.textField.helpUsage = "<text>[,required,secure,prompt=\"<text>\"]"
         argument.textField.helpLong = """
@@ -512,7 +512,7 @@ struct SDHelp {
                                        --\(appArguments.textField.long) <text>,regex="\\d{6}",prompt="000000",regexerror="Enter 6 digits"
         (secure fields cannot have the prompt modifier applied)
 """
-        
+
         argument.checkbox.helpShort = "Enable a checkbox with the specified label"
         argument.checkbox.helpLong = """
         When swiftDialog exits the status of the checkbox will be presented as <text> : [true|false]
@@ -521,7 +521,7 @@ struct SDHelp {
 
         Use --\(appArguments.checkboxStyle.long) to change appearance
 """
-        
+
         argument.checkboxStyle.helpShort = "Change the appearance of checkboxes"
         argument.checkboxStyle.helpUsage = "default|checkbox|switch[,<size>]"
         argument.checkboxStyle.helpLong = """
@@ -539,9 +539,9 @@ struct SDHelp {
 
         Additionally in switch style, you can specify an image on (appArguments.checkboxStyle.long):
             --\(appArguments.checkboxStyle.long) "<text>",icon=<path>
-    
+
 """
-        
+
         argument.listItem.helpShort = "Enable a list item with the specified label"
         argument.listItem.helpLong = """
         Multiple items can be added by specifying --\(appArguments.listItem.long) multiple times
@@ -581,19 +581,19 @@ struct SDHelp {
         <index> starts at 0
 
 """
-        
+
         argument.listStyle.helpShort = "Set list style [expanded|compact]"
         argument.listStyle.helpLong = """
         When presenting a list, use of this argument will adjust the vertical spacing between each row.
 """
-        
+
         argument.watermarkImage.helpShort = "Set a dialog background image"
         argument.watermarkImage.helpUsage = "<file>"
         argument.watermarkImage.helpLong = """
         If the image is larger than the default dialog size (820x380) and no window size options are given (specifically window height),
         the dialog window height will be adjusted so the image fills the entire window width, 820 by default or if specified using --\(appArguments.windowWidth.long)
 """
-        
+
         argument.watermarkAlpha.helpShort = "Set background image transparancy"
         argument.watermarkAlpha.helpUsage = "<number>"
         argument.watermarkAlpha.helpLong = """
@@ -602,14 +602,14 @@ struct SDHelp {
         1 is fully opaque
         Default is 0.5
 """
-        
+
         argument.watermarkPosition.helpShort = "Set background image position"
         argument.watermarkPosition.helpUsage = "[topleft | left | bottomleft | top | center/cetre | bottom | topright | right | bottomright]"
         argument.watermarkPosition.helpLong = """
         Positions the background image in the window.
         Default is center
 """
-        
+
         argument.watermarkFill.helpShort = "Set background image fill type"
         argument.watermarkFill.helpUsage = "[fill | fit]"
         argument.watermarkFill.helpLong = """
@@ -617,23 +617,23 @@ struct SDHelp {
         fit  - resizes the image to fit the window but will not truncate
         Default is none which will display the image at its native resolution
 """
-        
+
         argument.watermarkScale.helpShort = "Enable background image scaling"
         argument.watermarkScale.helpUsage = argument.watermarkFill.helpUsage
         argument.watermarkScale.helpLong = argument.watermarkFill.helpLong
-        
+
         argument.windowWidth.helpShort = "Set dialog window width"
         argument.windowWidth.helpUsage = "<number>"
         argument.windowWidth.helpLong = """
         Sets the width of the dialog window to the specified width in points
 """
-        
+
         argument.windowHeight.helpShort = "Set dialog window width"
         argument.windowHeight.helpUsage = "<number>"
         argument.windowHeight.helpLong = """
         Sets the height of the dialog window to the specified height in points
 """
-        
+
         argument.position.helpShort = "Set dialog window position"
         argument.position.helpUsage = "[topleft | left | bottomleft | top | center/centre | bottom | topright | right | bottomright]"
         argument.position.helpLong = """
@@ -641,7 +641,7 @@ struct SDHelp {
 
         Default is a visually appealing position slightly towards the top of centre, not dead centre.
 """
-        
+
         argument.timerBar.helpShort = "Enable countdown timer (with <seconds>)"
         argument.timerBar.helpUsage = "[<seconds>]"
         argument.timerBar.helpLong = """
@@ -653,33 +653,33 @@ struct SDHelp {
         will be displayed but will be disabled for the first 3 seconds of the timer, after which it
         becomes active and can be used to dismiss swiftDialog with the standard button 1 exit code of 0
 """
-        
+
         argument.hideTimerBar.helpShort = "Hide countdown timer if enabled"
         argument.hideTimerBar.helpLong = """
         Will hide the timer bar. swiftDialog will close after time specified by --\(appArguments.timerBar.long)
         Default OK button is displayed. This is to prevent persistant or unclosable dialogs of unknown duration.
 """
-        
+
         argument.movableWindow.helpShort = "Enable dialog to be moveable"
         argument.movableWindow.helpUsage = ""
         argument.movableWindow.helpLong = """
         Let window me moved around the screen. Default is not moveable
 """
-        
+
         argument.forceOnTop.helpShort = "Enable dialog to be always positioned on top of other windows"
         argument.forceOnTop.helpUsage = ""
         argument.forceOnTop.helpLong = """
         Make the window appear above all other windows even when not active
 """
-        
+
         argument.bigWindow.helpShort = "Enable 25% increase in default window size"
         argument.bigWindow.helpUsage = ""
         argument.bigWindow.helpLong = ""
-        
+
         argument.smallWindow.helpShort = "Enable 25% decrease in default window size"
         argument.smallWindow.helpUsage = ""
         argument.smallWindow.helpLong = ""
-        
+
         argument.miniMode.helpShort = "Enable mini mode"
         argument.miniMode.helpUsage = ""
         argument.miniMode.helpLong = """
@@ -688,14 +688,14 @@ struct SDHelp {
         When used with --progress, buttons are replaced by progress bar and progress text.
             * In this presentation, quitting the dialog is acheived with use of the command file.
 """
-        
+
         argument.jsonOutPut.helpShort = "Enable JSON output"
         argument.jsonOutPut.helpUsage = ""
         argument.jsonOutPut.helpLong = """
         Outputs any results in json format for easier processing
         (for dropdown item selections, textfield and checbox responses)
 """
-        
+
         argument.jsonFile.helpShort = "Read dialog settings from JSON formatted <file>"
         argument.jsonFile.helpUsage = "<file>"
         argument.jsonFile.helpLong = """
@@ -730,27 +730,27 @@ struct SDHelp {
             "textfield": ["Text Entry 1", "Text Entry 2", "Text Entry 3"]
         }
 """
-        
+
         argument.jsonString.helpShort = "Read dialog settings from JSON formatted <string>"
         argument.jsonString.helpLong = """
         Same data format as --\(appArguments.jsonFile.long) but passed in as a string on the command line without
         requiring an intermediate file.
 """
-        
+
         argument.quitKey.helpShort = "Set dialog quit key"
         argument.quitKey.helpUsage = "<char>"
         argument.quitKey.helpLong = """
         Use the specified character as the command+ key combination for quitting instead of "q".
         Capitol letters can be used in which case command+shift+<key> will be required
 """
-        
+
         argument.ignoreDND.helpShort = "Ignore user do-not-disturb settings"
         argument.ignoreDND.helpUsage = ""
         argument.ignoreDND.helpLong = """
         Will ignore user Do Not Disturb setting
             (Do Not Disturb detection only works in macOS 11)
 """
-        
+
         argument.jamfHelperMode.helpShort = "Enable jamfHelper mode"
         argument.jamfHelperMode.helpUsage = ""
         argument.jamfHelperMode.helpLong = """
@@ -765,15 +765,15 @@ struct SDHelp {
         swiftDialog will do its best to display jamfHelper content in a swiftDialog-esque way.
         Any unsupported display options will be ignored.
 """
-        
+
         argument.getVersion.helpShort = "Print version string"
         argument.getVersion.helpUsage = ""
         argument.getVersion.helpLong = ""
-        
+
         argument.licence.helpShort = "Print license"
         argument.licence.helpUsage = ""
         argument.licence.helpLong = ""
-        
+
         argument.helpOption.helpShort = "Print help"
         argument.helpOption.helpUsage = "[<argument>]"
         argument.helpOption.helpLong = """
@@ -782,5 +782,5 @@ struct SDHelp {
         Use with an option name as the argument to get detailed information about that argument
 """
     }
-    
+
 }

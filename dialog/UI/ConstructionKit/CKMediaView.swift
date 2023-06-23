@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct CKMediaView: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
-    
-    
+
+
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
     }
-    
+
     var body: some View {
         VStack { //buttons
             VStack {
@@ -38,7 +38,7 @@ struct CKMediaView: View {
                       }
                 TextField("ck-filename".localized, text: $observedData.args.video.value)
                 TextField("ck-caption".localized, text: $observedData.args.videoCaption.value)
-                
+
             }
             VStack {
                 LabelView(label: "ck-web".localized)

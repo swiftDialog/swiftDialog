@@ -10,27 +10,27 @@ import Foundation
 import Combine
 
 struct ImageView: View {
-    
+
     @State var index = 0
-    
+
     var images: Array = [NSImage]()
     var captions: Array = [String]()
     var autoPlaySeconds: CGFloat
-    
-    
+
+
     init(imageArray: [MainImage], captionArray: Array<String>, autoPlaySeconds: CGFloat) {
         for index in 0..<imageArray.count where imageArray[index].path != "" {
             images.append(getImageFromPath(fileImagePath: imageArray[index].path, returnErrorImage: true))
             captions.append(imageArray[index].caption)
         }
-        
+
         self.autoPlaySeconds = autoPlaySeconds
         if !imageArray.isEmpty {
             writeLog("Displaying images")
             writeLog("There are \(imageArray.count) images to display")
         }
     }
-    
+
     var body: some View {
 
         VStack(spacing: 20) {
@@ -58,5 +58,5 @@ struct ImageView: View {
             .clipShape(RoundedRectangle(cornerRadius: 10))
         }
         .border(appvars.debugBorderColour, width: 2)
-    }        
+    }
 }

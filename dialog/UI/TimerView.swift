@@ -9,23 +9,23 @@ import SwiftUI
 import Foundation
 
 struct TimerView: View {
-    
+
     @ObservedObject var observedData: DialogUpdatableContent
-    
+
     @State var progress: CGFloat = 0
     @State var progressWidth: CGFloat
-    
+
     let barheight: CGFloat = 16
     var barRadius: CGFloat
     var barColour = Color.accentColor
-    
+
     var steps: CGFloat // how many steps are there in the width of the progress bar
     var timerSteps: CGFloat
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect() // tick every 1 second
-    
+
     func numToHHMMSS(seconds: Int) -> String {
         var returnTime: String = "0"
-        
+
         if seconds != 0 {
             let hours = (seconds / 3600) % 3600
             let minutes = (seconds / 60) % 60
@@ -44,17 +44,17 @@ struct TimerView: View {
                 } else {
                     returnTime = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
                 }
-                
+
             }
             //return String(format:"%d:%02d", minutes, seconds)
         }
-        
+
         return returnTime
-        
+
     }
-    
+
     var barVisible: Bool
-    
+
     init(progressSteps: CGFloat?, visible: Bool?, observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
         barRadius = barheight/2 // adjusting this affects "roundness"
@@ -66,7 +66,7 @@ struct TimerView: View {
             writeLog("Displaying timer with \(steps) seconds")
         }
     }
-        
+
     var body: some View {
         if barVisible {
             VStack {
@@ -76,7 +76,7 @@ struct TimerView: View {
                     ZStack(alignment: .leading) {
                         Rectangle() // background of the progress bar
                             .fill(Color.secondary.opacity(0.5))
-                        
+
                         Rectangle() // forground, aka "progress" of the progress bar
                             .fill(barColour)
                             .onReceive(timer) { _ in
@@ -135,8 +135,8 @@ struct TimerView: View {
                     }
                 }
         }
-        
-        
+
+
     }
 }
 
