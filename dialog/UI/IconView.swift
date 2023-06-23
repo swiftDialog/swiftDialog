@@ -70,11 +70,9 @@ struct IconView: View {
                 if overlay.range(of: "bgcolour=none") == nil && overlay.range(of: "bgcolor=none") == nil && !["info","warning","caution"].contains(overlay) {
                     var SFValues = overlay.components(separatedBy: ",")
                     SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) }
-                    for value in SFValues {
-                        if value.hasPrefix("bgcolo") {
-                            if let bgColour = value.components(separatedBy: "=").last {
-                                sfBackgroundIconColour = stringToColour(bgColour)
-                            }
+                    for value in SFValues where value.hasPrefix("bgcolo") {
+                        if let bgColour = value.components(separatedBy: "=").last {
+                            sfBackgroundIconColour = stringToColour(bgColour)
                         }
                     }
                     overlayImageBackground = true

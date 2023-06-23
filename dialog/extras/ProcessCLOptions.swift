@@ -138,10 +138,8 @@ func processCLOptions(json: JSON = getJSON()) {
                 appvars.dropdownItems.append(DropDownItems(title: dropdownTitle, values: dropdownValues[i].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[i], selectedValue: dropdownDefaults[i], required: dropdownRequired, style: dropdownStyle))
             }
         }
-        for i in 0..<appvars.dropdownItems.count {
-            if appvars.dropdownItems[i].required {
-                appvars.userInputRequired = true
-            }
+        for i in 0..<appvars.dropdownItems.count where appvars.dropdownItems[i].required {
+            appvars.userInputRequired = true
         }
         writeLog("Processed \(appvars.dropdownItems.count) select items")
     }
@@ -230,12 +228,10 @@ func processCLOptions(json: JSON = getJSON()) {
                             value: fieldValue))
             }
         }
-        for i in 0..<appvars.textFields.count {
-            if appvars.textFields[i].required {
-                appvars.userInputRequired = true
-            }
+        for i in 0..<appvars.textFields.count where appvars.textFields[i].required {
+            appvars.userInputRequired = true
         }
-                                writeLog("textOptionsArray : \(appvars.textFields)")
+        writeLog("textOptionsArray : \(appvars.textFields)")
     }
     
     if appArguments.checkbox.present {
@@ -336,10 +332,8 @@ func processCLOptions(json: JSON = getJSON()) {
             appvars.imageCaptionArray = CLOptionMultiOptions(optionName: appArguments.mainImageCaption.long)
         }
                                 writeLog("imageCaptionArray : \(appvars.imageCaptionArray)")
-        for i in 0..<appvars.imageCaptionArray.count {
-            if i < appvars.imageArray.count {
-                appvars.imageArray[i].caption = appvars.imageCaptionArray[i]
-            }
+        for i in 0..<appvars.imageCaptionArray.count where i < appvars.imageArray.count {
+            appvars.imageArray[i].caption = appvars.imageCaptionArray[i]
         }
     }
     
