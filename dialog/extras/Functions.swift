@@ -222,7 +222,7 @@ func getAppIcon(appPath: String, withSize: CGFloat? = 300) -> NSImage {
     return image
 }
 
-func printVersionString() -> Void {
+func printVersionString() {
     //what it says on the tin
     print(getVersionString())
 }

@@ -22,7 +22,7 @@ class BlurWindowController: NSWindowController {
     }
         
     override func loadWindow() {
-        window = BlurWindow(contentRect: NSMakeRect(0, 0, 100, 100), styleMask: [], backing: .buffered, defer: true)
+        window = BlurWindow(contentRect: CGRect(x: 0, y: 0, width: 100, height: 100), styleMask: [], backing: .buffered, defer: true)
         self.window?.contentViewController = BlurViewController()
         self.window?.setFrame((allScreens.frame), display: true)
         self.window?.collectionBehavior = [.canJoinAllSpaces]
