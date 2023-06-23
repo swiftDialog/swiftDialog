@@ -36,7 +36,7 @@ struct VideoView: View {
     var body: some View {
         VStack {
             if embeddedContent {
-                WebView(url: playerURL) { webView in
+                WebView(url: playerURL) { _ in
                 }
             } else {
                 VideoPlayer(player: player)

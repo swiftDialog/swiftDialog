@@ -22,7 +22,7 @@ func sendNotification(title: String = "", subtitle: String = "", message: String
     let tempImagePath: String = "/var/tmp/sdnotification.png"
     
     let notification = UNUserNotificationCenter.current()
-    notification.requestAuthorization(options: [.alert, .sound]) { granted, error in
+    notification.requestAuthorization(options: [.alert, .sound]) { _, error in
         if let error = error {
             print("Notifications are not available: \(error.localizedDescription as Any)")
             print("Check to see if Notifications for Dialog.app are enabled in notification center")

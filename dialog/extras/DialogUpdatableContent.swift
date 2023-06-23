@@ -41,7 +41,7 @@ class FileReader {
         }
         fileHandle?.waitForDataInBackgroundAndNotify()
         
-        dataAvailable = NotificationCenter.default.addObserver(forName: NSNotification.Name.NSFileHandleDataAvailable, object: self.fileHandle, queue: nil) { notification in
+        dataAvailable = NotificationCenter.default.addObserver(forName: NSNotification.Name.NSFileHandleDataAvailable, object: self.fileHandle, queue: nil) { _ in
             if let data = self.fileHandle?.availableData,
                data.count > 0 {
                 self.parseAndPrint(data: data)
@@ -58,7 +58,7 @@ class FileReader {
         }
         
         dataReady = NotificationCenter.default.addObserver(forName: Process.didTerminateNotification,
-                                                           object: self.fileHandle, queue: nil) { notification -> Void in
+                                                           object: self.fileHandle, queue: nil) { _ -> Void in
                                                             NSLog("Task terminated!")
             NotificationCenter.default.removeObserver(self.dataReady as Any)
         }

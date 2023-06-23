@@ -76,7 +76,7 @@ struct WindowAccessor: NSViewRepresentable {
         private func monitorClosing(of window: NSWindow) {
             NotificationCenter.default
                 .publisher(for: NSWindow.willCloseNotification, object: window)
-                .sink { [weak self] notification in
+                .sink { [weak self] _ in
                     guard let self = self else { return }
                     self.onChange(nil)
                     self.cancellables.removeAll()
