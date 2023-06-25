@@ -12,7 +12,7 @@ import MarkdownUI
 struct MessageContent: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
-    @State private var contentHeight: CGFloat = 40
+    @State private var messageHeight: CGFloat = 100
 
     var fieldPadding: CGFloat = 15
     var dataEntryMaxWidth: CGFloat = 700
@@ -20,16 +20,6 @@ struct MessageContent: View {
     var messageColour: Color
 
     var iconDisplayWidth: CGFloat
-
-    /*
-    var markdownStyle: MarkdownStyle {
-        if observedData.appProperties.messageFontName == "" {
-            return MarkdownStyle(font: .system(size: appvars.messageFontSize, weight: appvars.messageFontWeight), foregroundColor: messageColour)
-        } else {
-            return MarkdownStyle(font: .custom(appvars.messageFontName, size: appvars.messageFontSize), foregroundColor: messageColour)
-        }
-    }
-    */
 
     let theAllignment: Alignment = .topLeading
 
@@ -79,11 +69,17 @@ struct MessageContent: View {
                     if ["centre", "center"].contains(observedData.args.messageVerticalAlignment.value) {
                         Spacer()
                     }
-                    GeometryReader { geometry in
+                    GeometryReader { messageGeometry in
                         Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                            .frame(width: geometry.size.width, alignment: observedData.appProperties.messagePosition)
+                            .frame(width: messageGeometry.size.width, alignment: observedData.appProperties.messagePosition)
                             .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                            .fixedSize()
+                            .background(GeometryReader {child -> Color in
+                                            DispatchQueue.main.async {
+                                                // update on next cycle with calculated height
+                                                    self.messageHeight = child.size.height
+                                            }
+                                            return Color.clear
+                                        })
                             .markdownTheme(.sdMarkdown)
                             .markdownTextStyle {
                                 FontSize(appvars.messageFontSize)
@@ -92,8 +88,8 @@ struct MessageContent: View {
                             .accessibilityHint(observedData.args.messageOption.value)
                             .focusable(false)
                             .scrollOnOverflow()
-                            //.wrappedInScrollView(when: !observedData.args.webcontent.present && !observedData.args.listItem.present && !observedData.args.messageVerticalAlignment.present)
                     }
+                    .frame(maxHeight: messageHeight)
 
                 }
                 if ["centre", "center"].contains(observedData.args.messageVerticalAlignment.value) {
