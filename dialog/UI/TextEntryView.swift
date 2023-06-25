@@ -68,10 +68,17 @@ struct TextEntryView: View {
                                     if observedData.appProperties.textFields[index].fileType != "" {
                                         var fileTypesArray: [UTType] = []
                                         for type in observedData.appProperties.textFields[index].fileType.components(separatedBy: " ") {
-                                            if type == "folder" {
+                                            switch type {
+                                            case "folder":
                                                 panel.canChooseDirectories = true
-                                            } else {
-                                                fileTypesArray.append(UTType(filenameExtension: type) ?? .text)
+                                            case "image":
+                                                fileTypesArray.append(UTType.image)
+                                            case "movie","video":
+                                                fileTypesArray.append(UTType.movie)
+                                            case "audio":
+                                                fileTypesArray.append(UTType.audio)
+                                            default:
+                                                fileTypesArray.append(UTType(filenameExtension: type) ?? .item)
                                             }
                                         }
                                         panel.allowedContentTypes = fileTypesArray
