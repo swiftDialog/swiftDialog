@@ -83,6 +83,7 @@ struct MessageContent: View {
                         Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
                             .frame(width: geometry.size.width, alignment: observedData.appProperties.messagePosition)
                             .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                            .fixedSize()
                             .markdownTheme(.sdMarkdown)
                             .markdownTextStyle {
                                 FontSize(appvars.messageFontSize)
