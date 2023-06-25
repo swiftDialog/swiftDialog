@@ -16,6 +16,9 @@ struct DialogView: View {
 
     var iconDisplayWidth: CGFloat
 
+    var showSideBar: Bool = true
+    var showInfoBox: Bool = false
+
     init(observedDialogContent: DialogUpdatableContent) {
         if !observedDialogContent.args.iconOption.present { //} appvars.iconIsHidden {
             writeLog("Icon is hidden")
@@ -23,6 +26,8 @@ struct DialogView: View {
         } else {
             iconDisplayWidth = observedDialogContent.iconSize
         }
+        showSideBar = observedDialogContent.args.iconOption.present && !observedDialogContent.args.centreIcon.present && observedDialogContent.args.iconOption.value != "none"
+        showInfoBox = observedDialogContent.args.infoBox.present
         self.observedData = observedDialogContent
     }
 
@@ -32,29 +37,30 @@ struct DialogView: View {
             if observedData.args.video.present {
                 VideoView(videourl: observedData.args.video.value, autoplay: observedData.args.autoPlay.present, caption: observedData.args.videoCaption.value)
             } else {
-                HStack {
-                    VStack {
-                        if observedData.args.iconOption.present && !observedData.args.centreIcon.present && observedData.args.iconOption.value != "none" {
-                            IconView(image: observedData.args.iconOption.value,
-                                     overlay: observedData.args.overlayIconOption.value,
-                                     alpha: observedData.iconAlpha)
-                            .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
-                            .frame(width: iconDisplayWidth, alignment: .top)
+                    HStack {
+                        if showSideBar || showInfoBox {
+                            VStack {
+                                if showSideBar {
+                                    IconView(image: observedData.args.iconOption.value,
+                                             overlay: observedData.args.overlayIconOption.value,
+                                             alpha: observedData.iconAlpha)
+                                    .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
+                                    .frame(width: iconDisplayWidth, alignment: .top)
+                                }
+                                if showInfoBox {
+                                    InfoBoxView(observedData: observedData)
+                                }
+                                Spacer()
+                            }
+                            .border(appvars.debugBorderColour, width: 2)
+                            .padding(.top, observedData.appProperties.topPadding)
+                            .padding(.bottom, observedData.appProperties.bottomPadding)
+                            .padding(.leading, observedData.appProperties.sidePadding+10)
+                            .padding(.trailing, observedData.appProperties.sidePadding+10)
                         }
-                        if observedData.args.infoBox.present {
-                            InfoBoxView(observedData: observedData)
-                        }
-                        Spacer()
+                        MessageContent(observedDialogContent: observedData)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
                     }
-                    .border(appvars.debugBorderColour, width: 2)
-                    .padding(.top, observedData.appProperties.topPadding)
-                    .padding(.bottom, observedData.appProperties.bottomPadding)
-                    .padding(.leading, observedData.appProperties.sidePadding+10)
-                    .padding(.trailing, observedData.appProperties.sidePadding+10)
-
-                    MessageContent(observedDialogContent: observedData)
-                        .border(observedData.appProperties.debugBorderColour, width: 2)
-                }
             }
             TaskProgressView(observedData: observedData)
         }
