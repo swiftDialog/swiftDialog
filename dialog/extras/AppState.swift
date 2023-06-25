@@ -130,6 +130,11 @@ struct AppVariables {
                                                       "right": .trailing,
                                                       "centre": .center,
                                                       "center": .center]
+    var messagePosition: Alignment = .leading
+    var positionStates: [String: Alignment] = ["left": .leading,
+                                                      "right": .trailing,
+                                                      "centre": .center,
+                                                      "center": .center]
 
     // button default strings
     // work out how to define a default width button that does what you tell it to. in the meantime, diry hack with spaces

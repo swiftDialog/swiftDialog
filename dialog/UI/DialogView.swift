@@ -33,24 +33,24 @@ struct DialogView: View {
                 VideoView(videourl: observedData.args.video.value, autoplay: observedData.args.autoPlay.present, caption: observedData.args.videoCaption.value)
             } else {
                 HStack {
-                    if observedData.args.iconOption.present && !observedData.args.centreIcon.present && observedData.args.iconOption.value != "none" {
-                        VStack(alignment: .leading) {
+                    VStack {
+                        if observedData.args.iconOption.present && !observedData.args.centreIcon.present && observedData.args.iconOption.value != "none" {
                             IconView(image: observedData.args.iconOption.value,
                                      overlay: observedData.args.overlayIconOption.value,
                                      alpha: observedData.iconAlpha)
-                                .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
-                                .frame(width: iconDisplayWidth, alignment: .top)
-                            if observedData.args.infoBox.present {
-                                InfoBoxView(observedData: observedData)
-                            }
-                            Spacer()
+                            .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
+                            .frame(width: iconDisplayWidth, alignment: .top)
                         }
-                        .border(appvars.debugBorderColour, width: 2)
-                        .padding(.top, observedData.appProperties.topPadding)
-                        .padding(.bottom, observedData.appProperties.bottomPadding)
-                        .padding(.leading, observedData.appProperties.sidePadding+10)
-                        .padding(.trailing, observedData.appProperties.sidePadding+10)
+                        if observedData.args.infoBox.present {
+                            InfoBoxView(observedData: observedData)
+                        }
+                        Spacer()
                     }
+                    .border(appvars.debugBorderColour, width: 2)
+                    .padding(.top, observedData.appProperties.topPadding)
+                    .padding(.bottom, observedData.appProperties.bottomPadding)
+                    .padding(.leading, observedData.appProperties.sidePadding+10)
+                    .padding(.trailing, observedData.appProperties.sidePadding+10)
 
                     MessageContent(observedDialogContent: observedData)
                         .border(observedData.appProperties.debugBorderColour, width: 2)

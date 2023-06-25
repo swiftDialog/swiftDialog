@@ -689,6 +689,7 @@ func processCLOptionValues() {
 
     if appArguments.messageAlignment.present {
         appvars.messageAlignment = appvars.allignmentStates[appArguments.messageAlignment.value] ?? .leading
+        appvars.messagePosition = appvars.positionStates[appArguments.messageAlignment.value] ?? .leading
     }
 
     appArguments.messageVerticalAlignment.value = json[appArguments.messageVerticalAlignment.long].string ?? CLOptionText(optionName: appArguments.messageVerticalAlignment)

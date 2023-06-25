@@ -79,21 +79,21 @@ struct MessageContent: View {
                     if ["centre", "center"].contains(observedData.args.messageVerticalAlignment.value) {
                         Spacer()
                     }
+                    GeometryReader { geometry in
+                        Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
+                            .frame(width: geometry.size.width, alignment: observedData.appProperties.messagePosition)
+                            .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                            .markdownTheme(.sdMarkdown)
+                            .markdownTextStyle {
+                                FontSize(appvars.messageFontSize)
+                                ForegroundColor(messageColour)
+                            }
+                            .accessibilityHint(observedData.args.messageOption.value)
+                            .focusable(false)
+                            .scrollOnOverflow()
+                            //.wrappedInScrollView(when: !observedData.args.webcontent.present && !observedData.args.listItem.present && !observedData.args.messageVerticalAlignment.present)
+                    }
 
-                    Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                        .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                        .markdownTextStyle {
-                            FontSize(appvars.messageFontSize)
-                            ForegroundColor(messageColour)
-                        }
-                        .markdownTheme(.sdMarkdown)
-                        .border(observedData.appProperties.debugBorderColour, width: 2)
-                        .accessibilityHint(observedData.args.messageOption.value)
-                        .focusable(false)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .if(!observedData.args.webcontent.present && !observedData.args.listItem.present && !observedData.args.messageVerticalAlignment.present) { view in
-                            view.scrollOnOverflow()
-                        }
                 }
                 if ["centre", "center"].contains(observedData.args.messageVerticalAlignment.value) {
                     Spacer()
