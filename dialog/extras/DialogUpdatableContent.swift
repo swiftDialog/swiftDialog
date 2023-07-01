@@ -383,6 +383,30 @@ class FileReader {
             case "\(observedData.args.iconAlpha.long):":
                 observedData.iconAlpha = Double(line.replacingOccurrences(of: "\(observedData.args.iconAlpha.long): ", with: "")) ?? 1.0
 
+            // video
+            case "\(observedData.args.video.long):":
+                let command = line.replacingOccurrences(of: "\(observedData.args.video.long): ", with: "")
+                if command == "none" {
+                    observedData.args.video.present = false
+                    observedData.args.video.value = ""
+                } else {
+                    observedData.args.video.value = command
+                    observedData.args.video.present = true
+                }
+
+            // web content
+            case "\(observedData.args.webcontent.long):":
+                let command = line.replacingOccurrences(of: "\(observedData.args.webcontent.long): ", with: "")
+                if command == "none" {
+                    observedData.args.webcontent.present = false
+                    observedData.args.webcontent.value = ""
+                } else {
+                    if command.hasPrefix("http") {
+                        observedData.args.webcontent.value = command
+                        observedData.args.webcontent.present = true
+                    }
+                }
+
             // quit
             case "quit:":
                 quitDialog(exitCode: appvars.exit5.code)
