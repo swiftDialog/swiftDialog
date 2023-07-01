@@ -52,9 +52,6 @@ struct MessageContent: View {
                 }
                 ImageView(imageArray: observedData.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: string2float(string: observedData.args.autoPlay.value))
             } else {
-                if ["bottom"].contains(observedData.args.messageVerticalAlignment.value) {
-                    Spacer()
-                }
                 if observedData.args.centreIcon.present && observedData.args.iconOption.present {
                     IconView(image: observedData.args.iconOption.value,
                              overlay: observedData.args.overlayIconOption.value,
@@ -66,7 +63,7 @@ struct MessageContent: View {
                 }
 
                 if !["", "none"].contains(observedData.args.messageOption.value) {
-                    if ["centre", "center"].contains(observedData.args.messageVerticalAlignment.value) {
+                    if ["centre", "center", "bottom"].contains(observedData.args.messageVerticalAlignment.value) {
                         Spacer()
                     }
                     GeometryReader { messageGeometry in
@@ -90,10 +87,9 @@ struct MessageContent: View {
                             .scrollOnOverflow()
                     }
                     .frame(maxHeight: messageHeight)
-
-                }
-                if ["centre", "center"].contains(observedData.args.messageVerticalAlignment.value) {
-                    Spacer()
+                    if !observedData.args.messageVerticalAlignment.present || ["centre", "center", "top"].contains(observedData.args.messageVerticalAlignment.value) {
+                        Spacer()
+                    }
                 }
 
                 Group {
