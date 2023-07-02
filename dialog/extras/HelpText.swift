@@ -173,6 +173,8 @@ struct SDHelp {
         Videos will be resized to fit the available display area without clipping the video
         Default dialog window size is changed to \(appvars.videoWindowWidth) x \(appvars.videoWindowHeight)
 
+        Optionally use 'youtube=<id>' or 'vimeo=<id>' in place of <url> as shortcuts to youtube and vimeo services
+
         --\(appArguments.videoCaption.long) <text>
             Text that will appear underneath the displayed video.
 
