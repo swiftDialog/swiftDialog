@@ -883,20 +883,8 @@ func processCLOptionValues() {
     appArguments.video.present                 = json[appArguments.video.long].exists() || CLOptionPresent(optionName: appArguments.video)
     if appArguments.video.present || appArguments.webcontent.present {
         // check if it's a youtube id
-        switch appArguments.video.value.components(separatedBy: "=").first!.lowercased() {
-        case "youtubeid":
-            writeLog("Youtube ID detected")
-            let youTubeID = appArguments.video.value.replacingOccurrences(of: "youtubeid=", with: "")
-            let youtubeURL = "https://www.youtube.com/embed/\(youTubeID)?autoplay=\(appArguments.autoPlay.present ? 1 : 0)&controls=0&showinfo=0"
-            appArguments.video.value = youtubeURL
-        case "vimeoid":
-            let vimeoID = appArguments.video.value.replacingOccurrences(of: "vimeoid=", with: "")
-            let vimeoURL = "https://player.vimeo.com/video/\(vimeoID)\(vimeoID.contains("?") ? "&" : "?")autoplay=\(appArguments.autoPlay.present ? 1 : 0)&controls=\(appArguments.autoPlay.present ? 0 : 1)"
-            appArguments.video.value = vimeoURL
-        default:
-            break
-        }
-        writeLog("video url is \(appArguments.video.value)")
+        appArguments.video.value = getVideoStreamingURLFromID(videoid: appArguments.video.value, autoplay: appArguments.autoPlay.present)
+
         // set a larger window size. 900x600 will fit a standard 16:9 video
         writeLog("resetting default window size to 900x600")
         appvars.windowWidth = appvars.videoWindowWidth

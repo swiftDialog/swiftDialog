@@ -508,3 +508,22 @@ func savePNG(image: NSImage, path: String) {
         print(error)
     }
 }
+
+func getVideoStreamingURLFromID(videoid: String, autoplay: Bool = false) -> String {
+    var fullURL: String = videoid
+    switch videoid.components(separatedBy: "=").first!.lowercased() {
+    case "youtubeid":
+        writeLog("Youtube ID detected")
+        let youTubeID = videoid.replacingOccurrences(of: "youtubeid=", with: "")
+        let youtubeURL = "https://www.youtube.com/embed/\(youTubeID)?autoplay=\(autoplay ? 1 : 0)&controls=0&showinfo=0"
+        fullURL = youtubeURL
+    case "vimeoid":
+        let vimeoID = videoid.replacingOccurrences(of: "vimeoid=", with: "")
+        let vimeoURL = "https://player.vimeo.com/video/\(vimeoID)\(vimeoID.contains("?") ? "&" : "?")autoplay=\(autoplay ? 1 : 0)&controls=\(autoplay ? 0 : 1)"
+        fullURL = vimeoURL
+    default:
+        break
+    }
+    writeLog("video url is \(fullURL)")
+    return fullURL
+}

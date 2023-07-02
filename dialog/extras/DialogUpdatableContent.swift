@@ -390,7 +390,8 @@ class FileReader {
                     observedData.args.video.present = false
                     observedData.args.video.value = ""
                 } else {
-                    observedData.args.video.value = command
+                    observedData.args.autoPlay.present = true
+                    observedData.args.video.value = getVideoStreamingURLFromID(videoid: command, autoplay: observedData.args.autoPlay.present)
                     observedData.args.video.present = true
                 }
 
