@@ -67,25 +67,28 @@ struct MessageContent: View {
                         Spacer()
                     }
                     GeometryReader { messageGeometry in
-                        Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                            .frame(width: messageGeometry.size.width, alignment: observedData.appProperties.messagePosition)
-                            .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                            .fixedSize()
-                            .background(GeometryReader {child -> Color in
-                                            DispatchQueue.main.async {
-                                                // update on next cycle with calculated height
-                                                    self.messageHeight = child.size.height
-                                            }
-                                            return Color.clear
-                                        })
-                            .markdownTheme(.sdMarkdown)
-                            .markdownTextStyle {
-                                FontSize(appvars.messageFontSize)
-                                ForegroundColor(messageColour)
-                            }
-                            .accessibilityHint(observedData.args.messageOption.value)
-                            .focusable(false)
-                            .scrollOnOverflow()
+                        ScrollView {
+                            Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
+                                .frame(width: messageGeometry.size.width, alignment: observedData.appProperties.messagePosition)
+                                .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                                .lineSpacing(2)
+                                .fixedSize()
+                                .background(GeometryReader {child -> Color in
+                                    DispatchQueue.main.async {
+                                        // update on next cycle with calculated height
+                                        self.messageHeight = child.size.height
+                                    }
+                                    return Color.clear
+                                })
+                                .markdownTheme(.sdMarkdown)
+                                .markdownTextStyle {
+                                    FontSize(appvars.messageFontSize)
+                                    ForegroundColor(messageColour)
+                                }
+                                .accessibilityHint(observedData.args.messageOption.value)
+                                .focusable(false)
+                            //.scrollOnOverflow()
+                        }
                     }
                     .frame(maxHeight: messageHeight)
                     if !observedData.args.messageVerticalAlignment.present || ["centre", "center", "top"].contains(observedData.args.messageVerticalAlignment.value) {
