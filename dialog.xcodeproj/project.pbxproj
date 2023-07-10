@@ -24,7 +24,6 @@
 		41512CC2286C77F200F22B86 /* ConstructionKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41512CC1286C77F200F22B86 /* ConstructionKitView.swift */; };
 		4153783226001A0900AA0E76 /* StringProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153783126001A0900AA0E76 /* StringProcessing.swift */; };
 		4153784E2604B71800AA0E76 /* TitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153784D2604B71800AA0E76 /* TitleView.swift */; };
-		415378532604B79F00AA0E76 /* IconOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415378522604B79E00AA0E76 /* IconOverlayView.swift */; };
 		4153785E2604B81300AA0E76 /* IconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153785D2604B81300AA0E76 /* IconView.swift */; };
 		4153786C2604BF1A00AA0E76 /* MessageContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153786B2604BF1A00AA0E76 /* MessageContentView.swift */; };
 		4154C2DE25F76BDB00A3D373 /* dialogApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154C2DD25F76BDB00A3D373 /* dialogApp.swift */; };
@@ -104,7 +103,6 @@
 		41512CC1286C77F200F22B86 /* ConstructionKitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstructionKitView.swift; sourceTree = "<group>"; };
 		4153783126001A0900AA0E76 /* StringProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringProcessing.swift; sourceTree = "<group>"; };
 		4153784D2604B71800AA0E76 /* TitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleView.swift; sourceTree = "<group>"; };
-		415378522604B79E00AA0E76 /* IconOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconOverlayView.swift; sourceTree = "<group>"; };
 		4153785D2604B81300AA0E76 /* IconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconView.swift; sourceTree = "<group>"; };
 		4153786B2604BF1A00AA0E76 /* MessageContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageContentView.swift; sourceTree = "<group>"; };
 		4154C2DA25F76BDB00A3D373 /* Dialog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dialog.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -365,7 +363,6 @@
 				41D81E5B25F817BF00D1F7E1 /* ButtonView.swift */,
 				418AE4222667A17A001E3423 /* DropdownView.swift */,
 				CCD8ACEB2A011C9500D98695 /* RadioView.swift */,
-				415378522604B79E00AA0E76 /* IconOverlayView.swift */,
 				416DED41261C5FE00049B6B5 /* FullscreenView.swift */,
 				41AD75B526AA81760023EBD8 /* TextEntryView.swift */,
 				41FD45FD26C40366006976FC /* TimerView.swift */,
@@ -602,7 +599,6 @@
 				4154C2E025F76BDB00A3D373 /* ContentView.swift in Sources */,
 				41D81E5C25F817BF00D1F7E1 /* ButtonView.swift in Sources */,
 				4153783226001A0900AA0E76 /* StringProcessing.swift in Sources */,
-				415378532604B79F00AA0E76 /* IconOverlayView.swift in Sources */,
 				41110A2825F9E79E008171D2 /* License.swift in Sources */,
 				411FC34628E2DDFD003EA2C2 /* Notifications.swift in Sources */,
 				4154C2DE25F76BDB00A3D373 /* dialogApp.swift in Sources */,

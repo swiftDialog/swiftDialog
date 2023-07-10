@@ -144,7 +144,7 @@ struct dialogApp: App {
 
         if appArguments.constructionKit.present {
             ConstructionKitView(observedDialogContent: observedData).showConstructionKit()
-            observedData.args.movableWindow.present = true
+            appArguments.movableWindow.present = true
         }
 
         // bring to front on launch
@@ -160,12 +160,12 @@ struct dialogApp: App {
                     window?.standardWindowButton(.closeButton)?.isHidden = true //hides the red close button
                     window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
                     window?.standardWindowButton(.zoomButton)?.isHidden = true //this removes the green zoom button
-                    window?.isMovable = observedData.args.movableWindow.present
+                    window?.isMovable = appArguments.movableWindow.present
                     window?.isMovableByWindowBackground = true
                     window?.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
 
                     // Set window level
-                    if observedData.args.forceOnTop.present || observedData.args.blurScreen.present {
+                    if appArguments.forceOnTop.present || appArguments.blurScreen.present {
                         window?.level = .floating
                         writeLog("Window is forceed on top")
                     } else {
@@ -173,7 +173,7 @@ struct dialogApp: App {
                     }
 
                     // display a blur screen window on all screens.
-                    if observedData.args.blurScreen.present && !appArguments.fullScreenWindow.present {
+                    if appArguments.blurScreen.present && !appArguments.fullScreenWindow.present {
                         writeLog("Blurscreen enabled")
                         let screens = NSScreen.screens
                         for (index, screen) in screens.enumerated() {
@@ -188,7 +188,7 @@ struct dialogApp: App {
                         background.close()
                     }
 
-                    if observedData.args.forceOnTop.present || observedData.args.blurScreen.present {
+                    if appArguments.forceOnTop.present || appArguments.blurScreen.present {
                         writeLog("Activating window")
                         NSApp.activate(ignoringOtherApps: true)
                     }

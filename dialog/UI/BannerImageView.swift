@@ -12,7 +12,7 @@ struct BannerImageView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
 
-    var bannerImage: NSImage
+    //var bannerImage: NSImage
     var bannerHeight: CGFloat = 0
     var bannerWidth: CGFloat = 0
     let maxBannerHeight: CGFloat = 150
@@ -26,9 +26,9 @@ struct BannerImageView: View {
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
         writeLog("Displaying banner image \(observedDialogContent.args.bannerImage.value)")
-        bannerImage = getImageFromPath(fileImagePath: observedDialogContent.args.bannerImage.value, returnErrorImage: true, errorImageName: "banner")
+        //bannerImage = getImageFromPath(fileImagePath: observedDialogContent.args.bannerImage.value, returnErrorImage: true, errorImageName: "banner")
         bannerWidth = observedDialogContent.windowWidth // appvars.windowWidth
-        bannerHeight = bannerImage.size.height*(bannerWidth / bannerImage.size.width)
+        bannerHeight = observedDialogContent.bannerImage.size.height*(bannerWidth / observedDialogContent.bannerImage.size.width)
         if bannerHeight > maxBannerHeight {
             bannerHeight = maxBannerHeight
         }
@@ -37,7 +37,7 @@ struct BannerImageView: View {
 
     var body: some View {
         ZStack {
-            Image(nsImage: bannerImage)
+            Image(nsImage: observedData.bannerImage)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .scaledToFill()

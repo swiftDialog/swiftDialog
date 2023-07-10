@@ -15,8 +15,6 @@ struct IconView: View {
     var messageUserImagePath: String
 
     var iconOverlay: String
-    var logoWidth: CGFloat = appvars.iconWidth
-    var logoHeight: CGFloat  = appvars.iconHeight
     var imgFromURL: Bool = false
     var imgFromAPP: Bool = false
     var imgFromBase64: Bool = false
@@ -51,6 +49,7 @@ struct IconView: View {
     var overlayImageBackgroundScale: CGFloat = 1.1
     var overlayImageBackground: Bool = false
 
+    let argRegex = String("(,? ?[a-zA-Z1-9]+=|(,\\s?editor)|(,\\s?fileselect))|(,\\s?passwordfill)|(,\\s?required)|(,\\s?secure)")
 
     init(image: String = "", overlay: String = "", alpha: Double = 1.0) {
         writeLog("Displaying icon image \(image), alpha \(alpha)")
@@ -60,9 +59,6 @@ struct IconView: View {
         mainImageAlpha = alpha
         messageUserImagePath = image
         iconOverlay = overlay
-
-        logoWidth = appvars.iconWidth
-        logoHeight = appvars.iconHeight
 
         if overlay != "" {
             mainImageScale = mainImageWithOverlayScale
@@ -118,7 +114,7 @@ struct IconView: View {
 
             framePadding = 15
 
-            var SFValues = messageUserImagePath.split(usingRegex: appvars.argRegex)
+            var SFValues = messageUserImagePath.split(usingRegex: argRegex)
             SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
 
             var SFArg: String = ""

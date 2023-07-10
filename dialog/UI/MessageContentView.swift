@@ -70,6 +70,7 @@ struct MessageContent: View {
                         Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
                             .frame(width: messageGeometry.size.width, alignment: observedData.appProperties.messagePosition)
                             .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                            .fixedSize()
                             .background(GeometryReader {child -> Color in
                                             DispatchQueue.main.async {
                                                 // update on next cycle with calculated height

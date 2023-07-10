@@ -106,7 +106,14 @@ class FileReader {
 
             // Message
             case "\(observedData.args.messageOption.long):":
-                observedData.args.messageOption.value = line.replacingOccurrences(of: "\(observedData.args.messageOption.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n")
+                let message = line.replacingOccurrences(of: "\(observedData.args.messageOption.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n")
+                if message.lowercased().hasSuffix(".md") {
+                    observedData.args.messageOption.value = getMarkdown(mdFilePath: message)
+                } else if message.hasPrefix("+ ") {
+                    observedData.args.messageOption.value += message.replacingOccurrences(of: "+ ", with: "  \n")
+                } else {
+                    observedData.args.messageOption.value = message
+                }
                 observedData.args.mainImage.present = false
                 observedData.args.mainImageCaption.present = false
                 observedData.args.listItem.present = false
@@ -202,7 +209,7 @@ class FileReader {
                     if iconState.replacingOccurrences(of: "size:", with: "").trimmingCharacters(in: .whitespaces) != "" {
                         observedData.iconSize = string2float(string: iconState.replacingOccurrences(of: "size: ", with: ""))
                     } else {
-                        observedData.iconSize = appvars.iconWidth
+                        observedData.iconSize = observedData.appProperties.iconWidth
                     }
                 } else {
                     switch iconState {
@@ -431,7 +438,7 @@ class DialogUpdatableContent: ObservableObject {
     // bring in all the collected appArguments
     // TODO: reduce double handling of data.
     @Published var args: CommandLineArguments
-    @Published var appProperties: AppVariables = appvars
+    @Published var appProperties: AppVariables = AppVariables()
 
     @Published var titleFontColour: Color
     @Published var titleFontSize: CGFloat
@@ -444,6 +451,7 @@ class DialogUpdatableContent: ObservableObject {
     @Published var iconAlpha: Double
 
     @Published var imageArray: [MainImage]
+    @Published var bannerImage: NSImage = NSImage()
 
     @Published var listItemsArray: [ListItems]
     @Published var listItemUpdateRow: Int
@@ -498,8 +506,11 @@ class DialogUpdatableContent: ObservableObject {
         iconAlpha = Double(appArguments.iconAlpha.value) ?? 1.0
 
         imageArray = appvars.imageArray
-        //imagePresent = appArguments.mainImage.present
-        //imageCaptionPresent = appArguments.mainImageCaption.present
+        // imagePresent = appArguments.mainImage.present
+        // imageCaptionPresent = appArguments.mainImageCaption.present
+        if appArguments.bannerImage.present {
+            bannerImage = getImageFromPath(fileImagePath: appArguments.bannerImage.value, returnErrorImage: true, errorImageName: "banner")
+        }
 
         listItemsArray = appvars.listItems
 

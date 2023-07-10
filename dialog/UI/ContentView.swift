@@ -70,9 +70,9 @@ struct ContentView: View {
                 if observedData.args.titleOption.value != "none" && !appArguments.bannerTitle.present {
                     // Dialog title
                     TitleView(observedData: observedData)
-                        .border(appvars.debugBorderColour, width: 2)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
                         .padding(.top, titlePadding)
-                        .frame(minWidth: string2float(string: observedData.args.windowWidth.value), minHeight: appvars.titleHeight, alignment: .center)
+                        .frame(minWidth: string2float(string: observedData.args.windowWidth.value), minHeight: observedData.appProperties.titleHeight, alignment: .center)
 
                     // Horozontal Line
                     Divider()
@@ -110,7 +110,7 @@ struct ContentView: View {
                 .padding(.leading, observedData.appProperties.sidePadding)
                 .padding(.trailing, observedData.appProperties.sidePadding)
                 .padding(.bottom, observedData.appProperties.bottomPadding)
-                .border(appvars.debugBorderColour, width: 2)
+                .border(observedData.appProperties.debugBorderColour, width: 2)
             }
 
         }
