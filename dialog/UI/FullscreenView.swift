@@ -97,8 +97,7 @@ struct FullscreenView: View {
         VStack {
             // banner image vstack
             if observedData.args.bannerImage.present {
-                Image(nsImage: getImageFromPath(fileImagePath: observedData.args.bannerImage.value))
-                    .resizable()
+                DisplayImage(observedData.args.bannerImage.value)
                     .clipShape(RoundedRectangle(cornerRadius: 15))
                     .scaledToFit()
                     .frame(maxWidth: maxBannerWidth, maxHeight: maxBannerHeight)

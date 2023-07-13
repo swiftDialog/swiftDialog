@@ -11,7 +11,6 @@ import Cocoa
 struct ContentView: View {
 
     var titlePadding       = CGFloat(10)
-    var waterMarkFill          = String("")
     var progressSteps: CGFloat = appvars.timerDefaultSeconds
 
     @ObservedObject var observedData: DialogUpdatableContent
@@ -58,6 +57,7 @@ struct ContentView: View {
         ZStack {
             if observedData.args.watermarkImage.present {
                     WatermarkView(observedContent: observedData)
+                    .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
             }
 
             // this stack controls the main view. Consists of a VStack containing all the content, and a HStack positioned at the bottom of the display area

@@ -12,8 +12,7 @@ struct BannerImageView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
 
-    //var bannerImage: NSImage
-    var bannerHeight: CGFloat = 0
+    //var bannerHeight: CGFloat = 0
     var bannerWidth: CGFloat = 0
     let maxBannerHeight: CGFloat = 150
 
@@ -21,27 +20,28 @@ struct BannerImageView: View {
     let opacity: CGFloat = 0.5
     let blurOffset: CGFloat = 2
 
-    let size: CGFloat
+    //let size: CGFloat
 
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
         writeLog("Displaying banner image \(observedDialogContent.args.bannerImage.value)")
-        //bannerImage = getImageFromPath(fileImagePath: observedDialogContent.args.bannerImage.value, returnErrorImage: true, errorImageName: "banner")
         bannerWidth = observedDialogContent.windowWidth // appvars.windowWidth
-        bannerHeight = observedDialogContent.bannerImage.size.height*(bannerWidth / observedDialogContent.bannerImage.size.width)
-        if bannerHeight > maxBannerHeight {
-            bannerHeight = maxBannerHeight
-        }
-        size = observedDialogContent.appProperties.titleFontSize
+        //bannerHeight = observedDialogContent.bannerImage.size.height*(bannerWidth / observedDialogContent.bannerImage.size.width)
+        //if bannerHeight > maxBannerHeight {
+        //    bannerHeight = maxBannerHeight
+        //}
+        //size = observedDialogContent.appProperties.titleFontSize
     }
 
     var body: some View {
         ZStack {
-            Image(nsImage: observedData.bannerImage)
-                .resizable()
+            DisplayImage(observedData.args.bannerImage.value, corners: false)
                 .aspectRatio(contentMode: .fill)
                 .scaledToFill()
-                .frame(width: bannerWidth, height: bannerHeight, alignment: .topLeading)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(width: bannerWidth, alignment: .topLeading)
+                .frame(maxHeight: maxBannerHeight)
+                .frame(minHeight: 100)
                 .clipped()
             if observedData.args.bannerTitle.present {
                 ZStack {
@@ -77,7 +77,7 @@ struct BannerImageView: View {
                     }
                 }
                 .padding(observedData.appProperties.topPadding)
-                .frame(height: bannerHeight, alignment: .center)
+                .frame(alignment: .center)
             }
         }
     }

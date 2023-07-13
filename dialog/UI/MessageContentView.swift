@@ -66,6 +66,7 @@ struct MessageContent: View {
                     if ["centre", "center", "bottom"].contains(observedData.args.messageVerticalAlignment.value) {
                         Spacer()
                     }
+
                     GeometryReader { messageGeometry in
                         ScrollView {
                             Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))

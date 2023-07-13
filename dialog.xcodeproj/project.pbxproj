@@ -65,6 +65,7 @@
 		41D81E7125F845D200D1F7E1 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E7025F845D200D1F7E1 /* AppState.swift */; };
 		41D81E7925F870A500D1F7E1 /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D81E7825F870A500D1F7E1 /* Functions.swift */; };
 		CC8D96302A01CCAB00CC84C6 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC8D962F2A01CCAB00CC84C6 /* Extensions.swift */; };
+		CC9F8FEF2A5EC76400802A88 /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC9F8FEE2A5EC76400802A88 /* ImageProcessing.swift */; };
 		CCD8ACEC2A011C9500D98695 /* RadioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD8ACEB2A011C9500D98695 /* RadioView.swift */; };
 /* End PBXBuildFile section */
 
@@ -156,6 +157,7 @@
 		41FD45FD26C40366006976FC /* TimerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimerView.swift; sourceTree = "<group>"; };
 		41FD45FF26C8DC5D006976FC /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
 		CC8D962F2A01CCAB00CC84C6 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		CC9F8FEE2A5EC76400802A88 /* ImageProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageProcessing.swift; sourceTree = "<group>"; };
 		CCD8ACEB2A011C9500D98695 /* RadioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -292,6 +294,7 @@
 				415934D926DB7604009C9C3A /* WindowPositioning.swift */,
 				41A44EB126F4C43A00FEE1AC /* HelpText.swift */,
 				CC8D962F2A01CCAB00CC84C6 /* Extensions.swift */,
+				CC9F8FEE2A5EC76400802A88 /* ImageProcessing.swift */,
 			);
 			path = extras;
 			sourceTree = "<group>";
@@ -593,6 +596,7 @@
 				417BF0BB260F1726009AD252 /* BannerImageView.swift in Sources */,
 				4153786C2604BF1A00AA0E76 /* MessageContentView.swift in Sources */,
 				416DED42261C5FE00049B6B5 /* FullscreenView.swift in Sources */,
+				CC9F8FEF2A5EC76400802A88 /* ImageProcessing.swift in Sources */,
 				418AE4232667A17A001E3423 /* DropdownView.swift in Sources */,
 				417BD43827992EDB009AE34A /* TaskProgressView.swift in Sources */,
 				41D81E5725F7929800D1F7E1 /* DialogView.swift in Sources */,

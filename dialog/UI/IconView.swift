@@ -207,45 +207,21 @@ struct IconView: View {
             if builtInIconPresent {
                 ZStack {
                     if sfGradientPresent || sfPalettePresent {
-
-                        if #available(macOS 12.0, *) {
-                            if sfPalettePresent {
-                                Image(systemName: builtInIconName)
-                                    .resizable()
-                                    .symbolRenderingMode(.palette)
-                                    .foregroundStyle(builtInIconColour, builtInIconSecondaryColour, builtInIconTertiaryColour)
-                                    .font(Font.title.weight(builtInIconWeight))
-                            } else {
-                                // gradient instead of palette
-                                Image(systemName: builtInIconName)
-                                    .resizable()
-                                    .symbolRenderingMode(.monochrome)
-                                    .foregroundStyle(
-                                        LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottomTrailing)
-                                    )
-                                    .font(Font.title.weight(builtInIconWeight))
-                            }
-
-                        } else {
-                            // macOS 11 doesn't support foregroundStyle so we'll do it the long way
-                            // we need to add this twice - once as a clear version to force the right aspect ratio
-                            // and again with the gradiet colour we want
-                            // the reason for this is gradient by itself is greedy and will consume the entire height and width of the display area
-                            // this causes some SF Symbols like applelogo and applescript to look distorted
+                        if sfPalettePresent {
                             Image(systemName: builtInIconName)
-                                .renderingMode(iconRenderingMode)
                                 .resizable()
-                                .foregroundColor(.clear)
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(builtInIconColour, builtInIconSecondaryColour, builtInIconTertiaryColour)
                                 .font(Font.title.weight(builtInIconWeight))
-
-                            LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottomTrailing)
-                                .mask(
-                                Image(systemName: builtInIconName)
-                                    .renderingMode(iconRenderingMode)
-                                    .resizable()
-                                    .foregroundColor(builtInIconColour)
-                                    .font(Font.title.weight(builtInIconWeight))
+                        } else {
+                            // gradient instead of palette
+                            Image(systemName: builtInIconName)
+                                .resizable()
+                                .symbolRenderingMode(.monochrome)
+                                .foregroundStyle(
+                                    LinearGradient(gradient: Gradient(colors: [builtInIconColour, builtInIconSecondaryColour]), startPoint: .top, endPoint: .bottomTrailing)
                                 )
+                                .font(Font.title.weight(builtInIconWeight))
                         }
 
                     } else {
@@ -254,29 +230,20 @@ struct IconView: View {
                                 .resizable()
                                 .foregroundColor(Color.white)
                         }
-                        if #available(macOS 12.0, *) {
-                            if messageUserImagePath == "default" {
-                                Image(systemName: builtInIconName)
-                                    .resizable()
-                                    .renderingMode(iconRenderingMode)
-                                    .font(Font.title.weight(builtInIconWeight))
-                                    .symbolRenderingMode(.monochrome)
-                                    .foregroundColor(builtInIconColour)
-                            } else {
-                                Image(systemName: builtInIconName)
-                                    .resizable()
-                                    .renderingMode(iconRenderingMode)
-                                    .font(Font.title.weight(builtInIconWeight))
-                                    .symbolRenderingMode(.hierarchical)
-                                    .foregroundStyle(builtInIconColour)
-                            }
-                        } else {
-                            // Fallback on earlier versions
+                        if messageUserImagePath == "default" {
                             Image(systemName: builtInIconName)
                                 .resizable()
                                 .renderingMode(iconRenderingMode)
                                 .font(Font.title.weight(builtInIconWeight))
+                                .symbolRenderingMode(.monochrome)
                                 .foregroundColor(builtInIconColour)
+                        } else {
+                            Image(systemName: builtInIconName)
+                                .resizable()
+                                .renderingMode(iconRenderingMode)
+                                .font(Font.title.weight(builtInIconWeight))
+                                .symbolRenderingMode(.hierarchical)
+                                .foregroundStyle(builtInIconColour)
                         }
                     }
                 }
@@ -284,20 +251,8 @@ struct IconView: View {
                 .scaledToFit()
                 .scaleEffect(mainImageScale, anchor: .topLeading)
                 .opacity(mainImageAlpha)
-            } else if imgFromAPP {
-                Image(nsImage: getAppIcon(appPath: messageUserImagePath))
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .scaledToFit()
-                        .scaleEffect(mainImageScale, anchor: .topLeading)
-                        .opacity(mainImageAlpha)
             } else {
-                let diskImage: NSImage = getImageFromPath(fileImagePath: messageUserImagePath, returnErrorImage: true)
-                Image(nsImage: diskImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .scaledToFit()
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                DisplayImage(messageUserImagePath, corners: true)
                     .scaleEffect(mainImageScale, anchor: .topLeading)
                     .opacity(mainImageAlpha)
             }

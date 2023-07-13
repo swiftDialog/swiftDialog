@@ -451,7 +451,6 @@ class DialogUpdatableContent: ObservableObject {
     @Published var iconAlpha: Double
 
     @Published var imageArray: [MainImage]
-    @Published var bannerImage: NSImage = NSImage()
 
     @Published var listItemsArray: [ListItems]
     @Published var listItemUpdateRow: Int
@@ -476,7 +475,7 @@ class DialogUpdatableContent: ObservableObject {
 
         self.args = appArguments
         self.appProperties = appvars
-
+        writeLog("Init updateable content")
         if appArguments.statusLogFile.present {
             path = appArguments.statusLogFile.value
         } else {
@@ -506,11 +505,6 @@ class DialogUpdatableContent: ObservableObject {
         iconAlpha = Double(appArguments.iconAlpha.value) ?? 1.0
 
         imageArray = appvars.imageArray
-        // imagePresent = appArguments.mainImage.present
-        // imageCaptionPresent = appArguments.mainImageCaption.present
-        if appArguments.bannerImage.present {
-            bannerImage = getImageFromPath(fileImagePath: appArguments.bannerImage.value, returnErrorImage: true, errorImageName: "banner")
-        }
 
         listItemsArray = appvars.listItems
 

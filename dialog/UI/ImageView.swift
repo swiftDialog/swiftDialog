@@ -13,14 +13,14 @@ struct ImageView: View {
 
     @State var index = 0
 
-    var images: Array = [NSImage]()
+    var imageList: Array = [String]()
     var captions: Array = [String]()
     var autoPlaySeconds: CGFloat
 
 
     init(imageArray: [MainImage], captionArray: Array<String>, autoPlaySeconds: CGFloat) {
         for index in 0..<imageArray.count where imageArray[index].path != "" {
-            images.append(getImageFromPath(fileImagePath: imageArray[index].path, returnErrorImage: true))
+            imageList.append(imageArray[index].path)
             captions.append(imageArray[index].caption)
         }
 
@@ -34,13 +34,11 @@ struct ImageView: View {
     var body: some View {
 
         VStack(spacing: 20) {
-            ImageSlider(index: $index.animation(), maxIndex: images.count - 1, autoPlaySeconds: autoPlaySeconds) {
-                ForEach(Array(self.images.enumerated()), id: \.offset) { imageIndex, imageName in
+            ImageSlider(index: $index.animation(), maxIndex: imageList.count - 1, autoPlaySeconds: autoPlaySeconds) {
+                ForEach(Array(self.imageList.enumerated()), id: \.offset) { imageIndex, imageName in
                     VStack {
-                        Image(nsImage: imageName)
-                            .resizable()
-                            .scaledToFit()
-                            .cornerRadius(10)
+                        DisplayImage(imageName, corners: true)
+
                         if captions.count > 0 {
                             if appArguments.fullScreenWindow.present {
                                 Text(captions[imageIndex])

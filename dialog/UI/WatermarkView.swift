@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct WatermarkView: View {
-    var mainImage: NSImage
     var imageOpacity: Double
     var imagePosition: Alignment = .leading
     var imageAlignmentGuite: Alignment = .center
@@ -18,7 +17,6 @@ struct WatermarkView: View {
     init(observedContent: DialogUpdatableContent) {
         self.observedData = observedContent
 
-        mainImage = getImageFromPath(fileImagePath: observedContent.args.watermarkImage.value)
         imageOpacity = Double(observedContent.args.watermarkAlpha.value) ??  0.5
 
         writeLog("Displaying background layer with image \(observedContent.args.watermarkImage.value) and alpha value \(observedContent.args.watermarkAlpha.value)")
@@ -48,26 +46,24 @@ struct WatermarkView: View {
     }
 
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                if observedData.args.watermarkFill.value == "fill" {
-                    Image(nsImage: mainImage)
-                        .resizable()
-                        .scaledToFill()
-                        .opacity(imageOpacity)
-                } else if observedData.args.watermarkFill.value == "fit" {
-                    Image(nsImage: mainImage)
-                        .resizable()
-                        .scaledToFit()
-                        .opacity(imageOpacity)
-                } else {
-                    Image(nsImage: mainImage)
-                        .opacity(imageOpacity)
-                }
-
+        ZStack {
+            if observedData.args.watermarkFill.value == "fill" {
+                DisplayImage(observedData.args.watermarkImage.value, rezize: true)
+                    .aspectRatio(contentMode: .fill)
+                    .scaledToFill()
+                    .opacity(imageOpacity)
+            } else if observedData.args.watermarkFill.value == "fit" {
+                DisplayImage(observedData.args.watermarkImage.value, rezize: true)
+                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
+                    .opacity(imageOpacity)
+            } else {
+                DisplayImage(observedData.args.watermarkImage.value, rezize: false)
+                    .fixedSize()
+                    .opacity(imageOpacity)
             }
-            .frame(maxWidth: geometry.size.width, maxHeight: geometry.size.height, alignment: imagePosition)
         }
+        .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight, alignment: imagePosition)
     }
 }
 

@@ -851,8 +851,8 @@ func processCLOptionValues() {
     appArguments.watermarkFill.value           = json[appArguments.watermarkFill.long].string ?? CLOptionText(optionName: appArguments.watermarkFill)
     appArguments.watermarkFill.present         = json[appArguments.watermarkFill.long].exists() || CLOptionPresent(optionName: appArguments.watermarkFill)
 
-    appArguments.watermarkFill.value           = json[appArguments.watermarkScale.long].string ?? CLOptionText(optionName: appArguments.watermarkScale)
-    appArguments.watermarkFill.present         = json[appArguments.watermarkScale.long].exists() || CLOptionPresent(optionName: appArguments.watermarkScale)
+    appArguments.watermarkScale.value           = json[appArguments.watermarkScale.long].string ?? CLOptionText(optionName: appArguments.watermarkScale)
+    appArguments.watermarkScale.present         = json[appArguments.watermarkScale.long].exists() || CLOptionPresent(optionName: appArguments.watermarkScale)
 
     appArguments.autoPlay.value                = json[appArguments.autoPlay.long].string ?? CLOptionText(optionName: appArguments.autoPlay, defaultValue: "\(appvars.timerDefaultSeconds)")
     appArguments.autoPlay.present              = json[appArguments.autoPlay.long].exists() || CLOptionPresent(optionName: appArguments.autoPlay)
@@ -894,6 +894,7 @@ func processCLOptionValues() {
     appArguments.videoCaption.value            = json[appArguments.videoCaption.long].string ?? CLOptionText(optionName: appArguments.videoCaption)
     appArguments.videoCaption.present          = json[appArguments.videoCaption.long].exists() || CLOptionPresent(optionName: appArguments.videoCaption)
 
+    /*
     if appArguments.watermarkImage.present {
         // return the image resolution and re-size the window to match
         let bgImage = getImageFromPath(fileImagePath: appArguments.watermarkImage.value)
@@ -912,8 +913,9 @@ func processCLOptionValues() {
                 appArguments.watermarkFill.present = true
                 appArguments.watermarkFill.value = "fill"
             }
-        }
     }
+     */
+
 
     appArguments.helpOption.present            = CLOptionPresent(optionName: appArguments.helpOption)
     appArguments.helpOption.value              = CLOptionText(optionName: appArguments.helpOption)
