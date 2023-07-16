@@ -6,6 +6,7 @@ iconupdater="${base_dir}/fileicon"
 dialog_root="/Library/Application Support/Dialog"
 iconfile="${dialog_root}/Dialog.png"
 dialogbundle="${dialog_root}/Dialog.app"
+dialogbinary="${dialogbundle}/Contents/MacOS/Dialog"
 enrolmentScript="${dialog_root}/swiftDialogEnrolment.sh"
 log_file="${dialog_root}/postinstall.log"
 
@@ -16,6 +17,7 @@ write_to_log() {
 }
 
 write_to_log "swiftDialog postinstall started"
+write_to_log "swiftDialog $(${dialogbinary} --version)"
 
 if [[ -e "${iconfile}" ]] && [[ -e "${dialogbundle}" ]]; then
     write_to_log "Icon file detected. Updating dialog icon"
