@@ -151,7 +151,7 @@ struct FullscreenView: View {
                     // message vstack
                     VStack {
                         ScrollView {
-                            Text(.init(observedData.messageText))
+                            Text(.init(observedData.args.messageOption.value))
                                 .foregroundColor(.white)
                                 .font(.system(size: messageContentFontSize))
                                 .multilineTextAlignment(.center)

@@ -347,7 +347,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
         }
 
         // print the output
-        if observedObject?.args.jsonOutPut.present ?? false { //} appvars.jsonOut {
+        if observedObject?.args.jsonOutPut.present ?? false {
             print(json)
         } else {
             for index in 0..<outputArray.count {

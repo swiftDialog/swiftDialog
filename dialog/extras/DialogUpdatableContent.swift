@@ -440,11 +440,6 @@ class DialogUpdatableContent: ObservableObject {
     @Published var args: CommandLineArguments
     @Published var appProperties: AppVariables = AppVariables()
 
-    @Published var titleFontColour: Color
-    @Published var titleFontSize: CGFloat
-
-    @Published var messageText: String
-    @Published var statusText: String
     @Published var progressValue: Double?
     @Published var progressTotal: Double
     @Published var iconSize: CGFloat
@@ -486,18 +481,11 @@ class DialogUpdatableContent: ObservableObject {
         // initialise all our observed variables
         // for the most part we pull from whatever was passed in save for some tracking variables
 
-        //button1Disabled = appArguments.button1Disabled.present
         if appArguments.timerBar.present && !appArguments.hideTimerBar.present {
             //self._button1disabled = State(initialValue: true)
             appArguments.button1Disabled.present = true
         }
 
-        titleFontColour = appvars.titleFontColour
-        titleFontSize = appvars.titleFontSize
-
-        messageText = appArguments.messageOption.value
-        statusText = appArguments.progressText.value
-        //progressValue = 0
         progressTotal = Double(appArguments.progressBar.value) ?? 100
         listItemUpdateRow = 0
 

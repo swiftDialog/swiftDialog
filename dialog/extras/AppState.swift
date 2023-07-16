@@ -122,27 +122,27 @@ struct AppVariables {
     var cliversion                      = "2.3.0"
 
     // message default strings
-    var titleDefault                    = String("default-title".localized)
-    var messageDefault                  = String("default-message".localized)
+    let titleDefault                    = String("default-title".localized)
+    let messageDefault                  = String("default-message".localized)
     var messageAlignment: TextAlignment = .leading
-    var messageAlignmentTextRepresentation = String("left")
-    var allignmentStates: [String: TextAlignment] = ["left": .leading,
+    let messageAlignmentTextRepresentation = String("left")
+    let allignmentStates: [String: TextAlignment] = ["left": .leading,
                                                       "right": .trailing,
                                                       "centre": .center,
                                                       "center": .center]
     var messagePosition: Alignment = .leading
-    var positionStates: [String: Alignment] = ["left": .leading,
+    let positionStates: [String: Alignment] = ["left": .leading,
                                                       "right": .trailing,
                                                       "centre": .center,
                                                       "center": .center]
 
     // button default strings
     // work out how to define a default width button that does what you tell it to. in the meantime, diry hack with spaces
-    var button1Default                  = String("button-ok".localized)
-    var button2Default                  = String("button-cancel".localized)
-    var buttonInfoDefault               = String("button-more-info".localized)
-    var buttonInfoActionDefault         = String("")
-    var button1DefaultAction            = KeyboardShortcut.defaultAction
+    let button1Default                  = String("button-ok".localized)
+    let button2Default                  = String("button-cancel".localized)
+    let buttonInfoDefault               = String("button-more-info".localized)
+    let buttonInfoActionDefault         = String("")
+    let button1DefaultAction            = KeyboardShortcut.defaultAction
 
     var helpButtonHoverText             = String("help-hover".localized)
 
@@ -156,10 +156,10 @@ struct AppVariables {
     var windowHeight                    = CGFloat(380)      // set default dialog height
 
     // Content padding
-    var sidePadding                     = CGFloat(15)
-    var topPadding                      = CGFloat(10)
-    var bottomPadding                   = CGFloat(15)
-    var contentPadding                  = CGFloat(8)
+    let sidePadding                     = CGFloat(15)
+    let topPadding                      = CGFloat(10)
+    let bottomPadding                   = CGFloat(15)
+    let contentPadding                  = CGFloat(8)
 
     // Screen Size
     var screenWidth                     = CGFloat(0)
@@ -180,9 +180,9 @@ struct AppVariables {
     var bigWindow                       = Bool(false)
     var scaleFactor                     = CGFloat(1)
 
-    var timerDefaultSeconds             = CGFloat(10)
+    let timerDefaultSeconds             = CGFloat(10)
 
-    var autoPlayDefaultSeconds          = CGFloat(10)
+    let autoPlayDefaultSeconds          = CGFloat(10)
 
     var horozontalLineScale             = CGFloat(0.9)
     var dialogContentScale              = CGFloat(0.65)
@@ -206,8 +206,6 @@ struct AppVariables {
 
     var showHelpMessage                 = Bool(false)
 
-    var jsonOut                         = Bool(false)
-
     var willDisturb                     = Bool(false)
 
     var checkboxArray                   = [CheckBoxes]()
@@ -221,34 +219,32 @@ struct AppVariables {
     var textFields = [TextFieldState]()
     var dropdownItems = [DropDownItems]()
 
-    var annimationSmoothing             = Double(20)
-
-    var defaultStatusLogFile            = String("/var/tmp/dialog.log")
+    let defaultStatusLogFile            = String("/var/tmp/dialog.log")
 
     var quitKeyCharacter                = String("q")
 
-    var argRegex                        = String("(,? ?[a-zA-Z1-9]+=|(,\\s?editor)|(,\\s?fileselect))|(,\\s?passwordfill)|(,\\s?required)|(,\\s?secure)")
+    let argRegex                        = String("(,? ?[a-zA-Z1-9]+=|(,\\s?editor)|(,\\s?fileselect))|(,\\s?passwordfill)|(,\\s?required)|(,\\s?secure)")
 
     // exit codes and error messages
-    var exit0                           = (code: Int32(0),   message: String("")) // normal exit
-    var exitNow                         = (code: Int32(255), message: String("")) // forced exit
-    var exit1                           = (code: Int32(1),   message: String("")) // pressed
-    var exit2                           = (code: Int32(2),   message: String("")) // pressed button 2
-    var exit3                           = (code: Int32(3),   message: String("")) // pressed button 3 (info button)
-    var exit4                           = (code: Int32(4),   message: String(""))
-    var exit5                           = (code: Int32(5),   message: String("")) // quit via command file
-    var exit10                          = (code: Int32(10),  message: String("")) // quit via command + quitKey
-    var exit20                          = (code: Int32(20),  message: String("Timeout Exceeded"))
-    var exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))
-    var exit202                         = (code: Int32(202), message: String("ERROR: File not found :"))
-    var exit203                         = (code: Int32(203), message: String("ERROR: Invalid Colour Value Specified. Use format #000000 :"))
-    var exit204                         = (code: Int32(204), message: String(""))
-    var exit205                         = (code: Int32(205), message: String(""))
-    var exit206                         = (code: Int32(206), message: String(""))
-    var exit207                         = (code: Int32(207), message: String(""))
-    var exit208                         = (code: Int32(208), message: String(""))
-    var exit209                         = (code: Int32(209), message: String(""))
-    var exit210                         = (code: Int32(210), message: String(""))
+    let exit0                           = (code: Int32(0),   message: String("")) // normal exit
+    let exitNow                         = (code: Int32(255), message: String("")) // forced exit
+    let exit1                           = (code: Int32(1),   message: String("")) // pressed
+    let exit2                           = (code: Int32(2),   message: String("")) // pressed button 2
+    let exit3                           = (code: Int32(3),   message: String("")) // pressed button 3 (info button)
+    let exit4                           = (code: Int32(4),   message: String(""))
+    let exit5                           = (code: Int32(5),   message: String("")) // quit via command file
+    let exit10                          = (code: Int32(10),  message: String("")) // quit via command + quitKey
+    let exit20                          = (code: Int32(20),  message: String("Timeout Exceeded"))
+    let exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))
+    let exit202                         = (code: Int32(202), message: String("ERROR: File not found :"))
+    let exit203                         = (code: Int32(203), message: String("ERROR: Invalid Colour Value Specified. Use format #000000 :"))
+    let exit204                         = (code: Int32(204), message: String(""))
+    let exit205                         = (code: Int32(205), message: String(""))
+    let exit206                         = (code: Int32(206), message: String(""))
+    let exit207                         = (code: Int32(207), message: String(""))
+    let exit208                         = (code: Int32(208), message: String(""))
+    let exit209                         = (code: Int32(209), message: String(""))
+    let exit210                         = (code: Int32(210), message: String(""))
 
     // debug flag
     var debugMode                       = Bool(false)
@@ -326,7 +322,7 @@ struct CommandLineArguments {
     var helpOption               = CommandlineArgument(long: "help")
     var demoOption               = CommandlineArgument(long: "demo")
     var buyCoffee                = CommandlineArgument(long: "coffee", short: "☕️")
-    var licence              = CommandlineArgument(long: "licence", short: "l")
+    var licence                  = CommandlineArgument(long: "licence", short: "l")
     var warningIcon              = CommandlineArgument(long: "warningicon") // Deprecated
     var infoIcon                 = CommandlineArgument(long: "infoicon") // Deprecated
     var cautionIcon              = CommandlineArgument(long: "cautionicon") // Deprecated

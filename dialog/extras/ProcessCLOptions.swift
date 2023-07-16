@@ -632,11 +632,6 @@ func processCLOptions(json: JSON = getJSON()) {
         writeLog("windowOnTop = true")
     }
 
-    if appArguments.jsonOutPut.present {
-        appvars.jsonOut = true
-        writeLog("jsonOut = true")
-    }
-
     // we define this stuff here as we will use the info to draw the window.
     if appArguments.smallWindow.present {
         // scale everything down a notch
