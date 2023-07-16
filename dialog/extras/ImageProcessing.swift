@@ -32,12 +32,19 @@ struct DisplayImage: View {
     var shouldClip: Bool = false
     var shouldResize: Bool = true
     var contentMode: ContentMode = .fit
+    var showBackground: Bool = false
 
-    init(_ path: String, corners: Bool = true, rezize: Bool = true, size: CGFloat = 100, content: ContentMode = .fit) {
+    init(_ path: String,
+         corners: Bool = true,
+         rezize: Bool = true,
+         size: CGFloat = 100,
+         content: ContentMode = .fit,
+         showBackgroundOnError: Bool = false) {
         self.imgPath = path
         self.shouldResize = rezize
         self.imgSize = size
         self.contentMode = content
+        self.showBackground = showBackgroundOnError
 
         switch path {
         case _ where path.hasPrefix("http"):
@@ -60,6 +67,10 @@ struct DisplayImage: View {
         if corners && self.shouldClip {
             self.clipShapeRadius = 10
         }
+
+        if !showBackgroundOnError {
+            imgSize = .infinity
+        }
     }
 
     var body: some View {
@@ -77,8 +88,10 @@ struct DisplayImage: View {
                     } else if phase.error != nil {
                         // error image
                         ZStack {
-                            RoundedRectangle(cornerRadius: clipShapeRadius, style: .continuous)
-                                .fill(.regularMaterial)
+                            if showBackground {
+                                RoundedRectangle(cornerRadius: clipShapeRadius, style: .continuous)
+                                    .fill(.thickMaterial)
+                            }
                             Image(systemName: "questionmark.square.fill")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)

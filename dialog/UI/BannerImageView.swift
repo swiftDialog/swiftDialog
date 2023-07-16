@@ -14,7 +14,7 @@ struct BannerImageView: View {
 
     //var bannerHeight: CGFloat = 0
     var bannerWidth: CGFloat = 0
-    let maxBannerHeight: CGFloat = 120
+    let maxBannerHeight: CGFloat = 130
 
     let blurRadius: CGFloat = 3
     let opacity: CGFloat = 0.5
@@ -35,7 +35,7 @@ struct BannerImageView: View {
 
     var body: some View {
         ZStack {
-            DisplayImage(observedData.args.bannerImage.value, corners: false)
+            DisplayImage(observedData.args.bannerImage.value, corners: false, showBackgroundOnError: true)
                 .aspectRatio(contentMode: .fill)
                 .scaledToFill()
                 .fixedSize(horizontal: false, vertical: true)
