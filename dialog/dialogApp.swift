@@ -198,10 +198,10 @@ struct dialogApp: App {
                 if !appArguments.notification.present {
                     if appArguments.miniMode.present {
                         MiniView(observedDialogContent: observedData)
-                            .frame(width: observedData.windowWidth, height: observedData.windowHeight)
+                            .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
                     } else {
                         ContentView(observedDialogContent: observedData)
-                            .frame(width: observedData.windowWidth, height: observedData.windowHeight)
+                            .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
                             .sheet(isPresented: $observedData.showSheet, content: {
                                 ErrorView(observedContent: observedData)
                             })

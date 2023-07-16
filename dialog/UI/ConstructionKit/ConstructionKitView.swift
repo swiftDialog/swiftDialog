@@ -51,8 +51,8 @@ struct JSONView: View {
 
         // copy modifyable objects into args
         observedDialogContent.args.iconSize.value = "\(observedDialogContent.iconSize)"
-        observedDialogContent.args.windowWidth.value = "\(observedDialogContent.windowWidth)"
-        observedDialogContent.args.windowHeight.value = "\(observedDialogContent.windowHeight)"
+        observedDialogContent.args.windowWidth.value = "\(observedDialogContent.appProperties.windowWidth)"
+        observedDialogContent.args.windowHeight.value = "\(observedDialogContent.appProperties.windowHeight)"
 
         let mirroredAppArguments = Mirror(reflecting: observedDialogContent.args)
         for (_, attr) in mirroredAppArguments.children.enumerated() {

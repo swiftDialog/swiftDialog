@@ -23,23 +23,23 @@ struct CKWindowProperties: View {
         VStack {
             LabelView(label: "ck-windowheight".localized)
             HStack {
-                TextField("ck-heightvalue", value: $observedData.windowHeight, formatter: displayAsInt )
+                TextField("ck-heightvalue", value: $observedData.appProperties.windowHeight, formatter: displayAsInt )
                     .frame(width: 50)
-                Slider(value: $observedData.windowHeight, in: 200...2000)
+                Slider(value: $observedData.appProperties.windowHeight, in: 200...2000)
                     .frame(width: 200)
-                    .onChange(of: observedData.windowHeight) { height in
-                        observedData.windowHeight = height.rounded()
+                    .onChange(of: observedData.appProperties.windowHeight) { height in
+                        observedData.appProperties.windowHeight = height.rounded()
                     }
                 Spacer()
             }
             LabelView(label: "ck-windowwidth".localized)
             HStack {
-                TextField("ck-widthvalue", value: $observedData.windowWidth, formatter: displayAsInt)
+                TextField("ck-widthvalue", value: $observedData.appProperties.windowWidth, formatter: displayAsInt)
                     .frame(width: 50)
-                Slider(value: $observedData.windowWidth, in: 200...2000)
+                Slider(value: $observedData.appProperties.windowWidth, in: 200...2000)
                     .frame(width: 200)
-                    .onChange(of: observedData.windowWidth) { width in
-                        observedData.windowWidth = width.rounded()
+                    .onChange(of: observedData.appProperties.windowWidth) { width in
+                        observedData.appProperties.windowWidth = width.rounded()
                     }
                 Spacer()
             }

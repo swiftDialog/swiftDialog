@@ -89,15 +89,15 @@ class FileReader {
             case "width:":
                 let tempWidth = line.replacingOccurrences(of: "width: ", with: "")
                 if tempWidth.isNumeric {
-                    observedData.windowWidth = CGFloat((tempWidth as NSString).floatValue)
-                    placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.windowWidth, height: observedData.windowHeight+28))
+                    observedData.appProperties.windowWidth = CGFloat((tempWidth as NSString).floatValue)
+                    placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28))
                 }
 
             case "height:":
                 let tempHeight = line.replacingOccurrences(of: "height: ", with: "")
                 if tempHeight.isNumeric {
-                    observedData.windowHeight = CGFloat((tempHeight as NSString).floatValue)
-                    placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.windowWidth, height: observedData.windowHeight+28))
+                    observedData.appProperties.windowHeight = CGFloat((tempHeight as NSString).floatValue)
+                    placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28))
                 }
 
             // Title
@@ -452,9 +452,6 @@ class DialogUpdatableContent: ObservableObject {
 
     @Published var requiredFieldsPresent: Bool
 
-    @Published var windowWidth: CGFloat
-    @Published var windowHeight: CGFloat
-
     @Published var showSheet: Bool
     @Published var sheetErrorMessage: String
 
@@ -463,8 +460,6 @@ class DialogUpdatableContent: ObservableObject {
     var status: StatusState
 
     let commandFilePermissions: [FileAttributeKey: Any] = [FileAttributeKey.posixPermissions: 0o666]
-
-    // init
 
     init() {
 
@@ -497,9 +492,6 @@ class DialogUpdatableContent: ObservableObject {
         listItemsArray = appvars.listItems
 
         requiredFieldsPresent = false
-
-        windowWidth = appvars.windowWidth
-        windowHeight = appvars.windowHeight
 
         showSheet = false
         sheetErrorMessage = ""
