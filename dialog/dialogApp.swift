@@ -36,7 +36,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 }
 
 
-@available(OSX 11.0, *)
+@available(OSX 12.0, *)
 @main
 struct dialogApp: App {
 

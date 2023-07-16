@@ -100,28 +100,28 @@ struct MessageContent: View {
                 Group {
                     WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
-                        .padding(.bottom, observedData.appProperties.bottomPadding)
+                        .padding(.bottom, observedData.appProperties.contentPadding)
 
                     ListView(observedDialogContent: observedData)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
-                        .padding(.bottom, observedData.appProperties.bottomPadding)
+                        .padding(.bottom, observedData.appProperties.contentPadding)
 
                     CheckboxView(observedDialogContent: observedData)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .frame(maxWidth: dataEntryMaxWidth)
 
                     TextEntryView(observedDialogContent: observedData)
-                        .padding(.bottom, observedData.appProperties.bottomPadding)
+                        .padding(.bottom, observedData.appProperties.contentPadding)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .frame(maxWidth: dataEntryMaxWidth)
 
                     RadioView(observedDialogContent: observedData)
-                        .padding(.bottom, observedData.appProperties.bottomPadding)
+                        .padding(.bottom, observedData.appProperties.contentPadding)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .frame(maxWidth: dataEntryMaxWidth)
 
                     DropdownView(observedDialogContent: observedData)
-                        .padding(.bottom, observedData.appProperties.bottomPadding)
+                        .padding(.bottom, observedData.appProperties.contentPadding)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .frame(maxWidth: dataEntryMaxWidth, alignment: .leading)
                 }

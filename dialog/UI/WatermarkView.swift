@@ -51,7 +51,6 @@ struct WatermarkView: View {
                 DisplayImage(observedData.args.watermarkImage.value, corners: false, rezize: true, content: .fill)
                     .scaledToFill()
                     .opacity(imageOpacity)
-                
             } else if observedData.args.watermarkFill.value == "fit" {
                 DisplayImage(observedData.args.watermarkImage.value, corners: false, rezize: true, content: .fit)
                     .scaledToFit()

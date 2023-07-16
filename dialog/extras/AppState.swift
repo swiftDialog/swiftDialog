@@ -159,6 +159,7 @@ struct AppVariables {
     var sidePadding                     = CGFloat(15)
     var topPadding                      = CGFloat(10)
     var bottomPadding                   = CGFloat(15)
+    var contentPadding                  = CGFloat(8)
 
     // Screen Size
     var screenWidth                     = CGFloat(0)

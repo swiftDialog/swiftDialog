@@ -106,7 +106,7 @@ class FileReader {
 
             // Message
             case "\(observedData.args.messageOption.long):":
-                let message = line.replacingOccurrences(of: "\(observedData.args.messageOption.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n")
+                let message = line.replacingOccurrences(of: "\(observedData.args.messageOption.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n").replacingOccurrences(of: "<br>", with: "\n")
                 if message.lowercased().hasSuffix(".md") {
                     observedData.args.messageOption.value = getMarkdown(mdFilePath: message)
                 } else if message.hasPrefix("+ ") {
