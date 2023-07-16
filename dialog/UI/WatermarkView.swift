@@ -48,17 +48,16 @@ struct WatermarkView: View {
     var body: some View {
         ZStack {
             if observedData.args.watermarkFill.value == "fill" {
-                DisplayImage(observedData.args.watermarkImage.value, rezize: true)
-                    .aspectRatio(contentMode: .fill)
+                DisplayImage(observedData.args.watermarkImage.value, corners: false, rezize: true, content: .fill)
                     .scaledToFill()
                     .opacity(imageOpacity)
+                
             } else if observedData.args.watermarkFill.value == "fit" {
-                DisplayImage(observedData.args.watermarkImage.value, rezize: true)
-                    .aspectRatio(contentMode: .fit)
+                DisplayImage(observedData.args.watermarkImage.value, corners: false, rezize: true, content: .fit)
                     .scaledToFit()
                     .opacity(imageOpacity)
             } else {
-                DisplayImage(observedData.args.watermarkImage.value, rezize: false)
+                DisplayImage(observedData.args.watermarkImage.value, corners: false, rezize: false)
                     .fixedSize()
                     .opacity(imageOpacity)
             }

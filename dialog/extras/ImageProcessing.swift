@@ -23,6 +23,7 @@ struct DisplayImage: View {
 
     var asyncURL: URL = URL(string: "https://macadmins.org")!
     var imgPath: String = ""
+    var imgSize: CGFloat = 100
     var imgFromURL: Bool = false
     var imgFromBase64: Bool = false
     var imgFromAPP: Bool = false
@@ -30,15 +31,19 @@ struct DisplayImage: View {
     var clipShapeRadius: CGFloat = 0
     var shouldClip: Bool = false
     var shouldResize: Bool = true
+    var contentMode: ContentMode = .fit
 
-    init(_ path: String, corners: Bool = true, rezize: Bool = true) {
+    init(_ path: String, corners: Bool = true, rezize: Bool = true, size: CGFloat = 100, content: ContentMode = .fit) {
         self.imgPath = path
         self.shouldResize = rezize
+        self.imgSize = size
+        self.contentMode = content
 
         switch path {
         case _ where path.hasPrefix("http"):
             asyncURL = URL(string: path)!
             imgFromURL = true
+            self.shouldClip = true
         case _ where path.hasPrefix("base64"):
             imgFromBase64 = true
         case _ where ["app", "prefPane", "framework"].contains(path.split(separator: ".").last):
@@ -58,23 +63,35 @@ struct DisplayImage: View {
     }
 
     var body: some View {
-
         ZStack {
             if imgFromURL {
-                AsyncImage(url: asyncURL) { image in
-                    if self.shouldResize {
-                        image
-                            .resizable()
-                            .interpolation(.medium)
+                AsyncImage(url: asyncURL) { phase in
+                    if let image = phase.image {
+                        if self.shouldResize {
+                            image
+                                .resizable()
+                                .interpolation(.medium)
+                        } else {
+                            image
+                        }
+                    } else if phase.error != nil {
+                        // error image
+                        ZStack {
+                            RoundedRectangle(cornerRadius: clipShapeRadius, style: .continuous)
+                                .fill(.regularMaterial)
+                            Image(systemName: "questionmark.square.fill")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(maxWidth: imgSize)
+                                .symbolRenderingMode(.hierarchical)
+                                .font(Font.title.weight(.thin))
+                                .foregroundColor(.accentColor)
+                        }
                     } else {
-                        image
+                        // placeholder image while the resource is loaded
+                        RoundedRectangle(cornerRadius: clipShapeRadius, style: .continuous)
+                            .fill(.regularMaterial)
                     }
-                } placeholder: {
-                    Image(systemName: "questionmark.app.fill")
-                        .resizable()
-                        .symbolRenderingMode(.hierarchical)
-                        .font(Font.title.weight(.thin))
-                        .foregroundColor(.accentColor)
                 }
             }
             if imgFromBase64 {
@@ -92,7 +109,7 @@ struct DisplayImage: View {
                     .foregroundColor(.clear)
             }
         }
-        .aspectRatio(contentMode: .fit)
+        .aspectRatio(contentMode: contentMode)
         //.scaledToFit()
         .clipShape(RoundedRectangle(cornerRadius: clipShapeRadius))
     }

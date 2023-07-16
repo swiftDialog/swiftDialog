@@ -14,7 +14,7 @@ struct BannerImageView: View {
 
     //var bannerHeight: CGFloat = 0
     var bannerWidth: CGFloat = 0
-    let maxBannerHeight: CGFloat = 150
+    let maxBannerHeight: CGFloat = 120
 
     let blurRadius: CGFloat = 3
     let opacity: CGFloat = 0.5
