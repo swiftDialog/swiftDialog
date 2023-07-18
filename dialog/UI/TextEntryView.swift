@@ -18,7 +18,7 @@ struct TextEntryView: View {
     init(observedDialogContent: DialogUpdatableContent, textfieldContent: [TextFieldState]) {
         // we take in textfieldContent but that just populates the State variable
         // When the state variable is updated, the global textFields variable initiated in AppState.swift is updated
-        
+
         self.observedData = observedDialogContent
         if !observedDialogContent.args.hideIcon.present { //} appArguments.hideIcon.present {
             fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value)

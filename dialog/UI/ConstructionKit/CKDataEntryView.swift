@@ -10,7 +10,7 @@ import SwiftUI
 struct CKDataEntryView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
-    @State var textfieldContent = [TextFieldState]()
+    @State var textfieldContent: [TextFieldState]
 
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
@@ -28,6 +28,7 @@ struct CKDataEntryView: View {
             HStack {
                 Button(action: {
                     textFields.append(TextFieldState(title: ""))
+                    textfieldContent.append(TextFieldState(title: ""))
                     observedData.args.textField.present = true
                     appArguments.textField.present = true
                 }, label: {

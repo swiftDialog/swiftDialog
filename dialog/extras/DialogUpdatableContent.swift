@@ -367,12 +367,23 @@ class FileReader {
                             if progressIsSet { listItems[row].progress = listProgressValue }
                             observedData.listItemUpdateRow = row
                         }
+                        // update the view if visible
+                        if observedData.args.listItem.present {
+                            observedData.args.listItem.present = true
+                        }
                     }
 
                     // add to the list items array
                     if addRow {
                         listItems.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon, progress: listProgressValue))
-                                                writeLog("row added with \(title) \(icon) \(statusText) \(statusIcon)")
+                        writeLog("row added with \(title) \(icon) \(statusText) \(statusIcon)")
+                        // update the view if visible
+                        if observedData.args.listItem.present {
+                            if let row = listItems.firstIndex(where: {$0.title == title}) {
+                                observedData.listItemUpdateRow = row
+                            }
+                            observedData.args.listItem.present = true
+                        }
                     }
 
                 }
