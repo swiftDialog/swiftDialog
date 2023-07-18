@@ -11,10 +11,14 @@ import UniformTypeIdentifiers
 struct TextEntryView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
+    @State var textfieldContent: [TextFieldState]
 
     var fieldwidth: CGFloat = 0
 
-    init(observedDialogContent: DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent, textfieldContent: [TextFieldState]) {
+        // we take in textfieldContent but that just populates the State variable
+        // When the state variable is updated, the global textFields variable initiated in AppState.swift is updated
+        
         self.observedData = observedDialogContent
         if !observedDialogContent.args.hideIcon.present { //} appArguments.hideIcon.present {
             fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value)
@@ -23,28 +27,32 @@ struct TextEntryView: View {
         }
         if observedDialogContent.args.textField.present {
             writeLog("Displaying text entry")
-            writeLog("\(observedDialogContent.appProperties.textFields.count) textfields detected")
+            writeLog("\(textFields.count) textfields detected")
         }
+        self.textfieldContent = textfieldContent
     }
 
     var body: some View {
         if observedData.args.textField.present {
             VStack {
-                ForEach(0..<observedData.appProperties.textFields.count, id: \.self) {index in
-                    if observedData.appProperties.textFields[index].editor {
+                ForEach(0..<textfieldContent.count, id: \.self) {index in
+                    if textfieldContent[index].editor {
                         VStack {
                             HStack {
-                                Text(observedData.appProperties.textFields[index].title + (observedData.appProperties.textFields[index].required ? " *":""))
+                                Text(textfieldContent[index].title + (textfieldContent[index].required ? " *":""))
                                     .frame(alignment: .leading)
                                 Spacer()
                             }
-                            TextEditor(text: $observedData.appProperties.textFields[index].value)
+                            TextEditor(text: $textfieldContent[index].value)
+                                .onChange(of: textfieldContent[index].value, perform: { textContent in
+                                    textFields[index].value = textContent
+                                })
                                 .background(Color("editorBackgroundColour"))
                                 .font(.custom("HelveticaNeue", size: 14))
                                 .cornerRadius(3.0)
                                 .frame(minHeight: 80, maxHeight: observedData.appProperties.windowHeight/2)
                                 .overlay(RoundedRectangle(cornerRadius: 5)
-                                            .stroke(observedData.appProperties.textFields[index].requiredTextfieldHighlight, lineWidth: 2)
+                                            .stroke(textfieldContent[index].requiredTextfieldHighlight, lineWidth: 2)
                                             .animation(
                                                 .easeIn(duration: 0.2)
                                                 .repeatCount(3, autoreverses: true),
@@ -56,18 +64,18 @@ struct TextEntryView: View {
                     } else {
                         HStack {
 
-                            Text(observedData.appProperties.textFields[index].title + (observedData.appProperties.textFields[index].required ? " *":""))
+                            Text(textfieldContent[index].title + (textfieldContent[index].required ? " *":""))
                                 .frame(idealWidth: fieldwidth*0.20, alignment: .leading)
                             Spacer()
 
-                            if observedData.appProperties.textFields[index].fileSelect {
+                            if textfieldContent[index].fileSelect {
                                 Button("button-select".localized) {
                                     let panel = NSOpenPanel()
                                     panel.allowsMultipleSelection = false
                                     panel.canChooseDirectories = false
-                                    if observedData.appProperties.textFields[index].fileType != "" {
+                                    if textfieldContent[index].fileType != "" {
                                         var fileTypesArray: [UTType] = []
-                                        for type in observedData.appProperties.textFields[index].fileType.components(separatedBy: " ") {
+                                        for type in textfieldContent[index].fileType.components(separatedBy: " ") {
                                             switch type {
                                             case "folder":
                                                 panel.canChooseDirectories = true
@@ -84,29 +92,35 @@ struct TextEntryView: View {
                                         panel.allowedContentTypes = fileTypesArray
                                     }
                                     if panel.runModal() == .OK {
-                                        observedData.appProperties.textFields[index].value = panel.url?.path ?? "<none>"
+                                        textfieldContent[index].value = panel.url?.path ?? "<none>"
                                     }
                                 }
                             }
                             HStack {
-                                if observedData.appProperties.textFields[index].secure {
+                                if textfieldContent[index].secure {
                                     ZStack {
-                                        SecureField("", text: $observedData.appProperties.textFields[index].value)
+                                        SecureField("", text: $textfieldContent[index].value)
                                             .disableAutocorrection(true)
-                                            .textContentType(observedData.appProperties.textFields[index].passwordFill ? .password: .none)
+                                            .textContentType(textfieldContent[index].passwordFill ? .password: .none)
+                                            .onChange(of: textfieldContent[index].value, perform: { textContent in
+                                                textFields[index].value = textContent
+                                            })
                                         Image(systemName: "lock.fill")
                                             .foregroundColor(stringToColour("#008815")).opacity(0.5)
                                             .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
                                     }
                                 } else {
-                                    TextField(observedData.appProperties.textFields[index].prompt, text: $observedData.appProperties.textFields[index].value)
+                                    TextField(textfieldContent[index].prompt, text: $textfieldContent[index].value)
+                                        .onChange(of: textfieldContent[index].value, perform: { textContent in
+                                            textFields[index].value = textContent
+                                        })
 
                                 }
                             }
                             .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
 
                             .overlay(RoundedRectangle(cornerRadius: 5)
-                                        .stroke(observedData.appProperties.textFields[index].requiredTextfieldHighlight, lineWidth: 2)
+                                        .stroke(textfieldContent[index].requiredTextfieldHighlight, lineWidth: 2)
                                         .animation(
                                             .easeIn(duration: 0.2)
                                             .repeatCount(3, autoreverses: true),

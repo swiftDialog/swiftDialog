@@ -92,13 +92,13 @@ func processCLOptions(json: JSON = getJSON()) {
             let selectValues = json[appArguments.dropdownValues.long].arrayValue.map {$0.stringValue}
             let selectTitle = json[appArguments.dropdownTitle.long].stringValue
             let selectDefault = json[appArguments.dropdownDefault.long].stringValue
-            appvars.dropdownItems.append(DropDownItems(title: selectTitle, values: selectValues, defaultValue: selectDefault, selectedValue: selectDefault))
+            dropdownItems.append(DropDownItems(title: selectTitle, values: selectValues, defaultValue: selectDefault, selectedValue: selectDefault))
         }
 
         if json["selectitems"].exists() {
             writeLog("processing select items from json")
             for index in 0..<json["selectitems"].count {
-                appvars.dropdownItems.append(DropDownItems(
+                dropdownItems.append(DropDownItems(
                         title: json["selectitems"][index]["title"].stringValue,
                         values: (json["selectitems"][index]["values"].arrayValue.map {$0.stringValue}).map { $0.trimmingCharacters(in: .whitespaces) },
                         defaultValue: json["selectitems"][index]["default"].stringValue,
@@ -135,13 +135,13 @@ func processCLOptions(json: JSON = getJSON()) {
                         dropdownStyle = labelItems[1]
                     }
                 }
-                appvars.dropdownItems.append(DropDownItems(title: dropdownTitle, values: dropdownValues[index].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[index], selectedValue: dropdownDefaults[index], required: dropdownRequired, style: dropdownStyle))
+                dropdownItems.append(DropDownItems(title: dropdownTitle, values: dropdownValues[index].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[index], selectedValue: dropdownDefaults[index], required: dropdownRequired, style: dropdownStyle))
             }
         }
-        for index in 0..<appvars.dropdownItems.count where appvars.dropdownItems[index].required {
+        for index in 0..<dropdownItems.count where dropdownItems[index].required {
             appvars.userInputRequired = true
         }
-        writeLog("Processed \(appvars.dropdownItems.count) select items")
+        writeLog("Processed \(dropdownItems.count) select items")
     }
 
     if appArguments.textField.present {
@@ -149,9 +149,9 @@ func processCLOptions(json: JSON = getJSON()) {
         if json[appArguments.textField.long].exists() {
             for index in 0..<json[appArguments.textField.long].arrayValue.count {
                 if json[appArguments.textField.long][index]["title"].stringValue == "" {
-                    appvars.textFields.append(TextFieldState(title: String(json[appArguments.textField.long][index].stringValue)))
+                    textFields.append(TextFieldState(title: String(json[appArguments.textField.long][index].stringValue)))
                 } else {
-                    appvars.textFields.append(TextFieldState(
+                    textFields.append(TextFieldState(
                         editor: Bool(json[appArguments.textField.long][index]["editor"].boolValue),
                         fileSelect: Bool(json[appArguments.textField.long][index]["fileselect"].boolValue),
                         fileType: String(json[appArguments.textField.long][index]["filetype"].stringValue),
@@ -214,7 +214,7 @@ func processCLOptions(json: JSON = getJSON()) {
                         }
                     }
                 }
-                appvars.textFields.append(TextFieldState(
+                textFields.append(TextFieldState(
                             editor: fieldEditor,
                             fileSelect: fieldFileSelect,
                             fileType: fieldSelectType,
@@ -228,10 +228,10 @@ func processCLOptions(json: JSON = getJSON()) {
                             value: fieldValue))
             }
         }
-        for index in 0..<appvars.textFields.count where appvars.textFields[index].required {
+        for index in 0..<textFields.count where textFields[index].required {
             appvars.userInputRequired = true
         }
-        writeLog("textOptionsArray : \(appvars.textFields)")
+        writeLog("textOptionsArray : \(textFields)")
     }
 
     if appArguments.checkbox.present {
@@ -343,9 +343,9 @@ func processCLOptions(json: JSON = getJSON()) {
 
             for index in 0..<json[appArguments.listItem.long].arrayValue.count {
                 if json[appArguments.listItem.long][index]["title"].stringValue == "" {
-                    appvars.listItems.append(ListItems(title: String(json[appArguments.listItem.long][index].stringValue)))
+                    listItems.append(ListItems(title: String(json[appArguments.listItem.long][index].stringValue)))
                 } else {
-                    appvars.listItems.append(ListItems(title: String(json[appArguments.listItem.long][index]["title"].stringValue),
+                    listItems.append(ListItems(title: String(json[appArguments.listItem.long][index]["title"].stringValue),
                                                icon: String(json[appArguments.listItem.long][index]["icon"].stringValue),
                                                statusText: String(json[appArguments.listItem.long][index]["statustext"].stringValue),
                                                statusIcon: String(json[appArguments.listItem.long][index]["status"].stringValue))
@@ -381,10 +381,10 @@ func processCLOptions(json: JSON = getJSON()) {
                         title = itemName
                     }
                 }
-                appvars.listItems.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon))
+                listItems.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon))
             }
         }
-        if appvars.listItems.isEmpty {
+        if listItems.isEmpty {
             appArguments.listItem.present = false
         }
     }

@@ -66,30 +66,30 @@ struct ListView: View {
             let _ = writeLog("Displaying listitems")
             ScrollViewReader { proxy in
                 GeometryReader { geometry in
-                    let listHeightPadding = ((geometry.size.height/CGFloat(observedData.listItemsArray.count)/2) * proportionalListHeight)
+                    let listHeightPadding = ((geometry.size.height/CGFloat(listItems.count)/2) * proportionalListHeight)
                 //withAnimation(.default) {
                     VStack {
-                        List(0..<observedData.listItemsArray.count, id: \.self) {index in
+                        List(0..<listItems.count, id: \.self) {index in
                             VStack {
                                 HStack {
-                                    if observedData.listItemsArray[index].icon != "" {
-                                        let _ = writeLog("Switch index \(index): Displaying icon \(observedData.listItemsArray[index].icon)")
-                                        IconView(image: observedData.listItemsArray[index].icon, overlay: "")
+                                    if listItems[index].icon != "" {
+                                        let _ = writeLog("Switch index \(index): Displaying icon \(listItems[index].icon)")
+                                        IconView(image: listItems[index].icon, overlay: "")
                                             .frame(maxHeight: rowHeight)
                                     }
-                                    Text(observedData.listItemsArray[index].title)
+                                    Text(listItems[index].title)
                                         .font(.system(size: rowFontSize))
                                         .id(index)
                                     Spacer()
                                     HStack {
-                                        if observedData.listItemsArray[index].statusText != "" {
-                                            Text(observedData.listItemsArray[index].statusText)
+                                        if listItems[index].statusText != "" {
+                                            Text(listItems[index].statusText)
                                                 .font(.system(size: rowFontSize))
                                                 .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
                                         }
-                                        switch observedData.listItemsArray[index].statusIcon {
+                                        switch listItems[index].statusIcon {
                                         case "progress":
-                                            ProgressView("", value: observedData.listItemsArray[index].progress, total: 100)
+                                            ProgressView("", value: listItems[index].progress, total: 100)
                                                 .progressViewStyle(CirclerPercentageProgressViewStyle())
                                                 .frame(width: rowStatusHeight, height: rowStatusHeight-5)
                                                 .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))

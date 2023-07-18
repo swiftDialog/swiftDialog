@@ -266,30 +266,30 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
             // check to see if fields marked as required have content before allowing the app to exit
             // if there is an empty field, update the highlight colour
 
-            for index in 0..<(observedObject?.appProperties.textFields.count ?? 0) {
+            for index in 0..<(textFields.count) {
                 //check for required fields
-                let textField = observedObject?.appProperties.textFields[index]
-                let textfieldValue = textField?.value ?? ""
-                let textfieldTitle = textField?.title ?? ""
-                let textfieldRequired = textField?.required ?? false
-                observedObject?.appProperties.textFields[index].requiredTextfieldHighlight = Color.clear
+                let textField = textFields[index]
+                let textfieldValue = textField.value
+                let textfieldTitle = textField.title
+                let textfieldRequired = textField.required
+                textFields[index].requiredTextfieldHighlight = Color.clear
 
                 if textfieldRequired && textfieldValue == "" { // && textFields[index].regex.isEmpty {
                     NSSound.beep()
                     requiredString += "• \"\(textfieldTitle)\" \("is-required".localized) \n"
-                    observedObject?.appProperties.textFields[index].requiredTextfieldHighlight = Color.red
+                    textFields[index].requiredTextfieldHighlight = Color.red
                     dontQuit = true
                     writeLog("Required text field \(textfieldTitle) has no value")
 
                 //check for regex requirements
                 } else if !(textfieldValue.isEmpty)
-                            && !(textField?.regex.isEmpty ?? false)
-                            && !checkRegexPattern(regexPattern: textField?.regex ?? "", textToValidate: textfieldValue) {
+                            && !(textField.regex.isEmpty)
+                            && !checkRegexPattern(regexPattern: textField.regex, textToValidate: textfieldValue) {
                     NSSound.beep()
-                    observedObject?.appProperties.textFields[index].requiredTextfieldHighlight = Color.green
-                    requiredString += "• "+(textField?.regexError ?? "Regex Check Failed  \n")
+                    textFields[index].requiredTextfieldHighlight = Color.green
+                    requiredString += "• "+(textField.regexError)
                     dontQuit = true
-                    writeLog("Textfield \(textfieldTitle) value \(textfieldValue) does not meet regex requirements \(String(describing: textField?.regex))")
+                    writeLog("Textfield \(textfieldTitle) value \(textfieldValue) does not meet regex requirements \(String(describing: textField.regex))")
                 }
 
                 outputArray.append("\(textfieldTitle) : \(textfieldValue)")
@@ -299,29 +299,29 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
 
         if observedObject?.args.dropdownValues.present != nil {
             writeLog("Select items present - checking require,ments are met")
-            if observedObject?.appProperties.dropdownItems.count == 1 {
-                let selectedValue = observedObject?.appProperties.dropdownItems[0].selectedValue
-                let selectedIndex = observedObject?.appProperties.dropdownItems[0].values
+            if dropdownItems.count == 1 {
+                let selectedValue = dropdownItems[0].selectedValue
+                let selectedIndex = dropdownItems[0].values
 
-                outputArray.append("\"SelectedOption\" : \"\(selectedValue ?? "")\"")
+                outputArray.append("\"SelectedOption\" : \"\(selectedValue)\"")
                 json["SelectedOption"].string = selectedValue
-                outputArray.append("\"SelectedIndex\" : \(selectedIndex?.firstIndex(of: (selectedValue)!) ?? -1)")
-                json["SelectedIndex"].int = selectedIndex?.firstIndex(of: selectedValue ?? "") ?? -1
+                outputArray.append("\"SelectedIndex\" : \(selectedIndex.firstIndex(of: (selectedValue)) ?? -1)")
+                json["SelectedIndex"].int = selectedIndex.firstIndex(of: selectedValue) ?? -1
             }
             // check to see if fields marked as required have content before allowing the app to exit
             // if there is an empty field, update the highlight colour
-            for index in 0..<(observedObject?.appProperties.dropdownItems.count ?? 0) {
-                let dropdownItem = observedObject?.appProperties.dropdownItems[index]
-                let dropdownItemValues = dropdownItem?.values ?? [""]
-                let dropdownItemSelectedValue = dropdownItem?.selectedValue ?? ""
-                let dropdownItemTitle = dropdownItem?.title ?? ""
-                let dropdownItemRequired = dropdownItem?.required ?? false
-                observedObject?.appProperties.dropdownItems[index].requiredfieldHighlight = Color.clear
+            for index in 0..<(dropdownItems.count) {
+                let dropdownItem = dropdownItems[index]
+                let dropdownItemValues = dropdownItem.values
+                let dropdownItemSelectedValue = dropdownItem.selectedValue
+                let dropdownItemTitle = dropdownItem.title
+                let dropdownItemRequired = dropdownItem.required
+                dropdownItems[index].requiredfieldHighlight = Color.clear
 
                 if dropdownItemRequired && dropdownItemSelectedValue == "" {
                     NSSound.beep()
                     requiredString += "• \"\(dropdownItemTitle)\" \("is-required".localized) \n"
-                    observedObject?.appProperties.dropdownItems[index].requiredfieldHighlight = Color.red
+                    dropdownItems[index].requiredfieldHighlight = Color.red
                     dontQuit = true
                     writeLog("Required select item \(dropdownItemTitle) has no value")
                 } else {

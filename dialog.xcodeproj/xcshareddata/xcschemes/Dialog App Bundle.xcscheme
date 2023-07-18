@@ -61,7 +61,7 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--bannerimage &quot;https://img.freepik.com/free-vector/abstract-orange-background-with-lines-halftone-effect_1017-32107.jpg&quot;"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--textfield &quot;Textfield Test&quot;,required --selecttitle &quot;Dropdown Test&quot;,required --selectvalues &quot;one, two, three&quot;"

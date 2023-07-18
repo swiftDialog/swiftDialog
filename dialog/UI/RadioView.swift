@@ -27,13 +27,13 @@ struct RadioView: View {
         }
 
         var defaultOptions: [String] = []
-        for index in 0..<observedDialogContent.appProperties.dropdownItems.count {
-            if observedDialogContent.appProperties.dropdownItems[index].defaultValue.isEmpty && observedDialogContent.appProperties.dropdownItems[index].style == "radio" {
-                observedDialogContent.appProperties.dropdownItems[index].defaultValue = observedDialogContent.appProperties.dropdownItems[index].values[0]
-                observedDialogContent.appProperties.dropdownItems[index].selectedValue = observedDialogContent.appProperties.dropdownItems[index].values[0]
+        for index in 0..<dropdownItems.count {
+            if dropdownItems[index].defaultValue.isEmpty && dropdownItems[index].style == "radio" {
+                dropdownItems[index].defaultValue = dropdownItems[index].values[0]
+                dropdownItems[index].selectedValue = dropdownItems[index].values[0]
             }
-            defaultOptions.append(observedDialogContent.appProperties.dropdownItems[index].defaultValue)
-            if observedDialogContent.appProperties.dropdownItems[index].style == "radio" {
+            defaultOptions.append(dropdownItems[index].defaultValue)
+            if dropdownItems[index].style == "radio" {
                 radioCount+=1
             }
         }
@@ -48,21 +48,24 @@ struct RadioView: View {
     var body: some View {
         if observedData.args.dropdownValues.present && radioCount > 0 {
             VStack {
-                ForEach(0..<observedData.appProperties.dropdownItems.count, id: \.self) {index in
-                    if observedData.appProperties.dropdownItems[index].style == "radio" {
+                ForEach(0..<dropdownItems.count, id: \.self) {index in
+                    if dropdownItems[index].style == "radio" {
                         VStack {
                             HStack {
-                                Text(observedData.appProperties.dropdownItems[index].title + (observedData.appProperties.dropdownItems[index].required ? " *":""))
+                                Text(dropdownItems[index].title + (dropdownItems[index].required ? " *":""))
                                     .frame(alignment: .leading)
                                 Spacer()
                             }
                             HStack {
-                                Picker("", selection: $observedData.appProperties.dropdownItems[index].selectedValue) {
-                                    ForEach(observedData.appProperties.dropdownItems[index].values, id: \.self) {
+                                Picker("", selection: $selectedOption[index]) {
+                                    ForEach(dropdownItems[index].values, id: \.self) {
                                         Text($0).tag($0)
                                             .font(.system(size: observedData.appProperties.labelFontSize))
                                     }
                                 }
+                                .onChange(of: selectedOption[index], perform: { selectedOption in
+                                    dropdownItems[index].selectedValue = selectedOption
+                                })
                                 .pickerStyle(RadioGroupPickerStyle())
                                 Spacer()
                             }

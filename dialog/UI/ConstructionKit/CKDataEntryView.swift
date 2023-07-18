@@ -10,9 +10,11 @@ import SwiftUI
 struct CKDataEntryView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
+    @State var textfieldContent = [TextFieldState]()
 
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
+        textfieldContent = textFields
     }
 
     var body: some View {
@@ -25,7 +27,7 @@ struct CKDataEntryView: View {
             LabelView(label: "ck-textfields".localized)
             HStack {
                 Button(action: {
-                    observedData.appProperties.textFields.append(TextFieldState(title: ""))
+                    textFields.append(TextFieldState(title: ""))
                     observedData.args.textField.present = true
                     appArguments.textField.present = true
                 }, label: {
@@ -42,7 +44,7 @@ struct CKDataEntryView: View {
                 Spacer()
             }
 
-            ForEach(0..<observedData.appProperties.textFields.count, id: \.self) { item in
+            ForEach(0..<textFields.count, id: \.self) { item in
                 HStack {
                     Button(action: {
                         //observedData.listItemsArray.remove(at: i)
@@ -50,24 +52,43 @@ struct CKDataEntryView: View {
                         Image(systemName: "trash")
                     })
                     .disabled(true) // MARK: disabled until I can work out how to delete from the array without causing a crash
-                    Toggle("ck-required".localized, isOn: $observedData.appProperties.textFields[item].required)
-                        .onChange(of: observedData.appProperties.textFields[item].required, perform: { _ in
+                    Toggle("ck-required".localized, isOn: $textfieldContent[item].required)
+                        .onChange(of: textfieldContent[item].required, perform: { textRequired in
                             observedData.requiredFieldsPresent.toggle()
+                            textFields[item].required = textRequired
                         })
                         .toggleStyle(.switch)
-                    Toggle("ck-secure".localized, isOn: $observedData.appProperties.textFields[item].secure)
+                    Toggle("ck-secure".localized, isOn: $textfieldContent[item].secure)
+                        .onChange(of: textfieldContent[item].secure, perform: { textSecure in
+                            textFields[item].secure = textSecure
+                        })
                         .toggleStyle(.switch)
                     Spacer()
                 }
                 HStack {
-                    TextField("ck-title".localized, text: $observedData.appProperties.textFields[item].title)
-                    TextField("ck-value".localized, text: $observedData.appProperties.textFields[item].value)
-                    TextField("ck-prompt".localized, text: $observedData.appProperties.textFields[item].prompt)
+                    TextField("ck-title".localized, text: $textfieldContent[item].title)
+                        .onChange(of: textfieldContent[item].title, perform: { textTitle in
+                            textFields[item].title = textTitle
+                        })
+                    TextField("ck-value".localized, text: $textfieldContent[item].value)
+                        .onChange(of: textfieldContent[item].value, perform: { textValue in
+                            textFields[item].value = textValue
+                        })
+                    TextField("ck-prompt".localized, text: $textfieldContent[item].prompt)
+                        .onChange(of: textfieldContent[item].prompt, perform: { textPrompt in
+                            textFields[item].prompt = textPrompt
+                        })
                 }
                 .padding(.leading, 20)
                 HStack {
-                    TextField("ck-regex".localized, text: $observedData.appProperties.textFields[item].regex)
-                    TextField("ck-regexerror".localized, text: $observedData.appProperties.textFields[item].regexError)
+                    TextField("ck-regex".localized, text: $textfieldContent[item].regex)
+                        .onChange(of: textfieldContent[item].regex, perform: { textRegex in
+                            textFields[item].regex = textRegex
+                        })
+                    TextField("ck-regexerror".localized, text: $textfieldContent[item].regexError)
+                        .onChange(of: textfieldContent[item].regexError, perform: { textRegexError in
+                            textFields[item].regexError = textRegexError
+                        })
                 }
                 .padding(.leading, 20)
                 Divider()

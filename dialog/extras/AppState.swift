@@ -16,6 +16,12 @@ var iconVisible: Bool = true
 var appvars = AppVariables()
 var appArguments = CommandLineArguments()
 
+// These items can get quite large so we declare them here and not as part of the main ObservableObject
+// Doing so saves on performance as the states only need to be updated to the value entered in, not re-evaluated on every keystroke
+var dropdownItems = [DropDownItems]()
+var listItems = [ListItems]()
+var textFields = [TextFieldState]()
+
 let displayAsInt: NumberFormatter = {
     let formatter = NumberFormatter()
     formatter.maximumFractionDigits = 0
@@ -214,10 +220,6 @@ struct AppVariables {
 
     var imageArray                      = [MainImage]()
     var imageCaptionArray               = [String]()
-
-    var listItems = [ListItems]()
-    var textFields = [TextFieldState]()
-    var dropdownItems = [DropDownItems]()
 
     let defaultStatusLogFile            = String("/var/tmp/dialog.log")
 
