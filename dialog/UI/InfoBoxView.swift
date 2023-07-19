@@ -27,9 +27,6 @@ struct InfoBoxView: View {
             }
             .focusable(false)
             .lineLimit(nil)
-            .frame(width: 150, alignment: .top)
-            .frame(minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
-            .padding(.top, observedData.appProperties.topPadding)
     }
 }
 

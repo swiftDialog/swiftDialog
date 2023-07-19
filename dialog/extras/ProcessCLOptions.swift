@@ -83,6 +83,9 @@ func processCLOptions(json: JSON = getJSON()) {
     if appArguments.messageOption.present && appArguments.messageOption.value.lowercased().hasSuffix(".md") {
         appArguments.messageOption.value = getMarkdown(mdFilePath: appArguments.messageOption.value)
     }
+    if appArguments.infoBox.present && appArguments.infoBox.value.lowercased().hasSuffix(".md") {
+        appArguments.infoBox.value = getMarkdown(mdFilePath: appArguments.infoBox.value)
+    }
 
     if appArguments.dropdownValues.present {
         writeLog("\(appArguments.dropdownValues.long) present")

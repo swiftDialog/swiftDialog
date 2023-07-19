@@ -197,7 +197,14 @@ class FileReader {
 
             // Info Box
             case "\(observedData.args.infoBox.long):":
-                observedData.args.infoBox.value = line.replacingOccurrences(of: "\(observedData.args.infoBox.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n")
+                let infoBoxContent = line.replacingOccurrences(of: "\(observedData.args.infoBox.long): ", with: "").replacingOccurrences(of: "\\n", with: "\n").replacingOccurrences(of: "<br>", with: "\n")
+                if infoBoxContent.lowercased().hasSuffix(".md") {
+                    observedData.args.infoBox.value = getMarkdown(mdFilePath: infoBoxContent)
+                } else if infoBoxContent.hasPrefix("+ ") {
+                    observedData.args.infoBox.value += infoBoxContent.replacingOccurrences(of: "+ ", with: "  \n")
+                } else {
+                    observedData.args.infoBox.value = infoBoxContent
+                }
                 observedData.args.infoBox.present = true
 
             // icon image

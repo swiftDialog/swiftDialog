@@ -49,12 +49,17 @@ struct DialogView: View {
                                 }
                                 if showInfoBox {
                                     InfoBoxView(observedData: observedData)
+                                        .frame(width: 150)
+                                        .frame(minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
+                                        .padding(.top, observedData.appProperties.topPadding)
+                                        .clipped()
+                                } else {
+                                    Spacer()
                                 }
-                                Spacer()
                             }
                             .border(appvars.debugBorderColour, width: 2)
                             .padding(.top, observedData.appProperties.topPadding)
-                            .padding(.bottom, observedData.appProperties.bottomPadding)
+                            //.padding(.bottom, observedData.appProperties.bottomPadding)
                             .padding(.leading, observedData.appProperties.sidePadding+10)
                             .padding(.trailing, observedData.appProperties.sidePadding+10)
                         }
