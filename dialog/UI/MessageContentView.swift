@@ -110,7 +110,7 @@ struct MessageContent: View {
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .frame(maxWidth: dataEntryMaxWidth)
 
-                    TextEntryView(observedDialogContent: observedData, textfieldContent: textFields)
+                    TextEntryView(observedDialogContent: observedData, textfieldContent: userInputState.textFields)
                         .padding(.bottom, observedData.appProperties.contentPadding)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .frame(maxWidth: dataEntryMaxWidth)

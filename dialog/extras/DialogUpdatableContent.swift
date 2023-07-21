@@ -269,7 +269,7 @@ class FileReader {
                 case "clear":
                     // clean everything out and remove the listview from display
                     observedData.args.listItem.present = false
-                    listItems = [ListItems]()
+                    userInputState.listItems = [ListItems]()
                 case "show":
                     // show the list
                     observedData.args.listItem.present = true
@@ -280,9 +280,9 @@ class FileReader {
                     var listItemsArray = line.replacingOccurrences(of: "list: ", with: "").components(separatedBy: ",")
                     listItemsArray = listItemsArray.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
 
-                    listItems = [ListItems]()
+                    userInputState.listItems = [ListItems]()
                     for itemTitle in listItemsArray {
-                        listItems.append(ListItems(title: itemTitle))
+                        userInputState.listItems.append(ListItems(title: itemTitle))
                     }
                     observedData.args.listItem.present = true
                 }
@@ -311,13 +311,13 @@ class FileReader {
                     title = listItemStateArray.first!
                     statusIcon = listItemStateArray.last!
                     // if using the new method, these will not be set as the title value won't match the ItemValue
-                    if let row = listItems.firstIndex(where: {$0.title == title}) {
+                    if let row = userInputState.listItems.firstIndex(where: {$0.title == title}) {
                         if statusTypeArray.contains(statusIcon) {
-                            listItems[row].statusIcon = statusIcon
-                            listItems[row].statusText = ""
+                            userInputState.listItems[row].statusIcon = statusIcon
+                            userInputState.listItems[row].statusText = ""
                         } else {
-                            listItems[row].statusIcon = ""
-                            listItems[row].statusText = statusIcon
+                            userInputState.listItems[row].statusIcon = ""
+                            userInputState.listItems[row].statusText = statusIcon
                         }
                         observedData.listItemUpdateRow = row
                         break
@@ -333,8 +333,8 @@ class FileReader {
                         switch action[0].lowercased().trimmingCharacters(in: .whitespaces) {
                             case "index":
                                 if let index = Int(action[1].trimmingCharacters(in: .whitespaces)) {
-                                    if index >= 0 && index < listItems.count {
-                                        title = listItems[index].title
+                                    if index >= 0 && index < userInputState.listItems.count {
+                                        title = userInputState.listItems[index].title
                                     }
                                 }
                             case "title":
@@ -363,15 +363,15 @@ class FileReader {
                     }
 
                     // update the list items array
-                    if let row = listItems.firstIndex(where: {$0.title == title}) {
+                    if let row = userInputState.listItems.firstIndex(where: {$0.title == title}) {
                         if deleteRow {
-                            listItems.remove(at: row)
+                            userInputState.listItems.remove(at: row)
                             writeLog("deleted row at index \(row)")
                         } else {
-                            if iconIsSet { listItems[row].icon = icon }
-                            if statusIsSet { listItems[row].statusIcon = statusIcon }
-                            if statusTextIsSet { listItems[row].statusText = statusText }
-                            if progressIsSet { listItems[row].progress = listProgressValue }
+                            if iconIsSet { userInputState.listItems[row].icon = icon }
+                            if statusIsSet { userInputState.listItems[row].statusIcon = statusIcon }
+                            if statusTextIsSet { userInputState.listItems[row].statusText = statusText }
+                            if progressIsSet { userInputState.listItems[row].progress = listProgressValue }
                             observedData.listItemUpdateRow = row
                         }
                         // update the view if visible
@@ -382,11 +382,11 @@ class FileReader {
 
                     // add to the list items array
                     if addRow {
-                        listItems.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon, progress: listProgressValue))
+                        userInputState.listItems.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon, progress: listProgressValue))
                         writeLog("row added with \(title) \(icon) \(statusText) \(statusIcon)")
                         // update the view if visible
                         if observedData.args.listItem.present {
-                            if let row = listItems.firstIndex(where: {$0.title == title}) {
+                            if let row = userInputState.listItems.firstIndex(where: {$0.title == title}) {
                                 observedData.listItemUpdateRow = row
                             }
                             observedData.args.listItem.present = true
@@ -507,7 +507,7 @@ class DialogUpdatableContent: ObservableObject {
 
         imageArray = appvars.imageArray
 
-        listItemsArray = listItems
+        listItemsArray = userInputState.listItems
 
         requiredFieldsPresent = false
 

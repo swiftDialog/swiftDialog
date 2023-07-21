@@ -27,13 +27,13 @@ struct RadioView: View {
         }
 
         var defaultOptions: [String] = []
-        for index in 0..<dropdownItems.count {
-            if dropdownItems[index].defaultValue.isEmpty && dropdownItems[index].style == "radio" {
-                dropdownItems[index].defaultValue = dropdownItems[index].values[0]
-                dropdownItems[index].selectedValue = dropdownItems[index].values[0]
+        for index in 0..<userInputState.dropdownItems.count {
+            if userInputState.dropdownItems[index].defaultValue.isEmpty && userInputState.dropdownItems[index].style == "radio" {
+                userInputState.dropdownItems[index].defaultValue = userInputState.dropdownItems[index].values[0]
+                userInputState.dropdownItems[index].selectedValue = userInputState.dropdownItems[index].values[0]
             }
-            defaultOptions.append(dropdownItems[index].defaultValue)
-            if dropdownItems[index].style == "radio" {
+            defaultOptions.append(userInputState.dropdownItems[index].defaultValue)
+            if userInputState.dropdownItems[index].style == "radio" {
                 radioCount+=1
             }
         }
@@ -48,23 +48,23 @@ struct RadioView: View {
     var body: some View {
         if observedData.args.dropdownValues.present && radioCount > 0 {
             VStack {
-                ForEach(0..<dropdownItems.count, id: \.self) {index in
-                    if dropdownItems[index].style == "radio" {
+                ForEach(0..<userInputState.dropdownItems.count, id: \.self) {index in
+                    if userInputState.dropdownItems[index].style == "radio" {
                         VStack {
                             HStack {
-                                Text(dropdownItems[index].title + (dropdownItems[index].required ? " *":""))
+                                Text(userInputState.dropdownItems[index].title + (userInputState.dropdownItems[index].required ? " *":""))
                                     .frame(alignment: .leading)
                                 Spacer()
                             }
                             HStack {
                                 Picker("", selection: $selectedOption[index]) {
-                                    ForEach(dropdownItems[index].values, id: \.self) {
+                                    ForEach(userInputState.dropdownItems[index].values, id: \.self) {
                                         Text($0).tag($0)
                                             .font(.system(size: observedData.appProperties.labelFontSize))
                                     }
                                 }
                                 .onChange(of: selectedOption[index], perform: { selectedOption in
-                                    dropdownItems[index].selectedValue = selectedOption
+                                    userInputState.dropdownItems[index].selectedValue = selectedOption
                                 })
                                 .pickerStyle(RadioGroupPickerStyle())
                                 Spacer()

@@ -27,7 +27,7 @@ struct TextEntryView: View {
         }
         if observedDialogContent.args.textField.present {
             writeLog("Displaying text entry")
-            writeLog("\(textFields.count) textfields detected")
+            writeLog("\(userInputState.textFields.count) textfields detected")
         }
         self.textfieldContent = textfieldContent
     }
@@ -45,14 +45,14 @@ struct TextEntryView: View {
                             }
                             TextEditor(text: $textfieldContent[index].value)
                                 .onChange(of: textfieldContent[index].value, perform: { textContent in
-                                    textFields[index].value = textContent
+                                    userInputState.textFields[index].value = textContent
                                 })
                                 .background(Color("editorBackgroundColour"))
                                 .font(.custom("HelveticaNeue", size: 14))
                                 .cornerRadius(3.0)
                                 .frame(minHeight: 80, maxHeight: observedData.appProperties.windowHeight/2)
                                 .overlay(RoundedRectangle(cornerRadius: 5)
-                                            .stroke(textfieldContent[index].requiredTextfieldHighlight, lineWidth: 2)
+                                    .stroke(userInputState.textFields[index].requiredTextfieldHighlight, lineWidth: 2)
                                             .animation(
                                                 .easeIn(duration: 0.2)
                                                 .repeatCount(3, autoreverses: true),
@@ -103,7 +103,7 @@ struct TextEntryView: View {
                                             .disableAutocorrection(true)
                                             .textContentType(textfieldContent[index].passwordFill ? .password: .none)
                                             .onChange(of: textfieldContent[index].value, perform: { textContent in
-                                                textFields[index].value = textContent
+                                                userInputState.textFields[index].value = textContent
                                             })
                                         Image(systemName: "lock.fill")
                                             .foregroundColor(stringToColour("#008815")).opacity(0.5)
@@ -112,7 +112,7 @@ struct TextEntryView: View {
                                 } else {
                                     TextField(textfieldContent[index].prompt, text: $textfieldContent[index].value)
                                         .onChange(of: textfieldContent[index].value, perform: { textContent in
-                                            textFields[index].value = textContent
+                                            userInputState.textFields[index].value = textContent
                                         })
 
                                 }
@@ -120,7 +120,7 @@ struct TextEntryView: View {
                             .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
 
                             .overlay(RoundedRectangle(cornerRadius: 5)
-                                        .stroke(textfieldContent[index].requiredTextfieldHighlight, lineWidth: 2)
+                                        .stroke(userInputState.textFields[index].requiredTextfieldHighlight, lineWidth: 2)
                                         .animation(
                                             .easeIn(duration: 0.2)
                                             .repeatCount(3, autoreverses: true),

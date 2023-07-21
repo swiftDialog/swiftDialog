@@ -15,12 +15,7 @@ var iconVisible: Bool = true
 // declare our app var in case we want to update values - e.g. future use, multiple dialog sizes
 var appvars = AppVariables()
 var appArguments = CommandLineArguments()
-
-// These items can get quite large so we declare them here and not as part of the main ObservableObject
-// Doing so saves on performance as the states only need to be updated to the value entered in, not re-evaluated on every keystroke
-var dropdownItems = [DropDownItems]()
-var listItems = [ListItems]()
-var textFields = [TextFieldState]()
+var userInputState = UserInputState()
 
 let displayAsInt: NumberFormatter = {
     let formatter = NumberFormatter()
@@ -35,6 +30,14 @@ let displayAsDouble: NumberFormatter = {
     formatter.numberStyle = .decimal
     return formatter
 }()
+
+struct UserInputState {
+    // These items can get quite large so we declare them here and not as part of the main ObservableObject
+    // Doing so saves on performance as the states only need to be updated to the value entered in, not re-evaluated on every keystroke
+    var dropdownItems = [DropDownItems]()
+    var listItems = [ListItems]()
+    var textFields = [TextFieldState]()
+}
 
 struct TextFieldState {
     var editor: Bool       = false
