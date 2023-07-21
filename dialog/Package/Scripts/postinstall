@@ -17,7 +17,7 @@ write_to_log() {
 }
 
 write_to_log "swiftDialog postinstall started"
-write_to_log "swiftDialog $(${dialogbinary} --version)"
+write_to_log "swiftDialog $("${dialogbinary}" --version)"
 
 if [[ -e "${iconfile}" ]] && [[ -e "${dialogbundle}" ]]; then
     write_to_log "Icon file detected. Updating dialog icon"
