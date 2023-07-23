@@ -87,6 +87,26 @@ func processCLOptions(json: JSON = getJSON()) {
         appArguments.infoBox.value = getMarkdown(mdFilePath: appArguments.infoBox.value)
     }
 
+    // Dialog style allows for pre-set types that define how the window will look
+    if appArguments.dialogStyle.present {
+        switch appArguments.dialogStyle.value {
+        case "alert":
+            // set defaults for the alert style
+            appArguments.buttonStyle.value = "centre"
+            appArguments.centreIcon.present = true
+            appArguments.messageOption.value = "### \(appArguments.titleOption.value)\n\n\(appArguments.messageOption.value)"
+            appArguments.iconSize.value = "80"
+            appArguments.titleOption.value = "none"
+            appvars.messagePosition = .center
+            appvars.messageAlignment = .center
+            appvars.windowHeight = 300
+            appvars.windowWidth = 300
+        case "mini":
+            appArguments.miniMode.present = true
+        default: ()
+        }
+    }
+
     if appArguments.dropdownValues.present {
         writeLog("\(appArguments.dropdownValues.long) present")
         // checking for the pre 1.10 way of defining a select list
@@ -665,6 +685,9 @@ func processCLOptionValues() {
     writeLog("Checking command line options for arguments")
     let json: JSON = getJSON()
 
+    appArguments.dialogStyle.value           = json[appArguments.dialogStyle.long].string ?? CLOptionText(optionName: appArguments.dialogStyle)
+    appArguments.dialogStyle.present         = json[appArguments.dialogStyle.long].exists() || CLOptionPresent(optionName: appArguments.dialogStyle)
+
     appArguments.titleOption.value             = json[appArguments.titleOption.long].string ?? CLOptionText(optionName: appArguments.titleOption, defaultValue: appvars.titleDefault)
     appArguments.titleOption.present           = json[appArguments.titleOption.long].exists() || CLOptionPresent(optionName: appArguments.titleOption)
 
@@ -793,6 +816,9 @@ func processCLOptionValues() {
 
     appArguments.buttonInfoActionOption.value  = json[appArguments.buttonInfoActionOption.long].string ?? CLOptionText(optionName: appArguments.buttonInfoActionOption)
     appArguments.buttonInfoActionOption.present = json[appArguments.buttonInfoActionOption.long].exists() || CLOptionPresent(optionName: appArguments.buttonInfoActionOption)
+
+    appArguments.buttonStyle.value  = json[appArguments.buttonStyle.long].string ?? CLOptionText(optionName: appArguments.buttonStyle)
+    appArguments.buttonStyle.present = json[appArguments.buttonStyle.long].exists() || CLOptionPresent(optionName: appArguments.buttonStyle)
 
     appArguments.dropdownTitle.present         = json[appArguments.dropdownTitle.long].exists() || CLOptionPresent(optionName: appArguments.dropdownTitle)
 

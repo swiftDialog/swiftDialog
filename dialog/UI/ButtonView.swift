@@ -12,6 +12,8 @@ struct ButtonView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
 
+    var progressSteps: CGFloat = appvars.timerDefaultSeconds
+
     var button1action: String = ""
     var buttonShellAction: Bool = false
 
@@ -24,6 +26,10 @@ struct ButtonView: View {
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
 
+        if observedDialogContent.args.timerBar.present {
+            progressSteps = string2float(string: observedDialogContent.args.timerBar.value)
+        }
+
         if observedDialogContent.args.button1ShellActionOption.present {
             writeLog("Using button 1 shell action")
             button1action = observedDialogContent.args.button1ShellActionOption.value
@@ -35,41 +41,95 @@ struct ButtonView: View {
     }
 
     var body: some View {
-        //secondary button
-        Spacer()
-        HStack {
-            if observedData.args.button2Option.present || observedData.args.button2TextOption.present {
-                let button2Text: String = observedData.args.button2TextOption.value
+        if ["centre","center"].contains(observedData.args.buttonStyle.value) {
+            HStack {
+                Spacer()
+                    .frame(width: 20)
                 Button(action: {
                     quitDialog(exitCode: observedData.appProperties.exit2.code, observedObject: observedData)
                 }, label: {
-                    Text(button2Text)
+                    Text(observedData.args.button2TextOption.value)
                         .frame(minWidth: 40, alignment: .center)
+                        .frame(width: observedData.appProperties.windowWidth * 0.35)
                     }
                 )
                 .keyboardShortcut(.cancelAction)
-                .disabled(observedData.args.button2Disabled.present)
+
+                Button(action: {
+                    buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction, observedObject: observedData)
+
+                }, label: {
+                    Text(observedData.args.button1TextOption.value)
+                        .frame(minWidth: 40, alignment: .center)
+                        .frame(width: observedData.appProperties.windowWidth * 0.35)
+                    }
+                )
+                .keyboardShortcut(observedData.appProperties.button1DefaultAction)
+
+                Spacer()
+                    .frame(width: 20)
+            }
+        } else {
+
+        // Buttons
+            HStack {
+                if observedData.args.infoText.present {
+                    Text(observedData.args.infoText.value)
+                        .foregroundColor(.secondary.opacity(0.7))
+                } else if observedData.args.infoButtonOption.present || observedData.args.buttonInfoTextOption.present {
+                    MoreInfoButton(observedDialogContent: observedData)
+                    if !observedData.args.timerBar.present {
+                        Spacer()
+                    }
+                }
+                if observedData.args.timerBar.present {
+                    TimerView(progressSteps: progressSteps, visible: !observedData.args.hideTimerBar.present, observedDialogContent: observedData)
+                        .frame(alignment: .bottom)
+                }
+                if (observedData.args.timerBar.present && observedData.args.button1TextOption.present) || !observedData.args.timerBar.present || observedData.args.hideTimerBar.present {
+                    // contains both button 1 and button 2
+
+                    //secondary button
+                    Spacer()
+                    HStack {
+                        if observedData.args.button2Option.present || observedData.args.button2TextOption.present {
+                            let button2Text: String = observedData.args.button2TextOption.value
+                            Button(action: {
+                                quitDialog(exitCode: observedData.appProperties.exit2.code, observedObject: observedData)
+                            }, label: {
+                                Text(button2Text)
+                                    .frame(minWidth: 40, alignment: .center)
+                            }
+                            )
+                            .keyboardShortcut(.cancelAction)
+                            .disabled(observedData.args.button2Disabled.present)
+                        }
+                    }
+
+                    // default button aka button 1
+                    let button1Text: String = observedData.args.button1TextOption.value
+
+                    Button(action: {
+                        buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction, observedObject: observedData)
+
+                    }, label: {
+                        Text(button1Text)
+                            .frame(minWidth: 40, alignment: .center)
+                    }
+                    )
+                    .keyboardShortcut(observedData.appProperties.button1DefaultAction)
+                    .disabled(observedData.args.button1Disabled.present)
+                    .onReceive(timer) { _ in
+                        if observedData.args.timerBar.present && !observedData.args.hideTimerBar.present {
+                            observedData.args.button1Disabled.present = false
+                        }
+                    }
+
+                    // Help Button
+                    HelpButton(observedDialogContent: observedData)
+                }
             }
         }
-        // default button aka button 1
-        let button1Text: String = observedData.args.button1TextOption.value
-
-        Button(action: {
-            buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction, observedObject: observedData)
-
-        }, label: {
-            Text(button1Text)
-                .frame(minWidth: 40, alignment: .center)
-            }
-        )
-        .keyboardShortcut(observedData.appProperties.button1DefaultAction)
-        .disabled(observedData.args.button1Disabled.present)
-        .onReceive(timer) { _ in
-            if observedData.args.timerBar.present && !observedData.args.hideTimerBar.present {
-                observedData.args.button1Disabled.present = false
-            }
-        }
-        HelpButton(observedDialogContent: observedData)
     }
 }
 

@@ -86,10 +86,17 @@ struct SDHelp {
 
         argument.messageOption.helpShort = "Set the dialog message"
         argument.messageOption.helpLong = """
-        Messages can be plain text or can include Markdown
-        Markdown follows the CommonMark Spec https://spec.commonmark.org/current/
+        Messages can be plain text or can include Markdown.
+
+        Markdown is compatible with the GitHub Flavored Markdown Spec (https://github.github.com/gfm/)
+        and can display images (URL only. Inline local resources are not supported), headings,
+        lists (including task lists), blockquotes, code blocks, tables, thematic breaks, styled text and links.
+
         The message can be of any length. If it is larger than the viewable area
-        The message contents will be presented in  scrolable area.
+        the message contents will be presented in  scrolable area.
+
+        Specifying a path to a markdown document will use the contents of the document as the message content.
+        The source can be a local file or URL, e.g. --\(argument.messageOption.long) /path/to/markdown.md
 """
 
         argument.messageAlignment.helpShort = "Set the message alignment"
@@ -124,16 +131,9 @@ struct SDHelp {
 
             size=<float>              - accepts any float value.
 
-            name=<fontname>           - accepts a font name or family
-                                        list of available names can be determined with --\(appArguments.listFonts.long)
+        example: \"colour=#00A4C7,size=60\"
 
-            weight=[thin | light | regular | medium | heavy | bold]
-                default is regular
-
-        Example1: \"colour=#00A4C7,weight=light,size=60\"
-        Example2: \"name=Chalkboard,colour=#FFD012,size=40\"
-
-        ## CAUTION : Results may be unexpected when mixing font names and weights with markdown
+        ## NOTE: swiftDialog 2.3 and later do not support changes to font name or weight
 """
 
         argument.notification.helpShort = "Send a system notification"
@@ -744,13 +744,6 @@ struct SDHelp {
         argument.quitKey.helpLong = """
         Use the specified character as the command+ key combination for quitting instead of "q".
         Capitol letters can be used in which case command+shift+<key> will be required
-"""
-
-        argument.ignoreDND.helpShort = "Ignore user do-not-disturb settings"
-        argument.ignoreDND.helpUsage = ""
-        argument.ignoreDND.helpLong = """
-        Will ignore user Do Not Disturb setting
-            (Do Not Disturb detection only works in macOS 11)
 """
 
         argument.jamfHelperMode.helpShort = "Enable jamfHelper mode"

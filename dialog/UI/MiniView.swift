@@ -82,7 +82,7 @@ struct MiniView: View {
                     VStack {
                         if observedData.args.iconOption.present && observedData.args.iconOption.value != "none" {
                             IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
-                                .frame( maxHeight: 90)
+                                .frame( maxHeight: 70)
                                 .padding(.leading, observedData.appProperties.sidePadding)
                             Spacer()
                         }

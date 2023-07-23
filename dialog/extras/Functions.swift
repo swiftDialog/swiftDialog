@@ -424,29 +424,13 @@ func stringToColour(_ colourValue: String) -> Color {
         case "yellow":
             returnColor = Color.yellow
         case "mint":
-            if #available(macOS 12.0, *) {
-                returnColor = Color.mint
-            } else {
-                returnColor = Color.init(red: 90, green: 196, blue: 198)
-            }
+            returnColor = Color.mint
         case "cyan":
-            if #available(macOS 12.0, *) {
-                returnColor = Color.cyan
-            } else {
-                returnColor = Color.init(red: 114, green: 187, blue: 235)
-            }
+            returnColor = Color.cyan
         case "indigo":
-            if #available(macOS 12.0, *) {
-                returnColor = Color.indigo
-            } else {
-                returnColor = Color.init(red: 88, green: 86, blue: 207)
-            }
+            returnColor = Color.indigo
         case "teal":
-            if #available(macOS 12.0, *) {
-                returnColor = Color.teal
-            } else {
-                returnColor = Color.init(red: 110, green: 171, blue: 193)
-            }
+            returnColor = Color.teal
         default:
             returnColor = Color.primary
         }

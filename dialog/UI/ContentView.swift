@@ -11,15 +11,11 @@ import Cocoa
 struct ContentView: View {
 
     var titlePadding       = CGFloat(10)
-    var progressSteps: CGFloat = appvars.timerDefaultSeconds
 
     @ObservedObject var observedData: DialogUpdatableContent
 
     init (observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
-        if observedDialogContent.args.timerBar.present {
-            progressSteps = string2float(string: observedDialogContent.args.timerBar.value)
-        }
         if observedData.args.bannerImage.present {
             writeLog("Banner Image is present")
             titlePadding = 0
@@ -89,28 +85,11 @@ struct ContentView: View {
                 Spacer()
 
                 // Buttons
-                HStack {
-                    if observedData.args.infoText.present {
-                        Text(observedData.args.infoText.value)
-                            .foregroundColor(.secondary.opacity(0.7))
-                    } else if observedData.args.infoButtonOption.present || observedData.args.buttonInfoTextOption.present {
-                        MoreInfoButton(observedDialogContent: observedData)
-                        if !observedData.args.timerBar.present {
-                            Spacer()
-                        }
-                    }
-                    if observedData.args.timerBar.present {
-                        TimerView(progressSteps: progressSteps, visible: !observedData.args.hideTimerBar.present, observedDialogContent: observedData)
-                            .frame(alignment: .bottom)
-                    }
-                    if (observedData.args.timerBar.present && observedData.args.button1TextOption.present) || !observedData.args.timerBar.present || observedData.args.hideTimerBar.present {
-                        ButtonView(observedDialogContent: observedData) // contains both button 1 and button 2
-                    }
-                }
-                .padding(.leading, observedData.appProperties.sidePadding)
-                .padding(.trailing, observedData.appProperties.sidePadding)
-                .padding(.bottom, observedData.appProperties.bottomPadding)
-                .border(observedData.appProperties.debugBorderColour, width: 2)
+                ButtonView(observedDialogContent: observedData)
+                    .padding(.leading, observedData.appProperties.sidePadding)
+                    .padding(.trailing, observedData.appProperties.sidePadding)
+                    .padding(.bottom, observedData.appProperties.bottomPadding)
+                    .border(observedData.appProperties.debugBorderColour, width: 2)
             }
 
         }
