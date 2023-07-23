@@ -147,6 +147,29 @@ struct SDHelp {
         * <image> must refer to a local file or app bundle. remote images sources are not supported.
 """
 
+        argument.dialogStyle.helpShort = "Configure a pre-set window style"
+        argument.dialogStyle.helpUsage = "mini | centered | alert | caution | warning"
+        argument.dialogStyle.helpLong = """
+        Displays the dialog in one of the defined styles by adjusting window defaults
+
+        "mini" is functionally equavelent to --\(argument.miniMode.long)
+        "centered" will set all the options for centered content
+        "alert" sets a pre-configured dialog window 300x300 and centered content
+        "caution" and "warning" are the same as "alert" with the icon configured
+
+        Style defaults (other than mini) can be overridden. e.g:
+            --\(argument.dialogStyle.long) alert --\(argument.windowWidth.long) 400
+        will use the alert style with 400 width instead of the default 300
+"""
+
+        argument.buttonStyle.helpShort = "Configure how the button area is displayed"
+        argument.buttonStyle.helpUsage = "center|centre"
+        argument.buttonStyle.helpLong = """
+        Displays the buttons centered at the bottom of the window
+
+        When using this mode, --\(argument.timerBar.long) and --\(argument.infoButtonOption.long) are not available
+"""
+
         argument.webcontent.helpShort = "Display a web page"
         argument.webcontent.helpUsage = "<url>"
         argument.webcontent.helpLong = """

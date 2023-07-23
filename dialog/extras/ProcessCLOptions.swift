@@ -104,6 +104,12 @@ func processCLOptions(json: JSON = getJSON()) {
             if ["caution", "warning"].contains(appArguments.dialogStyle.value.lowercased()) {
                 appArguments.iconOption.value = appArguments.dialogStyle.value.lowercased()
             }
+        case "centred", "centered":
+            appArguments.iconSize.value = "110"
+            appArguments.buttonStyle.value = "centre"
+            appArguments.centreIcon.present = true
+            appvars.messagePosition = .center
+            appvars.messageAlignment = .center
         case "mini":
             appArguments.miniMode.present = true
         default: ()
