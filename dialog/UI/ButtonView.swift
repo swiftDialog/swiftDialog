@@ -45,24 +45,25 @@ struct ButtonView: View {
             HStack {
                 Spacer()
                     .frame(width: 20)
-                Button(action: {
-                    quitDialog(exitCode: observedData.appProperties.exit2.code, observedObject: observedData)
-                }, label: {
-                    Text(observedData.args.button2TextOption.value)
-                        .frame(minWidth: 40, alignment: .center)
-                        .frame(width: observedData.appProperties.windowWidth * 0.35)
+
+                if observedData.args.button2Option.present || observedData.args.button2TextOption.present {
+                    Button(action: {
+                        quitDialog(exitCode: observedData.appProperties.exit2.code, observedObject: observedData)
+                    }, label: {
+                        Text(observedData.args.button2TextOption.value)
+                            .frame(minWidth: 50, alignment: .center)
                     }
-                )
-                .keyboardShortcut(.cancelAction)
+                    )
+                    .keyboardShortcut(.cancelAction)
+                }
 
                 Button(action: {
                     buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction, observedObject: observedData)
 
                 }, label: {
                     Text(observedData.args.button1TextOption.value)
-                        .frame(minWidth: 40, alignment: .center)
-                        .frame(width: observedData.appProperties.windowWidth * 0.35)
-                    }
+                        .frame(minWidth: 50, alignment: .center)
+                }
                 )
                 .keyboardShortcut(observedData.appProperties.button1DefaultAction)
 
@@ -70,18 +71,16 @@ struct ButtonView: View {
                     .frame(width: 20)
             }
         } else {
-
-        // Buttons
+            // Buttons
             HStack {
+                // info button or text
                 if observedData.args.infoText.present {
                     Text(observedData.args.infoText.value)
                         .foregroundColor(.secondary.opacity(0.7))
                 } else if observedData.args.infoButtonOption.present || observedData.args.buttonInfoTextOption.present {
                     MoreInfoButton(observedDialogContent: observedData)
-                    if !observedData.args.timerBar.present {
-                        Spacer()
-                    }
                 }
+                Spacer()
                 if observedData.args.timerBar.present {
                     TimerView(progressSteps: progressSteps, visible: !observedData.args.hideTimerBar.present, observedDialogContent: observedData)
                         .frame(alignment: .bottom)

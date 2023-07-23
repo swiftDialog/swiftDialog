@@ -90,7 +90,7 @@ func processCLOptions(json: JSON = getJSON()) {
     // Dialog style allows for pre-set types that define how the window will look
     if appArguments.dialogStyle.present {
         switch appArguments.dialogStyle.value {
-        case "alert":
+        case "alert","caution","warning":
             // set defaults for the alert style
             appArguments.buttonStyle.value = "centre"
             appArguments.centreIcon.present = true
@@ -101,6 +101,9 @@ func processCLOptions(json: JSON = getJSON()) {
             appvars.messageAlignment = .center
             appvars.windowHeight = 300
             appvars.windowWidth = 300
+            if ["caution", "warning"].contains(appArguments.dialogStyle.value.lowercased()) {
+                appArguments.iconOption.value = appArguments.dialogStyle.value.lowercased()
+            }
         case "mini":
             appArguments.miniMode.present = true
         default: ()
