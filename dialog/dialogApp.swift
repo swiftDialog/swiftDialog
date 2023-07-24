@@ -184,6 +184,8 @@ struct dialogApp: App {
                             observedData.blurredScreen[index].showWindow(self)
                         }
                         NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
+                    } else if appArguments.forceOnTop.present {
+                        NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
                     } else {
                         background.close()
                     }
@@ -212,10 +214,8 @@ struct dialogApp: App {
             .background(WindowAccessor { newWindow in
                     if let newWindow = newWindow {
                         monitorVisibility(window: newWindow)
-                        observedData.mainWindow = newWindow
                     } else {
                         // window closed: release all references
-                        observedData.mainWindow = nil
                         self.cancellables.removeAll()
                     }
                 })

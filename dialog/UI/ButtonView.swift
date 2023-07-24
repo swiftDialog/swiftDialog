@@ -41,7 +41,7 @@ struct ButtonView: View {
     }
 
     var body: some View {
-        if ["centre","center"].contains(observedData.args.buttonStyle.value) {
+        if ["centre","center","centred","centered"].contains(observedData.args.buttonStyle.value) {
             HStack {
                 Spacer()
                     .frame(width: 20)
