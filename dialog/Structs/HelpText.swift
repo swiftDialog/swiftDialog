@@ -783,6 +783,32 @@ struct SDHelp {
         swiftDialog will do its best to display jamfHelper content in a swiftDialog-esque way.
         Any unsupported display options will be ignored.
 """
+        argument.authkey.helpShort = "Use the specified authentication key to allow dialog to launch"
+        argument.authkey.helpUsage = "<string>"
+        argument.authkey.helpLong = """
+        The authentication key is a way to prevent unauthorised use of swiftDialog
+        the string value will be hashed with the SHA256 hash function and compared against a stored value
+
+        swiftDialog will check the au.csiro.dialog domain for the key name \"AuthorisationKey\"
+        The key value should be a SHA256 hash of a secret keyphrase
+        If this value is present, then it must match or swiftDialog will not launch.
+
+        e.g. if the secret phrase to be used is \"password\" then the store the SHA256 hash of this
+        phrase in the au.csiro.dialog domain:
+          \"AuthorisationKey\" = \"5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8\"
+        launch dialog and specify the secret phrase:
+          dialog --\(argument.authkey.long) \"password\"
+
+        Failure to specify the correct key will casue dialog to exit with code 30
+"""
+        argument.hash.helpShort = "Generate a SHA256 value"
+        argument.hash.helpUsage = "<string>"
+        argument.hash.helpLong = """
+        For use with --\(argument.authkey.long)
+
+        Equavelent of running:
+          echo -n <string> | shasum -a 256
+"""
 
         argument.getVersion.helpShort = "Print version string"
         argument.getVersion.helpUsage = ""

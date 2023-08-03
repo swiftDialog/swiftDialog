@@ -85,8 +85,8 @@ func processCLOptions(json: JSON = getJSON()) {
 
     // Check if an auth key is present and verify
     if !checkAuthorisationKey(key: hashForString(appArguments.authkey.value)) {
-        writeLog("Auth key is required", logLevel: .error)
-        quitDialog(exitCode: 30, exitMessage: "Launch authorisation failed. Required key missing")
+        writeLog("Auth key is required", logLevel: .debug)
+        quitDialog(exitCode: appvars.exit30.code, exitMessage: appvars.exit30.message)
     }
 
     // hash a key value
