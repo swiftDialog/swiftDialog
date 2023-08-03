@@ -265,7 +265,6 @@
 				4154C30C25F782E900A3D373 /* extras */,
 				4154C2DD25F76BDB00A3D373 /* dialogApp.swift */,
 				4154C2E125F76BDC00A3D373 /* Assets.xcassets */,
-				41832B7428436B430062AA1F /* Localizable.strings */,
 				4154C2E625F76BDC00A3D373 /* Info.plist */,
 				4154C2E725F76BDC00A3D373 /* dialog.entitlements */,
 				4154C2E325F76BDC00A3D373 /* Preview Content */,
@@ -302,6 +301,7 @@
 		4154C30C25F782E900A3D373 /* extras */ = {
 			isa = PBXGroup;
 			children = (
+				CC2190602A7BDCB100269525 /* Localisations */,
 				41110A2725F9E79E008171D2 /* License.swift */,
 			);
 			path = extras;
@@ -443,6 +443,14 @@
 				417BD4342798FE38009AE34A /* DialogUpdatableContent.swift */,
 			);
 			path = Classes;
+			sourceTree = "<group>";
+		};
+		CC2190602A7BDCB100269525 /* Localisations */ = {
+			isa = PBXGroup;
+			children = (
+				41832B7428436B430062AA1F /* Localizable.strings */,
+			);
+			path = Localisations;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
