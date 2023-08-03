@@ -86,18 +86,30 @@ class FileReader {
 
             switch command {
 
+            case "position:":
+                (observedData.appProperties.windowPositionVertical,
+                 observedData.appProperties.windowPositionHorozontal) = windowPosition(line.replacingOccurrences(of: "position: ", with: ""))
+                placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
+                    vertical: observedData.appProperties.windowPositionVertical,
+                    horozontal: observedData.appProperties.windowPositionHorozontal)
+                NSApp.activate(ignoringOtherApps: true)
+
             case "width:":
                 let tempWidth = line.replacingOccurrences(of: "width: ", with: "")
                 if tempWidth.isNumeric {
                     observedData.appProperties.windowWidth = CGFloat((tempWidth as NSString).floatValue)
-                    placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28))
+                    placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
+                        vertical: observedData.appProperties.windowPositionVertical,
+                        horozontal: observedData.appProperties.windowPositionHorozontal)
                 }
 
             case "height:":
                 let tempHeight = line.replacingOccurrences(of: "height: ", with: "")
                 if tempHeight.isNumeric {
                     observedData.appProperties.windowHeight = CGFloat((tempHeight as NSString).floatValue)
-                    placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28))
+                    placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
+                        vertical: observedData.appProperties.windowPositionVertical,
+                        horozontal: observedData.appProperties.windowPositionHorozontal)
                 }
 
             // Title
@@ -529,7 +541,7 @@ class DialogUpdatableContent: ObservableObject {
             do {
                 try reader.monitorFile()
             } catch {
-                print("Error: \(error.localizedDescription)")
+                writeLog("Error: \(error.localizedDescription)", logLevel: .error)
             }
         }
 
@@ -540,16 +552,16 @@ class DialogUpdatableContent: ObservableObject {
 
         // check to make sure the file exists
         if manager.fileExists(atPath: commandFilePath) {
-                                    writeLog("Existing file at \(commandFilePath). Cleaning")
+            writeLog("Existing file at \(commandFilePath). Cleaning")
             let text = ""
             do {
                 try text.write(toFile: path, atomically: false, encoding: String.Encoding.utf8)
             } catch {
-                                        writeLog("Existing file at \(commandFilePath) but couldn't clean. ")
-                                        writeLog("Error info: \(error)")
+                writeLog("Existing file at \(commandFilePath) but couldn't clean. ", logLevel: .error)
+                writeLog("Error info: \(error)", logLevel: .error)
             }
         } else {
-                                    writeLog("Creating file at \(commandFilePath)")
+            writeLog("Creating file at \(commandFilePath)")
             manager.createFile(atPath: path, contents: nil, attributes: commandFilePermissions)
         }
     }
@@ -566,7 +578,7 @@ class DialogUpdatableContent: ObservableObject {
                 try manager.removeItem(atPath: path)
                 //NSLog("Deleted Dialog command file")
             } catch {
-                                        writeLog("Unable to delete command file")
+                writeLog("Unable to delete command file", logLevel: .error)
             }
         }
     }

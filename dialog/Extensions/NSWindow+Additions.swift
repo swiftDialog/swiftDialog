@@ -107,7 +107,7 @@ func calculateWindowXPos(screenWidth: CGFloat, position: NSWindow.Position.Horiz
 }
 
 
-func placeWindow(_ window: NSWindow, size: CGSize? = nil) {
+func placeWindow(_ window: NSWindow, size: CGSize? = nil, vertical: NSWindow.Position.Vertical, horozontal: NSWindow.Position.Horizontal) {
     let main = NSScreen.main!
     let visibleFrame = main.visibleFrame
     var windowSize: CGSize
@@ -117,11 +117,37 @@ func placeWindow(_ window: NSWindow, size: CGSize? = nil) {
         windowSize = size ?? window.frame.size
     }
 
-    let windowX = calculateWindowXPos(screenWidth: visibleFrame.width - windowSize.width, position: appvars.windowPositionHorozontal)
-    let windowY = calculateWindowYPos(screenHeight: visibleFrame.height - windowSize.height, position: appvars.windowPositionVertical)
+    let windowX = calculateWindowXPos(screenWidth: visibleFrame.width - windowSize.width, position: horozontal)
+    let windowY = calculateWindowYPos(screenHeight: visibleFrame.height - windowSize.height, position: vertical)
 
     let desiredOrigin = CGPoint(x: visibleFrame.origin.x + windowX, y: visibleFrame.origin.y + windowY)
     window.setContentSize(windowSize)
     window.setFrameOrigin(desiredOrigin)
 }
 
+func windowPosition(_ position: String) -> (vertical: NSWindow.Position.Vertical, horozontal: NSWindow.Position.Horizontal) {
+    switch position {
+    case "topleft":
+        return (vertical: .top, horozontal: .left)
+    case "topright":
+        return (vertical: .top, horozontal: .right)
+    case "bottomleft":
+        return (vertical: .bottom, horozontal: .left)
+    case "bottomright":
+        return (vertical: .bottom, horozontal: .right)
+    case "left":
+        return (vertical: .center, horozontal: .left)
+    case "right":
+        return (vertical: .center, horozontal: .right)
+    case "top":
+        return (vertical: .top, horozontal: .center)
+    case "bottom":
+        return (vertical: .bottom, horozontal: .center)
+    case "centre","center":
+        return (vertical: .deadcenter, horozontal: .center)
+    case "default":
+        return (vertical: .center, horozontal: .center)
+    default:
+        return (vertical: .center, horozontal: .center)
+    }
+}

@@ -51,7 +51,10 @@ struct dialogApp: App {
             .dropFirst()  // we know: the first value is not interesting
             .sink(receiveValue: { isVisible in
                 if isVisible {
-                    placeWindow(window)
+                    placeWindow(window,
+                                vertical: observedData.appProperties.windowPositionVertical,
+                                horozontal: observedData.appProperties.windowPositionHorozontal)
+                    observedData.mainWindow = window
                 }
             })
             .store(in: &cancellables)
