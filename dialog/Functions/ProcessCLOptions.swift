@@ -80,6 +80,20 @@ func processCLOptions(json: JSON = getJSON()) {
 
     //this method goes through the arguments that are present and performs any processing required before use
     writeLog("Processing Options")
+
+    appvars.debugMode = appArguments.debug.present
+
+    // Check if an auth key is present and verify
+    if !checkAuthorisationKey(key: hashForString(appArguments.authkey.value)) {
+        writeLog("Auth key is required", logLevel: .error)
+        quitDialog(exitCode: 30, exitMessage: "Launch authorisation failed. Required key missing")
+    }
+
+    // hash a key value
+    if appArguments.hash.present {
+        quitDialog(exitCode: 0, exitMessage: hashForString(appArguments.hash.value))
+    }
+
     if appArguments.messageOption.present && appArguments.messageOption.value.lowercased().hasSuffix(".md") {
         appArguments.messageOption.value = getMarkdown(mdFilePath: appArguments.messageOption.value)
     }
@@ -693,6 +707,11 @@ func processCLOptionValues() {
     // also records whether an argument is present or not
     writeLog("Checking command line options for arguments")
     let json: JSON = getJSON()
+
+    appArguments.authkey.value               = json[appArguments.authkey.long].string ?? CLOptionText(optionName: appArguments.authkey, defaultValue: "")
+
+    appArguments.hash.value               = json[appArguments.hash.long].string ?? CLOptionText(optionName: appArguments.hash)
+    appArguments.hash.present         = json[appArguments.hash.long].exists() || CLOptionPresent(optionName: appArguments.hash)
 
     appArguments.dialogStyle.value           = json[appArguments.dialogStyle.long].string ?? CLOptionText(optionName: appArguments.dialogStyle)
     appArguments.dialogStyle.present         = json[appArguments.dialogStyle.long].exists() || CLOptionPresent(optionName: appArguments.dialogStyle)
