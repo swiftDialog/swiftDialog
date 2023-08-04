@@ -84,9 +84,22 @@ func processCLOptions(json: JSON = getJSON()) {
     appvars.debugMode = appArguments.debug.present
 
     // Check if an auth key is present and verify
-    if !checkAuthorisationKey(key: hashForString(appArguments.authkey.value)) {
+    if !dialogAuthorisationKey().isEmpty {
         writeLog("Auth key is required", logLevel: .debug)
-        quitDialog(exitCode: appvars.exit30.code, exitMessage: appvars.exit30.message)
+        var authKey: String = ""
+        if !appArguments.authkey.value.isEmpty {
+            writeLog("Using key value", logLevel: .debug)
+            authKey = appArguments.authkey.value
+        } else if let environmentAuthKey = ProcessInfo.processInfo.environment["DIALOG_AUTH_KEY"] {
+            writeLog("Using environment key value", logLevel: .debug)
+            authKey = environmentAuthKey
+        }
+        if !checkAuthorisationKey(key: hashForString(authKey)) {
+            writeLog("Auth key is required", logLevel: .debug)
+            quitDialog(exitCode: appvars.exit30.code, exitMessage: appvars.exit30.message)
+        } else {
+            appvars.authorised = true
+        }
     }
 
     // hash a key value

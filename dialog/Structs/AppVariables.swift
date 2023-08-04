@@ -134,6 +134,9 @@ struct AppVariables {
     let exit209                         = (code: Int32(209), message: String(""))
     let exit210                         = (code: Int32(210), message: String(""))
 
+    // Auth key validation
+    var authorised                      = Bool(false)
+
     // debug flag
     var debugMode                       = Bool(false)
     var debugBorderColour               = Color.clear

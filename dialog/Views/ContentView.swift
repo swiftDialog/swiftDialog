@@ -92,6 +92,21 @@ struct ContentView: View {
                     .border(observedData.appProperties.debugBorderColour, width: 2)
             }
 
+            if observedData.appProperties.authorised {
+                VStack {
+                    HStack {
+                        Spacer()
+                        Image(systemName: "lock.circle")
+                        //.resizable()
+                            .font(Font.title.weight(.light))
+                            .symbolRenderingMode(.monochrome)
+                            .foregroundColor(.yellow)
+                            .opacity(0.5)
+                    }
+                    Spacer()
+                }
+            }
+
         }
         .edgesIgnoringSafeArea(.all)
 
