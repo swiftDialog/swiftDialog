@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MarkdownUI
 
 struct ErrorView: View {
 
@@ -29,9 +30,12 @@ struct ErrorView: View {
             .padding(observedData.appProperties.sidePadding)
             Text("invalid-input").bold()
                 .padding()
-            Text(observedData.sheetErrorMessage)
+            Markdown(observedData.sheetErrorMessage)
+                .markdownTheme(.basic)
+            //Text(observedData.sheetErrorMessage)
                 .padding(.leading, observedData.appProperties.sidePadding)
                 .padding(.trailing, observedData.appProperties.sidePadding)
+
             Spacer()
             Button(action: {
                 observedData.showSheet = false

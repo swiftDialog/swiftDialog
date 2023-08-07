@@ -113,7 +113,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
 
                 if textfieldRequired && textfieldValue == "" { // && userInputState.textFields[index].regex.isEmpty {
                     NSSound.beep()
-                    requiredString += "• \"\(textfieldTitle)\" \("is-required".localized) \n"
+                    requiredString += " - \"\(textfieldTitle)\" \("is-required".localized)<br>"
                     userInputState.textFields[index].requiredTextfieldHighlight = Color.red
                     dontQuit = true
                     writeLog("Required text field \(textfieldTitle) has no value")
@@ -124,7 +124,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                             && !checkRegexPattern(regexPattern: textField.regex, textToValidate: textfieldValue) {
                     NSSound.beep()
                     userInputState.textFields[index].requiredTextfieldHighlight = Color.green
-                    requiredString += "• "+(textField.regexError)
+                    requiredString += " - "+(textField.regexError)
                     dontQuit = true
                     writeLog("Textfield \(textfieldTitle) value \(textfieldValue) does not meet regex requirements \(String(describing: textField.regex))")
                 }
@@ -157,7 +157,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
 
                 if dropdownItemRequired && dropdownItemSelectedValue == "" {
                     NSSound.beep()
-                    requiredString += "• \"\(dropdownItemTitle)\" \("is-required".localized) \n"
+                    requiredString += " - \"\(dropdownItemTitle)\" \("is-required".localized) <br>"
                     userInputState.dropdownItems[index].requiredfieldHighlight = Color.red
                     dontQuit = true
                     writeLog("Required select item \(dropdownItemTitle) has no value")

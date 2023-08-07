@@ -380,7 +380,10 @@ func processCLOptions(json: JSON = getJSON()) {
                 appvars.imageArray.append(MainImage(path: imgArray[index]))
             }
         }
-                                writeLog("imageArray : \(appvars.imageArray)")
+        if !appArguments.messageOption.present {
+            appArguments.messageOption.value = ""
+        }
+        writeLog("imageArray : \(appvars.imageArray)")
     }
 
     if json[appArguments.mainImageCaption.long].exists() || appArguments.mainImageCaption.present {

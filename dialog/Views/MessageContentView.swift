@@ -51,7 +51,7 @@ struct MessageContent: View {
                         .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
                 }
                 ImageView(imageArray: observedData.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: string2float(string: observedData.args.autoPlay.value))
-            } else {
+            } //else {
                 if observedData.args.centreIcon.present && observedData.args.iconOption.present {
                     IconView(image: observedData.args.iconOption.value,
                              overlay: observedData.args.overlayIconOption.value,
@@ -137,7 +137,7 @@ struct MessageContent: View {
                                     .weight(.light))
                     }
                 }
-            }
+            //}
         }
         .padding(.leading, observedData.appProperties.sidePadding)
         .padding(.trailing, observedData.appProperties.sidePadding)

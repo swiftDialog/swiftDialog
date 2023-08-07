@@ -6,6 +6,7 @@ iconupdater="${base_dir}/fileicon"
 dialog_root="/Library/Application Support/Dialog"
 iconfile="${dialog_root}/Dialog.png"
 dialogbundle="${dialog_root}/Dialog.app"
+localisedbundle="${dialog_root}/Dialog.localized/Dialog.app"
 dialogbinary="${dialogbundle}/Contents/MacOS/Dialog"
 enrolmentScript="${dialog_root}/swiftDialogEnrolment.sh"
 log_file="${dialog_root}/postinstall.log"
@@ -18,6 +19,20 @@ write_to_log() {
 
 write_to_log "swiftDialog postinstall started"
 write_to_log "swiftDialog $("${dialogbinary}" --version)"
+
+# Check for Dialog.localized. If it exists we need to move a few things
+
+if [[ -e "${localisedbundle}" ]]; then
+    write_to_log "Localised bundle found. Probably becasue the bundleID of Dialog.app changed"
+    if [[ -e "${dialogbundle}" ]]; then
+        write_to_log "Old Dialog bundle found. Removing"
+        rm -r "${dialogbundle}"
+    fi
+    write_to_log "Moving ${localisedbundle} to ${dialogbundle}"
+    mv "${localisedbundle}" "${dialogbundle}"
+    write_to_log "Moved. Hopefully we're good now"
+    rm -r "${dialog_root}/Dialog.localized"
+fi
 
 if [[ -e "${iconfile}" ]] && [[ -e "${dialogbundle}" ]]; then
     write_to_log "Icon file detected. Updating dialog icon"
