@@ -18,7 +18,9 @@ struct TaskProgressView: View {
                     ProgressView(value: observedData.progressValue, total: observedData.progressTotal )
                         .progressViewStyle(TaskProgressViewStyle())
                 }
-                Text(observedData.args.progressText.value)
+                if observedData.args.progressText.present {
+                    Text(observedData.args.progressText.value)
+                }
             }
             .padding(.leading,observedData.appProperties.sidePadding)
             .padding(.trailing,observedData.appProperties.sidePadding)

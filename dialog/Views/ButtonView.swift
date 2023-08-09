@@ -57,16 +57,17 @@ struct ButtonView: View {
                     .keyboardShortcut(.cancelAction)
                 }
 
-                Button(action: {
-                    buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction, observedObject: observedData)
+                if !(observedData.args.button1TextOption.value == "none") {
+                    Button(action: {
+                        buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction, observedObject: observedData)
 
-                }, label: {
-                    Text(observedData.args.button1TextOption.value)
-                        .frame(minWidth: 50, alignment: .center)
+                    }, label: {
+                        Text(observedData.args.button1TextOption.value)
+                            .frame(minWidth: 50, alignment: .center)
+                    }
+                    )
+                    .keyboardShortcut(observedData.appProperties.button1DefaultAction)
                 }
-                )
-                .keyboardShortcut(observedData.appProperties.button1DefaultAction)
-
                 Spacer()
                     .frame(width: 20)
             }
@@ -108,19 +109,21 @@ struct ButtonView: View {
                     // default button aka button 1
                     let button1Text: String = observedData.args.button1TextOption.value
 
-                    Button(action: {
-                        buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction, observedObject: observedData)
+                    if !(observedData.args.button1TextOption.value == "none") {
+                        Button(action: {
+                            buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction, observedObject: observedData)
 
-                    }, label: {
-                        Text(button1Text)
-                            .frame(minWidth: 40, alignment: .center)
-                    }
-                    )
-                    .keyboardShortcut(observedData.appProperties.button1DefaultAction)
-                    .disabled(observedData.args.button1Disabled.present)
-                    .onReceive(timer) { _ in
-                        if observedData.args.timerBar.present && !observedData.args.hideTimerBar.present {
-                            observedData.args.button1Disabled.present = false
+                        }, label: {
+                            Text(button1Text)
+                                .frame(minWidth: 40, alignment: .center)
+                        }
+                        )
+                        .keyboardShortcut(observedData.appProperties.button1DefaultAction)
+                        .disabled(observedData.args.button1Disabled.present)
+                        .onReceive(timer) { _ in
+                            if observedData.args.timerBar.present && !observedData.args.hideTimerBar.present {
+                                observedData.args.button1Disabled.present = false
+                            }
                         }
                     }
 
