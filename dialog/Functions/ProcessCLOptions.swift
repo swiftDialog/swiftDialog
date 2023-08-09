@@ -107,6 +107,11 @@ func processCLOptions(json: JSON = getJSON()) {
         quitDialog(exitCode: 0, exitMessage: hashForString(appArguments.hash.value))
     }
 
+    // Do some basic tag to markdown stuff
+    appArguments.messageOption.value = appArguments.messageOption.value
+                                        .replacingOccurrences(of: "<br>", with: "  \n")
+                                        .replacingOccurrences(of: "<hr>", with: "****")
+
     if appArguments.messageOption.present && appArguments.messageOption.value.lowercased().hasSuffix(".md") {
         appArguments.messageOption.value = getMarkdown(mdFilePath: appArguments.messageOption.value)
     }
