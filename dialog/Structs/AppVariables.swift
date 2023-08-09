@@ -16,6 +16,7 @@ struct AppVariables {
     let titleDefault                    = String("default-title".localized)
     let messageDefault                  = String("default-message".localized)
     var messageAlignment: TextAlignment = .leading
+    var helpAlignment: TextAlignment = .leading
     let messageAlignmentTextRepresentation = String("left")
     let allignmentStates: [String: TextAlignment] = ["left": .leading,
                                                       "right": .trailing,

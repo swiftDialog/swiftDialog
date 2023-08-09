@@ -27,6 +27,7 @@ struct CommandLineArguments {
     var messageOption            = CommandlineArgument(long: "message", short: "m")
     var dialogStyle              = CommandlineArgument(long: "style")
     var messageAlignment         = CommandlineArgument(long: "messagealignment")
+    var helpAlignment            = CommandlineArgument(long: "helpalignment")
     var messageAlignmentOld      = CommandlineArgument(long: "alignment")
     var messageVerticalAlignment = CommandlineArgument(long: "messageposition")
     var helpMessage              = CommandlineArgument(long: "helpmessage")

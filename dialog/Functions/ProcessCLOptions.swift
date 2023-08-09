@@ -757,6 +757,13 @@ func processCLOptionValues() {
         appvars.messagePosition = appvars.positionStates[appArguments.messageAlignment.value] ?? .leading
     }
 
+    appArguments.helpAlignment.value        = json[appArguments.helpAlignment.long].string ?? CLOptionText(optionName: appArguments.helpAlignment, defaultValue: appvars.messageAlignmentTextRepresentation)
+    appArguments.helpAlignment.present      = json[appArguments.helpAlignment.long].exists() || CLOptionPresent(optionName: appArguments.helpAlignment)
+
+    if appArguments.helpAlignment.present {
+        appvars.helpAlignment = appvars.allignmentStates[appArguments.helpAlignment.value] ?? .leading
+    }
+
     appArguments.messageVerticalAlignment.value = json[appArguments.messageVerticalAlignment.long].string ?? CLOptionText(optionName: appArguments.messageVerticalAlignment)
     appArguments.messageVerticalAlignment.present = json[appArguments.messageVerticalAlignment.long].exists() || CLOptionPresent(optionName: appArguments.messageVerticalAlignment)
 
