@@ -1,24 +1,15 @@
-[![swiftui-version](https://img.shields.io/badge/SwiftUI-2.0-brightgreen)](https://developer.apple.com/documentation/swiftui) ![macos-version](https://img.shields.io/badge/macOS-11+-blue) [![xcode-version](https://img.shields.io/badge/xcode-13-red)](https://developer.apple.com/xcode/)
+![Static Badge](https://img.shields.io/badge/SwiftUI-524520?logo=swift)
+![macos-version](https://img.shields.io/badge/macOS-12+-green) ![GitHub tag (with filter)](https://img.shields.io/github/v/tag/gonzalezreal/swift-markdown-ui?label=MarkdownUI) ![GitHub tag (with filter)](https://img.shields.io/github/v/tag/SwiftyJSON/SwiftyJSON?label=SwiftyJSON) ![GitHub tag (with filter)](https://img.shields.io/github/v/tag/danielsaidi/WebViewKit?label=WebViewKit)
 
 # swiftDialog
 
-swiftDialog is an [open source](https://github.com/bartreardon/Dialog/blob/main/LICENSE.md) admin utility app for macOS 11+ written in SwiftUI that displays a popup dialog, displaying the content to your users that you want to display.
+swiftDialog is an [open source](https://github.com/bartreardon/Dialog/blob/main/LICENSE.md) admin utility for macOS 12 or later written in SwiftUI that presents custom dialogs, displays informative messages or can be used as a form to request user input.
 
-swiftDialog's purpose is as a tool for Mac Admins to show informative messages via scripts, and relay back the users actions.
-
-The latest version can be found on the [Releases](https://github.com/bartreardon/Dialog/releases) page
+Latest releases can be found on the [Releases](https://github.com/bartreardon/Dialog/releases) page
 
 Detailed documentation and information can be found in the [Wiki](https://github.com/bartreardon/Dialog/wiki)
 
-![wiftDialog](https://user-images.githubusercontent.com/3598965/165020290-4c5b7913-3785-4ce6-8b12-f5caf97f5388.png)
-
-## What happened to Dialog?
-
-swiftDialog and Dialog are the same. There are a number of other utilities called `dialog` though and being a very generic word, becomes difficult to find in web searches. The decision was made to perform a front facing name change from Dialog to swiftDialog to help differentiate it from other utilities of the same name or type. 
-
-The core binary and app bundle will remain as `dialog` and `Dialog.app` respectively to maintain compatability with existing scripts and workflows and when mentioning the app in the wiki the terms `Dialog` and `swiftDialog` may be used interchangibly. 
-
-# Main Features
+<img src="https://user-images.githubusercontent.com/3598965/165020290-4c5b7913-3785-4ce6-8b12-f5caf97f5388.png" width=500>
 
 ## Appearance
 Every aspect of swiftDialog's appearance can be modified.
@@ -32,24 +23,20 @@ At the most simple level you need only give swiftDialog a [Title](https://github
  * Display [Videos](https://github.com/bartreardon/Dialog/wiki/Customising-the-Message-area#displaying-videos-new-from-v180) or [Images](https://github.com/bartreardon/Dialog/wiki/Customising-the-Message-area#displaying-images-new-from-v160) either locally or pass in a URL
  * and lots more...
 
-
 ## Commandline Options
 
 swiftDialog's interface is fully customised from a set of command line options.
 
 For details on all the available options, please read the [Command Line Options](https://github.com/bartreardon/Dialog/wiki/Command-Line-Options) page on the wiki.
 
+****
 
-## Getting Feedback
-Feedback on how someone interacts with swiftDialog can passed back into the calling script. At a basic level swiftDialog's exit codes will represent what button was pressed. For user input, swiftDialog will output any data to `sdtout` in either plain text or optionally json format for easy parsing.
+## 💡 Giving Feedback
+🐞 If there are bugs or ideas, please create an [issue](https://github.com/bartreardon/Dialog/issues/new/choose) so your idea doesn't go missing.
 
+<img src="https://github.com/bartreardon/swiftDialog/assets/3598965/edd4a7c2-c800-4a8f-b6ed-e4af9a8941a5" width=16> Also come chat in the `#swiftDialog` channel in the [MacAdmins Slack](https://www.macadmins.org)
 
-# Giving Feedback
-If there are bugs or ideas, please create an [issue](https://github.com/bartreardon/Dialog/issues/new/choose) so your idea doesn't go missing.
-
-Also come chat in the `#swiftDialog` channel in the [MacAdmins Slack](https://www.macadmins.org)
-
-# Contributing
+## 🤝 Contributing
 
 Please read the [CONTRIBUTING.md](https://github.com/bartreardon/Dialog/blob/main/CONTRIBUTING.md) for details on how you can contribute.
 
