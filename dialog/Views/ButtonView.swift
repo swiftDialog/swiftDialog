@@ -159,6 +159,7 @@ struct HelpButton: View {
                 }
                 .frame(width: 22, height: 22)
             })
+            .focusable(false)
             .buttonStyle(HelpButtonStyle())
             .sheet(isPresented: $observedData.appProperties.showHelpMessage) {
                 HelpView(observedContent: observedData)
@@ -171,7 +172,6 @@ struct HelpButton: View {
 struct HelpButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .focusable(false)
             .help(String("help-hover".localized))
             .onHover { inside in
                 if inside {
