@@ -1,48 +1,12 @@
 {
   "pins" : [
     {
-      "identity" : "attributedtext",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/gonzalezreal/AttributedText",
-      "state" : {
-        "revision" : "0e811cb14de367bbd58a94d12259687e5ee08bea",
-        "version" : "1.0.1"
-      }
-    },
-    {
-      "identity" : "combine-schedulers",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/pointfreeco/combine-schedulers",
-      "state" : {
-        "revision" : "0625932976b3ae23949f6b816d13bd97f3b40b7c",
-        "version" : "0.10.0"
-      }
-    },
-    {
       "identity" : "markdownui",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/gonzalezreal/MarkdownUI",
       "state" : {
-        "revision" : "6a33c60ad430772d69ac5278e35474d6b3e5d30a",
-        "version" : "1.1.1"
-      }
-    },
-    {
-      "identity" : "networkimage",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/gonzalezreal/NetworkImage",
-      "state" : {
-        "revision" : "c97f83e771c95186af80ef6118f158852a9e54be",
-        "version" : "4.0.1"
-      }
-    },
-    {
-      "identity" : "swiftcommonmark",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/gonzalezreal/SwiftCommonMark",
-      "state" : {
-        "revision" : "ed252beaddecce28ea6363f800c773d6169011b8",
-        "version" : "1.0.0"
+        "revision" : "12b351a75201a8124c2f2e1f9fc6ef5cd812c0b9",
+        "version" : "2.1.0"
       }
     },
     {
@@ -61,15 +25,6 @@
       "state" : {
         "branch" : "main",
         "revision" : "15d7422c883f15a0dafc8291e0bc8f4f4ae9070f"
-      }
-    },
-    {
-      "identity" : "xctest-dynamic-overlay",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
-      "state" : {
-        "revision" : "4af50b38daf0037cfbab15514a241224c3f62f98",
-        "version" : "0.8.5"
       }
     }
   ],

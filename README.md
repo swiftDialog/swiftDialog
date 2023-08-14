@@ -1,24 +1,16 @@
-[![swiftui-version](https://img.shields.io/badge/SwiftUI-2.0-brightgreen)](https://developer.apple.com/documentation/swiftui) ![macos-version](https://img.shields.io/badge/macOS-11+-blue) [![xcode-version](https://img.shields.io/badge/xcode-13-red)](https://developer.apple.com/xcode/)
+[![Static Badge](https://img.shields.io/badge/SwiftUI-524520?logo=swift)](https://developer.apple.com/xcode/swiftui/) [![GitHub tag (with filter)](https://img.shields.io/github/v/tag/gonzalezreal/swift-markdown-ui?label=MarkdownUI&logo=markdown)](https://github.com/gonzalezreal/swift-markdown-ui) [![GitHub tag (with filter)](https://img.shields.io/github/v/tag/SwiftyJSON/SwiftyJSON?label=SwiftyJSON&logo=json)](https://github.com/SwiftyJSON/SwiftyJSON) [![GitHub tag (with filter)](https://img.shields.io/github/v/tag/danielsaidi/WebViewKit?label=WebViewKit&logo=swift)](https://github.com/danielsaidi/WebViewKit) [![GitHub tag (with filter)](https://img.shields.io/github/v/tag/mklement0/fileicon?label=fileicon&logo=gnubash)](https://github.com/mklement0/fileicon)
+
+[![GitHub release (with filter)](https://img.shields.io/github/v/release/bartreardon/swiftDialog?color=green&label=Latest%20Release&logo=data:image/png;base64,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)](https://github.com/bartreardon/swiftDialog/releases)
 
 # swiftDialog
 
-swiftDialog is an [open source](https://github.com/bartreardon/Dialog/blob/main/LICENSE.md) admin utility app for macOS 11+ written in SwiftUI that displays a popup dialog, displaying the content to your users that you want to display.
+swiftDialog is an [open source](https://github.com/bartreardon/Dialog/blob/main/LICENSE.md) admin utility for macOS 12 or later written in SwiftUI that presents custom dialogs, displays informative messages or can be used as a form to request user input.
 
-swiftDialog's purpose is as a tool for Mac Admins to show informative messages via scripts, and relay back the users actions.
-
-The latest version can be found on the [Releases](https://github.com/bartreardon/Dialog/releases) page
+Latest releases can be found on the [Releases](https://github.com/bartreardon/Dialog/releases) page
 
 Detailed documentation and information can be found in the [Wiki](https://github.com/bartreardon/Dialog/wiki)
 
-![wiftDialog](https://user-images.githubusercontent.com/3598965/165020290-4c5b7913-3785-4ce6-8b12-f5caf97f5388.png)
-
-## What happened to Dialog?
-
-swiftDialog and Dialog are the same. There are a number of other utilities called `dialog` though and being a very generic word, becomes difficult to find in web searches. The decision was made to perform a front facing name change from Dialog to swiftDialog to help differentiate it from other utilities of the same name or type. 
-
-The core binary and app bundle will remain as `dialog` and `Dialog.app` respectively to maintain compatability with existing scripts and workflows and when mentioning the app in the wiki the terms `Dialog` and `swiftDialog` may be used interchangibly. 
-
-# Main Features
+<img src="https://user-images.githubusercontent.com/3598965/165020290-4c5b7913-3785-4ce6-8b12-f5caf97f5388.png" width=500>
 
 ## Appearance
 Every aspect of swiftDialog's appearance can be modified.
@@ -32,24 +24,20 @@ At the most simple level you need only give swiftDialog a [Title](https://github
  * Display [Videos](https://github.com/bartreardon/Dialog/wiki/Customising-the-Message-area#displaying-videos-new-from-v180) or [Images](https://github.com/bartreardon/Dialog/wiki/Customising-the-Message-area#displaying-images-new-from-v160) either locally or pass in a URL
  * and lots more...
 
-
 ## Commandline Options
 
 swiftDialog's interface is fully customised from a set of command line options.
 
 For details on all the available options, please read the [Command Line Options](https://github.com/bartreardon/Dialog/wiki/Command-Line-Options) page on the wiki.
 
+****
 
-## Getting Feedback
-Feedback on how someone interacts with swiftDialog can passed back into the calling script. At a basic level swiftDialog's exit codes will represent what button was pressed. For user input, swiftDialog will output any data to `sdtout` in either plain text or optionally json format for easy parsing.
+## 💡 Giving Feedback
+🐞 If there are bugs or ideas, please create an [issue](https://github.com/bartreardon/Dialog/issues/new/choose) so your idea doesn't go missing.
 
+<img src="https://github.com/bartreardon/swiftDialog/assets/3598965/edd4a7c2-c800-4a8f-b6ed-e4af9a8941a5" width=16> Also come chat in the `#swiftDialog` channel in the [MacAdmins Slack](https://www.macadmins.org)
 
-# Giving Feedback
-If there are bugs or ideas, please create an [issue](https://github.com/bartreardon/Dialog/issues/new/choose) so your idea doesn't go missing.
-
-Also come chat in the `#swiftDialog` channel in the [MacAdmins Slack](https://www.macadmins.org)
-
-# Contributing
+## 🤝 Contributing
 
 Please read the [CONTRIBUTING.md](https://github.com/bartreardon/Dialog/blob/main/CONTRIBUTING.md) for details on how you can contribute.
 

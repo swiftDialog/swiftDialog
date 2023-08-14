@@ -1,0 +1,17 @@
+#!/bin/sh
+
+#  preinstall.sh
+#  dialog
+#
+#  Created by Bart E Reardon on 5/8/2023.
+#  
+dialog_root="/Library/Application Support/Dialog"
+dialogbundle="${dialog_root}/Dialog.app"
+
+# If there is a previous install we want to remove it first
+# Usually wouldn't be an issue but we changed the bundle identifier
+# and installer doesn't seem to like that
+
+if [ -e "$dialogbundle" ]; then
+    rm -r "$dialogbundle"
+fi
