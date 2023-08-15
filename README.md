@@ -10,7 +10,7 @@ Latest releases can be found on the [Releases](https://github.com/bartreardon/Di
 
 Detailed documentation and information can be found in the [Wiki](https://github.com/bartreardon/Dialog/wiki)
 
-<img src="https://user-images.githubusercontent.com/3598965/165020290-4c5b7913-3785-4ce6-8b12-f5caf97f5388.png" width=500>
+<img width="500" alt="Screenshot 2023-08-15 at 1 35 15 pm" src="https://github.com/bartreardon/swiftDialog/assets/3598965/93f7fa7a-62e9-4a8b-8daa-1b004f1e1896">
 
 ## Appearance
 Every aspect of swiftDialog's appearance can be modified.
