@@ -30,6 +30,10 @@ struct HelpView: View {
                     FontSize(appvars.messageFontSize)
                     ForegroundColor(.primary)
                 }
+                .markdownTextStyle(\.link) {
+                    FontSize(appvars.messageFontSize)
+                    ForegroundColor(.link)
+                }
                 .padding(32)
                 .focusable(false)
             Spacer()
