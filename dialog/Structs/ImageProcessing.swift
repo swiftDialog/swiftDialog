@@ -76,34 +76,41 @@ struct DisplayImage: View {
     var body: some View {
         ZStack {
             if imgFromURL {
-                AsyncImage(url: asyncURL) { phase in
-                    if let image = phase.image {
-                        if self.shouldResize {
-                            image
-                                .resizable()
-                                .interpolation(.medium)
-                        } else {
-                            image
-                        }
-                    } else if phase.error != nil {
-                        // error image
-                        ZStack {
-                            if showBackground {
-                                RoundedRectangle(cornerRadius: clipShapeRadius, style: .continuous)
-                                    .fill(.thickMaterial)
+                if ["svg", "pdf"].contains(imgPath.split(separator: ".").last) {
+                    let legacyImage = getImageFromPath(fileImagePath: imgPath, returnErrorImage: false)
+                    Image(nsImage: legacyImage)
+                        .resizable()
+                        .interpolation(.high)
+                } else {
+                    AsyncImage(url: asyncURL) { phase in
+                        if let image = phase.image {
+                            if self.shouldResize {
+                                image
+                                    .resizable()
+                                    .interpolation(.high)
+                            } else {
+                                image
                             }
-                            Image(systemName: "questionmark.square.fill")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(maxWidth: imgSize)
-                                .symbolRenderingMode(.hierarchical)
-                                .font(Font.title.weight(.thin))
-                                .foregroundColor(.accentColor)
+                        } else if phase.error != nil {
+                            // error image
+                            ZStack {
+                                if showBackground {
+                                    RoundedRectangle(cornerRadius: clipShapeRadius, style: .continuous)
+                                        .fill(.thickMaterial)
+                                }
+                                Image(systemName: "questionmark.square.fill")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(maxWidth: imgSize)
+                                    .symbolRenderingMode(.hierarchical)
+                                    .font(Font.title.weight(.thin))
+                                    .foregroundColor(.accentColor)
+                            }
+                        } else {
+                            // placeholder image while the resource is loaded
+                            RoundedRectangle(cornerRadius: clipShapeRadius, style: .continuous)
+                                .fill(.regularMaterial)
                         }
-                    } else {
-                        // placeholder image while the resource is loaded
-                        RoundedRectangle(cornerRadius: clipShapeRadius, style: .continuous)
-                            .fill(.regularMaterial)
                     }
                 }
             }
@@ -115,7 +122,7 @@ struct DisplayImage: View {
             if imgFromAPP {
                 Image(nsImage: getAppIcon(appPath: imgPath))
                     .resizable()
-                    .interpolation(.medium)
+                    .interpolation(.high)
             }
             if nullImage {
                 Image(systemName: "circle.fill")
