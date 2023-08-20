@@ -1,8 +1,24 @@
 #!/bin/sh
 currentUser=$(echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { print $3 }')
+uid=$(id -u "$currentUser")
 dialogpath="/Library/Application Support/Dialog/Dialog.app"
 dialogbin="$dialogpath/Contents/MacOS/Dialog"
 commandfile=$(echo "$@" | awk -v pattern="--commandfile" '{for (i=0;i<=NF;i++) {if ($i==pattern) print $(i+1) }}')
+
+# convenience function to run a command as the current user
+# usage:
+#   runAsUser command arguments...
+# from https://scriptingosx.com/2020/08/running-a-command-as-another-user/
+runAsUser() {
+  if [ "$currentUser" != "loginwindow" ]; then
+    launchctl asuser "$uid" sudo -u "$currentUser" "$@"
+  else
+    echo "no user logged in"
+    # uncomment the exit command
+    # to make the function exit with an error when no user is logged in
+    # exit 1
+  fi
+}
 
 # Check to make sure we have a binary to run
 if [ ! -e "$dialogbin" ]; then
@@ -21,9 +37,10 @@ if [ $(id -u) -eq 0 ]; then
     if [ ! -z $commandfile ]; then
         # a command file is being used - make sure the console user has read access to it.
         /usr/bin/touch "$commandfile"
-        /bin/chmod 644 "$commandfile"
+        /bin/chmod 666 "$commandfile"
     fi
-    /bin/launchctl asuser $(id -u $currentUser) "$dialogbin" "$@"
+
+    runAsUser "$dialogbin" "$@"
 else
     "$dialogbin" "$@"
 fi
