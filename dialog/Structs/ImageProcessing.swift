@@ -8,6 +8,8 @@
 import Foundation
 import Combine
 import SwiftUI
+//import WebViewKit
+//import WebKit
 
 enum ImageSource {
     case remote(url: URL?)
@@ -77,10 +79,17 @@ struct DisplayImage: View {
         ZStack {
             if imgFromURL {
                 if ["svg", "pdf"].contains(imgPath.split(separator: ".").last) {
-                    let legacyImage = getImageFromPath(fileImagePath: imgPath, returnErrorImage: false)
+                    let legacyImage = getImageFromPath(fileImagePath: imgPath, returnErrorImage: true)
                     Image(nsImage: legacyImage)
                         .resizable()
                         .interpolation(.high)
+                /* Reserved for future use
+                } else if ["gif"].contains(imgPath.split(separator: ".").last) {
+                    WebView(url: asyncURL) { webView in
+                        webView.configuration.websiteDataStore = WKWebsiteDataStore.nonPersistent()
+                    }
+                    .frame(width: .infinity, height: .infinity)
+                */
                 } else {
                     AsyncImage(url: asyncURL) { phase in
                         if let image = phase.image {
