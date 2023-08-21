@@ -51,7 +51,7 @@ struct IconView: View {
 
     let argRegex = String("(,? ?[a-zA-Z1-9]+=|(,\\s?editor)|(,\\s?fileselect))|(,\\s?passwordfill)|(,\\s?required)|(,\\s?secure)")
 
-    init(image: String = "", overlay: String = "", alpha: Double = 1.0) {
+    init(image: String = "", overlay: String = "", alpha: Double = 1.0, padding: Double = 0) {
         writeLog("Displaying icon image \(image), alpha \(alpha)")
         if !overlay.isEmpty {
             writeLog("With overlay \(overlay)")
@@ -59,6 +59,8 @@ struct IconView: View {
         mainImageAlpha = alpha
         messageUserImagePath = image
         iconOverlay = overlay
+
+        framePadding = padding
 
         if overlay != "" {
             mainImageScale = mainImageWithOverlayScale
@@ -111,8 +113,6 @@ struct IconView: View {
             writeLog("Image is SF Symbol")
             sfSymbolPresent = true
             builtInIconPresent = true
-
-            framePadding = 15
 
             var SFValues = messageUserImagePath.split(usingRegex: argRegex)
             SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma

@@ -43,7 +43,7 @@ struct DialogView: View {
                                 if showSideBar {
                                     IconView(image: observedData.args.iconOption.value,
                                              overlay: observedData.args.overlayIconOption.value,
-                                             alpha: observedData.iconAlpha)
+                                             alpha: observedData.iconAlpha, padding: 15)
                                     .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
                                     .frame(width: iconDisplayWidth, alignment: .top)
                                 }
