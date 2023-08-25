@@ -245,7 +245,6 @@ func isDNDEnabled() -> Bool {
         return suite?.bool(forKey: "NSStatusItem Visible DoNotDisturb") ?? false
         
     }
-    quitDialog(exitCode: 21, exitMessage: "DND Prefs unavailable", observedObject: DialogUpdatableContent())
     return false
 }
 
