@@ -5,6 +5,10 @@ dialogpath="/Library/Application Support/Dialog/Dialog.app"
 dialogbin="$dialogpath/Contents/MacOS/Dialog"
 commandfile=$(echo "$@" | awk -v pattern="--commandfile" '{for (i=0;i<=NF;i++) {if ($i==pattern) print $(i+1) }}')
 
+if [[ -z $commandfile ]]; then
+    commandfile="/var/tmp/dialog.log"
+fi
+
 # convenience function to run a command as the current user
 # usage:
 #   runAsUser command arguments...
@@ -32,11 +36,20 @@ if [ "$currentUser" = "loginwindow" ] || [ -z $currentUser ]; then
     exit 255
 fi
 
+# check to see if the command file exists
+if [[ ! -e "$commandfile" ]]; then
+    /usr/bin/touch "$commandfile"
+# check to see if the command file is writeable
+elif [[ ! -w "$commandfile" ]]; then
+    echo "Warning: command file ${commandfile} is non zero and not writeable by user $currentUser"
+    echo "${commandfile} cannot be cleaned prior to launch. Behaviour may be unpredictable"
+    echo "re-run this command as root to rectify this issue"
+fi
+
 # If we're running as root, launch swiftDialog as the user.
 if [ $(id -u) -eq 0 ]; then
-    if [ ! -z $commandfile ]; then
-        # a command file is being used - make sure the console user has read access to it.
-        /usr/bin/touch "$commandfile"
+    if [ -e $commandfile ]; then
+        # make sure the console user has read access to the command file
         /bin/chmod 666 "$commandfile"
     fi
 

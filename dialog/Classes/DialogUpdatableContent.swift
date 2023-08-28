@@ -581,7 +581,7 @@ class DialogUpdatableContent: ObservableObject {
                 try manager.removeItem(atPath: path)
                 //NSLog("Deleted Dialog command file")
             } catch {
-                writeLog("Unable to delete command file", logLevel: .error)
+                writeLog("Unable to delete command file", logLevel: .debug)
             }
         }
     }
