@@ -227,23 +227,23 @@ func isDNDEnabled() -> Bool {
     let processInfo = ProcessInfo.processInfo
     let bigSur = OperatingSystemVersion(majorVersion: 11, minorVersion: 0, patchVersion: 0)
     let monterey = OperatingSystemVersion(majorVersion: 12, minorVersion: 0, patchVersion: 0)
-    
+
     guard processInfo.isOperatingSystemAtLeast(bigSur) else {
         return false
     }
 
     if processInfo.isOperatingSystemAtLeast(monterey) {
-        
+
         let suite = UserDefaults(suiteName: "com.apple.controlcenter")
-        
+
         return suite?.bool(forKey: "NSStatusItem Visible FocusModes") ?? false
-        
+
     } else if processInfo.isOperatingSystemAtLeast(bigSur) {
-        
+
         let suite = UserDefaults(suiteName: "com.apple.controlcenter")
-        
+
         return suite?.bool(forKey: "NSStatusItem Visible DoNotDisturb") ?? false
-        
+
     }
     return false
 }
