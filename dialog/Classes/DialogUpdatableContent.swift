@@ -183,6 +183,7 @@ class FileReader {
 
             //Progress Bar Label
             case "\(observedData.args.progressText.long):".lowercased():
+                observedData.args.progressText.present = true
                 observedData.args.progressText.value = line.replacingOccurrences(of: "\(observedData.args.progressText.long): ", with: "", options: .caseInsensitive)
 
             // Button 1 label
