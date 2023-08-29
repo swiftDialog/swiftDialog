@@ -115,11 +115,11 @@ struct dialogApp: App {
 
         //check debug mode and print info
         if appArguments.debug.present {
-            writeLog("debug options presented. dialog state sent to stdout")
+            writeLog("debug options presented. dialog state sent to stderr", logLevel: .debug)
             appvars.debugMode = true
             appvars.debugBorderColour = Color.green
 
-            writeLog("Window Height = \(appvars.windowHeight): Window Width = \(appvars.windowWidth)")
+            writeLog("Window Height = \(appvars.windowHeight): Window Width = \(appvars.windowWidth)", logLevel: .debug)
             /*
             print("\nApplication State Variables")
             let mirrored_appvars = Mirror(reflecting: appvars)
@@ -137,7 +137,7 @@ struct dialogApp: App {
             }
             */
         }
-        writeLog("width: \(appvars.windowWidth), height: \(appvars.windowHeight)")
+        writeLog("width: \(appvars.windowWidth), height: \(appvars.windowHeight)", logLevel: .debug)
 
         observedData = DialogUpdatableContent()
 
@@ -151,7 +151,7 @@ struct dialogApp: App {
         }
 
         // bring to front on launch
-        writeLog("Activating")
+        writeLog("Activating", logLevel: .debug)
         NSApp.activate(ignoringOtherApps: true)
     }
 
@@ -170,14 +170,14 @@ struct dialogApp: App {
                     // Set window level
                     if appArguments.forceOnTop.present || appArguments.blurScreen.present {
                         window?.level = .floating
-                        writeLog("Window is forceed on top")
+                        writeLog("Window is forced on top", logLevel: .debug)
                     } else {
                         window?.level = .normal
                     }
 
                     // display a blur screen window on all screens.
                     if appArguments.blurScreen.present && !appArguments.fullScreenWindow.present {
-                        writeLog("Blurscreen enabled")
+                        writeLog("Blurscreen enabled", logLevel: .debug)
                         let screens = NSScreen.screens
                         for (index, screen) in screens.enumerated() {
                             observedData.blurredScreen.append(BlurWindowController())
@@ -194,7 +194,7 @@ struct dialogApp: App {
                     }
 
                     if appArguments.forceOnTop.present || appArguments.blurScreen.present {
-                        writeLog("Activating window")
+                        writeLog("Activating window", logLevel: .debug)
                         NSApp.activate(ignoringOtherApps: true)
                     }
                 }

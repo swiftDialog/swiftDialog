@@ -24,8 +24,8 @@ func sendNotification(title: String = "", subtitle: String = "", message: String
     let notification = UNUserNotificationCenter.current()
     notification.requestAuthorization(options: [.alert, .sound]) { _, error in
         if let error = error {
-            print("Notifications are not available: \(error.localizedDescription as Any)")
-            print("Check to see if Notifications for Dialog.app are enabled in notification center")
+            writeLog("Notifications are not available: \(error.localizedDescription as Any)", logLevel: .error)
+            writeLog("Check to see if Notifications for Dialog.app are enabled in notification center", logLevel: .error)
         }
     }
 
@@ -62,7 +62,7 @@ func sendNotification(title: String = "", subtitle: String = "", message: String
                         let attachment = try UNNotificationAttachment(identifier: "AttachedContent", url: fileURL)
                         content.attachments = [attachment]
                     } catch let error {
-                        print(error.localizedDescription)
+                        writeLog(error.localizedDescription, logLevel: .error)
                     }
 
                 }
@@ -75,17 +75,17 @@ func sendNotification(title: String = "", subtitle: String = "", message: String
                 // Schedule the request with the system.
                 notification.add(request) { (error) in
                    if error != nil {
-                       print(error?.localizedDescription as Any)
+                       writeLog(error?.localizedDescription ?? "Notification error", logLevel: .error)
                    }
                 }
             case .provisional:
-                print("Notification authorisation is provisional")
+                writeLog("Notification authorisation is provisional")
             case .denied:
-                print("Notification authorisation is denied")
+                writeLog("Notification authorisation is denied")
             case .notDetermined:
-                print("Notification authorisation cannot be determined")
+                writeLog("Notification authorisation cannot be determined")
             default:
-                print("Notifications aren't authorised")
+            writeLog("Notifications aren't authorised")
         }
     }
 }

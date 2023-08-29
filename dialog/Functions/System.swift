@@ -266,3 +266,14 @@ func getVideoStreamingURLFromID(videoid: String, autoplay: Bool = false) -> Stri
     writeLog("video url is \(fullURL)")
     return fullURL
 }
+
+func getModificationDateOf(_ fileURL: URL) -> Date {
+    var theDate: Date = Date.now
+    do {
+        let attr = try FileManager.default.attributesOfItem(atPath: fileURL.absoluteString)
+        theDate = attr[FileAttributeKey.modificationDate] as! Date
+    } catch {
+        writeLog("Failed to get file creation date: \(error.localizedDescription)", logLevel: .error)
+    }
+    return theDate
+}

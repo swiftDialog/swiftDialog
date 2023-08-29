@@ -15,6 +15,14 @@ enum StatusState {
     case done
 }
 
+// swiftlint:disable force_try
+class StandardError: TextOutputStream {
+  func write(_ string: String) {
+    try! FileHandle.standardError.write(contentsOf: Data(string.utf8))
+  }
+}
+// swiftlint:enable force_try
+
 class FileReader {
     /// Provided by Joel Rennich
 
@@ -34,6 +42,14 @@ class FileReader {
     }
 
     func monitorFile() throws {
+            //print("mod date is less than now")
+        //}
+
+        /*
+
+         if getModificationDateOf(self.fileURL) > Date.now {
+         }
+         */
 
         try self.fileHandle = FileHandle(forReadingFrom: fileURL)
         if let data = try? self.fileHandle?.readToEnd() {
@@ -52,9 +68,10 @@ class FileReader {
                 do {
                     try self.monitorFile()
                 } catch {
-                    print("Error: \(error.localizedDescription)")
+                    writeLog("Error: \(error.localizedDescription)", logLevel: .error)
                 }
             }
+
         }
 
         dataReady = NotificationCenter.default.addObserver(forName: Process.didTerminateNotification,
@@ -77,7 +94,11 @@ class FileReader {
     }
 
     private func processCommands(commands: String) {
-
+        //print(getModificationDateOf(self.fileURL))
+        //print(Date.now)
+        if getModificationDateOf(self.fileURL) < observedData.appProperties.launchTime {
+            return
+        }
         let allCommands = commands.components(separatedBy: "\n")
 
         for line in allCommands {
