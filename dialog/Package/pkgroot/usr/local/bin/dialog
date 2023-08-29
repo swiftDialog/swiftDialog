@@ -5,6 +5,8 @@ dialogpath="/Library/Application Support/Dialog/Dialog.app"
 dialogbin="$dialogpath/Contents/MacOS/Dialog"
 commandfile=$(echo "$@" | awk -v pattern="--commandfile" '{for (i=0;i<=NF;i++) {if ($i==pattern) print $(i+1) }}')
 
+echoerr() { echo "$@" 1>&2; }
+
 if [[ -z $commandfile ]]; then
     commandfile="/var/tmp/dialog.log"
 fi
@@ -17,22 +19,19 @@ runAsUser() {
   if [ "$currentUser" != "loginwindow" ]; then
     launchctl asuser "$uid" sudo -u "$currentUser" "$@"
   else
-    echo "no user logged in"
-    # uncomment the exit command
-    # to make the function exit with an error when no user is logged in
-    # exit 1
+    echoerr "no user logged in"
   fi
 }
 
 # Check to make sure we have a binary to run
 if [ ! -e "$dialogbin" ]; then
-    echo "Cannot find swiftDialog binary at $dialogbin"
+    echoerr "Cannot find swiftDialog binary at $dialogbin"
     exit 255
 fi
 
 # check we have a valid console user
 if [ "$currentUser" = "loginwindow" ] || [ -z $currentUser ]; then
-    echo "Cannot run. No console user, or at loginwindow."
+    echoerr "Cannot run. No console user, or at loginwindow."
     exit 255
 fi
 
@@ -41,9 +40,11 @@ if [[ ! -e "$commandfile" ]]; then
     /usr/bin/touch "$commandfile"
 # check to see if the command file is writeable
 elif [[ ! -w "$commandfile" ]]; then
-    echo "Warning: command file ${commandfile} is non zero and not writeable by user $currentUser"
-    echo "${commandfile} cannot be cleaned prior to launch. Behaviour may be unpredictable"
-    echo "re-run this command as root to rectify this issue"
+    echoerr ""
+    echoerr "WARNING: command file ${commandfile} is non zero and not writeable by user $currentUser"
+    echoerr "  ${commandfile} cannot be cleaned prior to launch. Behaviour may be unpredictable"
+    echoerr "  re-run this command as root to rectify this issue"
+    echoerr ""
 fi
 
 # If we're running as root, launch swiftDialog as the user.
