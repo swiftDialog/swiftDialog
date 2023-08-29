@@ -581,8 +581,11 @@ class DialogUpdatableContent: ObservableObject {
             do {
                 try text.write(toFile: path, atomically: false, encoding: String.Encoding.utf8)
             } catch {
-                writeLog("Existing file at \(commandFilePath) but couldn't clean. ", logLevel: .error)
-                writeLog("Error info: \(error)", logLevel: .error)
+                if !manager.isReadableFile(atPath: commandFilePath) {
+                    writeLog(" Existing file at \(commandFilePath) is not readable\n\tCommands set to \(commandFilePath) will not be processed\n"
+                             , logLevel: .error)
+                    writeLog("\(error)\n", logLevel: .error)
+                }
             }
         } else {
             writeLog("Creating file at \(commandFilePath)")
@@ -602,7 +605,8 @@ class DialogUpdatableContent: ObservableObject {
                 try manager.removeItem(atPath: path)
                 //NSLog("Deleted Dialog command file")
             } catch {
-                writeLog("Unable to delete command file", logLevel: .debug)
+                writeLog("Unable to delete file at path \(path)", logLevel: .debug)
+                writeLog("\(error)", logLevel: .debug)
             }
         }
     }

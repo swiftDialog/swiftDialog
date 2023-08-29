@@ -25,13 +25,7 @@ runAsUser() {
 
 # Check to make sure we have a binary to run
 if [ ! -e "$dialogbin" ]; then
-    echoerr "Cannot find swiftDialog binary at $dialogbin"
-    exit 255
-fi
-
-# check we have a valid console user
-if [ "$currentUser" = "loginwindow" ] || [ -z $currentUser ]; then
-    echoerr "Cannot run. No console user, or at loginwindow."
+    echoerr "ERROR: Cannot find swiftDialog binary at $dialogbin"
     exit 255
 fi
 
@@ -41,9 +35,7 @@ if [[ ! -e "$commandfile" ]]; then
 # check to see if the command file is writeable
 elif [[ ! -w "$commandfile" ]]; then
     echoerr ""
-    echoerr "WARNING: command file ${commandfile} is non zero and not writeable by user $currentUser"
-    echoerr "  ${commandfile} cannot be cleaned prior to launch. Behaviour may be unpredictable"
-    echoerr "  re-run this command as root to rectify this issue"
+    echoerr "Warning: command file ${commandfile} is not empty and not writeable by user $currentUser"
     echoerr ""
 fi
 
