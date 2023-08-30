@@ -35,7 +35,7 @@ if [[ ! -e "$commandfile" ]]; then
 # check to see if the command file is writeable
 elif [[ ! -r "$commandfile" ]]; then
     echoerr ""
-    echoerr "Warning: command file ${commandfile} is not empty and not writeable by user $currentUser"
+    echoerr "Warning: command file ${commandfile} is not readable by user $currentUser"
     echoerr ""
 fi
 
