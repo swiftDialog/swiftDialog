@@ -15,6 +15,14 @@ enum StatusState {
     case done
 }
 
+// swiftlint:disable force_try
+class StandardError: TextOutputStream {
+  func write(_ string: String) {
+    try! FileHandle.standardError.write(contentsOf: Data(string.utf8))
+  }
+}
+// swiftlint:enable force_try
+
 class FileReader {
     /// Provided by Joel Rennich
 
@@ -34,6 +42,14 @@ class FileReader {
     }
 
     func monitorFile() throws {
+            //print("mod date is less than now")
+        //}
+
+        /*
+
+         if getModificationDateOf(self.fileURL) > Date.now {
+         }
+         */
 
         try self.fileHandle = FileHandle(forReadingFrom: fileURL)
         if let data = try? self.fileHandle?.readToEnd() {
@@ -52,9 +68,10 @@ class FileReader {
                 do {
                     try self.monitorFile()
                 } catch {
-                    print("Error: \(error.localizedDescription)")
+                    writeLog("Error: \(error.localizedDescription)", logLevel: .error)
                 }
             }
+
         }
 
         dataReady = NotificationCenter.default.addObserver(forName: Process.didTerminateNotification,
@@ -77,7 +94,11 @@ class FileReader {
     }
 
     private func processCommands(commands: String) {
-
+        //print(getModificationDateOf(self.fileURL))
+        //print(Date.now)
+        if getModificationDateOf(self.fileURL) < observedData.appProperties.launchTime {
+            return
+        }
         let allCommands = commands.components(separatedBy: "\n")
 
         for line in allCommands {
@@ -162,6 +183,7 @@ class FileReader {
 
             //Progress Bar Label
             case "\(observedData.args.progressText.long):".lowercased():
+                observedData.args.progressText.present = true
                 observedData.args.progressText.value = line.replacingOccurrences(of: "\(observedData.args.progressText.long): ", with: "", options: .caseInsensitive)
 
             // Button 1 label
@@ -560,8 +582,11 @@ class DialogUpdatableContent: ObservableObject {
             do {
                 try text.write(toFile: path, atomically: false, encoding: String.Encoding.utf8)
             } catch {
-                writeLog("Existing file at \(commandFilePath) but couldn't clean. ", logLevel: .error)
-                writeLog("Error info: \(error)", logLevel: .error)
+                if !manager.isReadableFile(atPath: commandFilePath) {
+                    writeLog(" Existing file at \(commandFilePath) is not readable\n\tCommands set to \(commandFilePath) will not be processed\n"
+                             , logLevel: .error)
+                    writeLog("\(error)\n", logLevel: .error)
+                }
             }
         } else {
             writeLog("Creating file at \(commandFilePath)")
@@ -581,7 +606,8 @@ class DialogUpdatableContent: ObservableObject {
                 try manager.removeItem(atPath: path)
                 //NSLog("Deleted Dialog command file")
             } catch {
-                writeLog("Unable to delete command file", logLevel: .error)
+                writeLog("Unable to delete file at path \(path)", logLevel: .debug)
+                writeLog("\(error)", logLevel: .debug)
             }
         }
     }

@@ -67,6 +67,7 @@ struct ButtonView: View {
                     }
                     )
                     .keyboardShortcut(observedData.appProperties.button1DefaultAction)
+                    .disabled(observedData.args.button1Disabled.present)
                 }
                 Spacer()
                     .frame(width: 20)

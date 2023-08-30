@@ -223,24 +223,27 @@ func plistFromData(_ data: Data) throws -> [String: Any] {
 
 func isDNDEnabled() -> Bool {
     // check for DND and return true if it is on
-    // ** This function will not work under macOS 12 as at July 2021
-    let consoleUser = SCDynamicStoreCopyConsoleUser(nil, nil , nil)
-    let consoleUserHomeDir = FileManager.default.homeDirectory(forUser: consoleUser! as String)?.path ?? ""
 
-    let ncprefsUrl = URL(
-        fileURLWithPath: String("\(consoleUserHomeDir)/Library/Preferences/com.apple.ncprefs.plist")
-    )
+    let processInfo = ProcessInfo.processInfo
+    let bigSur = OperatingSystemVersion(majorVersion: 11, minorVersion: 0, patchVersion: 0)
+    let monterey = OperatingSystemVersion(majorVersion: 12, minorVersion: 0, patchVersion: 0)
 
-    do {
-        let prefsList = try plistFromData(try Data(contentsOf: ncprefsUrl))
-        let dndPrefsData = prefsList["dnd_prefs"] as! Data
-        let dndPrefsList = try plistFromData(dndPrefsData)
+    guard processInfo.isOperatingSystemAtLeast(bigSur) else {
+        return false
+    }
 
-        if let userPref = dndPrefsList["userPref"] as? [String: Any] {
-            return userPref["enabled"] as! Bool
-        }
-    } catch {
-        quitDialog(exitCode: 21, exitMessage: "DND Prefs unavailable", observedObject: DialogUpdatableContent())
+    if processInfo.isOperatingSystemAtLeast(monterey) {
+
+        let suite = UserDefaults(suiteName: "com.apple.controlcenter")
+
+        return suite?.bool(forKey: "NSStatusItem Visible FocusModes") ?? false
+
+    } else if processInfo.isOperatingSystemAtLeast(bigSur) {
+
+        let suite = UserDefaults(suiteName: "com.apple.controlcenter")
+
+        return suite?.bool(forKey: "NSStatusItem Visible DoNotDisturb") ?? false
+
     }
     return false
 }
@@ -262,4 +265,15 @@ func getVideoStreamingURLFromID(videoid: String, autoplay: Bool = false) -> Stri
     }
     writeLog("video url is \(fullURL)")
     return fullURL
+}
+
+func getModificationDateOf(_ fileURL: URL) -> Date {
+    var theDate: Date = Date.now
+    do {
+        let attr = try FileManager.default.attributesOfItem(atPath: fileURL.absoluteString)
+        theDate = attr[FileAttributeKey.modificationDate] as! Date
+    } catch {
+        writeLog("Failed to get file creation date: \(error.localizedDescription)", logLevel: .error)
+    }
+    return theDate
 }

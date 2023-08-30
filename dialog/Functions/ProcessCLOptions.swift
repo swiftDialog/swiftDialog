@@ -564,7 +564,7 @@ func processCLOptions(json: JSON = getJSON()) {
             }
             if json[appArguments.titleFont.long]["colour"].exists() {
                 appvars.titleFontColour = stringToColour(json[appArguments.titleFont.long]["colour"].stringValue)
-                print("found a colour of \(json[appArguments.titleFont.long]["colour"].stringValue)")
+                writeLog("found a colour of \(json[appArguments.titleFont.long]["colour"].stringValue)", logLevel: .debug)
             } else if json[appArguments.titleFont.long]["color"].exists() {
                 appvars.titleFontColour = stringToColour(json[appArguments.titleFont.long]["color"].stringValue)
             }
@@ -572,8 +572,7 @@ func processCLOptions(json: JSON = getJSON()) {
                 appvars.titleFontName = json[appArguments.titleFont.long]["name"].stringValue
             }
         } else {
-
-                                    writeLog("titleFont.value : \(appArguments.titleFont.value)")
+            writeLog("titleFont.value : \(appArguments.titleFont.value)")
             let fontCLValues = appArguments.titleFont.value
             var fontValues = [""]
             //split by ,

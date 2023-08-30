@@ -10,11 +10,12 @@ import OSLog
 
 func writeLog(_ message: String, logLevel: OSLogType = .info, log: OSLog = osLog) {
     let logMessage = "\(message)"
+    var standardError = StandardError()
 
     os_log("%{public}@", log: log, type: logLevel, logMessage)
-    if logLevel == .error || (logLevel == .debug && appvars.debugMode) {
-        // print debug and error to stdout
-        print("\(oslogTypeToString(logLevel).uppercased()): \(message)")
+    if logLevel == .error || appvars.debugMode {
+        // print debug and error to sterr
+        print("\(oslogTypeToString(logLevel).uppercased()): \(message)", to: &standardError)
     }
 }
 
