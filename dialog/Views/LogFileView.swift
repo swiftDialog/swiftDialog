@@ -9,12 +9,8 @@ import SwiftUI
 
 struct LogFileView: View {
 
-    @State private var logContent: String = ""
+    @State private var logContent: [String] = [""]
     @State private var fileMonitor: DispatchSourceFileSystemObject?
-    @State private var fileHandle: FileHandle?
-    @State private var dataAvailable: NSObjectProtocol?
-    @State private var dataReady: NSObjectProtocol?
-
     var logFilePath: String
 
     var body: some View {
@@ -25,12 +21,17 @@ struct LogFileView: View {
                         Text("\(logFilePath):")
                         Spacer()
                     }
-                    ScrollView {
-                        Text(logContent)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .id("logContent")
+                    List {
+                        ForEach(0..<logContent.count, id: \.self) { index in
+                            HStack {
+                                Text(logContent[index])
+                                    .font(.system(.body, design: .monospaced))
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .id(index)
+                            }
+
+                        }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
                     .cornerRadius(3.0)
                     .background(Color("editorBackgroundColour"))
                     .onAppear {
@@ -39,9 +40,9 @@ struct LogFileView: View {
                         }
                     }
                     .onChange(of: logContent, perform: { _ in
-                        //DispatchQueue.main.async {
-                            proxy.scrollTo("logContent", anchor: .bottom)
-                        //}
+                        Task {
+                            proxy.scrollTo(logContent.count-1, anchor: .bottom)
+                        }
                     })
                 }
             }
@@ -53,48 +54,55 @@ struct LogFileView: View {
         fileMonitor = DispatchSource.makeFileSystemObjectSource(fileDescriptor: fileDescriptor, eventMask: .write, queue: .global())
 
         fileMonitor?.setEventHandler { [self] in
-            try? self.readLogFile()
+            self.readLogFile()
         }
 
         fileMonitor?.resume()
     }
 
-    private func readLogFile() throws {
-        //do {
-            try self.fileHandle = FileHandle(forReadingFrom: URL(fileURLWithPath: logFilePath))
+    private func readLogFile() {
+        do {
+            let fileHandle = try FileHandle(forReadingFrom: URL(fileURLWithPath: logFilePath))
+            fileHandle.seekToEndOfFile()
 
-            fileHandle?.waitForDataInBackgroundAndNotify()
-            //let fileHandle = try FileHandle(forReadingFrom: URL(fileURLWithPath: logFilePath))
-            //fileHandle.seekToEndOfFile()
-
-            dataAvailable = NotificationCenter.default.addObserver(forName: NSNotification.Name.NSFileHandleDataAvailable, object: self.fileHandle, queue: nil) { _ in
-                if let data = self.fileHandle?.availableData,
-                   data.count > 0 {
-                    //if let line = fileHandle.readLine() {
-                        //DispatchQueue.main.async {
-                            logContent += String(data: data, encoding: .utf8) ?? ""
-                        //}
-                    //}
+            while true {
+                if let line = fileHandle.readLine() {
+                    DispatchQueue.main.async {
+                        logContent.append(line)
+                    }
+                } else {
+                    usleep(10000)
                 }
             }
-            dataReady = NotificationCenter.default.addObserver(forName: Process.didTerminateNotification,
-                                                               object: self.fileHandle, queue: nil) { _ -> Void in
-                NSLog("Task terminated!")
-                NotificationCenter.default.removeObserver(self.dataReady as Any)
-            }
-        //} catch {
-        ///    print("Error opening or reading log file: \(error.localizedDescription)")
-        //}
+        } catch {
+            print("Error opening or reading log file: \(error.localizedDescription)")
+        }
     }
 
 }
 
 extension FileHandle {
     func readLine() -> String? {
-        let data = self.readData(ofLength: 1)
-        if data.isEmpty {
-            return nil
+            var lineData = Data()
+            while true {
+                let data = self.readData(ofLength: 1)
+
+                if data.isEmpty {
+                    if lineData.isEmpty {
+                        return nil
+                    } else {
+                        return String(data: lineData, encoding: .utf8)
+                    }
+                }
+
+                if let character = String(data: data, encoding: .utf8) {
+                    if character == "\n" {
+                        return String(data: lineData, encoding: .utf8)
+                    } else {
+                        lineData.append(data)
+                    }
+                }
+            }
         }
-        return String(data: data, encoding: .utf8)
-    }
 }
+
