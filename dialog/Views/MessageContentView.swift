@@ -98,6 +98,8 @@ struct MessageContent: View {
                 }
 
                 Group {
+                    LogFileView(logFilePath: observedData.args.logFileToTail.value)
+                        .padding(.bottom, observedData.appProperties.contentPadding)
                     WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .padding(.bottom, observedData.appProperties.contentPadding)

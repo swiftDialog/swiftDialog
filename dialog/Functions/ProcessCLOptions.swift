@@ -719,6 +719,7 @@ func processCLOptions(json: JSON = getJSON()) {
         writeLog("\(appArguments.quitOnInfo.long) enabled")
         appArguments.quitOnInfo.present = true
     }
+
 }
 
 func processCLOptionValues() {
@@ -964,6 +965,8 @@ func processCLOptionValues() {
     }
      */
 
+    appArguments.logFileToTail.present         = json[appArguments.logFileToTail.long].exists() || CLOptionPresent(optionName: appArguments.logFileToTail)
+    appArguments.logFileToTail.value           = json[appArguments.logFileToTail.long].string ?? CLOptionText(optionName: appArguments.logFileToTail)
 
     appArguments.helpOption.present            = CLOptionPresent(optionName: appArguments.helpOption)
     appArguments.helpOption.value              = CLOptionText(optionName: appArguments.helpOption)
