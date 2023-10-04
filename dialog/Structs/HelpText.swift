@@ -67,10 +67,12 @@ struct SDHelp {
         argument.titleFont.helpLong = """
         Can accept up to three parameters, in a comma seperated list, to modify font properties.
 
-            color,colour=<text><hex>  - specified in hex format, e.g. #00A4C7
-                                        Also accepts any of the standard Apple colours
-                                        black, blue, gray, green, orange, pink, purple, red, white, yellow
-                                        default if option is invalid is system primary colour
+            color,colour=<text><hex>  - accepts any of the following color specifiers:
+                                        * A standard macOS system color:
+                                            [black | blue | gray | green | orange | pink | purple | red | white | yellow]
+                                        * The user's preferred "Accent Color", specified with the string 'accent'
+                                        * A custom color specified in hex format, e.g. #00A4C7
+                                        Default: macOS system 'primary' color.
 
             size=<float>              - accepts any float value.
 
@@ -124,10 +126,12 @@ struct SDHelp {
         argument.messageFont.helpLong = """
         Can accept up to three parameters, in a comma seperated list, to modify font properties.
 
-            color,colour=<text><hex>  - specified in hex format, e.g. #00A4C7
-                                        Also accepts any of the standard Apple colours
-                                        black, blue, gray, green, orange, pink, purple, red, white, yellow
-                                        default if option is invalid is system primary colour
+            color,colour=<text><hex>  - accepts any of the following color specifiers:
+                                        * A standard macOS system color:
+                                            [black | blue | gray | green | orange | pink | purple | red | white | yellow]
+                                        * The user's preferred "Accent Color", specified with the string 'accent'
+                                        * A custom color specified in hex format, e.g. #00A4C7
+                                        Default: macOS system 'primary' color.
 
             size=<float>              - accepts any float value.
 
@@ -265,8 +269,12 @@ struct SDHelp {
 
         SF Symbols - visit https://developer.apple.com/sf-symbols/ for details on over 3,100 symbols
 
-        color,colour=<text><hex>          - specified in hex format, e.g. #00A4C7
-        bgcolor,bgcolour=<text><hex>
+        color,colour=<text><hex>          - accepts any of the following color specifiers:
+        bgcolor,bgcolour=<text><hex>        * A standard macOS system color:
+                                                [black | blue | gray | green | orange | pink | purple | red | white | yellow]
+                                            * The user's preferred "Accent Color", specified with the string 'accent'
+                                            * A custom color specified in hex format, e.g. #00A4C7
+                                            Default: macOS system 'primary' color.
         palette=<text><hex>               - palette accepts up to three colours for use in multicolour
                                             SF Symbols
                                             Use comma seperated values, e.g. palette=red,green,blue
