@@ -112,7 +112,8 @@ class FileReader {
                  observedData.appProperties.windowPositionHorozontal) = windowPosition(line.replacingOccurrences(of: "position: ", with: ""))
                 placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
                     vertical: observedData.appProperties.windowPositionVertical,
-                    horozontal: observedData.appProperties.windowPositionHorozontal)
+                    horozontal: observedData.appProperties.windowPositionHorozontal,
+                            offset: string2float(string: observedData.args.positionOffset.value))
                 NSApp.activate(ignoringOtherApps: true)
 
             case "width:":
@@ -121,7 +122,8 @@ class FileReader {
                     observedData.appProperties.windowWidth = CGFloat((tempWidth as NSString).floatValue)
                     placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
                         vertical: observedData.appProperties.windowPositionVertical,
-                        horozontal: observedData.appProperties.windowPositionHorozontal)
+                        horozontal: observedData.appProperties.windowPositionHorozontal,
+                                offset: string2float(string: observedData.args.positionOffset.value))
                 }
 
             case "height:":
@@ -130,7 +132,8 @@ class FileReader {
                     observedData.appProperties.windowHeight = CGFloat((tempHeight as NSString).floatValue)
                     placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
                         vertical: observedData.appProperties.windowPositionVertical,
-                        horozontal: observedData.appProperties.windowPositionHorozontal)
+                        horozontal: observedData.appProperties.windowPositionHorozontal,
+                                offset: string2float(string: observedData.args.positionOffset.value))
                 }
 
             // Title

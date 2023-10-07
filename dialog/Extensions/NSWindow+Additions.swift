@@ -86,28 +86,26 @@ struct WindowAccessor: NSViewRepresentable {
     }
 }
 
-func calculateWindowYPos(screenHeight: CGFloat, position: NSWindow.Position.Vertical) -> CGFloat {
-    let padding: CGFloat = 16
+func calculateWindowYPos(screenHeight: CGFloat, position: NSWindow.Position.Vertical, offset: CGFloat) -> CGFloat {
     switch position {
-    case .top: return screenHeight - padding
+    case .top: return screenHeight - offset
     case .center:
         return (screenHeight / 2) + (screenHeight * 0.15)
     case .deadcenter: return screenHeight / 2
-    case .bottom: return padding
+    case .bottom: return offset
     }
 }
 
-func calculateWindowXPos(screenWidth: CGFloat, position: NSWindow.Position.Horizontal) -> CGFloat {
-    let padding: CGFloat = 16
+func calculateWindowXPos(screenWidth: CGFloat, position: NSWindow.Position.Horizontal, offset: CGFloat) -> CGFloat {
     switch position {
-    case .left: return padding
+    case .left: return offset
     case .center: return screenWidth / 2
-    case .right: return screenWidth - padding
+    case .right: return screenWidth - offset
     }
 }
 
 
-func placeWindow(_ window: NSWindow, size: CGSize? = nil, vertical: NSWindow.Position.Vertical, horozontal: NSWindow.Position.Horizontal) {
+func placeWindow(_ window: NSWindow, size: CGSize? = nil, vertical: NSWindow.Position.Vertical, horozontal: NSWindow.Position.Horizontal, offset: CGFloat) {
     let main = NSScreen.main!
     let visibleFrame = main.visibleFrame
     var windowSize: CGSize
@@ -117,8 +115,8 @@ func placeWindow(_ window: NSWindow, size: CGSize? = nil, vertical: NSWindow.Pos
         windowSize = size ?? window.frame.size
     }
 
-    let windowX = calculateWindowXPos(screenWidth: visibleFrame.width - windowSize.width, position: horozontal)
-    let windowY = calculateWindowYPos(screenHeight: visibleFrame.height - windowSize.height, position: vertical)
+    let windowX = calculateWindowXPos(screenWidth: visibleFrame.width - windowSize.width, position: horozontal, offset: offset)
+    let windowY = calculateWindowYPos(screenHeight: visibleFrame.height - windowSize.height, position: vertical, offset: offset)
 
     let desiredOrigin = CGPoint(x: visibleFrame.origin.x + windowX, y: visibleFrame.origin.y + windowY)
     window.setContentSize(windowSize)

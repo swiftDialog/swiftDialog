@@ -968,6 +968,11 @@ func processCLOptionValues() {
     appArguments.logFileToTail.present         = json[appArguments.logFileToTail.long].exists() || CLOptionPresent(optionName: appArguments.logFileToTail)
     appArguments.logFileToTail.value           = json[appArguments.logFileToTail.long].string ?? CLOptionText(optionName: appArguments.logFileToTail)
 
+
+    appArguments.positionOffset.present         = json[appArguments.positionOffset.long].exists() || CLOptionPresent(optionName: appArguments.positionOffset)
+    appArguments.positionOffset.value           = json[appArguments.positionOffset.long].string ?? CLOptionText(optionName: appArguments.positionOffset, defaultValue: "\(appvars.windowPositionOffset)")
+
+
     appArguments.helpOption.present            = CLOptionPresent(optionName: appArguments.helpOption)
     appArguments.helpOption.value              = CLOptionText(optionName: appArguments.helpOption)
 

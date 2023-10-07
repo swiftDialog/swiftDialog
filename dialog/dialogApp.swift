@@ -53,7 +53,8 @@ struct dialogApp: App {
                 if isVisible {
                     placeWindow(window,
                                 vertical: observedData.appProperties.windowPositionVertical,
-                                horozontal: observedData.appProperties.windowPositionHorozontal)
+                                horozontal: observedData.appProperties.windowPositionHorozontal,
+                                offset: string2float(string: observedData.args.positionOffset.value))
                     observedData.mainWindow = window
                 }
             })
