@@ -28,6 +28,31 @@ extension View {
 }
 
 extension View {
+    func symbolAnimation(effect: String) -> some View {
+        if #available(macOS 14, *) {
+            switch effect {
+            case "variable":
+                return AnyView(symbolEffect(.variableColor.iterative, isActive: true))
+            case "variable.reversing":
+                return AnyView(symbolEffect(.variableColor.reversing, isActive: true))
+            case "variable.iterative":
+                return AnyView(symbolEffect(.variableColor.iterative, isActive: true))
+            case "variable.iterative.reversing":
+                return AnyView(symbolEffect(.variableColor.cumulative, isActive: true))
+            case "pulse":
+                return AnyView(symbolEffect(.pulse.wholeSymbol, isActive: true))
+            case "pulse.bylayer":
+                return AnyView(symbolEffect(.pulse.byLayer, isActive: true))
+            default:
+                return AnyView(self)
+            }
+        } else {
+            return AnyView(self)
+        }
+    }
+}
+
+extension View {
     /// Applies the given transform if the given condition evaluates to `true`.
     /// - Parameters:
     ///   - condition: The condition to evaluate.

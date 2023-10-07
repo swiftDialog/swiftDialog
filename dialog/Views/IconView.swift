@@ -27,7 +27,7 @@ struct IconView: View {
     var builtInIconFill: String = ""
     var builtInIconPresent: Bool = false
     var builtInIconWeight = Font.Weight.thin
-
+    
     var framePadding: CGFloat = 0
 
     var iconRenderingMode = Image.TemplateRenderingMode.original
@@ -37,6 +37,7 @@ struct IconView: View {
     var sfSymbolColour1: Color = Color.primary
     var sfSymbolColour2: Color = Color.secondary
     var sfSymbolPresent: Bool = false
+    var sfSymbolAnimation: String = ""
 
     var sfGradientPresent: Bool = false
     var sfPalettePresent: Bool = false
@@ -173,6 +174,8 @@ struct IconView: View {
                             default: ()
                             }
                         }
+                    case "animation":
+                        sfSymbolAnimation = SFArgValue
                     default:
                         iconRenderingMode = Image.TemplateRenderingMode.template
                     }
@@ -229,6 +232,7 @@ struct IconView: View {
                         if builtInIconFill != "" {
                             Image(systemName: builtInIconFill)
                                 .resizable()
+                                .symbolAnimation(effect: sfSymbolAnimation)
                                 .foregroundColor(Color.white)
                         }
                         if messageUserImagePath == "default" {
@@ -237,6 +241,7 @@ struct IconView: View {
                                 .renderingMode(iconRenderingMode)
                                 .font(Font.title.weight(builtInIconWeight))
                                 .symbolRenderingMode(.monochrome)
+                                .symbolAnimation(effect: sfSymbolAnimation)
                                 .foregroundColor(builtInIconColour)
                         } else {
                             Image(systemName: builtInIconName)
@@ -244,6 +249,7 @@ struct IconView: View {
                                 .renderingMode(iconRenderingMode)
                                 .font(Font.title.weight(builtInIconWeight))
                                 .symbolRenderingMode(builtInIconAutoColor ? .multicolor : .hierarchical)
+                                .symbolAnimation(effect: sfSymbolAnimation)
                                 .foregroundStyle(builtInIconColour)
                         }
                     }
