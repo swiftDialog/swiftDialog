@@ -989,6 +989,9 @@ func processCLOptionValues() {
     appArguments.smallWindow.present           = json[appArguments.smallWindow.long].boolValue || CLOptionPresent(optionName: appArguments.smallWindow)
     appArguments.bigWindow.present             = json[appArguments.bigWindow.long].boolValue || CLOptionPresent(optionName: appArguments.bigWindow)
     appArguments.fullScreenWindow.present      = json[appArguments.fullScreenWindow.long].boolValue || CLOptionPresent(optionName: appArguments.fullScreenWindow)
+    if appArguments.fullScreenWindow.present {
+        appArguments.forceOnTop.present = false
+    }
     appArguments.jsonOutPut.present            = json[appArguments.jsonOutPut.long].boolValue || CLOptionPresent(optionName: appArguments.jsonOutPut)
     appArguments.ignoreDND.present             = json[appArguments.ignoreDND.long].boolValue || CLOptionPresent(optionName: appArguments.ignoreDND)
     appArguments.hideTimerBar.present          = json[appArguments.hideTimerBar.long].boolValue || CLOptionPresent(optionName: appArguments.hideTimerBar)
