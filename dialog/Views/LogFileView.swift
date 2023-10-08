@@ -28,6 +28,7 @@ struct LogFileView: View {
                                     .font(.system(.body, design: .monospaced))
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .id(index)
+                                    .hideRowSeperator()
                             }
 
                         }

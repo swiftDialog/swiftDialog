@@ -32,12 +32,14 @@ extension View {
         if #available(macOS 14, *) {
             switch effect {
             case "variable":
-                return AnyView(symbolEffect(.variableColor.iterative, isActive: true))
+                return AnyView(symbolEffect(.variableColor, isActive: true))
             case "variable.reversing":
                 return AnyView(symbolEffect(.variableColor.reversing, isActive: true))
             case "variable.iterative":
                 return AnyView(symbolEffect(.variableColor.iterative, isActive: true))
             case "variable.iterative.reversing":
+                return AnyView(symbolEffect(.variableColor.iterative.reversing, isActive: true))
+            case "variable.cumulative":
                 return AnyView(symbolEffect(.variableColor.cumulative, isActive: true))
             case "pulse":
                 return AnyView(symbolEffect(.pulse.wholeSymbol, isActive: true))
@@ -48,6 +50,16 @@ extension View {
             }
         } else {
             return AnyView(self)
+        }
+    }
+}
+
+extension View {
+    func hideRowSeperator() -> some View {
+        if #available(macOS 13, *) {
+            return listRowSeparator(.hidden)
+        } else {
+            return self
         }
     }
 }
