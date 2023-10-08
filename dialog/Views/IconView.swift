@@ -27,7 +27,7 @@ struct IconView: View {
     var builtInIconFill: String = ""
     var builtInIconPresent: Bool = false
     var builtInIconWeight = Font.Weight.thin
-    
+
     var framePadding: CGFloat = 0
 
     var iconRenderingMode = Image.TemplateRenderingMode.original
