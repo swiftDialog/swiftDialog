@@ -9,7 +9,8 @@ import SwiftUI
 
 struct LogFileView: View {
 
-    @State private var logContent: [String] = [""]
+    @State private var logContentArray: [String] = [""]
+    @State private var logContent = ""
     @State private var fileMonitor: DispatchSourceFileSystemObject?
     var logFilePath: String
 
@@ -21,10 +22,30 @@ struct LogFileView: View {
                         Text("\(logFilePath):")
                         Spacer()
                     }
+
+                    /*
+                    TextEditor(text: $logContent)
+                        .font(.system(.body, design: .monospaced))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .cornerRadius(3.0)
+                        .background(Color("editorBackgroundColour"))
+                        .onAppear {
+                            DispatchQueue.main.async {
+                                startStreamingLogFile()
+                            }
+                        }
+                        .onChange(of: logContent, perform: { _ in
+                            Task {
+                                proxy.scrollTo(logContent, anchor: .bottom)
+                            }
+                        })
+                     */
+
+                    /*
                     List {
-                        ForEach(0..<logContent.count, id: \.self) { index in
+                        ForEach(0..<logContentArray.count, id: \.self) { index in
                             HStack {
-                                Text(logContent[index])
+                                Text(logContentArray[index])
                                     .font(.system(.body, design: .monospaced))
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .id(index)
@@ -40,9 +61,29 @@ struct LogFileView: View {
                             startStreamingLogFile()
                         }
                     }
+                    .onChange(of: logContentArray, perform: { _ in
+                        Task {
+                            proxy.scrollTo(logContentArray.count-1, anchor: .bottom)
+                        }
+                    })
+                     */
+
+                    List {
+                        Text(logContent)
+                            .font(.system(size: 12, design: .monospaced))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .id("logContent")
+                    }
+                    .background(Color("editorBackgroundColour"))
+                    .cornerRadius(5.0)
+                    .onAppear {
+                        DispatchQueue.main.async {
+                            startStreamingLogFile()
+                        }
+                    }
                     .onChange(of: logContent, perform: { _ in
                         Task {
-                            proxy.scrollTo(logContent.count-1, anchor: .bottom)
+                            proxy.scrollTo("logContent", anchor: .bottom)
                         }
                     })
                 }
@@ -64,12 +105,13 @@ struct LogFileView: View {
     private func readLogFile() {
         do {
             let fileHandle = try FileHandle(forReadingFrom: URL(fileURLWithPath: logFilePath))
-            fileHandle.seekToEndOfFile()
+            try fileHandle.seekToEnd()
 
             while true {
                 if let line = fileHandle.readLine() {
                     DispatchQueue.main.async {
-                        logContent.append(line)
+                        //logContentArray.append(line)
+                        logContent+="\(line)\n"
                     }
                 } else {
                     usleep(10000)
