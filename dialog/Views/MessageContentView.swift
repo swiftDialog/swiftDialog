@@ -59,28 +59,47 @@ struct MessageContent: View {
                 }
 
                 GeometryReader { messageGeometry in
-                    ScrollView {
-                        Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                            .frame(width: messageGeometry.size.width, alignment: observedData.appProperties.messagePosition)
-                            .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                            .lineSpacing(2)
-                            .fixedSize()
-                            .background(GeometryReader {child -> Color in
-                                DispatchQueue.main.async {
-                                    // update on next cycle with calculated height
-                                    self.messageHeight = child.size.height
+                        if observedData.args.eulaMode.present {
+                            HStack {
+                                List {
+                                    Text(observedData.args.messageOption.value)
+                                        .font(.system(size: 12, design: .monospaced))
+                                        .background(GeometryReader {child -> Color in
+                                            DispatchQueue.main.async {
+                                                // update on next cycle with calculated height
+                                                self.messageHeight = child.size.height
+                                            }
+                                            return Color.clear
+                                        })
+                                        .frame(maxWidth: .infinity, alignment: .leading)
                                 }
-                                return Color.clear
-                            })
-                            .markdownTheme(.sdMarkdown)
-                            .markdownTextStyle {
-                                FontSize(appvars.messageFontSize)
-                                ForegroundColor(messageColour)
+                                .background(Color("editorBackgroundColour"))
+                                .cornerRadius(5.0)
                             }
-                            .accessibilityHint(observedData.args.messageOption.value)
-                            .focusable(false)
-                        //.scrollOnOverflow()
-                    }
+                        } else {
+                            ScrollView {
+                                Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
+                                    .frame(width: messageGeometry.size.width, alignment: observedData.appProperties.messagePosition)
+                                    .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                                    .lineSpacing(2)
+                                    .fixedSize()
+                                    .background(GeometryReader {child -> Color in
+                                        DispatchQueue.main.async {
+                                            // update on next cycle with calculated height
+                                            self.messageHeight = child.size.height
+                                        }
+                                        return Color.clear
+                                    })
+                                    .markdownTheme(.sdMarkdown)
+                                    .markdownTextStyle {
+                                        FontSize(appvars.messageFontSize)
+                                        ForegroundColor(messageColour)
+                                    }
+                                    .accessibilityHint(observedData.args.messageOption.value)
+                                    .focusable(false)
+                                //.scrollOnOverflow()
+                            }
+                        }
                 }
                 .frame(maxHeight: messageHeight)
                 if !observedData.args.messageVerticalAlignment.present || ["centre", "center", "top"].contains(observedData.args.messageVerticalAlignment.value) {
@@ -89,7 +108,7 @@ struct MessageContent: View {
             }
 
             Group {
-                LogFileView(logFilePath: observedData.args.logFileToTail.value)
+                TextFileView(logFilePath: observedData.args.logFileToTail.value)
                     .padding(.bottom, observedData.appProperties.contentPadding)
                 WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
                     .border(observedData.appProperties.debugBorderColour, width: 2)

@@ -119,4 +119,5 @@ struct CommandLineArguments {
     var ignoreDND                = CommandlineArgument(long: "ignorednd", short: "d", isbool: true)
     var jamfHelperMode           = CommandlineArgument(long: "jh", short: "jh", isbool: true)
     var miniMode                 = CommandlineArgument(long: "mini")
+    var eulaMode                 = CommandlineArgument(long: "eula", isbool: true)
 }

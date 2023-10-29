@@ -73,7 +73,7 @@
 		CC8D96302A01CCAB00CC84C6 /* Theme+sdMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC8D962F2A01CCAB00CC84C6 /* Theme+sdMarkdown.swift */; };
 		CC9F8FEF2A5EC76400802A88 /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC9F8FEE2A5EC76400802A88 /* ImageProcessing.swift */; };
 		CCD8ACEC2A011C9500D98695 /* RadioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD8ACEB2A011C9500D98695 /* RadioView.swift */; };
-		CCE934AD2ACC29F60094BD06 /* LogFileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE934AC2ACC29F60094BD06 /* LogFileView.swift */; };
+		CCE934AD2ACC29F60094BD06 /* TextFileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE934AC2ACC29F60094BD06 /* TextFileView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -175,7 +175,7 @@
 		CC8D962F2A01CCAB00CC84C6 /* Theme+sdMarkdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Theme+sdMarkdown.swift"; sourceTree = "<group>"; };
 		CC9F8FEE2A5EC76400802A88 /* ImageProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageProcessing.swift; sourceTree = "<group>"; };
 		CCD8ACEB2A011C9500D98695 /* RadioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioView.swift; sourceTree = "<group>"; };
-		CCE934AC2ACC29F60094BD06 /* LogFileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogFileView.swift; sourceTree = "<group>"; };
+		CCE934AC2ACC29F60094BD06 /* TextFileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFileView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -388,7 +388,7 @@
 				412B26AE289CE02100493EFF /* MiniView.swift */,
 				41A5A6A528E546A000BD3D5E /* WebContentView.swift */,
 				4124EFD129455861003B00F4 /* HelpView.swift */,
-				CCE934AC2ACC29F60094BD06 /* LogFileView.swift */,
+				CCE934AC2ACC29F60094BD06 /* TextFileView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -640,7 +640,7 @@
 				418A7B522759949A00E4D6F1 /* WatermarkView.swift in Sources */,
 				418A7B532759949A00E4D6F1 /* TextEntryView.swift in Sources */,
 				CC21905F2A7BD7F200269525 /* CommandLineArguments.swift in Sources */,
-				CCE934AD2ACC29F60094BD06 /* LogFileView.swift in Sources */,
+				CCE934AD2ACC29F60094BD06 /* TextFileView.swift in Sources */,
 				418A7B542759949A00E4D6F1 /* TimerView.swift in Sources */,
 				4116923B2893A22300A88700 /* CKListView.swift in Sources */,
 				CCD8ACEC2A011C9500D98695 /* RadioView.swift in Sources */,

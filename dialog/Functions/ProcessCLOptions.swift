@@ -1000,6 +1000,7 @@ func processCLOptionValues() {
     appArguments.constructionKit.present       = json[appArguments.constructionKit.long].boolValue || CLOptionPresent(optionName: appArguments.constructionKit)
     appArguments.miniMode.present              = json[appArguments.miniMode.long].boolValue || CLOptionPresent(optionName: appArguments.miniMode)
     appArguments.notification.present          = json[appArguments.notification.long].boolValue || CLOptionPresent(optionName: appArguments.notification)
+    appArguments.eulaMode.present              = json[appArguments.eulaMode.long].boolValue || CLOptionPresent(optionName: appArguments.eulaMode)
 
     // command line only options
     appArguments.listFonts.present             = CLOptionPresent(optionName: appArguments.listFonts)
