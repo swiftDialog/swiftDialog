@@ -112,7 +112,8 @@ class FileReader {
                  observedData.appProperties.windowPositionHorozontal) = windowPosition(line.replacingOccurrences(of: "position: ", with: ""))
                 placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
                     vertical: observedData.appProperties.windowPositionVertical,
-                    horozontal: observedData.appProperties.windowPositionHorozontal)
+                    horozontal: observedData.appProperties.windowPositionHorozontal,
+                            offset: string2float(string: observedData.args.positionOffset.value))
                 NSApp.activate(ignoringOtherApps: true)
 
             case "width:":
@@ -121,7 +122,8 @@ class FileReader {
                     observedData.appProperties.windowWidth = CGFloat((tempWidth as NSString).floatValue)
                     placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
                         vertical: observedData.appProperties.windowPositionVertical,
-                        horozontal: observedData.appProperties.windowPositionHorozontal)
+                        horozontal: observedData.appProperties.windowPositionHorozontal,
+                                offset: string2float(string: observedData.args.positionOffset.value))
                 }
 
             case "height:":
@@ -130,12 +132,39 @@ class FileReader {
                     observedData.appProperties.windowHeight = CGFloat((tempHeight as NSString).floatValue)
                     placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
                         vertical: observedData.appProperties.windowPositionVertical,
-                        horozontal: observedData.appProperties.windowPositionHorozontal)
+                        horozontal: observedData.appProperties.windowPositionHorozontal,
+                                offset: string2float(string: observedData.args.positionOffset.value))
                 }
 
             // Title
             case "\(observedData.args.titleOption.long):":
                 observedData.args.titleOption.value = line.replacingOccurrences(of: "\(observedData.args.titleOption.long): ", with: "")
+
+            // Title Font
+            case "\(observedData.args.titleFont.long):":
+                let titleFontArray = line.replacingOccurrences(of: "\(observedData.args.titleOption.long): ", with: "")
+                let fontValues = titleFontArray.components(separatedBy: .whitespaces)
+
+                for value in fontValues {
+                    // split by =
+                    let item = value.components(separatedBy: "=")
+                    switch item[0] {
+                    case  "size":
+                        observedData.appProperties.titleFontSize = string2float(string: item[1], defaultValue: appvars.titleFontSize)
+                    case  "weight":
+                        observedData.appProperties.titleFontWeight = textToFontWeight(item[1])
+                    case  "colour","color":
+                        observedData.appProperties.titleFontColour = stringToColour(item[1])
+                    case  "name":
+                        observedData.appProperties.titleFontName = item[1]
+                    case  "shadow":
+                        observedData.appProperties.titleFontShadow = item[1].boolValue
+                    default:
+                        writeLog("Unknown paramater \(item[0])")
+                    }
+                }
+
+
 
             // Message
             case "\(observedData.args.messageOption.long):":
@@ -270,6 +299,38 @@ class FileReader {
                         observedData.args.iconOption.value = iconState
                     }
                 }
+
+            // banner image
+            case "\(observedData.args.bannerImage.long):":
+                let bannerImage = line.replacingOccurrences(of: "\(observedData.args.bannerImage.long): ", with: "")
+                switch bannerImage {
+                case "none":
+                    observedData.args.bannerImage.present = false
+                    observedData.args.bannerTitle.present = false
+                    observedData.appProperties.titleFontColour = appvars.titleFontColour
+                default:
+                    observedData.args.bannerImage.value = bannerImage
+                    observedData.args.bannerImage.present = true
+                }
+
+
+            // banner text
+            case "\(observedData.args.bannerText.long):":
+                let bannerText = line.replacingOccurrences(of: "\(observedData.args.bannerText.long): ", with: "")
+                switch bannerText {
+                case "enable":
+                    observedData.args.bannerTitle.present = true
+                    observedData.appProperties.titleFontColour = Color.white
+                case "disable":
+                    observedData.args.bannerTitle.present = false
+                    observedData.appProperties.titleFontColour = appvars.titleFontColour
+                case "shadow":
+                    observedData.appProperties.titleFontShadow = true
+                default:
+                    observedData.args.bannerText.value = bannerText
+                    observedData.args.bannerTitle.present = true
+                }
+
 
             // overlay icon
             case "\(observedData.args.overlayIconOption.long):":

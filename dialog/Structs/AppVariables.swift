@@ -10,7 +10,7 @@ import SwiftUI
 
 struct AppVariables {
 
-    var cliversion                      = "2.3.2"
+    var cliversion                      = "2.3.3"
     let launchTime                      = Date.now
     // message default strings
     let titleDefault                    = String("default-title".localized)
@@ -62,6 +62,7 @@ struct AppVariables {
 
     var windowPositionVertical          = NSWindow.Position.Vertical.center
     var windowPositionHorozontal        = NSWindow.Position.Horizontal.center
+    var windowPositionOffset            = CGFloat(16)
 
     var iconWidth                      = CGFloat(150)      // set default image area width
     var iconHeight                     = CGFloat(260)      // set default image area height

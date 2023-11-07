@@ -69,6 +69,7 @@ struct CommandLineArguments {
     var watermarkFill            = CommandlineArgument(long: "bgfill", short: "bf")
     var watermarkScale           = CommandlineArgument(long: "bgscale", short: "bs")
     var position                 = CommandlineArgument(long: "position")
+    var positionOffset           = CommandlineArgument(long: "positionoffset")
     var video                    = CommandlineArgument(long: "video")
     var videoCaption             = CommandlineArgument(long: "videocaption")
     var debug                    = CommandlineArgument(long: "debug")
@@ -83,6 +84,7 @@ struct CommandLineArguments {
     var webcontent               = CommandlineArgument(long: "webcontent")
     var authkey                  = CommandlineArgument(long: "key", short: "k")
     var hash                     = CommandlineArgument(long: "checksum")
+    var logFileToTail            = CommandlineArgument(long: "displaylog")
 
     // command line options that take no additional parameters
     var button1Disabled          = CommandlineArgument(long: "button1disabled", isbool: true)
@@ -117,4 +119,5 @@ struct CommandLineArguments {
     var ignoreDND                = CommandlineArgument(long: "ignorednd", short: "d", isbool: true)
     var jamfHelperMode           = CommandlineArgument(long: "jh", short: "jh", isbool: true)
     var miniMode                 = CommandlineArgument(long: "mini")
+    var eulaMode                 = CommandlineArgument(long: "eula", isbool: true)
 }

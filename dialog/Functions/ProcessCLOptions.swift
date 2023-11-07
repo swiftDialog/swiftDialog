@@ -719,6 +719,7 @@ func processCLOptions(json: JSON = getJSON()) {
         writeLog("\(appArguments.quitOnInfo.long) enabled")
         appArguments.quitOnInfo.present = true
     }
+
 }
 
 func processCLOptionValues() {
@@ -964,6 +965,13 @@ func processCLOptionValues() {
     }
      */
 
+    appArguments.logFileToTail.present         = json[appArguments.logFileToTail.long].exists() || CLOptionPresent(optionName: appArguments.logFileToTail)
+    appArguments.logFileToTail.value           = json[appArguments.logFileToTail.long].string ?? CLOptionText(optionName: appArguments.logFileToTail)
+
+
+    appArguments.positionOffset.present         = json[appArguments.positionOffset.long].exists() || CLOptionPresent(optionName: appArguments.positionOffset)
+    appArguments.positionOffset.value           = json[appArguments.positionOffset.long].string ?? CLOptionText(optionName: appArguments.positionOffset, defaultValue: "\(appvars.windowPositionOffset)")
+
 
     appArguments.helpOption.present            = CLOptionPresent(optionName: appArguments.helpOption)
     appArguments.helpOption.value              = CLOptionText(optionName: appArguments.helpOption)
@@ -981,6 +989,9 @@ func processCLOptionValues() {
     appArguments.smallWindow.present           = json[appArguments.smallWindow.long].boolValue || CLOptionPresent(optionName: appArguments.smallWindow)
     appArguments.bigWindow.present             = json[appArguments.bigWindow.long].boolValue || CLOptionPresent(optionName: appArguments.bigWindow)
     appArguments.fullScreenWindow.present      = json[appArguments.fullScreenWindow.long].boolValue || CLOptionPresent(optionName: appArguments.fullScreenWindow)
+    if appArguments.fullScreenWindow.present {
+        appArguments.forceOnTop.present = false
+    }
     appArguments.jsonOutPut.present            = json[appArguments.jsonOutPut.long].boolValue || CLOptionPresent(optionName: appArguments.jsonOutPut)
     appArguments.ignoreDND.present             = json[appArguments.ignoreDND.long].boolValue || CLOptionPresent(optionName: appArguments.ignoreDND)
     appArguments.hideTimerBar.present          = json[appArguments.hideTimerBar.long].boolValue || CLOptionPresent(optionName: appArguments.hideTimerBar)
@@ -989,6 +1000,7 @@ func processCLOptionValues() {
     appArguments.constructionKit.present       = json[appArguments.constructionKit.long].boolValue || CLOptionPresent(optionName: appArguments.constructionKit)
     appArguments.miniMode.present              = json[appArguments.miniMode.long].boolValue || CLOptionPresent(optionName: appArguments.miniMode)
     appArguments.notification.present          = json[appArguments.notification.long].boolValue || CLOptionPresent(optionName: appArguments.notification)
+    appArguments.eulaMode.present              = json[appArguments.eulaMode.long].boolValue || CLOptionPresent(optionName: appArguments.eulaMode)
 
     // command line only options
     appArguments.listFonts.present             = CLOptionPresent(optionName: appArguments.listFonts)

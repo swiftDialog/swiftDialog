@@ -117,6 +117,7 @@ struct ListView: View {
                             }
                         }
                         .background(Color("editorBackgroundColour"))
+                        .listStyle(SidebarListStyle())
                     }
                     .onChange(of: observedData.listItemUpdateRow, perform: { _ in
                         DispatchQueue.main.async {

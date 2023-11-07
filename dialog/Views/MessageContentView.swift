@@ -39,105 +39,116 @@ struct MessageContent: View {
 
     var body: some View {
         VStack {
+            if observedData.args.centreIcon.present && observedData.args.iconOption.present {
+                IconView(image: observedData.args.iconOption.value,
+                         overlay: observedData.args.overlayIconOption.value,
+                         alpha: observedData.iconAlpha)
+                    .frame(width: iconDisplayWidth, alignment: .top)
+                    .padding(.bottom, observedData.appProperties.bottomPadding)
+                    .border(observedData.appProperties.debugBorderColour, width: 2)
+                    .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
+            }
+
             if observedData.args.mainImage.present {
-
-                if observedData.args.iconOption.present && observedData.args.centreIcon.present { //}&& observedData.args.iconOption.value != "none" {
-                    IconView(image: observedData.args.iconOption.value,
-                             overlay: observedData.args.overlayIconOption.value,
-                             alpha: observedData.iconAlpha)
-                        .frame(width: iconDisplayWidth, alignment: .top)
-                        .padding(.bottom, observedData.appProperties.bottomPadding)
-                        .border(observedData.appProperties.debugBorderColour, width: 2)
-                        .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
-                }
                 ImageView(imageArray: observedData.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: string2float(string: observedData.args.autoPlay.value))
-            } //else {
-                if observedData.args.centreIcon.present && observedData.args.iconOption.present {
-                    IconView(image: observedData.args.iconOption.value,
-                             overlay: observedData.args.overlayIconOption.value,
-                             alpha: observedData.iconAlpha)
-                        .frame(width: iconDisplayWidth, alignment: .top)
-                        .padding(.bottom, observedData.appProperties.bottomPadding)
-                        .border(observedData.appProperties.debugBorderColour, width: 2)
-                        .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
-                }
+            }
 
-                if !["", "none"].contains(observedData.args.messageOption.value) {
-                    if ["centre", "center", "bottom"].contains(observedData.args.messageVerticalAlignment.value) {
-                        Spacer()
-                    }
-
-                    GeometryReader { messageGeometry in
-                        ScrollView {
-                            Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                                .frame(width: messageGeometry.size.width, alignment: observedData.appProperties.messagePosition)
-                                .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                                .lineSpacing(2)
-                                .fixedSize()
-                                .background(GeometryReader {child -> Color in
-                                    DispatchQueue.main.async {
-                                        // update on next cycle with calculated height
-                                        self.messageHeight = child.size.height
-                                    }
-                                    return Color.clear
-                                })
-                                .markdownTheme(.sdMarkdown)
-                                .markdownTextStyle {
-                                    FontSize(appvars.messageFontSize)
-                                    ForegroundColor(messageColour)
-                                }
-                                .accessibilityHint(observedData.args.messageOption.value)
-                                .focusable(false)
-                            //.scrollOnOverflow()
-                        }
-                    }
-                    .frame(maxHeight: messageHeight)
-                    if !observedData.args.messageVerticalAlignment.present || ["centre", "center", "top"].contains(observedData.args.messageVerticalAlignment.value) {
-                        Spacer()
-                    }
-                }
-
-                Group {
-                    WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
-                        .border(observedData.appProperties.debugBorderColour, width: 2)
-                        .padding(.bottom, observedData.appProperties.contentPadding)
-
-                    ListView(observedDialogContent: observedData)
-                        .border(observedData.appProperties.debugBorderColour, width: 2)
-                        .padding(.bottom, observedData.appProperties.contentPadding)
-
-                    CheckboxView(observedDialogContent: observedData)
-                        .border(observedData.appProperties.debugBorderColour, width: 2)
-                        .frame(maxWidth: dataEntryMaxWidth)
-
-                    TextEntryView(observedDialogContent: observedData, textfieldContent: userInputState.textFields)
-                        .padding(.bottom, observedData.appProperties.contentPadding)
-                        .border(observedData.appProperties.debugBorderColour, width: 2)
-                        .frame(maxWidth: dataEntryMaxWidth)
-
-                    RadioView(observedDialogContent: observedData)
-                        .padding(.bottom, observedData.appProperties.contentPadding)
-                        .border(observedData.appProperties.debugBorderColour, width: 2)
-                        .frame(maxWidth: dataEntryMaxWidth)
-
-                    DropdownView(observedDialogContent: observedData)
-                        .padding(.bottom, observedData.appProperties.contentPadding)
-                        .border(observedData.appProperties.debugBorderColour, width: 2)
-                        .frame(maxWidth: dataEntryMaxWidth, alignment: .leading)
-                }
-
-                if ["top"].contains(observedData.args.messageVerticalAlignment.value) {
+            if !["", "none"].contains(observedData.args.messageOption.value) {
+                if ["centre", "center", "bottom"].contains(observedData.args.messageVerticalAlignment.value) {
                     Spacer()
                 }
-                if observedData.appProperties.userInputRequired {
-                    HStack {
-                        Spacer()
-                        Text("required-note")
-                            .font(.system(size: 10)
-                                    .weight(.light))
-                    }
+
+                GeometryReader { messageGeometry in
+                        if observedData.args.eulaMode.present {
+                            HStack {
+                                List {
+                                    Text(observedData.args.messageOption.value)
+                                        .font(.system(size: 12, design: .monospaced))
+                                        .background(GeometryReader {child -> Color in
+                                            DispatchQueue.main.async {
+                                                // update on next cycle with calculated height
+                                                self.messageHeight = child.size.height
+                                            }
+                                            return Color.clear
+                                        })
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .background(Color("editorBackgroundColour"))
+                                .cornerRadius(5.0)
+                            }
+                        } else {
+                            ScrollView {
+                                Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
+                                    .frame(width: messageGeometry.size.width, alignment: observedData.appProperties.messagePosition)
+                                    .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                                    .lineSpacing(2)
+                                    .fixedSize()
+                                    .background(GeometryReader {child -> Color in
+                                        DispatchQueue.main.async {
+                                            // update on next cycle with calculated height
+                                            self.messageHeight = child.size.height
+                                        }
+                                        return Color.clear
+                                    })
+                                    .markdownTheme(.sdMarkdown)
+                                    .markdownTextStyle {
+                                        FontSize(appvars.messageFontSize)
+                                        ForegroundColor(messageColour)
+                                    }
+                                    .accessibilityHint(observedData.args.messageOption.value)
+                                    .focusable(false)
+                                //.scrollOnOverflow()
+                            }
+                        }
                 }
-            //}
+                .frame(maxHeight: messageHeight)
+                if !observedData.args.messageVerticalAlignment.present || ["centre", "center", "top"].contains(observedData.args.messageVerticalAlignment.value) {
+                    Spacer()
+                }
+            }
+
+            Group {
+                TextFileView(logFilePath: observedData.args.logFileToTail.value)
+                    .padding(.bottom, observedData.appProperties.contentPadding)
+                WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
+                    .border(observedData.appProperties.debugBorderColour, width: 2)
+                    .padding(.bottom, observedData.appProperties.contentPadding)
+
+                ListView(observedDialogContent: observedData)
+                    .border(observedData.appProperties.debugBorderColour, width: 2)
+                    .padding(.bottom, observedData.appProperties.contentPadding)
+
+                CheckboxView(observedDialogContent: observedData)
+                    .border(observedData.appProperties.debugBorderColour, width: 2)
+                    .frame(maxWidth: dataEntryMaxWidth)
+
+                TextEntryView(observedDialogContent: observedData, textfieldContent: userInputState.textFields)
+                    .padding(.bottom, observedData.appProperties.contentPadding)
+                    .border(observedData.appProperties.debugBorderColour, width: 2)
+                    .frame(maxWidth: dataEntryMaxWidth)
+
+                RadioView(observedDialogContent: observedData)
+                    .padding(.bottom, observedData.appProperties.contentPadding)
+                    .border(observedData.appProperties.debugBorderColour, width: 2)
+                    .frame(maxWidth: dataEntryMaxWidth)
+
+                DropdownView(observedDialogContent: observedData)
+                    .padding(.bottom, observedData.appProperties.contentPadding)
+                    .border(observedData.appProperties.debugBorderColour, width: 2)
+                    .frame(maxWidth: dataEntryMaxWidth, alignment: .leading)
+            }
+
+            if ["top"].contains(observedData.args.messageVerticalAlignment.value) {
+                Spacer()
+            }
+            if observedData.appProperties.userInputRequired {
+                HStack {
+                    Spacer()
+                    Text("required-note")
+                        .font(.system(size: 10)
+                                .weight(.light))
+                }
+            }
         }
         .padding(.leading, observedData.appProperties.sidePadding)
         .padding(.trailing, observedData.appProperties.sidePadding)
