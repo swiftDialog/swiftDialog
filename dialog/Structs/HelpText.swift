@@ -215,20 +215,61 @@ struct SDHelp {
         argument.autoPlay.helpShort = "Enable video autoplay"
         argument.autoPlay.helpLong = ""
 
+        let iconCommon = """
+        Acceptable Values:
+            file path to png or jpg           -  "/file/path/image.[png|jpg]"
+            file path to Application          -  "/Applications/Chess.app"
+            URL of file resource              -  "https://someurl/file.[png|jpg]"
+            SF Symbol                         -  "SF=sf.symbol.name"
+            builtin                           -  info | caution | warning
+
+        When Specifying SF Symbols for icon or overlay icon, additional parameters for colour and weight are available.
+        Additionl parameters are seperated by comma
+
+        "SF=sf.symbol.name,colour=<text><hex>,weight=<text>"
+
+        SF Symbols - visit https://developer.apple.com/sf-symbols/ for details on over 3,100 symbols
+
+        color,colour=<text><hex>          - accepts any of the following color specifiers:
+        bgcolor,bgcolour=<text><hex>        * A standard macOS system color:
+                                                [black | blue | gray | green | orange | pink | purple | red | white | yellow]
+                                            * 'auto' to use the prefered colour on supported SF Symbols
+                                            * 'accent' to use the user's preferred "Accent Color"
+                                            * A custom color specified in hex format, e.g. #00A4C7
+                                            Default: macOS system 'primary' color.
+        palette=<text><hex>               - palette accepts up to three colours for use in multicolour
+                                            SF Symbols
+                                            Use comma seperated values, e.g. palette=red,green,blue
+
+              Also accepts any of the standard Apple colours
+              black, blue, gray, green, orange, pink, purple, red, white,
+              yellow, mint, cyan, indigo or teal
+
+              default if option is invalid is system primary colour
+
+              bgcolour, bgcolor will set the background colour of the icon overlay
+                when SF Symbols are used
+
+              - Special colour "auto".
+              When used with a multicolor SF Symbol, the symbols
+                default colour scheem will be used
+              ** If used with a monochrome SF Symbol **
+              ** it will default to black and will not respect dark mode **
+
+        weight=<text>                     - accepts any of the following values:
+                                           thin (default), light, regular, medium, heavy, bold
+
+        animation=<keyword>  *(macOS 14)* - Uses animates SF symbols. Accepts one of the following keywords:
+                                           variable, variable.reversing, variable.iterative, variable.iterative.reversing
+                                           variable.cumulative, pulse, pulse.bylayer
+        """
+
         argument.iconOption.helpShort = "Set the dialog icon"
         argument.iconOption.helpUsage = "<file> | <url>"
         argument.iconOption.helpLong = """
-        Acceptable Values:
-        file path to png or jpg           -  "/file/path/image.[png|jpg]"
-        file path to Application          -  "/Applications/Chess.app"
-        URL of file resource              -  "https://someurl/file.[png|jpg]"
-        SF Symbol                         -  "SF=sf.symbol.name"
-        builtin                           -  info | caution | warning
+        "none" can be specified to not display an icon but maintain layout (see also --\(appArguments.hideIcon.long))
 
-        if not specified, default icon will be used
-        Images from either file or URL are displayed as roundrect if no transparancy
-
-        "none" can also be specified to not display an icon but maintain layout (see also --\(appArguments.hideIcon.long))
+        \(iconCommon)
 """
 
         argument.iconSize.helpShort = "Set the dialog icon size"
@@ -255,47 +296,7 @@ struct SDHelp {
         argument.overlayIconOption.helpLong = """
         Icon overlays are displayed at 1/2 resolution to the main icon and positioned to the bottom right
 
-        Acceptable Values:
-            file path to png or jpg           -  "/file/path/image.[png|jpg]"
-            file path to Application          -  "/Applications/Chess.app"
-            URL of file resource              -  "https://someurl/file.[png|jpg]"
-            SF Symbol                         -  "SF=sf.symbol.name"
-            builtin                           -  info | caution | warning
-
-        When Specifying SF Symbols for icon or overlay icon, additional parameters for colour and weight are available.
-        Additionl parameters are seperated by comma
-
-        "SF=sf.symbol.name,colour=<text><hex>,weight=<text>"
-
-        SF Symbols - visit https://developer.apple.com/sf-symbols/ for details on over 3,100 symbols
-
-        color,colour=<text><hex>          - accepts any of the following color specifiers:
-        bgcolor,bgcolour=<text><hex>        * A standard macOS system color:
-                                                [black | blue | gray | green | orange | pink | purple | red | white | yellow]
-                                            * The user's preferred "Accent Color", specified with the string 'accent'
-                                            * A custom color specified in hex format, e.g. #00A4C7
-                                            Default: macOS system 'primary' color.
-        palette=<text><hex>               - palette accepts up to three colours for use in multicolour
-                                            SF Symbols
-                                            Use comma seperated values, e.g. palette=red,green,blue
-
-              Also accepts any of the standard Apple colours
-              black, blue, gray, green, orange, pink, purple, red, white,
-              yellow, mint, cyan, indigo or teal
-
-              default if option is invalid is system primary colour
-
-              bgcolour, bgcolor will set the background colour of the icon overlay
-                when SF Symbols are used
-
-              - Special colour "auto".
-              When used with a multicolor SF Symbol, the symbols
-                default colour scheem will be used
-              ** If used with a monochrome SF Symbol **
-              ** it will default to black and will not respect dark mode **
-
-        weight=<text>                     - accepts any of the following values:
-                                           thin (default), light, regular, medium, heavy, bold
+        \(iconCommon)
 """
 
         argument.hideIcon.helpShort = "Hides the icon from view"
@@ -675,6 +676,14 @@ struct SDHelp {
         Default is a visually appealing position slightly towards the top of centre, not dead centre.
 """
 
+        argument.positionOffset.helpShort = "Set dialog window position offset"
+        argument.positionOffset.helpUsage = "<int>"
+        argument.positionOffset.helpLong = """
+        When used in conjunction with --\(argument.position.long) sets the offset from the edge of the display
+
+        Default is 16
+"""
+
         argument.timerBar.helpShort = "Enable countdown timer (with <seconds>)"
         argument.timerBar.helpUsage = "[<seconds>]"
         argument.timerBar.helpLong = """
@@ -686,6 +695,13 @@ struct SDHelp {
         will be displayed but will be disabled for the first 3 seconds of the timer, after which it
         becomes active and can be used to dismiss swiftDialog with the standard button 1 exit code of 0
 """
+
+        argument.logFileToTail.helpShort = "Open a file and display the contents as it is being written"
+        argument.logFileToTail.helpUsage = "<file>"
+        argument.logFileToTail.helpLong = """
+        Open a file and display the contents as it is being written
+"""
+
 
         argument.hideTimerBar.helpShort = "Hide countdown timer if enabled"
         argument.hideTimerBar.helpLong = """
