@@ -106,7 +106,7 @@ struct TextEntryView: View {
                                                 userInputState.textFields[index].value = textContent
                                             })
                                         Image(systemName: "lock.fill")
-                                            .foregroundColor(stringToColour("#008815")).opacity(0.5)
+                                            .foregroundColor(Color(argument: "#008815")).opacity(0.5)
                                             .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
                                     }
                                 } else {

@@ -72,7 +72,7 @@ struct IconView: View {
                     SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) }
                     for value in SFValues where value.hasPrefix("bgcolo") {
                         if let bgColour = value.components(separatedBy: "=").last {
-                            sfBackgroundIconColour = stringToColour(bgColour)
+                            sfBackgroundIconColour = Color(argument: bgColour)
                         }
                     }
                     overlayImageBackground = true
@@ -138,7 +138,7 @@ struct IconView: View {
                     case "sf":
                         builtInIconName = SFArgValue
                     case "weight":
-                        builtInIconWeight = textToFontWeight(SFArgValue)
+                            builtInIconWeight = Font.Weight(argument: SFArgValue)
                     case _ where SFArg.hasPrefix("colo"):
                         if SFArgValue == "auto" {
                             // detecting sf symbol properties seems to be annoying, at least in swiftui 2
@@ -151,11 +151,11 @@ struct IconView: View {
                             iconRenderingMode = Image.TemplateRenderingMode.template // switches to monochrome which allows us to tint the sf symbol
                             if SFArg.hasSuffix("2") {
                                 sfGradientPresent = true
-                                builtInIconSecondaryColour = stringToColour(SFArgValue)
+                                builtInIconSecondaryColour = Color(argument: SFArgValue)
                             } else if SFArg.hasSuffix("3") {
-                                builtInIconTertiaryColour = stringToColour(SFArgValue)
+                                builtInIconTertiaryColour = Color(argument: SFArgValue)
                             } else {
-                                builtInIconColour = stringToColour(SFArgValue)
+                                builtInIconColour = Color(argument: SFArgValue)
                             }
                         }
                     case "palette":
@@ -166,11 +166,11 @@ struct IconView: View {
                         for index in 0...paletteColours.count-1 {
                             switch index {
                             case 0:
-                                builtInIconColour = stringToColour(paletteColours[index])
+                                builtInIconColour = Color(argument: paletteColours[index])
                             case 1:
-                                builtInIconSecondaryColour = stringToColour(paletteColours[index])
+                                builtInIconSecondaryColour = Color(argument: paletteColours[index])
                             case 2:
-                                builtInIconTertiaryColour = stringToColour(paletteColours[index])
+                                builtInIconTertiaryColour = Color(argument: paletteColours[index])
                             default: ()
                             }
                         }
