@@ -6,8 +6,17 @@
 //
 
 import Foundation
+import CryptoKit
 
 extension String {
+
+    var sha256Hash: String {
+        // Returns a sha256 hash of the given text
+        let inputData = Data(self.utf8)
+        let hashed = SHA256.hash(data: inputData)
+        return hashed.compactMap { String(format: "%02x", $0) }.joined()
+    }
+
     var localized: String {
       return NSLocalizedString(self, comment: "\(self)_comment")
     }
