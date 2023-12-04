@@ -243,6 +243,9 @@ struct IconView: View {
                                 .symbolRenderingMode(.monochrome)
                                 .symbolAnimation(effect: sfSymbolAnimation)
                                 .foregroundColor(builtInIconColour)
+                        } else if messageUserImagePath == "computer" {
+                            Image(nsImage: NSImage(named: NSImage.computerName) ?? NSImage())
+                                    .resizable()
                         } else {
                             Image(systemName: builtInIconName)
                                 .resizable()
