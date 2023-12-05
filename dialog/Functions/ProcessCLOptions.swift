@@ -840,7 +840,7 @@ func processCLOptionValues() {
     appArguments.listItem.evaluate(json: json)
     appArguments.listStyle.evaluate(json: json)
 
-    appArguments.autoPlay.evaluate(json: json, defaultValue: "\(appvars.timerDefaultSeconds)")
+    appArguments.autoPlay.evaluate(json: json)
 
     appArguments.statusLogFile.evaluate(json: json)
     if !appArguments.statusLogFile.present {
@@ -848,7 +848,7 @@ func processCLOptionValues() {
     }
     appArguments.logFileToTail.evaluate(json: json)
 
-    appArguments.quitKey.evaluate(json: json)
+    appArguments.quitKey.evaluate(json: json, defaultValue: appvars.quitKeyCharacter)
 
     // rich content
     appArguments.webcontent.evaluate(json: json)
