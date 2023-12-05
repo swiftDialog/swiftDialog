@@ -54,3 +54,9 @@ extension String {
         return (self as NSString).boolValue
     }
 }
+
+extension CGFloat {
+    var stringValue: String {
+        return "\(self)"
+    }
+}

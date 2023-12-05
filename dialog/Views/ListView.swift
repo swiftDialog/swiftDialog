@@ -75,7 +75,7 @@ struct ListView: View {
                                     if userInputState.listItems[index].icon != "" {
                                         let _ = writeLog("Switch index \(index): Displaying icon \(userInputState.listItems[index].icon)")
                                         IconView(image: userInputState.listItems[index].icon, overlay: "")
-                                            .frame(maxHeight: rowHeight)
+                                            .frame(maxWidth: rowHeight, maxHeight: rowHeight)
                                     }
                                     Text(userInputState.listItems[index].title)
                                         .font(.system(size: rowFontSize))

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftyJSON
 
 struct CommandlineArgument {
     var long: String
@@ -16,8 +17,25 @@ struct CommandlineArgument {
     var helpUsage: String = "<text>"
     var present: Bool = false
     var isbool: Bool = false
-}
 
+    public mutating func evaluate(json: JSON = "{}", defaultValue: String = "") {
+        self.present = json[self.long].exists() || CLOptionPresent(optionName: self)
+        if !self.isbool && json[self.long].bool ?? false {
+            self.present = false
+        }
+
+        if self.present {
+            if let numberValue = json[self.long].number {
+                self.value = numberValue.stringValue
+            } else {
+                self.value = json[self.long].string ?? CLOptionText(optionName: self)
+            }
+        }
+        if self.value.isEmpty {
+            self.value = defaultValue
+        }
+    }
+}
 
 
 struct CommandLineArguments {
@@ -118,6 +136,6 @@ struct CommandLineArguments {
     var jsonOutPut               = CommandlineArgument(long: "json", short: "j", isbool: true)
     var ignoreDND                = CommandlineArgument(long: "ignorednd", short: "d", isbool: true)
     var jamfHelperMode           = CommandlineArgument(long: "jh", short: "jh", isbool: true)
-    var miniMode                 = CommandlineArgument(long: "mini")
+    var miniMode                 = CommandlineArgument(long: "mini", isbool: true)
     var eulaMode                 = CommandlineArgument(long: "eula", isbool: true)
 }
