@@ -9,6 +9,17 @@ import Foundation
 import SwiftUI
 
 extension Color {
+
+    var hexValue: String {
+        let components = self.cgColor?.components
+        let red: CGFloat = components?[0] ?? 0.0
+        let green: CGFloat = components?[1] ?? 0.0
+        let blue: CGFloat = components?[2] ?? 0.0
+
+        let hexString = String.init(format: "#%02lX%02lX%02lX", lroundf(Float(red * 255)), lroundf(Float(green * 255)), lroundf(Float(blue * 255)))
+        return hexString
+    }
+
     init(hex: UInt, alpha: Double = 1) {
         self.init(
             .sRGB,
@@ -17,6 +28,51 @@ extension Color {
             blue: Double((hex >> 00) & 0xff) / 255,
             opacity: alpha
         )
+    }
+
+    /// convert to a colour from an argument string representation
+    init(argument: String)
+    {
+        let hexRegEx = "^#([a-fA-F0-9]{6})$"
+        let hexPred = NSPredicate(format: "SELF MATCHES %@", hexRegEx)
+
+        if hexPred.evaluate(with: argument) {
+
+            let colourRedValue = "\(argument[1])\(argument[2])"
+            let colourRed = Double(Int(colourRedValue, radix: 16)!)/255
+
+            let colourGreenValue = "\(argument[3])\(argument[4])"
+            let colourGreen = Double(Int(colourGreenValue, radix: 16)!)/255
+
+            let colourBlueValue = "\(argument[5])\(argument[6])"
+            let colourBlue = Double(Int(colourBlueValue, radix: 16)!)/255
+
+            self.init(red: colourRed, green: colourGreen, blue: colourBlue)
+
+            return
+        }
+
+        switch argument {
+            case "accent"    : self = .accentColor
+            case "red"       : self = .red
+            case "orange"    : self = .orange
+            case "yellow"    : self = .yellow
+            case "green"     : self = .green
+            case "mint"      : self = .mint
+            case "teal"      : self = .teal
+            case "cyan"      : self = .cyan
+            case "blue"      : self = .blue
+            case "indigo"    : self = .indigo
+            case "purple"    : self = .purple
+            case "pink"      : self = .pink
+            case "brown"     : self = .brown
+            case "white"     : self = .white
+            case "gray"      : self = .gray
+            case "black"     : self = .black
+            case "primary"   : self = .primary
+            case "secondary" : self = .secondary
+            default          : self = .primary
+        }
     }
 }
 

@@ -152,9 +152,9 @@ class FileReader {
                     case  "size":
                         observedData.appProperties.titleFontSize = string2float(string: item[1], defaultValue: appvars.titleFontSize)
                     case  "weight":
-                        observedData.appProperties.titleFontWeight = textToFontWeight(item[1])
+                        observedData.appProperties.titleFontWeight = Font.Weight(argument: item[1])
                     case  "colour","color":
-                        observedData.appProperties.titleFontColour = stringToColour(item[1])
+                        observedData.appProperties.titleFontColour = Color(argument: item[1])
                     case  "name":
                         observedData.appProperties.titleFontName = item[1]
                     case  "shadow":

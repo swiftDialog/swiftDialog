@@ -89,11 +89,11 @@ struct JSONView: View {
 
         // message font stuff
         if observedDialogContent.appProperties.messageFontColour != .primary {
-            json[appArguments.messageFont.long].dictionaryObject = ["colour": colourToString(color: observedDialogContent.appProperties.messageFontColour)]
+            json[appArguments.messageFont.long].dictionaryObject = ["colour": observedDialogContent.appProperties.messageFontColour.hexValue]
         }
 
         if observedDialogContent.appProperties.titleFontColour != .primary {
-            json[appArguments.titleFont.long].dictionaryObject = ["colour": colourToString(color: observedDialogContent.appProperties.titleFontColour)]
+            json[appArguments.titleFont.long].dictionaryObject = ["colour": observedDialogContent.appProperties.titleFontColour.hexValue]
         }
 
         // convert the JSON to a raw String
