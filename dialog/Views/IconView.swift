@@ -18,6 +18,7 @@ struct IconView: View {
     var imgFromURL: Bool = false
     var imgFromAPP: Bool = false
     var imgFromBase64: Bool = false
+    var imgFromText: Bool = false
 
     var builtInIconName: String = ""
     var builtInIconAutoColor: Bool = false
@@ -111,6 +112,11 @@ struct IconView: View {
             builtInIconColour = .clear
         }
 
+        if messageUserImagePath.lowercased().hasPrefix("text=") {
+            writeLog("Image is Text")
+            imgFromText = true
+        }
+
         if messageUserImagePath.lowercased().hasPrefix("sf=") {
             writeLog("Image is SF Symbol")
             sfSymbolPresent = true
@@ -198,7 +204,7 @@ struct IconView: View {
             writeLog("Using default info icon")
             builtInIconName = "person.fill.questionmark"
             builtInIconPresent = true
-        } else if messageUserImagePath == "default" || (!builtInIconPresent && !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL && !imgFromBase64) {
+        } else if messageUserImagePath == "default" || (!builtInIconPresent && !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL && !imgFromBase64 && !imgFromText) {
             writeLog("Icon not specified - using default icon")
             builtInIconName = "bubble.left.circle.fill"
             iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
@@ -245,7 +251,7 @@ struct IconView: View {
                                 .foregroundColor(builtInIconColour)
                         } else if messageUserImagePath == "computer" {
                             Image(nsImage: NSImage(named: NSImage.computerName) ?? NSImage())
-                                    .resizable()
+                                .resizable()
                         } else {
                             Image(systemName: builtInIconName)
                                 .resizable()
@@ -260,6 +266,12 @@ struct IconView: View {
                 .aspectRatio(contentMode: .fit)
                 .scaledToFit()
                 .scaleEffect(mainImageScale, anchor: .topLeading)
+                .opacity(mainImageAlpha)
+            } else if imgFromText {
+                Text(messageUserImagePath.replacingOccurrences(of: "text=", with: ""))
+                .font(.system(size: 300))
+                .minimumScaleFactor(0.01)
+                .lineLimit(1)
                 .opacity(mainImageAlpha)
             } else {
                 DisplayImage(messageUserImagePath, corners: true)
