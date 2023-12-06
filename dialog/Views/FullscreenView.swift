@@ -133,7 +133,7 @@ struct FullscreenView: View {
                 if observedData.args.mainImage.present {
                     // print image and caption
                     VStack {
-                        ImageView(imageArray: observedData.appProperties.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: string2float(string: observedData.args.autoPlay.value))
+                        ImageView(imageArray: observedData.appProperties.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: observedData.args.autoPlay.value.floatValue())
                             .border(observedData.appProperties.debugBorderColour, width: 2)
                     }
                 } else {
@@ -176,7 +176,7 @@ struct FullscreenView: View {
                         }
 
                         if observedData.args.timerBar.present {
-                            TimerView(progressSteps: string2float(string: observedData.args.timerBar.value), visible: observedData.args.timerBar.present, observedDialogContent: observedData)
+                            TimerView(progressSteps: observedData.args.timerBar.value.floatValue(), visible: observedData.args.timerBar.present, observedDialogContent: observedData)
                         }
                     }
                     .padding(observedData.appProperties.topPadding*3)

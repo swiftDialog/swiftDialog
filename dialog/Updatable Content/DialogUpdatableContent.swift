@@ -113,7 +113,7 @@ class FileReader {
                 placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
                     vertical: observedData.appProperties.windowPositionVertical,
                     horozontal: observedData.appProperties.windowPositionHorozontal,
-                            offset: string2float(string: observedData.args.positionOffset.value))
+                    offset: observedData.args.positionOffset.value.floatValue())
                 NSApp.activate(ignoringOtherApps: true)
 
             case "width:":
@@ -123,7 +123,7 @@ class FileReader {
                     placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
                         vertical: observedData.appProperties.windowPositionVertical,
                         horozontal: observedData.appProperties.windowPositionHorozontal,
-                                offset: string2float(string: observedData.args.positionOffset.value))
+                                offset: observedData.args.positionOffset.value.floatValue())
                 }
 
             case "height:":
@@ -133,7 +133,7 @@ class FileReader {
                     placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
                         vertical: observedData.appProperties.windowPositionVertical,
                         horozontal: observedData.appProperties.windowPositionHorozontal,
-                                offset: string2float(string: observedData.args.positionOffset.value))
+                                offset: observedData.args.positionOffset.value.floatValue())
                 }
 
             // Title
@@ -150,7 +150,7 @@ class FileReader {
                     let item = value.components(separatedBy: "=")
                     switch item[0] {
                     case  "size":
-                        observedData.appProperties.titleFontSize = string2float(string: item[1], defaultValue: appvars.titleFontSize)
+                        observedData.appProperties.titleFontSize = item[1].floatValue(defaultValue: appvars.titleFontSize)
                     case  "weight":
                         observedData.appProperties.titleFontWeight = Font.Weight(argument: item[1])
                     case  "colour","color":
@@ -280,7 +280,7 @@ class FileReader {
 
                 if iconState.components(separatedBy: ": ").first == "size" {
                     if iconState.replacingOccurrences(of: "size:", with: "").trimmingCharacters(in: .whitespaces) != "" {
-                        observedData.iconSize = string2float(string: iconState.replacingOccurrences(of: "size: ", with: ""))
+                        observedData.iconSize = iconState.replacingOccurrences(of: "size: ", with: "").floatValue()
                     } else {
                         observedData.iconSize = observedData.appProperties.iconWidth
                     }
@@ -447,7 +447,7 @@ class FileReader {
                                 statusIcon = action[1].trimmingCharacters(in: .whitespaces)
                                 statusIsSet = true
                             case "progress":
-                                listProgressValue = string2float(string: action[1].trimmingCharacters(in: .whitespaces))
+                            listProgressValue = action[1].trimmingCharacters(in: .whitespaces).floatValue()
                                 statusIcon = "progress"
                                 progressIsSet = true
                                 statusIsSet = true
@@ -600,7 +600,7 @@ class DialogUpdatableContent: ObservableObject {
         progressTotal = Double(appArguments.progressBar.value) ?? 100
         listItemUpdateRow = 0
 
-        iconSize = string2float(string: appArguments.iconSize.value)
+        iconSize = appArguments.iconSize.value.floatValue()
         iconAlpha = Double(appArguments.iconAlpha.value) ?? 1.0
 
         imageArray = appvars.imageArray

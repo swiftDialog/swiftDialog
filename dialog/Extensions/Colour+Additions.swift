@@ -31,8 +31,7 @@ extension Color {
     }
 
     /// convert to a colour from an argument string representation
-    init(argument: String)
-    {
+    init(argument: String) {
         let hexRegEx = "^#([a-fA-F0-9]{6})$"
         let hexPred = NSPredicate(format: "SELF MATCHES %@", hexRegEx)
 
@@ -53,25 +52,25 @@ extension Color {
         }
 
         switch argument {
-            case "accent"    : self = .accentColor
-            case "red"       : self = .red
-            case "orange"    : self = .orange
-            case "yellow"    : self = .yellow
-            case "green"     : self = .green
-            case "mint"      : self = .mint
-            case "teal"      : self = .teal
-            case "cyan"      : self = .cyan
-            case "blue"      : self = .blue
-            case "indigo"    : self = .indigo
-            case "purple"    : self = .purple
-            case "pink"      : self = .pink
-            case "brown"     : self = .brown
-            case "white"     : self = .white
-            case "gray"      : self = .gray
-            case "black"     : self = .black
-            case "primary"   : self = .primary
-            case "secondary" : self = .secondary
-            default          : self = .primary
+            case "accent": self = .accentColor
+            case "red": self = .red
+            case "orange": self = .orange
+            case "yellow": self = .yellow
+            case "green": self = .green
+            case "mint": self = .mint
+            case "teal": self = .teal
+            case "cyan": self = .cyan
+            case "blue": self = .blue
+            case "indigo": self = .indigo
+            case "purple": self = .purple
+            case "pink": self = .pink
+            case "brown": self = .brown
+            case "white": self = .white
+            case "gray": self = .gray
+            case "black": self = .black
+            case "primary": self = .primary
+            case "secondary": self = .secondary
+            default: self = .primary
         }
     }
 }

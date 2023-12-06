@@ -261,9 +261,10 @@
 			children = (
 				417BBA6F297A15A600E13A45 /* Package */,
 				CC2190532A7BCD3400269525 /* Extensions */,
+				CC6538122B204DE700482768 /* Command Line */,
 				CC21904C2A7BC3BC00269525 /* Functions */,
-				CC21905A2A7BD47800269525 /* Structs */,
-				CC21905B2A7BD4C300269525 /* Classes */,
+				CC21905A2A7BD47800269525 /* App Processing */,
+				CC21905B2A7BD4C300269525 /* Updatable Content */,
 				41C8259825F99AF90042DC50 /* Views */,
 				4154C30C25F782E900A3D373 /* extras */,
 				4154C2DD25F76BDB00A3D373 /* dialogApp.swift */,
@@ -410,8 +411,6 @@
 				CC2190512A7BCC3A00269525 /* Images.swift */,
 				41D81E7825F870A500D1F7E1 /* System.swift */,
 				CC21904A2A7B994A00269525 /* Preferences.swift */,
-				41D81E6B25F8209F00D1F7E1 /* CLOptions.swift */,
-				415934D726DB1B44009C9C3A /* ProcessCLOptions.swift */,
 				411FC34528E2DDFD003EA2C2 /* Notifications.swift */,
 			);
 			path = Functions;
@@ -430,25 +429,23 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
-		CC21905A2A7BD47800269525 /* Structs */ = {
+		CC21905A2A7BD47800269525 /* App Processing */ = {
 			isa = PBXGroup;
 			children = (
 				41D81E7025F845D200D1F7E1 /* AppState.swift */,
 				CC21905C2A7BD7D300269525 /* AppVariables.swift */,
-				CC21905E2A7BD7F200269525 /* CommandLineArguments.swift */,
-				41A44EB126F4C43A00FEE1AC /* HelpText.swift */,
 				CC9F8FEE2A5EC76400802A88 /* ImageProcessing.swift */,
 				41D6FE8426DB11BA0083BE61 /* jamfHelper.swift */,
 			);
-			path = Structs;
+			path = "App Processing";
 			sourceTree = "<group>";
 		};
-		CC21905B2A7BD4C300269525 /* Classes */ = {
+		CC21905B2A7BD4C300269525 /* Updatable Content */ = {
 			isa = PBXGroup;
 			children = (
 				417BD4342798FE38009AE34A /* DialogUpdatableContent.swift */,
 			);
-			path = Classes;
+			path = "Updatable Content";
 			sourceTree = "<group>";
 		};
 		CC2190602A7BDCB100269525 /* Localisations */ = {
@@ -457,6 +454,17 @@
 				41832B7428436B430062AA1F /* Localizable.strings */,
 			);
 			path = Localisations;
+			sourceTree = "<group>";
+		};
+		CC6538122B204DE700482768 /* Command Line */ = {
+			isa = PBXGroup;
+			children = (
+				415934D726DB1B44009C9C3A /* ProcessCLOptions.swift */,
+				41D81E6B25F8209F00D1F7E1 /* CLOptions.swift */,
+				CC21905E2A7BD7F200269525 /* CommandLineArguments.swift */,
+				41A44EB126F4C43A00FEE1AC /* HelpText.swift */,
+			);
+			path = "Command Line";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -887,7 +895,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 2.3.3;
+				MARKETING_VERSION = 2.3.4;
 				PRODUCT_BUNDLE_IDENTIFIER = au.csiro.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -916,7 +924,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 2.3.3;
+				MARKETING_VERSION = 2.3.4;
 				PRODUCT_BUNDLE_IDENTIFIER = au.csiro.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

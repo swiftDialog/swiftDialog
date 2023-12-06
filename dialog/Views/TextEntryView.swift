@@ -21,9 +21,9 @@ struct TextEntryView: View {
 
         self.observedData = observedDialogContent
         if !observedDialogContent.args.hideIcon.present { //} appArguments.hideIcon.present {
-            fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value)
+            fieldwidth = observedDialogContent.args.windowWidth.value.floatValue()
         } else {
-            fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value) - string2float(string: observedDialogContent.args.iconSize.value)
+            fieldwidth = observedDialogContent.args.windowWidth.value.floatValue() - observedDialogContent.args.iconSize.value.floatValue()
         }
         if observedDialogContent.args.textField.present {
             writeLog("Displaying text entry")

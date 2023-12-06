@@ -21,9 +21,9 @@ struct RadioView: View {
         self.observedData = observedDialogContent
 
         if !observedDialogContent.args.hideIcon.present {
-            fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value)
+            fieldwidth = observedDialogContent.args.windowWidth.value.floatValue()
         } else {
-            fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value) - string2float(string: observedDialogContent.args.iconSize.value)
+            fieldwidth = observedDialogContent.args.windowWidth.value.floatValue() - observedDialogContent.args.iconSize.value.floatValue()
         }
 
         var defaultOptions: [String] = []

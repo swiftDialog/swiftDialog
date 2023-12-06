@@ -27,7 +27,7 @@ struct ButtonView: View {
         self.observedData = observedDialogContent
 
         if observedDialogContent.args.timerBar.present {
-            progressSteps = string2float(string: observedDialogContent.args.timerBar.value)
+            progressSteps = observedDialogContent.args.timerBar.value.floatValue()
         }
 
         if observedDialogContent.args.button1ShellActionOption.present {

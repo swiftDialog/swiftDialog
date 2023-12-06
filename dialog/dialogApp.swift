@@ -54,7 +54,7 @@ struct dialogApp: App {
                     placeWindow(window,
                                 vertical: observedData.appProperties.windowPositionVertical,
                                 horozontal: observedData.appProperties.windowPositionHorozontal,
-                                offset: string2float(string: observedData.args.positionOffset.value))
+                                offset: observedData.args.positionOffset.value.floatValue())
                     observedData.mainWindow = window
                 }
             })

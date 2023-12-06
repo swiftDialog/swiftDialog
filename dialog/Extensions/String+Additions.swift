@@ -64,6 +64,12 @@ extension String {
     }
 }
 
+extension String {
+    func floatValue(defaultValue: CGFloat = 0) -> CGFloat {
+        return CGFloat(truncating: Self.numberFormatter.number(from: self) ?? defaultValue as NSNumber)
+    }
+}
+
 extension CGFloat {
     var stringValue: String {
         return "\(self)"
