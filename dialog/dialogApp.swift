@@ -121,25 +121,9 @@ struct dialogApp: App {
             appvars.debugBorderColour = Color.green
 
             writeLog("Window Height = \(appvars.windowHeight): Window Width = \(appvars.windowWidth)", logLevel: .debug)
-            /*
-            print("\nApplication State Variables")
-            let mirrored_appvars = Mirror(reflecting: appvars)
-            for (_, attr) in mirrored_appvars.children.enumerated() {
-                if let propertyName = attr.label as String? {
-                print("  \(propertyName) = \(attr.value)")
-              }
-            }
-            print("\nApplication Command Line Options")
-            let mirrored_appArguments = Mirror(reflecting: appArguments)
-            for (_, attr) in mirrored_appArguments.children.enumerated() {
-                if let propertyName = attr.label as String? {
-                print("  \(propertyName) = \(attr.value)")
-              }
-            }
-            */
         }
-        writeLog("width: \(appvars.windowWidth), height: \(appvars.windowHeight)", logLevel: .debug)
 
+        // Create main dialog state object
         observedData = DialogUpdatableContent()
 
         if appArguments.fullScreenWindow.present {
@@ -161,9 +145,9 @@ struct dialogApp: App {
         WindowGroup {
             ZStack {
                 WindowAccessor {window in
-                    window?.standardWindowButton(.closeButton)?.isHidden = true //hides the red close button
-                    window?.standardWindowButton(.miniaturizeButton)?.isHidden = true //hides the yellow miniaturize button
-                    window?.standardWindowButton(.zoomButton)?.isHidden = true //this removes the green zoom button
+                    window?.standardWindowButton(.closeButton)?.isHidden = !appArguments.windowButtonsEnabled.present
+                    window?.standardWindowButton(.miniaturizeButton)?.isHidden = !appArguments.windowButtonsEnabled.present
+                    window?.standardWindowButton(.zoomButton)?.isHidden = !appArguments.windowButtonsEnabled.present
                     window?.isMovable = appArguments.movableWindow.present
                     window?.isMovableByWindowBackground = true
                     window?.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]

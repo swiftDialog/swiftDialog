@@ -903,4 +903,5 @@ func processCLOptionValues() {
     appArguments.jamfHelperMode.evaluate()
     appArguments.debug.evaluate()
     appArguments.getVersion.evaluate()
+    appArguments.windowButtonsEnabled.evaluate()
 }

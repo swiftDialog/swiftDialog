@@ -793,6 +793,14 @@ struct SDHelp {
         Capitol letters can be used in which case command+shift+<key> will be required
 """
 
+        argument.windowButtonsEnabled.helpShort = "Enables window buttons"
+        argument.windowButtonsEnabled.helpUsage = ""
+        argument.windowButtonsEnabled.helpLong = """
+        Enables window buttons (close, minimize, fullscreen)
+
+        Close and Minimize behave as usual. Fullscreen is not used but shown anyway for completeness.
+"""
+
         argument.jamfHelperMode.helpShort = "Enable jamfHelper mode"
         argument.jamfHelperMode.helpUsage = ""
         argument.jamfHelperMode.helpLong = """
