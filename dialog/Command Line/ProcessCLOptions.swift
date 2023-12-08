@@ -804,6 +804,7 @@ func processCLOptionValues() {
     if appArguments.bannerTitle.present {
         appArguments.titleOption.value = appArguments.bannerTitle.value
     }
+    appArguments.bannerHeight.evaluate(json: json)
 
     // Buttons
     appArguments.button1TextOption.evaluate(json: json, defaultValue: appvars.button1Default)

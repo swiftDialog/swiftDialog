@@ -57,6 +57,7 @@ struct CommandLineArguments {
     var bannerImage              = CommandlineArgument(long: "bannerimage", short: "n")
     var bannerTitle              = CommandlineArgument(long: "bannertitle")
     var bannerText               = CommandlineArgument(long: "bannertext")
+    var bannerHeight             = CommandlineArgument(long: "bannerheight")
     var button1TextOption        = CommandlineArgument(long: "button1text")
     var button1ActionOption      = CommandlineArgument(long: "button1action")
     var button1ShellActionOption = CommandlineArgument(long: "button1shellaction",short: "")

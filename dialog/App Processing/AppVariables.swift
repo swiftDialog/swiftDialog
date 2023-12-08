@@ -47,6 +47,8 @@ struct AppVariables {
     var windowWidth                     = CGFloat(820)      // set default dialog width
     var windowHeight                    = CGFloat(380)      // set default dialog height
 
+    var windowBackgroundColour          = Color.clear
+
     // Content padding
     let sidePadding                     = CGFloat(15)
     let topPadding                      = CGFloat(10)

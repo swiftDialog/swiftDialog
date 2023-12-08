@@ -70,7 +70,8 @@ extension Color {
             case "black": self = .black
             case "primary": self = .primary
             case "secondary": self = .secondary
-            default: self = .primary
+            case "clear": self = .clear
+            default: self = .clear
         }
     }
 }

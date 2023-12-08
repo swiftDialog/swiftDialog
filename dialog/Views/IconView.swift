@@ -192,9 +192,6 @@ struct IconView: View {
         if appArguments.warningIcon.present || messageUserImagePath == "warning" {
             writeLog("Using default warning icon")
             builtInIconName = "exclamationmark.octagon.fill"
-            builtInIconFill = "octagon.fill" //does not have multicolour sf symbol so we have to make out own using a fill layer
-            builtInIconColour = Color.red
-            iconRenderingMode = Image.TemplateRenderingMode.original
             builtInIconPresent = true
         } else if appArguments.cautionIcon.present || messageUserImagePath == "caution" {
             writeLog("Using default caution icon")

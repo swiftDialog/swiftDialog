@@ -51,9 +51,16 @@ struct ContentView: View {
     var body: some View {
 
         ZStack {
+            //Rectangle()
+            //    .fill(
+            //        LinearGradient(gradient: Gradient(colors: [.teal]), startPoint: .top, endPoint: .bottom)
+             // )
+            //Color(.red)
+            //    .opacity(0.5)
+            //    .background(ignoresSafeAreaEdges: .all)
             if observedData.args.watermarkImage.present {
                     WatermarkView(observedContent: observedData)
-                    .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
+                    //.frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
             }
 
             // this stack controls the main view. Consists of a VStack containing all the content, and a HStack positioned at the bottom of the display area
