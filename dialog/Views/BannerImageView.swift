@@ -14,8 +14,8 @@ struct BannerImageView: View {
 
     //var bannerHeight: CGFloat = 0
     var bannerWidth: CGFloat = 0
-    //var bannerHeight: CGFloat = 130
     var maxBannerHeight: CGFloat = 130
+    var minBannerHeight: CGFloat = 100
 
     let blurRadius: CGFloat = 3
     let opacity: CGFloat = 0.5
@@ -29,6 +29,7 @@ struct BannerImageView: View {
         bannerWidth = observedDialogContent.appProperties.windowWidth
         if observedDialogContent.args.bannerHeight.present {
             maxBannerHeight = observedDialogContent.args.bannerHeight.value.floatValue()
+            minBannerHeight = maxBannerHeight
         }
     }
 
@@ -45,7 +46,7 @@ struct BannerImageView: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(width: bannerWidth, alignment: .topLeading)
                     .frame(maxHeight: maxBannerHeight)
-                    .frame(minHeight: 100)
+                    .frame(minHeight: minBannerHeight)
                     .clipped()
             }
             if observedData.args.bannerTitle.present {
