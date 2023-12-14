@@ -15,26 +15,41 @@ import SystemConfiguration
 var background = BlurWindowController()
 
 // Log Stuff
-let bundleID = Bundle.main.bundleIdentifier ?? "au.bartreardon.dialog"
+let bundleID = Bundle.main.bundleIdentifier ?? "au.csiro.dialog"
 let osLog = OSLog(subsystem: bundleID, category: "main")
 
 // AppDelegate and extension used for notifications
-class AppDelegate: NSObject, NSApplicationDelegate {
-    func applicationDidFinishLaunching(_ aNotification: Notification) {
+class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                didReceive response: UNNotificationResponse,
+                withCompletionHandler completionHandler:
+                                @escaping () -> Void) {
+        writeLog("reading notification", logLevel: .debug)
+        if response.notification.request.content.categoryIdentifier == "SD_NOTIFICATION" {
+            processNotification(response: response)
+        } else {
+            writeLog("unknown notification type", logLevel: .debug)
+        }
+
+        // call the completion handler when done.
+        completionHandler()
+        // quit dialog since we dont need to show anything
+        quitDialog(exitCode: appvars.exitNow.code)
+    }
+
+    func applicationWillFinishLaunching(_ notification: Notification) {
         UNUserNotificationCenter.current().delegate = self
+
     }
 
-    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        return true
-    }
-}
-
-extension AppDelegate: UNUserNotificationCenterDelegate {
-    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        return completionHandler([.list, .sound])
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        //if CommandLine.arguments.count == 1 {
+        //    SDHelp(arguments: appArguments).printHelpShort()
+        //    quitDialog(exitCode: appvars.exitNow.code)
+        //}
     }
 }
-
 
 @available(OSX 12.0, *)
 @main
@@ -64,7 +79,10 @@ struct dialogApp: App {
     init () {
 
         writeLog("Dialog Launched")
-
+        for argument in CommandLine.arguments {
+            writeLog(argument, logLevel: .info)
+        }
+        checkNotificationAuthorisation()
         // Ensure the singleton NSApplication exists.
         // required for correct determination of screen dimentions for the screen in use in multi screen scenarios
         _ = NSApplication.shared
@@ -78,16 +96,32 @@ struct dialogApp: App {
         // get all the command line option values
         processCLOptionValues()
 
-        // check for notification
+        // check if we are sending a notification
         if appArguments.notification.present {
             writeLog("Sending a notification")
+            /*
             var notificationIcon = ""
             if appArguments.iconOption.present {
                 notificationIcon = appArguments.iconOption.value
             }
-            sendNotification(title: appArguments.titleOption.value, subtitle: appArguments.subTitleOption.value, message: appArguments.messageOption.value, image: notificationIcon)
-            writeLog("Notification sent")
+             */
+            var acceptActionLabel: String = ""
+            var declineActionLabel: String = ""
+            if appArguments.button1TextOption.present {
+                acceptActionLabel = appArguments.button1TextOption.value
+            }
+            if appArguments.button2TextOption.present {
+                declineActionLabel = appArguments.button2TextOption.value
+            }
+            sendNotification(title: appArguments.titleOption.value,
+                             subtitle: appArguments.subTitleOption.value,
+                             message: appArguments.messageOption.value,
+                             acceptString: acceptActionLabel,
+                             acceptAction: appArguments.button1ActionOption.value,
+                             declineString: declineActionLabel,
+                             declineAction: appArguments.button2ActionOption.value)
             usleep(100000)
+            writeLog("Notification sent")
             quitDialog(exitCode: 0)
         }
 
