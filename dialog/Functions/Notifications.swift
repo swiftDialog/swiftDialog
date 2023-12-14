@@ -123,7 +123,9 @@ func processNotification(response: UNNotificationResponse) {
 
 func notificationAction(_ action: String) {
     writeLog("processing notification action \(action)")
-    if action != "" {
-            openSpecifiedURL(urlToOpen: action)
+    if action.contains("://") {
+        openSpecifiedURL(urlToOpen: action)
+    } else {
+        _ = shell(action)
     }
 }
