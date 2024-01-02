@@ -82,6 +82,7 @@ struct CheckBoxes {
     var icon: String = ""
     var checked: Bool = false
     var disabled: Bool = false
+    var enablesButton1: Bool = false
 }
 
 struct ListItems: Codable {

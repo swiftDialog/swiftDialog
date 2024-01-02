@@ -306,8 +306,9 @@ func processCLOptions(json: JSON = getJSON()) {
                 let cbChecked = json[appArguments.checkbox.long][index]["checked"].boolValue
                 let cbDisabled = json[appArguments.checkbox.long][index]["disabled"].boolValue
                 let cbIcon = json[appArguments.checkbox.long][index]["icon"].stringValue
+                let cbButtonEnable = json[appArguments.checkbox.long][index]["enableButton1"].boolValue
 
-                appvars.checkboxArray.append(CheckBoxes(label: cbLabel, icon: cbIcon, checked: cbChecked, disabled: cbDisabled))
+                appvars.checkboxArray.append(CheckBoxes(label: cbLabel, icon: cbIcon, checked: cbChecked, disabled: cbDisabled, enablesButton1: cbButtonEnable))
             }
         } else {
             for checkboxes in CLOptionMultiOptions(optionName: appArguments.checkbox.long) {
@@ -316,6 +317,7 @@ func processCLOptions(json: JSON = getJSON()) {
                 var icon: String = ""
                 var checked: Bool = false
                 var disabled: Bool = false
+                var enableButton1: Bool = false
                 for item in items {
                     var itemKeyValuePair = item.split(separator: "=", maxSplits: 1)
                     for _ in itemKeyValuePair.count...2 {
@@ -332,11 +334,13 @@ func processCLOptions(json: JSON = getJSON()) {
                         checked = true
                     case "disabled":
                         disabled = true
+                    case "enablebutton1":
+                        enableButton1 = true
                     default:
                         label = itemName
                     }
                 }
-                appvars.checkboxArray.append(CheckBoxes(label: label, icon: icon, checked: checked, disabled: disabled))
+                appvars.checkboxArray.append(CheckBoxes(label: label, icon: icon, checked: checked, disabled: disabled, enablesButton1: enableButton1))
             }
         }
                                 writeLog("checkboxOptionsArray : \(appvars.checkboxArray)")
