@@ -909,4 +909,9 @@ func processCLOptionValues() {
     appArguments.debug.evaluate()
     appArguments.getVersion.evaluate()
     appArguments.windowButtonsEnabled.evaluate()
+    appArguments.hideDefaultKeyboardAction.evaluate()
+    if appArguments.hideDefaultKeyboardAction.present {
+        appvars.button1DefaultAction.modifiers = [.command, .shift]
+        appvars.button2DefaultAction.modifiers = [.command, .shift]
+    }
 }

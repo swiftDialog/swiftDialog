@@ -140,4 +140,5 @@ struct CommandLineArguments {
     var miniMode                 = CommandlineArgument(long: "mini", isbool: true)
     var eulaMode                 = CommandlineArgument(long: "eula", isbool: true)
     var windowButtonsEnabled     = CommandlineArgument(long: "windowbuttons", isbool: true)
+    var hideDefaultKeyboardAction = CommandlineArgument(long: "hidedefaultkeyboardaction", isbool: true)
 }

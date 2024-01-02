@@ -34,7 +34,8 @@ struct AppVariables {
     let button2Default                  = String("button-cancel".localized)
     let buttonInfoDefault               = String("button-more-info".localized)
     let buttonInfoActionDefault         = String("")
-    let button1DefaultAction            = KeyboardShortcut.defaultAction
+    var button1DefaultAction            = KeyboardShortcut.defaultAction
+    var button2DefaultAction            = KeyboardShortcut.cancelAction
 
     var helpButtonHoverText             = String("help-hover".localized)
 

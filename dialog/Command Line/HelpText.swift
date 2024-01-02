@@ -789,8 +789,9 @@ struct SDHelp {
         argument.quitKey.helpShort = "Set dialog quit key"
         argument.quitKey.helpUsage = "<char>"
         argument.quitKey.helpLong = """
-        Use the specified character as the command+ key combination for quitting instead of "q".
-        Capitol letters can be used in which case command+shift+<key> will be required
+        Use the specified character as the Command ⇧ + <key> combination for quitting instead of "q".
+
+        Capitol letters can be used in which case Command ⇧ + Shift ⇧ + <key> will be required
 """
 
         argument.windowButtonsEnabled.helpShort = "Enables window buttons"
@@ -799,6 +800,16 @@ struct SDHelp {
         Enables window buttons (close, minimize, fullscreen)
 
         Close and Minimize behave as usual. Fullscreen is not used but shown anyway for completeness.
+"""
+
+        argument.hideDefaultKeyboardAction.helpShort = "Hides the default behaviour of Return ↵ and Esc ⎋ keys"
+        argument.hideDefaultKeyboardAction.helpUsage = ""
+        argument.hideDefaultKeyboardAction.helpLong = """
+        When specified, the behaviour to action the default button (Return ↵) or secondary button (Esc ⎋) will be modified
+        to require Command ⌘ + Shift ⇧ in order to action.
+
+        This effectively disables unintentional activation of either of these buttons. They can still be activated
+        with the keyboard, but it is harder to do so without intent.
 """
 
         argument.jamfHelperMode.helpShort = "Enable jamfHelper mode"
