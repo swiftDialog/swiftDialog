@@ -226,7 +226,8 @@ func processCLOptions(json: JSON = getJSON()) {
                         required: Bool(json[appArguments.textField.long][index]["required"].boolValue),
                         secure: Bool(json[appArguments.textField.long][index]["secure"].boolValue),
                         title: String(json[appArguments.textField.long][index]["title"].stringValue),
-                        value: String(json[appArguments.textField.long][index]["value"].stringValue))
+                        value: String(json[appArguments.textField.long][index]["value"].stringValue),
+                        isDate: Bool(json[appArguments.textField.long][index]["isdate"].boolValue))
                     )
                 }
             }
@@ -244,6 +245,7 @@ func processCLOptions(json: JSON = getJSON()) {
                 var fieldSelectType: String = ""
                 var fieldTitle: String = ""
                 var fieldValue: String = ""
+                var fieldIsDate: Bool = false
                 if items.count > 0 {
                     fieldTitle = items[0]
                     if items.count > 1 {
@@ -273,6 +275,8 @@ func processCLOptions(json: JSON = getJSON()) {
                                 fieldSecure = true
                             case "value":
                                 fieldValue = items[index+1]
+                            case "isdate":
+                                fieldIsDate = true
                             default: ()
                             }
                         }
@@ -289,7 +293,8 @@ func processCLOptions(json: JSON = getJSON()) {
                             required: fieldRequire,
                             secure: fieldSecure,
                             title: fieldTitle,
-                            value: fieldValue))
+                            value: fieldValue,
+                            isDate: fieldIsDate))
             }
         }
         for index in 0..<userInputState.textFields.count where userInputState.textFields[index].required {

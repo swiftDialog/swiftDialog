@@ -12,8 +12,11 @@ struct TextEntryView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
     @State var textfieldContent: [TextFieldState]
+    @State var datepickerID: [Int]
 
     var fieldwidth: CGFloat = 0
+
+    let dateFormatter = DateFormatter()
 
     init(observedDialogContent: DialogUpdatableContent, textfieldContent: [TextFieldState]) {
         // we take in textfieldContent but that just populates the State variable
@@ -30,6 +33,7 @@ struct TextEntryView: View {
             writeLog("\(userInputState.textFields.count) textfields detected")
         }
         self.textfieldContent = textfieldContent
+        datepickerID = Array(0...textfieldContent.count-1)
     }
 
     var body: some View {
@@ -114,7 +118,17 @@ struct TextEntryView: View {
                                         .onChange(of: textfieldContent[index].value, perform: { textContent in
                                             userInputState.textFields[index].value = textContent
                                         })
-
+                                    if textfieldContent[index].isDate {
+                                        DatePicker("", selection: $textfieldContent[index].date, displayedComponents: [.date])
+                                            .onChange(of: textfieldContent[index].date, perform: { dateContent in
+                                                dateFormatter.timeStyle = .none
+                                                dateFormatter.dateStyle = .short
+                                                textfieldContent[index].value = dateFormatter.string(from: dateContent)
+                                                datepickerID[index] += 1 // stupid hack to make the picker disappear when a date is selected
+                                            })
+                                            .labelsHidden()
+                                            .id(datepickerID[index])
+                                    }
                                 }
                             }
                             .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
