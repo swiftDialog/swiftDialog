@@ -573,6 +573,8 @@ class DialogUpdatableContent: ObservableObject {
 
     @Published var blurredScreen = [BlurWindowController]()
 
+    @Published var updateView: Bool = true
+
     var status: StatusState
 
     let commandFilePermissions: [FileAttributeKey: Any] = [FileAttributeKey.posixPermissions: 0o666]

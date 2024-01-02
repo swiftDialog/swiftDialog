@@ -10,7 +10,7 @@ import SwiftUI
 
 struct AppVariables {
 
-    var cliversion                      = "2.3.4"
+    var cliversion                      = "2.4.0"
     let launchTime                      = Date.now
     // message default strings
     let titleDefault                    = String("default-title".localized)
