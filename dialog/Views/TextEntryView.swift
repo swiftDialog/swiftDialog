@@ -33,7 +33,7 @@ struct TextEntryView: View {
             writeLog("\(userInputState.textFields.count) textfields detected")
         }
         self.textfieldContent = textfieldContent
-        datepickerID = Array(0...textfieldContent.count-1)
+        datepickerID = Array(0...textfieldContent.count)
     }
 
     var body: some View {
