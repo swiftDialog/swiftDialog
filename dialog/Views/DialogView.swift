@@ -19,6 +19,8 @@ struct DialogView: View {
     var showSideBar: Bool = true
     var showInfoBox: Bool = false
 
+    var iconPadding: CGFloat = 10
+
     init(observedDialogContent: DialogUpdatableContent) {
         if !observedDialogContent.args.iconOption.present { //} appvars.iconIsHidden {
             writeLog("Icon is hidden")
@@ -43,9 +45,10 @@ struct DialogView: View {
                                 if showSideBar {
                                     IconView(image: observedData.args.iconOption.value,
                                              overlay: observedData.args.overlayIconOption.value,
-                                             alpha: observedData.iconAlpha, padding: 15)
+                                             alpha: observedData.iconAlpha, padding: iconPadding)
                                     .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
                                     .frame(width: iconDisplayWidth, alignment: .top)
+                                    //.border(.red)
                                 }
                                 if showInfoBox {
                                     InfoBoxView(observedData: observedData)

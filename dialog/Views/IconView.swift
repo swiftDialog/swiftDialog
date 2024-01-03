@@ -117,10 +117,15 @@ struct IconView: View {
             imgFromText = true
         }
 
+        if messageUserImagePath.lowercased() == "computer" {
+            framePadding = 0
+        }
+
         if messageUserImagePath.lowercased().hasPrefix("sf=") {
             writeLog("Image is SF Symbol")
             sfSymbolPresent = true
             builtInIconPresent = true
+            framePadding+=10
 
             var SFValues = messageUserImagePath.split(usingRegex: argRegex)
             SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
@@ -249,6 +254,7 @@ struct IconView: View {
                         } else if messageUserImagePath == "computer" {
                             Image(nsImage: NSImage(named: NSImage.computerName) ?? NSImage())
                                 .resizable()
+
                         } else {
                             Image(systemName: builtInIconName)
                                 .resizable()
