@@ -798,7 +798,7 @@ func processCLOptionValues() {
 
     // icon
     appArguments.iconOption.evaluate(json: json, defaultValue: "default")
-    appArguments.iconSize.evaluate(json: json, defaultValue: "\(appvars.iconWidth)")
+    appArguments.iconSize.evaluate(json: json, defaultValue: appvars.iconWidth.stringValue)
     appArguments.iconAlpha.evaluate(json: json, defaultValue: "1.0")
     appArguments.iconAccessabilityLabel.evaluate(json: json, defaultValue: "Dialog Icon")
     appArguments.overlayIconOption.evaluate(json: json)
