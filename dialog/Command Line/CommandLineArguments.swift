@@ -18,7 +18,7 @@ struct CommandlineArgument {
     var present: Bool = false
     var isbool: Bool = false
 
-    public mutating func evaluate(json: JSON = "{}", defaultValue: String = "") {
+    public mutating func evaluate(json: JSON = "{}", defaultValue: Any = "") {
         self.present = json[self.long].exists() || CLOptionPresent(optionName: self)
         if !self.isbool && json[self.long].bool ?? false {
             self.present = false
@@ -32,7 +32,13 @@ struct CommandlineArgument {
             }
         }
         if self.value.isEmpty {
-            self.value = defaultValue
+            if let floatValue = defaultValue as? CGFloat {
+                self.value = floatValue.stringValue
+            } else if let stringValue = defaultValue as? String {
+                self.value = stringValue
+            } else {
+                self.value = defaultValue as? String ?? ""
+            }
         }
     }
 }
