@@ -47,6 +47,7 @@ struct TextFieldState {
     var prompt: String     = ""
     var regex: String      = ""
     var regexError: String = ""
+    var backgroundColour: Color = .clear
     var required: Bool     = false
     var secure: Bool       = false
     var title: String

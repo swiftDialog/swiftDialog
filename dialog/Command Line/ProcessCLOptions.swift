@@ -836,6 +836,7 @@ func processCLOptionValues() {
     if selectItemsArg.present { appArguments.dropdownValues = selectItemsArg }
     appArguments.dropdownDefault.evaluate(json: json)
     appArguments.textField.evaluate(json: json)
+    appArguments.textFieldLiveValidation.evaluate(json: json)
     appArguments.checkbox.evaluate(json: json)
     appArguments.checkboxStyle.evaluate(json: json)
 

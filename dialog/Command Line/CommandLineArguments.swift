@@ -79,6 +79,7 @@ struct CommandLineArguments {
     var titleFont                = CommandlineArgument(long: "titlefont")
     var messageFont              = CommandlineArgument(long: "messagefont")
     var textField                = CommandlineArgument(long: "textfield")
+    var textFieldLiveValidation  = CommandlineArgument(long: "textfieldlivevalidation", isbool: true)
     var checkbox                 = CommandlineArgument(long: "checkbox")
     var checkboxStyle            = CommandlineArgument(long: "checkboxstyle")
     var timerBar                 = CommandlineArgument(long: "timer")

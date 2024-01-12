@@ -15,6 +15,7 @@ struct TextEntryView: View {
     @State var datepickerID: [Int]
 
     var fieldwidth: CGFloat = 0
+    var textFieldValidationOpacity: CGFloat = 0
 
     let dateFormatter = DateFormatter()
 
@@ -34,6 +35,10 @@ struct TextEntryView: View {
         }
         self.textfieldContent = textfieldContent
         datepickerID = Array(0...textfieldContent.count)
+
+        if observedDialogContent.args.textFieldLiveValidation.present {
+            textFieldValidationOpacity = 0.1
+        }
     }
 
     var body: some View {
@@ -117,7 +122,20 @@ struct TextEntryView: View {
                                     TextField(textfieldContent[index].prompt, text: $textfieldContent[index].value)
                                         .onChange(of: textfieldContent[index].value, perform: { textContent in
                                             userInputState.textFields[index].value = textContent
+                                            if textfieldContent[index].regex != "" && observedData.args.textFieldLiveValidation.present {
+                                                if checkRegexPattern(regexPattern: textfieldContent[index].regex, textToValidate: textfieldContent[index].value) {
+                                                    textfieldContent[index].backgroundColour = Color.green
+                                                } else {
+                                                    textfieldContent[index].backgroundColour = Color.red
+                                                }
+                                                if textfieldContent[index].value == "" {
+                                                    textfieldContent[index].backgroundColour = Color.clear
+                                                }
+                                            }
                                         })
+                                        //.background(textfieldContent[index].backgroundColour)
+
+
                                     if textfieldContent[index].isDate {
                                         DatePicker("", selection: $textfieldContent[index].date, displayedComponents: [.date])
                                             .onChange(of: textfieldContent[index].date, perform: { dateContent in
@@ -140,6 +158,7 @@ struct TextEntryView: View {
                                             .repeatCount(3, autoreverses: true),
                                             value: observedData.showSheet
                                         )
+                                            .background(textfieldContent[index].backgroundColour.opacity(textFieldValidationOpacity))
                                      )
                         }
                     }
