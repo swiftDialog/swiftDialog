@@ -94,6 +94,11 @@ struct ListView: View {
                                                 .font(.system(size: rowFontSize))
                                                 .id(index)
                                             Spacer()
+                                            if userInputState.listItems[index].statusText != "" {
+                                                Text(userInputState.listItems[index].statusText)
+                                                    .font(.system(size: rowFontSize))
+                                                    .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
+                                            }
                                         }
                                         if subtitlePresent {
                                             HStack {
@@ -108,11 +113,7 @@ struct ListView: View {
                                     }
                                     Spacer()
                                     HStack {
-                                        if userInputState.listItems[index].statusText != "" {
-                                            Text(userInputState.listItems[index].statusText)
-                                                .font(.system(size: rowFontSize))
-                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
-                                        }
+
                                         switch userInputState.listItems[index].statusIcon {
                                         case "progress":
                                             ProgressView("", value: userInputState.listItems[index].progress, total: 100)
