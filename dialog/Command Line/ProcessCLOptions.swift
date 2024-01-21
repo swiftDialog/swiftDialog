@@ -748,6 +748,12 @@ func processCLOptions(json: JSON = getJSON()) {
         }
     }
 
+    if appArguments.windowResizable.present {
+        appvars.windowWidth = .infinity
+        appvars.windowHeight = .infinity
+        appArguments.movableWindow.present = true
+    }
+
     //if info button is present but no button action then default to quit on info
     if !appArguments.buttonInfoActionOption.present {
         writeLog("\(appArguments.quitOnInfo.long) enabled")
@@ -935,6 +941,7 @@ func processCLOptionValues() {
     appArguments.miniMode.evaluate(json: json)
     appArguments.notification.evaluate(json: json)
     appArguments.eulaMode.evaluate(json: json)
+    appArguments.windowResizable.evaluate(json: json)
 
     // command line only options
     appArguments.listFonts.evaluate()

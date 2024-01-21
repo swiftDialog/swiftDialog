@@ -795,11 +795,13 @@ struct SDHelp {
 """
 
         argument.windowButtonsEnabled.helpShort = "Enables window buttons"
-        argument.windowButtonsEnabled.helpUsage = ""
+        argument.windowButtonsEnabled.helpUsage = "[close,min,max]"
         argument.windowButtonsEnabled.helpLong = """
-        Enables window buttons (close, minimize, fullscreen)
+        Enables window buttons, close, minimize and maximise(zoom)
 
-        Close and Minimize behave as usual. Fullscreen is not used but shown anyway for completeness.
+        You can optionally specify one or more of "close", "min" or "max" as comma seperated values.
+        e.g. to enable only the min and max(zoom) buttons:
+            --\(argument.windowButtonsEnabled.long) min,max
 """
 
         argument.hideDefaultKeyboardAction.helpShort = "Hides the default behaviour of Return ↵ and Esc ⎋ keys"
@@ -851,6 +853,14 @@ struct SDHelp {
 
         Equavelent of running:
           echo -n <string> | shasum -a 256
+"""
+
+        argument.windowResizable.helpShort = "Enable the dialog window to be resizable"
+        argument.windowResizable.helpUsage = ""
+        argument.windowResizable.helpLong = """
+        Enables the dialog window to be resizable.
+
+        This option also implies the --\(argument.movableWindow.long) flag
 """
 
         argument.getVersion.helpShort = "Print version string"

@@ -59,12 +59,10 @@ struct ListView: View {
             default: ()
             }
         }
-        for item in userInputState.listItems {
-            if item.subTitle != "" {
-                rowHeight += 25
-                subtitlePresent = true
-                break
-            }
+        for item in userInputState.listItems where item.subTitle != "" {
+            rowHeight += 25
+            subtitlePresent = true
+            break
         }
     }
 
