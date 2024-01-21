@@ -726,6 +726,28 @@ func processCLOptions(json: JSON = getJSON()) {
         writeLog("bigWindow.present")
     }
 
+    if appArguments.windowButtonsEnabled.present {
+        if appArguments.windowButtonsEnabled.value != "" {
+            // Reset default state to all false
+            appvars.windowCloseEnabled = false
+            appvars.windowMinimiseEnabled = false
+            appvars.windowMaximiseEnabled = false
+
+            let enabledStates = appArguments.windowButtonsEnabled.value.components(separatedBy: ",")
+            for state in enabledStates {
+                switch state.lowercased() {
+                case "min":
+                    appvars.windowMinimiseEnabled = true
+                case "max":
+                    appvars.windowMaximiseEnabled = true
+                case "close":
+                    appvars.windowCloseEnabled = true
+                default: ()
+                }
+            }
+        }
+    }
+
     //if info button is present but no button action then default to quit on info
     if !appArguments.buttonInfoActionOption.present {
         writeLog("\(appArguments.quitOnInfo.long) enabled")

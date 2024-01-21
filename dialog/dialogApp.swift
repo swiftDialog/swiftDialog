@@ -49,6 +49,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         //    quitDialog(exitCode: appvars.exitNow.code)
         //}
     }
+
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+            return true
+        }
 }
 
 @available(OSX 12.0, *)
@@ -182,6 +186,9 @@ struct dialogApp: App {
                     window?.standardWindowButton(.closeButton)?.isHidden = !appArguments.windowButtonsEnabled.present
                     window?.standardWindowButton(.miniaturizeButton)?.isHidden = !appArguments.windowButtonsEnabled.present
                     window?.standardWindowButton(.zoomButton)?.isHidden = !appArguments.windowButtonsEnabled.present
+                    window?.standardWindowButton(.closeButton)?.isEnabled = observedData.appProperties.windowCloseEnabled
+                    window?.standardWindowButton(.miniaturizeButton)?.isEnabled = observedData.appProperties.windowMinimiseEnabled
+                    window?.standardWindowButton(.zoomButton)?.isEnabled = observedData.appProperties.windowMaximiseEnabled
                     window?.isMovable = appArguments.movableWindow.present
                     window?.isMovableByWindowBackground = true
                     window?.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]

@@ -67,6 +67,10 @@ struct AppVariables {
     var windowPositionHorozontal        = NSWindow.Position.Horizontal.center
     var windowPositionOffset            = CGFloat(16)
 
+    var windowCloseEnabled              = Bool(true)
+    var windowMinimiseEnabled           = Bool(true)
+    var windowMaximiseEnabled           = Bool(true)
+
     var iconWidth                      = CGFloat(150)      // set default image area width
     var iconHeight                     = CGFloat(260)      // set default image area height
     var titleHeight                     = CGFloat(50)
