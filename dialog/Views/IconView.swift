@@ -39,6 +39,7 @@ struct IconView: View {
     var sfSymbolColour2: Color = Color.secondary
     var sfSymbolPresent: Bool = false
     var sfSymbolAnimation: String = ""
+    var sfSymbolPadding: Bool = true
 
     var sfGradientPresent: Bool = false
     var sfPalettePresent: Bool = false
@@ -54,7 +55,7 @@ struct IconView: View {
 
     let argRegex = String("(,? ?[a-zA-Z1-9]+=|(,\\s?editor)|(,\\s?fileselect))|(,\\s?passwordfill)|(,\\s?required)|(,\\s?secure)")
 
-    init(image: String = "", overlay: String = "", alpha: Double = 1.0, padding: Double = 0) {
+    init(image: String = "", overlay: String = "", alpha: Double = 1.0, padding: Double = 0, sfPaddingEnabled: Bool = true) {
         writeLog("Displaying icon image \(image), alpha \(alpha)")
         if !overlay.isEmpty {
             writeLog("With overlay \(overlay)")
@@ -64,6 +65,7 @@ struct IconView: View {
         iconOverlay = overlay
 
         framePadding = padding
+        sfSymbolPadding = sfPaddingEnabled
 
         if overlay != "" {
             mainImageScale = mainImageWithOverlayScale
@@ -125,7 +127,9 @@ struct IconView: View {
             writeLog("Image is SF Symbol")
             sfSymbolPresent = true
             builtInIconPresent = true
-            framePadding+=10
+            if sfSymbolPadding {
+                framePadding+=10
+            }
 
             var SFValues = messageUserImagePath.split(usingRegex: argRegex)
             SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
