@@ -388,6 +388,7 @@ class FileReader {
             // list item status
             case "\(observedData.args.listItem.long):":
                 var title: String = ""
+                var subtitle: String = ""
                 var icon: String = ""
                 var statusText: String = ""
                 var statusIcon: String = ""
@@ -396,6 +397,7 @@ class FileReader {
                 var deleteRow: Bool = false
                 var addRow: Bool = false
 
+                var subTitleIsSet: Bool = false
                 var iconIsSet: Bool = false
                 var statusIsSet: Bool = false
                 var statusTextIsSet: Bool = false
@@ -437,6 +439,9 @@ class FileReader {
                                 }
                             case "title":
                                 title = action[1].trimmingCharacters(in: .whitespaces)
+                            case "subtitle":
+                                subtitle = action[1].trimmingCharacters(in: .whitespaces)
+                                subTitleIsSet = true
                             case "icon":
                                 icon = action[1].trimmingCharacters(in: .whitespaces)
                                 iconIsSet = true
@@ -466,6 +471,7 @@ class FileReader {
                             userInputState.listItems.remove(at: row)
                             writeLog("deleted row at index \(row)")
                         } else {
+                            if subTitleIsSet { userInputState.listItems[row].subTitle = subtitle }
                             if iconIsSet { userInputState.listItems[row].icon = icon }
                             if statusIsSet { userInputState.listItems[row].statusIcon = statusIcon }
                             if statusTextIsSet { userInputState.listItems[row].statusText = statusText }
@@ -480,8 +486,8 @@ class FileReader {
 
                     // add to the list items array
                     if addRow {
-                        userInputState.listItems.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon, progress: listProgressValue))
-                        writeLog("row added with \(title) \(icon) \(statusText) \(statusIcon)")
+                        userInputState.listItems.append(ListItems(title: title, subTitle: subtitle, icon: icon, statusText: statusText, statusIcon: statusIcon, progress: listProgressValue))
+                        writeLog("row added with \(title) \(subtitle) \(icon) \(statusText) \(statusIcon)")
                         // update the view if visible
                         if observedData.args.listItem.present {
                             if let row = userInputState.listItems.firstIndex(where: {$0.title == title}) {
