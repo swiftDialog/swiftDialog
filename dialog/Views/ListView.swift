@@ -37,6 +37,7 @@ struct ListView: View {
     var rowStatusHeight: CGFloat
     var rowFontSize: CGFloat
     var proportionalListHeight: CGFloat
+    var subtitlePresent: Bool = false
 
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
@@ -58,6 +59,13 @@ struct ListView: View {
             default: ()
             }
         }
+        for item in userInputState.listItems {
+            if item.subTitle != "" {
+                rowHeight += 25
+                subtitlePresent = true
+                break
+            }
+        }
     }
 
 
@@ -74,12 +82,30 @@ struct ListView: View {
                                 HStack {
                                     if userInputState.listItems[index].icon != "" {
                                         let _ = writeLog("Switch index \(index): Displaying icon \(userInputState.listItems[index].icon)")
-                                        IconView(image: userInputState.listItems[index].icon, overlay: "", sfPaddingEnabled: false)
-                                            .frame(maxWidth: rowHeight, maxHeight: rowHeight)
+                                        VStack {
+                                            IconView(image: userInputState.listItems[index].icon, overlay: "", sfPaddingEnabled: false)
+                                                .frame(maxWidth: rowHeight, maxHeight: rowHeight)
+                                            Spacer()
+                                        }
                                     }
-                                    Text(userInputState.listItems[index].title)
-                                        .font(.system(size: rowFontSize))
-                                        .id(index)
+                                    VStack {
+                                        HStack {
+                                            Text(userInputState.listItems[index].title)
+                                                .font(.system(size: rowFontSize))
+                                                .id(index)
+                                            Spacer()
+                                        }
+                                        if subtitlePresent {
+                                            HStack {
+                                                Text(userInputState.listItems[index].subTitle)
+                                                    .lineLimit(2)
+                                                    .font(.system(size: rowFontSize-6))
+                                                    .foregroundStyle(.secondary)
+                                                    //.padding(.top, 1)
+                                                Spacer()
+                                            }
+                                        }
+                                    }
                                     Spacer()
                                     HStack {
                                         if userInputState.listItems[index].statusText != "" {

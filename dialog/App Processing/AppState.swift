@@ -90,12 +90,15 @@ struct CheckBoxes {
 
 struct ListItems: Codable {
     var title: String
+    var subTitle: String = ""
     var icon: String = ""
     var statusText: String = ""
     var statusIcon: String = ""
     var progress: CGFloat = 0
     var dictionary: [String: Any] {
             return ["title": title,
+                    "subtitle": subTitle,
+                    "icon": icon,
                     "statustext": statusText,
                     "status": statusIcon,
                     "progress": progress]
