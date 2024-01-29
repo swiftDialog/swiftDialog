@@ -76,14 +76,13 @@ struct ListView: View {
                 //withAnimation(.default) {
                     VStack {
                         List(0..<userInputState.listItems.count, id: \.self) {index in
-                            VStack {
                                 HStack {
                                     if userInputState.listItems[index].icon != "" {
                                         let _ = writeLog("Switch index \(index): Displaying icon \(userInputState.listItems[index].icon)")
                                         VStack {
                                             IconView(image: userInputState.listItems[index].icon, overlay: "", sfPaddingEnabled: false)
                                                 .frame(maxWidth: rowHeight, maxHeight: rowHeight)
-                                            Spacer()
+                                                .frame(width: rowHeight)
                                         }
                                     }
                                     VStack {
@@ -139,7 +138,6 @@ struct ListView: View {
                                 }
                                 .frame(height: rowHeight+listHeightPadding)
                                 Divider()
-                            }
                         }
                         .background(Color("editorBackgroundColour"))
                         .listStyle(SidebarListStyle())
