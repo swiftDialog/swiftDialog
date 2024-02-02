@@ -664,7 +664,6 @@ class DialogUpdatableContent: ObservableObject {
     }
 
 
-
     func killCommandFile() {
         // delete the command file
 

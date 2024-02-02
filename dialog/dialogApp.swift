@@ -48,6 +48,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         //    SDHelp(arguments: appArguments).printHelpShort()
         //    quitDialog(exitCode: appvars.exitNow.code)
         //}
+        /*
+        if let window = NSApplication.shared.windows.first {
+            placeWindow(window, size: CGSize(width: appvars.windowWidth, height: appvars.windowHeight+28),
+                        vertical: appvars.windowPositionVertical,
+                horozontal: appvars.windowPositionHorozontal,
+                        offset: appvars.windowPositionOffset)
+        }
+         */
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
@@ -101,34 +109,10 @@ struct dialogApp: App {
         processCLOptionValues()
 
         // check if we are sending a notification
-        if appArguments.notification.present {
-            writeLog("Sending a notification")
-            /*
-            var notificationIcon = ""
-            if appArguments.iconOption.present {
-                notificationIcon = appArguments.iconOption.value
-            }
-             */
-            var acceptActionLabel: String = ""
-            var declineActionLabel: String = ""
-            if appArguments.button1TextOption.present {
-                acceptActionLabel = appArguments.button1TextOption.value
-            }
-            if appArguments.button2TextOption.present {
-                declineActionLabel = appArguments.button2TextOption.value
-            }
-            sendNotification(title: appArguments.titleOption.value,
-                             subtitle: appArguments.subTitleOption.value,
-                             message: appArguments.messageOption.value,
-                             acceptString: acceptActionLabel,
-                             acceptAction: appArguments.button1ActionOption.value,
-                             declineString: declineActionLabel,
-                             declineAction: appArguments.button2ActionOption.value)
-            usleep(100000)
+        if checkForDialogNotificationMode(appArguments) {
             writeLog("Notification sent")
             quitDialog(exitCode: 0)
         }
-
 
         // check for jamfhelper mode
         if appArguments.jamfHelperMode.present {

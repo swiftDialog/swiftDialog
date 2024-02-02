@@ -60,7 +60,7 @@ struct ListView: View {
             }
         }
         for item in userInputState.listItems where item.subTitle != "" {
-            rowHeight += 25
+            rowHeight += 28
             subtitlePresent = true
             break
         }
@@ -91,17 +91,19 @@ struct ListView: View {
                                                 .font(.system(size: rowFontSize))
                                                 .id(index)
                                             Spacer()
+                                            /*
                                             if userInputState.listItems[index].statusText != "" {
                                                 Text(userInputState.listItems[index].statusText)
                                                     .font(.system(size: rowFontSize))
                                                     .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
                                             }
+                                             */
                                         }
                                         if subtitlePresent {
                                             HStack {
                                                 Text(userInputState.listItems[index].subTitle)
                                                     .lineLimit(2)
-                                                    .font(.system(size: rowFontSize-6))
+                                                    .font(.system(size: rowFontSize-4))
                                                     .foregroundStyle(.secondary)
                                                     //.padding(.top, 1)
                                                 Spacer()
@@ -110,6 +112,11 @@ struct ListView: View {
                                     }
                                     Spacer()
                                     HStack {
+                                        if userInputState.listItems[index].statusText != "" {
+                                            Text(userInputState.listItems[index].statusText)
+                                                .font(.system(size: rowFontSize))
+                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
+                                        }
 
                                         switch userInputState.listItems[index].statusIcon {
                                         case "progress":

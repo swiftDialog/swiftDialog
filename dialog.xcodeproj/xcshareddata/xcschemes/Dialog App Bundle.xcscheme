@@ -56,8 +56,12 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--moveable"
+            argument = "--listitem &quot;test1&quot;,icon=&quot;sf=applelogo&quot;,status=wait,subtitle=&quot;Here is a sub title. Here is a sub title. Here is a sub title. Here is a sub title. Here is a sub title. Here is a sub title. &quot; --icon sf=applelogo --listitem &quot;test 2&quot;,icon=&quot;sf=applelogo&quot;,status=progress"
             isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--moveable"
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--bannerimage &quot;https://img.freepik.com/free-vector/abstract-orange-background-with-lines-halftone-effect_1017-32107.jpg&quot;"
@@ -65,11 +69,11 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--textfield &quot;Textfield Test&quot;,required --selecttitle &quot;Dropdown Test&quot;,required --selectvalues &quot;one, two, three&quot;"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--ontop"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--icon &quot;https://www.dropbox.com/s/4batk8v5outfxo5/install.png?dl=0&quot;"

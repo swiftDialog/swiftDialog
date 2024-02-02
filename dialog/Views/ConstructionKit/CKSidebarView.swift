@@ -35,6 +35,14 @@ struct CKSidebarView: View {
                           }
                     TextField("", text: $observedData.args.iconOption.value)
                 }
+                HStack {
+                    Button(action: {
+                        observedData.args.iconOption.value = "SF=\(observedData.args.iconOption.value)"
+                    }, label: {
+                        Text("SF Symbol")
+                    })
+                    Spacer()
+                }
                 LabelView(label: "ck-iconsize".localized)
                 HStack {
                     Slider(value: $observedData.iconSize, in: 0...400)

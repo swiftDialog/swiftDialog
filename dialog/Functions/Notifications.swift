@@ -25,6 +25,36 @@ func checkNotificationAuthorisation() {
     }
 }
 
+func checkForDialogNotificationMode(_ arguments: CommandLineArguments) -> Bool {
+    // check if we are sending a notification
+    if arguments.notification.present {
+        writeLog("Sending a notification")
+        /*
+        var notificationIcon = ""
+        if appArguments.iconOption.present {
+            notificationIcon = appArguments.iconOption.value
+        }
+         */
+        var acceptActionLabel: String = ""
+        var declineActionLabel: String = ""
+        if arguments.button1TextOption.present {
+            acceptActionLabel = arguments.button1TextOption.value
+        }
+        if arguments.button2TextOption.present {
+            declineActionLabel = arguments.button2TextOption.value
+        }
+        sendNotification(title: arguments.titleOption.value,
+                         subtitle: arguments.subTitleOption.value,
+                         message: arguments.messageOption.value,
+                         acceptString: acceptActionLabel,
+                         acceptAction: arguments.button1ActionOption.value,
+                         declineString: declineActionLabel,
+                         declineAction: arguments.button2ActionOption.value)
+        usleep(100000)
+    }
+    return arguments.notification.present
+}
+
 func sendNotification(title: String = "",
                       subtitle: String = "",
                       message: String = "",
