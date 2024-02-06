@@ -11,6 +11,7 @@ struct WatermarkView: View {
     var imageOpacity: Double
     var imagePosition: Alignment = .leading
     var imageAlignmentGuite: Alignment = .center
+    let gradient = Gradient(colors: [.white, .clear])
 
     @ObservedObject var observedData: DialogUpdatableContent
 
@@ -46,22 +47,26 @@ struct WatermarkView: View {
     }
 
     var body: some View {
-        ZStack {
-            if observedData.args.watermarkFill.value == "fill" {
-                DisplayImage(observedData.args.watermarkImage.value, corners: false, rezize: true, content: .fill)
-                    .scaledToFill()
-                    .opacity(imageOpacity)
-            } else if observedData.args.watermarkFill.value == "fit" {
-                DisplayImage(observedData.args.watermarkImage.value, corners: false, rezize: true, content: .fit)
-                    .scaledToFit()
-                    .opacity(imageOpacity)
-            } else {
-                DisplayImage(observedData.args.watermarkImage.value, corners: false, rezize: false)
-                    .fixedSize()
-                    .opacity(imageOpacity)
+        GeometryReader { window in
+            ZStack {
+                if observedData.args.watermarkImage.value.range(of: "colo[u]?r=", options: .regularExpression) != nil {
+                    SolidColourView(colourValue: observedData.args.watermarkImage.value)
+                } else if observedData.args.watermarkFill.value == "fill" {
+                    DisplayImage(observedData.args.watermarkImage.value, corners: false, rezize: true, content: .fill)
+                        .scaledToFill()
+                        .opacity(imageOpacity)
+                } else if observedData.args.watermarkFill.value == "fit" {
+                    DisplayImage(observedData.args.watermarkImage.value, corners: false, rezize: true, content: .fit)
+                        .scaledToFit()
+                        .opacity(imageOpacity)
+                } else {
+                    DisplayImage(observedData.args.watermarkImage.value, corners: false, rezize: false)
+                        .fixedSize()
+                        .opacity(imageOpacity)
+                }
             }
+            .frame(width: window.size.width, height: window.size.height, alignment: imagePosition)
         }
-        .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight, alignment: imagePosition)
     }
 }
 

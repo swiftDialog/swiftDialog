@@ -3,7 +3,7 @@
 base_dir="${PWD}"
 iconupdater="${base_dir}/fileicon"
 
-dialog_root="/Library/Application Support/Dialog"
+dialog_root="$3/Library/Application Support/Dialog"
 iconfile="${dialog_root}/Dialog.png"
 dialogbundle="${dialog_root}/Dialog.app"
 localisedbundle="${dialog_root}/Dialog.localized/Dialog.app"

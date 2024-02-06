@@ -50,7 +50,7 @@ struct MessageContent: View {
             }
 
             if observedData.args.mainImage.present {
-                ImageView(imageArray: observedData.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: string2float(string: observedData.args.autoPlay.value))
+                ImageView(imageArray: observedData.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: observedData.args.autoPlay.value.floatValue())
             }
 
             if !["", "none"].contains(observedData.args.messageOption.value) {

@@ -789,8 +789,29 @@ struct SDHelp {
         argument.quitKey.helpShort = "Set dialog quit key"
         argument.quitKey.helpUsage = "<char>"
         argument.quitKey.helpLong = """
-        Use the specified character as the command+ key combination for quitting instead of "q".
-        Capitol letters can be used in which case command+shift+<key> will be required
+        Use the specified character as the Command ⇧ + <key> combination for quitting instead of "q".
+
+        Capitol letters can be used in which case Command ⇧ + Shift ⇧ + <key> will be required
+"""
+
+        argument.windowButtonsEnabled.helpShort = "Enables window buttons"
+        argument.windowButtonsEnabled.helpUsage = "[close,min,max]"
+        argument.windowButtonsEnabled.helpLong = """
+        Enables window buttons, close, minimize and maximise(zoom)
+
+        You can optionally specify one or more of "close", "min" or "max" as comma seperated values.
+        e.g. to enable only the min and max(zoom) buttons:
+            --\(argument.windowButtonsEnabled.long) min,max
+"""
+
+        argument.hideDefaultKeyboardAction.helpShort = "Hides the default behaviour of Return ↵ and Esc ⎋ keys"
+        argument.hideDefaultKeyboardAction.helpUsage = ""
+        argument.hideDefaultKeyboardAction.helpLong = """
+        When specified, the behaviour to action the default button (Return ↵) or secondary button (Esc ⎋) will be modified
+        to require Command ⌘ + Shift ⇧ in order to action.
+
+        This effectively disables unintentional activation of either of these buttons. They can still be activated
+        with the keyboard, but it is harder to do so without intent.
 """
 
         argument.jamfHelperMode.helpShort = "Enable jamfHelper mode"
@@ -832,6 +853,14 @@ struct SDHelp {
 
         Equavelent of running:
           echo -n <string> | shasum -a 256
+"""
+
+        argument.windowResizable.helpShort = "Enable the dialog window to be resizable"
+        argument.windowResizable.helpUsage = ""
+        argument.windowResizable.helpLong = """
+        Enables the dialog window to be resizable.
+
+        This option also implies the --\(argument.movableWindow.long) flag
 """
 
         argument.getVersion.helpShort = "Print version string"

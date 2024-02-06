@@ -10,7 +10,7 @@ import SwiftUI
 
 struct AppVariables {
 
-    var cliversion                      = "2.3.3"
+    var cliversion                      = "2.4.0"
     let launchTime                      = Date.now
     // message default strings
     let titleDefault                    = String("default-title".localized)
@@ -34,7 +34,8 @@ struct AppVariables {
     let button2Default                  = String("button-cancel".localized)
     let buttonInfoDefault               = String("button-more-info".localized)
     let buttonInfoActionDefault         = String("")
-    let button1DefaultAction            = KeyboardShortcut.defaultAction
+    var button1DefaultAction            = KeyboardShortcut.defaultAction
+    var button2DefaultAction            = KeyboardShortcut.cancelAction
 
     var helpButtonHoverText             = String("help-hover".localized)
 
@@ -46,6 +47,8 @@ struct AppVariables {
     // Window Sizes
     var windowWidth                     = CGFloat(820)      // set default dialog width
     var windowHeight                    = CGFloat(380)      // set default dialog height
+
+    var windowBackgroundColour          = Color.clear
 
     // Content padding
     let sidePadding                     = CGFloat(15)
@@ -63,6 +66,10 @@ struct AppVariables {
     var windowPositionVertical          = NSWindow.Position.Vertical.center
     var windowPositionHorozontal        = NSWindow.Position.Horizontal.center
     var windowPositionOffset            = CGFloat(16)
+
+    var windowCloseEnabled              = Bool(true)
+    var windowMinimiseEnabled           = Bool(true)
+    var windowMaximiseEnabled           = Bool(true)
 
     var iconWidth                      = CGFloat(150)      // set default image area width
     var iconHeight                     = CGFloat(260)      // set default image area height

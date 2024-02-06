@@ -113,7 +113,7 @@ class FileReader {
                 placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
                     vertical: observedData.appProperties.windowPositionVertical,
                     horozontal: observedData.appProperties.windowPositionHorozontal,
-                            offset: string2float(string: observedData.args.positionOffset.value))
+                    offset: observedData.args.positionOffset.value.floatValue())
                 NSApp.activate(ignoringOtherApps: true)
 
             case "width:":
@@ -123,7 +123,7 @@ class FileReader {
                     placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
                         vertical: observedData.appProperties.windowPositionVertical,
                         horozontal: observedData.appProperties.windowPositionHorozontal,
-                                offset: string2float(string: observedData.args.positionOffset.value))
+                                offset: observedData.args.positionOffset.value.floatValue())
                 }
 
             case "height:":
@@ -133,7 +133,7 @@ class FileReader {
                     placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
                         vertical: observedData.appProperties.windowPositionVertical,
                         horozontal: observedData.appProperties.windowPositionHorozontal,
-                                offset: string2float(string: observedData.args.positionOffset.value))
+                                offset: observedData.args.positionOffset.value.floatValue())
                 }
 
             // Title
@@ -150,11 +150,11 @@ class FileReader {
                     let item = value.components(separatedBy: "=")
                     switch item[0] {
                     case  "size":
-                        observedData.appProperties.titleFontSize = string2float(string: item[1], defaultValue: appvars.titleFontSize)
+                        observedData.appProperties.titleFontSize = item[1].floatValue(defaultValue: appvars.titleFontSize)
                     case  "weight":
-                        observedData.appProperties.titleFontWeight = textToFontWeight(item[1])
+                        observedData.appProperties.titleFontWeight = Font.Weight(argument: item[1])
                     case  "colour","color":
-                        observedData.appProperties.titleFontColour = stringToColour(item[1])
+                        observedData.appProperties.titleFontColour = Color(argument: item[1])
                     case  "name":
                         observedData.appProperties.titleFontName = item[1]
                     case  "shadow":
@@ -280,7 +280,7 @@ class FileReader {
 
                 if iconState.components(separatedBy: ": ").first == "size" {
                     if iconState.replacingOccurrences(of: "size:", with: "").trimmingCharacters(in: .whitespaces) != "" {
-                        observedData.iconSize = string2float(string: iconState.replacingOccurrences(of: "size: ", with: ""))
+                        observedData.iconSize = iconState.replacingOccurrences(of: "size: ", with: "").floatValue()
                     } else {
                         observedData.iconSize = observedData.appProperties.iconWidth
                     }
@@ -388,6 +388,7 @@ class FileReader {
             // list item status
             case "\(observedData.args.listItem.long):":
                 var title: String = ""
+                var subtitle: String = ""
                 var icon: String = ""
                 var statusText: String = ""
                 var statusIcon: String = ""
@@ -396,6 +397,7 @@ class FileReader {
                 var deleteRow: Bool = false
                 var addRow: Bool = false
 
+                var subTitleIsSet: Bool = false
                 var iconIsSet: Bool = false
                 var statusIsSet: Bool = false
                 var statusTextIsSet: Bool = false
@@ -437,6 +439,9 @@ class FileReader {
                                 }
                             case "title":
                                 title = action[1].trimmingCharacters(in: .whitespaces)
+                            case "subtitle":
+                                subtitle = action[1].trimmingCharacters(in: .whitespaces)
+                                subTitleIsSet = true
                             case "icon":
                                 icon = action[1].trimmingCharacters(in: .whitespaces)
                                 iconIsSet = true
@@ -447,7 +452,7 @@ class FileReader {
                                 statusIcon = action[1].trimmingCharacters(in: .whitespaces)
                                 statusIsSet = true
                             case "progress":
-                                listProgressValue = string2float(string: action[1].trimmingCharacters(in: .whitespaces))
+                            listProgressValue = action[1].trimmingCharacters(in: .whitespaces).floatValue()
                                 statusIcon = "progress"
                                 progressIsSet = true
                                 statusIsSet = true
@@ -466,6 +471,7 @@ class FileReader {
                             userInputState.listItems.remove(at: row)
                             writeLog("deleted row at index \(row)")
                         } else {
+                            if subTitleIsSet { userInputState.listItems[row].subTitle = subtitle }
                             if iconIsSet { userInputState.listItems[row].icon = icon }
                             if statusIsSet { userInputState.listItems[row].statusIcon = statusIcon }
                             if statusTextIsSet { userInputState.listItems[row].statusText = statusText }
@@ -480,8 +486,8 @@ class FileReader {
 
                     // add to the list items array
                     if addRow {
-                        userInputState.listItems.append(ListItems(title: title, icon: icon, statusText: statusText, statusIcon: statusIcon, progress: listProgressValue))
-                        writeLog("row added with \(title) \(icon) \(statusText) \(statusIcon)")
+                        userInputState.listItems.append(ListItems(title: title, subTitle: subtitle, icon: icon, statusText: statusText, statusIcon: statusIcon, progress: listProgressValue))
+                        writeLog("row added with \(title) \(subtitle) \(icon) \(statusText) \(statusIcon)")
                         // update the view if visible
                         if observedData.args.listItem.present {
                             if let row = userInputState.listItems.firstIndex(where: {$0.title == title}) {
@@ -573,6 +579,8 @@ class DialogUpdatableContent: ObservableObject {
 
     @Published var blurredScreen = [BlurWindowController]()
 
+    @Published var updateView: Bool = true
+
     var status: StatusState
 
     let commandFilePermissions: [FileAttributeKey: Any] = [FileAttributeKey.posixPermissions: 0o666]
@@ -600,7 +608,7 @@ class DialogUpdatableContent: ObservableObject {
         progressTotal = Double(appArguments.progressBar.value) ?? 100
         listItemUpdateRow = 0
 
-        iconSize = string2float(string: appArguments.iconSize.value)
+        iconSize = appArguments.iconSize.value.floatValue()
         iconAlpha = Double(appArguments.iconAlpha.value) ?? 1.0
 
         imageArray = appvars.imageArray
@@ -654,7 +662,6 @@ class DialogUpdatableContent: ObservableObject {
             manager.createFile(atPath: path, contents: nil, attributes: commandFilePermissions)
         }
     }
-
 
 
     func killCommandFile() {

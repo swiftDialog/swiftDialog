@@ -53,6 +53,11 @@ struct RenderToggles: View {
                     } else {
                         Toggle(observedData.appProperties.checkboxArray[index].label, isOn: $observedData.appProperties.checkboxArray[index].checked)
                             .toggleStyle(.checkbox)
+                            .onChange(of: observedData.appProperties.checkboxArray[index].checked) { checked in
+                                if observedData.appProperties.checkboxArray[index].enablesButton1 {
+                                    observedData.args.button1Disabled.present = !checked
+                                }
+                            }
                             .disabled(observedData.appProperties.checkboxArray[index].disabled)
                         Spacer()
                     }

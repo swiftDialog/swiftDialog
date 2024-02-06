@@ -47,10 +47,13 @@ struct TextFieldState {
     var prompt: String     = ""
     var regex: String      = ""
     var regexError: String = ""
+    var backgroundColour: Color = .clear
     var required: Bool     = false
     var secure: Bool       = false
     var title: String
     var value: String      = ""
+    var date: Date         = Date.now
+    var isDate: Bool       = false
     var requiredTextfieldHighlight: Color = .clear
     var dictionary: [String: Any] {
             return ["title": title,
@@ -82,16 +85,20 @@ struct CheckBoxes {
     var icon: String = ""
     var checked: Bool = false
     var disabled: Bool = false
+    var enablesButton1: Bool = false
 }
 
 struct ListItems: Codable {
     var title: String
+    var subTitle: String = ""
     var icon: String = ""
     var statusText: String = ""
     var statusIcon: String = ""
     var progress: CGFloat = 0
     var dictionary: [String: Any] {
             return ["title": title,
+                    "subtitle": subTitle,
+                    "icon": icon,
                     "statustext": statusText,
                     "status": statusIcon,
                     "progress": progress]

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftyJSON
 
 struct CommandlineArgument {
     var long: String
@@ -16,8 +17,31 @@ struct CommandlineArgument {
     var helpUsage: String = "<text>"
     var present: Bool = false
     var isbool: Bool = false
-}
 
+    public mutating func evaluate(json: JSON = "{}", defaultValue: Any = "") {
+        self.present = json[self.long].exists() || CLOptionPresent(optionName: self)
+        if !self.isbool && json[self.long].bool ?? false {
+            self.present = false
+        }
+
+        if self.present {
+            if let numberValue = json[self.long].number {
+                self.value = numberValue.stringValue
+            } else {
+                self.value = json[self.long].string ?? CLOptionText(optionName: self)
+            }
+        }
+        if self.value.isEmpty {
+            if let floatValue = defaultValue as? CGFloat {
+                self.value = floatValue.stringValue
+            } else if let stringValue = defaultValue as? String {
+                self.value = stringValue
+            } else {
+                self.value = defaultValue as? String ?? ""
+            }
+        }
+    }
+}
 
 
 struct CommandLineArguments {
@@ -39,6 +63,7 @@ struct CommandLineArguments {
     var bannerImage              = CommandlineArgument(long: "bannerimage", short: "n")
     var bannerTitle              = CommandlineArgument(long: "bannertitle")
     var bannerText               = CommandlineArgument(long: "bannertext")
+    var bannerHeight             = CommandlineArgument(long: "bannerheight")
     var button1TextOption        = CommandlineArgument(long: "button1text")
     var button1ActionOption      = CommandlineArgument(long: "button1action")
     var button1ShellActionOption = CommandlineArgument(long: "button1shellaction",short: "")
@@ -54,6 +79,7 @@ struct CommandLineArguments {
     var titleFont                = CommandlineArgument(long: "titlefont")
     var messageFont              = CommandlineArgument(long: "messagefont")
     var textField                = CommandlineArgument(long: "textfield")
+    var textFieldLiveValidation  = CommandlineArgument(long: "textfieldlivevalidation", isbool: true)
     var checkbox                 = CommandlineArgument(long: "checkbox")
     var checkboxStyle            = CommandlineArgument(long: "checkboxstyle")
     var timerBar                 = CommandlineArgument(long: "timer")
@@ -118,6 +144,9 @@ struct CommandLineArguments {
     var jsonOutPut               = CommandlineArgument(long: "json", short: "j", isbool: true)
     var ignoreDND                = CommandlineArgument(long: "ignorednd", short: "d", isbool: true)
     var jamfHelperMode           = CommandlineArgument(long: "jh", short: "jh", isbool: true)
-    var miniMode                 = CommandlineArgument(long: "mini")
+    var miniMode                 = CommandlineArgument(long: "mini", isbool: true)
     var eulaMode                 = CommandlineArgument(long: "eula", isbool: true)
+    var windowButtonsEnabled     = CommandlineArgument(long: "windowbuttons")
+    var windowResizable          = CommandlineArgument(long: "resizable", isbool: true)
+    var hideDefaultKeyboardAction = CommandlineArgument(long: "hidedefaultkeyboardaction", isbool: true)
 }

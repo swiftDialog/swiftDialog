@@ -27,7 +27,7 @@ struct ButtonView: View {
         self.observedData = observedDialogContent
 
         if observedDialogContent.args.timerBar.present {
-            progressSteps = string2float(string: observedDialogContent.args.timerBar.value)
+            progressSteps = observedDialogContent.args.timerBar.value.floatValue()
         }
 
         if observedDialogContent.args.button1ShellActionOption.present {
@@ -54,7 +54,7 @@ struct ButtonView: View {
                             .frame(minWidth: 50, alignment: .center)
                     }
                     )
-                    .keyboardShortcut(.cancelAction)
+                    .keyboardShortcut(observedData.appProperties.button2DefaultAction)
                 }
 
                 if !(observedData.args.button1TextOption.value == "none") {
@@ -102,7 +102,7 @@ struct ButtonView: View {
                                     .frame(minWidth: 40, alignment: .center)
                             }
                             )
-                            .keyboardShortcut(.cancelAction)
+                            .keyboardShortcut(observedData.appProperties.button2DefaultAction)
                             .disabled(observedData.args.button2Disabled.present)
                         }
                     }

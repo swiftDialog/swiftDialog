@@ -11,11 +11,16 @@ struct CKWindowProperties: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
     @State var bgAlpha: Double = 0.5
+    @State var bgColour: Color = .white
+    @State var bannerColour: Color = .white
+    @State var bannerHeight: CGFloat
+
     let positionArray = ["topleft", "left", "bottomleft", "top", "center", "bottom", "topright", "right", "bottomright"]
     let fillScaleArray = ["fill", "fit"]
 
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
+        bannerHeight = observedDialogContent.args.bannerHeight.value.floatValue()
     }
 
     var body: some View {
@@ -74,6 +79,18 @@ struct CKWindowProperties: View {
                         })
                     Spacer()
                 }
+                LabelView(label: "Configurations")
+                HStack {
+                    Text("Will not apply to live view").italic()
+                    Spacer()
+                }
+                HStack {
+                    Text("Window Buttons")
+                        .frame(width: 100, alignment: .leading)
+                    Toggle("", isOn: $observedData.args.windowButtonsEnabled.present)
+                        .toggleStyle(.switch)
+                    Spacer()
+                }
                 HStack {
                     Text("ck-screenblur".localized)
                         .frame(width: 100, alignment: .leading)
@@ -95,6 +112,7 @@ struct CKWindowProperties: View {
                         .toggleStyle(.switch)
                     Spacer()
                 }
+                LabelView(label: "Progress Bar")
                 HStack {
                     Text("ck-progressbar".localized)
                         .frame(width: 100, alignment: .leading)
@@ -110,16 +128,41 @@ struct CKWindowProperties: View {
                     Spacer()
                 }
             }
-            HStack {
-                Text("ck-bannerimage".localized)
-                    .frame(width: 100, alignment: .leading)
-                Toggle("", isOn: $observedData.args.bannerImage.present)
-                    .toggleStyle(.switch)
-                    .disabled(observedData.args.bannerImage.value == "")
-                    .onChange(of: observedData.args.bannerImage.present, perform: { _ in
-                        observedData.args.iconOption.present.toggle()
-                    })
-                Button("ck-select".localized) {
+            Group {
+                LabelView(label: "ck-bannerimage".localized)
+                HStack {
+                    Toggle("Enabled", isOn: $observedData.args.bannerImage.present)
+                        .toggleStyle(.switch)
+                        .disabled(observedData.args.bannerImage.value == "")
+                        .onChange(of: observedData.args.bannerImage.present, perform: { isEnabled in
+                            observedData.args.iconOption.present.toggle()
+                            observedData.args.bannerTitle.present = isEnabled
+                        })
+                    Toggle("Banner Title", isOn: $observedData.args.bannerTitle.present)
+                        .toggleStyle(.switch)
+                        //.disabled(observedData.args.bannerImage.value == "")
+                        .onChange(of: observedData.args.bannerTitle.present, perform: { isEnabled in
+                            if isEnabled {
+                                observedData.appProperties.titleFontColour = Color.white
+                            } else {
+                                observedData.appProperties.titleFontColour = Color.black
+                            }
+                        })
+                    Toggle("Text Shadow", isOn: $observedData.appProperties.titleFontShadow)
+                        .toggleStyle(.switch)
+                        //.disabled(observedData.args.bannerImage.value == "")
+                        //.onChange(of: observedData.args.bannerImage.present, perform: { _ in
+                        //    observedData.args.iconOption.present.toggle()
+                        //})
+                    Spacer()
+                }
+                HStack {
+                    ColorPicker("ck-colour".localized,selection: $bannerColour)
+                        .onChange(of: bannerColour, perform: { _ in
+                            observedData.args.bannerImage.value = "color=\(bannerColour.hexValue)"
+                            observedData.args.bannerImage.present = true
+                        })
+                    Button("ck-select".localized) {
                         let panel = NSOpenPanel()
                         panel.allowsMultipleSelection = false
                         panel.canChooseDirectories = false
@@ -127,7 +170,20 @@ struct CKWindowProperties: View {
                         if panel.runModal() == .OK {
                             observedData.args.bannerImage.value = panel.url?.path ?? ""
                         }
-                      }
+                    }
+                    Spacer()
+                }
+                HStack {
+                    Text("Banner Height")
+                        .frame(alignment: .leading)
+                    TextField("", value: $bannerHeight, formatter: displayAsInt)
+                        .frame(width: 50)
+                    Slider(value: $bannerHeight, in: 28...250)
+                        .onChange(of: bannerHeight, perform: { height in
+                            observedData.args.bannerHeight.present = true
+                            observedData.args.bannerHeight.value = "\(height.rounded())"
+                        })
+                }
                 TextField("", text: $observedData.args.bannerImage.value)
             }
             /*

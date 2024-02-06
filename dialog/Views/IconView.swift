@@ -18,6 +18,7 @@ struct IconView: View {
     var imgFromURL: Bool = false
     var imgFromAPP: Bool = false
     var imgFromBase64: Bool = false
+    var imgFromText: Bool = false
 
     var builtInIconName: String = ""
     var builtInIconAutoColor: Bool = false
@@ -38,6 +39,7 @@ struct IconView: View {
     var sfSymbolColour2: Color = Color.secondary
     var sfSymbolPresent: Bool = false
     var sfSymbolAnimation: String = ""
+    var sfSymbolPadding: Bool = true
 
     var sfGradientPresent: Bool = false
     var sfPalettePresent: Bool = false
@@ -53,7 +55,7 @@ struct IconView: View {
 
     let argRegex = String("(,? ?[a-zA-Z1-9]+=|(,\\s?editor)|(,\\s?fileselect))|(,\\s?passwordfill)|(,\\s?required)|(,\\s?secure)")
 
-    init(image: String = "", overlay: String = "", alpha: Double = 1.0, padding: Double = 0) {
+    init(image: String = "", overlay: String = "", alpha: Double = 1.0, padding: Double = 0, sfPaddingEnabled: Bool = true) {
         writeLog("Displaying icon image \(image), alpha \(alpha)")
         if !overlay.isEmpty {
             writeLog("With overlay \(overlay)")
@@ -63,6 +65,7 @@ struct IconView: View {
         iconOverlay = overlay
 
         framePadding = padding
+        sfSymbolPadding = sfPaddingEnabled
 
         if overlay != "" {
             mainImageScale = mainImageWithOverlayScale
@@ -72,7 +75,7 @@ struct IconView: View {
                     SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) }
                     for value in SFValues where value.hasPrefix("bgcolo") {
                         if let bgColour = value.components(separatedBy: "=").last {
-                            sfBackgroundIconColour = stringToColour(bgColour)
+                            sfBackgroundIconColour = Color(argument: bgColour)
                         }
                     }
                     overlayImageBackground = true
@@ -111,10 +114,22 @@ struct IconView: View {
             builtInIconColour = .clear
         }
 
+        if messageUserImagePath.lowercased().hasPrefix("text=") {
+            writeLog("Image is Text")
+            imgFromText = true
+        }
+
+        if messageUserImagePath.lowercased() == "computer" {
+            framePadding = 0
+        }
+
         if messageUserImagePath.lowercased().hasPrefix("sf=") {
             writeLog("Image is SF Symbol")
             sfSymbolPresent = true
             builtInIconPresent = true
+            if sfSymbolPadding {
+                framePadding+=10
+            }
 
             var SFValues = messageUserImagePath.split(usingRegex: argRegex)
             SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) } // trim out any whitespace from the values if there were spaces before after the comma
@@ -138,7 +153,7 @@ struct IconView: View {
                     case "sf":
                         builtInIconName = SFArgValue
                     case "weight":
-                        builtInIconWeight = textToFontWeight(SFArgValue)
+                            builtInIconWeight = Font.Weight(argument: SFArgValue)
                     case _ where SFArg.hasPrefix("colo"):
                         if SFArgValue == "auto" {
                             // detecting sf symbol properties seems to be annoying, at least in swiftui 2
@@ -151,11 +166,11 @@ struct IconView: View {
                             iconRenderingMode = Image.TemplateRenderingMode.template // switches to monochrome which allows us to tint the sf symbol
                             if SFArg.hasSuffix("2") {
                                 sfGradientPresent = true
-                                builtInIconSecondaryColour = stringToColour(SFArgValue)
+                                builtInIconSecondaryColour = Color(argument: SFArgValue)
                             } else if SFArg.hasSuffix("3") {
-                                builtInIconTertiaryColour = stringToColour(SFArgValue)
+                                builtInIconTertiaryColour = Color(argument: SFArgValue)
                             } else {
-                                builtInIconColour = stringToColour(SFArgValue)
+                                builtInIconColour = Color(argument: SFArgValue)
                             }
                         }
                     case "palette":
@@ -166,11 +181,11 @@ struct IconView: View {
                         for index in 0...paletteColours.count-1 {
                             switch index {
                             case 0:
-                                builtInIconColour = stringToColour(paletteColours[index])
+                                builtInIconColour = Color(argument: paletteColours[index])
                             case 1:
-                                builtInIconSecondaryColour = stringToColour(paletteColours[index])
+                                builtInIconSecondaryColour = Color(argument: paletteColours[index])
                             case 2:
-                                builtInIconTertiaryColour = stringToColour(paletteColours[index])
+                                builtInIconTertiaryColour = Color(argument: paletteColours[index])
                             default: ()
                             }
                         }
@@ -186,9 +201,6 @@ struct IconView: View {
         if appArguments.warningIcon.present || messageUserImagePath == "warning" {
             writeLog("Using default warning icon")
             builtInIconName = "exclamationmark.octagon.fill"
-            builtInIconFill = "octagon.fill" //does not have multicolour sf symbol so we have to make out own using a fill layer
-            builtInIconColour = Color.red
-            iconRenderingMode = Image.TemplateRenderingMode.original
             builtInIconPresent = true
         } else if appArguments.cautionIcon.present || messageUserImagePath == "caution" {
             writeLog("Using default caution icon")
@@ -198,7 +210,7 @@ struct IconView: View {
             writeLog("Using default info icon")
             builtInIconName = "person.fill.questionmark"
             builtInIconPresent = true
-        } else if messageUserImagePath == "default" || (!builtInIconPresent && !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL && !imgFromBase64) {
+        } else if messageUserImagePath == "default" || (!builtInIconPresent && !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL && !imgFromBase64 && !imgFromText) {
             writeLog("Icon not specified - using default icon")
             builtInIconName = "bubble.left.circle.fill"
             iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
@@ -243,6 +255,10 @@ struct IconView: View {
                                 .symbolRenderingMode(.monochrome)
                                 .symbolAnimation(effect: sfSymbolAnimation)
                                 .foregroundColor(builtInIconColour)
+                        } else if messageUserImagePath == "computer" {
+                            Image(nsImage: NSImage(named: NSImage.computerName) ?? NSImage())
+                                .resizable()
+
                         } else {
                             Image(systemName: builtInIconName)
                                 .resizable()
@@ -257,6 +273,12 @@ struct IconView: View {
                 .aspectRatio(contentMode: .fit)
                 .scaledToFit()
                 .scaleEffect(mainImageScale, anchor: .topLeading)
+                .opacity(mainImageAlpha)
+            } else if imgFromText {
+                Text(messageUserImagePath.replacingOccurrences(of: "text=", with: ""))
+                .font(.system(size: 300))
+                .minimumScaleFactor(0.01)
+                .lineLimit(1)
                 .opacity(mainImageAlpha)
             } else {
                 DisplayImage(messageUserImagePath, corners: true)

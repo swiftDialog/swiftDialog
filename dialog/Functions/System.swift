@@ -195,32 +195,6 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
     exit(exitCode)
 }
 
-func textToFontWeight(_ weight: String) -> Font.Weight {
-    switch weight {
-        case "bold":
-            return Font.Weight.bold
-        case "heavy":
-            return Font.Weight.heavy
-        case "light":
-            return Font.Weight.light
-        case "medium":
-            return Font.Weight.medium
-        case "regular":
-            return Font.Weight.regular
-        case "thin":
-            return Font.Weight.thin
-        default:
-            return Font.Weight.thin
-    }
-}
-
-func plistFromData(_ data: Data) throws -> [String: Any] {
-    try PropertyListSerialization.propertyList(
-        from: data,
-        format: nil
-    ) as! [String: Any]
-}
-
 func isDNDEnabled() -> Bool {
     // check for DND and return true if it is on
 

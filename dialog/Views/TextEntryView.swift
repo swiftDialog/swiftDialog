@@ -12,8 +12,12 @@ struct TextEntryView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
     @State var textfieldContent: [TextFieldState]
+    @State var datepickerID: [Int]
 
     var fieldwidth: CGFloat = 0
+    var textFieldValidationOpacity: CGFloat = 0
+
+    let dateFormatter = DateFormatter()
 
     init(observedDialogContent: DialogUpdatableContent, textfieldContent: [TextFieldState]) {
         // we take in textfieldContent but that just populates the State variable
@@ -21,15 +25,20 @@ struct TextEntryView: View {
 
         self.observedData = observedDialogContent
         if !observedDialogContent.args.hideIcon.present { //} appArguments.hideIcon.present {
-            fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value)
+            fieldwidth = observedDialogContent.args.windowWidth.value.floatValue()
         } else {
-            fieldwidth = string2float(string: observedDialogContent.args.windowWidth.value) - string2float(string: observedDialogContent.args.iconSize.value)
+            fieldwidth = observedDialogContent.args.windowWidth.value.floatValue() - observedDialogContent.args.iconSize.value.floatValue()
         }
         if observedDialogContent.args.textField.present {
             writeLog("Displaying text entry")
             writeLog("\(userInputState.textFields.count) textfields detected")
         }
         self.textfieldContent = textfieldContent
+        datepickerID = Array(0...textfieldContent.count)
+
+        if observedDialogContent.args.textFieldLiveValidation.present {
+            textFieldValidationOpacity = 0.1
+        }
     }
 
     var body: some View {
@@ -106,15 +115,38 @@ struct TextEntryView: View {
                                                 userInputState.textFields[index].value = textContent
                                             })
                                         Image(systemName: "lock.fill")
-                                            .foregroundColor(stringToColour("#008815")).opacity(0.5)
+                                            .foregroundColor(Color(argument: "#008815")).opacity(0.5)
                                             .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
                                     }
                                 } else {
                                     TextField(textfieldContent[index].prompt, text: $textfieldContent[index].value)
                                         .onChange(of: textfieldContent[index].value, perform: { textContent in
                                             userInputState.textFields[index].value = textContent
+                                            if textfieldContent[index].regex != "" && observedData.args.textFieldLiveValidation.present {
+                                                if checkRegexPattern(regexPattern: textfieldContent[index].regex, textToValidate: textfieldContent[index].value) {
+                                                    textfieldContent[index].backgroundColour = Color.green
+                                                } else {
+                                                    textfieldContent[index].backgroundColour = Color.red
+                                                }
+                                                if textfieldContent[index].value == "" {
+                                                    textfieldContent[index].backgroundColour = Color.clear
+                                                }
+                                            }
                                         })
+                                        //.background(textfieldContent[index].backgroundColour)
 
+
+                                    if textfieldContent[index].isDate {
+                                        DatePicker("", selection: $textfieldContent[index].date, displayedComponents: [.date])
+                                            .onChange(of: textfieldContent[index].date, perform: { dateContent in
+                                                dateFormatter.timeStyle = .none
+                                                dateFormatter.dateStyle = .short
+                                                textfieldContent[index].value = dateFormatter.string(from: dateContent)
+                                                datepickerID[index] += 1 // stupid hack to make the picker disappear when a date is selected
+                                            })
+                                            .labelsHidden()
+                                            .id(datepickerID[index])
+                                    }
                                 }
                             }
                             .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
@@ -126,6 +158,7 @@ struct TextEntryView: View {
                                             .repeatCount(3, autoreverses: true),
                                             value: observedData.showSheet
                                         )
+                                            .background(textfieldContent[index].backgroundColour.opacity(textFieldValidationOpacity))
                                      )
                         }
                     }

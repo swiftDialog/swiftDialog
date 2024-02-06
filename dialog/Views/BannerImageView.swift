@@ -14,7 +14,8 @@ struct BannerImageView: View {
 
     //var bannerHeight: CGFloat = 0
     var bannerWidth: CGFloat = 0
-    let maxBannerHeight: CGFloat = 130
+    var maxBannerHeight: CGFloat = 130
+    var minBannerHeight: CGFloat = 100
 
     let blurRadius: CGFloat = 3
     let opacity: CGFloat = 0.5
@@ -26,18 +27,28 @@ struct BannerImageView: View {
         self.observedData = observedDialogContent
         writeLog("Displaying banner image \(observedDialogContent.args.bannerImage.value)")
         bannerWidth = observedDialogContent.appProperties.windowWidth
+        if observedDialogContent.args.bannerHeight.present {
+            maxBannerHeight = observedDialogContent.args.bannerHeight.value.floatValue()
+            minBannerHeight = maxBannerHeight
+        }
     }
 
     var body: some View {
         ZStack {
-            DisplayImage(observedData.args.bannerImage.value, corners: false, showBackgroundOnError: true)
-                .aspectRatio(contentMode: .fill)
-                .scaledToFill()
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(width: bannerWidth, alignment: .topLeading)
-                .frame(maxHeight: maxBannerHeight)
-                .frame(minHeight: 100)
-                .clipped()
+            if observedData.args.bannerImage.value.range(of: "colo[u]?r=", options: .regularExpression) != nil {
+                SolidColourView(colourValue: observedData.args.bannerImage.value)
+                    .frame(maxHeight: maxBannerHeight)
+                    //.frame(minHeight: 100)
+            } else {
+                DisplayImage(observedData.args.bannerImage.value, corners: false, showBackgroundOnError: true)
+                    .aspectRatio(contentMode: .fill)
+                    .scaledToFill()
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(width: bannerWidth, alignment: .topLeading)
+                    .frame(maxHeight: maxBannerHeight)
+                    .frame(minHeight: minBannerHeight)
+                    .clipped()
+            }
             if observedData.args.bannerTitle.present {
                 ZStack {
                     if observedData.appProperties.titleFontShadow {

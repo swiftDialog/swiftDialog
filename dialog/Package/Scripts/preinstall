@@ -5,7 +5,7 @@
 #
 #  Created by Bart E Reardon on 5/8/2023.
 #  
-dialog_root="/Library/Application Support/Dialog"
+dialog_root="$3/Library/Application Support/Dialog"
 dialogbundle="${dialog_root}/Dialog.app"
 
 # If there is a previous install we want to remove it first
