@@ -863,6 +863,14 @@ struct SDHelp {
         This option also implies the --\(argument.movableWindow.long) flag
 """
 
+        argument.showOnAllScreens.helpShort = "Enable the dialog window to appear on all screens"
+        argument.showOnAllScreens.helpUsage = ""
+        argument.showOnAllScreens.helpLong = """
+        Dialog windows will appear on all screens, even on top of fullscreen applications
+
+        This property is implied when using --\(argument.forceOnTop.long)
+"""
+
         argument.getVersion.helpShort = "Print version string"
         argument.getVersion.helpUsage = ""
         argument.getVersion.helpLong = ""

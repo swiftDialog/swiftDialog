@@ -148,5 +148,6 @@ struct CommandLineArguments {
     var eulaMode                 = CommandlineArgument(long: "eula", isbool: true)
     var windowButtonsEnabled     = CommandlineArgument(long: "windowbuttons")
     var windowResizable          = CommandlineArgument(long: "resizable", isbool: true)
+    var showOnAllScreens         = CommandlineArgument(long: "showonallscreens", isbool: true)
     var hideDefaultKeyboardAction = CommandlineArgument(long: "hidedefaultkeyboardaction", isbool: true)
 }

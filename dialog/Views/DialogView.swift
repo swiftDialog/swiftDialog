@@ -66,6 +66,7 @@ struct DialogView: View {
                             .padding(.leading, observedData.appProperties.sidePadding+10)
                             .padding(.trailing, observedData.iconSize/10)
                         }
+                        Spacer()
                         MessageContent(observedDialogContent: observedData)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
                     }

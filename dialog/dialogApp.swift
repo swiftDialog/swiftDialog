@@ -44,18 +44,57 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        //if CommandLine.arguments.count == 1 {
-        //    SDHelp(arguments: appArguments).printHelpShort()
-        //    quitDialog(exitCode: appvars.exitNow.code)
-        //}
-        /*
+        var blurredScreen = [BlurWindowController]()
+
         if let window = NSApplication.shared.windows.first {
+            window.standardWindowButton(.closeButton)?.isHidden = !appArguments.windowButtonsEnabled.present
+            window.standardWindowButton(.miniaturizeButton)?.isHidden = !appArguments.windowButtonsEnabled.present
+            window.standardWindowButton(.zoomButton)?.isHidden = !appArguments.windowButtonsEnabled.present
+            window.standardWindowButton(.closeButton)?.isEnabled = appvars.windowCloseEnabled
+            window.standardWindowButton(.miniaturizeButton)?.isEnabled = appvars.windowMinimiseEnabled
+            window.standardWindowButton(.zoomButton)?.isEnabled = appvars.windowMaximiseEnabled
+            window.isMovable = appArguments.movableWindow.present
+            window.isMovableByWindowBackground = true
+            if appArguments.showOnAllScreens.present {
+                window.collectionBehavior = [.canJoinAllSpaces]
+            }
+
+            // Set window level
+            if appArguments.forceOnTop.present || appArguments.blurScreen.present {
+                window.level = .floating
+                writeLog("Window is forced on top", logLevel: .debug)
+            } else {
+                window.level = .normal
+            }
+
+            // display a blur screen window on all screens.
+            if appArguments.blurScreen.present && !appArguments.fullScreenWindow.present {
+                writeLog("Blurscreen enabled", logLevel: .debug)
+                let screens = NSScreen.screens
+                for (index, screen) in screens.enumerated() {
+                    blurredScreen.append(BlurWindowController())
+                    allScreens = screen
+                    blurredScreen[index].close()
+                    blurredScreen[index].loadWindow()
+                    blurredScreen[index].showWindow(self)
+                }
+                NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
+            } else if appArguments.forceOnTop.present {
+                NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
+            } else {
+                background.close()
+            }
+
+            if appArguments.forceOnTop.present || appArguments.blurScreen.present {
+                writeLog("Activating window", logLevel: .debug)
+                NSApp.activate(ignoringOtherApps: true)
+            }
+
             placeWindow(window, size: CGSize(width: appvars.windowWidth, height: appvars.windowHeight+28),
                         vertical: appvars.windowPositionVertical,
                 horozontal: appvars.windowPositionHorozontal,
                         offset: appvars.windowPositionOffset)
         }
-         */
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
@@ -70,23 +109,6 @@ struct dialogApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     @ObservedObject var observedData: DialogUpdatableContent
-
-    @State private var cancellables = Set<AnyCancellable>()
-
-    func monitorVisibility(window: NSWindow) {
-        window.publisher(for: \.isVisible)
-            .dropFirst()  // we know: the first value is not interesting
-            .sink(receiveValue: { isVisible in
-                if isVisible {
-                    placeWindow(window,
-                                vertical: observedData.appProperties.windowPositionVertical,
-                                horozontal: observedData.appProperties.windowPositionHorozontal,
-                                offset: observedData.args.positionOffset.value.floatValue())
-                    observedData.mainWindow = window
-                }
-            })
-            .store(in: &cancellables)
-    }
 
     init () {
 
@@ -165,74 +187,18 @@ struct dialogApp: App {
     var body: some Scene {
 
         WindowGroup {
-            ZStack {
-                WindowAccessor {window in
-                    window?.standardWindowButton(.closeButton)?.isHidden = !appArguments.windowButtonsEnabled.present
-                    window?.standardWindowButton(.miniaturizeButton)?.isHidden = !appArguments.windowButtonsEnabled.present
-                    window?.standardWindowButton(.zoomButton)?.isHidden = !appArguments.windowButtonsEnabled.present
-                    window?.standardWindowButton(.closeButton)?.isEnabled = observedData.appProperties.windowCloseEnabled
-                    window?.standardWindowButton(.miniaturizeButton)?.isEnabled = observedData.appProperties.windowMinimiseEnabled
-                    window?.standardWindowButton(.zoomButton)?.isEnabled = observedData.appProperties.windowMaximiseEnabled
-                    window?.isMovable = appArguments.movableWindow.present
-                    window?.isMovableByWindowBackground = true
-                    window?.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
-
-                    // Set window level
-                    if appArguments.forceOnTop.present || appArguments.blurScreen.present {
-                        window?.level = .floating
-                        writeLog("Window is forced on top", logLevel: .debug)
-                    } else {
-                        window?.level = .normal
-                    }
-
-                    // display a blur screen window on all screens.
-                    if appArguments.blurScreen.present && !appArguments.fullScreenWindow.present {
-                        writeLog("Blurscreen enabled", logLevel: .debug)
-                        let screens = NSScreen.screens
-                        for (index, screen) in screens.enumerated() {
-                            observedData.blurredScreen.append(BlurWindowController())
-                            allScreens = screen
-                            observedData.blurredScreen[index].close()
-                            observedData.blurredScreen[index].loadWindow()
-                            observedData.blurredScreen[index].showWindow(self)
-                        }
-                        NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
-                    } else if appArguments.forceOnTop.present {
-                        NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
-                    } else {
-                        background.close()
-                    }
-
-                    if appArguments.forceOnTop.present || appArguments.blurScreen.present {
-                        writeLog("Activating window", logLevel: .debug)
-                        NSApp.activate(ignoringOtherApps: true)
-                    }
-                }
-                .frame(width: 0, height: 0) //ensures WindowAccessor isn't taking up any real estate
-
-                if !appArguments.notification.present {
-                    if appArguments.miniMode.present {
-                        MiniView(observedDialogContent: observedData)
-                            .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
-                    } else {
-                        ContentView(observedDialogContent: observedData)
-                            .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
-                            .sheet(isPresented: $observedData.showSheet, content: {
-                                ErrorView(observedContent: observedData)
-                            })
-                    }
+            if !appArguments.notification.present {
+                if appArguments.miniMode.present {
+                    MiniView(observedDialogContent: observedData)
+                        .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
+                } else {
+                    ContentView(observedDialogContent: observedData)
+                        .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
+                        .sheet(isPresented: $observedData.showSheet, content: {
+                            ErrorView(observedContent: observedData)
+                        })
                 }
             }
-            // Monitor window visibility, process position on screen before rendering.
-            .background(WindowAccessor { newWindow in
-                    if let newWindow = newWindow {
-                        monitorVisibility(window: newWindow)
-                    } else {
-                        // window closed: release all references
-                        self.cancellables.removeAll()
-                    }
-                })
-
         }
         // Hide Title Bar
         .windowStyle(HiddenTitleBarWindowStyle())
