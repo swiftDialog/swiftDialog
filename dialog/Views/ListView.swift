@@ -59,7 +59,7 @@ struct ListView: View {
             default: ()
             }
         }
-        for item in userInputState.listItems where item.subTitle != "" {
+        for item in userInputState.listItems where !item.subTitle.isEmpty {
             rowHeight += 28
             subtitlePresent = true
             break
@@ -71,93 +71,82 @@ struct ListView: View {
         if observedData.args.listItem.present {
             let _ = writeLog("Displaying listitems")
             ScrollViewReader { proxy in
-                GeometryReader { geometry in
-                    let listHeightPadding = ((geometry.size.height/CGFloat(userInputState.listItems.count)/2) * proportionalListHeight)
-                //withAnimation(.default) {
-                    VStack {
-                        List(0..<userInputState.listItems.count, id: \.self) {index in
-                                HStack {
-                                    if userInputState.listItems[index].icon != "" {
-                                        let _ = writeLog("Switch index \(index): Displaying icon \(userInputState.listItems[index].icon)")
-                                        VStack {
-                                            IconView(image: userInputState.listItems[index].icon, overlay: "", sfPaddingEnabled: false)
-                                                .frame(maxWidth: rowHeight, maxHeight: rowHeight)
-                                                .frame(width: rowHeight)
-                                        }
-                                    }
-                                    VStack {
-                                        HStack {
-                                            Text(userInputState.listItems[index].title)
-                                                .font(.system(size: rowFontSize))
-                                                .id(index)
-                                            Spacer()
-                                            /*
-                                            if userInputState.listItems[index].statusText != "" {
-                                                Text(userInputState.listItems[index].statusText)
-                                                    .font(.system(size: rowFontSize))
-                                                    .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
-                                            }
-                                             */
-                                        }
-                                        if subtitlePresent {
-                                            HStack {
-                                                Text(userInputState.listItems[index].subTitle)
-                                                    .lineLimit(2)
-                                                    .font(.system(size: rowFontSize-4))
-                                                    .foregroundStyle(.secondary)
-                                                    //.padding(.top, 1)
-                                                Spacer()
-                                            }
-                                        }
-                                    }
-                                    Spacer()
+                VStack {
+                    List(0..<userInputState.listItems.count, id: \.self) {index in
+                        VStack {
+                            HStack {
+                                if !userInputState.listItems[index].icon.isEmpty {
+                                    let _ = writeLog("Switch index \(index): Displaying icon \(userInputState.listItems[index].icon)")
+                                    IconView(image: userInputState.listItems[index].icon, overlay: "", sfPaddingEnabled: false)
+                                        .frame(maxHeight: rowHeight)
+                                        .frame(width: rowHeight)
+                                }
+                                VStack {
                                     HStack {
-                                        if userInputState.listItems[index].statusText != "" {
-                                            Text(userInputState.listItems[index].statusText)
-                                                .font(.system(size: rowFontSize))
-                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
-                                        }
-
-                                        switch userInputState.listItems[index].statusIcon {
-                                        case "progress":
-                                            ProgressView("", value: userInputState.listItems[index].progress, total: 100)
-                                                .progressViewStyle(CirclerPercentageProgressViewStyle())
-                                                .frame(width: rowStatusHeight, height: rowStatusHeight-5)
-                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
-                                        case "wait":
-                                            ProgressView()
-                                                .progressViewStyle(.circular)
-                                                .scaleEffect(0.8, anchor: .trailing)
-                                                .frame(height: rowStatusHeight)
-                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
-                                        case "success":
-                                            StatusImage(name: "checkmark.circle.fill", colour: .green, size: rowStatusHeight)
-                                        case "fail":
-                                            StatusImage(name: "xmark.circle.fill", colour: .red, size: rowStatusHeight)
-                                        case "pending":
-                                            StatusImage(name: "ellipsis.circle.fill", colour: .gray, size: rowStatusHeight)
-                                        case "error":
-                                            StatusImage(name: "exclamationmark.circle.fill", colour: .yellow, size: rowStatusHeight)
-                                        default:
-                                            EmptyView()
+                                        Text(userInputState.listItems[index].title)
+                                            .font(.system(size: rowFontSize))
+                                            .id(index)
+                                        Spacer()
+                                    }
+                                    if subtitlePresent {
+                                        HStack {
+                                            Text(userInputState.listItems[index].subTitle)
+                                                .lineLimit(2)
+                                                .font(.system(size: rowFontSize-4))
+                                                .foregroundStyle(.secondary)
+                                            //.padding(.top, 1)
+                                            Spacer()
                                         }
                                     }
                                 }
-                                .frame(height: rowHeight+listHeightPadding)
-                                Divider()
-                        }
-                        .background(Color("editorBackgroundColour"))
-                        .listStyle(SidebarListStyle())
-                    }
-                    .onChange(of: observedData.listItemUpdateRow, perform: { _ in
-                        DispatchQueue.main.async {
-                            withAnimation(.easeInOut(duration: 0.5)) {
-                                proxy.scrollTo(observedData.listItemUpdateRow)
+                                Spacer()
+                                HStack {
+                                    if userInputState.listItems[index].statusText != "" {
+                                        Text(userInputState.listItems[index].statusText)
+                                            .font(.system(size: rowFontSize))
+                                            .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
+                                    }
+
+                                    switch userInputState.listItems[index].statusIcon {
+                                    case "progress":
+                                        ProgressView("", value: userInputState.listItems[index].progress, total: 100)
+                                            .progressViewStyle(CirclerPercentageProgressViewStyle())
+                                            .frame(width: rowStatusHeight, height: rowStatusHeight-5)
+                                            .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
+                                    case "wait":
+                                        ProgressView()
+                                            .progressViewStyle(.circular)
+                                            .scaleEffect(0.8, anchor: .trailing)
+                                            .frame(height: rowStatusHeight)
+                                            .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
+                                    case "success":
+                                        StatusImage(name: "checkmark.circle.fill", colour: .green, size: rowStatusHeight)
+                                    case "fail":
+                                        StatusImage(name: "xmark.circle.fill", colour: .red, size: rowStatusHeight)
+                                    case "pending":
+                                        StatusImage(name: "ellipsis.circle.fill", colour: .gray, size: rowStatusHeight)
+                                    case "error":
+                                        StatusImage(name: "exclamationmark.circle.fill", colour: .yellow, size: rowStatusHeight)
+                                    default:
+                                        EmptyView()
+                                    }
+                                }
                             }
+                            .frame(maxHeight: rowHeight)
+                            Divider()
                         }
-                    })
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                    .background(Color("editorBackgroundColour"))
+                    .listStyle(SidebarListStyle())
                 }
+                .onChange(of: observedData.listItemUpdateRow, perform: { _ in
+                    DispatchQueue.main.async {
+                        withAnimation(.easeInOut(duration: 0.5)) {
+                            proxy.scrollTo(observedData.listItemUpdateRow)
+                        }
+                    }
+                })
+                .clipShape(RoundedRectangle(cornerRadius: 8))
             }
         }
     }
