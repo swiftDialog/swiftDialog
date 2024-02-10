@@ -50,7 +50,8 @@ func checkForDialogNotificationMode(_ arguments: CommandLineArguments) -> Bool {
                          acceptString: acceptActionLabel,
                          acceptAction: arguments.button1ActionOption.value,
                          declineString: declineActionLabel,
-                         declineAction: arguments.button2ActionOption.value)
+                         declineAction: arguments.button2ActionOption.value,
+                         notificationSoundEnabled: arguments.notificationGoPing.present)
         usleep(100000)
     }
     return arguments.notification.present
@@ -63,7 +64,8 @@ func sendNotification(title: String = "",
                       acceptString: String = "Open",
                       acceptAction: String = "",
                       declineString: String = "Close",
-                      declineAction: String = "") {
+                      declineAction: String = "",
+                      notificationSoundEnabled: Bool = false) {
     let notification = UNUserNotificationCenter.current()
     let tempImagePath: String = "/var/tmp/sdnotification.png"
     // Define the custom actions.
@@ -75,8 +77,11 @@ func sendNotification(title: String = "",
         options: [])
     var actions: [UNNotificationAction] = []
 
-    if !acceptString.isEmpty && !declineString.isEmpty {
-        actions = [acceptActionLabel, declineActionLabel]
+    if !acceptString.isEmpty {
+        actions.append(acceptActionLabel)
+    }
+    if !declineString.isEmpty {
+        actions.append(declineActionLabel)
     }
 
     if !image.isEmpty {
@@ -120,7 +125,9 @@ func sendNotification(title: String = "",
                 content.userInfo = ["ACCEPT_ACTION": acceptAction,
                                 "DECLINE_ACTION": declineAction ]
                 content.categoryIdentifier = "SD_NOTIFICATION"
-                content.sound = UNNotificationSound.default
+                if notificationSoundEnabled {
+                    content.sound = UNNotificationSound.default
+                }
                 content.attachments = []
                 // Add any Attachments
                 if !image.isEmpty {

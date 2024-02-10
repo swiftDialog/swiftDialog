@@ -947,6 +947,7 @@ func processCLOptionValues() {
     appArguments.constructionKit.evaluate(json: json)
     appArguments.miniMode.evaluate(json: json)
     appArguments.notification.evaluate(json: json)
+    appArguments.notificationGoPing.evaluate(json: json)
     appArguments.eulaMode.evaluate(json: json)
     appArguments.windowResizable.evaluate(json: json)
 
