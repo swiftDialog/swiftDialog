@@ -57,6 +57,10 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "--listitem &quot;test1&quot;,icon=&quot;sf=applelogo&quot;,status=wait,subtitle=&quot;Here is a sub title. Here is a sub title. Here is a sub title. Here is a sub title. Here is a sub title. Here is a sub title. &quot; --icon sf=applelogo --listitem &quot;test 2&quot;,icon=&quot;sf=applelogo&quot;,status=progress"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--jsonstring &apos;{&quot;listitem&quot; : [{&quot;title&quot; : &quot;Item One&quot;, &quot;icon&quot; : &quot;/path/to/image&quot;, &quot;status&quot; : &quot;pending&quot;, &quot;statustext&quot; : &quot;Pending&quot;},{&quot;title&quot; : &quot;Item Two&quot;, &quot;icon&quot; : &quot;/path/to/image&quot;, &quot;status&quot; : &quot;pending&quot;, &quot;statustext&quot; : &quot;Pending&quot;}]}&apos;"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

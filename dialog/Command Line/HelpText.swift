@@ -13,7 +13,7 @@ struct SDHelp {
     public func printHelpShort() {
         writeLog("Printing short help")
         print("swiftDialog v\(getVersionString())")
-        print("©2023 Bart Reardon\n")
+        print("©2024 Bart Reardon\n")
         print("\n use --help <option> for more details\n")
         let mirror = Mirror(reflecting: argument)
         for child in mirror.children {
@@ -861,6 +861,14 @@ struct SDHelp {
         Enables the dialog window to be resizable.
 
         This option also implies the --\(argument.movableWindow.long) flag
+"""
+
+        argument.showOnAllScreens.helpShort = "Enable the dialog window to appear on all screens"
+        argument.showOnAllScreens.helpUsage = ""
+        argument.showOnAllScreens.helpLong = """
+        Dialog windows will appear on all screens, even on top of fullscreen applications
+
+        This property is implied when using --\(argument.forceOnTop.long)
 """
 
         argument.getVersion.helpShort = "Print version string"

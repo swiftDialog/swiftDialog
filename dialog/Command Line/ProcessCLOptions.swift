@@ -111,7 +111,9 @@ func processCLOptions(json: JSON = getJSON()) {
     appArguments.messageOption.value = appArguments.messageOption.value
                                         .replacingOccurrences(of: "<br>", with: "  \n")
                                         .replacingOccurrences(of: "<hr>", with: "****")
-
+    if !appArguments.messageOption.present {
+        appArguments.messageOption.value = appvars.messageDefault
+    }
     if appArguments.messageOption.present && appArguments.messageOption.value.lowercased().hasSuffix(".md") {
         appArguments.messageOption.value = getMarkdown(mdFilePath: appArguments.messageOption.value)
     }
@@ -706,6 +708,7 @@ func processCLOptions(json: JSON = getJSON()) {
     }
 
     if appArguments.forceOnTop.present {
+        appArguments.showOnAllScreens.present = true
         appvars.windowOnTop = true
         writeLog("windowOnTop = true")
     }
@@ -781,7 +784,7 @@ func processCLOptionValues() {
     appArguments.titleFont.evaluate(json: json)
 
     // message
-    appArguments.messageOption.evaluate(json: json, defaultValue: appvars.messageDefault)
+    appArguments.messageOption.evaluate(json: json)
     appArguments.messageAlignment.evaluate(json: json, defaultValue: appvars.messageAlignmentTextRepresentation)
     appArguments.messageAlignmentOld.evaluate(json: json, defaultValue: appvars.messageAlignmentTextRepresentation)
     if appArguments.messageAlignmentOld.present {
@@ -816,6 +819,9 @@ func processCLOptionValues() {
         (appvars.windowPositionVertical,appvars.windowPositionHorozontal) = windowPosition(appArguments.position.value)
     }
     appArguments.positionOffset.evaluate(json: json, defaultValue: "\(appvars.windowPositionOffset)")
+    if appArguments.positionOffset.present {
+        appvars.windowPositionOffset = appArguments.positionOffset.value.floatValue()
+    }
 
     // window properties
     appArguments.windowWidth.evaluate(json: json)
@@ -925,6 +931,7 @@ func processCLOptionValues() {
     appArguments.cautionIcon.evaluate(json: json)
     appArguments.movableWindow.evaluate(json: json)
     appArguments.forceOnTop.evaluate(json: json)
+    appArguments.showOnAllScreens.evaluate(json: json)
     appArguments.smallWindow.evaluate(json: json)
     appArguments.bigWindow.evaluate(json: json)
     appArguments.fullScreenWindow.evaluate(json: json)
@@ -940,6 +947,7 @@ func processCLOptionValues() {
     appArguments.constructionKit.evaluate(json: json)
     appArguments.miniMode.evaluate(json: json)
     appArguments.notification.evaluate(json: json)
+    appArguments.notificationGoPing.evaluate(json: json)
     appArguments.eulaMode.evaluate(json: json)
     appArguments.windowResizable.evaluate(json: json)
 

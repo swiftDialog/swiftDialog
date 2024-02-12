@@ -29,12 +29,12 @@ func checkForDialogNotificationMode(_ arguments: CommandLineArguments) -> Bool {
     // check if we are sending a notification
     if arguments.notification.present {
         writeLog("Sending a notification")
-        /*
+
         var notificationIcon = ""
         if appArguments.iconOption.present {
             notificationIcon = appArguments.iconOption.value
         }
-         */
+
         var acceptActionLabel: String = ""
         var declineActionLabel: String = ""
         if arguments.button1TextOption.present {
@@ -46,10 +46,12 @@ func checkForDialogNotificationMode(_ arguments: CommandLineArguments) -> Bool {
         sendNotification(title: arguments.titleOption.value,
                          subtitle: arguments.subTitleOption.value,
                          message: arguments.messageOption.value,
+                         image: notificationIcon,
                          acceptString: acceptActionLabel,
                          acceptAction: arguments.button1ActionOption.value,
                          declineString: declineActionLabel,
-                         declineAction: arguments.button2ActionOption.value)
+                         declineAction: arguments.button2ActionOption.value,
+                         notificationSoundEnabled: arguments.notificationGoPing.present)
         usleep(100000)
     }
     return arguments.notification.present
@@ -58,33 +60,57 @@ func checkForDialogNotificationMode(_ arguments: CommandLineArguments) -> Bool {
 func sendNotification(title: String = "",
                       subtitle: String = "",
                       message: String = "",
+                      image: String = "",
                       acceptString: String = "Open",
                       acceptAction: String = "",
                       declineString: String = "Close",
-                      declineAction: String = "") {
+                      declineAction: String = "",
+                      notificationSoundEnabled: Bool = false) {
     let notification = UNUserNotificationCenter.current()
+    let tempImagePath: String = "/var/tmp/sdnotification.png"
     // Define the custom actions.
     let acceptActionLabel = UNNotificationAction(identifier: "ACCEPT_ACTION_LABEL",
-          title: acceptString,
-          options: [])
+        title: acceptString,
+        options: [])
     let declineActionLabel = UNNotificationAction(identifier: "DECLINE_ACTION_LABEL",
-          title: declineString,
-          options: [])
+        title: declineString,
+        options: [])
     var actions: [UNNotificationAction] = []
 
-    if !acceptString.isEmpty && !declineString.isEmpty {
-        actions = [acceptActionLabel, declineActionLabel]
+    if !acceptString.isEmpty {
+        actions.append(acceptActionLabel)
+    }
+    if !declineString.isEmpty {
+        actions.append(declineActionLabel)
+    }
+
+    if !image.isEmpty {
+        // default image just in case
+        var importedImage: NSImage = NSImage(systemSymbolName: "applelogo", accessibilityDescription: "Apple logo")!
+
+        if image.hasSuffix(".app") || image.hasSuffix("prefPane") {
+            importedImage = getAppIcon(appPath: image)
+        } else if image.lowercased().hasPrefix("sf=") {
+            let imageConfig = NSImage.SymbolConfiguration(pointSize: 128, weight: .thin)
+            importedImage = NSImage(systemSymbolName: String(image.dropFirst(3)), accessibilityDescription: "SF Symbol")!
+                .withSymbolConfiguration(imageConfig)!
+        } else {
+            importedImage = getImageFromPath(fileImagePath: image, returnErrorImage: true)
+        }
+
+        // need to save a temp version of the image for the notification to be able to load it
+        savePNG(image: importedImage, path: tempImagePath)
     }
 
     // Define the notification type
-    let meetingInviteCategory =
+    let sdCategory =
           UNNotificationCategory(identifier: "SD_NOTIFICATION",
           actions: actions,
           intentIdentifiers: [],
           hiddenPreviewsBodyPlaceholder: "",
                                  options: .customDismissAction)
 
-    notification.setNotificationCategories([meetingInviteCategory])
+    notification.setNotificationCategories([sdCategory])
 
     notification.getNotificationSettings { settings in
         guard (settings.authorizationStatus == .authorized) ||
@@ -99,6 +125,20 @@ func sendNotification(title: String = "",
                 content.userInfo = ["ACCEPT_ACTION": acceptAction,
                                 "DECLINE_ACTION": declineAction ]
                 content.categoryIdentifier = "SD_NOTIFICATION"
+                if notificationSoundEnabled {
+                    content.sound = UNNotificationSound.default
+                }
+                content.attachments = []
+                // Add any Attachments
+                if !image.isEmpty {
+                    do {
+                        let fileURL = URL(fileURLWithPath: tempImagePath)
+                        let attachment = try UNNotificationAttachment(identifier: "AttachedContent", url: fileURL, options: .none)
+                        content.attachments = [attachment]
+                    } catch let error {
+                        writeLog(error.localizedDescription, logLevel: .error)
+                    }
+                }
 
                 // Create the request
                 //let uuidString = UUID().uuidString

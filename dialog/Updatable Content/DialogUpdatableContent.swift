@@ -577,7 +577,7 @@ class DialogUpdatableContent: ObservableObject {
     @Published var showSheet: Bool
     @Published var sheetErrorMessage: String
 
-    @Published var blurredScreen = [BlurWindowController]()
+    //@Published var blurredScreen = [BlurWindowController]()
 
     @Published var updateView: Bool = true
 
