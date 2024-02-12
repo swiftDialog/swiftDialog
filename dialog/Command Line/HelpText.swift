@@ -13,7 +13,7 @@ struct SDHelp {
     public func printHelpShort() {
         writeLog("Printing short help")
         print("swiftDialog v\(getVersionString())")
-        print("©2023 Bart Reardon\n")
+        print("©2024 Bart Reardon\n")
         print("\n use --help <option> for more details\n")
         let mirror = Mirror(reflecting: argument)
         for child in mirror.children {
