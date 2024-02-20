@@ -78,9 +78,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                     blurredScreen[index].loadWindow()
                     blurredScreen[index].showWindow(self)
                 }
-                NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
+                window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
             } else if appArguments.forceOnTop.present {
-                NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
+                window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
             } else {
                 background.close()
             }
@@ -90,7 +90,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 NSApp.activate(ignoringOtherApps: true)
             }
 
-            placeWindow(window, size: CGSize(width: appvars.windowWidth, height: appvars.windowHeight+28),
+            placeWindow(window, size: window.frame.size,
                         vertical: appvars.windowPositionVertical,
                 horozontal: appvars.windowPositionHorozontal,
                         offset: appvars.windowPositionOffset)
@@ -192,11 +192,18 @@ struct dialogApp: App {
                     MiniView(observedDialogContent: observedData)
                         .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
                 } else {
-                    ContentView(observedDialogContent: observedData)
-                        .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
-                        .sheet(isPresented: $observedData.showSheet, content: {
-                            ErrorView(observedContent: observedData)
-                        })
+                    if appArguments.windowResizable.present {
+                        ContentView(observedDialogContent: observedData)
+                            .sheet(isPresented: $observedData.showSheet, content: {
+                                ErrorView(observedContent: observedData)
+                            })
+                    } else {
+                        ContentView(observedDialogContent: observedData)
+                            .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
+                            .sheet(isPresented: $observedData.showSheet, content: {
+                                ErrorView(observedContent: observedData)
+                            })
+                    }
                 }
             }
         }

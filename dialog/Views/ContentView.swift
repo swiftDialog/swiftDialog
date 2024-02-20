@@ -75,7 +75,8 @@ struct ContentView: View {
                     TitleView(observedData: observedData)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .padding(.top, titlePadding)
-                        .frame(minWidth: observedData.args.windowWidth.value.floatValue(), minHeight: observedData.appProperties.titleHeight, alignment: .center)
+                        //.frame(minWidth: observedData.args.windowWidth.value.floatValue(), minHeight: observedData.appProperties.titleHeight, alignment: .center)
+                        .frame(minHeight: observedData.appProperties.titleHeight, alignment: .center)
 
                     // Horozontal Line
                     Divider()
