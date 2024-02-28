@@ -78,9 +78,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                     blurredScreen[index].loadWindow()
                     blurredScreen[index].showWindow(self)
                 }
-                NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
+                window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
             } else if appArguments.forceOnTop.present {
-                NSApp.windows[0].level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
+                window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
             } else {
                 background.close()
             }
@@ -90,7 +90,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 NSApp.activate(ignoringOtherApps: true)
             }
 
-            placeWindow(window, size: CGSize(width: appvars.windowWidth, height: appvars.windowHeight+28),
+            placeWindow(window, size: window.frame.size,
                         vertical: appvars.windowPositionVertical,
                 horozontal: appvars.windowPositionHorozontal,
                         offset: appvars.windowPositionOffset)
@@ -116,7 +116,7 @@ struct dialogApp: App {
         for argument in CommandLine.arguments {
             writeLog(argument, logLevel: .info)
         }
-        checkNotificationAuthorisation()
+
         // Ensure the singleton NSApplication exists.
         // required for correct determination of screen dimentions for the screen in use in multi screen scenarios
         _ = NSApplication.shared
@@ -129,6 +129,8 @@ struct dialogApp: App {
 
         // get all the command line option values
         processCLOptionValues()
+
+        checkNotificationAuthorisation(notificationPresent: appArguments.notification.present)
 
         // check if we are sending a notification
         if checkForDialogNotificationMode(appArguments) {
@@ -192,11 +194,18 @@ struct dialogApp: App {
                     MiniView(observedDialogContent: observedData)
                         .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
                 } else {
-                    ContentView(observedDialogContent: observedData)
-                        .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
-                        .sheet(isPresented: $observedData.showSheet, content: {
-                            ErrorView(observedContent: observedData)
-                        })
+                    if appArguments.windowResizable.present {
+                        ContentView(observedDialogContent: observedData)
+                            .sheet(isPresented: $observedData.showSheet, content: {
+                                ErrorView(observedContent: observedData)
+                            })
+                    } else {
+                        ContentView(observedDialogContent: observedData)
+                            .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
+                            .sheet(isPresented: $observedData.showSheet, content: {
+                                ErrorView(observedContent: observedData)
+                            })
+                    }
                 }
             }
         }

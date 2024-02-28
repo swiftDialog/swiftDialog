@@ -105,7 +105,7 @@ struct MessageContent: View {
                 if !observedData.args.messageVerticalAlignment.present || ["centre", "center", "top"].contains(observedData.args.messageVerticalAlignment.value) {
                     Spacer()
                 }
-            } 
+            }
 
             Group {
                 TextFileView(logFilePath: observedData.args.logFileToTail.value)

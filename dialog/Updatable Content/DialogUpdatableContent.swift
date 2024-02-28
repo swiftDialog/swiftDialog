@@ -110,7 +110,7 @@ class FileReader {
             case "position:":
                 (observedData.appProperties.windowPositionVertical,
                  observedData.appProperties.windowPositionHorozontal) = windowPosition(line.replacingOccurrences(of: "position: ", with: ""))
-                placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
+                placeWindow(observedData.mainWindow ?? NSApp.windows[0], size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
                     vertical: observedData.appProperties.windowPositionVertical,
                     horozontal: observedData.appProperties.windowPositionHorozontal,
                     offset: observedData.args.positionOffset.value.floatValue())
@@ -120,7 +120,7 @@ class FileReader {
                 let tempWidth = line.replacingOccurrences(of: "width: ", with: "")
                 if tempWidth.isNumeric {
                     observedData.appProperties.windowWidth = CGFloat((tempWidth as NSString).floatValue)
-                    placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
+                    placeWindow(observedData.mainWindow ?? NSApp.windows[0], size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
                         vertical: observedData.appProperties.windowPositionVertical,
                         horozontal: observedData.appProperties.windowPositionHorozontal,
                                 offset: observedData.args.positionOffset.value.floatValue())
@@ -130,7 +130,7 @@ class FileReader {
                 let tempHeight = line.replacingOccurrences(of: "height: ", with: "")
                 if tempHeight.isNumeric {
                     observedData.appProperties.windowHeight = CGFloat((tempHeight as NSString).floatValue)
-                    placeWindow(observedData.mainWindow!, size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
+                    placeWindow(observedData.mainWindow ?? NSApp.windows[0], size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
                         vertical: observedData.appProperties.windowPositionVertical,
                         horozontal: observedData.appProperties.windowPositionHorozontal,
                                 offset: observedData.args.positionOffset.value.floatValue())
