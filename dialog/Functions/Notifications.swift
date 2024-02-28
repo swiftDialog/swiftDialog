@@ -16,10 +16,12 @@ func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent noti
     completionHandler([.banner, .sound])
 }
 
-func checkNotificationAuthorisation() {
+func checkNotificationAuthorisation(notificationPresent: Bool) {
     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, error in
         if let error = error {
-            writeLog(error.localizedDescription, logLevel: .error)
+            if notificationPresent {
+                writeLog(error.localizedDescription, logLevel: .error)
+            }
             return
         }
     }

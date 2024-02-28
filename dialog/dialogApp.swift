@@ -116,7 +116,7 @@ struct dialogApp: App {
         for argument in CommandLine.arguments {
             writeLog(argument, logLevel: .info)
         }
-        checkNotificationAuthorisation()
+
         // Ensure the singleton NSApplication exists.
         // required for correct determination of screen dimentions for the screen in use in multi screen scenarios
         _ = NSApplication.shared
@@ -129,6 +129,8 @@ struct dialogApp: App {
 
         // get all the command line option values
         processCLOptionValues()
+
+        checkNotificationAuthorisation(notificationPresent: appArguments.notification.present)
 
         // check if we are sending a notification
         if checkForDialogNotificationMode(appArguments) {
