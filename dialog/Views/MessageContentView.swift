@@ -22,7 +22,12 @@ struct MessageContent: View {
     var iconDisplayWidth: CGFloat
 
     let theAllignment: Alignment = .topLeading
-
+/*
+    let arrayOfViews    : [AnyView]   = [
+        AnyView(ViewA()),
+        AnyView(ViewB())
+    ]
+*/
     init(observedDialogContent: DialogUpdatableContent) {
         writeLog("Displaying main message content")
         self.observedData = observedDialogContent
@@ -110,6 +115,7 @@ struct MessageContent: View {
             Group {
                 TextFileView(logFilePath: observedData.args.logFileToTail.value)
                     .padding(.bottom, observedData.appProperties.contentPadding)
+
                 WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
                     .padding(.bottom, observedData.appProperties.contentPadding)

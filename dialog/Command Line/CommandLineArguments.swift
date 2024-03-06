@@ -146,6 +146,7 @@ struct CommandLineArguments {
     var jamfHelperMode           = CommandlineArgument(long: "jh", short: "jh", isbool: true)
     var miniMode                 = CommandlineArgument(long: "mini", isbool: true)
     var eulaMode                 = CommandlineArgument(long: "eula", isbool: true)
+    var presentationMode         = CommandlineArgument(long: "presentation", isbool: true)
     var windowButtonsEnabled     = CommandlineArgument(long: "windowbuttons")
     var windowResizable          = CommandlineArgument(long: "resizable", isbool: true)
     var showOnAllScreens         = CommandlineArgument(long: "showonallscreens", isbool: true)

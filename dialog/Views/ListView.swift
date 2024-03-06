@@ -38,9 +38,11 @@ struct ListView: View {
     var rowFontSize: CGFloat
     var proportionalListHeight: CGFloat
     var subtitlePresent: Bool = false
+    var clipRadius: CGFloat = 8
 
-    init(observedDialogContent: DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent, clipRadius: CGFloat = 8) {
         self.observedData = observedDialogContent
+        self.clipRadius = clipRadius
 
         rowHeight = observedDialogContent.appProperties.messageFontSize + 14
         rowStatusHeight = observedDialogContent.appProperties.messageFontSize + 5
@@ -146,7 +148,7 @@ struct ListView: View {
                         }
                     }
                 })
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .clipShape(RoundedRectangle(cornerRadius: clipRadius))
             }
         }
     }

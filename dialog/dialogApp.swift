@@ -193,6 +193,9 @@ struct dialogApp: App {
                 if appArguments.miniMode.present {
                     MiniView(observedDialogContent: observedData)
                         .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
+                } else if appArguments.presentationMode.present {
+                    PresentationView(observedData: observedData)
+                        .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
                 } else {
                     if appArguments.windowResizable.present {
                         ContentView(observedDialogContent: observedData)

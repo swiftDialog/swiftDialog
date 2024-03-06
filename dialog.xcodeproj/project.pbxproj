@@ -71,6 +71,7 @@
 		CC2190592A7BCDDD00269525 /* View+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2190582A7BCDDD00269525 /* View+Additions.swift */; };
 		CC21905D2A7BD7D300269525 /* AppVariables.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC21905C2A7BD7D300269525 /* AppVariables.swift */; };
 		CC21905F2A7BD7F200269525 /* CommandLineArguments.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC21905E2A7BD7F200269525 /* CommandLineArguments.swift */; };
+		CC7D43CF2B972976004B9E65 /* PresentationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC7D43CE2B972976004B9E65 /* PresentationView.swift */; };
 		CC8D96302A01CCAB00CC84C6 /* Theme+sdMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC8D962F2A01CCAB00CC84C6 /* Theme+sdMarkdown.swift */; };
 		CC9F8FEF2A5EC76400802A88 /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC9F8FEE2A5EC76400802A88 /* ImageProcessing.swift */; };
 		CCB334702B2320F20079FB83 /* SolidColourView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB3346F2B2320F20079FB83 /* SolidColourView.swift */; };
@@ -175,6 +176,7 @@
 		CC21905C2A7BD7D300269525 /* AppVariables.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVariables.swift; sourceTree = "<group>"; };
 		CC21905E2A7BD7F200269525 /* CommandLineArguments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandLineArguments.swift; sourceTree = "<group>"; };
 		CC2190622A7DCA1A00269525 /* preinstall */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = preinstall; sourceTree = "<group>"; };
+		CC7D43CE2B972976004B9E65 /* PresentationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationView.swift; sourceTree = "<group>"; };
 		CC8D962F2A01CCAB00CC84C6 /* Theme+sdMarkdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Theme+sdMarkdown.swift"; sourceTree = "<group>"; };
 		CC9F8FEE2A5EC76400802A88 /* ImageProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageProcessing.swift; sourceTree = "<group>"; };
 		CCB3346F2B2320F20079FB83 /* SolidColourView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolidColourView.swift; sourceTree = "<group>"; };
@@ -395,6 +397,7 @@
 				4124EFD129455861003B00F4 /* HelpView.swift */,
 				CCE934AC2ACC29F60094BD06 /* TextFileView.swift */,
 				CCB3346F2B2320F20079FB83 /* SolidColourView.swift */,
+				CC7D43CE2B972976004B9E65 /* PresentationView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -687,6 +690,7 @@
 				417BD43827992EDB009AE34A /* TaskProgressView.swift in Sources */,
 				41D81E5725F7929800D1F7E1 /* DialogView.swift in Sources */,
 				4154C2E025F76BDB00A3D373 /* ContentView.swift in Sources */,
+				CC7D43CF2B972976004B9E65 /* PresentationView.swift in Sources */,
 				41D81E5C25F817BF00D1F7E1 /* ButtonView.swift in Sources */,
 				CC21904B2A7B994A00269525 /* Preferences.swift in Sources */,
 				41110A2825F9E79E008171D2 /* License.swift in Sources */,
@@ -899,7 +903,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 2.4.2;
+				MARKETING_VERSION = 2.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.csiro.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -928,7 +932,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 2.4.2;
+				MARKETING_VERSION = 2.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.csiro.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
