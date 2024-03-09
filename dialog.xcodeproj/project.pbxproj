@@ -72,6 +72,7 @@
 		CC21905D2A7BD7D300269525 /* AppVariables.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC21905C2A7BD7D300269525 /* AppVariables.swift */; };
 		CC21905F2A7BD7F200269525 /* CommandLineArguments.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC21905E2A7BD7F200269525 /* CommandLineArguments.swift */; };
 		CC7D43CF2B972976004B9E65 /* PresentationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC7D43CE2B972976004B9E65 /* PresentationView.swift */; };
+		CC7D44082B9C6FB5004B9E65 /* ImageFader.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC7D44072B9C6FB5004B9E65 /* ImageFader.swift */; };
 		CC8D96302A01CCAB00CC84C6 /* Theme+sdMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC8D962F2A01CCAB00CC84C6 /* Theme+sdMarkdown.swift */; };
 		CC9F8FEF2A5EC76400802A88 /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC9F8FEE2A5EC76400802A88 /* ImageProcessing.swift */; };
 		CCB334702B2320F20079FB83 /* SolidColourView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB3346F2B2320F20079FB83 /* SolidColourView.swift */; };
@@ -177,6 +178,7 @@
 		CC21905E2A7BD7F200269525 /* CommandLineArguments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandLineArguments.swift; sourceTree = "<group>"; };
 		CC2190622A7DCA1A00269525 /* preinstall */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = preinstall; sourceTree = "<group>"; };
 		CC7D43CE2B972976004B9E65 /* PresentationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationView.swift; sourceTree = "<group>"; };
+		CC7D44072B9C6FB5004B9E65 /* ImageFader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageFader.swift; sourceTree = "<group>"; };
 		CC8D962F2A01CCAB00CC84C6 /* Theme+sdMarkdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Theme+sdMarkdown.swift"; sourceTree = "<group>"; };
 		CC9F8FEE2A5EC76400802A88 /* ImageProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageProcessing.swift; sourceTree = "<group>"; };
 		CCB3346F2B2320F20079FB83 /* SolidColourView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolidColourView.swift; sourceTree = "<group>"; };
@@ -388,6 +390,7 @@
 				41FD45FD26C40366006976FC /* TimerView.swift */,
 				41FD45FF26C8DC5D006976FC /* ImageView.swift */,
 				41876682275D87C70023A6A1 /* ImageSlider.swift */,
+				CC7D44072B9C6FB5004B9E65 /* ImageFader.swift */,
 				417BD43727992EDB009AE34A /* TaskProgressView.swift */,
 				417BD470279CB658009AE34A /* CheckboxView.swift */,
 				415E1FC927A2694B00DE971B /* ListView.swift */,
@@ -664,6 +667,7 @@
 				CCD8ACEC2A011C9500D98695 /* RadioView.swift in Sources */,
 				418A7B552759949B00E4D6F1 /* ImageView.swift in Sources */,
 				418A7B562759949B00E4D6F1 /* jamfHelper.swift in Sources */,
+				CC7D44082B9C6FB5004B9E65 /* ImageFader.swift in Sources */,
 				418A7B572759949B00E4D6F1 /* ProcessCLOptions.swift in Sources */,
 				411692382893A21500A88700 /* CKImageView.swift in Sources */,
 				CC2190522A7BCC3A00269525 /* Images.swift in Sources */,

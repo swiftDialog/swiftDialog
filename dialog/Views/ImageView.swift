@@ -16,9 +16,13 @@ struct ImageView: View {
     var imageList: Array = [String]()
     var captions: Array = [String]()
     var autoPlaySeconds: CGFloat
+    var showControls: Bool
+    var clipRadius: CGFloat
 
 
-    init(imageArray: [MainImage], captionArray: Array<String>, autoPlaySeconds: CGFloat) {
+    init(imageArray: [MainImage], captionArray: Array<String>, autoPlaySeconds: CGFloat, showControls: Bool = false, clipRadius: CGFloat = 10) {
+        self.showControls = showControls
+        self.clipRadius = clipRadius
         for index in 0..<imageArray.count where imageArray[index].path != "" {
             imageList.append(imageArray[index].path)
             captions.append(imageArray[index].caption)
@@ -34,26 +38,8 @@ struct ImageView: View {
     var body: some View {
 
         VStack(spacing: 20) {
-            ImageSlider(index: $index.animation(), maxIndex: imageList.count - 1, autoPlaySeconds: autoPlaySeconds) {
-                ForEach(Array(self.imageList.enumerated()), id: \.offset) { imageIndex, imageName in
-                    VStack {
-                        DisplayImage(imageName, corners: true)
-
-                        if captions.count > 0 {
-                            if appArguments.fullScreenWindow.present {
-                                Text(captions[imageIndex])
-                                    .font(.system(size: 60))
-                                    .foregroundColor(.white)
-                            } else {
-                                Text(captions[imageIndex])
-                                    .font(.system(size: 20))
-                                    .italic()
-                            }
-                        }
-                    }
-                }
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            ImageFader(imageList: imageList, captionsList: captions, autoPlaySeconds: autoPlaySeconds, showControls: showControls, showCorners: clipRadius > 0 ? true : false)
+            .clipShape(RoundedRectangle(cornerRadius: clipRadius))
         }
         .border(appvars.debugBorderColour, width: 2)
     }

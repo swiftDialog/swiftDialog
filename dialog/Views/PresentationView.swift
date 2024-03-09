@@ -25,27 +25,21 @@ struct PresentationView: View {
     var body: some View {
         GeometryReader { content in
             Color.clear.onAppear {
-                observedData.appProperties.windowWidth = content.size.width
+                if !observedData.args.windowResizable.present {
+                    observedData.appProperties.windowWidth = content.size.width
+                }
             }
             VStack {
                 // title
                 //TitleView(observedData: observedData)
                 // content
                 HStack {
-                    // image, full height
-                    /*
-                    ImageView(imageArray: observedData.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: observedData.args.autoPlay.value.floatValue())
-                        .aspectRatio(contentMode: .fill)
-                        .scaledToFill()
-                        .fixedSize(horizontal: true, vertical: false)
-                        .clipped()
-                     */
                     if observedData.args.mainImage.present {
-                        DisplayImage(observedData.args.mainImage.value, corners: false, showBackgroundOnError: true)
-                            .aspectRatio(contentMode: .fill)
+                        ImageView(imageArray: observedData.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: observedData.args.autoPlay.value.floatValue(), showControls: false, clipRadius: 0)
+                            .aspectRatio(contentMode: .fit)
                             .scaledToFill()
-                            .fixedSize(horizontal: true, vertical: false)
                             .clipped()
+                            .frame(maxWidth: content.size.width*0.3)
                     } else if observedData.args.webcontent.present {
                         WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
                             .frame(maxWidth: content.size.width*0.3)
@@ -78,10 +72,8 @@ struct PresentationView: View {
 
                     // list view
                     ListView(observedDialogContent: observedData, clipRadius: 0)
-
-                    // message content
-                    //MessageContent(observedDialogContent: observedData)
                 }
+
                 // footer
                 VStack {
                     ProgressView(value: observedData.progressValue, total: observedData.progressTotal)
