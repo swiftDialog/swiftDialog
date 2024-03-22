@@ -144,7 +144,7 @@ func sendNotification(title: String = "",
 
                 // Create the request
                 //let uuidString = UUID().uuidString
-                let request = UNNotificationRequest(identifier: "SD_NOTIFICATION",
+                let request = UNNotificationRequest(identifier: UUID().uuidString,
                             content: content, trigger: nil)
 
                 // Schedule the request with the system.
