@@ -193,15 +193,19 @@ func processCLOptions(json: JSON = getJSON()) {
                 var dropdownRequired: Bool = false
                 var dropdownStyle: String = "list"
                 let dropdownTitle: String = labelItems[0]
+                var dropdownName: String = ""
                 if labelItems.count > 1 {
-                    if labelItems[1] == "required" {
+                    switch labelItems[1].components(separatedBy: "=").first {
+                    case "required":
                         dropdownRequired = true
-                    }
-                    if labelItems[1] == "radio" {
-                        dropdownStyle = labelItems[1]
+                    case "radio":
+                        dropdownStyle = "radio"
+                    case "name":
+                        dropdownName = labelItems[1].components(separatedBy: "=").last ?? dropdownTitle
+                    default: ()
                     }
                 }
-                userInputState.dropdownItems.append(DropDownItems(title: dropdownTitle, values: dropdownValues[index].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[index], selectedValue: dropdownDefaults[index], required: dropdownRequired, style: dropdownStyle))
+                userInputState.dropdownItems.append(DropDownItems(title: dropdownTitle, name: dropdownName, values: dropdownValues[index].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[index], selectedValue: dropdownDefaults[index], required: dropdownRequired, style: dropdownStyle))
             }
         }
         for index in 0..<userInputState.dropdownItems.count where userInputState.dropdownItems[index].required {
@@ -228,6 +232,7 @@ func processCLOptions(json: JSON = getJSON()) {
                         required: Bool(json[appArguments.textField.long][index]["required"].boolValue),
                         secure: Bool(json[appArguments.textField.long][index]["secure"].boolValue),
                         title: String(json[appArguments.textField.long][index]["title"].stringValue),
+                        name: String(json[appArguments.textField.long][index]["name"].stringValue),
                         value: String(json[appArguments.textField.long][index]["value"].stringValue),
                         isDate: Bool(json[appArguments.textField.long][index]["isdate"].boolValue))
                     )
@@ -246,6 +251,7 @@ func processCLOptions(json: JSON = getJSON()) {
                 var fieldSecure: Bool = false
                 var fieldSelectType: String = ""
                 var fieldTitle: String = ""
+                var fieldName: String = ""
                 var fieldValue: String = ""
                 var fieldIsDate: Bool = false
                 if items.count > 0 {
@@ -277,6 +283,8 @@ func processCLOptions(json: JSON = getJSON()) {
                                 fieldSecure = true
                             case "value":
                                 fieldValue = items[index+1]
+                            case "name":
+                                fieldName = items[index+1]
                             case "isdate":
                                 fieldIsDate = true
                             default: ()
@@ -295,6 +303,7 @@ func processCLOptions(json: JSON = getJSON()) {
                             required: fieldRequire,
                             secure: fieldSecure,
                             title: fieldTitle,
+                            name: fieldName,
                             value: fieldValue,
                             isDate: fieldIsDate))
             }
@@ -321,6 +330,7 @@ func processCLOptions(json: JSON = getJSON()) {
             for checkboxes in CLOptionMultiOptions(optionName: appArguments.checkbox.long) {
                 let items = checkboxes.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
                 var label: String = ""
+                var name: String = ""
                 var icon: String = ""
                 var checked: Bool = false
                 var disabled: Bool = false
@@ -335,6 +345,8 @@ func processCLOptions(json: JSON = getJSON()) {
                     switch itemName.lowercased() {
                     case "label":
                         label = itemValue
+                    case "name":
+                        name = itemValue
                     case "icon":
                         icon = itemValue
                     case "checked":
@@ -347,7 +359,8 @@ func processCLOptions(json: JSON = getJSON()) {
                         label = itemName
                     }
                 }
-                appvars.checkboxArray.append(CheckBoxes(label: label, icon: icon, checked: checked, disabled: disabled, enablesButton1: enableButton1))
+                userInputState.checkBoxes.append(CheckBoxes(label: label, name: name, icon: icon, checked: checked, disabled: disabled, enablesButton1: enableButton1))
+                //appvars.checkboxArray.append(CheckBoxes(label: label, name: name, icon: icon, checked: checked, disabled: disabled, enablesButton1: enableButton1))
             }
         }
                                 writeLog("checkboxOptionsArray : \(appvars.checkboxArray)")

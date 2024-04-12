@@ -37,6 +37,7 @@ struct UserInputState {
     var dropdownItems = [DropDownItems]()
     var listItems = [ListItems]()
     var textFields = [TextFieldState]()
+    var checkBoxes = [CheckBoxes]()
 }
 
 struct TextFieldState {
@@ -51,12 +52,14 @@ struct TextFieldState {
     var required: Bool     = false
     var secure: Bool       = false
     var title: String
+    var name: String       = ""
     var value: String      = ""
     var date: Date         = Date.now
     var isDate: Bool       = false
     var requiredTextfieldHighlight: Color = .clear
     var dictionary: [String: Any] {
             return ["title": title,
+                    "name": name,
                     "required": required,
                     "secure": secure,
                     "prompt": prompt,
@@ -72,6 +75,7 @@ struct TextFieldState {
 
 struct DropDownItems {
     var title: String
+    var name: String = ""
     var values: [String]
     var defaultValue: String
     var selectedValue: String = ""
@@ -82,6 +86,7 @@ struct DropDownItems {
 
 struct CheckBoxes {
     var label: String
+    var name: String = ""
     var icon: String = ""
     var checked: Bool = false
     var disabled: Bool = false

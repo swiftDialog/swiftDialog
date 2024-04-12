@@ -107,16 +107,21 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                 //check for required fields
                 let textField = userInputState.textFields[index]
                 let textfieldValue = textField.value
+                var textfieldName = textField.name
                 let textfieldTitle = textField.title
                 let textfieldRequired = textField.required
                 userInputState.textFields[index].requiredTextfieldHighlight = Color.clear
 
+                if textfieldName.isEmpty {
+                    textfieldName = textfieldTitle
+                }
+
                 if textfieldRequired && textfieldValue == "" { // && userInputState.textFields[index].regex.isEmpty {
                     NSSound.beep()
-                    requiredString += "  - \"\(textfieldTitle)\" \("is-required".localized)<br>"
+                    requiredString += "  - \"\(textfieldName)\" \("is-required".localized)<br>"
                     userInputState.textFields[index].requiredTextfieldHighlight = Color.red
                     dontQuit = true
-                    writeLog("Required text field \(textfieldTitle) has no value")
+                    writeLog("Required text field \(textfieldName) has no value")
 
                 //check for regex requirements
                 } else if !(textfieldValue.isEmpty)
@@ -126,11 +131,11 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                     userInputState.textFields[index].requiredTextfieldHighlight = Color.green
                     requiredString += "  - "+(textField.regexError)+"<br>"
                     dontQuit = true
-                    writeLog("Textfield \(textfieldTitle) value \(textfieldValue) does not meet regex requirements \(String(describing: textField.regex))")
+                    writeLog("Textfield \(textfieldName) value \(textfieldValue) does not meet regex requirements \(String(describing: textField.regex))")
                 }
 
-                outputArray.append("\(textfieldTitle) : \(textfieldValue)")
-                json[textfieldTitle].string = textfieldValue
+                outputArray.append("\(textfieldName) : \(textfieldValue)")
+                json[textfieldName].string = textfieldValue
             }
         }
 
@@ -152,19 +157,24 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                 let dropdownItemValues = dropdownItem.values
                 let dropdownItemSelectedValue = dropdownItem.selectedValue
                 let dropdownItemTitle = dropdownItem.title
+                var dropdownItemName = dropdownItem.name
                 let dropdownItemRequired = dropdownItem.required
                 userInputState.dropdownItems[index].requiredfieldHighlight = Color.clear
 
+                if dropdownItemName.isEmpty {
+                    dropdownItemName = dropdownItem.title
+                }
+
                 if dropdownItemRequired && dropdownItemSelectedValue == "" {
                     NSSound.beep()
-                    requiredString += "  - \"\(dropdownItemTitle)\" \("is-required".localized)<br>"
+                    requiredString += "  - \"\(dropdownItemName)\" \("is-required".localized)<br>"
                     userInputState.dropdownItems[index].requiredfieldHighlight = Color.red
                     dontQuit = true
-                    writeLog("Required select item \(dropdownItemTitle) has no value")
+                    writeLog("Required select item \(dropdownItemName) has no value")
                 } else {
-                    outputArray.append("\"\(dropdownItemTitle)\" : \"\(dropdownItemSelectedValue)\"")
-                    outputArray.append("\"\(dropdownItemTitle)\" index : \"\(dropdownItemValues.firstIndex(of: dropdownItemSelectedValue) ?? -1)\"")
-                    json[dropdownItemTitle] = ["selectedValue": dropdownItemSelectedValue, "selectedIndex": dropdownItemValues.firstIndex(of: dropdownItemSelectedValue) ?? -1]
+                    outputArray.append("\"\(dropdownItemName)\" : \"\(dropdownItemSelectedValue)\"")
+                    outputArray.append("\"\(dropdownItemName)\" index : \"\(dropdownItemValues.firstIndex(of: dropdownItemSelectedValue) ?? -1)\"")
+                    json[dropdownItemName] = ["selectedValue": dropdownItemSelectedValue, "selectedIndex": dropdownItemValues.firstIndex(of: dropdownItemSelectedValue) ?? -1]
                 }
             }
         }
@@ -176,10 +186,15 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
             return
         }
 
-        if observedObject?.args.checkbox.present != nil {
-            for index in 0..<(observedObject?.appProperties.checkboxArray.count ?? 0) {
-                outputArray.append("\"\(observedObject?.appProperties.checkboxArray[index].label ?? "checkbox \(index)")\" : \"\(observedObject?.appProperties.checkboxArray[index].checked ?? false)\"")
-                json[observedObject?.appProperties.checkboxArray[index].label ?? 0].boolValue = observedObject?.appProperties.checkboxArray[index].checked ?? false
+        if appArguments.checkbox.present {
+            for index in 0..<(userInputState.checkBoxes.count) {
+                let checkBox = userInputState.checkBoxes[index]
+                var checkboxName = checkBox.name
+                if checkboxName.isEmpty {
+                    checkboxName = checkBox.label
+                }
+                outputArray.append("\"\(checkboxName)\" : \"\(checkBox.checked)\"")
+                json[checkboxName].boolValue = checkBox.checked
             }
         }
 
