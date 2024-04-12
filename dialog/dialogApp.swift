@@ -53,6 +53,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             window.standardWindowButton(.closeButton)?.isEnabled = appvars.windowCloseEnabled
             window.standardWindowButton(.miniaturizeButton)?.isEnabled = appvars.windowMinimiseEnabled
             window.standardWindowButton(.zoomButton)?.isEnabled = appvars.windowMaximiseEnabled
+            window.title = appArguments.titleOption.value
             window.isMovable = appArguments.movableWindow.present
             window.isMovableByWindowBackground = true
             if appArguments.showOnAllScreens.present {
