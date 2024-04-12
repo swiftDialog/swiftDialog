@@ -108,7 +108,7 @@ struct TextEntryView: View {
                             HStack {
                                 if textfieldContent[index].secure {
                                     ZStack {
-                                        SecureField("", text: $textfieldContent[index].value)
+                                        SecureField(textfieldContent[index].prompt, text: $textfieldContent[index].value)
                                             .disableAutocorrection(true)
                                             .textContentType(textfieldContent[index].passwordFill ? .password: .none)
                                             .onChange(of: textfieldContent[index].value, perform: { textContent in
