@@ -22,12 +22,7 @@ struct MessageContent: View {
     var iconDisplayWidth: CGFloat
 
     let theAllignment: Alignment = .topLeading
-/*
-    let arrayOfViews    : [AnyView]   = [
-        AnyView(ViewA()),
-        AnyView(ViewB())
-    ]
-*/
+
     init(observedDialogContent: DialogUpdatableContent) {
         writeLog("Displaying main message content")
         self.observedData = observedDialogContent
@@ -113,36 +108,47 @@ struct MessageContent: View {
             }
 
             Group {
-                TextFileView(logFilePath: observedData.args.logFileToTail.value)
-                    .padding(.bottom, observedData.appProperties.contentPadding)
-
-                WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .padding(.bottom, observedData.appProperties.contentPadding)
-
-                ListView(observedDialogContent: observedData)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .padding(.bottom, observedData.appProperties.contentPadding)
-
-                CheckboxView(observedDialogContent: observedData)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .frame(maxWidth: dataEntryMaxWidth)
-
-                TextEntryView(observedDialogContent: observedData, textfieldContent: userInputState.textFields)
-                    .padding(.bottom, observedData.appProperties.contentPadding)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .frame(maxWidth: dataEntryMaxWidth)
-
-                RadioView(observedDialogContent: observedData)
-                    .padding(.bottom, observedData.appProperties.contentPadding)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .frame(maxWidth: dataEntryMaxWidth)
-
-                DropdownView(observedDialogContent: observedData)
-                    .padding(.bottom, observedData.appProperties.contentPadding)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .frame(maxWidth: dataEntryMaxWidth, alignment: .leading)
+                ForEach(Array(observedData.appProperties.viewOrder.indices), id: \.self) { index in
+                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.textfile.rawValue) == index {
+                        TextFileView(logFilePath: observedData.args.logFileToTail.value)
+                            .padding(.bottom, observedData.appProperties.contentPadding)
+                    }
+                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.webcontent.rawValue) == index {
+                        WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .padding(.bottom, observedData.appProperties.contentPadding)
+                    }
+                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.listitem.rawValue) == index {
+                        ListView(observedDialogContent: observedData)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .padding(.bottom, observedData.appProperties.contentPadding)
+                    }
+                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.checkbox.rawValue) == index {
+                        CheckboxView(observedDialogContent: observedData)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .frame(maxWidth: dataEntryMaxWidth)
+                    }
+                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.textfield.rawValue) == index {
+                        TextEntryView(observedDialogContent: observedData, textfieldContent: userInputState.textFields)
+                            .padding(.bottom, observedData.appProperties.contentPadding)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .frame(maxWidth: dataEntryMaxWidth)
+                    }
+                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.radiobutton.rawValue) == index {
+                        RadioView(observedDialogContent: observedData)
+                            .padding(.bottom, observedData.appProperties.contentPadding)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .frame(maxWidth: dataEntryMaxWidth)
+                    }
+                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.dropdown.rawValue) == index {
+                        DropdownView(observedDialogContent: observedData)
+                            .padding(.bottom, observedData.appProperties.contentPadding)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .frame(maxWidth: dataEntryMaxWidth, alignment: .leading)
+                    }
+                }
             }
+
 
             if ["top"].contains(observedData.args.messageVerticalAlignment.value) {
                 Spacer()

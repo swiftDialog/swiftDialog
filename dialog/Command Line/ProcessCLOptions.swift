@@ -484,6 +484,11 @@ func processCLOptions(json: JSON = getJSON()) {
         }
     }
 
+    // Process view order
+    if appArguments.preferredViewOrder.present {
+        appvars.viewOrder = reorderViewArray(orderList: appArguments.preferredViewOrder.value, viewOrderArray: appvars.viewOrder) ?? appvars.viewOrder
+    }
+
     if !json[appArguments.autoPlay.long].exists() && !appArguments.autoPlay.present {
         writeLog("\(appArguments.autoPlay.long) present")
         appArguments.autoPlay.value = "0"
@@ -890,6 +895,7 @@ func processCLOptionValues() {
     appArguments.textFieldLiveValidation.evaluate(json: json)
     appArguments.checkbox.evaluate(json: json)
     appArguments.checkboxStyle.evaluate(json: json)
+    appArguments.preferredViewOrder.evaluate(json: json)
 
     // timers and progress
     appArguments.timerBar.evaluate(json: json, defaultValue: appvars.timerDefaultSeconds.stringValue)

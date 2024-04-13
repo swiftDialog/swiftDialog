@@ -27,6 +27,15 @@ struct AppVariables {
                                                       "right": .trailing,
                                                       "centre": .center,
                                                       "center": .center]
+    var viewOrder: [String] = [
+        ViewType.textfile.rawValue,
+        ViewType.webcontent.rawValue,
+        ViewType.listitem.rawValue,
+        ViewType.checkbox.rawValue,
+        ViewType.textfield.rawValue,
+        ViewType.radiobutton.rawValue,
+        ViewType.dropdown.rawValue
+    ]
 
     // button default strings
     // work out how to define a default width button that does what you tell it to. in the meantime, diry hack with spaces

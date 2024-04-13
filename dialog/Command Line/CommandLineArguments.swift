@@ -111,6 +111,7 @@ struct CommandLineArguments {
     var authkey                  = CommandlineArgument(long: "key", short: "k")
     var hash                     = CommandlineArgument(long: "checksum")
     var logFileToTail            = CommandlineArgument(long: "displaylog")
+    var preferredViewOrder       = CommandlineArgument(long: "vieworder")
 
     // command line options that take no additional parameters
     var button1Disabled          = CommandlineArgument(long: "button1disabled", isbool: true)
