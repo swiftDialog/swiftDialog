@@ -117,6 +117,8 @@ func processCLOptions(json: JSON = getJSON()) {
     if appArguments.messageOption.present && appArguments.messageOption.value.lowercased().hasSuffix(".md") {
         appArguments.messageOption.value = getMarkdown(mdFilePath: appArguments.messageOption.value)
     }
+    appArguments.messageOption.value = processEmbeddedVariables(appArguments.messageOption.value)
+
     if appArguments.infoBox.present && appArguments.infoBox.value.lowercased().hasSuffix(".md") {
         appArguments.infoBox.value = getMarkdown(mdFilePath: appArguments.infoBox.value)
     }
@@ -870,6 +872,7 @@ func processCLOptionValues() {
     if appArguments.bannerTitle.present {
         appArguments.titleOption.value = appArguments.bannerTitle.value
     }
+    appArguments.titleOption.value = processEmbeddedVariables(appArguments.titleOption.value)
     appArguments.bannerHeight.evaluate(json: json)
 
     // Buttons

@@ -46,3 +46,16 @@ func reorderViewArray(orderList: String, viewOrderArray: [String]) -> [String]? 
 
     return reorderedArray
 }
+
+func processEmbeddedVariables(_ textToProcess: String) -> String {
+    // replace embedded variables in text.
+    var processedTextString = textToProcess
+    for (label, value) in appvars.systemInfo {
+        processedTextString = processedTextString.replacingOccurrences(of: "{\(label)}", with: value)
+        print("\(label) : \(value)")
+    }
+
+    print("input: \(textToProcess)")
+    print("output: \(processedTextString)")
+    return processedTextString
+}

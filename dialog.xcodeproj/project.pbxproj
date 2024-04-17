@@ -76,6 +76,7 @@
 		CC8D96302A01CCAB00CC84C6 /* Theme+sdMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC8D962F2A01CCAB00CC84C6 /* Theme+sdMarkdown.swift */; };
 		CC9F8FEF2A5EC76400802A88 /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC9F8FEE2A5EC76400802A88 /* ImageProcessing.swift */; };
 		CCB334702B2320F20079FB83 /* SolidColourView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB3346F2B2320F20079FB83 /* SolidColourView.swift */; };
+		CCB35CB42BCFF4460041A701 /* SystemInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB35CB32BCFF4460041A701 /* SystemInfo.swift */; };
 		CCD8ACEC2A011C9500D98695 /* RadioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD8ACEB2A011C9500D98695 /* RadioView.swift */; };
 		CCE934AD2ACC29F60094BD06 /* TextFileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE934AC2ACC29F60094BD06 /* TextFileView.swift */; };
 /* End PBXBuildFile section */
@@ -182,6 +183,7 @@
 		CC8D962F2A01CCAB00CC84C6 /* Theme+sdMarkdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Theme+sdMarkdown.swift"; sourceTree = "<group>"; };
 		CC9F8FEE2A5EC76400802A88 /* ImageProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageProcessing.swift; sourceTree = "<group>"; };
 		CCB3346F2B2320F20079FB83 /* SolidColourView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolidColourView.swift; sourceTree = "<group>"; };
+		CCB35CB32BCFF4460041A701 /* SystemInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemInfo.swift; sourceTree = "<group>"; };
 		CCD8ACEB2A011C9500D98695 /* RadioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioView.swift; sourceTree = "<group>"; };
 		CCE934AC2ACC29F60094BD06 /* TextFileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFileView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -421,6 +423,7 @@
 				41D81E7825F870A500D1F7E1 /* System.swift */,
 				CC21904A2A7B994A00269525 /* Preferences.swift */,
 				411FC34528E2DDFD003EA2C2 /* Notifications.swift */,
+				CCB35CB32BCFF4460041A701 /* SystemInfo.swift */,
 			);
 			path = Functions;
 			sourceTree = "<group>";
@@ -653,6 +656,7 @@
 				4116922C28939B4500A88700 /* CKBasicsView.swift in Sources */,
 				415E1FCB27A2B0A000DE971B /* ListView.swift in Sources */,
 				4116922F28939C2A00A88700 /* CKWindowProperties.swift in Sources */,
+				CCB35CB42BCFF4460041A701 /* SystemInfo.swift in Sources */,
 				417BD4362798FE48009AE34A /* DialogUpdatableContent.swift in Sources */,
 				41876684275D88D60023A6A1 /* ImageSlider.swift in Sources */,
 				414550AA27C799D000D756E3 /* BackgroundBlur.swift in Sources */,

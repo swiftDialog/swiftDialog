@@ -27,6 +27,16 @@ struct AppVariables {
                                                       "right": .trailing,
                                                       "centre": .center,
                                                       "center": .center]
+    let systemInfo: [String: String] = [
+        "computername": Host.current().localizedName ?? "Mac",
+        "computermodel": getMarketingModel(),
+        "serialnumber": getDeviceSerialNumber(),
+        "username": getConsoleUserInfo().username,
+        "userfullname": NSFullUserName(),
+        "osversion": ProcessInfo.processInfo.osVersionString(),
+        "osname": ProcessInfo.processInfo.osName()
+    ]
+
     var viewOrder: [String] = [
         ViewType.textfile.rawValue,
         ViewType.webcontent.rawValue,
