@@ -47,15 +47,14 @@ func reorderViewArray(orderList: String, viewOrderArray: [String]) -> [String]? 
     return reorderedArray
 }
 
-func processEmbeddedVariables(_ textToProcess: String) -> String {
-    // replace embedded variables in text.
+func processTextString(_ textToProcess: String, tags: [String:String]) -> String {
+    // replace html with markdown
     var processedTextString = textToProcess
-    for (label, value) in appvars.systemInfo {
+    // replace embedded variables in text.
+    for (label, value) in tags {
         processedTextString = processedTextString.replacingOccurrences(of: "{\(label)}", with: value)
-        print("\(label) : \(value)")
     }
-
-    print("input: \(textToProcess)")
-    print("output: \(processedTextString)")
     return processedTextString
+        .replacingOccurrences(of: "<br>", with: "  \n")
+        .replacingOccurrences(of: "<hr>", with: "****")
 }

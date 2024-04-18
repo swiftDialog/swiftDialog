@@ -20,13 +20,22 @@ struct InfoBoxView: View {
     }
 
     var body: some View {
-        Markdown(observedData.args.infoBox.value, baseURL: URL(string: "http://"))
-            .multilineTextAlignment(.leading)
-            .markdownTextStyle {
-                ForegroundColor(.secondary)
-            }
-            .focusable(false)
-            .lineLimit(nil)
+        ZStack {
+            Markdown(observedData.args.infoBox.value, baseURL: URL(string: "http://"))
+                .multilineTextAlignment(.leading)
+                .markdownTextStyle {
+                    ForegroundColor(.secondary)
+                }
+                .focusable(false)
+                .lineLimit(nil)
+        }
+        .frame(
+              minWidth: 0,
+              maxWidth: .infinity,
+              minHeight: 0,
+              maxHeight: .infinity,
+              alignment: .topLeading
+            )
     }
 }
 

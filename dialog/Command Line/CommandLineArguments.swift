@@ -39,6 +39,8 @@ struct CommandlineArgument {
             } else {
                 self.value = defaultValue as? String ?? ""
             }
+        } else {
+            self.value = processTextString(self.value, tags: appvars.systemInfo)
         }
     }
 }

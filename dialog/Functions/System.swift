@@ -266,3 +266,21 @@ func getModificationDateOf(_ fileURL: URL) -> Date {
     }
     return theDate
 }
+
+func getEnvironmentVars() -> [String:String] {
+    var systemInfo: [String: String] = [
+        "computername": Host.current().localizedName ?? "Mac",
+        "computermodel": getMarketingModel(),
+        "serialnumber": getDeviceSerialNumber(),
+        "username": getConsoleUserInfo().username,
+        "userfullname": NSFullUserName(),
+        "osversion": ProcessInfo.processInfo.osVersionString(),
+        "osname": ProcessInfo.processInfo.osName()
+    ]
+
+    let env = ProcessInfo.processInfo.environment
+    for (key, value) in env {
+        systemInfo[key] = value
+    }
+    return systemInfo
+}

@@ -107,17 +107,12 @@ func processCLOptions(json: JSON = getJSON()) {
         quitDialog(exitCode: 0, exitMessage: appArguments.hash.value.sha256Hash)
     }
 
-    // Do some basic tag to markdown stuff
-    appArguments.messageOption.value = appArguments.messageOption.value
-                                        .replacingOccurrences(of: "<br>", with: "  \n")
-                                        .replacingOccurrences(of: "<hr>", with: "****")
     if !appArguments.messageOption.present {
         appArguments.messageOption.value = appvars.messageDefault
     }
     if appArguments.messageOption.present && appArguments.messageOption.value.lowercased().hasSuffix(".md") {
         appArguments.messageOption.value = getMarkdown(mdFilePath: appArguments.messageOption.value)
     }
-    appArguments.messageOption.value = processEmbeddedVariables(appArguments.messageOption.value)
 
     if appArguments.infoBox.present && appArguments.infoBox.value.lowercased().hasSuffix(".md") {
         appArguments.infoBox.value = getMarkdown(mdFilePath: appArguments.infoBox.value)
@@ -872,7 +867,6 @@ func processCLOptionValues() {
     if appArguments.bannerTitle.present {
         appArguments.titleOption.value = appArguments.bannerTitle.value
     }
-    appArguments.titleOption.value = processEmbeddedVariables(appArguments.titleOption.value)
     appArguments.bannerHeight.evaluate(json: json)
 
     // Buttons
