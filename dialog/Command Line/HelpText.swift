@@ -167,9 +167,12 @@ struct SDHelp {
 """
 
         argument.buttonStyle.helpShort = "Configure how the button area is displayed"
-        argument.buttonStyle.helpUsage = "center|centre"
+        argument.buttonStyle.helpUsage = "center|centre|stack"
         argument.buttonStyle.helpLong = """
-        Displays the buttons centered at the bottom of the window
+        Displays the buttons the bottom of the window, in style indicated.
+
+        "center|centre" will display the buttons at the bottom center.
+        "stack" will display full width buttons in a vertical stack with additional padding.
 
         When using this mode, --\(argument.timerBar.long) and --\(argument.infoButtonOption.long) are not available
 """
