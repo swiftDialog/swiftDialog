@@ -47,7 +47,7 @@ func reorderViewArray(orderList: String, viewOrderArray: [String]) -> [String]? 
     return reorderedArray
 }
 
-func processTextString(_ textToProcess: String, tags: [String:String]) -> String {
+func processTextString(_ textToProcess: String, tags: [String: String]) -> String {
     // replace html with markdown
     var processedTextString = textToProcess
     // replace embedded variables in text.

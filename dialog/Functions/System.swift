@@ -88,7 +88,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
     }
 
     // only print if exit code os 0
-    if exitCode == 0 {
+    if exitCode <= appvars.exit3.code {
 
         // build json using SwiftyJSON
         var json = JSON()
@@ -156,7 +156,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                 let dropdownItem = userInputState.dropdownItems[index]
                 let dropdownItemValues = dropdownItem.values
                 let dropdownItemSelectedValue = dropdownItem.selectedValue
-                let dropdownItemTitle = dropdownItem.title
+                // let dropdownItemTitle = dropdownItem.title
                 var dropdownItemName = dropdownItem.name
                 let dropdownItemRequired = dropdownItem.required
                 userInputState.dropdownItems[index].requiredfieldHighlight = Color.clear
@@ -267,7 +267,7 @@ func getModificationDateOf(_ fileURL: URL) -> Date {
     return theDate
 }
 
-func getEnvironmentVars() -> [String:String] {
+func getEnvironmentVars() -> [String: String] {
     var systemInfo: [String: String] = [
         "computername": Host.current().localizedName ?? "Mac",
         "computermodel": getMarketingModel(),

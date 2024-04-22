@@ -37,9 +37,9 @@ struct PresentationView: View {
                     if observedData.args.mainImage.present {
                         ImageView(imageArray: observedData.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: observedData.args.autoPlay.value.floatValue(), showControls: false, clipRadius: 0)
                             .aspectRatio(contentMode: .fit)
-                            .scaledToFill()
-                            .clipped()
-                            .frame(maxWidth: content.size.width*0.3)
+                            //.scaledToFill()
+                            //.clipped()
+                            //.frame(width: content.size.width*0.3)
                     } else if observedData.args.webcontent.present {
                         WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
                             .frame(maxWidth: content.size.width*0.3)
@@ -89,7 +89,7 @@ struct PresentationView: View {
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                 }
             }
-            .edgesIgnoringSafeArea(.all)
+            .edgesIgnoringSafeArea(.top)
         }
     }
 }
