@@ -16,6 +16,7 @@ struct ImageFader: View {
     var autoPlaySeconds: CGFloat = 0
     var showControls: Bool = false
     var showCorners: Bool = false
+    var contentMode: ContentMode = .fit
 
     var autoPlayTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -42,33 +43,38 @@ struct ImageFader: View {
     }
 
     var body: some View {
-        ZStack {
-            ForEach(0..<imageList.count, id: \.self) { index in
-                VStack {
-                    DisplayImage(imageList[index], corners: showCorners)
-                    if captionsList.count > 0 {
-                        if appArguments.fullScreenWindow.present {
-                            Text(captionsList[index])
-                                .font(.system(size: 60))
-                                .foregroundColor(.white)
-                        } else {
-                            Text(captionsList[index])
-                                .font(.system(size: 20))
-                                .italic()
+        HStack {
+            Spacer()
+            ZStack {
+                ForEach(0..<imageList.count, id: \.self) { index in
+                    VStack {
+                        DisplayImage(imageList[index], corners: showCorners, content: contentMode)
+                        if captionsList.count > 0 {
+                            if appArguments.fullScreenWindow.present {
+                                Text(captionsList[index])
+                                    .font(.system(size: 60))
+                                    .foregroundColor(.white)
+                            } else {
+                                Text(captionsList[index])
+                                    .font(.system(size: 20))
+                                    .italic()
+                            }
                         }
                     }
+                    .opacity(index==visibleIndex ? 1 : 0)
+                    //.frame(maxHeight: .infinity)
                 }
-                .animation(.easeInOut(duration: 0.4), value: visibleIndex)
-                .opacity(index==visibleIndex ? 1 : 0)
+                if imageList.count > 1 && showControls && autoPlaySeconds < 1 {
+                    FaderControls(increment: incrementIndex, decrement: decrementIndex)
+                }
             }
-            if imageList.count > 0 && showControls && autoPlaySeconds < 1 {
-                FaderControls(increment: incrementIndex, decrement: decrementIndex)
+            .animation(.easeInOut(duration: 0.4), value: visibleIndex)
+            .onReceive(autoPlayTimer) { _ in
+                if autoPlaySeconds > 0 {
+                    incrementTimer()
+                }
             }
-        }
-        .onReceive(autoPlayTimer) { _ in
-            if autoPlaySeconds > 0 {
-                incrementTimer()
-            }
+            Spacer()
         }
     }
 }

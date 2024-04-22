@@ -175,6 +175,7 @@ struct SDHelp {
         "stack" will display full width buttons in a vertical stack with additional padding.
 
         When using this mode, --\(argument.timerBar.long) and --\(argument.infoButtonOption.long) are not available
+        In "stack" mode, Info button is not available.
 """
 
         argument.webcontent.helpShort = "Display a web page"

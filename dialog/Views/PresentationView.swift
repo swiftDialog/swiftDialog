@@ -15,11 +15,18 @@ struct PresentationView: View {
     var messageColor: Color
     var backgroundColour: Color
     //Color(.accentColor).isDark ? Color.white : Color.black
+    var imageList: Array = [String]()
+    var autoPlaySeconds: CGFloat
 
     init(observedData: DialogUpdatableContent) {
         self.observedData = observedData
         self.backgroundColour = Color(argument: observedData.args.watermarkImage.value.components(separatedBy: "=").last ?? "accent")
         self.messageColor = self.backgroundColour.isDark ? Color.white : Color.black
+
+        for index in 0..<observedData.imageArray.count where observedData.imageArray[index].path != "" {
+            imageList.append(observedData.imageArray[index].path)
+        }
+        self.autoPlaySeconds = observedData.args.autoPlay.value.floatValue()
     }
 
     var body: some View {
@@ -35,11 +42,18 @@ struct PresentationView: View {
                 // content
                 HStack {
                     if observedData.args.mainImage.present {
+                        /*
                         ImageView(imageArray: observedData.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: observedData.args.autoPlay.value.floatValue(), showControls: false, clipRadius: 0)
-                            .aspectRatio(contentMode: .fit)
+                            .aspectRatio(contentMode: .fill)
                             //.scaledToFill()
                             //.clipped()
-                            //.frame(width: content.size.width*0.3)
+                            .frame(maxWidth: content.size.width*0.3)
+                         */
+                        ImageFader(imageList: imageList, captionsList: [], autoPlaySeconds: autoPlaySeconds, showControls: false, showCorners: false, contentMode: .fill)
+                            //.aspectRatio(contentMode: .fill)
+                            .frame(maxWidth: content.size.width*0.3)
+                            .clipped()
+
                     } else if observedData.args.webcontent.present {
                         WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
                             .frame(maxWidth: content.size.width*0.3)
