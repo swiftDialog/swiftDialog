@@ -12,16 +12,20 @@ struct PresentationView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
 
-    var messageColor: Color
+    var messageColour: Color
+    var infoColour: Color
     var backgroundColour: Color
     //Color(.accentColor).isDark ? Color.white : Color.black
     var imageList: Array = [String]()
     var autoPlaySeconds: CGFloat
 
+    let sbWidthProportion = 0.3
+
     init(observedData: DialogUpdatableContent) {
         self.observedData = observedData
         self.backgroundColour = Color(argument: observedData.args.watermarkImage.value.components(separatedBy: "=").last ?? "accent")
-        self.messageColor = self.backgroundColour.isDark ? Color.white : Color.black
+        self.infoColour = self.backgroundColour.isDark ? Color.white : Color.black
+        self.messageColour = observedData.appProperties.messageFontColour
 
         for index in 0..<observedData.imageArray.count where observedData.imageArray[index].path != "" {
             imageList.append(observedData.imageArray[index].path)
@@ -40,52 +44,59 @@ struct PresentationView: View {
                 // title
                 //TitleView(observedData: observedData)
                 // content
-                HStack {
-                    if observedData.args.mainImage.present {
-                        /*
-                        ImageView(imageArray: observedData.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: observedData.args.autoPlay.value.floatValue(), showControls: false, clipRadius: 0)
-                            .aspectRatio(contentMode: .fill)
-                            //.scaledToFill()
-                            //.clipped()
-                            .frame(maxWidth: content.size.width*0.3)
-                         */
-                        ImageFader(imageList: imageList, captionsList: [], autoPlaySeconds: autoPlaySeconds, showControls: false, showCorners: false, contentMode: .fill)
-                            //.aspectRatio(contentMode: .fill)
-                            .frame(maxWidth: content.size.width*0.3)
-                            .clipped()
-
-                    } else if observedData.args.webcontent.present {
-                        WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
-                            .frame(maxWidth: content.size.width*0.3)
-                    } else {
-                        ZStack {
-                            if observedData.args.watermarkImage.value.range(of: "colo[u]?r=", options: .regularExpression) != nil {
-                                SolidColourView(colourValue: observedData.args.watermarkImage.value)
-                            } else {
-                                SolidColourView(colourValue: "accent")
-                            }
-
-                            Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                                .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                                .markdownTheme(.sdMarkdown)
-                                .markdownTextStyle {
-                                    FontSize(appvars.messageFontSize)
-                                }
-                                .accessibilityHint(observedData.args.messageOption.value)
-                                .focusable(false)
-                                .markdownTextStyle {
-                                    FontSize(appvars.messageFontSize)
-                                    ForegroundColor(messageColor)
-                                }
-                                .truncationMode(.tail)
-                                .padding(.all, 15)
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        }
-                        .frame(maxWidth: content.size.width*0.3)
+                GeometryReader { sidebar in
+                    Color.clear.onAppear {
+                        let sbImageWidth = (sidebar.size.width*sbWidthProportion).rounded()*2
+                        let sbImageHeight = sidebar.size.height.rounded()*2
+                        writeLog("Ideal presentation sidebar image size for these window dimensions would be width:\(sbImageWidth), height:\(sbImageHeight)", logLevel: .debug)
                     }
+                    HStack {
+                        if observedData.args.mainImage.present {
+                            ImageFader(imageList: imageList, captionsList: [], autoPlaySeconds: autoPlaySeconds, showControls: false, showCorners: false, contentMode: .fill)
+                            //.aspectRatio(contentMode: .fill)
+                                .frame(maxWidth: content.size.width*sbWidthProportion)
+                                .clipped()
+                        } else if observedData.args.webcontent.present {
+                            WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
+                                .frame(maxWidth: content.size.width*sbWidthProportion)
+                        } else {
+                            ZStack {
+                                if observedData.args.watermarkImage.value.range(of: "colo[u]?r=", options: .regularExpression) != nil {
+                                    SolidColourView(colourValue: observedData.args.watermarkImage.value)
+                                } else {
+                                    SolidColourView(colourValue: "accent")
+                                }
 
-                    // list view
-                    ListView(observedDialogContent: observedData, clipRadius: 0)
+                                VStack {
+                                    if observedData.args.iconOption.present && observedData.args.iconOption.value != "default" {
+                                        HStack {
+                                            IconView(image: observedData.args.iconOption.value, overlay: "", alpha: 1, padding: 10, sfPaddingEnabled: true)
+                                                .frame(width: observedData.args.iconSize.value.floatValue())
+                                            Spacer()
+                                        }
+                                        Spacer()
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                PresentationViewMarkdown(content: observedData.args.infoBox.value,
+                                                         contentAlignment: .leading,
+                                                         contentColour: infoColour)
+                            }
+                            .frame(maxWidth: content.size.width*sbWidthProportion)
+                        }
+
+                        if observedData.args.listItem.present {
+                            // list view
+                            ListView(observedDialogContent: observedData, clipRadius: 0)
+                        } else {
+
+                            PresentationViewMarkdown(content: observedData.args.messageOption.value,
+                                                     contentAlignment: .leading,
+                                                     contentColour: messageColour)
+                            .scrollOnOverflow()
+
+                        }
+                    }
                 }
 
                 // footer
@@ -108,3 +119,24 @@ struct PresentationView: View {
     }
 }
 
+struct PresentationViewMarkdown: View {
+    var content: String
+    var contentAlignment: TextAlignment
+    var contentColour: Color
+    var body: some View {
+        Markdown(content, baseURL: URL(string: "http://"))
+            .multilineTextAlignment(contentAlignment)
+            .markdownTheme(.sdMarkdown)
+            .markdownTextStyle {
+                FontSize(appvars.messageFontSize)
+            }
+            .focusable(false)
+            .markdownTextStyle {
+                FontSize(appvars.messageFontSize)
+                ForegroundColor(contentColour)
+            }
+            .truncationMode(.tail)
+            .padding(.all, 15)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
