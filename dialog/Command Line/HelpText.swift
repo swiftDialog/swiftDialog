@@ -473,7 +473,7 @@ struct SDHelp {
 """
 
         argument.dropdownTitle.helpShort = "Select list name"
-        argument.dropdownTitle.helpUsage = "<text>(,radio|required)"
+        argument.dropdownTitle.helpUsage = "<text>(,radio|required,name=\"<text>\")"
         argument.dropdownTitle.helpLong = """
         Sets the name for a dropdown select list.
 
@@ -504,8 +504,10 @@ struct SDHelp {
                 "selectitems" : [{"title" : "Select 1", "values" : ["one","two","three"], "required" : true}]
 
         Modifiers:
-        The ",radio" modifier will change the select list to display a group with radio buttons. When using radio with no default item specified, the first entry in the list will become the default selected item.
-        The ",required" modifier will make that particular list a required item that must have a value before swiftDialog will exit
+            name       - Output will use this value as the key instead of the title
+            radio      - Change the select list to display a group with radio buttons. When using radio with no default
+                         item specified, the first entry in the list will become the default selected item.
+            required   - Make that particular list a required item that must have a value before swiftDialog will exit
 """
 
         argument.dropdownValues.helpShort = "Select list values"
@@ -529,13 +531,14 @@ struct SDHelp {
 """
 
         argument.textField.helpShort = "Enable a textfield with the specified label"
-        argument.textField.helpUsage = "<text>[,required,secure,prompt=\"<text>\"]"
+        argument.textField.helpUsage = "<text>[,required,secure,prompt=\"<text>\",name=\"<text>\"]"
         argument.textField.helpLong = """
         When swiftDialog exits the contents of the textfield will be presented as <text> : <user_input>
         in plain or as json using [-\(appArguments.jsonOutPut.short), --\(appArguments.jsonOutPut.long)] option
         Multiple textfields can be specified as required.
 
         Modifiers available to text fields are:
+            name       - Output will use this value as the key instead of the title
             secure     - Presends a secure input area. Contents of the textfield will not be shown on screen
             required   - swiftDialog will not exit until the field is populated
             prompt     - Pre-fill the field with some prompt text
@@ -558,6 +561,9 @@ struct SDHelp {
         Multiple checkboxes can be specified as required.
 
         Use --\(appArguments.checkboxStyle.long) to change appearance
+
+        Modifiers:
+            name       - Output will use this value as the key instead of the title
 """
 
         argument.checkboxStyle.helpShort = "Change the appearance of checkboxes"
@@ -577,6 +583,27 @@ struct SDHelp {
 
         Additionally in switch style, you can specify an image on (appArguments.checkboxStyle.long):
             --\(appArguments.checkboxStyle.long) "<text>",icon=<path>
+
+"""
+
+        argument.preferredViewOrder.helpShort = "Change the order in which some items are displayed"
+        argument.preferredViewOrder.helpUsage = "<csv>"
+        argument.preferredViewOrder.helpLong = """
+        The view order of particular item types can be re-arranged from their default values.
+
+        The default order is as follows:
+            - textfile
+            - webcontent
+            - listitem
+            - checkbox
+            - textfield
+            - radiobutton
+            - dropdown
+
+        To re-arrange the order, specify the preferred order as a comma seperated list.
+        Only the items being displayed need to be specified.
+        e.g.
+        --\(argument.preferredViewOrder.long) \"textfield,checkbox,dropdown\"
 
 """
 
@@ -740,6 +767,49 @@ struct SDHelp {
         Button 1 and 2 with modofocations are available.
         When used with --progress, buttons are replaced by progress bar and progress text.
             * In this presentation, quitting the dialog is acheived with use of the command file.
+"""
+
+        argument.presentationMode.helpShort = "Enable presentation mode"
+        argument.presentationMode.helpUsage = ""
+        argument.presentationMode.helpLong = """
+        Presentation mode is an output only (no user input) mode of swiftDialog intended for displaying
+        an ongoing process or task.
+
+        Updating the display will require the use of a command file and appropriate commands
+
+        The view is split into two main areas with a progress bar underneath
+        The left 1/3 of the window contains an information area and can show _one_ of the following:
+
+        Default:
+            A background colour representing the users highlight colour preference.
+            You can optionally make the following modifiers:
+            --\(argument.infoBox.long) <text> to display text (markdown format supported)
+            --\(argument.watermarkImage.long) color=<color|hex> to set the background colour
+            --\(argument.iconOption.long) <image> to display an icon in the top left
+            --\(argument.iconSize.long) <int> to set the icon size.
+
+        Image:
+            Specify one or more --\(argument.mainImage.long) to fill this area with an image
+            Multiple images will stack as an image carousel
+            include --\(argument.autoPlay.long) <sec> to have the images rotate
+            * Use images with portrait orientation for best results
+            * Images will be scaled to fill the area and cropping may occur
+              Run presentation mode with --\(argument.debug.long) and a recommended image size
+                for the current window will be included in debug log output.
+
+        Web content:
+            Specify --\(argument.webcontent.long) <url> to display the contents of a html source.
+            * If using a local file, reference the file using 'file:///path/to/file.html'
+
+        The right 2/3 of the window is dedicated to content in one of the following forms:
+
+        Default:
+            Any --\(argument.messageOption.long) <text> in any of the supported forms.
+
+        List:
+            One or more --\(argument.listItem.long) <item> in any of the supported forms.
+
+        The footer of the window is always visible and dedicated to a full width progress bar and buttons.
 """
 
         argument.jsonOutPut.helpShort = "Enable JSON output"
