@@ -321,7 +321,7 @@ func processCLOptions(json: JSON = getJSON()) {
                 let cbIcon = json[appArguments.checkbox.long][index]["icon"].stringValue
                 let cbButtonEnable = json[appArguments.checkbox.long][index]["enableButton1"].boolValue
 
-                appvars.checkboxArray.append(CheckBoxes(label: cbLabel, icon: cbIcon, checked: cbChecked, disabled: cbDisabled, enablesButton1: cbButtonEnable))
+                userInputState.checkBoxes.append(CheckBoxes(label: cbLabel, icon: cbIcon, checked: cbChecked, disabled: cbDisabled, enablesButton1: cbButtonEnable))
             }
         } else {
             for checkboxes in CLOptionMultiOptions(optionName: appArguments.checkbox.long) {
