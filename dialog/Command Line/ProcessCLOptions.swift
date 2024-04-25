@@ -163,6 +163,7 @@ func processCLOptions(json: JSON = getJSON()) {
             for index in 0..<json["selectitems"].count {
                 userInputState.dropdownItems.append(DropDownItems(
                         title: json["selectitems"][index]["title"].stringValue,
+                        name: json["selectitems"][index]["name"].stringValue,
                         values: (json["selectitems"][index]["values"].arrayValue.map {$0.stringValue}).map { $0.trimmingCharacters(in: .whitespaces) },
                         defaultValue: json["selectitems"][index]["default"].stringValue,
                         selectedValue: json["selectitems"][index]["default"].stringValue,
@@ -320,8 +321,9 @@ func processCLOptions(json: JSON = getJSON()) {
                 let cbDisabled = json[appArguments.checkbox.long][index]["disabled"].boolValue
                 let cbIcon = json[appArguments.checkbox.long][index]["icon"].stringValue
                 let cbButtonEnable = json[appArguments.checkbox.long][index]["enableButton1"].boolValue
+                let cbName = json[appArguments.checkbox.long][index]["name"].stringValue
 
-                userInputState.checkBoxes.append(CheckBoxes(label: cbLabel, icon: cbIcon, checked: cbChecked, disabled: cbDisabled, enablesButton1: cbButtonEnable))
+                userInputState.checkBoxes.append(CheckBoxes(label: cbLabel, name: cbName, icon: cbIcon, checked: cbChecked, disabled: cbDisabled, enablesButton1: cbButtonEnable))
             }
         } else {
             for checkboxes in CLOptionMultiOptions(optionName: appArguments.checkbox.long) {
