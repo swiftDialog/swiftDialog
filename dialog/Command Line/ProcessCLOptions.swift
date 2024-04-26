@@ -780,6 +780,10 @@ func processCLOptions(json: JSON = getJSON()) {
         appArguments.quitOnInfo.present = true
     }
 
+    if appArguments.timerBar.present && !appArguments.hideTimerBar.present {
+        appArguments.button1Disabled.present = true
+    }
+
 }
 
 func processCLOptionValues() {
@@ -900,9 +904,6 @@ func processCLOptionValues() {
     appArguments.timerBar.evaluate(json: json, defaultValue: appvars.timerDefaultSeconds.stringValue)
     appArguments.progressBar.evaluate(json: json)
     appArguments.progressText.evaluate(json: json, defaultValue: " ")
-    if appArguments.timerBar.present {
-        appArguments.button1Disabled.present = true
-    }
 
     // images
     appArguments.mainImage.evaluate(json: json)
