@@ -963,6 +963,7 @@ func processCLOptionValues() {
     appArguments.jsonOutPut.evaluate(json: json)
     appArguments.ignoreDND.evaluate(json: json)
     appArguments.hideTimerBar.evaluate(json: json)
+    appArguments.hideTimer.evaluate(json: json)
     appArguments.quitOnInfo.evaluate(json: json)
     appArguments.blurScreen.evaluate(json: json)
     appArguments.constructionKit.evaluate(json: json)

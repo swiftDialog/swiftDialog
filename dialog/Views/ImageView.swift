@@ -18,9 +18,10 @@ struct ImageView: View {
     var autoPlaySeconds: CGFloat
     var showControls: Bool
     var clipRadius: CGFloat
+    var hideTimer: Bool
 
 
-    init(imageArray: [MainImage], captionArray: Array<String>, autoPlaySeconds: CGFloat, showControls: Bool = false, clipRadius: CGFloat = 10) {
+    init(imageArray: [MainImage], captionArray: Array<String>, autoPlaySeconds: CGFloat, showControls: Bool = false, clipRadius: CGFloat = 10, hideTimer: Bool = false) {
         self.showControls = showControls
         self.clipRadius = clipRadius
         for index in 0..<imageArray.count where imageArray[index].path != "" {
@@ -33,12 +34,18 @@ struct ImageView: View {
             writeLog("Displaying images")
             writeLog("There are \(imageArray.count) images to display")
         }
+        self.hideTimer = hideTimer
     }
 
     var body: some View {
 
         VStack(spacing: 20) {
-            ImageFader(imageList: imageList, captionsList: captions, autoPlaySeconds: autoPlaySeconds, showControls: showControls, showCorners: clipRadius > 0 ? true : false)
+            ImageFader(imageList: imageList,
+                       captionsList: captions,
+                       autoPlaySeconds: autoPlaySeconds,
+                       showControls: showControls,
+                       showCorners: clipRadius > 0 ? true : false,
+                       hideTimer: hideTimer )
             .clipShape(RoundedRectangle(cornerRadius: clipRadius))
         }
         .border(appvars.debugBorderColour, width: 2)

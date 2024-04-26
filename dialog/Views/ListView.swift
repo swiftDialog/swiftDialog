@@ -112,7 +112,7 @@ struct ListView: View {
                                     switch userInputState.listItems[index].statusIcon {
                                     case "progress":
                                         ProgressView("", value: userInputState.listItems[index].progress, total: 100)
-                                            .progressViewStyle(CirclerPercentageProgressViewStyle())
+                                            .progressViewStyle(CircularPercentageProgressViewStyle())
                                             .frame(width: rowStatusHeight, height: rowStatusHeight-5)
                                             .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
                                     case "wait":
@@ -154,7 +154,7 @@ struct ListView: View {
     }
 }
 
-struct CirclerPercentageProgressViewStyle: ProgressViewStyle {
+struct CircularPercentageProgressViewStyle: ProgressViewStyle {
     public func makeBody(configuration: LinearProgressViewStyle.Configuration) -> some View {
         let stroke: CGFloat = 5
         let padding: CGFloat = stroke / 2

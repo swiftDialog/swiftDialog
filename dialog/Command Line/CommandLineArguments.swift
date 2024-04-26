@@ -132,6 +132,7 @@ struct CommandLineArguments {
     var infoIcon                 = CommandlineArgument(long: "infoicon") // Deprecated
     var cautionIcon              = CommandlineArgument(long: "cautionicon") // Deprecated
     var hideTimerBar             = CommandlineArgument(long: "hidetimerbar")
+    var hideTimer                = CommandlineArgument(long: "hidetimer")
     var autoPlay                 = CommandlineArgument(long: "autoplay")
     var blurScreen               = CommandlineArgument(long: "blurscreen", isbool: true)
     var notification             = CommandlineArgument(long: "notification", isbool: true)

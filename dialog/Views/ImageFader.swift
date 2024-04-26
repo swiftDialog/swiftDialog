@@ -17,6 +17,7 @@ struct ImageFader: View {
     var showControls: Bool = false
     var showCorners: Bool = false
     var contentMode: ContentMode = .fit
+    var hideTimer: Bool = false
 
     var autoPlayTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -66,6 +67,16 @@ struct ImageFader: View {
                 }
                 if imageList.count > 1 && showControls && autoPlaySeconds < 1 {
                     FaderControls(increment: incrementIndex, decrement: decrementIndex)
+                }
+                if autoPlaySeconds > 1 && !hideTimer {
+                    HStack {
+                        Spacer()
+                        VStack {
+                            CircularProgressTimer(timerSeconds: autoPlaySeconds, size: 15)
+                                .padding(15)
+                            Spacer()
+                        }
+                    }
                 }
             }
             .animation(.easeInOut(duration: 0.4), value: visibleIndex)
@@ -124,3 +135,45 @@ struct FaderControls: View {
     }
 }
 
+struct CircularProgressTimer: View {
+    @State private var currentCount: Double = 1
+    @State private var timer: Timer?
+
+    var timerSeconds: CGFloat
+    var size: CGFloat
+
+    init(timerSeconds: CGFloat, size: CGFloat) {
+        self.timerSeconds = timerSeconds
+        self.size = size
+    }
+
+    func startCounting() {
+        timer = Timer.scheduledTimer(withTimeInterval: timerSeconds / 360, repeats: true) { _ in
+            if currentCount < 360 {
+                currentCount += 1
+            } else {
+                currentCount = 1
+            }
+        }
+    }
+
+    var body: some View {
+        Path { path in
+            path.move(to: CGPoint(x: size, y: size))
+            path.addArc(
+                center: CGPoint(x: size, y: size),
+                radius: size,
+                startAngle: .degrees(0),
+                endAngle: .degrees(currentCount),
+                clockwise: true
+            )
+        }
+        .rotation(.degrees(-90))
+        .fill(.secondary)
+        .frame(width: size*2, height: size*2)
+        .opacity(0.4)
+        .onAppear {
+            startCounting()
+        }
+    }
+}

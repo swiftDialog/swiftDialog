@@ -52,7 +52,7 @@ struct PresentationView: View {
                     }
                     HStack {
                         if observedData.args.mainImage.present {
-                            ImageFader(imageList: imageList, captionsList: [], autoPlaySeconds: autoPlaySeconds, showControls: false, showCorners: false, contentMode: .fill)
+                            ImageFader(imageList: imageList, captionsList: [], autoPlaySeconds: autoPlaySeconds, showControls: false, showCorners: false, contentMode: .fill, hideTimer: true)
                             //.aspectRatio(contentMode: .fill)
                                 .frame(maxWidth: content.size.width*sbWidthProportion)
                                 .clipped()
