@@ -132,7 +132,6 @@
 		4154C2FD25F76BDC00A3D373 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4156C1CD29F69E27003F04DF /* postinstall */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = postinstall; sourceTree = "<group>"; };
 		4156C1CE29F69E27003F04DF /* fileicon */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = fileicon; sourceTree = "<group>"; };
-		4156C21B29F6A1F7003F04DF /* Dialog copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Dialog copy-Info.plist"; path = "/Users/rea094/Library/CloudStorage/OneDrive-CSIRO/Documents/code/Dialog-public/Dialog copy-Info.plist"; sourceTree = "<absolute>"; };
 		415934D726DB1B44009C9C3A /* ProcessCLOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessCLOptions.swift; sourceTree = "<group>"; };
 		415934D926DB7604009C9C3A /* NSWindow+Additions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSWindow+Additions.swift"; sourceTree = "<group>"; };
 		415E1FC927A2694B00DE971B /* ListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
@@ -250,7 +249,6 @@
 				41FB6481268070CF00A54C3E /* dialog */,
 				4154C2DB25F76BDB00A3D373 /* Products */,
 				4114E1E727153FEE00388274 /* Frameworks */,
-				4156C21B29F6A1F7003F04DF /* Dialog copy-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
