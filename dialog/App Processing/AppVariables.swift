@@ -127,6 +127,8 @@ struct AppVariables {
     var imageArray                      = [MainImage]()
     var imageCaptionArray               = [String]()
 
+    var quitAfterProcessingNotifications = true
+
     let defaultStatusLogFile            = String("/var/tmp/dialog.log")
 
     var quitKeyCharacter                = String("q")

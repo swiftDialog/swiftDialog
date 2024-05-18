@@ -25,7 +25,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 didReceive response: UNNotificationResponse,
                 withCompletionHandler completionHandler:
                                 @escaping () -> Void) {
+
         writeLog("reading notification", logLevel: .debug)
+
         if response.notification.request.content.categoryIdentifier == "SD_NOTIFICATION" {
             processNotification(response: response)
         } else {
@@ -35,7 +37,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         // call the completion handler when done.
         completionHandler()
         // quit dialog since we dont need to show anything
-        quitDialog(exitCode: appvars.exitNow.code)
+        if appvars.quitAfterProcessingNotifications {
+            quitDialog(exitCode: appvars.exitNow.code)
+        }
     }
 
     func applicationWillFinishLaunching(_ notification: Notification) {
@@ -114,6 +118,11 @@ struct dialogApp: App {
     init () {
 
         writeLog("Dialog Launched")
+
+        if CommandLine.arguments.count > 1 {
+            appvars.quitAfterProcessingNotifications = false
+        }
+
         for argument in CommandLine.arguments {
             writeLog(argument, logLevel: .info)
         }
