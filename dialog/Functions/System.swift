@@ -284,3 +284,28 @@ func getEnvironmentVars() -> [String: String] {
     }
     return systemInfo
 }
+
+func captureQuitKey(keyValue: String) {
+    // capture command+quitKey for quit
+    NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+        switch event.modifierFlags.intersection(.deviceIndependentFlagsMask) {
+        case [.command] where "wnm".contains(event.characters ?? ""):
+            writeLog("Detected cmd+w or cmd+n or cmd+m")
+            return nil
+        case [.command] where event.characters == "q":
+            writeLog("Detected cmd+q")
+            if keyValue != "q" {
+                writeLog("cmd+q is disabled")
+                return nil
+            } else {
+                quitDialog(exitCode: 10)
+            }
+        case [.command] where event.characters == keyValue, [.command, .shift] where event.characters == keyValue.lowercased():
+            writeLog("detected cmd+\(keyValue)")
+            quitDialog(exitCode: 10)
+        default:
+            return event
+        }
+        return event
+    }
+}

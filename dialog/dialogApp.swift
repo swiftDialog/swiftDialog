@@ -142,6 +142,8 @@ struct dialogApp: App {
 
         checkNotificationAuthorisation(notificationPresent: appArguments.notification.present)
 
+        captureQuitKey(keyValue: appArguments.quitKey.value)
+
         // check if we are sending a notification
         if checkForDialogNotificationMode(appArguments) {
             writeLog("Notification sent")

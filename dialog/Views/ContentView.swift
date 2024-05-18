@@ -20,29 +20,6 @@ struct ContentView: View {
             writeLog("Banner Image is present")
             titlePadding = 0
         }
-
-        // capture command+quitKey for quit
-        NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            switch event.modifierFlags.intersection(.deviceIndependentFlagsMask) {
-            case [.command] where "wnm".contains(event.characters ?? ""):
-                writeLog("Detected cmd+w or cmd+n or cmd+m")
-                return nil
-            case [.command] where event.characters == "q":
-                writeLog("Detected cmd+q")
-                if observedDialogContent.args.quitKey.value != "q" {
-                    writeLog("cmd+q is disabled")
-                    return nil
-                } else {
-                    quitDialog(exitCode: observedDialogContent.appProperties.exit10.code)
-                }
-            case [.command] where event.characters == observedDialogContent.args.quitKey.value, [.command, .shift] where event.characters == observedDialogContent.args.quitKey.value.lowercased():
-                writeLog("detected cmd+\(observedDialogContent.args.quitKey.value)")
-                quitDialog(exitCode: observedDialogContent.appProperties.exit10.code)
-            default:
-                return event
-            }
-            return event
-        }
     }
 //
 //    // set up timer to read data from temp file
