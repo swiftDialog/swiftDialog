@@ -9,6 +9,13 @@ import Foundation
 import SwiftUI
 import MarkdownUI
 
+extension Theme {
+    static let infoBoxTheme = Theme()
+        .link {
+            ForegroundColor(.tertiaryText)
+            UnderlineStyle(.single)
+        }
+}
 
 extension Theme {
   static let sdMarkdown = Theme()
