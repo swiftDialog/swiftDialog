@@ -110,6 +110,8 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                 var textfieldName = textField.name
                 let textfieldTitle = textField.title
                 let textfieldRequired = textField.required
+                let textfieldValidation = textField.confirm
+                let textFieldValidationValue = textField.validationValue
                 userInputState.textFields[index].requiredTextfieldHighlight = Color.clear
 
                 if textfieldName.isEmpty {
@@ -118,7 +120,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
 
                 if textfieldRequired && textfieldValue == "" { // && userInputState.textFields[index].regex.isEmpty {
                     NSSound.beep()
-                    requiredString += "  - \"\(textfieldName)\" \("is-required".localized)<br>"
+                    requiredString += "  - \"\(textfieldTitle)\" \("is-required".localized)<br>"
                     userInputState.textFields[index].requiredTextfieldHighlight = Color.red
                     dontQuit = true
                     writeLog("Required text field \(textfieldName) has no value")
@@ -131,7 +133,13 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                     userInputState.textFields[index].requiredTextfieldHighlight = Color.green
                     requiredString += "  - "+(textField.regexError)+"<br>"
                     dontQuit = true
-                    writeLog("Textfield \(textfieldName) value \(textfieldValue) does not meet regex requirements \(String(describing: textField.regex))")
+                    writeLog("Textfield \(textfieldTitle) value \(textfieldValue) does not meet regex requirements \(String(describing: textField.regex))")
+                } else if textfieldValidation && textFieldValidationValue != textfieldValue {
+                    NSSound.beep()
+                    requiredString += "  - \"\(textfieldTitle)\" confirmation failed  <br>values do not match<br>"
+                    userInputState.textFields[index].requiredTextfieldHighlight = Color.red
+                    dontQuit = true
+                    writeLog("Text field \(textfieldName) confirmation failed")
                 }
 
                 outputArray.append("\(textfieldName) : \(textfieldValue)")

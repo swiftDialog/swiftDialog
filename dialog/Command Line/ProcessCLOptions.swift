@@ -232,7 +232,8 @@ func processCLOptions(json: JSON = getJSON()) {
                         title: String(json[appArguments.textField.long][index]["title"].stringValue),
                         name: String(json[appArguments.textField.long][index]["name"].stringValue),
                         value: String(json[appArguments.textField.long][index]["value"].stringValue),
-                        isDate: Bool(json[appArguments.textField.long][index]["isdate"].boolValue))
+                        isDate: Bool(json[appArguments.textField.long][index]["isdate"].boolValue),
+                        confirm: Bool(json[appArguments.textField.long][index]["confirm"].boolValue))
                     )
                 }
             }
@@ -252,6 +253,7 @@ func processCLOptions(json: JSON = getJSON()) {
                 var fieldName: String = ""
                 var fieldValue: String = ""
                 var fieldIsDate: Bool = false
+                var fieldConfirm: Bool = false
                 if items.count > 0 {
                     fieldTitle = items[0]
                     if items.count > 1 {
@@ -285,6 +287,8 @@ func processCLOptions(json: JSON = getJSON()) {
                                 fieldName = items[index+1]
                             case "isdate":
                                 fieldIsDate = true
+                            case "confirm":
+                                fieldConfirm = true
                             default: ()
                             }
                         }
@@ -303,7 +307,8 @@ func processCLOptions(json: JSON = getJSON()) {
                             title: fieldTitle,
                             name: fieldName,
                             value: fieldValue,
-                            isDate: fieldIsDate))
+                            isDate: fieldIsDate,
+                            confirm: fieldConfirm))
             }
         }
         for index in 0..<userInputState.textFields.count where userInputState.textFields[index].required {

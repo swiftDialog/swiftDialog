@@ -56,6 +56,8 @@ struct TextFieldState {
     var value: String      = ""
     var date: Date         = Date.now
     var isDate: Bool       = false
+    var confirm: Bool     = false
+    var validationValue: String = ""
     var requiredTextfieldHighlight: Color = .clear
     var dictionary: [String: Any] {
             return ["title": title,

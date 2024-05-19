@@ -25,6 +25,8 @@
 "default-message" = "Tämä sisältää tärkeän viestin sisältöä\n\nLue";
 "help-hover" = "Napsauta saadaksesi lisätietoja";
 
+"Confirm" = "Vahvistaa";
+
 //constructor kit labels
 "ck-welcome"            = "Tervetuloa swiftDialog builderiin";
 "ck-welcomeinfo"        = "Valitse muokattavat ominaisuudet vasemmalta. swiftDialog päivittyy ja näyttää muutokset reaaliajassa";

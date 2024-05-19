@@ -26,6 +26,8 @@
 "default-message" = "Dit bevat een belangrijk bericht\n\n Lees dit alsjeblieft";
 "help-hover" = "Klik voor aanvullende informatie";
 
+"Confirm" = "Bevestigen";
+
 //constructor kit labels
 "ck-welcome"            = "Welkom bij de swiftDialog-bouwer";
 "ck-welcomeinfo"        = "Selecteer eigenschappen aan de linkerkant om te wijzigen. swiftDialog wordt bijgewerkt om de wijzigingen in realtime weer te geven";

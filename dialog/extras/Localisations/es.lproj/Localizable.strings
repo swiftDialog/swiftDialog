@@ -25,6 +25,8 @@
 "default-message" = "Este mensaje contiene contenido importante\n\nLea";
 "help-hover" = "Haga clic para obtener información adicional";
 
+"Confirm" = "Confirmar";
+
 //constructor kit labels
 "ck-welcome"            = "Bienvenido al constructor swiftDialog";
 "ck-welcomeinfo"        = "Seleccione las propiedades a la izquierda para modificar. swiftDialog se actualizará para mostrar los cambios en tiempo real";

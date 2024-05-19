@@ -133,7 +133,7 @@ struct AppVariables {
 
     var quitKeyCharacter                = String("q")
 
-    let argRegex                        = String("(,? ?[a-zA-Z1-9]+=|(,\\s?editor)|(,\\s?fileselect))|(,\\s?passwordfill)|(,\\s?required)|(,\\s?secure)")
+    let argRegex                        = String("(,? ?[a-zA-Z1-9]+=|(,\\s?editor)|(,\\s?fileselect))|(,\\s?passwordfill)|(,\\s?required)|(,\\s?secure)|(,\\s?confirm)")
 
     // exit codes and error messages
     let exit0                           = (code: Int32(0),   message: String("")) // normal exit

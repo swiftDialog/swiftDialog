@@ -72,9 +72,21 @@ struct TextEntryView: View {
                         .padding(.bottom, observedData.appProperties.contentPadding)
                     } else {
                         HStack {
-
-                            Text(textfieldContent[index].title + (textfieldContent[index].required ? " *":""))
-                                .frame(idealWidth: fieldwidth*0.20, alignment: .leading)
+                            VStack {
+                                HStack {
+                                    Text(textfieldContent[index].title + (textfieldContent[index].required ? " *":""))
+                                    Spacer()
+                                }
+                                if textfieldContent[index].confirm {
+                                    HStack {
+                                        Text("Confirm".localized + " \(textfieldContent[index].title)")
+                                            .foregroundStyle(.secondary)
+                                            .padding(.top, 5)
+                                        Spacer()
+                                    }
+                                }
+                            }
+                            .frame(idealWidth: fieldwidth*0.20, alignment: .leading)
                             Spacer()
 
                             if textfieldContent[index].fileSelect {
@@ -107,33 +119,55 @@ struct TextEntryView: View {
                             }
                             HStack {
                                 if textfieldContent[index].secure {
-                                    ZStack {
-                                        SecureField(textfieldContent[index].prompt, text: $textfieldContent[index].value)
-                                            .disableAutocorrection(true)
-                                            .textContentType(textfieldContent[index].passwordFill ? .password: .none)
-                                            .onChange(of: textfieldContent[index].value, perform: { textContent in
-                                                userInputState.textFields[index].value = textContent
-                                            })
-                                        Image(systemName: "lock.fill")
-                                            .foregroundColor(Color(argument: "#008815")).opacity(0.5)
-                                            .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
+                                    VStack {
+                                        ZStack {
+                                            SecureField(textfieldContent[index].prompt, text: $textfieldContent[index].value)
+                                                .disableAutocorrection(true)
+                                                .textContentType(textfieldContent[index].passwordFill ? .password: .none)
+                                                .onChange(of: textfieldContent[index].value, perform: { textContent in
+                                                    userInputState.textFields[index].value = textContent
+                                                })
+                                            Image(systemName: "lock.fill")
+                                                .foregroundColor(Color(argument: "#008815")).opacity(0.5)
+                                                .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
+                                        }
+                                        if textfieldContent[index].confirm {
+                                            ZStack {
+                                                SecureField(textfieldContent[index].prompt, text: $textfieldContent[index].validationValue)
+                                                    .onChange(of: textfieldContent[index].validationValue, perform: { textContent in
+                                                        userInputState.textFields[index].validationValue = textContent
+                                                    })
+                                                Image(systemName: "lock.fill")
+                                                    .foregroundColor(Color(argument: "#008815")).opacity(0.5)
+                                                    .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
+                                            }
+                                            .padding(.top, 5)
+                                        }
                                     }
                                 } else {
-                                    TextField(textfieldContent[index].prompt, text: $textfieldContent[index].value)
-                                        .onChange(of: textfieldContent[index].value, perform: { textContent in
-                                            userInputState.textFields[index].value = textContent
-                                            if textfieldContent[index].regex != "" && observedData.args.textFieldLiveValidation.present {
-                                                if checkRegexPattern(regexPattern: textfieldContent[index].regex, textToValidate: textfieldContent[index].value) {
-                                                    textfieldContent[index].backgroundColour = Color.green
-                                                } else {
-                                                    textfieldContent[index].backgroundColour = Color.red
+                                    VStack {
+                                        TextField(textfieldContent[index].prompt, text: $textfieldContent[index].value)
+                                            .onChange(of: textfieldContent[index].value, perform: { textContent in
+                                                userInputState.textFields[index].value = textContent
+                                                if textfieldContent[index].regex != "" && observedData.args.textFieldLiveValidation.present {
+                                                    if checkRegexPattern(regexPattern: textfieldContent[index].regex, textToValidate: textfieldContent[index].value) {
+                                                        textfieldContent[index].backgroundColour = Color.green
+                                                    } else {
+                                                        textfieldContent[index].backgroundColour = Color.red
+                                                    }
+                                                    if textfieldContent[index].value == "" {
+                                                        textfieldContent[index].backgroundColour = Color.clear
+                                                    }
                                                 }
-                                                if textfieldContent[index].value == "" {
-                                                    textfieldContent[index].backgroundColour = Color.clear
-                                                }
-                                            }
-                                        })
+                                            })
                                         //.background(textfieldContent[index].backgroundColour)
+                                        if textfieldContent[index].confirm {
+                                            TextField(textfieldContent[index].prompt, text: $textfieldContent[index].validationValue)
+                                                .onChange(of: textfieldContent[index].validationValue, perform: { textContent in
+                                                    userInputState.textFields[index].validationValue = textContent
+                                                })
+                                        }
+                                    }
 
 
                                     if textfieldContent[index].isDate {
