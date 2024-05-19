@@ -543,6 +543,7 @@ struct SDHelp {
             required   - swiftDialog will not exit until the field is populated
             prompt     - Pre-fill the field with some prompt text
             regex      - Specify a regular expression that the field must satisfy for the content to be accepted.
+            confirm    - Will display a duplicate of the textfield who's content needs to match to validate
             regexerror - Specify a custom error to display if regex conditions are not met
             fileselect - Adds a "Select" button and presents a file picker
             filetype   - Limits fileselect to the named file extensions. Presented in space seperated values
