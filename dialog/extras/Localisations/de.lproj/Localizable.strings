@@ -28,6 +28,8 @@
 
 "Confirm" = "Bestätigen";
 
+"confirmation-failed" = "Bestätigung fehlgeschlagen <br>Werte stimmen nicht überein";
+
 //constructor kit labels
 "ck-welcome"            = "Willkommen beim swiftDialog Builder";
 "ck-welcomeinfo"        = "Wählen Sie die zu ändernden Eigenschaften auf der linken Seite aus. swiftDialog wird aktualisiert, um die Änderungen in Echtzeit anzuzeigen.";

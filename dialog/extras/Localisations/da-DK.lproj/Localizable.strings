@@ -28,6 +28,8 @@
 
 "Confirm" = "Bekræfte";
 
+"confirmation-failed" = "bekræftelse mislykkedes <br>værdier stemmer ikke overens";
+
 //constructor kit labels
 "ck-welcome"            = "Velkommen til swiftDialog Builder";
 "ck-welcomeinfo"        = "Vælg egenskaber til venstre for at ændre. swiftDialog vil opdatere for at vise ændringerne i realtid";

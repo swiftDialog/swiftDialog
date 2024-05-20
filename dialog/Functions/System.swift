@@ -136,7 +136,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                     writeLog("Textfield \(textfieldTitle) value \(textfieldValue) does not meet regex requirements \(String(describing: textField.regex))")
                 } else if textfieldValidation && textFieldValidationValue != textfieldValue {
                     NSSound.beep()
-                    requiredString += "  - \"\(textfieldTitle)\" confirmation failed  <br>values do not match<br>"
+                    requiredString += "  - \"\(textfieldTitle)\" \("confirmation-failed".localized)<br>"
                     userInputState.textFields[index].requiredTextfieldHighlight = Color.red
                     dontQuit = true
                     writeLog("Text field \(textfieldName) confirmation failed")

@@ -27,6 +27,8 @@
 
 "Confirm" = "Confirmer";
 
+"confirmation-failed" = "échec de la confirmation <br>les valeurs ne correspondent pas";
+
 //constructor kit labels
 "ck-welcome"            = "Bienvenue dans le générateur de SwiftDialog";
 "ck-welcomeinfo"        = "Sélectionnez les propriétés à gauche pour les modifier. SwiftDialog se mettra à jour pour afficher les modifications en temps réel";

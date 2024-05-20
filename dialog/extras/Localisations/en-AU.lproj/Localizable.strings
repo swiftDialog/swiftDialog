@@ -27,6 +27,8 @@
 
 "Confirm" = "Confirm";
 
+"confirmation-failed" = "confirmation failed  <br>values do not match";
+
 //constructor kit labels
 "ck-welcome"            = "Welcome to the swiftDialog builder";
 "ck-welcomeinfo"        = "Select properties on the left to modify. swiftDialog will update to show the changes in realtime";

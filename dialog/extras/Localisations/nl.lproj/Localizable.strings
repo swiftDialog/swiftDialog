@@ -28,6 +28,8 @@
 
 "Confirm" = "Bevestigen";
 
+"confirmation-failed" = "bevestiging mislukt <br>waarden komen niet overeen";
+
 //constructor kit labels
 "ck-welcome"            = "Welkom bij de swiftDialog-bouwer";
 "ck-welcomeinfo"        = "Selecteer eigenschappen aan de linkerkant om te wijzigen. swiftDialog wordt bijgewerkt om de wijzigingen in realtime weer te geven";
