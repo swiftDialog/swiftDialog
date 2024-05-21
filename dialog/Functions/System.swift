@@ -87,7 +87,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
         exit(0)
     }
 
-    // only print if exit code os 0
+    // only print if exit code is 0
     if exitCode <= appvars.exit3.code {
 
         // build json using SwiftyJSON
@@ -118,28 +118,30 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                     textfieldName = textfieldTitle
                 }
 
-                if textfieldRequired && textfieldValue == "" { // && userInputState.textFields[index].regex.isEmpty {
-                    NSSound.beep()
-                    requiredString += "  - \"\(textfieldTitle)\" \("is-required".localized)<br>"
-                    userInputState.textFields[index].requiredTextfieldHighlight = Color.red
-                    dontQuit = true
-                    writeLog("Required text field \(textfieldName) has no value")
+                if exitCode == 0 {
+                    if textfieldRequired && textfieldValue == "" { // && userInputState.textFields[index].regex.isEmpty {
+                        NSSound.beep()
+                        requiredString += "  - \"\(textfieldTitle)\" \("is-required".localized)<br>"
+                        userInputState.textFields[index].requiredTextfieldHighlight = Color.red
+                        dontQuit = true
+                        writeLog("Required text field \(textfieldName) has no value")
 
-                //check for regex requirements
-                } else if !(textfieldValue.isEmpty)
-                            && !(textField.regex.isEmpty)
-                            && !checkRegexPattern(regexPattern: textField.regex, textToValidate: textfieldValue) {
-                    NSSound.beep()
-                    userInputState.textFields[index].requiredTextfieldHighlight = Color.green
-                    requiredString += "  - "+(textField.regexError)+"<br>"
-                    dontQuit = true
-                    writeLog("Textfield \(textfieldTitle) value \(textfieldValue) does not meet regex requirements \(String(describing: textField.regex))")
-                } else if textfieldValidation && textFieldValidationValue != textfieldValue {
-                    NSSound.beep()
-                    requiredString += "  - \"\(textfieldTitle)\" \("confirmation-failed".localized)<br>"
-                    userInputState.textFields[index].requiredTextfieldHighlight = Color.red
-                    dontQuit = true
-                    writeLog("Text field \(textfieldName) confirmation failed")
+                        //check for regex requirements
+                    } else if !(textfieldValue.isEmpty)
+                                && !(textField.regex.isEmpty)
+                                && !checkRegexPattern(regexPattern: textField.regex, textToValidate: textfieldValue) {
+                        NSSound.beep()
+                        userInputState.textFields[index].requiredTextfieldHighlight = Color.green
+                        requiredString += "  - "+(textField.regexError)+"<br>"
+                        dontQuit = true
+                        writeLog("Textfield \(textfieldTitle) value \(textfieldValue) does not meet regex requirements \(String(describing: textField.regex))")
+                    } else if textfieldValidation && textFieldValidationValue != textfieldValue {
+                        NSSound.beep()
+                        requiredString += "  - \"\(textfieldTitle)\" \("confirmation-failed".localized)<br>"
+                        userInputState.textFields[index].requiredTextfieldHighlight = Color.red
+                        dontQuit = true
+                        writeLog("Text field \(textfieldName) confirmation failed")
+                    }
                 }
 
                 outputArray.append("\(textfieldName) : \(textfieldValue)")
@@ -173,7 +175,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                     dropdownItemName = dropdownItem.title
                 }
 
-                if dropdownItemRequired && dropdownItemSelectedValue == "" {
+                if exitCode == 0 && dropdownItemRequired && dropdownItemSelectedValue == "" {
                     NSSound.beep()
                     requiredString += "  - \"\(dropdownItemName)\" \("is-required".localized)<br>"
                     userInputState.dropdownItems[index].requiredfieldHighlight = Color.red
