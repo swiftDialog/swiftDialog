@@ -176,7 +176,7 @@ struct dialogApp: App {
         if appArguments.debug.present {
             writeLog("debug options presented. dialog state sent to stderr", logLevel: .debug)
             appvars.debugMode = true
-            appvars.debugBorderColour = Color.green
+            appvars.debugBorderColour = appArguments.debug.value != "" ? Color(argument: appArguments.debug.value) : Color.clear
 
             writeLog("Window Height = \(appvars.windowHeight): Window Width = \(appvars.windowWidth)", logLevel: .debug)
         }

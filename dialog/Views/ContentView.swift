@@ -13,10 +13,11 @@ struct ContentView: View {
     var titlePadding       = CGFloat(10)
 
     @ObservedObject var observedData: DialogUpdatableContent
+    @State private var windowFrame: CGSize = CGSize(width: 0, height: 0)
 
     init (observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
-        if observedData.args.bannerImage.present {
+        if observedDialogContent.args.bannerImage.present {
             writeLog("Banner Image is present")
             titlePadding = 0
         }
@@ -28,16 +29,8 @@ struct ContentView: View {
     var body: some View {
 
         ZStack {
-            //Rectangle()
-            //    .fill(
-            //        LinearGradient(gradient: Gradient(colors: [.teal]), startPoint: .top, endPoint: .bottom)
-             // )
-            //Color(.red)
-            //    .opacity(0.5)
-            //    .background(ignoresSafeAreaEdges: .all)
             if observedData.args.watermarkImage.present {
                     WatermarkView(observedContent: observedData)
-                    //.frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
             }
 
             // this stack controls the main view. Consists of a VStack containing all the content, and a HStack positioned at the bottom of the display area
@@ -91,9 +84,32 @@ struct ContentView: View {
                     Spacer()
                 }
             }
-
+            if observedData.args.debug.present {
+                // Display window information in the title bar and keep it updated
+                VStack {
+                    HStack {
+                        Text("DEBUG - Window height: \(Int(windowFrame.width)) width: \(Int(windowFrame.height)) - Icon width: \(Int(observedData.iconSize)) alpha: \(observedData.iconAlpha)")
+                        Spacer()
+                        Text("quitkey: cmd+\(observedData.args.quitKey.value.uppercased() == observedData.args.quitKey.value ? "shift+" : "")\(observedData.args.quitKey.value.lowercased())")
+                    }
+                    .foregroundColor(observedData.appProperties.titleFontColour.opacity(0.7))
+                    .padding(.top, 5)
+                    .padding(.leading, observedData.args.windowButtonsEnabled.present ? 70 : 5)
+                    .padding(.trailing, 5)
+                    Spacer()
+                }
+            }
         }
         .edgesIgnoringSafeArea(.all)
+        .background(GeometryReader {child -> Color in
+            if observedData.args.debug.present {
+                DispatchQueue.main.async {
+                    // update on next cycle with calculated height
+                    self.windowFrame = child.size
+                }
+            }
+            return Color.clear
+        })
 
     }
 

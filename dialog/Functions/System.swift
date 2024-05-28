@@ -149,8 +149,8 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
             }
         }
 
-        if observedObject?.args.dropdownValues.present != nil {
-            writeLog("Select items present - checking require,ments are met")
+        if observedObject?.args.dropdownValues.present ?? false {
+            writeLog("Select items present - checking requirements are met")
             if userInputState.dropdownItems.count == 1 {
                 let selectedValue = userInputState.dropdownItems[0].selectedValue
                 let selectedIndex = userInputState.dropdownItems[0].values

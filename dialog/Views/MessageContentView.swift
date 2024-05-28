@@ -12,7 +12,7 @@ import MarkdownUI
 struct MessageContent: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
-    @State private var messageHeight: CGFloat = 100
+    @State private var messageHeight: CGFloat = 50
 
     var fieldPadding: CGFloat = 15
     var dataEntryMaxWidth: CGFloat = 700
@@ -75,6 +75,7 @@ struct MessageContent: View {
                                 }
                                 .background(Color("editorBackgroundColour"))
                                 .cornerRadius(5.0)
+                                .border(observedData.appProperties.debugBorderColour, width: 2)
                             }
                         } else {
                             ScrollView {
@@ -97,10 +98,11 @@ struct MessageContent: View {
                                     }
                                     .accessibilityHint(observedData.args.messageOption.value)
                                     .focusable(false)
+                                    .border(observedData.appProperties.debugBorderColour, width: 2)
                             }
                         }
                 }
-                .frame(minHeight: 100, maxHeight: messageHeight)
+                .frame(minHeight: 30, maxHeight: messageHeight)
                 if !observedData.args.messageVerticalAlignment.present || ["centre", "center", "top"].contains(observedData.args.messageVerticalAlignment.value) {
                     Spacer()
                 }
