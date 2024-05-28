@@ -13,7 +13,7 @@ func writeLog(_ message: String, logLevel: OSLogType = .info, log: OSLog = osLog
     var standardError = StandardError()
 
     os_log("%{public}@", log: log, type: logLevel, logMessage)
-    if logLevel == .error || appvars.debugMode {
+    if logLevel == .error || appvars.debugMode || appArguments.verboseLogging.present {
         // print debug and error to sterr
         print("\(logLevel.stringValue.uppercased()): \(message)", to: &standardError)
     }
