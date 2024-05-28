@@ -87,6 +87,7 @@ struct RenderToggles: View {
 struct CheckboxView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
+    @State private var switchHeight: CGFloat = 30
 
     var toggleStyle: any ToggleStyle = .checkbox
 
@@ -99,10 +100,18 @@ struct CheckboxView: View {
         if observedData.args.checkbox.present {
             if observedData.appProperties.checkboxControlStyle.lowercased() == "switch" {
                 VStack {
-                    Spacer()
+                    //Spacer()
                     RenderToggles(observedDialogContent: observedData, checkboxContent: userInputState.checkBoxes)
+                        .background(GeometryReader {child -> Color in
+                            DispatchQueue.main.async {
+                                // update on next cycle with calculated height
+                                self.switchHeight = child.size.height
+                            }
+                            return Color.clear
+                        })
+                        .scrollOnOverflow()
                 }
-                .scrollOnOverflow()
+                .frame(minHeight: 10, maxHeight: switchHeight)
             } else {
                 RenderToggles(observedDialogContent: observedData, checkboxContent: userInputState.checkBoxes)
             }

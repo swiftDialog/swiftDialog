@@ -97,11 +97,10 @@ struct MessageContent: View {
                                     }
                                     .accessibilityHint(observedData.args.messageOption.value)
                                     .focusable(false)
-                                //.scrollOnOverflow()
                             }
                         }
                 }
-                .frame(maxHeight: messageHeight)
+                .frame(minHeight: 100, maxHeight: messageHeight)
                 if !observedData.args.messageVerticalAlignment.present || ["centre", "center", "top"].contains(observedData.args.messageVerticalAlignment.value) {
                     Spacer()
                 }
