@@ -8,7 +8,7 @@
 import Foundation
 import SystemConfiguration
 
-func getConsoleUserInfo() -> (username: String, userID: String) {
+public var consoleUserInfo: (username: String, userID: String) {
     // We need the console user, not the process owner so NSUserName() won't work for our needs when outset runs as root
     var uid: uid_t = 0
     if let consoleUser = SCDynamicStoreCopyConsoleUser(nil, &uid, nil) as? String {
@@ -18,14 +18,14 @@ func getConsoleUserInfo() -> (username: String, userID: String) {
     }
 }
 
-func getOSVersion() -> String {
+public var osVersion: String {
     // Returns the OS version
     let osVersion = ProcessInfo().operatingSystemVersion
     let version = "\(osVersion.majorVersion).\(osVersion.minorVersion).\(osVersion.patchVersion)"
     return version
 }
 
-func getOSBuildVersion() -> String {
+public var osBuildVersion: String {
     // Returns the current OS build from sysctl
     var size = 0
     sysctlbyname("kern.osversion", nil, &size, nil, 0)
@@ -35,7 +35,7 @@ func getOSBuildVersion() -> String {
 
 }
 
-func getDeviceSerialNumber() -> String {
+public var deviceSerialNumber: String {
     // Returns the current devices serial number
     let platformExpert = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("IOPlatformExpertDevice") )
       guard platformExpert > 0 else {
@@ -48,7 +48,11 @@ func getDeviceSerialNumber() -> String {
       return serialNumber
 }
 
-func getMarketingModel() -> String {
+public var marketingModel: String {
+    return !marketingModelARM.isEmpty ? marketingModelARM : marketingModelIntel
+}
+
+public var marketingModelARM: String {
     let appleSiliconProduct = IORegistryEntryFromPath(kIOMainPortDefault, "IOService:/AppleARMPE/product")
         let cfKeyValue = IORegistryEntryCreateCFProperty(appleSiliconProduct, "product-description" as CFString, kCFAllocatorDefault, 0)
         IOObjectRelease(appleSiliconProduct)
@@ -59,7 +63,29 @@ func getMarketingModel() -> String {
         return ""
 }
 
-func getDeviceHardwareModel() -> String {
+public var marketingModelIntel: String {
+    guard let locale = Locale.current.languageCode else { return "en" }
+
+    let modelIdentifier = deviceHardwareModel
+
+    var path = "/System/Library/PrivateFrameworks/ServerInformation.framework/Versions/A/Resources/"
+    path += locale + ".lproj"
+    path += "/SIMachineAttributes.plist"
+
+    if let fileData = FileManager.default.contents(atPath: path) {
+        if let plistContents = try? PropertyListSerialization.propertyList(from: fileData, format: nil)
+            as? [String: Any] {
+            if let contents = plistContents[modelIdentifier] as? [String: Any],
+               let localizable = contents["_LOCALIZABLE_"] as? [String: String] {
+                let marketingModel = localizable["marketingModel"] ?? modelIdentifier
+                return marketingModel
+            }
+        }
+    }
+    return modelIdentifier
+}
+
+public var deviceHardwareModel: String {
     // Returns the current devices hardware model from sysctl
     var size = 0
     sysctlbyname("hw.model", nil, &size, nil, 0)
@@ -69,7 +95,7 @@ func getDeviceHardwareModel() -> String {
 }
 
 public extension ProcessInfo {
-    func osName() -> String {
+    var osName: String {
         let version = self.operatingSystemVersion
         switch version.majorVersion {
         case 14: return "Sonoma"
@@ -84,7 +110,7 @@ public extension ProcessInfo {
 }
 
 public extension ProcessInfo {
-    func osVersionString() -> String {
+    var osVersionString: String {
         let version = self.operatingSystemVersion
         return "\(version.majorVersion).\(version.minorVersion).\(version.patchVersion)"
     }
