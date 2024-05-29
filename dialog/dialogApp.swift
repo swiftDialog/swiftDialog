@@ -202,25 +202,28 @@ struct dialogApp: App {
 
         WindowGroup {
             if !appArguments.notification.present {
-                if appArguments.miniMode.present {
-                    MiniView(observedDialogContent: observedData)
-                        .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
-                } else if appArguments.presentationMode.present {
-                    PresentationView(observedData: observedData)
-                        .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
-                } else {
-                    if appArguments.windowResizable.present {
-                        ContentView(observedDialogContent: observedData)
-                            .sheet(isPresented: $observedData.showSheet, content: {
-                                ErrorView(observedContent: observedData)
-                            })
-                    } else {
-                        ContentView(observedDialogContent: observedData)
+                ZStack {
+                    if appArguments.miniMode.present {
+                        MiniView(observedDialogContent: observedData)
                             .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
-                            .sheet(isPresented: $observedData.showSheet, content: {
-                                ErrorView(observedContent: observedData)
-                            })
+                    } else if appArguments.presentationMode.present {
+                        PresentationView(observedData: observedData)
+                            .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
+                    } else {
+                        if appArguments.windowResizable.present {
+                            ContentView(observedDialogContent: observedData)
+                                .sheet(isPresented: $observedData.showSheet, content: {
+                                    ErrorView(observedContent: observedData)
+                                })
+                        } else {
+                            ContentView(observedDialogContent: observedData)
+                                .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
+                                .sheet(isPresented: $observedData.showSheet, content: {
+                                    ErrorView(observedContent: observedData)
+                                })
+                        }
                     }
+                    DebugOverlay(observedData: observedData)
                 }
             }
         }

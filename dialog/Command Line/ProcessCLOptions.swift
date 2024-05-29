@@ -143,6 +143,8 @@ func processCLOptions(json: JSON = getJSON()) {
             appvars.messageAlignment = .center
         case "mini":
             appArguments.miniMode.present = true
+        case "presentation":
+            appArguments.presentationMode.present = true
         default: ()
         }
     }

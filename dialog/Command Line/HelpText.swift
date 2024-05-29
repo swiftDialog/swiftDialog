@@ -152,16 +152,17 @@ struct SDHelp {
 """
 
         argument.dialogStyle.helpShort = "Configure a pre-set window style"
-        argument.dialogStyle.helpUsage = "mini | centered | alert | caution | warning"
+        argument.dialogStyle.helpUsage = "presentation | mini | centered | alert | caution | warning"
         argument.dialogStyle.helpLong = """
         Displays the dialog in one of the defined styles by adjusting window defaults
 
+        "presentation" is functionally equavelent to --\(argument.presentationMode.long)
         "mini" is functionally equavelent to --\(argument.miniMode.long)
         "centered" will set all the options for centered content
         "alert" sets a pre-configured dialog window 300x300 and centered content
         "caution" and "warning" are the same as "alert" with the icon configured
 
-        Style defaults (other than mini) can be overridden. e.g:
+        Style defaults other than mini and presentation can be overridden. e.g:
             --\(argument.dialogStyle.long) alert --\(argument.windowWidth.long) 400
         will use the alert style with 400 width instead of the default 300
 """
@@ -547,6 +548,7 @@ struct SDHelp {
             regexerror - Specify a custom error to display if regex conditions are not met
             fileselect - Adds a "Select" button and presents a file picker
             filetype   - Limits fileselect to the named file extensions. Presented in space seperated values
+            confirm    - Adds a secondary textfield whose contents need to match the primary one for validation to succeed
 
         modifiers can be combined e.g. --\(appArguments.textField.long) <text>,secure,required
                                        --\(appArguments.textField.long) <text>,required,prompt="<text>"
@@ -944,6 +946,19 @@ struct SDHelp {
         Dialog windows will appear on all screens, even on top of fullscreen applications
 
         This property is implied when using --\(argument.forceOnTop.long)
+"""
+
+        argument.debug.helpShort = "Enable debug mode"
+        argument.debug.helpUsage = "(<colour>)"
+        argument.debug.helpLong = """
+        Enables debug mode. This increases the level of log output on stdout and
+        displays additional window properties along the title bar area for reference.
+
+        Optionally supply a <colour> argument as either a named colour or hex value.
+        This will enable content area boundry highlights.
+
+        Used in conjunction with \(argument.windowResizable.long) this is a good way to evaluate dialog
+        look and feel.
 """
 
         argument.getVersion.helpShort = "Print version string"
