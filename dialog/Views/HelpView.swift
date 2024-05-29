@@ -46,6 +46,7 @@ struct HelpView: View {
             .keyboardShortcut(.defaultAction)
         }
         .frame(width: observedData.appProperties.windowWidth-100)
+        .fixedSize()
     }
 }
 
