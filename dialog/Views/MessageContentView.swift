@@ -40,13 +40,17 @@ struct MessageContent: View {
     var body: some View {
         VStack {
             if observedData.args.centreIcon.present && observedData.args.iconOption.present {
-                IconView(image: observedData.args.iconOption.value,
-                         overlay: observedData.args.overlayIconOption.value,
-                         alpha: observedData.iconAlpha)
-                    .frame(width: iconDisplayWidth, alignment: .top)
-                    .padding(.bottom, observedData.appProperties.bottomPadding)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
+                HStack {
+                    Spacer()
+                    IconView(image: observedData.args.iconOption.value,
+                             overlay: observedData.args.overlayIconOption.value,
+                             alpha: observedData.iconAlpha)
+                        .frame(width: iconDisplayWidth, alignment: .top)
+                        //.padding(.bottom, observedData.appProperties.bottomPadding)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
+                        .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
+                    Spacer()
+                }
             }
 
             if observedData.args.mainImage.present {

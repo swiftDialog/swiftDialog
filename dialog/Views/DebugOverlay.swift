@@ -16,7 +16,7 @@ struct DebugOverlay: View {
             // Display window information in the title bar and keep it updated
             VStack {
                 HStack {
-                    Text("DEBUG - Window height: \(Int(windowFrame.width)) width: \(Int(windowFrame.height)) - Icon width: \(Int(observedData.iconSize)) alpha: \(observedData.iconAlpha)")
+                    Text("DEBUG - Window width: \(Int(windowFrame.width)) height: \(Int(windowFrame.height-28)) - Icon width: \(Int(observedData.iconSize)) alpha: \(observedData.iconAlpha)")
                     Spacer()
                     Text("quitkey: cmd+\(observedData.args.quitKey.value.uppercased() == observedData.args.quitKey.value ? "shift+" : "")\(observedData.args.quitKey.value.lowercased())")
                 }
