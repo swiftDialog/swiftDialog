@@ -10,11 +10,11 @@ import SwiftUI
 import MarkdownUI
 
 extension Theme {
-    static let infoBoxTheme = Theme()
-        .link {
-            ForegroundColor(.tertiaryText)
-            UnderlineStyle(.single)
-        }
+    func basicWithInfoBoxLinkStyle() -> Theme {
+        var modifiedTheme = Theme.basic
+        modifiedTheme.link = UnderlineStyle(.single)
+        return modifiedTheme
+    }
 }
 
 extension Theme {

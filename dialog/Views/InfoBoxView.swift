@@ -26,7 +26,7 @@ struct InfoBoxView: View {
                 .markdownTextStyle {
                     ForegroundColor(.secondary)
                 }
-                .markdownTheme(.infoBoxTheme)
+                .markdownTheme(Theme().basicWithInfoBoxLinkStyle())
                 .focusable(false)
                 .lineLimit(nil)
         }
