@@ -246,7 +246,9 @@
 				4114E1E727153FEE00388274 /* Frameworks */,
 				4156C21B29F6A1F7003F04DF /* Dialog copy-Info.plist */,
 			);
+			indentWidth = 4;
 			sourceTree = "<group>";
+			tabWidth = 4;
 			usesTabs = 0;
 		};
 		4154C2DB25F76BDB00A3D373 /* Products */ = {
