@@ -87,8 +87,8 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
         exit(0)
     }
 
-    // only print if exit code os 0
-    if exitCode == 0 {
+    // only print if exit code is 0
+    if exitCode <= appvars.exit3.code {
 
         // build json using SwiftyJSON
         var json = JSON()
@@ -107,35 +107,50 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                 //check for required fields
                 let textField = userInputState.textFields[index]
                 let textfieldValue = textField.value
+                var textfieldName = textField.name
                 let textfieldTitle = textField.title
                 let textfieldRequired = textField.required
+                let textfieldValidation = textField.confirm
+                let textFieldValidationValue = textField.validationValue
                 userInputState.textFields[index].requiredTextfieldHighlight = Color.clear
 
-                if textfieldRequired && textfieldValue == "" { // && userInputState.textFields[index].regex.isEmpty {
-                    NSSound.beep()
-                    requiredString += "  - \"\(textfieldTitle)\" \("is-required".localized)<br>"
-                    userInputState.textFields[index].requiredTextfieldHighlight = Color.red
-                    dontQuit = true
-                    writeLog("Required text field \(textfieldTitle) has no value")
-
-                //check for regex requirements
-                } else if !(textfieldValue.isEmpty)
-                            && !(textField.regex.isEmpty)
-                            && !checkRegexPattern(regexPattern: textField.regex, textToValidate: textfieldValue) {
-                    NSSound.beep()
-                    userInputState.textFields[index].requiredTextfieldHighlight = Color.green
-                    requiredString += "  - "+(textField.regexError)+"<br>"
-                    dontQuit = true
-                    writeLog("Textfield \(textfieldTitle) value \(textfieldValue) does not meet regex requirements \(String(describing: textField.regex))")
+                if textfieldName.isEmpty {
+                    textfieldName = textfieldTitle
                 }
 
-                outputArray.append("\(textfieldTitle) : \(textfieldValue)")
-                json[textfieldTitle].string = textfieldValue
+                if exitCode == 0 {
+                    if textfieldRequired && textfieldValue == "" { // && userInputState.textFields[index].regex.isEmpty {
+                        NSSound.beep()
+                        requiredString += "  - \"\(textfieldTitle)\" \("is-required".localized)<br>"
+                        userInputState.textFields[index].requiredTextfieldHighlight = Color.red
+                        dontQuit = true
+                        writeLog("Required text field \(textfieldName) has no value")
+
+                        //check for regex requirements
+                    } else if !(textfieldValue.isEmpty)
+                                && !(textField.regex.isEmpty)
+                                && !checkRegexPattern(regexPattern: textField.regex, textToValidate: textfieldValue) {
+                        NSSound.beep()
+                        userInputState.textFields[index].requiredTextfieldHighlight = Color.green
+                        requiredString += "  - "+(textField.regexError)+"<br>"
+                        dontQuit = true
+                        writeLog("Textfield \(textfieldTitle) value \(textfieldValue) does not meet regex requirements \(String(describing: textField.regex))")
+                    } else if textfieldValidation && textFieldValidationValue != textfieldValue {
+                        NSSound.beep()
+                        requiredString += "  - \"\(textfieldTitle)\" \("confirmation-failed".localized)<br>"
+                        userInputState.textFields[index].requiredTextfieldHighlight = Color.red
+                        dontQuit = true
+                        writeLog("Text field \(textfieldName) confirmation failed")
+                    }
+                }
+
+                outputArray.append("\(textfieldName) : \(textfieldValue)")
+                json[textfieldName].string = textfieldValue
             }
         }
 
-        if observedObject?.args.dropdownValues.present != nil {
-            writeLog("Select items present - checking require,ments are met")
+        if observedObject?.args.dropdownValues.present ?? false {
+            writeLog("Select items present - checking requirements are met")
             if userInputState.dropdownItems.count == 1 {
                 let selectedValue = userInputState.dropdownItems[0].selectedValue
                 let selectedIndex = userInputState.dropdownItems[0].values
@@ -151,20 +166,25 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                 let dropdownItem = userInputState.dropdownItems[index]
                 let dropdownItemValues = dropdownItem.values
                 let dropdownItemSelectedValue = dropdownItem.selectedValue
-                let dropdownItemTitle = dropdownItem.title
+                // let dropdownItemTitle = dropdownItem.title
+                var dropdownItemName = dropdownItem.name
                 let dropdownItemRequired = dropdownItem.required
                 userInputState.dropdownItems[index].requiredfieldHighlight = Color.clear
 
-                if dropdownItemRequired && dropdownItemSelectedValue == "" {
+                if dropdownItemName.isEmpty {
+                    dropdownItemName = dropdownItem.title
+                }
+
+                if exitCode == 0 && dropdownItemRequired && dropdownItemSelectedValue == "" {
                     NSSound.beep()
-                    requiredString += "  - \"\(dropdownItemTitle)\" \("is-required".localized)<br>"
+                    requiredString += "  - \"\(dropdownItemName)\" \("is-required".localized)<br>"
                     userInputState.dropdownItems[index].requiredfieldHighlight = Color.red
                     dontQuit = true
-                    writeLog("Required select item \(dropdownItemTitle) has no value")
+                    writeLog("Required select item \(dropdownItemName) has no value")
                 } else {
-                    outputArray.append("\"\(dropdownItemTitle)\" : \"\(dropdownItemSelectedValue)\"")
-                    outputArray.append("\"\(dropdownItemTitle)\" index : \"\(dropdownItemValues.firstIndex(of: dropdownItemSelectedValue) ?? -1)\"")
-                    json[dropdownItemTitle] = ["selectedValue": dropdownItemSelectedValue, "selectedIndex": dropdownItemValues.firstIndex(of: dropdownItemSelectedValue) ?? -1]
+                    outputArray.append("\"\(dropdownItemName)\" : \"\(dropdownItemSelectedValue)\"")
+                    outputArray.append("\"\(dropdownItemName)\" index : \"\(dropdownItemValues.firstIndex(of: dropdownItemSelectedValue) ?? -1)\"")
+                    json[dropdownItemName] = ["selectedValue": dropdownItemSelectedValue, "selectedIndex": dropdownItemValues.firstIndex(of: dropdownItemSelectedValue) ?? -1]
                 }
             }
         }
@@ -176,10 +196,15 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
             return
         }
 
-        if observedObject?.args.checkbox.present != nil {
-            for index in 0..<(observedObject?.appProperties.checkboxArray.count ?? 0) {
-                outputArray.append("\"\(observedObject?.appProperties.checkboxArray[index].label ?? "checkbox \(index)")\" : \"\(observedObject?.appProperties.checkboxArray[index].checked ?? false)\"")
-                json[observedObject?.appProperties.checkboxArray[index].label ?? 0].boolValue = observedObject?.appProperties.checkboxArray[index].checked ?? false
+        if appArguments.checkbox.present {
+            for index in 0..<(userInputState.checkBoxes.count) {
+                let checkBox = userInputState.checkBoxes[index]
+                var checkboxName = checkBox.name
+                if checkboxName.isEmpty {
+                    checkboxName = checkBox.label
+                }
+                outputArray.append("\"\(checkboxName)\" : \"\(checkBox.checked)\"")
+                json[checkboxName].boolValue = checkBox.checked
             }
         }
 
@@ -250,4 +275,47 @@ func getModificationDateOf(_ fileURL: URL) -> Date {
         writeLog("Failed to get file creation date: \(error.localizedDescription)", logLevel: .error)
     }
     return theDate
+}
+
+func getEnvironmentVars() -> [String: String] {
+    var systemInfo: [String: String] = [
+        "computername": Host.current().localizedName ?? "Mac",
+        "computermodel": marketingModel,
+        "serialnumber": deviceSerialNumber,
+        "username": consoleUserInfo.username,
+        "userfullname": NSFullUserName(),
+        "osversion": ProcessInfo.processInfo.osVersionString,
+        "osname": ProcessInfo.processInfo.osName
+    ]
+
+    let env = ProcessInfo.processInfo.environment
+    for (key, value) in env {
+        systemInfo[key] = value
+    }
+    return systemInfo
+}
+
+func captureQuitKey(keyValue: String) {
+    // capture command+quitKey for quit
+    NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+        switch event.modifierFlags.intersection(.deviceIndependentFlagsMask) {
+        case [.command] where "wnm".contains(event.characters ?? ""):
+            writeLog("Detected cmd+w or cmd+n or cmd+m")
+            return nil
+        case [.command] where event.characters == "q":
+            writeLog("Detected cmd+q")
+            if keyValue != "q" {
+                writeLog("cmd+q is disabled")
+                return nil
+            } else {
+                quitDialog(exitCode: 10)
+            }
+        case [.command] where event.characters == keyValue, [.command, .shift] where event.characters == keyValue.lowercased():
+            writeLog("detected cmd+\(keyValue)")
+            quitDialog(exitCode: 10)
+        default:
+            return event
+        }
+        return event
+    }
 }

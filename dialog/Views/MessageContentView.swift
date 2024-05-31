@@ -12,7 +12,7 @@ import MarkdownUI
 struct MessageContent: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
-    @State private var messageHeight: CGFloat = 100
+    @State private var messageHeight: CGFloat = 50
 
     var fieldPadding: CGFloat = 15
     var dataEntryMaxWidth: CGFloat = 700
@@ -40,17 +40,21 @@ struct MessageContent: View {
     var body: some View {
         VStack {
             if observedData.args.centreIcon.present && observedData.args.iconOption.present {
-                IconView(image: observedData.args.iconOption.value,
-                         overlay: observedData.args.overlayIconOption.value,
-                         alpha: observedData.iconAlpha)
-                    .frame(width: iconDisplayWidth, alignment: .top)
-                    .padding(.bottom, observedData.appProperties.bottomPadding)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
+                HStack {
+                    Spacer()
+                    IconView(image: observedData.args.iconOption.value,
+                             overlay: observedData.args.overlayIconOption.value,
+                             alpha: observedData.iconAlpha)
+                        .frame(width: iconDisplayWidth, alignment: .top)
+                        //.padding(.bottom, observedData.appProperties.bottomPadding)
+                        .border(observedData.appProperties.debugBorderColour, width: 2)
+                        .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
+                    Spacer()
+                }
             }
 
             if observedData.args.mainImage.present {
-                ImageView(imageArray: observedData.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: observedData.args.autoPlay.value.floatValue())
+                ImageView(imageArray: observedData.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: observedData.args.autoPlay.value.floatValue(), showControls: true, hideTimer: observedData.args.hideTimer.present)
             }
 
             if !["", "none"].contains(observedData.args.messageOption.value) {
@@ -75,6 +79,7 @@ struct MessageContent: View {
                                 }
                                 .background(Color("editorBackgroundColour"))
                                 .cornerRadius(5.0)
+                                .border(observedData.appProperties.debugBorderColour, width: 2)
                             }
                         } else {
                             ScrollView {
@@ -97,46 +102,58 @@ struct MessageContent: View {
                                     }
                                     .accessibilityHint(observedData.args.messageOption.value)
                                     .focusable(false)
-                                //.scrollOnOverflow()
+                                    .border(observedData.appProperties.debugBorderColour, width: 2)
                             }
                         }
                 }
-                .frame(maxHeight: messageHeight)
+                .frame(minHeight: 30, maxHeight: messageHeight)
                 if !observedData.args.messageVerticalAlignment.present || ["centre", "center", "top"].contains(observedData.args.messageVerticalAlignment.value) {
                     Spacer()
                 }
             }
 
             Group {
-                TextFileView(logFilePath: observedData.args.logFileToTail.value)
-                    .padding(.bottom, observedData.appProperties.contentPadding)
-                WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .padding(.bottom, observedData.appProperties.contentPadding)
-
-                ListView(observedDialogContent: observedData)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .padding(.bottom, observedData.appProperties.contentPadding)
-
-                CheckboxView(observedDialogContent: observedData)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .frame(maxWidth: dataEntryMaxWidth)
-
-                TextEntryView(observedDialogContent: observedData, textfieldContent: userInputState.textFields)
-                    .padding(.bottom, observedData.appProperties.contentPadding)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .frame(maxWidth: dataEntryMaxWidth)
-
-                RadioView(observedDialogContent: observedData)
-                    .padding(.bottom, observedData.appProperties.contentPadding)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .frame(maxWidth: dataEntryMaxWidth)
-
-                DropdownView(observedDialogContent: observedData)
-                    .padding(.bottom, observedData.appProperties.contentPadding)
-                    .border(observedData.appProperties.debugBorderColour, width: 2)
-                    .frame(maxWidth: dataEntryMaxWidth, alignment: .leading)
+                ForEach(Array(observedData.appProperties.viewOrder.indices), id: \.self) { index in
+                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.textfile.rawValue) == index {
+                        TextFileView(logFilePath: observedData.args.logFileToTail.value)
+                            .padding(.bottom, observedData.appProperties.contentPadding)
+                    }
+                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.webcontent.rawValue) == index {
+                        WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .padding(.bottom, observedData.appProperties.contentPadding)
+                    }
+                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.listitem.rawValue) == index {
+                        ListView(observedDialogContent: observedData)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .padding(.bottom, observedData.appProperties.contentPadding)
+                    }
+                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.checkbox.rawValue) == index {
+                        CheckboxView(observedDialogContent: observedData)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .frame(maxWidth: dataEntryMaxWidth)
+                    }
+                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.textfield.rawValue) == index {
+                        TextEntryView(observedDialogContent: observedData, textfieldContent: userInputState.textFields)
+                            .padding(.bottom, observedData.appProperties.contentPadding)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .frame(maxWidth: dataEntryMaxWidth)
+                    }
+                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.radiobutton.rawValue) == index {
+                        RadioView(observedDialogContent: observedData)
+                            .padding(.bottom, observedData.appProperties.contentPadding)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .frame(maxWidth: dataEntryMaxWidth)
+                    }
+                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.dropdown.rawValue) == index {
+                        DropdownView(observedDialogContent: observedData)
+                            .padding(.bottom, observedData.appProperties.contentPadding)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .frame(maxWidth: dataEntryMaxWidth, alignment: .leading)
+                    }
+                }
             }
+
 
             if ["top"].contains(observedData.args.messageVerticalAlignment.value) {
                 Spacer()

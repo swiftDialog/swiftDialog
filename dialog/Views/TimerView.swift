@@ -124,7 +124,7 @@ struct TimerView: View {
             }.frame(height: barheight, alignment: .bottom) //needed to force limit the entire progress bar frame height
             .padding(observedData.appProperties.sidePadding)
         } else {
-            Spacer()
+            EmptyView()
                 .onReceive(timer) { _ in
                     if progress <= timerSteps {
                         progress += 1

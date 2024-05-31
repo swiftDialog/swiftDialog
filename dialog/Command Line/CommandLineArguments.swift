@@ -22,6 +22,10 @@ struct CommandlineArgument {
         self.present = json[self.long].exists() || CLOptionPresent(optionName: self)
         if !self.isbool && json[self.long].bool ?? false {
             self.present = false
+            return
+        } else if let boolValue = json[self.long].bool {
+            self.present = boolValue
+            return
         }
 
         if self.present {
@@ -39,6 +43,8 @@ struct CommandlineArgument {
             } else {
                 self.value = defaultValue as? String ?? ""
             }
+        } else {
+            self.value = processTextString(self.value, tags: appvars.systemInfo)
         }
     }
 }
@@ -111,27 +117,30 @@ struct CommandLineArguments {
     var authkey                  = CommandlineArgument(long: "key", short: "k")
     var hash                     = CommandlineArgument(long: "checksum")
     var logFileToTail            = CommandlineArgument(long: "displaylog")
+    var preferredViewOrder       = CommandlineArgument(long: "vieworder")
 
     // command line options that take no additional parameters
     var button1Disabled          = CommandlineArgument(long: "button1disabled", isbool: true)
     var button2Disabled          = CommandlineArgument(long: "button2disabled", isbool: true)
     var button2Option            = CommandlineArgument(long: "button2", short: "2", isbool: true)
     var infoButtonOption         = CommandlineArgument(long: "infobutton", short: "3", isbool: true)
-    var getVersion               = CommandlineArgument(long: "version", short: "v")
-    var hideIcon                 = CommandlineArgument(long: "hideicon", short: "h")
+    var getVersion               = CommandlineArgument(long: "version", short: "v", isbool: true)
+    var hideIcon                 = CommandlineArgument(long: "hideicon", short: "h", isbool: true)
     var centreIcon               = CommandlineArgument(long: "centreicon", isbool: true)
     var centreIconSE             = CommandlineArgument(long: "centericon", isbool: true) // the other way of spelling
-    var helpOption               = CommandlineArgument(long: "help")
-    var demoOption               = CommandlineArgument(long: "demo")
-    var buyCoffee                = CommandlineArgument(long: "coffee", short: "☕️")
-    var licence                  = CommandlineArgument(long: "licence", short: "l")
-    var warningIcon              = CommandlineArgument(long: "warningicon") // Deprecated
-    var infoIcon                 = CommandlineArgument(long: "infoicon") // Deprecated
-    var cautionIcon              = CommandlineArgument(long: "cautionicon") // Deprecated
-    var hideTimerBar             = CommandlineArgument(long: "hidetimerbar")
-    var autoPlay                 = CommandlineArgument(long: "autoplay")
+    var helpOption               = CommandlineArgument(long: "help", isbool: true)
+    var demoOption               = CommandlineArgument(long: "demo", isbool: true)
+    var buyCoffee                = CommandlineArgument(long: "coffee", short: "☕️", isbool: true)
+    var licence                  = CommandlineArgument(long: "licence", short: "l", isbool: true)
+    var warningIcon              = CommandlineArgument(long: "warningicon", isbool: true) // Deprecated
+    var infoIcon                 = CommandlineArgument(long: "infoicon", isbool: true) // Deprecated
+    var cautionIcon              = CommandlineArgument(long: "cautionicon", isbool: true) // Deprecated
+    var hideTimerBar             = CommandlineArgument(long: "hidetimerbar", isbool: true)
+    var hideTimer                = CommandlineArgument(long: "hidetimer", isbool: true)
+    var autoPlay                 = CommandlineArgument(long: "autoplay", isbool: true)
     var blurScreen               = CommandlineArgument(long: "blurscreen", isbool: true)
     var notification             = CommandlineArgument(long: "notification", isbool: true)
+    var verboseLogging           = CommandlineArgument(long: "verbose", short: "vvv", isbool: true)
 
     var constructionKit          = CommandlineArgument(long: "builder", isbool: true)
     var movableWindow            = CommandlineArgument(long: "moveable", short: "o", isbool: true)
@@ -140,13 +149,14 @@ struct CommandLineArguments {
     var bigWindow                = CommandlineArgument(long: "big", short: "b", isbool: true)
     var fullScreenWindow         = CommandlineArgument(long: "fullscreen", short: "f", isbool: true)
     var quitOnInfo               = CommandlineArgument(long: "quitoninfo", isbool: true)
-    var listFonts                = CommandlineArgument(long: "listfonts")
+    var listFonts                = CommandlineArgument(long: "listfonts", isbool: true)
     var jsonOutPut               = CommandlineArgument(long: "json", short: "j", isbool: true)
     var ignoreDND                = CommandlineArgument(long: "ignorednd", short: "d", isbool: true)
     var jamfHelperMode           = CommandlineArgument(long: "jh", short: "jh", isbool: true)
     var miniMode                 = CommandlineArgument(long: "mini", isbool: true)
     var eulaMode                 = CommandlineArgument(long: "eula", isbool: true)
-    var windowButtonsEnabled     = CommandlineArgument(long: "windowbuttons")
+    var presentationMode         = CommandlineArgument(long: "presentation", isbool: true)
+    var windowButtonsEnabled     = CommandlineArgument(long: "windowbuttons", isbool: true)
     var windowResizable          = CommandlineArgument(long: "resizable", isbool: true)
     var showOnAllScreens         = CommandlineArgument(long: "showonallscreens", isbool: true)
     var notificationGoPing       = CommandlineArgument(long: "enablenotificationsounds", isbool: true)

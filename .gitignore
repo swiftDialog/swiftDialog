@@ -1,0 +1,36 @@
+### Xcode ###
+
+## Xcode Project Bundles
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace
+
+## Xcode Workspaces
+*.xcworkspace/*
+!*.xcworkspace/contents.xcworkspacedata
+!*.xcworkspace/xcshareddata/
+*.xcodeproj/xcshareddata/xcschemes/dialogTests.xcscheme
+
+## Workspaces inside project bundles
+*.xcodeproj/project.xcworkspace/*
+!*.xcodeproj/project.xcworkspace/xcshareddata
+!*.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+!*.xcodeproj/project.xcworkspace/xcshareddata/
+*.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings 
+
+### macOS ###
+
+## General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+## Thumbnails
+._*
+
+## Icon must end with two \r
+Icon
+
+
+
