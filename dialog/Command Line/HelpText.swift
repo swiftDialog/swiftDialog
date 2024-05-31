@@ -871,6 +871,14 @@ struct SDHelp {
         This property is implied when using --\(argument.forceOnTop.long)
 """
 
+        argument.loginWindow.helpShort = "Enable the dialog window to be shown at login"
+        argument.loginWindow.helpUsage = ""
+        argument.loginWindow.helpLong = """
+        Enables the dialog window to be shown at login.
+
+        This option also implies the --\(argument.forceOnTop.long) flag
+"""
+
         argument.getVersion.helpShort = "Print version string"
         argument.getVersion.helpUsage = ""
         argument.getVersion.helpLong = ""

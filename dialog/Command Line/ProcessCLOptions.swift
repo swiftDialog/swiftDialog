@@ -950,6 +950,7 @@ func processCLOptionValues() {
     appArguments.notificationGoPing.evaluate(json: json)
     appArguments.eulaMode.evaluate(json: json)
     appArguments.windowResizable.evaluate(json: json)
+    appArguments.loginWindow.evaluate(json: json)
 
     // command line only options
     appArguments.listFonts.evaluate()
