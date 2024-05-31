@@ -26,6 +26,9 @@ class BlurWindowController: NSWindowController {
         self.window?.contentViewController = BlurViewController()
         self.window?.setFrame((allScreens.frame), display: true)
         self.window?.collectionBehavior = [.canJoinAllSpaces]
+        if appArguments.loginWindow.present {
+            self.window?.canBecomeVisibleWithoutLogin = true
+        }
     }
 }
 

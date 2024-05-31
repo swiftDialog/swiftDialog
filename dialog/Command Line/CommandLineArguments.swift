@@ -160,5 +160,6 @@ struct CommandLineArguments {
     var windowResizable          = CommandlineArgument(long: "resizable", isbool: true)
     var showOnAllScreens         = CommandlineArgument(long: "showonallscreens", isbool: true)
     var notificationGoPing       = CommandlineArgument(long: "enablenotificationsounds", isbool: true)
+    var loginWindow              = CommandlineArgument(long: "loginwindow", isbool: true)
     var hideDefaultKeyboardAction = CommandlineArgument(long: "hidedefaultkeyboardaction", isbool: true)
 }

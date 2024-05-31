@@ -63,9 +63,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             if appArguments.showOnAllScreens.present {
                 window.collectionBehavior = [.canJoinAllSpaces]
             }
+            if appArguments.loginWindow.present {
+                window.canBecomeVisibleWithoutLogin = true
+                writeLog("Window can appear at the loginwindow", logLevel: .debug)
+            }
 
             // Set window level
-            if appArguments.forceOnTop.present || appArguments.blurScreen.present {
+            if appArguments.forceOnTop.present || appArguments.blurScreen.present || appArguments.loginWindow.present {
                 window.level = .floating
                 writeLog("Window is forced on top", logLevel: .debug)
             } else {
