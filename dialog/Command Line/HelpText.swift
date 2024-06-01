@@ -951,7 +951,16 @@ struct SDHelp {
         argument.loginWindow.helpShort = "Enable the dialog window to be shown at login"
         argument.loginWindow.helpUsage = ""
         argument.loginWindow.helpLong = """
-        Enables the dialog window to be shown at login.
+        Login window support requires an appropriate LaunchAgent to launch swiftDialog
+        in the appropriate context. This should be acheived with a standard LaunchAgent
+        that includes the following key:
+
+        <key>LimitLoadToSessionType</key>
+        <string>LoginWindow</string>
+
+        Both the LaunchAgent and --\(argument.loginWindow.long) argument are required.
+
+        Supports standard dialogs with or without --\(argument.blurScreen.long)
 
         This option also implies the --\(argument.forceOnTop.long) flag
 """

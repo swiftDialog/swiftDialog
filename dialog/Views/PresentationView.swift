@@ -61,11 +61,7 @@ struct PresentationView: View {
                                 .frame(maxWidth: content.size.width*sbWidthProportion)
                         } else {
                             ZStack {
-                                if observedData.args.watermarkImage.value.range(of: "colo[u]?r=", options: .regularExpression) != nil {
-                                    SolidColourView(colourValue: observedData.args.watermarkImage.value)
-                                } else {
-                                    SolidColourView(colourValue: "accent")
-                                }
+                                SolidColourView(colourValue: observedData.args.watermarkImage.present ? observedData.args.watermarkImage.value : "accent")
 
                                 VStack {
                                     if observedData.args.iconOption.present && observedData.args.iconOption.value != "default" {
@@ -89,12 +85,10 @@ struct PresentationView: View {
                             // list view
                             ListView(observedDialogContent: observedData, clipRadius: 0)
                         } else {
-
                             PresentationViewMarkdown(content: observedData.args.messageOption.value,
                                                      contentAlignment: .leading,
                                                      contentColour: messageColour)
                             .scrollOnOverflow()
-
                         }
                     }
                 }
