@@ -162,4 +162,5 @@ struct CommandLineArguments {
     var notificationGoPing       = CommandlineArgument(long: "enablenotificationsounds", isbool: true)
     var loginWindow              = CommandlineArgument(long: "loginwindow", isbool: true)
     var hideDefaultKeyboardAction = CommandlineArgument(long: "hidedefaultkeyboardaction", isbool: true)
+    var alwaysReturnUserInput      = CommandlineArgument(long: "alwaysreturninput", isbool: true)
 }

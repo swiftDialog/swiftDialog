@@ -983,6 +983,7 @@ func processCLOptionValues() {
     appArguments.windowResizable.evaluate(json: json)
     appArguments.loginWindow.evaluate(json: json)
     appArguments.verboseLogging.evaluate(json: json)
+    appArguments.alwaysReturnUserInput.evaluate(json: json)
 
     // command line only options
     appArguments.listFonts.evaluate()

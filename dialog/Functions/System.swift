@@ -88,7 +88,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
     }
 
     // only print if exit code is 0
-    if exitCode <= appvars.exit3.code {
+    if exitCode == appvars.exit0.code || appArguments.alwaysReturnUserInput.present {
 
         // build json using SwiftyJSON
         var json = JSON()
