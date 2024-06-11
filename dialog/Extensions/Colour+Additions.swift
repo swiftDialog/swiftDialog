@@ -105,3 +105,15 @@ extension Color {
     static let checkbox = Color(rgba: 0xb9b9_bbff)
     static let checkboxBackground = Color(rgba: 0xeeee_efff)
 }
+
+extension Color {
+    var isDark: Bool {
+        let components = self.cgColor?.components
+        let red: CGFloat = components?[0] ?? 0.0
+        let green: CGFloat = components?[1] ?? 0.0
+        let blue: CGFloat = components?[2] ?? 0.0
+
+        let lum = 0.2126 * red + 0.7152 * green + 0.0722 * blue
+        return lum < 0.5
+    }
+}

@@ -9,19 +9,21 @@ import SwiftUI
 
 struct RenderToggles: View {
     @ObservedObject var observedData: DialogUpdatableContent
+    @State var checkboxContent: [CheckBoxes]
 
     var iconPresent: Bool = false
     var rowHeight: CGFloat = 10
 
-    init(observedDialogContent: DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent, checkboxContent: [CheckBoxes]) {
         self.observedData = observedDialogContent
+        self.checkboxContent = checkboxContent
         if observedData.appProperties.checkboxControlSize == .large {
             rowHeight = observedData.appProperties.messageFontSize + 24
         } else {
             rowHeight = observedData.appProperties.messageFontSize + 14
         }
 
-        iconPresent = observedData.appProperties.checkboxArray.contains { $0.icon != "" }
+        iconPresent = checkboxContent.contains { $0.icon != "" }
         if iconPresent {
             writeLog("One or more switches have an acssociated icon")
         }
@@ -29,14 +31,14 @@ struct RenderToggles: View {
 
     var body: some View {
         VStack {
-            ForEach(0..<observedData.appProperties.checkboxArray.count, id: \.self) {index in
+            ForEach(0..<checkboxContent.count, id: \.self) {index in
                 HStack {
                     if observedData.appProperties.checkboxControlStyle == "switch" {
                         let _ = writeLog("Displaying switches instead of checkboxes")
                         if iconPresent {
-                            if observedData.appProperties.checkboxArray[index].icon != "" {
-                                let _ = writeLog("Switch index \(index): Displaying icon \(observedData.appProperties.checkboxArray[index].icon)")
-                                IconView(image: observedData.appProperties.checkboxArray[index].icon, overlay: "")
+                            if checkboxContent[index].icon != "" {
+                                let _ = writeLog("Switch index \(index): Displaying icon \(checkboxContent[index].icon)")
+                                IconView(image: checkboxContent[index].icon, overlay: "")
                                     .frame(height: rowHeight)
                             } else {
                                 let _ = writeLog("Switch index \(index) has no icon")
@@ -44,21 +46,25 @@ struct RenderToggles: View {
                                     .frame(height: rowHeight)
                             }
                         }
-                        Text(observedData.appProperties.checkboxArray[index].label)
+                        Text(checkboxContent[index].label)
                         Spacer()
-                        Toggle("", isOn: $observedData.appProperties.checkboxArray[index].checked)
+                        Toggle("", isOn: $checkboxContent[index].checked)
                             .toggleStyle(.switch)
-                            .disabled(observedData.appProperties.checkboxArray[index].disabled)
+                            .disabled(checkboxContent[index].disabled)
                             .controlSize(observedData.appProperties.checkboxControlSize)
+                            .onChange(of: checkboxContent[index].checked) { checked in
+                                userInputState.checkBoxes[index].checked = checked
+                            }
                     } else {
-                        Toggle(observedData.appProperties.checkboxArray[index].label, isOn: $observedData.appProperties.checkboxArray[index].checked)
+                        Toggle(checkboxContent[index].label, isOn: $checkboxContent[index].checked)
                             .toggleStyle(.checkbox)
-                            .onChange(of: observedData.appProperties.checkboxArray[index].checked) { checked in
-                                if observedData.appProperties.checkboxArray[index].enablesButton1 {
+                            .onChange(of: checkboxContent[index].checked) { checked in
+                                userInputState.checkBoxes[index].checked = checked
+                                if checkboxContent[index].enablesButton1 {
                                     observedData.args.button1Disabled.present = !checked
                                 }
                             }
-                            .disabled(observedData.appProperties.checkboxArray[index].disabled)
+                            .disabled(checkboxContent[index].disabled)
                         Spacer()
                     }
                 }
@@ -66,7 +72,7 @@ struct RenderToggles: View {
                 .frame(width: .infinity)
 
                 // Horozontal Line
-                if index < observedData.appProperties.checkboxArray.count-1 {
+                if index < checkboxContent.count-1 {
                     Divider().opacity(0.5)
                 }
             }
@@ -81,6 +87,7 @@ struct RenderToggles: View {
 struct CheckboxView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
+    @State private var switchHeight: CGFloat = 30
 
     var toggleStyle: any ToggleStyle = .checkbox
 
@@ -93,12 +100,20 @@ struct CheckboxView: View {
         if observedData.args.checkbox.present {
             if observedData.appProperties.checkboxControlStyle.lowercased() == "switch" {
                 VStack {
-                    Spacer()
-                    RenderToggles(observedDialogContent: observedData)
+                    //Spacer()
+                    RenderToggles(observedDialogContent: observedData, checkboxContent: userInputState.checkBoxes)
+                        .background(GeometryReader {child -> Color in
+                            DispatchQueue.main.async {
+                                // update on next cycle with calculated height
+                                self.switchHeight = child.size.height
+                            }
+                            return Color.clear
+                        })
+                        .scrollOnOverflow()
                 }
-                .scrollOnOverflow()
+                .frame(minHeight: 10, maxHeight: switchHeight)
             } else {
-                RenderToggles(observedDialogContent: observedData)
+                RenderToggles(observedDialogContent: observedData, checkboxContent: userInputState.checkBoxes)
             }
         }
     }

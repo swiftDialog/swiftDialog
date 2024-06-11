@@ -25,7 +25,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 didReceive response: UNNotificationResponse,
                 withCompletionHandler completionHandler:
                                 @escaping () -> Void) {
+
         writeLog("reading notification", logLevel: .debug)
+
         if response.notification.request.content.categoryIdentifier == "SD_NOTIFICATION" {
             processNotification(response: response)
         } else {
@@ -35,7 +37,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         // call the completion handler when done.
         completionHandler()
         // quit dialog since we dont need to show anything
-        quitDialog(exitCode: appvars.exitNow.code)
+        if appvars.quitAfterProcessingNotifications {
+            quitDialog(exitCode: appvars.exitNow.code)
+        }
     }
 
     func applicationWillFinishLaunching(_ notification: Notification) {
@@ -53,14 +57,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             window.standardWindowButton(.closeButton)?.isEnabled = appvars.windowCloseEnabled
             window.standardWindowButton(.miniaturizeButton)?.isEnabled = appvars.windowMinimiseEnabled
             window.standardWindowButton(.zoomButton)?.isEnabled = appvars.windowMaximiseEnabled
+            window.title = appArguments.titleOption.value
             window.isMovable = appArguments.movableWindow.present
             window.isMovableByWindowBackground = true
             if appArguments.showOnAllScreens.present {
                 window.collectionBehavior = [.canJoinAllSpaces]
             }
+            if appArguments.loginWindow.present {
+                window.canBecomeVisibleWithoutLogin = true
+                writeLog("Window can appear at the loginwindow", logLevel: .debug)
+            }
 
             // Set window level
-            if appArguments.forceOnTop.present || appArguments.blurScreen.present {
+            if appArguments.forceOnTop.present || appArguments.blurScreen.present || appArguments.loginWindow.present {
                 window.level = .floating
                 writeLog("Window is forced on top", logLevel: .debug)
             } else {
@@ -113,6 +122,11 @@ struct dialogApp: App {
     init () {
 
         writeLog("Dialog Launched")
+
+        if CommandLine.arguments.count > 1 {
+            appvars.quitAfterProcessingNotifications = false
+        }
+
         for argument in CommandLine.arguments {
             writeLog(argument, logLevel: .info)
         }
@@ -131,6 +145,8 @@ struct dialogApp: App {
         processCLOptionValues()
 
         checkNotificationAuthorisation(notificationPresent: appArguments.notification.present)
+
+        captureQuitKey(keyValue: appArguments.quitKey.value)
 
         // check if we are sending a notification
         if checkForDialogNotificationMode(appArguments) {
@@ -164,7 +180,7 @@ struct dialogApp: App {
         if appArguments.debug.present {
             writeLog("debug options presented. dialog state sent to stderr", logLevel: .debug)
             appvars.debugMode = true
-            appvars.debugBorderColour = Color.green
+            appvars.debugBorderColour = appArguments.debug.value != "" ? Color(argument: appArguments.debug.value) : Color.clear
 
             writeLog("Window Height = \(appvars.windowHeight): Window Width = \(appvars.windowWidth)", logLevel: .debug)
         }
@@ -190,22 +206,28 @@ struct dialogApp: App {
 
         WindowGroup {
             if !appArguments.notification.present {
-                if appArguments.miniMode.present {
-                    MiniView(observedDialogContent: observedData)
-                        .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
-                } else {
-                    if appArguments.windowResizable.present {
-                        ContentView(observedDialogContent: observedData)
-                            .sheet(isPresented: $observedData.showSheet, content: {
-                                ErrorView(observedContent: observedData)
-                            })
-                    } else {
-                        ContentView(observedDialogContent: observedData)
+                ZStack {
+                    if appArguments.miniMode.present {
+                        MiniView(observedDialogContent: observedData)
                             .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
-                            .sheet(isPresented: $observedData.showSheet, content: {
-                                ErrorView(observedContent: observedData)
-                            })
+                    } else if appArguments.presentationMode.present {
+                        PresentationView(observedData: observedData)
+                            .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
+                    } else {
+                        if appArguments.windowResizable.present {
+                            ContentView(observedDialogContent: observedData)
+                                .sheet(isPresented: $observedData.showSheet, content: {
+                                    ErrorView(observedContent: observedData)
+                                })
+                        } else {
+                            ContentView(observedDialogContent: observedData)
+                                .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
+                                .sheet(isPresented: $observedData.showSheet, content: {
+                                    ErrorView(observedContent: observedData)
+                                })
+                        }
                     }
+                    DebugOverlay(observedData: observedData)
                 }
             }
         }

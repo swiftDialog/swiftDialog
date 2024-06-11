@@ -10,7 +10,7 @@ import SwiftUI
 
 struct AppVariables {
 
-    var cliversion                      = "2.4.2"
+    var cliversion                      = "2.5.0"
     let launchTime                      = Date.now
     // message default strings
     let titleDefault                    = String("default-title".localized)
@@ -27,6 +27,18 @@ struct AppVariables {
                                                       "right": .trailing,
                                                       "centre": .center,
                                                       "center": .center]
+
+    var systemInfo: [String: String] = getEnvironmentVars()
+
+    var viewOrder: [String] = [
+        ViewType.textfile.rawValue,
+        ViewType.webcontent.rawValue,
+        ViewType.listitem.rawValue,
+        ViewType.checkbox.rawValue,
+        ViewType.textfield.rawValue,
+        ViewType.radiobutton.rawValue,
+        ViewType.dropdown.rawValue
+    ]
 
     // button default strings
     // work out how to define a default width button that does what you tell it to. in the meantime, diry hack with spaces
@@ -115,11 +127,13 @@ struct AppVariables {
     var imageArray                      = [MainImage]()
     var imageCaptionArray               = [String]()
 
+    var quitAfterProcessingNotifications = true
+
     let defaultStatusLogFile            = String("/var/tmp/dialog.log")
 
     var quitKeyCharacter                = String("q")
 
-    let argRegex                        = String("(,? ?[a-zA-Z1-9]+=|(,\\s?editor)|(,\\s?fileselect))|(,\\s?passwordfill)|(,\\s?required)|(,\\s?secure)")
+    let argRegex                        = String("(,? ?[a-zA-Z1-9]+=|(,\\s?editor)|(,\\s?fileselect))|(,\\s?passwordfill)|(,\\s?required)|(,\\s?secure)|(,\\s?confirm)")
 
     // exit codes and error messages
     let exit0                           = (code: Int32(0),   message: String("")) // normal exit

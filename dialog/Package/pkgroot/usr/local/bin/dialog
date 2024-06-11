@@ -19,7 +19,13 @@ runAsUser() {
   if [ "$currentUser" != "loginwindow" ]; then
     launchctl asuser "$uid" sudo -u "$currentUser" "$@"
   else
-    echoerr "no user logged in"
+    args=("$@")
+    item="--loginwindow"
+    if [[ ! " ${args[*]} " =~ " $item " ]]; then
+        echoerr "no user logged in"
+    else
+        "$dialogbin" "$@"
+    fi
   fi
 }
 

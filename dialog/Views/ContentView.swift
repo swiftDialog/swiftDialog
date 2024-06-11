@@ -16,32 +16,9 @@ struct ContentView: View {
 
     init (observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
-        if observedData.args.bannerImage.present {
+        if observedDialogContent.args.bannerImage.present {
             writeLog("Banner Image is present")
             titlePadding = 0
-        }
-
-        // capture command+quitKey for quit
-        NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            switch event.modifierFlags.intersection(.deviceIndependentFlagsMask) {
-            case [.command] where "wnm".contains(event.characters ?? ""):
-                writeLog("Detected cmd+w or cmd+n or cmd+m")
-                return nil
-            case [.command] where event.characters == "q":
-                writeLog("Detected cmd+q")
-                if observedDialogContent.args.quitKey.value != "q" {
-                    writeLog("cmd+q is disabled")
-                    return nil
-                } else {
-                    quitDialog(exitCode: observedDialogContent.appProperties.exit10.code)
-                }
-            case [.command] where event.characters == observedDialogContent.args.quitKey.value, [.command, .shift] where event.characters == observedDialogContent.args.quitKey.value.lowercased():
-                writeLog("detected cmd+\(observedDialogContent.args.quitKey.value)")
-                quitDialog(exitCode: observedDialogContent.appProperties.exit10.code)
-            default:
-                return event
-            }
-            return event
         }
     }
 //
@@ -51,16 +28,8 @@ struct ContentView: View {
     var body: some View {
 
         ZStack {
-            //Rectangle()
-            //    .fill(
-            //        LinearGradient(gradient: Gradient(colors: [.teal]), startPoint: .top, endPoint: .bottom)
-             // )
-            //Color(.red)
-            //    .opacity(0.5)
-            //    .background(ignoresSafeAreaEdges: .all)
             if observedData.args.watermarkImage.present {
                     WatermarkView(observedContent: observedData)
-                    //.frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
             }
 
             // this stack controls the main view. Consists of a VStack containing all the content, and a HStack positioned at the bottom of the display area
@@ -114,10 +83,8 @@ struct ContentView: View {
                     Spacer()
                 }
             }
-
         }
         .edgesIgnoringSafeArea(.all)
-
     }
 
 

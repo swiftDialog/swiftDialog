@@ -38,9 +38,11 @@ struct ListView: View {
     var rowFontSize: CGFloat
     var proportionalListHeight: CGFloat
     var subtitlePresent: Bool = false
+    var clipRadius: CGFloat = 8
 
-    init(observedDialogContent: DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent, clipRadius: CGFloat = 8) {
         self.observedData = observedDialogContent
+        self.clipRadius = clipRadius
 
         rowHeight = observedDialogContent.appProperties.messageFontSize + 14
         rowStatusHeight = observedDialogContent.appProperties.messageFontSize + 5
@@ -110,7 +112,7 @@ struct ListView: View {
                                     switch userInputState.listItems[index].statusIcon {
                                     case "progress":
                                         ProgressView("", value: userInputState.listItems[index].progress, total: 100)
-                                            .progressViewStyle(CirclerPercentageProgressViewStyle())
+                                            .progressViewStyle(CircularPercentageProgressViewStyle())
                                             .frame(width: rowStatusHeight, height: rowStatusHeight-5)
                                             .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
                                     case "wait":
@@ -146,13 +148,13 @@ struct ListView: View {
                         }
                     }
                 })
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .clipShape(RoundedRectangle(cornerRadius: clipRadius))
             }
         }
     }
 }
 
-struct CirclerPercentageProgressViewStyle: ProgressViewStyle {
+struct CircularPercentageProgressViewStyle: ProgressViewStyle {
     public func makeBody(configuration: LinearProgressViewStyle.Configuration) -> some View {
         let stroke: CGFloat = 5
         let padding: CGFloat = stroke / 2

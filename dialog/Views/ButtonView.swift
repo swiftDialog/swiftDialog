@@ -72,6 +72,34 @@ struct ButtonView: View {
                 Spacer()
                     .frame(width: 20)
             }
+        } else if ["stack"].contains(observedData.args.buttonStyle.value) {
+            VStack {
+                if !(observedData.args.button1TextOption.value == "none") {
+                    Button(action: {
+                        buttonAction(action: self.button1action, exitCode: 0, executeShell: self.buttonShellAction, observedObject: observedData)
+
+                    }, label: {
+                        Text(observedData.args.button1TextOption.value)
+                            .frame(minWidth: 50, maxWidth: .infinity, alignment: .center)
+                            .padding(5)
+                    }
+                    )
+                    .keyboardShortcut(observedData.appProperties.button1DefaultAction)
+                    .disabled(observedData.args.button1Disabled.present)
+                }
+
+                if observedData.args.button2Option.present || observedData.args.button2TextOption.present {
+                    Button(action: {
+                        quitDialog(exitCode: observedData.appProperties.exit2.code, observedObject: observedData)
+                    }, label: {
+                        Text(observedData.args.button2TextOption.value)
+                            .frame(minWidth: 50, maxWidth: .infinity, alignment: .center)
+                            .padding(5)
+                    }
+                    )
+                    .keyboardShortcut(observedData.appProperties.button2DefaultAction)
+                }
+            }
         } else {
             // Buttons
             HStack {

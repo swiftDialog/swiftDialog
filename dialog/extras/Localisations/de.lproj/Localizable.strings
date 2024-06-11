@@ -26,6 +26,10 @@
 "default-message" = "Diese ist eine wichtige Nachrichten\n\n Bitte lesen Sie diese";
 "help-hover" = "Klicken Sie für weitere Informationen";
 
+"Confirm" = "Bestätigen";
+
+"confirmation-failed" = "Bestätigung fehlgeschlagen <br>Werte stimmen nicht überein";
+
 //constructor kit labels
 "ck-welcome"            = "Willkommen beim swiftDialog Builder";
 "ck-welcomeinfo"        = "Wählen Sie die zu ändernden Eigenschaften auf der linken Seite aus. swiftDialog wird aktualisiert, um die Änderungen in Echtzeit anzuzeigen.";

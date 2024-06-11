@@ -26,6 +26,10 @@
 "default-message" = "Dette er en vigtigt besked\n\nLæs venligst";
 "help-hover" = "Klik for yderligere information";
 
+"Confirm" = "Bekræfte";
+
+"confirmation-failed" = "bekræftelse mislykkedes <br>værdier stemmer ikke overens";
+
 //constructor kit labels
 "ck-welcome"            = "Velkommen til swiftDialog Builder";
 "ck-welcomeinfo"        = "Vælg egenskaber til venstre for at ændre. swiftDialog vil opdatere for at vise ændringerne i realtid";
