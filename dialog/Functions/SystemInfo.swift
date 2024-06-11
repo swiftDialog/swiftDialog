@@ -98,6 +98,7 @@ public extension ProcessInfo {
     var osName: String {
         let version = self.operatingSystemVersion
         switch version.majorVersion {
+        case 15: return "Sequoia"
         case 14: return "Sonoma"
         case 13: return "Ventura"
         case 12: return "Monterey"
