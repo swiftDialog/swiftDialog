@@ -391,7 +391,7 @@ struct SDHelp {
         Markdown is supported
 """
 
-        argument.helpMessage.helpShort = "Enable help button with contect <text>"
+        argument.helpMessage.helpShort = "Enable help button with content <text>"
         argument.helpMessage.helpLong = """
         Will display a help icon to the right of the the default button
         When clicked, contents of the help message will be displayed as a popover
