@@ -156,8 +156,8 @@ struct SDHelp {
         argument.dialogStyle.helpLong = """
         Displays the dialog in one of the defined styles by adjusting window defaults
 
-        "presentation" is functionally equavelent to --\(argument.presentationMode.long)
-        "mini" is functionally equavelent to --\(argument.miniMode.long)
+        "presentation" is functionally equivalent to --\(argument.presentationMode.long)
+        "mini" is functionally equivalent to --\(argument.miniMode.long)
         "centered" will set all the options for centered content
         "alert" sets a pre-configured dialog window 300x300 and centered content
         "caution" and "warning" are the same as "alert" with the icon configured
@@ -470,7 +470,7 @@ struct SDHelp {
 
         argument.bannerText.helpShort = "Set text to display in banner area"
         argument.bannerText.helpLong = """
-        Using this argument is the equavelent of \(argument.bannerTitle.long) and \(argument.titleOption.long)
+        Using this argument is the equivalent of \(argument.bannerTitle.long) and \(argument.titleOption.long)
 """
 
         argument.dropdownTitle.helpShort = "Select list name"
@@ -928,7 +928,7 @@ struct SDHelp {
         argument.hash.helpLong = """
         For use with --\(argument.authkey.long)
 
-        Equavelent of running:
+        Equivalent of running:
           echo -n <string> | shasum -a 256
 """
 
