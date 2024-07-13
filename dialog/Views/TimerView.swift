@@ -58,13 +58,13 @@ struct TimerView: View {
 
     init(progressSteps: CGFloat?, visible: Bool?, observedDialogContent: DialogUpdatableContent, stacked: Bool = false) {
         self.observedData = observedDialogContent
-        barRadius = barheight/2 // adjusting this affects "roundness"
+        barRadius = stacked ? barheight/3 : barheight/2 // adjusting this affects "roundness"
         steps = progressSteps ?? 10
         timerSteps = steps - 1
         barVisible = visible ?? true
         progressWidth = 0
         if stacked {
-            barPadding = EdgeInsets(top: observedData.appProperties.sidePadding/4, leading: observedData.appProperties.sidePadding/4, bottom: 0, trailing: observedData.appProperties.sidePadding/4)
+            barPadding = EdgeInsets(top: observedData.appProperties.sidePadding/4, leading: 0, bottom: 0, trailing: 0)
         } else {
             barPadding = EdgeInsets(top: observedData.appProperties.sidePadding, leading: observedData.appProperties.sidePadding, bottom: observedData.appProperties.sidePadding, trailing: observedData.appProperties.sidePadding)
         }
