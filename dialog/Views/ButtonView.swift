@@ -100,7 +100,7 @@ struct ButtonView: View {
                     .keyboardShortcut(observedData.appProperties.button2DefaultAction)
                 }
                 if observedData.args.timerBar.present {
-                    TimerView(progressSteps: progressSteps, visible: !observedData.args.hideTimerBar.present, observedDialogContent: observedData)
+                    TimerView(progressSteps: progressSteps, visible: !observedData.args.hideTimerBar.present, observedDialogContent: observedData, stacked: true)
                         .frame(alignment: .bottom )
                 }
             }

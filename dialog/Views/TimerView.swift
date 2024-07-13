@@ -56,14 +56,18 @@ struct TimerView: View {
 
     var barVisible: Bool
 
-    init(progressSteps: CGFloat?, visible: Bool?, observedDialogContent: DialogUpdatableContent) {
+    init(progressSteps: CGFloat?, visible: Bool?, observedDialogContent: DialogUpdatableContent, stacked: Bool = false) {
         self.observedData = observedDialogContent
         barRadius = barheight/2 // adjusting this affects "roundness"
         steps = progressSteps ?? 10
         timerSteps = steps - 1
         barVisible = visible ?? true
         progressWidth = 0
-        barPadding = EdgeInsets(top: observedData.appProperties.sidePadding, leading: observedData.appProperties.sidePadding, bottom: observedData.appProperties.sidePadding, trailing: observedData.appProperties.sidePadding)
+        if stacked {
+            barPadding = EdgeInsets(top: observedData.appProperties.sidePadding/4, leading: observedData.appProperties.sidePadding/4, bottom: 0, trailing: observedData.appProperties.sidePadding/4)
+        } else {
+            barPadding = EdgeInsets(top: observedData.appProperties.sidePadding, leading: observedData.appProperties.sidePadding, bottom: observedData.appProperties.sidePadding, trailing: observedData.appProperties.sidePadding)
+        }
         if barVisible {
             writeLog("Displaying timer with \(steps) seconds")
         }
