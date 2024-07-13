@@ -16,6 +16,7 @@ struct TimerView: View {
     @State var progressWidth: CGFloat
 
     let barheight: CGFloat = 16
+    var barPadding: EdgeInsets = EdgeInsets(top: 4, leading: 4, bottom: 4, trailing: 4)
     var barRadius: CGFloat
     var barColour = Color.accentColor
 
@@ -62,6 +63,7 @@ struct TimerView: View {
         timerSteps = steps - 1
         barVisible = visible ?? true
         progressWidth = 0
+        barPadding = EdgeInsets(top: observedData.appProperties.sidePadding, leading: observedData.appProperties.sidePadding, bottom: observedData.appProperties.sidePadding, trailing: observedData.appProperties.sidePadding)
         if barVisible {
             writeLog("Displaying timer with \(steps) seconds")
         }
@@ -122,7 +124,7 @@ struct TimerView: View {
                     .clipShape(RoundedRectangle(cornerRadius: barRadius))
                 }
             }.frame(height: barheight, alignment: .bottom) //needed to force limit the entire progress bar frame height
-            .padding(observedData.appProperties.sidePadding)
+                .padding(barPadding)
         } else {
             EmptyView()
                 .onReceive(timer) { _ in
