@@ -10,6 +10,30 @@ import Cocoa
 var allScreens = NSScreen()
 
 class BlurWindow: NSWindow {
+
+    private var blurredWindows = [BlurWindowController()]
+
+    public func show() {
+        writeLog("initiating blurred window")
+        let screens = NSScreen.screens
+        for (index, screen) in screens.enumerated() {
+            blurredWindows.append(BlurWindowController())
+            allScreens = screen
+            blurredWindows[index].close()
+            blurredWindows[index].loadWindow()
+            blurredWindows[index].showWindow(NSApp.windows.first)
+        }
+        NSApp.windows.first?.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
+    }
+
+    public func hide() {
+        writeLog("removing blurred window")
+        let screens = NSScreen.screens
+        for (index, screen) in screens.enumerated() {
+            blurredWindows[index].close()
+        }
+    }
+
     override init(contentRect: NSRect, styleMask style: NSWindow.StyleMask, backing backingStoreType: NSWindow.BackingStoreType, defer flag: Bool) {
         super.init(contentRect: contentRect, styleMask: [.fullSizeContentView],  backing: .buffered, defer: true)
      }

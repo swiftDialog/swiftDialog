@@ -48,7 +48,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        var blurredScreen = [BlurWindowController]()
+        //var blurredScreen = [BlurWindowController]()
 
         if let window = NSApplication.shared.windows.first {
             window.standardWindowButton(.closeButton)?.isHidden = !appArguments.windowButtonsEnabled.present
@@ -79,15 +79,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             // display a blur screen window on all screens.
             if appArguments.blurScreen.present && !appArguments.fullScreenWindow.present {
                 writeLog("Blurscreen enabled", logLevel: .debug)
-                let screens = NSScreen.screens
-                for (index, screen) in screens.enumerated() {
-                    blurredScreen.append(BlurWindowController())
-                    allScreens = screen
-                    blurredScreen[index].close()
-                    blurredScreen[index].loadWindow()
-                    blurredScreen[index].showWindow(self)
-                }
-                window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
+                blurredScreen.show()
+                //window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
             } else if appArguments.forceOnTop.present {
                 window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
             } else {

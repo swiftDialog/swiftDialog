@@ -16,6 +16,7 @@ var iconVisible: Bool = true
 var appvars = AppVariables()
 var appArguments = CommandLineArguments()
 var userInputState = UserInputState()
+var blurredScreen = BlurWindow()
 
 let displayAsInt: NumberFormatter = {
     let formatter = NumberFormatter()

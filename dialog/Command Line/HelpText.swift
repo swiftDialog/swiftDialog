@@ -446,6 +446,41 @@ struct SDHelp {
         argument.statusLogFile.helpLong = """
         Sets the path to the command file swiftDialog will read from to receive updates
         Default file is /var/tmp/dialog.log
+
+        Sending commands:
+            echo "<command>" >> [<file>]
+
+        Available commands:
+            title: <text>
+            message: (+)<text>
+            image: <path/url>
+            imagecaption: <text>
+            progress: <int>/<text>
+            progress: hide/show
+            progresstext: <text>
+            list: <text/csv>
+            list: clear
+            listitem: <item>: [<text>/wait]
+            listitem: add, title: <text>[, status: <status>, statustext: <text>]
+            listitem: delete, title: <text>
+            listitem: delete, index: <index>
+            button1: [disable/enable]
+            button2: [disable/enable]
+            button1text: (+)<text>
+            button2text: (+)<text>
+            infobuttontext: <text>
+            infobox: <text>
+            icon: <path/url/SF Symbol>
+            icon: <centre/center/left/default>
+            icon: size: <num>
+            width: <num>
+            height: <num>
+            position: <position>
+            webcontent: <url>
+            video: <path/url>
+            blurscreen: [enable/disable]
+            activate:
+            quit:
 """
 
         argument.bannerImage.helpShort = "Enable banner image"
