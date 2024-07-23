@@ -111,7 +111,7 @@ func processCLOptions(json: JSON = getJSON()) {
         appArguments.messageOption.value = appvars.messageDefault
     }
     if appArguments.messageOption.present && appArguments.messageOption.value.lowercased().hasSuffix(".md") {
-        appArguments.messageOption.value = getMarkdown(mdFilePath: appArguments.messageOption.value)
+        appArguments.messageOption.value = processTextString(getMarkdown(mdFilePath: appArguments.messageOption.value), tags: appvars.systemInfo)
     }
 
     if appArguments.infoBox.present && appArguments.infoBox.value.lowercased().hasSuffix(".md") {
