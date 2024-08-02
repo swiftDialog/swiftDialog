@@ -189,21 +189,27 @@ func processCLOptions(json: JSON = getJSON()) {
             }
 
             for index in 0..<(dropdownValues.count) {
-                let labelItems = dropdownLabels[index].components(separatedBy: ",")
+                let labelItems = dropdownLabels[index].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
                 var dropdownRequired: Bool = false
                 var dropdownStyle: String = "list"
                 let dropdownTitle: String = labelItems[0]
                 var dropdownName: String = ""
-                if labelItems.count > 1 {
-                    switch labelItems[1].components(separatedBy: "=").first {
-                    case "required":
-                        dropdownRequired = true
-                    case "radio":
-                        dropdownStyle = "radio"
-                    case "name":
-                        dropdownName = labelItems[1].components(separatedBy: "=").last ?? dropdownTitle
-                    default: ()
+                for item in labelItems {
+                    var itemKeyValuePair = item.split(separator: "=", maxSplits: 1)
+                    for _ in itemKeyValuePair.count...2 {
+                        itemKeyValuePair.append("")
                     }
+                    let itemName = String(itemKeyValuePair[0])
+                    let itemValue = String(itemKeyValuePair[1])
+                    switch itemName.lowercased() {
+                        case "required":
+                            dropdownRequired = true
+                        case "radio":
+                            dropdownStyle = "radio"
+                        case "name":
+                            dropdownName = itemValue
+                        default: ()
+                        }
                 }
                 userInputState.dropdownItems.append(DropDownItems(title: dropdownTitle, name: dropdownName, values: dropdownValues[index].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[index], selectedValue: dropdownDefaults[index], required: dropdownRequired, style: dropdownStyle))
             }

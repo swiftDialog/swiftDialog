@@ -177,10 +177,10 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
 
                 if exitCode == 0 && dropdownItemRequired && dropdownItemSelectedValue == "" {
                     NSSound.beep()
-                    requiredString += "  - \"\(dropdownItemName)\" \("is-required".localized)<br>"
+                    requiredString += "  - \"\(dropdownItem.title)\" \("is-required".localized)<br>"
                     userInputState.dropdownItems[index].requiredfieldHighlight = Color.red
                     dontQuit = true
-                    writeLog("Required select item \(dropdownItemName) has no value")
+                    writeLog("Required select item \(dropdownItem.title) has no value")
                 } else {
                     outputArray.append("\"\(dropdownItemName)\" : \"\(dropdownItemSelectedValue)\"")
                     outputArray.append("\"\(dropdownItemName)\" index : \"\(dropdownItemValues.firstIndex(of: dropdownItemSelectedValue) ?? -1)\"")
