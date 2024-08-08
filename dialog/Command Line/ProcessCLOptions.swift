@@ -990,6 +990,7 @@ func processCLOptionValues() {
     appArguments.loginWindow.evaluate(json: json)
     appArguments.verboseLogging.evaluate(json: json)
     appArguments.alwaysReturnUserInput.evaluate(json: json)
+    appArguments.windowButtonsEnabled.evaluate(json: json)
 
     // command line only options
     appArguments.listFonts.evaluate()
@@ -999,7 +1000,6 @@ func processCLOptionValues() {
     appArguments.jamfHelperMode.evaluate()
     appArguments.debug.evaluate()
     appArguments.getVersion.evaluate()
-    appArguments.windowButtonsEnabled.evaluate()
     appArguments.hideDefaultKeyboardAction.evaluate()
     if appArguments.hideDefaultKeyboardAction.present {
         appvars.button1DefaultAction.modifiers = [.command, .shift]
