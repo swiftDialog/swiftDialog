@@ -29,7 +29,7 @@ class BlurWindow: NSWindow {
     public func hide() {
         writeLog("removing blurred window")
         let screens = NSScreen.screens
-        for (index, screen) in screens.enumerated() {
+        for (index, _) in screens.enumerated() {
             blurredWindows[index].close()
         }
     }
