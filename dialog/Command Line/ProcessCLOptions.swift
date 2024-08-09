@@ -991,6 +991,7 @@ func processCLOptionValues() {
     appArguments.verboseLogging.evaluate(json: json)
     appArguments.alwaysReturnUserInput.evaluate(json: json)
     appArguments.windowButtonsEnabled.evaluate(json: json)
+    appArguments.colourScheme.evaluate(json: json)
 
     // command line only options
     appArguments.listFonts.evaluate()

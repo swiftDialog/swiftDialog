@@ -228,6 +228,10 @@ struct SDHelp {
             SF Symbol                         -  "SF=sf.symbol.name"
             builtin                           -  info | caution | warning
 
+        You can optionally specify an alternate resource value for use in dark mode using the following syntax:
+
+            <value>:dark=<alternate_value>
+
         When Specifying SF Symbols for icon or overlay icon, additional parameters for colour and weight are available.
         Additional parameters are separated by comma
 
@@ -973,6 +977,15 @@ struct SDHelp {
         Enables the dialog window to be resizable.
 
         This option also implies the --\(argument.movableWindow.long) flag
+"""
+
+        argument.colourScheme.helpShort = "Set the preferred window mode"
+        argument.colourScheme.helpUsage = "[dark|light]"
+        argument.colourScheme.helpLong = """
+        Sets the window mode to either dark or light. This will be enforced and all assets that support
+        multiple modes will comply to the specified one.
+
+        The default is to use the current window colour scheme
 """
 
         argument.showOnAllScreens.helpShort = "Enable the dialog window to appear on all screens"

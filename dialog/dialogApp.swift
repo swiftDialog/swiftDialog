@@ -222,6 +222,11 @@ struct dialogApp: App {
                     }
                     DebugOverlay(observedData: observedData)
                 }
+                .preferredColorScheme(observedData.args.colourScheme.present &&
+                                      observedData.args.colourScheme.value.lowercased() == "dark" ? .dark
+                                      : observedData.args.colourScheme.present &&
+                                      observedData.args.colourScheme.value.lowercased() == "light" ? .light
+                                      : nil)
             }
         }
         // Hide Title Bar

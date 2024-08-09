@@ -10,6 +10,12 @@ import SwiftUI
 
 var iconVisible: Bool = true
 
+var darkMode: Bool {
+    let mode = UserDefaults.standard.string(forKey: "AppleInterfaceStyle")
+    if appArguments.colourScheme.value.lowercased() == "light" { return false }
+    return mode == "Dark" || appArguments.colourScheme.value.lowercased() == "dark"
+}
+
 // Probably a way to work all this out as a nice dictionary. For now, long form.
 
 // declare our app var in case we want to update values - e.g. future use, multiple dialog sizes
