@@ -979,13 +979,12 @@ struct SDHelp {
         This option also implies the --\(argument.movableWindow.long) flag
 """
 
-        argument.colourScheme.helpShort = "Set the preferred window mode"
-        argument.colourScheme.helpUsage = "[dark|light]"
-        argument.colourScheme.helpLong = """
-        Sets the window mode to either dark or light. This will be enforced and all assets that support
-        multiple modes will comply to the specified one.
+        argument.preferredAppearance.helpShort = "Set the preferred window appearance"
+        argument.preferredAppearance.helpUsage = "[dark|light]"
+        argument.preferredAppearance.helpLong = """
+        Sets the window appearance to either dark or light regardless what appearance setting
+        the user currently has selected.
 
-        The default is to use the current window colour scheme
 """
 
         argument.showOnAllScreens.helpShort = "Enable the dialog window to appear on all screens"

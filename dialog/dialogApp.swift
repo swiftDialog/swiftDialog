@@ -222,10 +222,10 @@ struct dialogApp: App {
                     }
                     DebugOverlay(observedData: observedData)
                 }
-                .preferredColorScheme(observedData.args.colourScheme.present &&
-                                      observedData.args.colourScheme.value.lowercased() == "dark" ? .dark
-                                      : observedData.args.colourScheme.present &&
-                                      observedData.args.colourScheme.value.lowercased() == "light" ? .light
+                .preferredColorScheme(observedData.args.preferredAppearance.present &&
+                                      observedData.args.preferredAppearance.value.lowercased() == "dark" ? .dark
+                                      : observedData.args.preferredAppearance.present &&
+                                      observedData.args.preferredAppearance.value.lowercased() == "light" ? .light
                                       : nil)
             }
         }
