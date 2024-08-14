@@ -69,7 +69,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             }
 
             // Set window level
-            if appArguments.forceOnTop.present || appArguments.blurScreen.present || appArguments.loginWindow.present {
+            if appArguments.forceOnTop.present || appArguments.blurScreen.present {
                 window.level = .floating
                 writeLog("Window is forced on top", logLevel: .debug)
             } else {
