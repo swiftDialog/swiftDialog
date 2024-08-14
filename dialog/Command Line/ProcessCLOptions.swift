@@ -731,6 +731,10 @@ func processCLOptions(json: JSON = getJSON()) {
         writeLog("windowIsMoveable = true")
     }
 
+    if appArguments.loginWindow.present {
+        appArguments.forceOnTop.present = true
+    }
+
     if appArguments.forceOnTop.present {
         appArguments.showOnAllScreens.present = true
         appvars.windowOnTop = true
