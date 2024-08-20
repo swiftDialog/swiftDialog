@@ -44,27 +44,4 @@ if [[ -e "${iconfile}" ]] && [[ -e "${dialogbundle}" ]]; then
     fi
 fi
 
-# Experiment: running MDM policies or enrolment scripts at the setup assistant
-
-currentUser=$(echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { print $3 }')
-jamfbinary="/usr/local/bin/jamf"
-
-write_to_log "Checking for Setup Assistant"
-write_to_log "Current user is ${currentUser}"
-# check we have a valid console user
-if [ "$currentUser" = "_mbsetupuser" ]; then
-    write_to_log "Setup Assistant detected"
-    if [ -e "$jamfbinary" ]; then
-        write_to_log "Jamf enrolled system detected at the setup assistant - triggering swiftDialogEnrolment policy"
-        $jamfbinary policy -event swiftDialogEnrolment
-    fi
-    # We are running at the setup assistant - trigger a script
-    if [[ -e "${enrolmentScript}" ]]; then
-        write_to_log "${enrolmentScript} detected at the setup assistant - running ${enrolmentScript} in the blind"
-        "${enrolmentScript}" &
-        PID=$!
-        write_to_log "${enrolmentScript} initiated with pid $PID. postinstall will continue"
-    fi
-fi
-
 write_to_log "swiftDialog postinstall complete"

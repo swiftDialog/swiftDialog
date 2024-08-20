@@ -10,7 +10,7 @@ import SwiftUI
 struct TextFileView: View {
 
     @State private var textAreaContent = ""
-    @State private var fileMonitor: DispatchSourceFileSystemObject?
+    @State private var fileMonitor: DispatchSourceRead?
     var textContentPath: String
 
     init(logFilePath: String) {
@@ -44,7 +44,7 @@ struct TextFileView: View {
 
     private func startStreamingLogFile() {
         let fileDescriptor = open(textContentPath, O_EVTONLY)
-        fileMonitor = DispatchSource.makeFileSystemObjectSource(fileDescriptor: fileDescriptor, eventMask: .write, queue: .global())
+        fileMonitor = DispatchSource.makeReadSource(fileDescriptor: fileDescriptor, queue: .global())
 
         fileMonitor?.setEventHandler { [self] in
             self.readLogFile()
@@ -76,26 +76,26 @@ struct TextFileView: View {
 
 extension FileHandle {
     func readLine() -> String? {
-            var lineData = Data()
-            while true {
-                let data = self.readData(ofLength: 1)
+        var lineData = Data()
+        while true {
+            let data = self.readData(ofLength: 1)
 
-                if data.isEmpty {
-                    if lineData.isEmpty {
-                        return nil
-                    } else {
-                        return String(data: lineData, encoding: .utf8)
-                    }
+            if data.isEmpty {
+                if !lineData.isEmpty {
+                    return String(data: lineData, encoding: .utf8)
+                } else {
+                    return nil
                 }
+            }
 
-                if let character = String(data: data, encoding: .utf8) {
-                    if character == "\n" {
-                        return String(data: lineData, encoding: .utf8)
-                    } else {
-                        lineData.append(data)
-                    }
+            if let character = String(data: data, encoding: .utf8) {
+                if character == "\n" {
+                    return String(data: lineData, encoding: .utf8)
+                } else {
+                    lineData.append(data)
                 }
             }
         }
+    }
 }
 

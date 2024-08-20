@@ -12,10 +12,11 @@ import MarkdownUI
 struct MessageContent: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
-    @State private var messageHeight: CGFloat = 50
+    @State private var messageHeight: CGFloat
 
     var fieldPadding: CGFloat = 15
     var dataEntryMaxWidth: CGFloat = 700
+    let defaultMessageHeight: CGFloat = 50
 
     var messageColour: Color
 
@@ -26,6 +27,7 @@ struct MessageContent: View {
     init(observedDialogContent: DialogUpdatableContent) {
         writeLog("Displaying main message content")
         self.observedData = observedDialogContent
+        self.messageHeight = defaultMessageHeight
         if !observedDialogContent.args.iconOption.present { //cloptions.hideIcon.present {
             writeLog("Icon is hidden")
             fieldPadding = 30
@@ -71,7 +73,7 @@ struct MessageContent: View {
                                         .background(GeometryReader {child -> Color in
                                             DispatchQueue.main.async {
                                                 // update on next cycle with calculated height
-                                                self.messageHeight = child.size.height
+                                                self.messageHeight = child.size.height > defaultMessageHeight ? child.size.height : defaultMessageHeight
                                             }
                                             return Color.clear
                                         })
@@ -91,7 +93,7 @@ struct MessageContent: View {
                                     .background(GeometryReader {child -> Color in
                                         DispatchQueue.main.async {
                                             // update on next cycle with calculated height
-                                            self.messageHeight = child.size.height
+                                            self.messageHeight = child.size.height > defaultMessageHeight ? child.size.height : defaultMessageHeight
                                         }
                                         return Color.clear
                                     })

@@ -580,6 +580,22 @@ class FileReader {
                     observedData.args.video.present = true
                 }
 
+            // blur screen
+            case "\(observedData.args.blurScreen.long):":
+                let command = line.replacingOccurrences(of: "\(observedData.args.blurScreen.long): ", with: "")
+                writeToLog("setting blur screen state to \(command)")
+                switch command {
+                case "enable":
+                    writeToLog("enabling blur screen")
+                    observedData.args.blurScreen.present = true
+                    blurredScreen.show()
+                    NSApp.activate(ignoringOtherApps: true)
+                default:
+                    observedData.args.blurScreen.present = false
+                    blurredScreen.hide()
+                    NSApp.activate(ignoringOtherApps: true)
+                }
+
             // web content
             case "\(observedData.args.webcontent.long):":
                 let command = line.replacingOccurrences(of: "\(observedData.args.webcontent.long): ", with: "")
@@ -634,8 +650,6 @@ class DialogUpdatableContent: ObservableObject {
 
     @Published var showSheet: Bool
     @Published var sheetErrorMessage: String
-
-    //@Published var blurredScreen = [BlurWindowController]()
 
     @Published var updateView: Bool = true
 

@@ -118,6 +118,7 @@ struct CommandLineArguments {
     var hash                     = CommandlineArgument(long: "checksum")
     var logFileToTail            = CommandlineArgument(long: "displaylog")
     var preferredViewOrder       = CommandlineArgument(long: "vieworder")
+    var preferredAppearance      = CommandlineArgument(long: "appearance")
 
     // command line options that take no additional parameters
     var button1Disabled          = CommandlineArgument(long: "button1disabled", isbool: true)

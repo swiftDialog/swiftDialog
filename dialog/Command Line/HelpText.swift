@@ -65,7 +65,7 @@ struct SDHelp {
 
         argument.titleFont.helpShort = "Lets you modify the title text of the dialog"
         argument.titleFont.helpLong = """
-        Can accept up to three parameters, in a comma seperated list, to modify font properties.
+        Can accept up to three parameters, in a comma separated list, to modify font properties.
 
             color,colour=<text><hex>  - accepts any of the following color specifiers:
                                         * A standard macOS system color:
@@ -95,7 +95,7 @@ struct SDHelp {
         lists (including task lists), blockquotes, code blocks, tables, thematic breaks, styled text and links.
 
         The message can be of any length. If it is larger than the viewable area
-        the message contents will be presented in  scrolable area.
+        the message contents will be presented in a scrollable area.
 
         Specifying a path to a markdown document will use the contents of the document as the message content.
         The source can be a local file or URL, e.g. --\(argument.messageOption.long) /path/to/markdown.md
@@ -113,7 +113,7 @@ struct SDHelp {
         argument.messageVerticalAlignment.helpLong = """
         Positions the message content with the specified vertical positioning.
 
-        Content is affected as a block, and include any items present in the content area, including:
+        Content is affected as a block, and includes all items present in the content area, including:
             Message
             Web Content
             Lists
@@ -124,7 +124,7 @@ struct SDHelp {
 
         argument.messageFont.helpShort = "Set the message font of the dialog"
         argument.messageFont.helpLong = """
-        Can accept up to three parameters, in a comma seperated list, to modify font properties.
+        Can accept up to three parameters, in a comma separated list, to modify font properties.
 
             color,colour=<text><hex>  - accepts any of the following color specifiers:
                                         * A standard macOS system color:
@@ -148,7 +148,7 @@ struct SDHelp {
           --\(appArguments.messageOption.long) <text> (as plain text. newlines supported as \\n)
           --\(appArguments.iconOption.long) <image> *
 
-        * <image> must refer to a local file or app bundle. remote images sources are not supported.
+        * <image> must refer to a local file or app bundle. Remote images sources are not supported.
 """
 
         argument.dialogStyle.helpShort = "Configure a pre-set window style"
@@ -156,8 +156,8 @@ struct SDHelp {
         argument.dialogStyle.helpLong = """
         Displays the dialog in one of the defined styles by adjusting window defaults
 
-        "presentation" is functionally equavelent to --\(argument.presentationMode.long)
-        "mini" is functionally equavelent to --\(argument.miniMode.long)
+        "presentation" is functionally equivalent to --\(argument.presentationMode.long)
+        "mini" is functionally equivalent to --\(argument.miniMode.long)
         "centered" will set all the options for centered content
         "alert" sets a pre-configured dialog window 300x300 and centered content
         "caution" and "warning" are the same as "alert" with the icon configured
@@ -193,7 +193,7 @@ struct SDHelp {
         --\(appArguments.mainImageCaption.long) <text>
             Text that will appear underneath the displayed image.
 
-        Multiple --\(appArguments.mainImage.long) arguments can be used which will display the images as a carosel in argument order
+        Multiple --\(appArguments.mainImage.long) arguments can be used which will display the images as a carousel in argument order
 """
 
         argument.mainImageCaption.helpShort = "Display a caption underneath an image"
@@ -228,8 +228,12 @@ struct SDHelp {
             SF Symbol                         -  "SF=sf.symbol.name"
             builtin                           -  info | caution | warning
 
+        You can optionally specify an alternate resource value for use in dark mode using the following syntax:
+
+            <value>:dark=<alternate_value>
+
         When Specifying SF Symbols for icon or overlay icon, additional parameters for colour and weight are available.
-        Additionl parameters are seperated by comma
+        Additional parameters are separated by comma
 
         "SF=sf.symbol.name,colour=<text><hex>,weight=<text>"
 
@@ -244,7 +248,7 @@ struct SDHelp {
                                             Default: macOS system 'primary' color.
         palette=<text><hex>               - palette accepts up to three colours for use in multicolour
                                             SF Symbols
-                                            Use comma seperated values, e.g. palette=red,green,blue
+                                            Use comma separated values, e.g. palette=red,green,blue
 
               Also accepts any of the standard Apple colours
               black, blue, gray, green, orange, pink, purple, red, white,
@@ -264,7 +268,7 @@ struct SDHelp {
         weight=<text>                     - accepts any of the following values:
                                            thin (default), light, regular, medium, heavy, bold
 
-        animation=<keyword>  *(macOS 14)* - Uses animates SF symbols. Accepts one of the following keywords:
+        animation=<keyword>  *(macOS 14)* - Uses animated SF symbols. Accepts one of the following keywords:
                                            variable, variable.reversing, variable.iterative, variable.iterative.reversing
                                            variable.cumulative, pulse, pulse.bylayer
         """
@@ -285,7 +289,7 @@ struct SDHelp {
         argument.iconAlpha.helpUsage = "<num>"
         argument.iconAlpha.helpLong = """
         Accepts values from 0.0 to 1.0
-        Where 0.0 is completly transparant and 1.0 is completly opaque
+        Where 0.0 is completely transparant and 1.0 is completely opaque
 
         The default value is 1.0
 
@@ -391,7 +395,7 @@ struct SDHelp {
         Markdown is supported
 """
 
-        argument.helpMessage.helpShort = "Enable help button with contect <text>"
+        argument.helpMessage.helpShort = "Enable help button with content <text>"
         argument.helpMessage.helpLong = """
         Will display a help icon to the right of the the default button
         When clicked, contents of the help message will be displayed as a popover
@@ -446,13 +450,48 @@ struct SDHelp {
         argument.statusLogFile.helpLong = """
         Sets the path to the command file swiftDialog will read from to receive updates
         Default file is /var/tmp/dialog.log
+
+        Sending commands:
+            echo "<command>" >> [<file>]
+
+        Available commands:
+            title: <text>
+            message: (+)<text>
+            image: <path/url>
+            imagecaption: <text>
+            progress: <int>/<text>
+            progress: hide/show
+            progresstext: <text>
+            list: <text/csv>
+            list: clear
+            listitem: <item>: [<text>/wait]
+            listitem: add, title: <text>[, status: <status>, statustext: <text>]
+            listitem: delete, title: <text>
+            listitem: delete, index: <index>
+            button1: [disable/enable]
+            button2: [disable/enable]
+            button1text: (+)<text>
+            button2text: (+)<text>
+            infobuttontext: <text>
+            infobox: <text>
+            icon: <path/url/SF Symbol>
+            icon: <centre/center/left/default>
+            icon: size: <num>
+            width: <num>
+            height: <num>
+            position: <position>
+            webcontent: <url>
+            video: <path/url>
+            blurscreen: [enable/disable]
+            activate:
+            quit:
 """
 
         argument.bannerImage.helpShort = "Enable banner image"
         argument.bannerImage.helpUsage = "<file> | <url>"
         argument.bannerImage.helpLong = """
         Shows a banner image at the top of the dialog
-        Banners images fill the entire top width of the window and are resized to fill, positioned from
+        Banner images fill the entire top width of the window and are resized to fill, positioned from
         the top left corner of the image.
         Specifying this option will imply --\(appArguments.hideIcon.long)
 
@@ -464,13 +503,13 @@ struct SDHelp {
         Title is displayed on top of the banner image.
         Title font color is set to "white" by default.
 
-        Additional --\(appArguments.titleFont.long) paramater "shadow=<bool>". When set to true,
+        Additional --\(appArguments.titleFont.long) parameter "shadow=<bool>". When set to true,
         displays a drop shadow underneath the text
 """
 
         argument.bannerText.helpShort = "Set text to display in banner area"
         argument.bannerText.helpLong = """
-        Using this argument is the equavelent of \(argument.bannerTitle.long) and \(argument.titleOption.long)
+        Using this argument is the equivalent of \(argument.bannerTitle.long) and \(argument.titleOption.long)
 """
 
         argument.dropdownTitle.helpShort = "Select list name"
@@ -540,14 +579,14 @@ struct SDHelp {
 
         Modifiers available to text fields are:
             name       - Output will use this value as the key instead of the title
-            secure     - Presends a secure input area. Contents of the textfield will not be shown on screen
+            secure     - Presents a secure input area. Contents of the textfield will not be shown on screen
             required   - swiftDialog will not exit until the field is populated
             prompt     - Pre-fill the field with some prompt text
             regex      - Specify a regular expression that the field must satisfy for the content to be accepted.
             confirm    - Will display a duplicate of the textfield who's content needs to match to validate
             regexerror - Specify a custom error to display if regex conditions are not met
             fileselect - Adds a "Select" button and presents a file picker
-            filetype   - Limits fileselect to the named file extensions. Presented in space seperated values
+            filetype   - Limits fileselect to the named file extensions. Presented in space separated values
             confirm    - Adds a secondary textfield whose contents need to match the primary one for validation to succeed
 
         modifiers can be combined e.g. --\(appArguments.textField.long) <text>,secure,required
@@ -603,7 +642,7 @@ struct SDHelp {
             - radiobutton
             - dropdown
 
-        To re-arrange the order, specify the preferred order as a comma seperated list.
+        To re-arrange the order, specify the preferred order as a comma separated list.
         Only the items being displayed need to be specified.
         e.g.
         --\(argument.preferredViewOrder.long) \"textfield,checkbox,dropdown\"
@@ -629,7 +668,7 @@ struct SDHelp {
         }
 
         <status> can be one of "wait", "success", "fail", "error" or "pending"
-        and will display an apropriate icon in the status area.
+        and will display an appropriate icon in the status area.
 
         Updates to items in the list can be sent to the command file specified by --\(appArguments.statusLogFile.long):
         Clear an existing list:
@@ -705,7 +744,7 @@ struct SDHelp {
         argument.position.helpShort = "Set dialog window position"
         argument.position.helpUsage = "[topleft | left | bottomleft | top | center/centre | bottom | topright | right | bottomright]"
         argument.position.helpLong = """
-        Poitions the dialog window a the the defined location on the screen
+        Poitions the dialog window to the defined location on the screen
 
         Default is a visually appealing position slightly towards the top of centre, not dead centre.
 """
@@ -740,7 +779,7 @@ struct SDHelp {
         argument.hideTimerBar.helpShort = "Hide countdown timer if enabled"
         argument.hideTimerBar.helpLong = """
         Will hide the timer bar. swiftDialog will close after time specified by --\(appArguments.timerBar.long)
-        Default OK button is displayed. This is to prevent persistant or unclosable dialogs of unknown duration.
+        Default OK button is displayed. This is to prevent persistent or unclosable dialogs of unknown duration.
 """
 
         argument.movableWindow.helpShort = "Enable dialog to be moveable"
@@ -767,9 +806,9 @@ struct SDHelp {
         argument.miniMode.helpUsage = ""
         argument.miniMode.helpLong = """
         Presents a mini mode dialog of fixed size, presenting title, icon and message, limited to two lines.
-        Button 1 and 2 with modofocations are available.
+        Button 1 and 2 with modifications are available.
         When used with --progress, buttons are replaced by progress bar and progress text.
-            * In this presentation, quitting the dialog is acheived with use of the command file.
+            * In this presentation, quitting the dialog is achieved with use of the command file.
 """
 
         argument.presentationMode.helpShort = "Enable presentation mode"
@@ -850,7 +889,7 @@ struct SDHelp {
             ...]
         }
 
-        "\(appArguments.textField.long)" can specify multiple valuse as a simple array:
+        "\(appArguments.textField.long)" can specify multiple values as a simple array:
         e.g.
         {
             "textfield": ["Text Entry 1", "Text Entry 2", "Text Entry 3"]
@@ -868,7 +907,7 @@ struct SDHelp {
         argument.quitKey.helpLong = """
         Use the specified character as the Command ⇧ + <key> combination for quitting instead of "q".
 
-        Capitol letters can be used in which case Command ⇧ + Shift ⇧ + <key> will be required
+        Capital letters can be used in which case Command ⇧ + Shift ⇧ + <key> will be required
 """
 
         argument.windowButtonsEnabled.helpShort = "Enables window buttons"
@@ -876,7 +915,7 @@ struct SDHelp {
         argument.windowButtonsEnabled.helpLong = """
         Enables window buttons, close, minimize and maximise(zoom)
 
-        You can optionally specify one or more of "close", "min" or "max" as comma seperated values.
+        You can optionally specify one or more of "close", "min" or "max" as comma separated values.
         e.g. to enable only the min and max(zoom) buttons:
             --\(argument.windowButtonsEnabled.long) min,max
 """
@@ -921,14 +960,14 @@ struct SDHelp {
         launch dialog and specify the secret phrase:
           dialog --\(argument.authkey.long) \"password\"
 
-        Failure to specify the correct key will casue dialog to exit with code 30
+        Failure to specify the correct key will cause dialog to exit with code 30
 """
         argument.hash.helpShort = "Generate a SHA256 value"
         argument.hash.helpUsage = "<string>"
         argument.hash.helpLong = """
         For use with --\(argument.authkey.long)
 
-        Equavelent of running:
+        Equivalent of running:
           echo -n <string> | shasum -a 256
 """
 
@@ -938,6 +977,14 @@ struct SDHelp {
         Enables the dialog window to be resizable.
 
         This option also implies the --\(argument.movableWindow.long) flag
+"""
+
+        argument.preferredAppearance.helpShort = "Set the preferred window appearance"
+        argument.preferredAppearance.helpUsage = "[dark|light]"
+        argument.preferredAppearance.helpLong = """
+        Sets the window appearance to either dark or light regardless what appearance setting
+        the user currently has selected.
+
 """
 
         argument.showOnAllScreens.helpShort = "Enable the dialog window to appear on all screens"
@@ -972,7 +1019,7 @@ struct SDHelp {
         displays additional window properties along the title bar area for reference.
 
         Optionally supply a <colour> argument as either a named colour or hex value.
-        This will enable content area boundry highlights.
+        This will enable content area boundary highlights.
 
         Used in conjunction with \(argument.windowResizable.long) this is a good way to evaluate dialog
         look and feel.

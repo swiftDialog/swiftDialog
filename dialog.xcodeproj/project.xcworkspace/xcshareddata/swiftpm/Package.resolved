@@ -1,12 +1,13 @@
 {
+  "originHash" : "7c4a9b7e3498b9c10c6c04b3fadf9d6d916c4da184d07191e0b328f67f72e7d0",
   "pins" : [
     {
       "identity" : "markdownui",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/gonzalezreal/MarkdownUI",
       "state" : {
-        "revision" : "ae799d015a5374708f7b4c85f3294c05f2a564e2",
-        "version" : "2.3.0"
+        "revision" : "9a8119b37e09a770367eeb26e05267c75d854053",
+        "version" : "2.3.1"
       }
     },
     {
@@ -23,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SwiftyJSON/SwiftyJSON.git",
       "state" : {
-        "revision" : "b3dcd7dbd0d488e1a7077cb33b00f2083e382f07",
-        "version" : "5.0.1"
+        "revision" : "af76cf3ef710b6ca5f8c05f3a31307d44a3c5828",
+        "version" : "5.0.2"
       }
     },
     {
@@ -33,9 +34,9 @@
       "location" : "https://github.com/danielsaidi/WebViewKit.git",
       "state" : {
         "branch" : "main",
-        "revision" : "15d7422c883f15a0dafc8291e0bc8f4f4ae9070f"
+        "revision" : "7a8e547121f8c7fa5f4255933fb31f37229937bb"
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

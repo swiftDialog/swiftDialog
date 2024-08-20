@@ -111,7 +111,7 @@ func processCLOptions(json: JSON = getJSON()) {
         appArguments.messageOption.value = appvars.messageDefault
     }
     if appArguments.messageOption.present && appArguments.messageOption.value.lowercased().hasSuffix(".md") {
-        appArguments.messageOption.value = getMarkdown(mdFilePath: appArguments.messageOption.value)
+        appArguments.messageOption.value = processTextString(getMarkdown(mdFilePath: appArguments.messageOption.value), tags: appvars.systemInfo)
     }
 
     if appArguments.infoBox.present && appArguments.infoBox.value.lowercased().hasSuffix(".md") {
@@ -189,21 +189,27 @@ func processCLOptions(json: JSON = getJSON()) {
             }
 
             for index in 0..<(dropdownValues.count) {
-                let labelItems = dropdownLabels[index].components(separatedBy: ",")
+                let labelItems = dropdownLabels[index].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
                 var dropdownRequired: Bool = false
                 var dropdownStyle: String = "list"
                 let dropdownTitle: String = labelItems[0]
                 var dropdownName: String = ""
-                if labelItems.count > 1 {
-                    switch labelItems[1].components(separatedBy: "=").first {
-                    case "required":
-                        dropdownRequired = true
-                    case "radio":
-                        dropdownStyle = "radio"
-                    case "name":
-                        dropdownName = labelItems[1].components(separatedBy: "=").last ?? dropdownTitle
-                    default: ()
+                for item in labelItems {
+                    var itemKeyValuePair = item.split(separator: "=", maxSplits: 1)
+                    for _ in itemKeyValuePair.count...2 {
+                        itemKeyValuePair.append("")
                     }
+                    let itemName = String(itemKeyValuePair[0])
+                    let itemValue = String(itemKeyValuePair[1])
+                    switch itemName.lowercased() {
+                        case "required":
+                            dropdownRequired = true
+                        case "radio":
+                            dropdownStyle = "radio"
+                        case "name":
+                            dropdownName = itemValue
+                        default: ()
+                        }
                 }
                 userInputState.dropdownItems.append(DropDownItems(title: dropdownTitle, name: dropdownName, values: dropdownValues[index].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[index], selectedValue: dropdownDefaults[index], required: dropdownRequired, style: dropdownStyle))
             }
@@ -731,6 +737,10 @@ func processCLOptions(json: JSON = getJSON()) {
         writeLog("windowIsMoveable = true")
     }
 
+    if appArguments.loginWindow.present {
+        appArguments.forceOnTop.present = true
+    }
+
     if appArguments.forceOnTop.present {
         appArguments.showOnAllScreens.present = true
         appvars.windowOnTop = true
@@ -984,6 +994,8 @@ func processCLOptionValues() {
     appArguments.loginWindow.evaluate(json: json)
     appArguments.verboseLogging.evaluate(json: json)
     appArguments.alwaysReturnUserInput.evaluate(json: json)
+    appArguments.windowButtonsEnabled.evaluate(json: json)
+    appArguments.preferredAppearance.evaluate(json: json)
 
     // command line only options
     appArguments.listFonts.evaluate()
@@ -993,7 +1005,6 @@ func processCLOptionValues() {
     appArguments.jamfHelperMode.evaluate()
     appArguments.debug.evaluate()
     appArguments.getVersion.evaluate()
-    appArguments.windowButtonsEnabled.evaluate()
     appArguments.hideDefaultKeyboardAction.evaluate()
     if appArguments.hideDefaultKeyboardAction.present {
         appvars.button1DefaultAction.modifiers = [.command, .shift]

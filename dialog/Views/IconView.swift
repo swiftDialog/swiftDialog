@@ -8,13 +8,13 @@
 import Foundation
 import SwiftUI
 
-
 struct IconView: View {
-    @Environment(\.colorScheme) var colorScheme
-
     var messageUserImagePath: String
+    var messageUserImagePathDark: String = ""
+    let darkModeSeperator = ":dark="
 
     var iconOverlay: String
+    var iconOverlayDark: String = ""
     var imgFromURL: Bool = false
     var imgFromAPP: Bool = false
     var imgFromBase64: Bool = false
@@ -56,10 +56,7 @@ struct IconView: View {
     let argRegex = String("(,? ?[a-zA-Z1-9]+=|(,\\s?editor)|(,\\s?fileselect))|(,\\s?passwordfill)|(,\\s?required)|(,\\s?secure)")
 
     init(image: String = "", overlay: String = "", alpha: Double = 1.0, padding: Double = 0, sfPaddingEnabled: Bool = true) {
-        writeLog("Displaying icon image \(image), alpha \(alpha)")
-        if !overlay.isEmpty {
-            writeLog("With overlay \(overlay)")
-        }
+
         mainImageAlpha = alpha
         messageUserImagePath = image
         iconOverlay = overlay
@@ -67,11 +64,22 @@ struct IconView: View {
         framePadding = padding
         sfSymbolPadding = sfPaddingEnabled
 
-        if overlay != "" {
+        writeLog("Displaying icon image \(image), alpha \(alpha)")
+        if !iconOverlay.isEmpty {
+            writeLog("With overlay \(overlay)")
+        }
+
+        // split if there is a dark mode alternate
+        let messageUserImagePathComponents = messageUserImagePath.components(separatedBy: darkModeSeperator)
+        let overlayComponents = iconOverlay.components(separatedBy: darkModeSeperator)
+        messageUserImagePath = darkMode && messageUserImagePathComponents.count > 1 ? messageUserImagePathComponents[1] : messageUserImagePathComponents[0]
+        iconOverlay = darkMode && overlayComponents.count > 1 ? overlayComponents[1] : overlayComponents[0]
+
+        if iconOverlay != "" {
             mainImageScale = mainImageWithOverlayScale
-            if overlay.lowercased().hasPrefix("sf=") {
-                if overlay.range(of: "bgcolour=none") == nil && overlay.range(of: "bgcolor=none") == nil && !["info","warning","caution"].contains(overlay) {
-                    var SFValues = overlay.components(separatedBy: ",")
+            if iconOverlay.lowercased().hasPrefix("sf=") {
+                if iconOverlay.range(of: "bgcolour=none") == nil && iconOverlay.range(of: "bgcolor=none") == nil && !["info","warning","caution"].contains(overlay) {
+                    var SFValues = iconOverlay.components(separatedBy: ",")
                     SFValues = SFValues.map { $0.trimmingCharacters(in: .whitespaces) }
                     for value in SFValues where value.hasPrefix("bgcolo") {
                         if let bgColour = value.components(separatedBy: "=").last {
