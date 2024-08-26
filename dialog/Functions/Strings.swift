@@ -55,6 +55,7 @@ func processTextString(_ textToProcess: String, tags: [String: String]) -> Strin
         processedTextString = processedTextString.replacingOccurrences(of: "{\(label)}", with: value)
     }
     return processedTextString
+        .replacingOccurrences(of: "\\n", with: "\n")
         .replacingOccurrences(of: "<br>", with: "  \n")
         .replacingOccurrences(of: "<hr>", with: "****")
 }
