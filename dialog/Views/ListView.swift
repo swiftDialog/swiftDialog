@@ -79,7 +79,7 @@ struct ListView: View {
                             HStack {
                                 if !userInputState.listItems[index].icon.isEmpty {
                                     let _ = writeLog("Switch index \(index): Displaying icon \(userInputState.listItems[index].icon)")
-                                    IconView(image: userInputState.listItems[index].icon, overlay: "", sfPaddingEnabled: false)
+                                    IconView(image: userInputState.listItems[index].icon, overlay: "", sfPaddingEnabled: false, corners: false)
                                         .frame(maxHeight: rowHeight)
                                         .frame(width: rowHeight)
                                 }

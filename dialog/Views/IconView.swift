@@ -47,6 +47,7 @@ struct IconView: View {
 
     var mainImageScale: CGFloat = 1
     var mainImageAlpha: Double
+    var mainImageCorners: Bool = true
 
     let mainImageWithOverlayScale: CGFloat = 0.88
     let overlayImageScale: CGFloat = 0.4
@@ -55,11 +56,12 @@ struct IconView: View {
 
     let argRegex = String("(,? ?[a-zA-Z1-9]+=|(,\\s?editor)|(,\\s?fileselect))|(,\\s?passwordfill)|(,\\s?required)|(,\\s?secure)")
 
-    init(image: String = "", overlay: String = "", alpha: Double = 1.0, padding: Double = 0, sfPaddingEnabled: Bool = true) {
+    init(image: String = "", overlay: String = "", alpha: Double = 1.0, padding: Double = 0, sfPaddingEnabled: Bool = true, corners: Bool = true) {
 
         mainImageAlpha = alpha
         messageUserImagePath = image
         iconOverlay = overlay
+        mainImageCorners = corners
 
         framePadding = padding
         sfSymbolPadding = sfPaddingEnabled
@@ -289,7 +291,7 @@ struct IconView: View {
                 .lineLimit(1)
                 .opacity(mainImageAlpha)
             } else {
-                DisplayImage(messageUserImagePath, corners: true)
+                DisplayImage(messageUserImagePath, corners: mainImageCorners)
                     .scaleEffect(mainImageScale, anchor: .topLeading)
                     .opacity(mainImageAlpha)
             }
