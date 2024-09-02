@@ -960,6 +960,15 @@ struct SDHelp {
         launch dialog and specify the secret phrase:
           dialog --\(argument.authkey.long) \"password\"
 
+        Valid key names that can store this value are:
+          AuthorisationKey
+          AuthorizationKey
+          AuthKey
+          Key
+
+        If multiple key names are present, only the first one found will be used, following the order
+        specified above.
+
         Failure to specify the correct key will cause dialog to exit with code 30
 """
         argument.hash.helpShort = "Generate a SHA256 value"
