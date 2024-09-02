@@ -85,6 +85,12 @@ struct ContentView: View {
             }
         }
         .edgesIgnoringSafeArea(.all)
+        .sheet(isPresented: $observedData.showSheet, content: {
+            ErrorView(observedContent: observedData)
+                .background(WindowAccessor { window in
+                    window?.canBecomeVisibleWithoutLogin = true
+                })
+        })
     }
 
 

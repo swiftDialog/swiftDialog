@@ -198,6 +198,9 @@ struct HelpButton: View {
             .buttonStyle(HelpButtonStyle())
             .sheet(isPresented: $observedData.appProperties.showHelpMessage) {
                 HelpView(observedContent: observedData)
+                    .background(WindowAccessor { window in
+                        window?.canBecomeVisibleWithoutLogin = true
+                    })
             }
         }
     }

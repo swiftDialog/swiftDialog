@@ -209,15 +209,9 @@ struct dialogApp: App {
                     } else {
                         if appArguments.windowResizable.present {
                             ContentView(observedDialogContent: observedData)
-                                .sheet(isPresented: $observedData.showSheet, content: {
-                                    ErrorView(observedContent: observedData)
-                                })
                         } else {
                             ContentView(observedDialogContent: observedData)
                                 .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
-                                .sheet(isPresented: $observedData.showSheet, content: {
-                                    ErrorView(observedContent: observedData)
-                                })
                         }
                     }
                     DebugOverlay(observedData: observedData)
