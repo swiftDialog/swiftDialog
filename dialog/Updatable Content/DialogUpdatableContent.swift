@@ -285,7 +285,7 @@ class FileReader {
             case "\(observedData.args.messageOption.long):":
                 if argument.lowercased().hasSuffix(".md") {
                     writeToLog("message from markdown")
-                    observedData.args.messageOption.value = getMarkdown(mdFilePath: argument)
+                    observedData.args.messageOption.value = processTextString(getMarkdown(mdFilePath: argument), tags: appvars.systemInfo)
                 } else if argument.hasPrefix("+ ") {
                     writeToLog("appending to existing message")
                     observedData.args.messageOption.value += argument.replacingOccurrences(of: "+ ", with: "  \n")
@@ -382,7 +382,7 @@ class FileReader {
             case "\(observedData.args.infoBox.long):":
                 if argument.lowercased().hasSuffix(".md") {
                     writeToLog("info box from markdown")
-                    observedData.args.infoBox.value = getMarkdown(mdFilePath: argument)
+                    observedData.args.infoBox.value = processTextString(getMarkdown(mdFilePath: argument), tags: appvars.systemInfo)
                 } else if argument.hasPrefix("+ ") {
                     writeToLog("adding to existing info box")
                     observedData.args.infoBox.value += argument.replacingOccurrences(of: "+ ", with: "  \n")
