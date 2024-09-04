@@ -144,7 +144,7 @@ func processCLOptions(json: JSON = getJSON()) {
     }
 
     if appArguments.infoBox.present && appArguments.infoBox.value.lowercased().hasSuffix(".md") {
-        appArguments.infoBox.value = getMarkdown(mdFilePath: appArguments.infoBox.value)
+        appArguments.infoBox.value = processTextString(getMarkdown(mdFilePath: appArguments.infoBox.value), tags: appvars.systemInfo)
     }
 
     // Dialog style allows for pre-set types that define how the window will look
