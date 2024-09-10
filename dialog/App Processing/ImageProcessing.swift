@@ -68,6 +68,8 @@ struct DisplayImage: View {
 
         if corners && self.shouldClip {
             self.clipShapeRadius = 10
+        } else {
+            self.clipShapeRadius = 2.5
         }
 
         if !showBackgroundOnError {

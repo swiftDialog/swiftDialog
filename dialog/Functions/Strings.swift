@@ -20,8 +20,8 @@ enum ViewType: String {
 func getVersionString() -> String {
     // return the cf bundle version
     var appVersion: String = appvars.cliversion
-    if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
-        if let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
+    if let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String {
+        if let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String {
             appVersion = "\(version).\(build)"
         } else {
             appVersion = version
@@ -55,6 +55,7 @@ func processTextString(_ textToProcess: String, tags: [String: String]) -> Strin
         processedTextString = processedTextString.replacingOccurrences(of: "{\(label)}", with: value)
     }
     return processedTextString
+        .replacingOccurrences(of: "\\n", with: "\n")
         .replacingOccurrences(of: "<br>", with: "  \n")
         .replacingOccurrences(of: "<hr>", with: "****")
 }

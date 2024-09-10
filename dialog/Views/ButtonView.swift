@@ -111,7 +111,9 @@ struct ButtonView: View {
                 if observedData.args.infoText.present {
                     Text(observedData.args.infoText.value)
                         .foregroundColor(.secondary.opacity(0.7))
-                } else if observedData.args.infoButtonOption.present || observedData.args.buttonInfoTextOption.present {
+                } else if (observedData.args.infoButtonOption.present ||
+                           observedData.args.buttonInfoTextOption.present) &&
+                           !observedData.args.miniMode.present {
                     MoreInfoButton(observedDialogContent: observedData)
                 }
                 Spacer()
@@ -196,6 +198,9 @@ struct HelpButton: View {
             .buttonStyle(HelpButtonStyle())
             .sheet(isPresented: $observedData.appProperties.showHelpMessage) {
                 HelpView(observedContent: observedData)
+                    .background(WindowAccessor { window in
+                        window?.canBecomeVisibleWithoutLogin = true
+                    })
             }
         }
     }

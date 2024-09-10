@@ -82,6 +82,35 @@ func processCLOptions(json: JSON = getJSON()) {
     writeLog("Processing Options")
 
     appvars.debugMode = appArguments.debug.present
+    
+    // process command line options that just display info and exit before we show the main window
+    if appArguments.helpOption.present { //}|| CommandLine.arguments.count == 1 {
+        writeLog("\(appArguments.helpOption.long) present")
+        let sdHelp = SDHelp(arguments: appArguments)
+        if appArguments.helpOption.value != "" {
+            writeLog("Printing help for \(appArguments.helpOption.value)")
+            sdHelp.printHelpLong(for: appArguments.helpOption.value)
+        } else {
+            sdHelp.printHelpShort()
+        }
+        quitDialog(exitCode: appvars.exitNow.code)
+    }
+    if appArguments.getVersion.present {
+        writeLog("\(appArguments.getVersion.long) called")
+        printVersionString()
+        quitDialog(exitCode: appvars.exitNow.code)
+    }
+    if appArguments.licence.present {
+        writeLog("\(appArguments.licence.long) called")
+        print(licenseText)
+        quitDialog(exitCode: appvars.exitNow.code)
+    }
+    if appArguments.buyCoffee.present {
+        writeLog("\(appArguments.buyCoffee.long) called :)")
+        //I'm a teapot
+        print("If you like this app and want to buy me a coffee https://www.buymeacoffee.com/bartreardon")
+        quitDialog(exitCode: appvars.exitNow.code)
+    }
 
     // Check if an auth key is present and verify
     if !dialogAuthorisationKey().isEmpty {
@@ -115,7 +144,7 @@ func processCLOptions(json: JSON = getJSON()) {
     }
 
     if appArguments.infoBox.present && appArguments.infoBox.value.lowercased().hasSuffix(".md") {
-        appArguments.infoBox.value = getMarkdown(mdFilePath: appArguments.infoBox.value)
+        appArguments.infoBox.value = processTextString(getMarkdown(mdFilePath: appArguments.infoBox.value), tags: appvars.systemInfo)
     }
 
     // Dialog style allows for pre-set types that define how the window will look
@@ -507,35 +536,6 @@ func processCLOptions(json: JSON = getJSON()) {
                                 writeLog("autoPlay.value : \(appArguments.autoPlay.value)")
     }
 
-    // process command line options that just display info and exit before we show the main window
-    if appArguments.helpOption.present { //}|| CommandLine.arguments.count == 1 {
-        writeLog("\(appArguments.helpOption.long) present")
-        let sdHelp = SDHelp(arguments: appArguments)
-        if appArguments.helpOption.value != "" {
-            writeLog("Printing help for \(appArguments.helpOption.value)")
-            sdHelp.printHelpLong(for: appArguments.helpOption.value)
-        } else {
-            sdHelp.printHelpShort()
-        }
-        quitDialog(exitCode: appvars.exitNow.code)
-    }
-
-    if appArguments.getVersion.present {
-        writeLog("\(appArguments.getVersion.long) called")
-        printVersionString()
-        quitDialog(exitCode: appvars.exitNow.code)
-    }
-    if appArguments.licence.present {
-        writeLog("\(appArguments.licence.long) called")
-        print(licenseText)
-        quitDialog(exitCode: appvars.exitNow.code)
-    }
-    if appArguments.buyCoffee.present {
-        writeLog("\(appArguments.buyCoffee.long) called :)")
-        //I'm a teapot
-        print("If you like this app and want to buy me a coffee https://www.buymeacoffee.com/bartreardon")
-        quitDialog(exitCode: appvars.exitNow.code)
-    }
     if appArguments.ignoreDND.present {
         writeLog("\(appArguments.ignoreDND.long) set")
         appvars.willDisturb = true

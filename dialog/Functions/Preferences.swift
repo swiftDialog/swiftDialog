@@ -15,7 +15,14 @@ func loadPreferences() -> DialogPreferences {
     let defaults = UserDefaults.standard
     var dialogPrefs = DialogPreferences()
 
-    dialogPrefs.authorisationKey = defaults.string(forKey: "AuthorisationKey") ?? ""
+    if defaults.objectIsForced(forKey: "AuthorisationKey") {
+        writeLog("auth key is managed", logLevel: .debug)
+    }
+    dialogPrefs.authorisationKey = defaults.string(forKey: "AuthorisationKey")
+                                    ?? defaults.string(forKey: "AuthorizationKey")
+                                    ?? defaults.string(forKey: "AuthKey")
+                                    ?? defaults.string(forKey: "Key")
+                                    ?? ""
 
     return dialogPrefs
 }
