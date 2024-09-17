@@ -34,7 +34,7 @@ struct SDHelp {
         writeLog("Printing long help for \(selectedArg)")
         let mirror = Mirror(reflecting: argument)
         for child in mirror.children {
-            if let arg = child.value as? CommandlineArgument, (arg.long == selectedArg || arg.short == selectedArg) {
+            if let arg = child.value as? CommandlineArgument, arg.long == selectedArg || arg.short == selectedArg {
                 var helpArgs = " --\(arg.long) \(arg.helpUsage)"
                 if arg.short != "" {
                     helpArgs = " -\(arg.short), \(helpArgs)"

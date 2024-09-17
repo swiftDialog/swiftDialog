@@ -82,7 +82,7 @@ func processCLOptions(json: JSON = getJSON()) {
     writeLog("Processing Options")
 
     appvars.debugMode = appArguments.debug.present
-    
+
     // process command line options that just display info and exit before we show the main window
     if appArguments.helpOption.present { //}|| CommandLine.arguments.count == 1 {
         writeLog("\(appArguments.helpOption.long) present")

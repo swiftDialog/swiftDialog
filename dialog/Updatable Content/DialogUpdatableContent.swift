@@ -76,7 +76,7 @@ class FileReader {
         }
 
         dataReady = NotificationCenter.default.addObserver(forName: Process.didTerminateNotification,
-                                                           object: self.fileHandle, queue: nil) { _ -> Void in
+                                                           object: self.fileHandle, queue: nil) { _ in
                                                             NSLog("Task terminated!")
             NotificationCenter.default.removeObserver(self.dataReady as Any)
         }
