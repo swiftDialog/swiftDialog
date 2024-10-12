@@ -66,6 +66,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             if appArguments.loginWindow.present {
                 window.canBecomeVisibleWithoutLogin = true
                 writeLog("Window can appear at the loginwindow", logLevel: .debug)
+                while CGSessionCopyCurrentDictionary() == nil {
+                    // Wait until the session is available before continuing
+                    // appropriated from munkistatus
+                    // https://github.com/munki/munki/blob/main/code/apps/MunkiStatus/MunkiStatus/main.swift
+                    writeLog("Waiting for a CGSession...", logLevel: .debug)
+                    usleep(500000)
+                }
+                writeLog("CGSession found. Continuing", logLevel: .debug)
             }
 
             // Set window level
