@@ -147,6 +147,10 @@ func processCLOptions(json: JSON = getJSON()) {
         appArguments.infoBox.value = processTextString(getMarkdown(mdFilePath: appArguments.infoBox.value), tags: appvars.systemInfo)
     }
 
+    if appArguments.helpMessage.present && appArguments.helpMessage.value.lowercased().hasSuffix(".md") {
+        appArguments.helpMessage.value = processTextString(getMarkdown(mdFilePath: appArguments.helpMessage.value), tags: appvars.systemInfo)
+    }
+
     // Dialog style allows for pre-set types that define how the window will look
     if appArguments.dialogStyle.present {
         switch appArguments.dialogStyle.value {
