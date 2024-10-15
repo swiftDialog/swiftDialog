@@ -1,58 +1,49 @@
 #!/bin/sh
-currentUser=$(echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { print $3 }')
-uid=$(id -u "$currentUser")
+
 dialogpath="/Library/Application Support/Dialog/Dialog.app"
 dialogbin="$dialogpath/Contents/MacOS/Dialog"
-commandfile=$(echo "$@" | awk -v pattern="--commandfile" '{for (i=0;i<=NF;i++) {if ($i==pattern) print $(i+1) }}')
 
 echoerr() { echo "$@" 1>&2; }
 
-if [[ -z $commandfile ]]; then
-    commandfile="/var/tmp/dialog.log"
-fi
-
-# convenience function to run a command as the current user
-# usage:
-#   runAsUser command arguments...
-# from https://scriptingosx.com/2020/08/running-a-command-as-another-user/
-runAsUser() {
-  if [ "$currentUser" != "loginwindow" ]; then
-    launchctl asuser "$uid" sudo -u "$currentUser" "$@"
-  else
-    args=("$@")
-    item="--loginwindow"
-    if [[ ! " ${args[*]} " =~ " $item " ]]; then
-        echoerr "no user logged in"
-    else
-        "$dialogbin" "$@"
-    fi
-  fi
-}
-
 # Check to make sure we have a binary to run
-if [ ! -e "$dialogbin" ]; then
-    echoerr "ERROR: Cannot find swiftDialog binary at $dialogbin"
-    exit 255
+if [ ! -x "$dialogbin" ]; then
+	echoerr "ERROR: Cannot find swiftDialog binary at $dialogbin"
+	exit 255
 fi
 
-# check to see if the command file exists
-if [[ ! -e "$commandfile" ]]; then
-    /usr/bin/touch "$commandfile"
-# check to see if the command file is writeable
-elif [[ ! -r "$commandfile" ]]; then
-    echoerr ""
-    echoerr "Warning: command file ${commandfile} is not readable by user $currentUser"
-    echoerr ""
+# If we're running as root and the console user isnt root, relaunch this script as the user.
+if [ `/usr/bin/id -u` -eq 0 ]; then
+	currentUser=`/bin/echo "show State:/Users/ConsoleUser" | /usr/sbin/scutil | /usr/bin/awk '/Name :/ { print $3 }'`
+	uid=`/usr/bin/id -u "$currentUser"`
+	if [ "$USER" != "$currentUser" ]; then
+		if [ "$currentUser" != "loginwindow" ]; then
+			echoerr "dialog: restarting $0 as $currentUser uid=$uid"
+			exec launchctl asuser "$uid" sudo -u "$currentUser" $0 "$@"
+		else
+			unset loginwindow
+			for arg; do
+				[ " $arg " = " --loginwindow " ] && { loginwindow=true ; break; }
+			done
+			if [ ! $loginwindow ]; then
+				echoerr "ERROR: no user logged in AND --loginwindow not specified"
+				exit 255
+			fi
+		fi
+	fi
 fi
 
-# If we're running as root, launch swiftDialog as the user.
-if [ $(id -u) -eq 0 ]; then
-    if [ -e $commandfile ]; then
-        # make sure the console user has read access to the command file
-        /bin/chmod 666 "$commandfile"
-    fi
+# determining if commandfile specified on cmdline
+unset commandfile nextarg
+for arg; do
+	[ $nextarg ] && { unset nextarg ; commandfile=$arg; break; }
+	[ " $arg " = " --commandfile " ] && { nextarg=true; continue; }
+done
 
-    runAsUser "$dialogbin" "$@"
-else
-    "$dialogbin" "$@"
+if [ -n "$commandfile" ]; then
+	if [ ! -r "$commandfile" ]; then
+		# advise if the running user does not have read access to the command file
+		echoerr "WARNING: custom command file \"${commandfile}\" is not readable by $USER"
+	fi
 fi
+
+exec "$dialogbin" "$@"
