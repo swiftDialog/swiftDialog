@@ -568,7 +568,7 @@ func processCLOptions(json: JSON = getJSON()) {
         if appArguments.windowWidth.value.last == "%" {
             appvars.windowWidth = appvars.screenWidth * appArguments.windowWidth.value.replacingOccurrences(of: "%", with: "").floatValue()/100
         } else {
-            appvars.windowWidth = appArguments.windowWidth.value.floatValue()
+            appvars.windowWidth = appArguments.windowWidth.value.floatValue(defaultValue: appvars.windowWidth)
         }
         writeLog("windowWidth : \(appvars.windowWidth)")
     }
@@ -577,7 +577,7 @@ func processCLOptions(json: JSON = getJSON()) {
         if appArguments.windowHeight.value.last == "%" {
             appvars.windowHeight = appvars.screenHeight * appArguments.windowHeight.value.replacingOccurrences(of: "%", with: "").floatValue()/100
         } else {
-            appvars.windowHeight = appArguments.windowHeight.value.floatValue()
+            appvars.windowHeight = appArguments.windowHeight.value.floatValue(defaultValue: appvars.windowHeight)
         }
         writeLog("windowHeight : \(appvars.windowHeight)")
     }
@@ -585,7 +585,7 @@ func processCLOptions(json: JSON = getJSON()) {
     if appArguments.iconSize.present {
         writeLog("\(appArguments.iconSize.long) present")
         //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: appArguments.windowWidth)
-        appvars.iconWidth = appArguments.iconSize.value.floatValue()
+        appvars.iconWidth = appArguments.iconSize.value.floatValue(defaultValue: appvars.iconWidth)
         writeLog("iconWidth : \(appvars.iconWidth)")
     }
     // Correct feng shui so the app accepts keyboard input
@@ -806,7 +806,7 @@ func processCLOptionValues() {
     appArguments.titleFont.evaluate(json: json)
 
     // message
-    appArguments.messageOption.evaluate(json: json)
+    appArguments.messageOption.evaluate(json: json, defaultValue: appDefaults.messageDefault)
     appArguments.messageAlignment.evaluate(json: json, defaultValue: appDefaults.messageAlignmentTextRepresentation)
     appArguments.messageAlignmentOld.evaluate(json: json, defaultValue: appDefaults.messageAlignmentTextRepresentation)
     if appArguments.messageAlignmentOld.present {
@@ -846,8 +846,8 @@ func processCLOptionValues() {
     }
 
     // window properties
-    appArguments.windowWidth.evaluate(json: json)
-    appArguments.windowHeight.evaluate(json: json)
+    appArguments.windowWidth.evaluate(json: json, defaultValue: appvars.windowWidth)
+    appArguments.windowHeight.evaluate(json: json, defaultValue: appvars.windowHeight)
 
     // window adornments
     appArguments.watermarkImage.evaluate(json: json)

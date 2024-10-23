@@ -19,15 +19,30 @@ struct CommandlineArgument {
     var isbool: Bool = false
 
     public mutating func evaluate(json: JSON = "{}", defaultValue: Any = "") {
-        self.present = json[self.long].exists() || CLOptionPresent(optionName: self)
-        if !self.isbool && json[self.long].bool ?? false {
-            self.present = false
-            return
-        } else if let boolValue = json[self.long].bool {
-            self.present = boolValue
-            return
+        // This function self updates the parameters of the argument based on
+        // what is passed in from json or from the command line
+        // It tries to process json first, and then process command line
+
+        // Simple test - if the value exists then we are present
+        let isJson = json[self.long].exists() || json[self.short].exists()
+        let isComandLine = CLOptionPresent(optionName: self)
+
+        self.present = isJson || isComandLine
+
+        // we need to check if the value is set in json but set to false
+        // case we need to set the "present" state to false
+        if isJson {
+            if !self.isbool && json[self.long].bool ?? false {
+                self.present = false
+                return
+            } else if let boolValue = json[self.long].bool {
+                self.present = boolValue
+                return
+            }
         }
 
+        // json numbers can be input as an int or string. we need to check for both
+        // command line arguments always some in as strings
         if self.present {
             if let numberValue = json[self.long].number {
                 self.value = numberValue.stringValue
@@ -35,6 +50,8 @@ struct CommandlineArgument {
                 self.value = json[self.long].string ?? CLOptionText(optionName: self)
             }
         }
+
+        // nothing was collected so set the default value as a string
         if self.value.isEmpty {
             if let floatValue = defaultValue as? CGFloat {
                 self.value = floatValue.stringValue
@@ -44,6 +61,7 @@ struct CommandlineArgument {
                 self.value = defaultValue as? String ?? ""
             }
         } else {
+            // we have a value - perform string processing on it
             self.value = processTextString(self.value, tags: appvars.systemInfo)
         }
     }
