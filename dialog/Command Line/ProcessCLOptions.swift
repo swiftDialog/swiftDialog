@@ -19,13 +19,13 @@ func processJSON(jsonFilePath: String) -> JSON {
     do {
         jsonData = try Data(contentsOf: jsonDataPath as URL)
     } catch {
-        quitDialog(exitCode: appvars.exit202.code, exitMessage: "\(appvars.exit202.message) \(jsonFilePath)")
+        quitDialog(exitCode: appDefaults.exit202.code, exitMessage: "\(appDefaults.exit202.message) \(jsonFilePath)")
     }
 
     do {
         json = try JSON(data: jsonData)
     } catch {
-        quitDialog(exitCode: appvars.exit202.code, exitMessage: "JSON import failed")
+        quitDialog(exitCode: appDefaults.exit202.code, exitMessage: "JSON import failed")
     }
     return json
 }
@@ -36,7 +36,7 @@ func processJSONString(jsonString: String) -> JSON {
     do {
         json = try JSON(data: dataFromString!)
     } catch {
-        quitDialog(exitCode: appvars.exit202.code, exitMessage: "JSON import failed")
+        quitDialog(exitCode: appDefaults.exit202.code, exitMessage: "JSON import failed")
     }
     return json
 }
@@ -93,23 +93,23 @@ func processCLOptions(json: JSON = getJSON()) {
         } else {
             sdHelp.printHelpShort()
         }
-        quitDialog(exitCode: appvars.exitNow.code)
+        quitDialog(exitCode: appDefaults.exitNow.code)
     }
     if appArguments.getVersion.present {
         writeLog("\(appArguments.getVersion.long) called")
         printVersionString()
-        quitDialog(exitCode: appvars.exitNow.code)
+        quitDialog(exitCode: appDefaults.exitNow.code)
     }
     if appArguments.licence.present {
         writeLog("\(appArguments.licence.long) called")
         print(licenseText)
-        quitDialog(exitCode: appvars.exitNow.code)
+        quitDialog(exitCode: appDefaults.exitNow.code)
     }
     if appArguments.buyCoffee.present {
         writeLog("\(appArguments.buyCoffee.long) called :)")
         //I'm a teapot
         print("If you like this app and want to buy me a coffee https://www.buymeacoffee.com/bartreardon")
-        quitDialog(exitCode: appvars.exitNow.code)
+        quitDialog(exitCode: appDefaults.exitNow.code)
     }
 
     // Check if an auth key is present and verify
@@ -125,7 +125,7 @@ func processCLOptions(json: JSON = getJSON()) {
         }
         if !checkAuthorisationKey(key: authKey.sha256Hash) {
             writeLog("Auth key is required", logLevel: .debug)
-            quitDialog(exitCode: appvars.exit30.code, exitMessage: appvars.exit30.message)
+            quitDialog(exitCode: appDefaults.exit30.code, exitMessage: appDefaults.exit30.message)
         } else {
             appvars.authorised = true
         }
@@ -137,7 +137,7 @@ func processCLOptions(json: JSON = getJSON()) {
     }
 
     if !appArguments.messageOption.present {
-        appArguments.messageOption.value = appvars.messageDefault
+        appArguments.messageOption.value = appDefaults.messageDefault
     }
     if appArguments.messageOption.present && appArguments.messageOption.value.lowercased().hasSuffix(".md") {
         appArguments.messageOption.value = processTextString(getMarkdown(mdFilePath: appArguments.messageOption.value), tags: appvars.systemInfo)
@@ -280,7 +280,7 @@ func processCLOptions(json: JSON = getJSON()) {
             }
         } else {
             for textFieldOption in CLOptionMultiOptions(optionName: appArguments.textField.long) {
-                let items = textFieldOption.split(usingRegex: appvars.argRegex)
+                let items = textFieldOption.split(usingRegex: appDefaults.argRegex)
                 var fieldEditor: Bool = false
                 var fieldFileSelect: Bool = false
                 var fieldPasswordFill: Bool = false
@@ -560,7 +560,7 @@ func processCLOptions(json: JSON = getJSON()) {
         for fontname in fonts.enumerated() {
             print("  \(fontname.element)")
         }
-        quitDialog(exitCode: appvars.exit0.code)
+        quitDialog(exitCode: appDefaults.exit0.code)
     }
 
     if appArguments.windowWidth.present {
@@ -726,43 +726,23 @@ func processCLOptions(json: JSON = getJSON()) {
         appArguments.iconOption.present = true
     }
 
-    if appArguments.bannerImage.present && appArguments.iconOption.present {
-        writeLog("banner image and icon are specified, un-hide the icon")
-        appvars.iconIsHidden = false
-    }
-
-    if appArguments.centreIcon.present {
-        appvars.iconIsCentred = true
-        writeLog("iconIsCentred = true")
-    }
-
-    if appArguments.movableWindow.present {
-        appvars.windowIsMoveable = true
-        writeLog("windowIsMoveable = true")
-    }
-
     if appArguments.loginWindow.present {
         appArguments.forceOnTop.present = true
     }
 
     if appArguments.forceOnTop.present {
         appArguments.showOnAllScreens.present = true
-        appvars.windowOnTop = true
         writeLog("windowOnTop = true")
     }
 
     // we define this stuff here as we will use the info to draw the window.
     if appArguments.smallWindow.present {
-        // scale everything down a notch
-        appvars.smallWindow = true
         appvars.scaleFactor = 0.75
         if !appArguments.iconSize.present {
             appArguments.iconSize.value = "120"
         }
         writeLog("smallWindow.present")
     } else if appArguments.bigWindow.present {
-        // scale everything up a notch
-        appvars.bigWindow = true
         appvars.scaleFactor = 1.25
         writeLog("bigWindow.present")
     }
@@ -821,21 +801,21 @@ func processCLOptionValues() {
     appArguments.dialogStyle.evaluate(json: json)
 
     // title
-    appArguments.titleOption.evaluate(json: json, defaultValue: appvars.titleDefault)
+    appArguments.titleOption.evaluate(json: json, defaultValue: appDefaults.titleDefault)
     appArguments.subTitleOption.evaluate(json: json)
     appArguments.titleFont.evaluate(json: json)
 
     // message
     appArguments.messageOption.evaluate(json: json)
-    appArguments.messageAlignment.evaluate(json: json, defaultValue: appvars.messageAlignmentTextRepresentation)
-    appArguments.messageAlignmentOld.evaluate(json: json, defaultValue: appvars.messageAlignmentTextRepresentation)
+    appArguments.messageAlignment.evaluate(json: json, defaultValue: appDefaults.messageAlignmentTextRepresentation)
+    appArguments.messageAlignmentOld.evaluate(json: json, defaultValue: appDefaults.messageAlignmentTextRepresentation)
     if appArguments.messageAlignmentOld.present {
         appArguments.messageAlignment.present = appArguments.messageAlignmentOld.present
         appArguments.messageAlignment.value = appArguments.messageAlignmentOld.value
     }
     if appArguments.messageAlignment.present {
-        appvars.messageAlignment = appvars.allignmentStates[appArguments.messageAlignment.value] ?? .leading
-        appvars.messagePosition = appvars.positionStates[appArguments.messageAlignment.value] ?? .leading
+        appvars.messageAlignment = appDefaults.allignmentStates[appArguments.messageAlignment.value] ?? .leading
+        appvars.messagePosition = appDefaults.positionStates[appArguments.messageAlignment.value] ?? .leading
     }
     appArguments.messageVerticalAlignment.evaluate(json: json)
     appArguments.messageFont.evaluate(json: json)
@@ -849,9 +829,9 @@ func processCLOptionValues() {
 
     // help sheet
     appArguments.helpMessage.evaluate(json: json)
-    appArguments.helpAlignment.evaluate(json: json, defaultValue: appvars.messageAlignmentTextRepresentation)
+    appArguments.helpAlignment.evaluate(json: json, defaultValue: appDefaults.messageAlignmentTextRepresentation)
     if appArguments.helpAlignment.present {
-        appvars.helpAlignment = appvars.allignmentStates[appArguments.helpAlignment.value] ?? .leading
+        appvars.helpAlignment = appDefaults.allignmentStates[appArguments.helpAlignment.value] ?? .leading
     }
 
     // window location on screen
@@ -897,14 +877,14 @@ func processCLOptionValues() {
     appArguments.bannerHeight.evaluate(json: json)
 
     // Buttons
-    appArguments.button1TextOption.evaluate(json: json, defaultValue: appvars.button1Default)
+    appArguments.button1TextOption.evaluate(json: json, defaultValue: appDefaults.button1Default)
     appArguments.button1ActionOption.evaluate(json: json)
     appArguments.button1ShellActionOption.evaluate(json: json)
     appArguments.button1Disabled.evaluate(json: json)
-    appArguments.button2TextOption.evaluate(json: json, defaultValue: appvars.button2Default)
+    appArguments.button2TextOption.evaluate(json: json, defaultValue: appDefaults.button2Default)
     appArguments.button2ActionOption.evaluate(json: json)
     appArguments.button2Disabled.evaluate(json: json)
-    appArguments.buttonInfoTextOption.evaluate(json: json, defaultValue: appvars.buttonInfoDefault)
+    appArguments.buttonInfoTextOption.evaluate(json: json, defaultValue: appDefaults.buttonInfoDefault)
     appArguments.buttonInfoActionOption.evaluate(json: json)
     appArguments.buttonStyle.evaluate(json: json)
 
@@ -922,7 +902,7 @@ func processCLOptionValues() {
     appArguments.preferredViewOrder.evaluate(json: json)
 
     // timers and progress
-    appArguments.timerBar.evaluate(json: json, defaultValue: appvars.timerDefaultSeconds.stringValue)
+    appArguments.timerBar.evaluate(json: json, defaultValue: appDefaults.timerDefaultSeconds.stringValue)
     appArguments.progressBar.evaluate(json: json)
     appArguments.progressText.evaluate(json: json, defaultValue: " ")
 
@@ -938,7 +918,7 @@ func processCLOptionValues() {
 
     appArguments.statusLogFile.evaluate(json: json)
     if !appArguments.statusLogFile.present {
-        appArguments.statusLogFile.value = appvars.defaultStatusLogFile
+        appArguments.statusLogFile.value = appDefaults.defaultStatusLogFile
     }
     appArguments.logFileToTail.evaluate(json: json)
 

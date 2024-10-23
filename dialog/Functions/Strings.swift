@@ -19,7 +19,7 @@ enum ViewType: String {
 
 func getVersionString() -> String {
     // return the cf bundle version
-    var appVersion: String = appvars.cliversion
+    var appVersion: String = appDefaults.cliversion
     if let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String {
         if let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String {
             appVersion = "\(version).\(build)"

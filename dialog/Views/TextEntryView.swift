@@ -103,7 +103,7 @@ struct TextEntryView: View {
                                             )
                                          )
                         }
-                        .padding(.bottom, observedData.appProperties.contentPadding)
+                        .padding(.bottom, appDefaults.contentPadding)
                     } else {
                         HStack {
                             VStack {

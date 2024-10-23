@@ -220,7 +220,7 @@ struct ConstructionKitView: View {
             Spacer()
             HStack {
                 Button("ck-quit".localized) {
-                    quitDialog(exitCode: observedData.appProperties.exit0.code)
+                    quitDialog(exitCode: appDefaults.exit0.code)
                 }
                 Spacer()
                 .disabled(false)

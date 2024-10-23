@@ -12,7 +12,7 @@ struct ButtonView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
 
-    var progressSteps: CGFloat = appvars.timerDefaultSeconds
+    var progressSteps: CGFloat = appDefaults.timerDefaultSeconds
 
     var button1action: String = ""
     var buttonShellAction: Bool = false
@@ -48,7 +48,7 @@ struct ButtonView: View {
 
                 if observedData.args.button2Option.present || observedData.args.button2TextOption.present {
                     Button(action: {
-                        quitDialog(exitCode: observedData.appProperties.exit2.code, observedObject: observedData)
+                        quitDialog(exitCode: appDefaults.exit2.code, observedObject: observedData)
                     }, label: {
                         Text(observedData.args.button2TextOption.value)
                             .frame(minWidth: 50, alignment: .center)
@@ -90,7 +90,7 @@ struct ButtonView: View {
 
                 if observedData.args.button2Option.present || observedData.args.button2TextOption.present {
                     Button(action: {
-                        quitDialog(exitCode: observedData.appProperties.exit2.code, observedObject: observedData)
+                        quitDialog(exitCode: appDefaults.exit2.code, observedObject: observedData)
                     }, label: {
                         Text(observedData.args.button2TextOption.value)
                             .frame(minWidth: 50, maxWidth: .infinity, alignment: .center)
@@ -130,7 +130,7 @@ struct ButtonView: View {
                         if observedData.args.button2Option.present || observedData.args.button2TextOption.present {
                             let button2Text: String = observedData.args.button2TextOption.value
                             Button(action: {
-                                quitDialog(exitCode: observedData.appProperties.exit2.code, observedObject: observedData)
+                                quitDialog(exitCode: appDefaults.exit2.code, observedObject: observedData)
                             }, label: {
                                 Text(button2Text)
                                     .frame(minWidth: 40, alignment: .center)

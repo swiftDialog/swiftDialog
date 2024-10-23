@@ -56,7 +56,7 @@ struct SDHelp {
         argument.titleOption.helpShort = "Set the Dialog title"
         argument.titleOption.helpLong = """
         Text beyond the length of the title area will get truncated
-        Default Title is \"\(appvars.titleDefault)\"
+        Default Title is \"\(appDefaults.titleDefault)\"
         Use keyword "none" to disable the title area entirely
 """
 
@@ -315,7 +315,7 @@ struct SDHelp {
 
         argument.button1TextOption.helpShort = "Set the label for Button1"
         argument.button1TextOption.helpLong = """
-        Default label is "\(appvars.button1Default)"
+        Default label is "\(appDefaults.button1Default)"
         Bound to <Enter> key
 """
 
@@ -337,7 +337,7 @@ struct SDHelp {
         argument.button2Option.helpUsage = ""
         argument.button2Option.helpLong = """
         Use \(argument.button2TextOption.long) to modify the button label
-        Default label is "\(appvars.button2Default)"
+        Default label is "\(appDefaults.button2Default)"
         Bound to <ESC> key
         Return code when actioned is 2
 """
@@ -363,7 +363,7 @@ struct SDHelp {
         argument.infoButtonOption.helpShort = "Displays info button"
         argument.infoButtonOption.helpUsage = ""
         argument.infoButtonOption.helpLong = """
-        Default label is "\(appvars.buttonInfoDefault)"
+        Default label is "\(appDefaults.buttonInfoDefault)"
 """
 
         argument.buttonInfoTextOption.helpShort = "Displays info button with <text>"

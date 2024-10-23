@@ -48,7 +48,6 @@ struct MessageContent: View {
                              overlay: observedData.args.overlayIconOption.value,
                              alpha: observedData.iconAlpha)
                         .frame(width: iconDisplayWidth, alignment: .top)
-                        //.padding(.bottom, observedData.appProperties.bottomPadding)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
                     Spacer()
@@ -118,17 +117,17 @@ struct MessageContent: View {
                 ForEach(Array(observedData.appProperties.viewOrder.indices), id: \.self) { index in
                     if observedData.appProperties.viewOrder.firstIndex(of: ViewType.textfile.rawValue) == index {
                         TextFileView(logFilePath: observedData.args.logFileToTail.value)
-                            .padding(.bottom, observedData.appProperties.contentPadding)
+                            .padding(.bottom, appDefaults.contentPadding)
                     }
                     if observedData.appProperties.viewOrder.firstIndex(of: ViewType.webcontent.rawValue) == index {
                         WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
-                            .padding(.bottom, observedData.appProperties.contentPadding)
+                            .padding(.bottom, appDefaults.contentPadding)
                     }
                     if observedData.appProperties.viewOrder.firstIndex(of: ViewType.listitem.rawValue) == index {
                         ListView(observedDialogContent: observedData)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
-                            .padding(.bottom, observedData.appProperties.contentPadding)
+                            .padding(.bottom, appDefaults.contentPadding)
                     }
                     if observedData.appProperties.viewOrder.firstIndex(of: ViewType.checkbox.rawValue) == index {
                         CheckboxView(observedDialogContent: observedData)
@@ -137,19 +136,19 @@ struct MessageContent: View {
                     }
                     if observedData.appProperties.viewOrder.firstIndex(of: ViewType.textfield.rawValue) == index {
                         TextEntryView(observedDialogContent: observedData, textfieldContent: userInputState.textFields)
-                            .padding(.bottom, observedData.appProperties.contentPadding)
+                            .padding(.bottom, appDefaults.contentPadding)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
                             .frame(maxWidth: dataEntryMaxWidth)
                     }
                     if observedData.appProperties.viewOrder.firstIndex(of: ViewType.radiobutton.rawValue) == index {
                         RadioView(observedDialogContent: observedData)
-                            .padding(.bottom, observedData.appProperties.contentPadding)
+                            .padding(.bottom, appDefaults.contentPadding)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
                             .frame(maxWidth: dataEntryMaxWidth)
                     }
                     if observedData.appProperties.viewOrder.firstIndex(of: ViewType.dropdown.rawValue) == index {
                         DropdownView(observedDialogContent: observedData)
-                            .padding(.bottom, observedData.appProperties.contentPadding)
+                            .padding(.bottom, appDefaults.contentPadding)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
                             .frame(maxWidth: dataEntryMaxWidth, alignment: .leading)
                     }
@@ -169,9 +168,9 @@ struct MessageContent: View {
                 }
             }
         }
-        .padding(.leading, observedData.appProperties.sidePadding)
-        .padding(.trailing, observedData.appProperties.sidePadding)
-        .padding(.top, observedData.appProperties.topPadding)
+        .padding(.leading, appDefaults.sidePadding)
+        .padding(.trailing, appDefaults.sidePadding)
+        .padding(.top, appDefaults.topPadding)
         .textSelection(.enabled)
     }
 }

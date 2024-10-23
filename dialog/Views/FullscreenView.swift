@@ -125,7 +125,7 @@ struct FullscreenView: View {
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                     Spacer()
                 }
-                .padding(observedData.appProperties.topPadding*3)
+                .padding(appDefaults.topPadding*3)
             }
 
             // icon and message vstack group
@@ -179,7 +179,7 @@ struct FullscreenView: View {
                             TimerView(progressSteps: observedData.args.timerBar.value.floatValue(), visible: observedData.args.timerBar.present, observedDialogContent: observedData)
                         }
                     }
-                    .padding(observedData.appProperties.topPadding*3)
+                    .padding(appDefaults.topPadding*3)
                     .padding(10)
                 }
             }

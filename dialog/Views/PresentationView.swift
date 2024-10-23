@@ -102,9 +102,9 @@ struct PresentationView: View {
                         .lineLimit(1)
                     // Buttons
                     ButtonView(observedDialogContent: observedData)
-                        .padding(.leading, observedData.appProperties.sidePadding)
-                        .padding(.trailing, observedData.appProperties.sidePadding)
-                        .padding(.bottom, observedData.appProperties.bottomPadding)
+                        .padding(.leading, appDefaults.sidePadding)
+                        .padding(.trailing, appDefaults.sidePadding)
+                        .padding(.bottom, appDefaults.bottomPadding)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                 }
             }

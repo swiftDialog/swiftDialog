@@ -22,8 +22,8 @@ struct TaskProgressView: View {
                     Text(observedData.args.progressText.value)
                 }
             }
-            .padding(.leading,observedData.appProperties.sidePadding)
-            .padding(.trailing,observedData.appProperties.sidePadding)
+            .padding(.leading,appDefaults.sidePadding)
+            .padding(.trailing,appDefaults.sidePadding)
         }
     }
 }

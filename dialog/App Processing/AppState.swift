@@ -20,6 +20,7 @@ var darkMode: Bool {
 
 // declare our app var in case we want to update values - e.g. future use, multiple dialog sizes
 var appvars = AppVariables()
+var appDefaults = AppDefaults()
 var appArguments = CommandLineArguments()
 var userInputState = UserInputState()
 var blurredScreen = BlurWindow()

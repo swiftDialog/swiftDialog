@@ -23,7 +23,7 @@ struct HelpView: View {
                 .resizable()
                 .foregroundColor(.orange)
                 .frame(width: 32, height: 32)
-                .padding(.top, observedData.appProperties.topPadding)
+                .padding(.top, appDefaults.topPadding)
             Markdown(observedData.args.helpMessage.value, baseURL: URL(string: "http://"))
                 .multilineTextAlignment(observedData.appProperties.helpAlignment)
                 .markdownTextStyle {
@@ -42,7 +42,7 @@ struct HelpView: View {
             }, label: {
                 Text("button-ok".localized)
             })
-            .padding(observedData.appProperties.sidePadding)
+            .padding(appDefaults.sidePadding)
             .keyboardShortcut(.defaultAction)
         }
         .frame(width: observedData.appProperties.windowWidth-100)

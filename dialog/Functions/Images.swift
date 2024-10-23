@@ -52,7 +52,7 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
             return errorImage
         } else {
             writeLog("An error occured - exiting")
-            quitDialog(exitCode: appvars.exit201.code, exitMessage: "\(appvars.exit201.message) \(fileImagePath)", observedObject: DialogUpdatableContent())
+            quitDialog(exitCode: appDefaults.exit201.code, exitMessage: "\(appDefaults.exit201.message) \(fileImagePath)", observedObject: DialogUpdatableContent())
         }
     }
 
