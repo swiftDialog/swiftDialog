@@ -8,15 +8,10 @@
 import SwiftUI
 import Combine
 import UserNotifications
-import OSLog
 
 import SystemConfiguration
 
 var background = BlurWindowController()
-
-// Log Stuff
-let bundleID = Bundle.main.bundleIdentifier ?? "au.csiro.dialog"
-let osLog = OSLog(subsystem: bundleID, category: "main")
 
 // AppDelegate and extension used for notifications
 class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
@@ -95,15 +90,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 background.close()
             }
 
-            if appArguments.forceOnTop.present || appArguments.blurScreen.present {
-                writeLog("Activating window", logLevel: .debug)
-                NSApp.activate(ignoringOtherApps: true)
-            }
-
             placeWindow(window, size: window.frame.size,
                         vertical: appvars.windowPositionVertical,
                 horozontal: appvars.windowPositionHorozontal,
                         offset: appvars.windowPositionOffset)
+
+            // order to the front
+            window.makeKeyAndOrderFront(self)
+
+            if appArguments.forceOnTop.present || appArguments.blurScreen.present {
+                writeLog("Activating window", logLevel: .debug)
+                NSApp.activate(ignoringOtherApps: true)
+            }
         }
     }
 
@@ -122,15 +120,13 @@ struct dialogApp: App {
 
     init () {
 
-        writeLog("Dialog Launched")
+        appvars.debugMode = CLOptionPresent(optionName: appArguments.debug)
 
         if CommandLine.arguments.count > 1 {
             appvars.quitAfterProcessingNotifications = false
         }
 
-        for argument in CommandLine.arguments {
-            writeLog(argument, logLevel: .info)
-        }
+        writeLog("Dialog Launched", logLevel: .info)
 
         // Ensure the singleton NSApplication exists.
         // required for correct determination of screen dimentions for the screen in use in multi screen scenarios
@@ -201,6 +197,7 @@ struct dialogApp: App {
         // bring to front on launch
         writeLog("Activating", logLevel: .debug)
         NSApp.activate(ignoringOtherApps: true)
+        writeLog("Activated", logLevel: .debug)
     }
 
     var body: some Scene {

@@ -7,14 +7,13 @@
 
 import Foundation
 import SwiftUI
+import OSLog
+
+// Log Stuff
+let bundleID = Bundle.main.bundleIdentifier ?? "au.csiro.dialog"
+let osLog: OSLog = OSLog(subsystem: bundleID, category: "main")
 
 var iconVisible: Bool = true
-
-var darkMode: Bool {
-    let mode = UserDefaults.standard.string(forKey: "AppleInterfaceStyle")
-    if appArguments.preferredAppearance.value.lowercased() == "light" { return false }
-    return mode == "Dark" || appArguments.preferredAppearance.value.lowercased() == "dark"
-}
 
 // Probably a way to work all this out as a nice dictionary. For now, long form.
 
@@ -24,6 +23,12 @@ var appDefaults = AppDefaults()
 var appArguments = CommandLineArguments()
 var userInputState = UserInputState()
 var blurredScreen = BlurWindow()
+
+var darkMode: Bool {
+    let mode = UserDefaults.standard.string(forKey: "AppleInterfaceStyle")
+    if appArguments.preferredAppearance.value.lowercased() == "light" { return false }
+    return mode == "Dark" || appArguments.preferredAppearance.value.lowercased() == "dark"
+}
 
 let displayAsInt: NumberFormatter = {
     let formatter = NumberFormatter()
