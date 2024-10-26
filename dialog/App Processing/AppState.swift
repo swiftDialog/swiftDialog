@@ -51,6 +51,7 @@ struct UserInputState {
     var listItems = [ListItems]()
     var textFields = [TextFieldState]()
     var checkBoxes = [CheckBoxes]()
+    var iconItems = [Icons]()
 }
 
 struct TextFieldState {
@@ -86,6 +87,9 @@ struct TextFieldState {
     var nsDictionary: NSDictionary {
             return dictionary as NSDictionary
         }
+}
+struct Icons {
+    var value: String
 }
 
 struct DropDownItems {

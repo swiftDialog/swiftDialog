@@ -250,7 +250,7 @@ func processCLOptions(json: JSON = getJSON()) {
                 appArguments.iconOption.value = appArguments.dialogStyle.value.lowercased()
             }
         case "centred", "centered":
-            appArguments.iconSize.value = "110"
+            appArguments.iconSize.value = !appArguments.iconSize.present ? "110" : appArguments.iconSize.value
             appArguments.buttonStyle.value = "centre"
             appArguments.centreIcon.present = true
             appvars.messagePosition = .center
@@ -793,6 +793,18 @@ func processCLOptions(json: JSON = getJSON()) {
     if appArguments.iconOption.value != "" {
         writeLog("\(appArguments.iconOption.long) present")
         appArguments.iconOption.present = true
+        if json["icons"].exists() {
+            writeLog("processing multiple icons from json")
+            for index in 0..<json["icons"].count {
+                userInputState.iconItems.append(Icons(value: json["icons"][index]["icon"].stringValue))
+            }
+            // use index 0 for the default icon value
+            appArguments.iconOption.value = userInputState.iconItems[0].value
+        } else {
+            for iconOption in CLOptionMultiOptions(optionName: appArguments.iconOption.long) {
+                userInputState.iconItems.append(Icons(value: iconOption))
+            }
+        }
     }
 
     // hide the icon if asked to or if banner image is present

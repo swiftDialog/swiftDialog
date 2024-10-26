@@ -44,14 +44,17 @@ struct MessageContent: View {
             if observedData.args.centreIcon.present && observedData.args.iconOption.present {
                 HStack {
                     Spacer()
-                    IconView(image: observedData.args.iconOption.value,
-                             overlay: observedData.args.overlayIconOption.value,
-                             alpha: observedData.iconAlpha)
-                        .frame(width: iconDisplayWidth, alignment: .top)
+                    ForEach(0..<userInputState.iconItems.count, id: \.self) {index in
+                        IconView(image: userInputState.iconItems[index].value,
+                                 alpha: observedData.iconAlpha)
+                        .frame(height: iconDisplayWidth, alignment: .top)
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
+                    }
                     Spacer()
                 }
+                .frame(maxWidth: appvars.windowWidth*0.8)
+                .frame(maxHeight: iconDisplayWidth)
             }
 
             if observedData.args.mainImage.present {

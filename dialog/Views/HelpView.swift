@@ -24,18 +24,28 @@ struct HelpView: View {
                 .foregroundColor(.orange)
                 .frame(width: 32, height: 32)
                 .padding(.top, appDefaults.topPadding)
-            Markdown(observedData.args.helpMessage.value, baseURL: URL(string: "http://"))
-                .multilineTextAlignment(observedData.appProperties.helpAlignment)
-                .markdownTextStyle {
-                    FontSize(appvars.messageFontSize)
-                    ForegroundColor(.primary)
+            HStack {
+                Markdown(observedData.args.helpMessage.value, baseURL: URL(string: "http://"))
+                    .multilineTextAlignment(observedData.appProperties.helpAlignment)
+                    .markdownTextStyle {
+                        FontSize(appvars.messageFontSize)
+                        ForegroundColor(.primary)
+                    }
+                    .markdownTextStyle(\.link) {
+                        FontSize(appvars.messageFontSize)
+                        ForegroundColor(.link)
+                    }
+                    .padding(32)
+                    .focusable(false)
+                if observedData.args.helpImage.present {
+                    Divider()
+                        .padding(appDefaults.sidePadding)
+                        .frame(width: 2)
+                    IconView(image: observedData.args.helpImage.value)
+                        .frame(height: 160)
+                        .padding(.leading, appDefaults.sidePadding)
                 }
-                .markdownTextStyle(\.link) {
-                    FontSize(appvars.messageFontSize)
-                    ForegroundColor(.link)
-                }
-                .padding(32)
-                .focusable(false)
+            }
             Spacer()
             Button(action: {
                 observedData.appProperties.showHelpMessage = false

@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import CoreImage.CIFilterBuiltins
 
 struct IconView: View {
     var messageUserImagePath: String
@@ -19,6 +20,7 @@ struct IconView: View {
     var imgFromAPP: Bool = false
     var imgFromBase64: Bool = false
     var imgFromText: Bool = false
+    var textToQR: Bool = false
 
     var builtInIconName: String = ""
     var builtInIconAutoColor: Bool = false
@@ -105,6 +107,11 @@ struct IconView: View {
         if messageUserImagePath.starts(with: "http") {
             writeLog("Image is http source")
             imgFromURL = true
+        }
+
+        if messageUserImagePath.starts(with: "qr=") {
+            writeLog("Create QR code from text")
+            textToQR = true
         }
 
         if messageUserImagePath.starts(with: "base64") {
@@ -220,7 +227,7 @@ struct IconView: View {
             writeLog("Using default info icon")
             builtInIconName = "person.fill.questionmark"
             builtInIconPresent = true
-        } else if messageUserImagePath == "default" || (!builtInIconPresent && !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL && !imgFromBase64 && !imgFromText) {
+        } else if messageUserImagePath == "default" || (!builtInIconPresent && !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL && !imgFromBase64 && !imgFromText && !textToQR) {
             writeLog("Icon not specified - using default icon")
             builtInIconName = "bubble.left.circle.fill"
             iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
@@ -286,10 +293,19 @@ struct IconView: View {
                 .opacity(mainImageAlpha)
             } else if imgFromText {
                 Text(messageUserImagePath.replacingOccurrences(of: "text=", with: ""))
-                .font(.system(size: 300))
-                .minimumScaleFactor(0.01)
-                .lineLimit(1)
-                .opacity(mainImageAlpha)
+                    .font(.system(size: 300))
+                    .minimumScaleFactor(0.01)
+                    .lineLimit(1)
+                    .opacity(mainImageAlpha)
+            } else if textToQR {
+                ZStack {
+                    Image(nsImage: generateQRCode(from: messageUserImagePath.replacingOccurrences(of: "qr=", with: "")))
+                        .interpolation(.none)
+                        .resizable()
+                        .scaledToFit()
+                        .clipShape(RoundedRectangle(cornerRadius: 5))
+                }
+
             } else {
                 DisplayImage(messageUserImagePath, corners: mainImageCorners)
                     .scaleEffect(mainImageScale, anchor: .topLeading)

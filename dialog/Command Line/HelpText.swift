@@ -226,6 +226,7 @@ struct SDHelp {
             file path to Application          -  "/Applications/Chess.app"
             URL of file resource              -  "https://someurl/file.[png|jpg]"
             SF Symbol                         -  "SF=sf.symbol.name"
+            QR Code                           -  "qr=text/url to be represented as a QR code"
             builtin                           -  info | caution | warning
 
         You can optionally specify an alternate resource value for use in dark mode using the following syntax:
@@ -278,6 +279,9 @@ struct SDHelp {
         argument.iconOption.helpLong = """
         "none" can be specified to not display an icon but maintain layout (see also --\(appArguments.hideIcon.long))
 
+        When used in conjunction with --\(argument.centreIcon.long), you can specify
+        --\(appArguments.iconOption.long) multiple times to show multiple icons at once
+
         \(iconCommon)
 """
 
@@ -317,6 +321,8 @@ struct SDHelp {
         argument.button1TextOption.helpLong = """
         Default label is "\(appDefaults.button1Default)"
         Bound to <Enter> key
+
+        If the text \"none\" is used, the button will be hidden.
 """
 
         argument.button1ActionOption.helpShort = "Set the Button1 action"
@@ -401,6 +407,11 @@ struct SDHelp {
         When clicked, contents of the help message will be displayed as a popover
         Supports markdown for formatting.
 
+"""
+
+        argument.helpImage.helpShort = "Add an image to the help message"
+        argument.helpImage.helpLong = """
+        Will display an image or icon to the right of any specified help message
 """
 
         argument.quitOnInfo.helpShort = "Quit when info button is selected"

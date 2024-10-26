@@ -31,6 +31,7 @@ struct CommandLineArguments {
     var messageAlignmentOld      = CommandlineArgument(long: "alignment", defaultValue: appDefaults.messageAlignmentTextRepresentation)
     var messageVerticalAlignment = CommandlineArgument(long: "messageposition")
     var helpMessage              = CommandlineArgument(long: "helpmessage")
+    var helpImage                = CommandlineArgument(long: "helpimage")
     var iconOption               = CommandlineArgument(long: "icon", short: "i", defaultValue: "default")
     var iconSize                 = CommandlineArgument(long: "iconsize", defaultValue: appvars.iconWidth)
     var iconAlpha                = CommandlineArgument(long: "iconalpha", defaultValue: "1.0")
@@ -207,6 +208,7 @@ extension CommandLineArguments {
                     case "messageAlignmentOld": self.messageAlignmentOld = argument
                     case "messageVerticalAlignment": self.messageVerticalAlignment = argument
                     case "helpMessage": self.helpMessage = argument
+                    case "helpImage": self.helpImage = argument
                     case "iconOption": self.iconOption = argument
                     case "iconSize": self.iconSize = argument
                     case "iconAlpha": self.iconAlpha = argument
