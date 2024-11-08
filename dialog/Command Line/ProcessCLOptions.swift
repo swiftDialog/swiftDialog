@@ -192,6 +192,11 @@ func processCLOptions(json: JSON = getJSON()) {
         print("If you like this app and want to buy me a coffee https://www.buymeacoffee.com/bartreardon")
         quitDialog(exitCode: appDefaults.exitNow.code)
     }
+    if appArguments.setAppIcon.present {
+        setAppIcon(named: appArguments.setAppIcon.value)
+        print("Setting app icon to \(appArguments.setAppIcon.value)")
+        quitDialog(exitCode: appDefaults.exitNow.code)
+    }
 
     // Check if an auth key is present and verify
     if !dialogAuthorisationKey().isEmpty {

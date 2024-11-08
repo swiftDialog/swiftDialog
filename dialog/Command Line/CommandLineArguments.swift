@@ -90,6 +90,7 @@ struct CommandLineArguments {
     var logFileToTail            = CommandlineArgument(long: "displaylog")
     var preferredViewOrder       = CommandlineArgument(long: "vieworder")
     var preferredAppearance      = CommandlineArgument(long: "appearance")
+    var setAppIcon               = CommandlineArgument(long: "seticon")
 
     // command line options that take no additional parameters
     var button1Disabled          = CommandlineArgument(long: "button1disabled", isbool: true)
@@ -309,6 +310,7 @@ extension CommandLineArguments {
                     case "loginWindow": self.loginWindow = argument
                     case "hideDefaultKeyboardAction": self.hideDefaultKeyboardAction = argument
                     case "alwaysReturnUserInput": self.alwaysReturnUserInput = argument
+                    case "setAppIcon": self.setAppIcon = argument
                     default: break
                     }
                 }

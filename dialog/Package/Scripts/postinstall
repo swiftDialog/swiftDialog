@@ -1,7 +1,6 @@
 #!/bin/bash
 
 base_dir="${PWD}"
-iconupdater="${base_dir}/fileicon"
 
 dialog_root="$3/Library/Application Support/Dialog"
 iconfile="${dialog_root}/Dialog.png"
@@ -36,7 +35,7 @@ fi
 
 if [[ -e "${iconfile}" ]] && [[ -e "${dialogbundle}" ]]; then
     write_to_log "Icon file detected. Updating dialog icon"
-    ${iconupdater} set "${dialogbundle}" "${iconfile}" >> "${log_file}"
+    "${dialogbinary}" --seticon "${iconfile}" >> "${log_file}"
     if [[ $? == 0 ]]; then
         write_to_log "Icon update success"
     else

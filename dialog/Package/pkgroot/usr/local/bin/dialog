@@ -17,7 +17,7 @@ fi
 # from https://scriptingosx.com/2020/08/running-a-command-as-another-user/
 runAsUser() {
   if [ "$currentUser" != "loginwindow" ]; then
-    launchctl asuser "$uid" sudo -u "$currentUser" "$@"
+    launchctl asuser "$uid" sudo -H -u "$currentUser" "$@"
   else
     args=("$@")
     item="--loginwindow"

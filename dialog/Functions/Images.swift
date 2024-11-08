@@ -9,6 +9,7 @@ import Foundation
 import AppKit
 import CoreImage.CIFilterBuiltins
 import SwiftUI
+import UniformTypeIdentifiers
 
 func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, imgHeight: CGFloat? = .infinity, returnErrorImage: Bool? = false, errorImageName: String? = "questionmark.square.dashed") -> NSImage {
     // accept image as local file path or as URL and return NSImage
@@ -145,4 +146,9 @@ func generateQRCode(from string: String, withSize: CGFloat? = 300) -> NSImage {
     }
 
     return NSImage(systemSymbolName: "xmark.circle", accessibilityDescription: "") ?? NSImage()
+}
+
+func setAppIcon(named name: String) {
+    let iconImage = getImageFromPath(fileImagePath: name)
+    NSWorkspace.shared.setIcon(iconImage, forFile: Bundle.main.bundlePath)
 }
