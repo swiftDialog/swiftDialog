@@ -7,6 +7,9 @@
 
 import Foundation
 import AppKit
+import CoreImage.CIFilterBuiltins
+import SwiftUI
+import UniformTypeIdentifiers
 
 func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, imgHeight: CGFloat? = .infinity, returnErrorImage: Bool? = false, errorImageName: String? = "questionmark.square.dashed") -> NSImage {
     // accept image as local file path or as URL and return NSImage
@@ -52,7 +55,7 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
             return errorImage
         } else {
             writeLog("An error occured - exiting")
-            quitDialog(exitCode: appvars.exit201.code, exitMessage: "\(appvars.exit201.message) \(fileImagePath)", observedObject: DialogUpdatableContent())
+            quitDialog(exitCode: appDefaults.exit201.code, exitMessage: "\(appDefaults.exit201.message) \(fileImagePath)", observedObject: DialogUpdatableContent())
         }
     }
 
@@ -128,4 +131,24 @@ func savePNG(image: NSImage, path: String) {
     } catch {
         print(error)
     }
+}
+
+func generateQRCode(from string: String, withSize: CGFloat? = 300) -> NSImage {
+    let context = CIContext()
+    let filter = CIFilter.qrCodeGenerator()
+    let size = NSSize(width: withSize!, height: withSize!)
+    filter.message = Data(string.utf8)
+
+    if let outputImage = filter.outputImage {
+        if let cgImage = context.createCGImage(outputImage, from: outputImage.extent) {
+            return NSImage(cgImage: cgImage, size: size)
+        }
+    }
+
+    return NSImage(systemSymbolName: "xmark.circle", accessibilityDescription: "") ?? NSImage()
+}
+
+func setAppIcon(named name: String) {
+    let iconImage = getImageFromPath(fileImagePath: name)
+    NSWorkspace.shared.setIcon(iconImage, forFile: Bundle.main.bundlePath)
 }

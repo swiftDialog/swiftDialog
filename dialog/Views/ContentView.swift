@@ -49,12 +49,12 @@ struct ContentView: View {
 
                     // Horozontal Line
                     Divider()
-                        .padding(.leading, observedData.appProperties.sidePadding)
-                        .padding(.trailing, observedData.appProperties.sidePadding)
+                        .padding(.leading, appDefaults.sidePadding)
+                        .padding(.trailing, appDefaults.sidePadding)
                         .frame(height: 2)
                 } else {
                     Spacer()
-                        .frame(height: observedData.appProperties.sidePadding)
+                        .frame(height: appDefaults.sidePadding)
                 }
 
                 DialogView(observedDialogContent: observedData)
@@ -63,9 +63,9 @@ struct ContentView: View {
 
                 // Buttons
                 ButtonView(observedDialogContent: observedData)
-                    .padding(.leading, observedData.appProperties.sidePadding)
-                    .padding(.trailing, observedData.appProperties.sidePadding)
-                    .padding(.bottom, observedData.appProperties.bottomPadding)
+                    .padding(.leading, appDefaults.sidePadding)
+                    .padding(.trailing, appDefaults.sidePadding)
+                    .padding(.bottom, appDefaults.bottomPadding)
                     .border(observedData.appProperties.debugBorderColour, width: 2)
             }
 

@@ -76,7 +76,7 @@ class FileReader {
         }
 
         dataReady = NotificationCenter.default.addObserver(forName: Process.didTerminateNotification,
-                                                           object: self.fileHandle, queue: nil) { _ -> Void in
+                                                           object: self.fileHandle, queue: nil) { _ in
                                                             NSLog("Task terminated!")
             NotificationCenter.default.removeObserver(self.dataReady as Any)
         }
@@ -224,7 +224,7 @@ class FileReader {
     private func processCommands(commands: String) {
         //print(getModificationDateOf(self.fileURL))
         //print(Date.now)
-        if getModificationDateOf(self.fileURL) < observedData.appProperties.launchTime {
+        if getModificationDateOf(self.fileURL) < appDefaults.launchTime {
             return
         }
         let allCommands = commands.components(separatedBy: "\n")
@@ -559,7 +559,7 @@ class FileReader {
             // quit
             case "quit:":
                 writeToLog("quitting")
-                quitDialog(exitCode: appvars.exit5.code)
+                quitDialog(exitCode: appDefaults.exit5.code)
 
             default:
                 writeToLog("unrecognised command \(line)")

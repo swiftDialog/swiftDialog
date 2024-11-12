@@ -31,7 +31,6 @@
 		4154C2E525F76BDC00A3D373 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4154C2E425F76BDC00A3D373 /* Preview Assets.xcassets */; };
 		4154C2F125F76BDC00A3D373 /* dialogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154C2F025F76BDC00A3D373 /* dialogTests.swift */; };
 		4154C2FC25F76BDC00A3D373 /* dialogUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4154C2FB25F76BDC00A3D373 /* dialogUITests.swift */; };
-		4156C1D029F69E27003F04DF /* fileicon in Resources */ = {isa = PBXBuildFile; fileRef = 4156C1CE29F69E27003F04DF /* fileicon */; };
 		415E1FCB27A2B0A000DE971B /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415E1FC927A2694B00DE971B /* ListView.swift */; };
 		416DED42261C5FE00049B6B5 /* FullscreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 416DED41261C5FE00049B6B5 /* FullscreenView.swift */; };
 		417BD4362798FE48009AE34A /* DialogUpdatableContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417BD4342798FE38009AE34A /* DialogUpdatableContent.swift */; };
@@ -132,7 +131,6 @@
 		4154C2FB25F76BDC00A3D373 /* dialogUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dialogUITests.swift; sourceTree = "<group>"; };
 		4154C2FD25F76BDC00A3D373 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4156C1CD29F69E27003F04DF /* postinstall */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = postinstall; sourceTree = "<group>"; };
-		4156C1CE29F69E27003F04DF /* fileicon */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = fileicon; sourceTree = "<group>"; };
 		415934D726DB1B44009C9C3A /* ProcessCLOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessCLOptions.swift; sourceTree = "<group>"; };
 		415934D926DB7604009C9C3A /* NSWindow+Additions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSWindow+Additions.swift"; sourceTree = "<group>"; };
 		415E1FC927A2694B00DE971B /* ListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
@@ -327,7 +325,6 @@
 			children = (
 				4156C1CD29F69E27003F04DF /* postinstall */,
 				CC2190622A7DCA1A00269525 /* preinstall */,
-				4156C1CE29F69E27003F04DF /* fileicon */,
 			);
 			path = Scripts;
 			sourceTree = "<group>";
@@ -607,7 +604,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				4154C2E525F76BDC00A3D373 /* Preview Assets.xcassets in Resources */,
-				4156C1D029F69E27003F04DF /* fileicon in Resources */,
 				41832B7228436B430062AA1F /* Localizable.strings in Resources */,
 				4154C2E225F76BDC00A3D373 /* Assets.xcassets in Resources */,
 			);
@@ -918,7 +914,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 2.5.2;
+				MARKETING_VERSION = 2.5.3;
 				PRODUCT_BUNDLE_IDENTIFIER = au.csiro.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -947,7 +943,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 2.5.2;
+				MARKETING_VERSION = 2.5.3;
 				PRODUCT_BUNDLE_IDENTIFIER = au.csiro.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

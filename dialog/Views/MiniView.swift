@@ -37,8 +37,8 @@ struct MiniView: View {
                     Spacer() //push button bar to the bottom of the window
                     HStack {
                         ButtonView(observedDialogContent: observedData)
-                            .padding(.bottom, observedData.appProperties.bottomPadding)
-                            .padding(.trailing, observedData.appProperties.sidePadding)
+                            .padding(.bottom, appDefaults.bottomPadding)
+                            .padding(.trailing, appDefaults.sidePadding)
                     }
                 }
             }
@@ -64,7 +64,7 @@ struct MiniView: View {
                         if observedData.args.iconOption.present && observedData.args.iconOption.value != "none" {
                             IconView(image: observedData.args.iconOption.value, overlay: observedData.args.overlayIconOption.value)
                                 .frame( maxHeight: 70)
-                                .padding(.leading, observedData.appProperties.sidePadding)
+                                .padding(.leading, appDefaults.sidePadding)
                             Spacer()
                         }
                     }
@@ -81,9 +81,9 @@ struct MiniView: View {
                             MiniProgressView(observedData: observedData)
                         }
                     }
-                    .padding(.leading,observedData.appProperties.sidePadding)
-                    .padding(.trailing,observedData.appProperties.sidePadding)
-                    .padding(.bottom, observedData.appProperties.bottomPadding)
+                    .padding(.leading,appDefaults.sidePadding)
+                    .padding(.trailing,appDefaults.sidePadding)
+                    .padding(.bottom, appDefaults.bottomPadding)
                 }
             }
         }

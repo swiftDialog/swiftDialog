@@ -64,9 +64,9 @@ struct TimerView: View {
         barVisible = visible ?? true
         progressWidth = 0
         if stacked {
-            barPadding = EdgeInsets(top: observedData.appProperties.sidePadding/4, leading: 0, bottom: 0, trailing: 0)
+            barPadding = EdgeInsets(top: appDefaults.sidePadding/4, leading: 0, bottom: 0, trailing: 0)
         } else {
-            barPadding = EdgeInsets(top: observedData.appProperties.sidePadding, leading: observedData.appProperties.sidePadding, bottom: observedData.appProperties.sidePadding, trailing: observedData.appProperties.sidePadding)
+            barPadding = EdgeInsets(top: appDefaults.sidePadding, leading: appDefaults.sidePadding, bottom: appDefaults.sidePadding, trailing: appDefaults.sidePadding)
         }
         if barVisible {
             writeLog("Displaying timer with \(steps) seconds")
@@ -99,7 +99,7 @@ struct TimerView: View {
                                         timer.upstream.connect().cancel()
                                         // add a slight delay so the 0 countdown is displayed for a fraction of a second before dialog quits
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                            quitDialog(exitCode: observedData.appProperties.exit4.code)
+                                            quitDialog(exitCode: appDefaults.exit4.code)
                                         }
                                         //perform(quitDialog(exitCode: 4), with: nil, afterDelay: 4.0)
                                     }
@@ -137,7 +137,7 @@ struct TimerView: View {
                     }
                     if progress > timerSteps {
                         writeLog("Timer expired - exiting")
-                        quitDialog(exitCode: observedData.appProperties.exit4.code)
+                        quitDialog(exitCode: appDefaults.exit4.code)
                     }
                 }
         }

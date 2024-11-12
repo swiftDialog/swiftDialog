@@ -82,7 +82,7 @@ struct BannerImageView: View {
                             .accessibilityHint(observedData.args.titleOption.value)
                     }
                 }
-                .padding(observedData.appProperties.topPadding)
+                .padding(appDefaults.topPadding)
                 .frame(alignment: .center)
             }
         }

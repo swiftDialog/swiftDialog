@@ -41,6 +41,40 @@ struct TextEntryView: View {
         }
     }
 
+    func openFilePanel(fileType: String, completion: @escaping (String) -> Void) {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        if fileType != "" {
+            var fileTypesArray: [UTType] = []
+            for type in fileType.components(separatedBy: " ") {
+                switch type {
+                case "folder":
+                    panel.canChooseDirectories = true
+                case "image":
+                    fileTypesArray.append(UTType.image)
+                case "movie","video":
+                    fileTypesArray.append(UTType.movie)
+                case "audio":
+                    fileTypesArray.append(UTType.audio)
+                default:
+                    fileTypesArray.append(UTType(filenameExtension: type) ?? .item)
+                }
+            }
+            panel.allowedContentTypes = fileTypesArray
+        }
+        // Find the main app window
+        if let window = NSApp.mainWindow {
+            // Begin the modal as a sheet attached to the window
+            panel.beginSheetModal(for: window, completionHandler: { response in
+                // Handle the response after the panel is dismissed
+                if response == .OK {
+                    completion(panel.url?.path ?? "")  // Call the completion handler with the selection
+                }
+            })
+        }
+    }
+
     var body: some View {
         if observedData.args.textField.present {
             VStack {
@@ -69,7 +103,7 @@ struct TextEntryView: View {
                                             )
                                          )
                         }
-                        .padding(.bottom, observedData.appProperties.contentPadding)
+                        .padding(.bottom, appDefaults.contentPadding)
                     } else {
                         HStack {
                             VStack {
@@ -91,29 +125,8 @@ struct TextEntryView: View {
 
                             if textfieldContent[index].fileSelect {
                                 Button("button-select".localized) {
-                                    let panel = NSOpenPanel()
-                                    panel.allowsMultipleSelection = false
-                                    panel.canChooseDirectories = false
-                                    if textfieldContent[index].fileType != "" {
-                                        var fileTypesArray: [UTType] = []
-                                        for type in textfieldContent[index].fileType.components(separatedBy: " ") {
-                                            switch type {
-                                            case "folder":
-                                                panel.canChooseDirectories = true
-                                            case "image":
-                                                fileTypesArray.append(UTType.image)
-                                            case "movie","video":
-                                                fileTypesArray.append(UTType.movie)
-                                            case "audio":
-                                                fileTypesArray.append(UTType.audio)
-                                            default:
-                                                fileTypesArray.append(UTType(filenameExtension: type) ?? .item)
-                                            }
-                                        }
-                                        panel.allowedContentTypes = fileTypesArray
-                                    }
-                                    if panel.runModal() == .OK {
-                                        textfieldContent[index].value = panel.url?.path ?? "<none>"
+                                    openFilePanel(fileType: textfieldContent[index].fileType) { selectedPath in
+                                         textfieldContent[index].value = selectedPath
                                     }
                                 }
                             }

@@ -34,7 +34,7 @@ struct SDHelp {
         writeLog("Printing long help for \(selectedArg)")
         let mirror = Mirror(reflecting: argument)
         for child in mirror.children {
-            if let arg = child.value as? CommandlineArgument, (arg.long == selectedArg || arg.short == selectedArg) {
+            if let arg = child.value as? CommandlineArgument, arg.long == selectedArg || arg.short == selectedArg {
                 var helpArgs = " --\(arg.long) \(arg.helpUsage)"
                 if arg.short != "" {
                     helpArgs = " -\(arg.short), \(helpArgs)"
@@ -56,7 +56,7 @@ struct SDHelp {
         argument.titleOption.helpShort = "Set the Dialog title"
         argument.titleOption.helpLong = """
         Text beyond the length of the title area will get truncated
-        Default Title is \"\(appvars.titleDefault)\"
+        Default Title is \"\(appDefaults.titleDefault)\"
         Use keyword "none" to disable the title area entirely
 """
 
@@ -226,6 +226,7 @@ struct SDHelp {
             file path to Application          -  "/Applications/Chess.app"
             URL of file resource              -  "https://someurl/file.[png|jpg]"
             SF Symbol                         -  "SF=sf.symbol.name"
+            QR Code                           -  "qr=text/url to be represented as a QR code"
             builtin                           -  info | caution | warning
 
         You can optionally specify an alternate resource value for use in dark mode using the following syntax:
@@ -278,6 +279,9 @@ struct SDHelp {
         argument.iconOption.helpLong = """
         "none" can be specified to not display an icon but maintain layout (see also --\(appArguments.hideIcon.long))
 
+        When used in conjunction with --\(argument.centreIcon.long), you can specify
+        --\(appArguments.iconOption.long) multiple times to show multiple icons at once
+
         \(iconCommon)
 """
 
@@ -315,8 +319,10 @@ struct SDHelp {
 
         argument.button1TextOption.helpShort = "Set the label for Button1"
         argument.button1TextOption.helpLong = """
-        Default label is "\(appvars.button1Default)"
+        Default label is "\(appDefaults.button1Default)"
         Bound to <Enter> key
+
+        If the text \"none\" is used, the button will be hidden.
 """
 
         argument.button1ActionOption.helpShort = "Set the Button1 action"
@@ -337,7 +343,7 @@ struct SDHelp {
         argument.button2Option.helpUsage = ""
         argument.button2Option.helpLong = """
         Use \(argument.button2TextOption.long) to modify the button label
-        Default label is "\(appvars.button2Default)"
+        Default label is "\(appDefaults.button2Default)"
         Bound to <ESC> key
         Return code when actioned is 2
 """
@@ -363,7 +369,7 @@ struct SDHelp {
         argument.infoButtonOption.helpShort = "Displays info button"
         argument.infoButtonOption.helpUsage = ""
         argument.infoButtonOption.helpLong = """
-        Default label is "\(appvars.buttonInfoDefault)"
+        Default label is "\(appDefaults.buttonInfoDefault)"
 """
 
         argument.buttonInfoTextOption.helpShort = "Displays info button with <text>"
@@ -401,6 +407,11 @@ struct SDHelp {
         When clicked, contents of the help message will be displayed as a popover
         Supports markdown for formatting.
 
+"""
+
+        argument.helpImage.helpShort = "Add an image to the help message"
+        argument.helpImage.helpLong = """
+        Will display an image or icon to the right of any specified help message
 """
 
         argument.quitOnInfo.helpShort = "Quit when info button is selected"

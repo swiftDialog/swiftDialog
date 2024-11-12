@@ -55,6 +55,7 @@ struct DisplayImage: View {
             self.shouldClip = true
         case _ where path.hasPrefix("base64"):
             imgFromBase64 = true
+            self.shouldClip = true
         case _ where ["app", "prefPane", "framework"].contains(path.split(separator: ".").last):
             imgFromAPP = true
             self.shouldClip = false

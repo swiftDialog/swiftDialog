@@ -15,9 +15,12 @@ struct WebContentView: View {
 
     var url: String //(string: observedDialogContent.args.webcontent.value)
 
+    let wvConfiguration = WKWebViewConfiguration()
+
     init(observedDialogContent: DialogUpdatableContent, url: String) {
         self.observedDialogContent = observedDialogContent
         self.url = url
+        wvConfiguration.websiteDataStore = WKWebsiteDataStore.nonPersistent()
     }
 
     var body: some View {
@@ -31,9 +34,7 @@ struct WebContentView: View {
 private extension WebContentView {
 
     var webView: some View {
-        WebView(url: URL(string: url)) { webView in
-            webView.configuration.websiteDataStore = WKWebsiteDataStore.nonPersistent()
-        }
+        WebView(url: URL(string: url), configuration: wvConfiguration)
         .clipShape(RoundedRectangle(cornerRadius: 5))
         .overlay(RoundedRectangle(cornerRadius: 5)
             .stroke(.gray.opacity(0.5), lineWidth: 1))

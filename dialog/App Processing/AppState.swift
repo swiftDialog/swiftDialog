@@ -7,22 +7,28 @@
 
 import Foundation
 import SwiftUI
+import OSLog
+
+// Log Stuff
+let bundleID = Bundle.main.bundleIdentifier ?? "au.csiro.dialog"
+let osLog: OSLog = OSLog(subsystem: bundleID, category: "main")
 
 var iconVisible: Bool = true
+
+// Probably a way to work all this out as a nice dictionary. For now, long form.
+
+// declare our app var in case we want to update values - e.g. future use, multiple dialog sizes
+var appvars = AppVariables()
+var appDefaults = AppDefaults()
+var appArguments = CommandLineArguments()
+var userInputState = UserInputState()
+var blurredScreen = BlurWindow()
 
 var darkMode: Bool {
     let mode = UserDefaults.standard.string(forKey: "AppleInterfaceStyle")
     if appArguments.preferredAppearance.value.lowercased() == "light" { return false }
     return mode == "Dark" || appArguments.preferredAppearance.value.lowercased() == "dark"
 }
-
-// Probably a way to work all this out as a nice dictionary. For now, long form.
-
-// declare our app var in case we want to update values - e.g. future use, multiple dialog sizes
-var appvars = AppVariables()
-var appArguments = CommandLineArguments()
-var userInputState = UserInputState()
-var blurredScreen = BlurWindow()
 
 let displayAsInt: NumberFormatter = {
     let formatter = NumberFormatter()
@@ -45,6 +51,7 @@ struct UserInputState {
     var listItems = [ListItems]()
     var textFields = [TextFieldState]()
     var checkBoxes = [CheckBoxes]()
+    var iconItems = [Icons]()
 }
 
 struct TextFieldState {
@@ -80,6 +87,9 @@ struct TextFieldState {
     var nsDictionary: NSDictionary {
             return dictionary as NSDictionary
         }
+}
+struct Icons {
+    var value: String
 }
 
 struct DropDownItems {

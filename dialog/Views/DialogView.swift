@@ -54,16 +54,16 @@ struct DialogView: View {
                                     InfoBoxView(observedData: observedData)
                                         .frame(width: iconDisplayWidth < 150 ? 150 : iconDisplayWidth)
                                         .frame(minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
-                                        .padding(.top, observedData.appProperties.topPadding)
+                                        .padding(.top, appDefaults.topPadding)
                                         .clipped()
                                 } else {
                                     Spacer()
                                 }
                             }
                             .border(appvars.debugBorderColour, width: 2)
-                            .padding(.top, observedData.appProperties.topPadding)
-                            //.padding(.bottom, observedData.appProperties.bottomPadding)
-                            .padding(.leading, observedData.appProperties.sidePadding+10)
+                            .padding(.top, appDefaults.topPadding)
+                            //.padding(.bottom, appDefaults.bottomPadding)
+                            .padding(.leading, appDefaults.sidePadding+10)
                             .padding(.trailing, observedData.iconSize/10)
                         }
                         Spacer()

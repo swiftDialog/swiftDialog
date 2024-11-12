@@ -19,13 +19,13 @@ func processJSON(jsonFilePath: String) -> JSON {
     do {
         jsonData = try Data(contentsOf: jsonDataPath as URL)
     } catch {
-        quitDialog(exitCode: appvars.exit202.code, exitMessage: "\(appvars.exit202.message) \(jsonFilePath)")
+        quitDialog(exitCode: appDefaults.exit202.code, exitMessage: "\(appDefaults.exit202.message) \(jsonFilePath)")
     }
 
     do {
         json = try JSON(data: jsonData)
     } catch {
-        quitDialog(exitCode: appvars.exit202.code, exitMessage: "JSON import failed")
+        quitDialog(exitCode: appDefaults.exit202.code, exitMessage: "JSON import failed")
     }
     return json
 }
@@ -36,7 +36,7 @@ func processJSONString(jsonString: String) -> JSON {
     do {
         json = try JSON(data: dataFromString!)
     } catch {
-        quitDialog(exitCode: appvars.exit202.code, exitMessage: "JSON import failed")
+        quitDialog(exitCode: appDefaults.exit202.code, exitMessage: "JSON import failed")
     }
     return json
 }
@@ -76,15 +76,96 @@ func getMarkdown(mdFilePath: String) -> String {
 
 }
 
+func processCLOptionValues() {
+
+    // this method reads in arguments from either json file or from the command line and loads them into the appArguments object
+    // also records whether an argument is present or not
+    writeLog("Checking command line options for arguments")
+    for argument in CommandLine.arguments {
+        writeLog("Using argument: \(argument)", logLevel: .debug)
+    }
+    let json: JSON = getJSON()
+
+    appArguments.updateAllItems(with: json)
+}
+
 func processCLOptions(json: JSON = getJSON()) {
 
     //this method goes through the arguments that are present and performs any processing required before use
     writeLog("Processing Options")
 
-    appvars.debugMode = appArguments.debug.present
-    
+    if appArguments.messageAlignmentOld.present {
+        appArguments.messageAlignment.present = appArguments.messageAlignmentOld.present
+        appArguments.messageAlignment.value = appArguments.messageAlignmentOld.value
+    }
+    if appArguments.messageAlignment.present {
+        appvars.messageAlignment = appDefaults.allignmentStates[appArguments.messageAlignment.value] ?? .leading
+        appvars.messagePosition = appDefaults.positionStates[appArguments.messageAlignment.value] ?? .leading
+    }
+
+    // info box
+    if (getVersionString().starts(with: "Alpha") || getVersionString().starts(with: "Beta")) && !appArguments.constructionKit.present {
+        appArguments.infoText.present = true
+    }
+
+    // help sheet
+    if appArguments.helpAlignment.present {
+        appvars.helpAlignment = appDefaults.allignmentStates[appArguments.helpAlignment.value] ?? .leading
+    }
+
+    // window location on screen
+    if appArguments.position.present {
+        writeLog("Window position will be set to \(appArguments.position.value)")
+        (appvars.windowPositionVertical,appvars.windowPositionHorozontal) = windowPosition(appArguments.position.value)
+    }
+    if appArguments.positionOffset.present {
+        appvars.windowPositionOffset = appArguments.positionOffset.value.floatValue()
+    }
+
+    // banner image
+    if appArguments.bannerText.present {
+        appArguments.bannerTitle.value = appArguments.bannerText.value
+        appArguments.bannerTitle.present = true
+    }
+    if appArguments.bannerTitle.present {
+        appArguments.titleOption.value = appArguments.bannerTitle.value
+    }
+
+    //  User Input
+    var selectItemsArg = CommandlineArgument(long: "selectitems")
+    selectItemsArg.evaluate(json: json)
+    if selectItemsArg.present { appArguments.dropdownValues = selectItemsArg }
+
+    if !appArguments.statusLogFile.present {
+        appArguments.statusLogFile.value = appDefaults.defaultStatusLogFile
+    }
+
+    // rich content
+    if appArguments.video.present || appArguments.webcontent.present {
+        // check if it's a youtube id
+        appArguments.video.value = getVideoStreamingURLFromID(videoid: appArguments.video.value, autoplay: appArguments.autoPlay.present)
+        // set a larger window size. 900x600 will fit a standard 16:9 video
+        writeLog("resetting default window size to 900x600")
+        appvars.windowWidth = appvars.videoWindowWidth
+        appvars.windowHeight = appvars.videoWindowHeight
+    }
+
+    // anthing that is an option only with no value
+    if appArguments.centreIconSE.present {
+        appArguments.centreIcon.present = true
+    }
+    if appArguments.fullScreenWindow.present {
+        appArguments.forceOnTop.present = false
+    }
+
+    // command line only options
+    if appArguments.hideDefaultKeyboardAction.present {
+        appvars.button1DefaultAction.modifiers = [.command, .shift]
+        appvars.button2DefaultAction.modifiers = [.command, .shift]
+    }
+
     // process command line options that just display info and exit before we show the main window
-    if appArguments.helpOption.present { //}|| CommandLine.arguments.count == 1 {
+    if appArguments.helpOption.present {
         writeLog("\(appArguments.helpOption.long) present")
         let sdHelp = SDHelp(arguments: appArguments)
         if appArguments.helpOption.value != "" {
@@ -93,23 +174,28 @@ func processCLOptions(json: JSON = getJSON()) {
         } else {
             sdHelp.printHelpShort()
         }
-        quitDialog(exitCode: appvars.exitNow.code)
+        quitDialog(exitCode: appDefaults.exitNow.code)
     }
     if appArguments.getVersion.present {
         writeLog("\(appArguments.getVersion.long) called")
         printVersionString()
-        quitDialog(exitCode: appvars.exitNow.code)
+        quitDialog(exitCode: appDefaults.exitNow.code)
     }
     if appArguments.licence.present {
         writeLog("\(appArguments.licence.long) called")
         print(licenseText)
-        quitDialog(exitCode: appvars.exitNow.code)
+        quitDialog(exitCode: appDefaults.exitNow.code)
     }
     if appArguments.buyCoffee.present {
         writeLog("\(appArguments.buyCoffee.long) called :)")
         //I'm a teapot
         print("If you like this app and want to buy me a coffee https://www.buymeacoffee.com/bartreardon")
-        quitDialog(exitCode: appvars.exitNow.code)
+        quitDialog(exitCode: appDefaults.exitNow.code)
+    }
+    if appArguments.setAppIcon.present {
+        setAppIcon(named: appArguments.setAppIcon.value)
+        print("Setting app icon to \(appArguments.setAppIcon.value)")
+        quitDialog(exitCode: appDefaults.exitNow.code)
     }
 
     // Check if an auth key is present and verify
@@ -125,7 +211,7 @@ func processCLOptions(json: JSON = getJSON()) {
         }
         if !checkAuthorisationKey(key: authKey.sha256Hash) {
             writeLog("Auth key is required", logLevel: .debug)
-            quitDialog(exitCode: appvars.exit30.code, exitMessage: appvars.exit30.message)
+            quitDialog(exitCode: appDefaults.exit30.code, exitMessage: appDefaults.exit30.message)
         } else {
             appvars.authorised = true
         }
@@ -137,7 +223,7 @@ func processCLOptions(json: JSON = getJSON()) {
     }
 
     if !appArguments.messageOption.present {
-        appArguments.messageOption.value = appvars.messageDefault
+        appArguments.messageOption.value = appDefaults.messageDefault
     }
     if appArguments.messageOption.present && appArguments.messageOption.value.lowercased().hasSuffix(".md") {
         appArguments.messageOption.value = processTextString(getMarkdown(mdFilePath: appArguments.messageOption.value), tags: appvars.systemInfo)
@@ -145,6 +231,10 @@ func processCLOptions(json: JSON = getJSON()) {
 
     if appArguments.infoBox.present && appArguments.infoBox.value.lowercased().hasSuffix(".md") {
         appArguments.infoBox.value = processTextString(getMarkdown(mdFilePath: appArguments.infoBox.value), tags: appvars.systemInfo)
+    }
+
+    if appArguments.helpMessage.present && appArguments.helpMessage.value.lowercased().hasSuffix(".md") {
+        appArguments.helpMessage.value = processTextString(getMarkdown(mdFilePath: appArguments.helpMessage.value), tags: appvars.systemInfo)
     }
 
     // Dialog style allows for pre-set types that define how the window will look
@@ -165,7 +255,7 @@ func processCLOptions(json: JSON = getJSON()) {
                 appArguments.iconOption.value = appArguments.dialogStyle.value.lowercased()
             }
         case "centred", "centered":
-            appArguments.iconSize.value = "110"
+            appArguments.iconSize.value = !appArguments.iconSize.present ? "110" : appArguments.iconSize.value
             appArguments.buttonStyle.value = "centre"
             appArguments.centreIcon.present = true
             appvars.messagePosition = .center
@@ -276,7 +366,7 @@ func processCLOptions(json: JSON = getJSON()) {
             }
         } else {
             for textFieldOption in CLOptionMultiOptions(optionName: appArguments.textField.long) {
-                let items = textFieldOption.split(usingRegex: appvars.argRegex)
+                let items = textFieldOption.split(usingRegex: appDefaults.argRegex)
                 var fieldEditor: Bool = false
                 var fieldFileSelect: Bool = false
                 var fieldPasswordFill: Bool = false
@@ -556,7 +646,7 @@ func processCLOptions(json: JSON = getJSON()) {
         for fontname in fonts.enumerated() {
             print("  \(fontname.element)")
         }
-        quitDialog(exitCode: appvars.exit0.code)
+        quitDialog(exitCode: appDefaults.exit0.code)
     }
 
     if appArguments.windowWidth.present {
@@ -564,7 +654,7 @@ func processCLOptions(json: JSON = getJSON()) {
         if appArguments.windowWidth.value.last == "%" {
             appvars.windowWidth = appvars.screenWidth * appArguments.windowWidth.value.replacingOccurrences(of: "%", with: "").floatValue()/100
         } else {
-            appvars.windowWidth = appArguments.windowWidth.value.floatValue()
+            appvars.windowWidth = appArguments.windowWidth.value.floatValue(defaultValue: appvars.windowWidth)
         }
         writeLog("windowWidth : \(appvars.windowWidth)")
     }
@@ -573,7 +663,7 @@ func processCLOptions(json: JSON = getJSON()) {
         if appArguments.windowHeight.value.last == "%" {
             appvars.windowHeight = appvars.screenHeight * appArguments.windowHeight.value.replacingOccurrences(of: "%", with: "").floatValue()/100
         } else {
-            appvars.windowHeight = appArguments.windowHeight.value.floatValue()
+            appvars.windowHeight = appArguments.windowHeight.value.floatValue(defaultValue: appvars.windowHeight)
         }
         writeLog("windowHeight : \(appvars.windowHeight)")
     }
@@ -581,7 +671,7 @@ func processCLOptions(json: JSON = getJSON()) {
     if appArguments.iconSize.present {
         writeLog("\(appArguments.iconSize.long) present")
         //appvars.windowWidth = CGFloat() //CLOptionText(OptionName: appArguments.windowWidth)
-        appvars.iconWidth = appArguments.iconSize.value.floatValue()
+        appvars.iconWidth = appArguments.iconSize.value.floatValue(defaultValue: appvars.iconWidth)
         writeLog("iconWidth : \(appvars.iconWidth)")
     }
     // Correct feng shui so the app accepts keyboard input
@@ -708,6 +798,18 @@ func processCLOptions(json: JSON = getJSON()) {
     if appArguments.iconOption.value != "" {
         writeLog("\(appArguments.iconOption.long) present")
         appArguments.iconOption.present = true
+        if json["icons"].exists() {
+            writeLog("processing multiple icons from json")
+            for index in 0..<json["icons"].count {
+                userInputState.iconItems.append(Icons(value: json["icons"][index]["icon"].stringValue))
+            }
+            // use index 0 for the default icon value
+            appArguments.iconOption.value = userInputState.iconItems[0].value
+        } else {
+            for iconOption in CLOptionMultiOptions(optionName: appArguments.iconOption.long) {
+                userInputState.iconItems.append(Icons(value: iconOption))
+            }
+        }
     }
 
     // hide the icon if asked to or if banner image is present
@@ -722,43 +824,23 @@ func processCLOptions(json: JSON = getJSON()) {
         appArguments.iconOption.present = true
     }
 
-    if appArguments.bannerImage.present && appArguments.iconOption.present {
-        writeLog("banner image and icon are specified, un-hide the icon")
-        appvars.iconIsHidden = false
-    }
-
-    if appArguments.centreIcon.present {
-        appvars.iconIsCentred = true
-        writeLog("iconIsCentred = true")
-    }
-
-    if appArguments.movableWindow.present {
-        appvars.windowIsMoveable = true
-        writeLog("windowIsMoveable = true")
-    }
-
     if appArguments.loginWindow.present {
         appArguments.forceOnTop.present = true
     }
 
     if appArguments.forceOnTop.present {
         appArguments.showOnAllScreens.present = true
-        appvars.windowOnTop = true
         writeLog("windowOnTop = true")
     }
 
     // we define this stuff here as we will use the info to draw the window.
     if appArguments.smallWindow.present {
-        // scale everything down a notch
-        appvars.smallWindow = true
         appvars.scaleFactor = 0.75
         if !appArguments.iconSize.present {
             appArguments.iconSize.value = "120"
         }
         writeLog("smallWindow.present")
     } else if appArguments.bigWindow.present {
-        // scale everything up a notch
-        appvars.bigWindow = true
         appvars.scaleFactor = 1.25
         writeLog("bigWindow.present")
     }
@@ -803,211 +885,3 @@ func processCLOptions(json: JSON = getJSON()) {
 
 }
 
-func processCLOptionValues() {
-
-    // this method reads in arguments from either json file or from the command line and loads them into the appArguments object
-    // also records whether an argument is present or not
-    writeLog("Checking command line options for arguments")
-    let json: JSON = getJSON()
-
-    // security stuff
-    appArguments.authkey.evaluate(json: json, defaultValue: "")
-    appArguments.hash.evaluate(json: json)
-
-    appArguments.dialogStyle.evaluate(json: json)
-
-    // title
-    appArguments.titleOption.evaluate(json: json, defaultValue: appvars.titleDefault)
-    appArguments.subTitleOption.evaluate(json: json)
-    appArguments.titleFont.evaluate(json: json)
-
-    // message
-    appArguments.messageOption.evaluate(json: json)
-    appArguments.messageAlignment.evaluate(json: json, defaultValue: appvars.messageAlignmentTextRepresentation)
-    appArguments.messageAlignmentOld.evaluate(json: json, defaultValue: appvars.messageAlignmentTextRepresentation)
-    if appArguments.messageAlignmentOld.present {
-        appArguments.messageAlignment.present = appArguments.messageAlignmentOld.present
-        appArguments.messageAlignment.value = appArguments.messageAlignmentOld.value
-    }
-    if appArguments.messageAlignment.present {
-        appvars.messageAlignment = appvars.allignmentStates[appArguments.messageAlignment.value] ?? .leading
-        appvars.messagePosition = appvars.positionStates[appArguments.messageAlignment.value] ?? .leading
-    }
-    appArguments.messageVerticalAlignment.evaluate(json: json)
-    appArguments.messageFont.evaluate(json: json)
-
-    // info box
-    appArguments.infoBox.evaluate(json: json)
-    appArguments.infoText.evaluate(json: json, defaultValue: "swiftDialog \(getVersionString())")
-    if (getVersionString().starts(with: "Alpha") || getVersionString().starts(with: "Beta")) && !appArguments.constructionKit.present {
-        appArguments.infoText.present = true
-    }
-
-    // help sheet
-    appArguments.helpMessage.evaluate(json: json)
-    appArguments.helpAlignment.evaluate(json: json, defaultValue: appvars.messageAlignmentTextRepresentation)
-    if appArguments.helpAlignment.present {
-        appvars.helpAlignment = appvars.allignmentStates[appArguments.helpAlignment.value] ?? .leading
-    }
-
-    // window location on screen
-    appArguments.position.evaluate(json: json)
-    if appArguments.position.present {
-        writeLog("Window position will be set to \(appArguments.position.value)")
-        (appvars.windowPositionVertical,appvars.windowPositionHorozontal) = windowPosition(appArguments.position.value)
-    }
-    appArguments.positionOffset.evaluate(json: json, defaultValue: "\(appvars.windowPositionOffset)")
-    if appArguments.positionOffset.present {
-        appvars.windowPositionOffset = appArguments.positionOffset.value.floatValue()
-    }
-
-    // window properties
-    appArguments.windowWidth.evaluate(json: json)
-    appArguments.windowHeight.evaluate(json: json)
-
-    // window adornments
-    appArguments.watermarkImage.evaluate(json: json)
-    appArguments.watermarkAlpha.evaluate(json: json)
-    appArguments.watermarkPosition.evaluate(json: json)
-    appArguments.watermarkFill.evaluate(json: json)
-    appArguments.watermarkScale.evaluate(json: json)
-
-    // icon
-    appArguments.iconOption.evaluate(json: json, defaultValue: "default")
-    appArguments.iconSize.evaluate(json: json, defaultValue: appvars.iconWidth)
-    appArguments.iconAlpha.evaluate(json: json, defaultValue: "1.0")
-    appArguments.iconAccessabilityLabel.evaluate(json: json, defaultValue: "Dialog Icon")
-    appArguments.overlayIconOption.evaluate(json: json)
-
-    // banner image
-    appArguments.bannerImage.evaluate(json: json)
-    appArguments.bannerTitle.evaluate(json: json, defaultValue: appArguments.titleOption.value)
-    appArguments.bannerText.evaluate(json: json, defaultValue: appArguments.titleOption.value)
-    if appArguments.bannerText.present {
-        appArguments.bannerTitle.value = appArguments.bannerText.value
-        appArguments.bannerTitle.present = true
-    }
-    if appArguments.bannerTitle.present {
-        appArguments.titleOption.value = appArguments.bannerTitle.value
-    }
-    appArguments.bannerHeight.evaluate(json: json)
-
-    // Buttons
-    appArguments.button1TextOption.evaluate(json: json, defaultValue: appvars.button1Default)
-    appArguments.button1ActionOption.evaluate(json: json)
-    appArguments.button1ShellActionOption.evaluate(json: json)
-    appArguments.button1Disabled.evaluate(json: json)
-    appArguments.button2TextOption.evaluate(json: json, defaultValue: appvars.button2Default)
-    appArguments.button2ActionOption.evaluate(json: json)
-    appArguments.button2Disabled.evaluate(json: json)
-    appArguments.buttonInfoTextOption.evaluate(json: json, defaultValue: appvars.buttonInfoDefault)
-    appArguments.buttonInfoActionOption.evaluate(json: json)
-    appArguments.buttonStyle.evaluate(json: json)
-
-    //  User Input
-    appArguments.dropdownTitle.evaluate(json: json)
-    appArguments.dropdownValues.evaluate(json: json)
-    var selectItemsArg = CommandlineArgument(long: "selectitems")
-    selectItemsArg.evaluate(json: json)
-    if selectItemsArg.present { appArguments.dropdownValues = selectItemsArg }
-    appArguments.dropdownDefault.evaluate(json: json)
-    appArguments.textField.evaluate(json: json)
-    appArguments.textFieldLiveValidation.evaluate(json: json)
-    appArguments.checkbox.evaluate(json: json)
-    appArguments.checkboxStyle.evaluate(json: json)
-    appArguments.preferredViewOrder.evaluate(json: json)
-
-    // timers and progress
-    appArguments.timerBar.evaluate(json: json, defaultValue: appvars.timerDefaultSeconds.stringValue)
-    appArguments.progressBar.evaluate(json: json)
-    appArguments.progressText.evaluate(json: json, defaultValue: " ")
-
-    // images
-    appArguments.mainImage.evaluate(json: json)
-    appArguments.mainImageCaption.evaluate(json: json)
-
-    // lists
-    appArguments.listItem.evaluate(json: json)
-    appArguments.listStyle.evaluate(json: json)
-
-    appArguments.autoPlay.evaluate(json: json)
-
-    appArguments.statusLogFile.evaluate(json: json)
-    if !appArguments.statusLogFile.present {
-        appArguments.statusLogFile.value = appvars.defaultStatusLogFile
-    }
-    appArguments.logFileToTail.evaluate(json: json)
-
-    appArguments.quitKey.evaluate(json: json, defaultValue: appvars.quitKeyCharacter)
-
-    // rich content
-    appArguments.webcontent.evaluate(json: json)
-    appArguments.video.evaluate(json: json)
-    if appArguments.video.present || appArguments.webcontent.present {
-        // check if it's a youtube id
-        appArguments.video.value = getVideoStreamingURLFromID(videoid: appArguments.video.value, autoplay: appArguments.autoPlay.present)
-
-        // set a larger window size. 900x600 will fit a standard 16:9 video
-        writeLog("resetting default window size to 900x600")
-        appvars.windowWidth = appvars.videoWindowWidth
-        appvars.windowHeight = appvars.videoWindowHeight
-    }
-    appArguments.videoCaption.evaluate(json: json)
-
-    appArguments.helpOption.evaluate(json: json)
-
-    // anthing that is an option only with no value
-    appArguments.button2Option.evaluate(json: json)
-    appArguments.infoButtonOption.evaluate(json: json)
-    appArguments.hideIcon.evaluate(json: json)
-    appArguments.centreIcon.evaluate(json: json)
-    appArguments.centreIconSE.evaluate(json: json)
-    if appArguments.centreIconSE.present {
-        appArguments.centreIcon.present = true
-    }
-    appArguments.warningIcon.evaluate(json: json)
-    appArguments.infoIcon.evaluate(json: json)
-    appArguments.cautionIcon.evaluate(json: json)
-    appArguments.movableWindow.evaluate(json: json)
-    appArguments.forceOnTop.evaluate(json: json)
-    appArguments.showOnAllScreens.evaluate(json: json)
-    appArguments.smallWindow.evaluate(json: json)
-    appArguments.bigWindow.evaluate(json: json)
-    appArguments.fullScreenWindow.evaluate(json: json)
-    if appArguments.fullScreenWindow.present {
-        appArguments.forceOnTop.present = false
-    }
-
-    appArguments.jsonOutPut.evaluate(json: json)
-    appArguments.ignoreDND.evaluate(json: json)
-    appArguments.hideTimerBar.evaluate(json: json)
-    appArguments.hideTimer.evaluate(json: json)
-    appArguments.quitOnInfo.evaluate(json: json)
-    appArguments.blurScreen.evaluate(json: json)
-    appArguments.constructionKit.evaluate(json: json)
-    appArguments.miniMode.evaluate(json: json)
-    appArguments.presentationMode.evaluate(json: json)
-    appArguments.notification.evaluate(json: json)
-    appArguments.notificationGoPing.evaluate(json: json)
-    appArguments.eulaMode.evaluate(json: json)
-    appArguments.windowResizable.evaluate(json: json)
-    appArguments.loginWindow.evaluate(json: json)
-    appArguments.verboseLogging.evaluate(json: json)
-    appArguments.alwaysReturnUserInput.evaluate(json: json)
-    appArguments.windowButtonsEnabled.evaluate(json: json)
-    appArguments.preferredAppearance.evaluate(json: json)
-
-    // command line only options
-    appArguments.listFonts.evaluate()
-    appArguments.demoOption.evaluate()
-    appArguments.buyCoffee.evaluate()
-    appArguments.licence.evaluate()
-    appArguments.jamfHelperMode.evaluate()
-    appArguments.debug.evaluate()
-    appArguments.getVersion.evaluate()
-    appArguments.hideDefaultKeyboardAction.evaluate()
-    if appArguments.hideDefaultKeyboardAction.present {
-        appvars.button1DefaultAction.modifiers = [.command, .shift]
-        appvars.button2DefaultAction.modifiers = [.command, .shift]
-    }
-}
