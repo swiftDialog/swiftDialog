@@ -141,7 +141,13 @@ struct dialogApp: App {
         // get all the command line option values
         processCLOptionValues()
 
-        checkNotificationAuthorisation(notificationPresent: appArguments.notification.present)
+        if !(appArguments.setAppIcon.present ||
+            appArguments.getVersion.present ||
+            appArguments.buyCoffee.present ||
+            appArguments.helpOption.present ||
+            appArguments.licence.present) {
+            checkNotificationAuthorisation(notificationPresent: appArguments.notification.present)
+        }
 
         captureQuitKey(keyValue: appArguments.quitKey.value)
 

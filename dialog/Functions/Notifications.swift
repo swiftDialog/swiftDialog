@@ -17,6 +17,7 @@ func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent noti
 }
 
 func checkNotificationAuthorisation(notificationPresent: Bool) {
+    writeLog("Checking notification request authorization", logLevel: .debug)
     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, error in
         if let error = error {
             if notificationPresent {
