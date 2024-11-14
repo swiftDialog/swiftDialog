@@ -81,6 +81,12 @@ func processCLOptionValues() {
     // this method reads in arguments from either json file or from the command line and loads them into the appArguments object
     // also records whether an argument is present or not
     writeLog("Checking command line options for arguments")
+    // if argument count is < 2 print help and exit
+    if CommandLine.arguments.count < 2 {
+        SDHelp(arguments: appArguments).printHelpShort()
+        quitDialog(exitCode: 0)
+    }
+    writeLog("Argument count: \(CommandLine.arguments.count)", logLevel: .debug)
     for argument in CommandLine.arguments {
         writeLog("Using argument: \(argument)", logLevel: .debug)
     }

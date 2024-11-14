@@ -168,7 +168,11 @@ extension CommandlineArgument {
             if let numberValue = json[self.long].number {
                 self.value = numberValue.stringValue
             } else {
-                self.value = json[self.long].string ?? CLOptionText(optionName: self)
+                var stringValue = json[self.long].string ?? CLOptionText(optionName: self)
+                if stringValue == "" {
+                    stringValue = "none"
+                }
+                self.value = stringValue
             }
         }
 
