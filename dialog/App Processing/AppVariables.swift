@@ -149,7 +149,7 @@ struct AppVariables {
     var imageArray                      = [MainImage]()
     var imageCaptionArray               = [String]()
 
-    var quitAfterProcessingNotifications = true
+    var isProcessingNotification = false
 
     var quitKeyCharacter                = String("q")
 
