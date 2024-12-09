@@ -35,24 +35,22 @@ if [ ! -e "$dialogbin" ]; then
     exit 255
 fi
 
-# check to see if the command file exists
-if [[ ! -e "$commandfile" ]]; then
-    /usr/bin/touch "$commandfile"
-# check to see if the command file is writeable
-elif [[ ! -r "$commandfile" ]]; then
-    echoerr ""
-    echoerr "Warning: command file ${commandfile} is not readable by user $currentUser"
-    echoerr ""
-fi
-
 # If we're running as root, launch swiftDialog as the user.
 if [ $(id -u) -eq 0 ]; then
     if [ -e $commandfile ]; then
-        # make sure the console user has read access to the command file
-        /bin/chmod 666 "$commandfile"
+        # Remove the command file if it exists
+        # Addresses issues with local privilege escalation via insecure file system operations
+        # (the dialog app will create this file if it doesn't exist)
+        rm $commandfile
     fi
-
     runAsUser "$dialogbin" "$@"
 else
+    # check to see if the command file exists is readable by the user
+    if [[ -e "$commandfile" ]] && [[ ! -r "$commandfile" ]]; then
+        echoerr ""
+        echoerr "Warning: command file ${commandfile} is not readable by user $currentUser"
+        echoerr ""
+        exit 255
+    fi
     "$dialogbin" "$@"
 fi
