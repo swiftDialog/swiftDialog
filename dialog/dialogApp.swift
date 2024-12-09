@@ -125,6 +125,8 @@ struct dialogApp: App {
 
         if CommandLine.arguments.count > 1 {
             appvars.isProcessingNotification = false
+        } else {
+            appvars.noargs = true
         }
 
         writeLog("Dialog Launched", logLevel: .info)
@@ -201,16 +203,24 @@ struct dialogApp: App {
             appArguments.movableWindow.present = true
         }
 
-        // bring to front on launch
-        writeLog("Activating", logLevel: .debug)
-        NSApp.activate(ignoringOtherApps: true)
-        writeLog("Activated", logLevel: .debug)
+        if appvars.noargs {
+            let timer = BackgroundTimer()
+            timer.startTimer(duration: 3.0) {
+                writeLog("No arguments. Quitting", logLevel: .debug)
+                quitDialog(exitCode: 0)
+            }
+        } else {
+            // bring to front on launch
+            writeLog("Activating", logLevel: .debug)
+            NSApp.activate(ignoringOtherApps: true)
+            writeLog("Activated", logLevel: .debug)
+        }
     }
 
     var body: some Scene {
 
         WindowGroup {
-            if !appArguments.notification.present {
+            if !appArguments.notification.present && !appvars.noargs {
                 ZStack {
                     if appArguments.miniMode.present {
                         MiniView(observedDialogContent: observedData)

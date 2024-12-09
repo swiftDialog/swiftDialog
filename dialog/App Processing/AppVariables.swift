@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct AppDefaults {
-    let cliversion                      = "2.5.4"
+    let cliversion                      = "2.5.5"
     let launchTime                      = Date.now
     // message default strings
     let titleDefault                    = String("default-title".localized)
@@ -149,7 +149,8 @@ struct AppVariables {
     var imageArray                      = [MainImage]()
     var imageCaptionArray               = [String]()
 
-    var isProcessingNotification = false
+    var isProcessingNotification        = false
+    var noargs                          = false
 
     var quitKeyCharacter                = String("q")
 

@@ -319,3 +319,13 @@ func captureQuitKey(keyValue: String) {
         return event
     }
 }
+
+class BackgroundTimer {
+    private let queue = DispatchQueue(label: "background.timer.queue")
+
+    func startTimer(duration: TimeInterval, completion: @escaping () -> Void) {
+        queue.asyncAfter(deadline: .now() + duration) {
+            completion()
+        }
+    }
+}
