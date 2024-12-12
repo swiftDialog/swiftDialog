@@ -50,7 +50,7 @@ struct HelpView: View {
             Button(action: {
                 observedData.appProperties.showHelpMessage = false
             }, label: {
-                Text("button-ok".localized)
+                Text(observedData.args.helpSheetButton.value)
             })
             .padding(appDefaults.sidePadding)
             .keyboardShortcut(.defaultAction)
