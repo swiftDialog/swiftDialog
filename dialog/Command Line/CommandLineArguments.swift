@@ -169,7 +169,7 @@ extension CommandlineArgument {
                 self.value = numberValue.stringValue
             } else {
                 var stringValue = json[self.long].string ?? CLOptionText(optionName: self)
-                if stringValue == "" {
+                if stringValue == "" && self.defaultValue as! String == "" {
                     stringValue = "none"
                 }
                 self.value = stringValue
