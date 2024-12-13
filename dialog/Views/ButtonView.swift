@@ -16,6 +16,7 @@ struct ButtonView: View {
 
     var button1action: String = ""
     var buttonShellAction: Bool = false
+    var buttonCentreStyle: Bool = false
 
     var defaultExit: Int32 = 0
     var cancelExit: Int32 = 2
@@ -25,6 +26,8 @@ struct ButtonView: View {
 
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
+
+        buttonCentreStyle = ["centre","center","centred","centered"].contains(observedDialogContent.args.buttonStyle.value)
 
         if observedDialogContent.args.timerBar.present {
             progressSteps = observedDialogContent.args.timerBar.value.floatValue()
@@ -41,7 +44,7 @@ struct ButtonView: View {
     }
 
     var body: some View {
-        if ["centre","center","centred","centered"].contains(observedData.args.buttonStyle.value) {
+        if buttonCentreStyle {
             HStack {
                 Spacer()
                     .frame(width: 20)
@@ -67,7 +70,7 @@ struct ButtonView: View {
                     }
                     )
                     .keyboardShortcut(observedData.appProperties.button1DefaultAction)
-                    .disabled(observedData.args.button1Disabled.present)
+                    .disabled(buttonCentreStyle ? false : observedData.args.button1Disabled.present)
                 }
                 Spacer()
                     .frame(width: 20)
@@ -85,7 +88,7 @@ struct ButtonView: View {
                     }
                     )
                     .keyboardShortcut(observedData.appProperties.button1DefaultAction)
-                    .disabled(observedData.args.button1Disabled.present)
+                    .disabled(buttonCentreStyle ? false : observedData.args.button1Disabled.present)
                 }
 
                 if observedData.args.button2Option.present || observedData.args.button2TextOption.present {
