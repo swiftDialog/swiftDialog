@@ -68,8 +68,14 @@ if [ $(id -u) -eq 0 ]; then
             exit 1
         fi
         # make sure the console user has read access to the command file
-        # -h flag is used to dereference the symlink if it is one, which it shouldn't be but just in case, to be sure, you never know, etc.
-        /bin/chmod -h 666 "$commandfile"
+        if ! sudo -u currentUser test -r "$commandfile"; then
+            echoerr ""
+            echoerr "ERROR: command file ${commandfile} is not readable by user $currentUser"
+            echoerr "Check permissions are correct. The dialog process will not be able to read updates"
+            echoerr "aborting"
+            echoerr ""
+            exit 1
+        fi
     fi
     runAsUser "$dialogbin" "$@"
 else
