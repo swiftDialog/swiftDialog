@@ -24,6 +24,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         writeLog("reading notification", logLevel: .debug)
 
         if response.notification.request.content.categoryIdentifier == "SD_NOTIFICATION" {
+            appvars.isProcessingNotification = true
             processNotification(response: response)
         } else {
             writeLog("unknown notification type", logLevel: .debug)
@@ -32,7 +33,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         // call the completion handler when done.
         completionHandler()
         // quit dialog since we dont need to show anything
-        if appvars.quitAfterProcessingNotifications {
+        if appvars.isProcessingNotification {
             quitDialog(exitCode: appDefaults.exitNow.code)
         }
     }
@@ -123,7 +124,9 @@ struct dialogApp: App {
         appvars.debugMode = CLOptionPresent(optionName: appArguments.debug)
 
         if CommandLine.arguments.count > 1 {
-            appvars.quitAfterProcessingNotifications = false
+            appvars.isProcessingNotification = false
+        } else {
+            appvars.noargs = true
         }
 
         writeLog("Dialog Launched", logLevel: .info)
@@ -200,16 +203,24 @@ struct dialogApp: App {
             appArguments.movableWindow.present = true
         }
 
-        // bring to front on launch
-        writeLog("Activating", logLevel: .debug)
-        NSApp.activate(ignoringOtherApps: true)
-        writeLog("Activated", logLevel: .debug)
+        if appvars.noargs {
+            let timer = BackgroundTimer()
+            timer.startTimer(duration: 3.0) {
+                writeLog("No arguments. Quitting", logLevel: .debug)
+                quitDialog(exitCode: 0)
+            }
+        } else {
+            // bring to front on launch
+            writeLog("Activating", logLevel: .debug)
+            NSApp.activate(ignoringOtherApps: true)
+            writeLog("Activated", logLevel: .debug)
+        }
     }
 
     var body: some Scene {
 
         WindowGroup {
-            if !appArguments.notification.present {
+            if !appArguments.notification.present && !appvars.noargs {
                 ZStack {
                     if appArguments.miniMode.present {
                         MiniView(observedDialogContent: observedData)

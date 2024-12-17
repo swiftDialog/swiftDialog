@@ -84,7 +84,9 @@ func processCLOptionValues() {
     // if argument count is < 2 print help and exit
     if CommandLine.arguments.count < 2 {
         SDHelp(arguments: appArguments).printHelpShort()
-        quitDialog(exitCode: 0)
+        //if !appvars.quitAfterProcessingNotifications {
+        //    quitDialog(exitCode: 0)
+        //}
     }
     writeLog("Argument count: \(CommandLine.arguments.count)", logLevel: .debug)
     for argument in CommandLine.arguments {

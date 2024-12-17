@@ -18,13 +18,14 @@ struct CommandlineArgument {
     var helpUsage: String = "<text>"
     var present: Bool = false
     var isbool: Bool = false
+    var overrideDefaultIfNill = false
 }
 
 struct CommandLineArguments {
     // command line options that take string parameters
-    var titleOption              = CommandlineArgument(long: "title", short: "t", defaultValue: appDefaults.titleDefault)
+    var titleOption              = CommandlineArgument(long: "title", short: "t", defaultValue: appDefaults.titleDefault, overrideDefaultIfNill: true)
     var subTitleOption           = CommandlineArgument(long: "subtitle")
-    var messageOption            = CommandlineArgument(long: "message", short: "m", defaultValue: appDefaults.messageDefault)
+    var messageOption            = CommandlineArgument(long: "message", short: "m", defaultValue: appDefaults.messageDefault, overrideDefaultIfNill: true)
     var dialogStyle              = CommandlineArgument(long: "style")
     var messageAlignment         = CommandlineArgument(long: "messagealignment", defaultValue: appDefaults.messageAlignmentTextRepresentation)
     var helpAlignment            = CommandlineArgument(long: "helpalignment", defaultValue: appDefaults.messageAlignmentTextRepresentation)
@@ -32,7 +33,8 @@ struct CommandLineArguments {
     var messageVerticalAlignment = CommandlineArgument(long: "messageposition")
     var helpMessage              = CommandlineArgument(long: "helpmessage")
     var helpImage                = CommandlineArgument(long: "helpimage")
-    var iconOption               = CommandlineArgument(long: "icon", short: "i", defaultValue: "default")
+    var helpSheetButton          = CommandlineArgument(long: "helpsheetbuttontext", defaultValue: "button-ok".localized)
+    var iconOption               = CommandlineArgument(long: "icon", short: "i", defaultValue: "default", overrideDefaultIfNill: true)
     var iconSize                 = CommandlineArgument(long: "iconsize", defaultValue: appvars.iconWidth)
     var iconAlpha                = CommandlineArgument(long: "iconalpha", defaultValue: "1.0")
     var iconAccessabilityLabel   = CommandlineArgument(long: "iconalttext", defaultValue: "Dialog Icon")
@@ -41,7 +43,7 @@ struct CommandLineArguments {
     var bannerTitle              = CommandlineArgument(long: "bannertitle", defaultValue: appDefaults.titleDefault)
     var bannerText               = CommandlineArgument(long: "bannertext", defaultValue: appDefaults.titleDefault)
     var bannerHeight             = CommandlineArgument(long: "bannerheight")
-    var button1TextOption        = CommandlineArgument(long: "button1text", defaultValue: appDefaults.button1Default)
+    var button1TextOption        = CommandlineArgument(long: "button1text", defaultValue: appDefaults.button1Default, overrideDefaultIfNill: true)
     var button1ActionOption      = CommandlineArgument(long: "button1action")
     var button1ShellActionOption = CommandlineArgument(long: "button1shellaction",short: "")
     var button2TextOption        = CommandlineArgument(long: "button2text", defaultValue: appDefaults.button2Default)
@@ -59,7 +61,7 @@ struct CommandLineArguments {
     var textFieldLiveValidation  = CommandlineArgument(long: "textfieldlivevalidation", isbool: true)
     var checkbox                 = CommandlineArgument(long: "checkbox")
     var checkboxStyle            = CommandlineArgument(long: "checkboxstyle")
-    var timerBar                 = CommandlineArgument(long: "timer", defaultValue: appDefaults.timerDefaultSeconds.stringValue)
+    var timerBar                 = CommandlineArgument(long: "timer", defaultValue: appDefaults.timerDefaultSeconds)
     var progressBar              = CommandlineArgument(long: "progress")
     var progressText             = CommandlineArgument(long: "progresstext", defaultValue: " ")
     var mainImage                = CommandlineArgument(long: "image", short: "g")
@@ -169,7 +171,7 @@ extension CommandlineArgument {
                 self.value = numberValue.stringValue
             } else {
                 var stringValue = json[self.long].string ?? CLOptionText(optionName: self)
-                if stringValue == "" {
+                if stringValue == "" && self.overrideDefaultIfNill {
                     stringValue = "none"
                 }
                 self.value = stringValue
@@ -214,6 +216,7 @@ extension CommandLineArguments {
                     case "messageVerticalAlignment": self.messageVerticalAlignment = argument
                     case "helpMessage": self.helpMessage = argument
                     case "helpImage": self.helpImage = argument
+                    case "helpSheetButton": self.helpSheetButton = argument
                     case "iconOption": self.iconOption = argument
                     case "iconSize": self.iconSize = argument
                     case "iconAlpha": self.iconAlpha = argument

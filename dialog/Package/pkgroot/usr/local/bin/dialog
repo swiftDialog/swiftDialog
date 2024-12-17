@@ -4,11 +4,13 @@ uid=$(id -u "$currentUser")
 dialogpath="/Library/Application Support/Dialog/Dialog.app"
 dialogbin="$dialogpath/Contents/MacOS/Dialog"
 commandfile=$(echo "$@" | awk -v pattern="--commandfile" '{for (i=0;i<=NF;i++) {if ($i==pattern) print $(i+1) }}')
-
+commandFileInUse=0
 echoerr() { echo "$@" 1>&2; }
 
-if [[ -z $commandfile ]]; then
+if [ -z $commandfile ]; then
     commandfile="/var/tmp/dialog.log"
+else
+    commandFileInUse=1
 fi
 
 # convenience function to run a command as the current user
@@ -29,17 +31,26 @@ runAsUser() {
   fi
 }
 
+# Check to see if the command file is a symbolic link and abort if it is
+if [ -L $commandfile ]; then
+    echo "WARNING: ${commandfile} is a symbolic link - aborting"
+    echo "Did someone try and symlink the command file to a different location?"
+    echo "${commandfile} is a symbolic link to $(readlink $commandfile)"
+    echo "If you want to use a different command file, specify it with the --commandfile option"
+    exit 1
+fi
+
 # Check to make sure we have a binary to run
 if [ ! -e "$dialogbin" ]; then
     echoerr "ERROR: Cannot find swiftDialog binary at $dialogbin"
     exit 255
 fi
 
-# check to see if the command file exists
-if [[ ! -e "$commandfile" ]]; then
+# check to see if the command file exists and create it if it doesn't
+if [ ! -e "$commandfile" ]; then
     /usr/bin/touch "$commandfile"
 # check to see if the command file is writeable
-elif [[ ! -r "$commandfile" ]]; then
+elif [ ! -r "$commandfile" ]; then
     echoerr ""
     echoerr "Warning: command file ${commandfile} is not readable by user $currentUser"
     echoerr ""
@@ -47,12 +58,27 @@ fi
 
 # If we're running as root, launch swiftDialog as the user.
 if [ $(id -u) -eq 0 ]; then
-    if [ -e $commandfile ]; then
+    # check if the command file is a file and in use
+    if [ -f $commandfile ] && [ $commandFileInUse -eq 1 ]; then
         # make sure the console user has read access to the command file
-        /bin/chmod 666 "$commandfile"
+        # we need to do this safely though in case something has replaced the command file with a symlink
+        if [ -L $commandfile ]; then
+            # this should be caught earlier in the script, but just in case
+            echoerr "ERROR: ${commandfile} is a symbolic link - aborting"
+            exit 1
+        fi
+        # make sure the console user has read access to the command file
+        if ! sudo -u $currentUser test -r "$commandfile"; then
+            echoerr ""
+            echoerr "ERROR: command file ${commandfile} is not readable by user $currentUser"
+            echoerr "Check permissions are correct. The dialog process will not be able to read updates"
+            echoerr "aborting"
+            echoerr ""
+            exit 1
+        fi
     fi
-
     runAsUser "$dialogbin" "$@"
 else
     "$dialogbin" "$@"
 fi
+

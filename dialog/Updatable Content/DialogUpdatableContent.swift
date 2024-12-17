@@ -541,6 +541,9 @@ class FileReader {
                 default:
                     observedData.args.blurScreen.present = false
                     blurredScreen.hide()
+                    if !observedData.args.forceOnTop.present {
+                        NSApp.windows.first?.level = .normal
+                    }
                     NSApp.activate(ignoringOtherApps: true)
                 }
 
