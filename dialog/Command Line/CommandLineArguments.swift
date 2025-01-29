@@ -93,6 +93,7 @@ struct CommandLineArguments {
     var preferredViewOrder       = CommandlineArgument(long: "vieworder")
     var preferredAppearance      = CommandlineArgument(long: "appearance")
     var setAppIcon               = CommandlineArgument(long: "seticon")
+    var notificationIdentifier   = CommandlineArgument(long: "identifier", short: "id")
 
     // command line options that take no additional parameters
     var button1Disabled          = CommandlineArgument(long: "button1disabled", isbool: true)
@@ -138,6 +139,7 @@ struct CommandLineArguments {
     var loginWindow              = CommandlineArgument(long: "loginwindow", isbool: true)
     var hideDefaultKeyboardAction = CommandlineArgument(long: "hidedefaultkeyboardaction", isbool: true)
     var alwaysReturnUserInput      = CommandlineArgument(long: "alwaysreturninput", isbool: true)
+    var removeNotification        = CommandlineArgument(long: "remove", isbool: true)
 }
 
 extension CommandlineArgument {
@@ -318,6 +320,8 @@ extension CommandLineArguments {
                     case "hideDefaultKeyboardAction": self.hideDefaultKeyboardAction = argument
                     case "alwaysReturnUserInput": self.alwaysReturnUserInput = argument
                     case "setAppIcon": self.setAppIcon = argument
+                    case "removeNotification": self.removeNotification = argument
+                    case "notificationIdentifier": self.notificationIdentifier = argument
                     default: break
                     }
                 }
