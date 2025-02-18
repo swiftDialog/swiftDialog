@@ -361,7 +361,17 @@ class FileReader {
                 default:
                     observedData.args.button2Disabled.present = false
                 }
+                
+            // Button control size
+            case "buttonsize:":
+                switch argument {
+                case "mini", "small", "regular", "large":
+                    observedData.appProperties.buttonSize = appDefaults.buttonSizeStates[argument] ?? .regular
+                default:
+                    observedData.appProperties.buttonSize = .regular
+                }
 
+                
             // Info Button label
             case "\(observedData.args.infoButtonOption.long):":
                 observedData.args.infoButtonOption.value = argument
@@ -601,7 +611,8 @@ class DialogUpdatableContent: ObservableObject {
     @Published var sheetErrorMessage: String
 
     @Published var updateView: Bool = true
-
+    @Published var constructionKitShown: Bool = false
+    
     var status: StatusState
 
     let commandFilePermissions: [FileAttributeKey: Any] = [FileAttributeKey.posixPermissions: 0o666]

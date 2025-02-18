@@ -27,7 +27,13 @@ struct AppDefaults {
     let button2Default                  = String("button-cancel".localized)
     let buttonInfoDefault               = String("button-more-info".localized)
     let buttonInfoActionDefault         = String("")
-
+    let buttonSizeStates : [String : ControlSize] = ["mini": .mini,
+                                                      "small": .small,
+                                                      "regular": .regular,
+                                                      "large": .large]
+    let buttonSize                      = String("regular")
+    
+    
     // Content padding
     let sidePadding                     = CGFloat(15)
     let topPadding                      = CGFloat(10)
@@ -115,6 +121,7 @@ struct AppVariables {
     var iconHeight                     = CGFloat(260)      // set default image area height
     var titleHeight                     = CGFloat(50)
     var bannerHeight                    = CGFloat(-10)
+    var buttonSize                      = ControlSize.regular
 
     var scaleFactor                     = CGFloat(1)
 

@@ -178,6 +178,12 @@ struct SDHelp {
         When using this mode, --\(argument.timerBar.long) and --\(argument.infoButtonOption.long) are not available
         In "stack" mode, Info button is not available.
 """
+        argument.buttonSize.helpShort = "Configure how large the buttons are"
+        argument.buttonSize.helpUsage = "mini|small|regular|large"
+        argument.buttonSize.helpLong = """
+        Adjusts the size of the buttons at the bottom of the window.
+        Default: regular
+"""
 
         argument.webcontent.helpShort = "Display a web page"
         argument.webcontent.helpUsage = "<url>"

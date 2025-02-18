@@ -51,6 +51,7 @@ struct CommandLineArguments {
     var buttonInfoTextOption     = CommandlineArgument(long: "infobuttontext", defaultValue: appDefaults.buttonInfoDefault)
     var buttonInfoActionOption   = CommandlineArgument(long: "infobuttonaction")
     var buttonStyle              = CommandlineArgument(long: "buttonstyle")
+    var buttonSize               = CommandlineArgument(long: "buttonsize", defaultValue: "regular")
     var dropdownTitle            = CommandlineArgument(long: "selecttitle")
     var dropdownValues           = CommandlineArgument(long: "selectvalues")
     var dropdownDefault          = CommandlineArgument(long: "selectdefault")
@@ -234,6 +235,7 @@ extension CommandLineArguments {
                     case "buttonInfoTextOption": self.buttonInfoTextOption = argument
                     case "buttonInfoActionOption": self.buttonInfoActionOption = argument
                     case "buttonStyle": self.buttonStyle = argument
+                    case "buttonSize": self.buttonSize = argument
                     case "dropdownTitle": self.dropdownTitle = argument
                     case "dropdownValues": self.dropdownValues = argument
                     case "dropdownDefault": self.dropdownDefault = argument
