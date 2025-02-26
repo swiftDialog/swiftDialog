@@ -198,11 +198,7 @@ struct dialogApp: App {
             FullscreenView(observedData: observedData).showFullScreen()
         }
 
-        if appArguments.constructionKit.present {
-            ConstructionKitView(observedDialogContent: observedData).showConstructionKit()
-            appArguments.movableWindow.present = true
-        }
-
+        
         if appvars.noargs {
             let timer = BackgroundTimer()
             timer.startTimer(duration: 3.0) {
@@ -237,6 +233,16 @@ struct dialogApp: App {
                         }
                     }
                     DebugOverlay(observedData: observedData)
+                }
+                .onAppear {
+                    // Only show the construction kit once, if needed.
+                    if appArguments.constructionKit.present && !observedData.constructionKitShown {
+                        observedData.constructionKitShown = true
+                        DispatchQueue.main.async {
+                            ConstructionKitView(observedDialogContent: observedData).showConstructionKit()
+                            appArguments.movableWindow.present = true
+                        }
+                    }
                 }
                 .preferredColorScheme(observedData.args.preferredAppearance.present &&
                                       observedData.args.preferredAppearance.value.lowercased() == "dark" ? .dark

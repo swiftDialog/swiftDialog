@@ -38,6 +38,7 @@
 "ck-sidebar"            = "Sidebar";
 "ck-dataentry"          = "Data Entry";
 "ck-buttons"            = "Buttons";
+"ck-buttonsize"         = "Button Size";
 "ck-advanced"           = "Advanced";
 "ck-listitems"          = "List Items";
 "ck-images"             = "Images";

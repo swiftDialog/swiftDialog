@@ -74,7 +74,7 @@ struct ButtonView: View {
                 }
                 Spacer()
                     .frame(width: 20)
-            }
+            }.controlSize(observedData.appProperties.buttonSize)
         } else if ["stack"].contains(observedData.args.buttonStyle.value) {
             VStack {
                 if !(observedData.args.button1TextOption.value == "none") {
@@ -106,7 +106,7 @@ struct ButtonView: View {
                     TimerView(progressSteps: progressSteps, visible: !observedData.args.hideTimerBar.present, observedDialogContent: observedData, stacked: true)
                         .frame(alignment: .bottom )
                 }
-            }
+            }.controlSize(observedData.appProperties.buttonSize)
         } else {
             // Buttons
             HStack {
@@ -169,6 +169,7 @@ struct ButtonView: View {
                     HelpButton(observedDialogContent: observedData)
                 }
             }
+            .controlSize(observedData.appProperties.buttonSize)
         }
     }
 }
