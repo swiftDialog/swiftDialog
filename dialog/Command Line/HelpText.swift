@@ -147,9 +147,27 @@ struct SDHelp {
           --\(appArguments.subTitleOption.long) <text>
           --\(appArguments.messageOption.long) <text> (as plain text. newlines supported as \\n)
           --\(appArguments.iconOption.long) <image> *
+          --\(appArguments.notificationIdentifier.long) <text>
+          --\(appArguments.removeNotification.long)
 
         * <image> must refer to a local file or app bundle. Remote images sources are not supported.
 """
+        
+        argument.notificationIdentifier.helpShort = "Set the notification identifier"
+        argument.notificationIdentifier.helpLong = """
+        Identifier is used to uniquely identify the notification.
+        If not specified, a random identifier will be generated.
+        
+        Use this identifier to remove the notification with the --\(appArguments.removeNotification.long) option
+        
+        If the identifier is not unique, the previous notification will be replaced by the new one.
+        """
+        
+        argument.removeNotification.helpShort = "Remove a system notification"
+        argument.removeNotification.helpLong = """
+        Removes the notification with the specified identifier.
+        If no identifier is specified, all notifications will be removed.
+        """
 
         argument.dialogStyle.helpShort = "Configure a pre-set window style"
         argument.dialogStyle.helpUsage = "presentation | mini | centered | alert | caution | warning"
