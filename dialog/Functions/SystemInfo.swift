@@ -64,7 +64,7 @@ public var marketingModelARM: String {
 }
 
 public var marketingModelIntel: String {
-    guard let locale = Locale.current.languageCode else { return "en" }
+    guard let locale = Locale.current.language.languageCode?.identifier else { return "en" }
 
     let modelIdentifier = deviceHardwareModel
 

@@ -275,7 +275,7 @@ func processCLOptions(json: JSON = getJSON()) {
         default: ()
         }
     }
-    
+
     if appArguments.buttonSize.present {
         appvars.buttonSize = appDefaults.buttonSizeStates[appArguments.buttonSize.value] ?? .regular
     }

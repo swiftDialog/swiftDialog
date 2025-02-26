@@ -52,16 +52,16 @@ struct RenderToggles: View {
                             .toggleStyle(.switch)
                             .disabled(checkboxContent[index].disabled)
                             .controlSize(observedData.appProperties.checkboxControlSize)
-                            .onChange(of: checkboxContent[index].checked) { checked in
-                                userInputState.checkBoxes[index].checked = checked
+                            .onChange(of: checkboxContent[index].checked) {
+                                userInputState.checkBoxes[index].checked = checkboxContent[index].checked
                             }
                     } else {
                         Toggle(checkboxContent[index].label, isOn: $checkboxContent[index].checked)
                             .toggleStyle(.checkbox)
-                            .onChange(of: checkboxContent[index].checked) { checked in
-                                userInputState.checkBoxes[index].checked = checked
+                            .onChange(of: checkboxContent[index].checked) {
+                                userInputState.checkBoxes[index].checked = checkboxContent[index].checked
                                 if checkboxContent[index].enablesButton1 {
-                                    observedData.args.button1Disabled.present = !checked
+                                    observedData.args.button1Disabled.present = !checkboxContent[index].checked
                                 }
                             }
                             .disabled(checkboxContent[index].disabled)

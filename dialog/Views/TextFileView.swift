@@ -33,11 +33,11 @@ struct TextFileView: View {
                         startStreamingLogFile()
                     }
                 }
-                .onChange(of: textAreaContent, perform: { _ in
+                .onChange(of: textAreaContent) {
                     Task {
                         proxy.scrollTo("logContent", anchor: .bottom)
                     }
-                })
+                }
             }
         }
     }

@@ -34,15 +34,14 @@ func checkForDialogNotificationMode(_ arguments: CommandLineArguments) -> Bool {
         if arguments.removeNotification.present {
             writeLog("Removing notifications")
             removeNotification(identifier: arguments.notificationIdentifier.value)
-        }
-        else {
+        } else {
             writeLog("Sending a notification")
-            
+
             var notificationIcon = ""
             if appArguments.iconOption.present {
                 notificationIcon = appArguments.iconOption.value
             }
-            
+
             var acceptActionLabel: String = ""
             var declineActionLabel: String = ""
             if arguments.button1TextOption.present {
@@ -69,7 +68,7 @@ func checkForDialogNotificationMode(_ arguments: CommandLineArguments) -> Bool {
 
 func removeNotification(identifier: String? = nil) {
     let notificationCenter = UNUserNotificationCenter.current()
-    
+
     if let id = identifier, !id.isEmpty {
         // Clear a specific notification using its identifier
         notificationCenter.removeDeliveredNotifications(withIdentifiers: [id])

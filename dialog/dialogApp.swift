@@ -198,7 +198,7 @@ struct dialogApp: App {
             FullscreenView(observedData: observedData).showFullScreen()
         }
 
-        
+
         if appvars.noargs {
             let timer = BackgroundTimer()
             timer.startTimer(duration: 3.0) {

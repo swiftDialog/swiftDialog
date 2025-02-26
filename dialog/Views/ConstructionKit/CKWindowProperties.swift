@@ -32,8 +32,8 @@ struct CKWindowProperties: View {
                     .frame(width: 50)
                 Slider(value: $observedData.appProperties.windowHeight, in: 200...2000)
                     .frame(width: 200)
-                    .onChange(of: observedData.appProperties.windowHeight) { height in
-                        observedData.appProperties.windowHeight = height.rounded()
+                    .onChange(of: observedData.appProperties.windowHeight) {
+                        observedData.appProperties.windowHeight = observedData.appProperties.windowHeight.rounded()
                     }
                 Spacer()
             }
@@ -43,8 +43,8 @@ struct CKWindowProperties: View {
                     .frame(width: 50)
                 Slider(value: $observedData.appProperties.windowWidth, in: 200...2000)
                     .frame(width: 200)
-                    .onChange(of: observedData.appProperties.windowWidth) { width in
-                        observedData.appProperties.windowWidth = width.rounded()
+                    .onChange(of: observedData.appProperties.windowWidth) {
+                        observedData.appProperties.windowWidth = observedData.appProperties.windowWidth.rounded()
                     }
                 Spacer()
             }
@@ -62,21 +62,21 @@ struct CKWindowProperties: View {
                         .frame(width: 100, alignment: .leading)
                     Toggle("ck-small", isOn: $observedData.args.smallWindow.present)
                         .toggleStyle(.switch)
-                        .onChange(of: observedData.args.smallWindow.present, perform: { _ in
+                        .onChange(of: observedData.args.smallWindow.present) {
                             observedData.appProperties.scaleFactor = 0.75
                             observedData.iconSize = 120
                             if observedData.args.smallWindow.present {
                                 observedData.args.bigWindow.present = false
                             }
-                        })
+                        }
                     Toggle("ck-big".localized, isOn: $observedData.args.bigWindow.present)
                         .toggleStyle(.switch)
-                        .onChange(of: observedData.args.bigWindow.present, perform: { _ in
+                        .onChange(of: observedData.args.bigWindow.present) {
                             observedData.appProperties.scaleFactor = 1.25
                             if observedData.args.bigWindow.present {
                                 observedData.args.smallWindow.present = false
                             }
-                        })
+                        }
                     Spacer()
                 }
                 LabelView(label: "Configurations")
@@ -122,9 +122,9 @@ struct CKWindowProperties: View {
                         .frame(width: 50)
                     TextField("ck-progresstext".localized, text: $observedData.args.progressText.value)
                         .frame(width: 150)
-                        .onChange(of: observedData.args.progressText.value, perform: { _ in
+                        .onChange(of: observedData.args.progressText.value) {
                             observedData.args.progressText.present = true
-                        })
+                        }
                     Spacer()
                 }
             }
@@ -134,20 +134,20 @@ struct CKWindowProperties: View {
                     Toggle("Enabled", isOn: $observedData.args.bannerImage.present)
                         .toggleStyle(.switch)
                         .disabled(observedData.args.bannerImage.value == "")
-                        .onChange(of: observedData.args.bannerImage.present, perform: { isEnabled in
+                        .onChange(of: observedData.args.bannerImage.present) {
                             observedData.args.iconOption.present.toggle()
-                            observedData.args.bannerTitle.present = isEnabled
-                        })
+                            observedData.args.bannerTitle.present = observedData.args.bannerImage.present
+                        }
                     Toggle("Banner Title", isOn: $observedData.args.bannerTitle.present)
                         .toggleStyle(.switch)
                         //.disabled(observedData.args.bannerImage.value == "")
-                        .onChange(of: observedData.args.bannerTitle.present, perform: { isEnabled in
-                            if isEnabled {
+                        .onChange(of: observedData.args.bannerTitle.present) {
+                            if observedData.args.bannerTitle.present {
                                 observedData.appProperties.titleFontColour = Color.white
                             } else {
                                 observedData.appProperties.titleFontColour = Color.black
                             }
-                        })
+                        }
                     Toggle("Text Shadow", isOn: $observedData.appProperties.titleFontShadow)
                         .toggleStyle(.switch)
                         //.disabled(observedData.args.bannerImage.value == "")
@@ -158,10 +158,10 @@ struct CKWindowProperties: View {
                 }
                 HStack {
                     ColorPicker("ck-colour".localized,selection: $bannerColour)
-                        .onChange(of: bannerColour, perform: { _ in
+                        .onChange(of: bannerColour) {
                             observedData.args.bannerImage.value = "color=\(bannerColour.hexValue)"
                             observedData.args.bannerImage.present = true
-                        })
+                        }
                     Button("ck-select".localized) {
                         let panel = NSOpenPanel()
                         panel.allowsMultipleSelection = false
@@ -179,10 +179,10 @@ struct CKWindowProperties: View {
                     TextField("", value: $bannerHeight, formatter: displayAsInt)
                         .frame(width: 50)
                     Slider(value: $bannerHeight, in: 28...250)
-                        .onChange(of: bannerHeight, perform: { height in
+                        .onChange(of: bannerHeight) {
                             observedData.args.bannerHeight.present = true
-                            observedData.args.bannerHeight.value = "\(height.rounded())"
-                        })
+                            observedData.args.bannerHeight.value = "\(bannerHeight.rounded())"
+                        }
                 }
                 TextField("", text: $observedData.args.bannerImage.value)
             }
@@ -219,9 +219,9 @@ struct CKWindowProperties: View {
                 HStack {
                     Text("ck-alpha".localized)
                     Slider(value: $bgAlpha, in: 0.0...1.0, step: 0.1)
-                        .onChange(of: bgAlpha, perform: { _ in
+                        .onChange(of: bgAlpha) {
                             observedData.args.watermarkAlpha.value = String(format: "%.1f", bgAlpha)
-                        })
+                        }
                 }
                 Picker("ck-scale".localized, selection: $observedData.args.watermarkScale.value) {
                     Text("").tag("")

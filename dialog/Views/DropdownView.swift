@@ -77,9 +77,9 @@ struct DropdownView: View {
                                 }
                             }
                             .pickerStyle(MenuPickerStyle())
-                            .onChange(of: selectedOption[index], perform: { selectedOption in
-                                userInputState.dropdownItems[index].selectedValue = selectedOption
-                            })
+                            .onChange(of: selectedOption[index]) {
+                                userInputState.dropdownItems[index].selectedValue = selectedOption[index]
+                            }
                             .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
                             .overlay(RoundedRectangle(cornerRadius: 5)
                                 .stroke(userInputState.dropdownItems[index].requiredfieldHighlight, lineWidth: 2)

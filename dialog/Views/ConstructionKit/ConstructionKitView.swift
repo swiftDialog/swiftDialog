@@ -95,7 +95,7 @@ struct JSONView: View {
         if observedDialogContent.appProperties.titleFontColour != .primary {
             json[appArguments.titleFont.long].dictionaryObject = ["colour": observedDialogContent.appProperties.titleFontColour.hexValue]
         }
-        
+
         if observedDialogContent.appProperties.buttonSize != .regular {
             json[appArguments.buttonSize.long].string = observedDialogContent.args.buttonSize.value
         }

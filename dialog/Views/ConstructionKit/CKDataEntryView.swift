@@ -54,42 +54,42 @@ struct CKDataEntryView: View {
                     })
                     .disabled(true) // MARK: disabled until I can work out how to delete from the array without causing a crash
                     Toggle("ck-required".localized, isOn: $textfieldContent[item].required)
-                        .onChange(of: textfieldContent[item].required, perform: { textRequired in
+                        .onChange(of: textfieldContent[item].required) {
                             observedData.requiredFieldsPresent.toggle()
-                            userInputState.textFields[item].required = textRequired
-                        })
+                            userInputState.textFields[item].required = textfieldContent[item].required
+                        }
                         .toggleStyle(.switch)
                     Toggle("ck-secure".localized, isOn: $textfieldContent[item].secure)
-                        .onChange(of: textfieldContent[item].secure, perform: { textSecure in
-                            userInputState.textFields[item].secure = textSecure
-                        })
+                        .onChange(of: textfieldContent[item].secure) {
+                            userInputState.textFields[item].secure = textfieldContent[item].secure
+                        }
                         .toggleStyle(.switch)
                     Spacer()
                 }
                 HStack {
                     TextField("ck-title".localized, text: $textfieldContent[item].title)
-                        .onChange(of: textfieldContent[item].title, perform: { textTitle in
-                            userInputState.textFields[item].title = textTitle
-                        })
+                        .onChange(of: textfieldContent[item].title) {
+                            userInputState.textFields[item].title = textfieldContent[item].title
+                        }
                     TextField("ck-value".localized, text: $textfieldContent[item].value)
-                        .onChange(of: textfieldContent[item].value, perform: { textValue in
-                            userInputState.textFields[item].value = textValue
-                        })
+                        .onChange(of: textfieldContent[item].value) {
+                            userInputState.textFields[item].value = textfieldContent[item].value
+                        }
                     TextField("ck-prompt".localized, text: $textfieldContent[item].prompt)
-                        .onChange(of: textfieldContent[item].prompt, perform: { textPrompt in
-                            userInputState.textFields[item].prompt = textPrompt
-                        })
+                        .onChange(of: textfieldContent[item].prompt) {
+                            userInputState.textFields[item].prompt = textfieldContent[item].prompt
+                        }
                 }
                 .padding(.leading, 20)
                 HStack {
                     TextField("ck-regex".localized, text: $textfieldContent[item].regex)
-                        .onChange(of: textfieldContent[item].regex, perform: { textRegex in
-                            userInputState.textFields[item].regex = textRegex
-                        })
+                        .onChange(of: textfieldContent[item].regex) {
+                            userInputState.textFields[item].regex = textfieldContent[item].regex
+                        }
                     TextField("ck-regexerror".localized, text: $textfieldContent[item].regexError)
-                        .onChange(of: textfieldContent[item].regexError, perform: { textRegexError in
-                            userInputState.textFields[item].regexError = textRegexError
-                        })
+                        .onChange(of: textfieldContent[item].regexError) {
+                            userInputState.textFields[item].regexError = textfieldContent[item].regexError
+                        }
                 }
                 .padding(.leading, 20)
                 Divider()

@@ -141,13 +141,13 @@ struct ListView: View {
                     .background(Color("editorBackgroundColour"))
                     .listStyle(SidebarListStyle())
                 }
-                .onChange(of: observedData.listItemUpdateRow, perform: { _ in
+                .onChange(of: observedData.listItemUpdateRow) {
                     DispatchQueue.main.async {
                         withAnimation(.easeInOut(duration: 0.5)) {
                             proxy.scrollTo(observedData.listItemUpdateRow)
                         }
                     }
-                })
+                }
                 .clipShape(RoundedRectangle(cornerRadius: clipRadius))
             }
         }

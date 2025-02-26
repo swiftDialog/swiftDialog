@@ -87,9 +87,9 @@ struct TextEntryView: View {
                                 Spacer()
                             }
                             TextEditor(text: $textfieldContent[index].value)
-                                .onChange(of: textfieldContent[index].value, perform: { textContent in
-                                    userInputState.textFields[index].value = textContent
-                                })
+                                .onChange(of: textfieldContent[index].value) {
+                                    userInputState.textFields[index].value = textfieldContent[index].value
+                                }
                                 .background(Color("editorBackgroundColour"))
                                 .font(.custom("HelveticaNeue", size: 14))
                                 .cornerRadius(3.0)
@@ -137,9 +137,9 @@ struct TextEntryView: View {
                                             SecureField(textfieldContent[index].prompt, text: $textfieldContent[index].value)
                                                 .disableAutocorrection(true)
                                                 .textContentType(textfieldContent[index].passwordFill ? .password: .none)
-                                                .onChange(of: textfieldContent[index].value, perform: { textContent in
-                                                    userInputState.textFields[index].value = textContent
-                                                })
+                                                .onChange(of: textfieldContent[index].value) {
+                                                    userInputState.textFields[index].value = textfieldContent[index].value
+                                                }
                                             Image(systemName: "lock.fill")
                                                 .foregroundColor(Color(argument: "#008815")).opacity(0.5)
                                                 .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
@@ -147,9 +147,9 @@ struct TextEntryView: View {
                                         if textfieldContent[index].confirm {
                                             ZStack {
                                                 SecureField(textfieldContent[index].prompt, text: $textfieldContent[index].validationValue)
-                                                    .onChange(of: textfieldContent[index].validationValue, perform: { textContent in
-                                                        userInputState.textFields[index].validationValue = textContent
-                                                    })
+                                                    .onChange(of: textfieldContent[index].validationValue) {
+                                                        userInputState.textFields[index].validationValue = textfieldContent[index].validationValue
+                                                    }
                                                 Image(systemName: "lock.fill")
                                                     .foregroundColor(Color(argument: "#008815")).opacity(0.5)
                                                     .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
@@ -160,8 +160,8 @@ struct TextEntryView: View {
                                 } else {
                                     VStack {
                                         TextField(textfieldContent[index].prompt, text: $textfieldContent[index].value)
-                                            .onChange(of: textfieldContent[index].value, perform: { textContent in
-                                                userInputState.textFields[index].value = textContent
+                                            .onChange(of: textfieldContent[index].value) {
+                                                userInputState.textFields[index].value = textfieldContent[index].value
                                                 if textfieldContent[index].regex != "" && observedData.args.textFieldLiveValidation.present {
                                                     if checkRegexPattern(regexPattern: textfieldContent[index].regex, textToValidate: textfieldContent[index].value) {
                                                         textfieldContent[index].backgroundColour = Color.green
@@ -172,25 +172,25 @@ struct TextEntryView: View {
                                                         textfieldContent[index].backgroundColour = Color.clear
                                                     }
                                                 }
-                                            })
+                                            }
                                         //.background(textfieldContent[index].backgroundColour)
                                         if textfieldContent[index].confirm {
                                             TextField(textfieldContent[index].prompt, text: $textfieldContent[index].validationValue)
-                                                .onChange(of: textfieldContent[index].validationValue, perform: { textContent in
-                                                    userInputState.textFields[index].validationValue = textContent
-                                                })
+                                                .onChange(of: textfieldContent[index].validationValue) {
+                                                    userInputState.textFields[index].validationValue = textfieldContent[index].validationValue
+                                                }
                                         }
                                     }
 
 
                                     if textfieldContent[index].isDate {
                                         DatePicker("", selection: $textfieldContent[index].date, displayedComponents: [.date])
-                                            .onChange(of: textfieldContent[index].date, perform: { dateContent in
+                                            .onChange(of: textfieldContent[index].date) {
                                                 dateFormatter.timeStyle = .none
                                                 dateFormatter.dateStyle = .short
-                                                textfieldContent[index].value = dateFormatter.string(from: dateContent)
+                                                textfieldContent[index].value = dateFormatter.string(from: textfieldContent[index].date)
                                                 datepickerID[index] += 1 // stupid hack to make the picker disappear when a date is selected
-                                            })
+                                            }
                                             .labelsHidden()
                                             .id(datepickerID[index])
                                     }
