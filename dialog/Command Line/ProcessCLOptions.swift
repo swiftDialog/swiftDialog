@@ -817,6 +817,8 @@ func processCLOptions(json: JSON = getJSON()) {
             }
             // use index 0 for the default icon value
             appArguments.iconOption.value = userInputState.iconItems[0].value
+        } else if json["icon"].exists() {
+            userInputState.iconItems.append(Icons(value: json["icon"].stringValue))
         } else {
             for iconOption in CLOptionMultiOptions(optionName: appArguments.iconOption.long) {
                 userInputState.iconItems.append(Icons(value: iconOption))
