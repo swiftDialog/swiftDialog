@@ -522,6 +522,17 @@ class FileReader {
             case "activate:":
                 writeToLog("activating window")
                 NSApp.activate(ignoringOtherApps: true)
+                
+            // hide
+            case "hide:":
+                writeToLog("hiding windows")
+                NSApp.hide(self)
+                
+            // hide
+            case "show:":
+                writeToLog("Showing windows")
+                NSApp.unhide(self)
+                NSApp.activate(ignoringOtherApps: true)
 
             // icon alpha
             case "\(observedData.args.iconAlpha.long):":
