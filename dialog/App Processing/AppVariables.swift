@@ -27,13 +27,13 @@ struct AppDefaults {
     let button2Default                  = String("button-cancel".localized)
     let buttonInfoDefault               = String("button-more-info".localized)
     let buttonInfoActionDefault         = String("")
-    let buttonSizeStates : [String : ControlSize] = ["mini": .mini,
+    let buttonSizeStates: [String: ControlSize] = ["mini": .mini,
                                                       "small": .small,
                                                       "regular": .regular,
                                                       "large": .large]
     let buttonSize                      = String("regular")
-    
-    
+
+
     // Content padding
     let sidePadding                     = CGFloat(15)
     let topPadding                      = CGFloat(10)
