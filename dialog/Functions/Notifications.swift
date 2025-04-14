@@ -30,7 +30,7 @@ func checkNotificationAuthorisation(notificationPresent: Bool) {
 
 func checkForDialogNotificationMode(_ arguments: CommandLineArguments) -> Bool {
     // check if we are sending a notification
-    if arguments.notification.present {
+    if arguments.notification.present && dialogIsAuthorised {
         if arguments.removeNotification.present {
             writeLog("Removing notifications")
             removeNotification(identifier: arguments.notificationIdentifier.value)
@@ -62,6 +62,8 @@ func checkForDialogNotificationMode(_ arguments: CommandLineArguments) -> Bool {
                              notificationSoundEnabled: arguments.notificationGoPing.present)
             usleep(100000)
         }
+    } else {
+        return false
     }
     return arguments.notification.present
 }

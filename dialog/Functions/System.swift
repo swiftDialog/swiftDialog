@@ -329,3 +329,20 @@ class BackgroundTimer {
         }
     }
 }
+
+var dialogIsAuthorised: Bool {
+    // Check if an auth key is present and verify
+    if !dialogAuthorisationKey().isEmpty && CommandLine.arguments.count > 2 {
+        writeLog("Auth key is required", logLevel: .debug)
+        var authKey: String = ""
+        if !appArguments.authkey.value.isEmpty {
+            writeLog("Using key value", logLevel: .debug)
+            authKey = appArguments.authkey.value
+        } else if let environmentAuthKey = ProcessInfo.processInfo.environment["DIALOG_AUTH_KEY"] {
+            writeLog("Using environment key value", logLevel: .debug)
+            authKey = environmentAuthKey
+        }
+        return checkAuthorisationKey(key: authKey.sha256Hash)
+    }
+    return true
+}

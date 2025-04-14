@@ -34,7 +34,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         completionHandler()
         // quit dialog since we dont need to show anything
         if appvars.isProcessingNotification {
-            quitDialog(exitCode: appDefaults.exitNow.code)
+            //quitDialog(exitCode: appDefaults.exitNow.code)
         }
     }
 
