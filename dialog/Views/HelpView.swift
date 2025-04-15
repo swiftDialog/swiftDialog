@@ -44,6 +44,7 @@ struct HelpView: View {
                     IconView(image: observedData.args.helpImage.value)
                         .frame(height: 160)
                         .padding(.leading, appDefaults.sidePadding)
+                        .padding(.trailing, appDefaults.sidePadding)
                 }
             }
             Spacer()
