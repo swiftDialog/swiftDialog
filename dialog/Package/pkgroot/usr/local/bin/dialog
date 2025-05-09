@@ -1,5 +1,5 @@
 #!/bin/sh
-currentUser=$(echo "show State:/Users/ConsoleUser" | /usr/sbin/scutil | awk '/Name :/ { print $3 }')
+currentUser=$(echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { print $3 }')
 uid=$(id -u "$currentUser")
 dialogpath="/Library/Application Support/Dialog/Dialog.app"
 dialogbin="$dialogpath/Contents/MacOS/Dialog"
