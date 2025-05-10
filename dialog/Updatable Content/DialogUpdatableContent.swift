@@ -362,6 +362,15 @@ class FileReader {
                     observedData.args.button2Disabled.present = false
                 }
 
+            // Button control size
+            case "buttonsize:":
+                switch argument {
+                case "mini", "small", "regular", "large":
+                    observedData.appProperties.buttonSize = appDefaults.buttonSizeStates[argument] ?? .regular
+                default:
+                    observedData.appProperties.buttonSize = .regular
+                }
+
             // Info Button label
             case "\(observedData.args.infoButtonOption.long):":
                 observedData.args.infoButtonOption.value = argument
@@ -513,6 +522,17 @@ class FileReader {
                 writeToLog("activating window")
                 NSApp.activate(ignoringOtherApps: true)
 
+            // hide
+            case "hide:":
+                writeToLog("hiding windows")
+                NSApp.hide(self)
+
+            // hide
+            case "show:":
+                writeToLog("Showing windows")
+                NSApp.unhide(self)
+                NSApp.activate(ignoringOtherApps: true)
+
             // icon alpha
             case "\(observedData.args.iconAlpha.long):":
                 let alphaValue = Double(argument) ?? 1.0
@@ -601,6 +621,7 @@ class DialogUpdatableContent: ObservableObject {
     @Published var sheetErrorMessage: String
 
     @Published var updateView: Bool = true
+    @Published var constructionKitShown: Bool = false
 
     var status: StatusState
 

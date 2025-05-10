@@ -18,6 +18,30 @@ struct CKButtonView: View {
     var body: some View {
         VStack { //buttons
             VStack {
+                     LabelView(label: "ck-buttonsize".localized)
+                     HStack {
+                         Button("mini") {
+                             observedData.args.buttonSize.value = "mini"
+                         } .controlSize(.mini)
+
+                         Button("small") {
+                             observedData.args.buttonSize.value = "small"
+                         } .controlSize(.small)
+                         Button("regular") {
+                             observedData.args.buttonSize.value = "regular"
+                         } .controlSize(.regular)
+                         Button("large") {
+                             observedData.args.buttonSize.value = "large"
+                         } .controlSize(.large)
+
+
+                         TextField("", text: $observedData.args.buttonSize.value)
+                             .onChange(of: observedData.args.buttonSize.value) { newValue in
+                                    observedData.appProperties.buttonSize = appDefaults.buttonSizeStates[newValue] ?? .regular
+                                }
+                     }
+                 }
+            VStack {
                 LabelView(label: "ck-button1".localized)
                 HStack {
                     Toggle("ck-disabled".localized, isOn: $observedData.args.button1Disabled.present)

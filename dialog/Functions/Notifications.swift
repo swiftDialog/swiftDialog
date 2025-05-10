@@ -30,40 +30,65 @@ func checkNotificationAuthorisation(notificationPresent: Bool) {
 
 func checkForDialogNotificationMode(_ arguments: CommandLineArguments) -> Bool {
     // check if we are sending a notification
-    if arguments.notification.present {
-        writeLog("Sending a notification")
+    if arguments.notification.present && dialogIsAuthorised {
+        if arguments.removeNotification.present {
+            writeLog("Removing notifications")
+            removeNotification(identifier: arguments.notificationIdentifier.value)
+        } else {
+            writeLog("Sending a notification")
 
-        var notificationIcon = ""
-        if appArguments.iconOption.present {
-            notificationIcon = appArguments.iconOption.value
-        }
+            var notificationIcon = ""
+            if appArguments.iconOption.present {
+                notificationIcon = appArguments.iconOption.value
+            }
 
-        var acceptActionLabel: String = ""
-        var declineActionLabel: String = ""
-        if arguments.button1TextOption.present {
-            acceptActionLabel = arguments.button1TextOption.value
+            var acceptActionLabel: String = ""
+            var declineActionLabel: String = ""
+            if arguments.button1TextOption.present {
+                acceptActionLabel = arguments.button1TextOption.value
+            }
+            if arguments.button2TextOption.present {
+                declineActionLabel = arguments.button2TextOption.value
+            }
+            sendNotification(title: arguments.titleOption.value,
+                             subtitle: arguments.subTitleOption.value,
+                             message: arguments.messageOption.value,
+                             image: notificationIcon,
+                             identifier: arguments.notificationIdentifier.value,
+                             acceptString: acceptActionLabel,
+                             acceptAction: arguments.button1ActionOption.value,
+                             declineString: declineActionLabel,
+                             declineAction: arguments.button2ActionOption.value,
+                             notificationSoundEnabled: arguments.notificationGoPing.present)
+            usleep(100000)
         }
-        if arguments.button2TextOption.present {
-            declineActionLabel = arguments.button2TextOption.value
-        }
-        sendNotification(title: arguments.titleOption.value,
-                         subtitle: arguments.subTitleOption.value,
-                         message: arguments.messageOption.value,
-                         image: notificationIcon,
-                         acceptString: acceptActionLabel,
-                         acceptAction: arguments.button1ActionOption.value,
-                         declineString: declineActionLabel,
-                         declineAction: arguments.button2ActionOption.value,
-                         notificationSoundEnabled: arguments.notificationGoPing.present)
-        usleep(100000)
+    } else {
+        return false
     }
     return arguments.notification.present
+}
+
+func removeNotification(identifier: String? = nil) {
+    let notificationCenter = UNUserNotificationCenter.current()
+
+    if let id = identifier, !id.isEmpty {
+        // Clear a specific notification using its identifier
+        notificationCenter.removeDeliveredNotifications(withIdentifiers: [id])
+        notificationCenter.removePendingNotificationRequests(withIdentifiers: [id])
+        writeLog("Removed notification with identifier: \(id)", logLevel: .info)
+    } else {
+        // Clear all notifications
+        notificationCenter.removeAllDeliveredNotifications()
+        notificationCenter.removeAllPendingNotificationRequests()
+        writeLog("Removed all notifications", logLevel: .info)
+    }
 }
 
 func sendNotification(title: String = "",
                       subtitle: String = "",
                       message: String = "",
                       image: String = "",
+                      identifier: String = "",
                       acceptString: String = "Open",
                       acceptAction: String = "",
                       declineString: String = "Close",
@@ -144,9 +169,9 @@ func sendNotification(title: String = "",
                 }
 
                 // Create the request
-                //let uuidString = UUID().uuidString
-                let request = UNNotificationRequest(identifier: UUID().uuidString,
-                            content: content, trigger: nil)
+                // Use provided identifier or generated UUID
+                let request = UNNotificationRequest(identifier: identifier.isEmpty ? UUID().uuidString : identifier,
+                                                    content: content, trigger: nil)
 
                 // Schedule the request with the system.
                 notification.add(request) { (error) in

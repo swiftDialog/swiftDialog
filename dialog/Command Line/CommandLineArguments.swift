@@ -51,6 +51,7 @@ struct CommandLineArguments {
     var buttonInfoTextOption     = CommandlineArgument(long: "infobuttontext", defaultValue: appDefaults.buttonInfoDefault)
     var buttonInfoActionOption   = CommandlineArgument(long: "infobuttonaction")
     var buttonStyle              = CommandlineArgument(long: "buttonstyle")
+    var buttonSize               = CommandlineArgument(long: "buttonsize", defaultValue: "regular")
     var dropdownTitle            = CommandlineArgument(long: "selecttitle")
     var dropdownValues           = CommandlineArgument(long: "selectvalues")
     var dropdownDefault          = CommandlineArgument(long: "selectdefault")
@@ -93,6 +94,7 @@ struct CommandLineArguments {
     var preferredViewOrder       = CommandlineArgument(long: "vieworder")
     var preferredAppearance      = CommandlineArgument(long: "appearance")
     var setAppIcon               = CommandlineArgument(long: "seticon")
+    var notificationIdentifier   = CommandlineArgument(long: "identifier", short: "id")
 
     // command line options that take no additional parameters
     var button1Disabled          = CommandlineArgument(long: "button1disabled", isbool: true)
@@ -138,6 +140,7 @@ struct CommandLineArguments {
     var loginWindow              = CommandlineArgument(long: "loginwindow", isbool: true)
     var hideDefaultKeyboardAction = CommandlineArgument(long: "hidedefaultkeyboardaction", isbool: true)
     var alwaysReturnUserInput      = CommandlineArgument(long: "alwaysreturninput", isbool: true)
+    var removeNotification        = CommandlineArgument(long: "remove", isbool: true)
 }
 
 extension CommandlineArgument {
@@ -234,6 +237,7 @@ extension CommandLineArguments {
                     case "buttonInfoTextOption": self.buttonInfoTextOption = argument
                     case "buttonInfoActionOption": self.buttonInfoActionOption = argument
                     case "buttonStyle": self.buttonStyle = argument
+                    case "buttonSize": self.buttonSize = argument
                     case "dropdownTitle": self.dropdownTitle = argument
                     case "dropdownValues": self.dropdownValues = argument
                     case "dropdownDefault": self.dropdownDefault = argument
@@ -318,6 +322,8 @@ extension CommandLineArguments {
                     case "hideDefaultKeyboardAction": self.hideDefaultKeyboardAction = argument
                     case "alwaysReturnUserInput": self.alwaysReturnUserInput = argument
                     case "setAppIcon": self.setAppIcon = argument
+                    case "removeNotification": self.removeNotification = argument
+                    case "notificationIdentifier": self.notificationIdentifier = argument
                     default: break
                     }
                 }
