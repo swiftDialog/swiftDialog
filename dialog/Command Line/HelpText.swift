@@ -147,9 +147,27 @@ struct SDHelp {
           --\(appArguments.subTitleOption.long) <text>
           --\(appArguments.messageOption.long) <text> (as plain text. newlines supported as \\n)
           --\(appArguments.iconOption.long) <image> *
+          --\(appArguments.notificationIdentifier.long) <text>
+          --\(appArguments.removeNotification.long)
 
         * <image> must refer to a local file or app bundle. Remote images sources are not supported.
 """
+
+        argument.notificationIdentifier.helpShort = "Set the notification identifier"
+        argument.notificationIdentifier.helpLong = """
+        Identifier is used to uniquely identify the notification.
+        If not specified, a random identifier will be generated.
+
+        Use this identifier to remove the notification with the --\(appArguments.removeNotification.long) option
+
+        If the identifier is not unique, the previous notification will be replaced by the new one.
+        """
+
+        argument.removeNotification.helpShort = "Remove a system notification"
+        argument.removeNotification.helpLong = """
+        Removes the notification with the specified identifier.
+        If no identifier is specified, all notifications will be removed.
+        """
 
         argument.dialogStyle.helpShort = "Configure a pre-set window style"
         argument.dialogStyle.helpUsage = "presentation | mini | centered | alert | caution | warning"
@@ -177,6 +195,12 @@ struct SDHelp {
 
         When using this mode, --\(argument.timerBar.long) and --\(argument.infoButtonOption.long) are not available
         In "stack" mode, Info button is not available.
+"""
+        argument.buttonSize.helpShort = "Configure how large the buttons are"
+        argument.buttonSize.helpUsage = "mini|small|regular|large"
+        argument.buttonSize.helpLong = """
+        Adjusts the size of the buttons at the bottom of the window.
+        Default: regular
 """
 
         argument.webcontent.helpShort = "Display a web page"
@@ -593,12 +617,12 @@ struct SDHelp {
             secure     - Presents a secure input area. Contents of the textfield will not be shown on screen
             required   - swiftDialog will not exit until the field is populated
             prompt     - Pre-fill the field with some prompt text
+            value      - Pre-fill the field with a specific value
             regex      - Specify a regular expression that the field must satisfy for the content to be accepted.
             confirm    - Will display a duplicate of the textfield who's content needs to match to validate
             regexerror - Specify a custom error to display if regex conditions are not met
             fileselect - Adds a "Select" button and presents a file picker
             filetype   - Limits fileselect to the named file extensions. Presented in space separated values
-            confirm    - Adds a secondary textfield whose contents need to match the primary one for validation to succeed
 
         modifiers can be combined e.g. --\(appArguments.textField.long) <text>,secure,required
                                        --\(appArguments.textField.long) <text>,required,prompt="<text>"
