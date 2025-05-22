@@ -119,13 +119,15 @@ struct ListItems: Codable {
     var statusText: String = ""
     var statusIcon: String = ""
     var progress: CGFloat = 0
+    var action: String = ""
     var dictionary: [String: Any] {
             return ["title": title,
                     "subtitle": subTitle,
                     "icon": icon,
                     "statustext": statusText,
                     "status": statusIcon,
-                    "progress": progress]
+                    "progress": progress,
+                    "action": action]
         }
     var nsDictionary: NSDictionary {
             return dictionary as NSDictionary

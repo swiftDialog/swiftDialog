@@ -111,6 +111,7 @@ class FileReader {
         var icon: String = ""
         var statusText: String = ""
         var statusIcon: String = ""
+        var clickAction: String = ""
         let statusTypeArray = ["wait","success","fail","error","pending","progress"]
         var listProgressValue: CGFloat = 0
         var deleteRow: Bool = false
@@ -171,10 +172,12 @@ class FileReader {
                         statusIcon = action[1].trimmingCharacters(in: .whitespaces)
                         statusIsSet = true
                     case "progress":
-                    listProgressValue = action[1].trimmingCharacters(in: .whitespaces).floatValue()
+                        listProgressValue = action[1].trimmingCharacters(in: .whitespaces).floatValue()
                         statusIcon = "progress"
                         progressIsSet = true
                         statusIsSet = true
+                    case "action":
+                        clickAction = action[1].trimmingCharacters(in: .whitespaces)
                     case "delete":
                         deleteRow = true
                     case "add":
@@ -195,6 +198,7 @@ class FileReader {
                     if statusIsSet { userInputState.listItems[row].statusIcon = statusIcon }
                     if statusTextIsSet { userInputState.listItems[row].statusText = statusText }
                     if progressIsSet { userInputState.listItems[row].progress = listProgressValue }
+                    if !clickAction.isEmpty { userInputState.listItems[row].action = clickAction }
                     observedData.listItemUpdateRow = row
                     writeToLog("updated row at index \(row)")
                 }
@@ -207,7 +211,7 @@ class FileReader {
 
             // add to the list items array
             if addRow {
-                userInputState.listItems.append(ListItems(title: title, subTitle: subtitle, icon: icon, statusText: statusText, statusIcon: statusIcon, progress: listProgressValue))
+                userInputState.listItems.append(ListItems(title: title, subTitle: subtitle, icon: icon, statusText: statusText, statusIcon: statusIcon, progress: listProgressValue, action: clickAction))
                 writeToLog("row added with \(title) \(subtitle) \(icon) \(statusText) \(statusIcon)")
                 // update the view if visible
                 if observedData.args.listItem.present {

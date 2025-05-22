@@ -581,7 +581,8 @@ func processCLOptions(json: JSON = getJSON()) {
                                                subTitle: String(json[appArguments.listItem.long][index]["subtitle"].stringValue),
                                                icon: String(json[appArguments.listItem.long][index]["icon"].stringValue),
                                                statusText: String(json[appArguments.listItem.long][index]["statustext"].stringValue),
-                                               statusIcon: String(json[appArguments.listItem.long][index]["status"].stringValue))
+                                               statusIcon: String(json[appArguments.listItem.long][index]["status"].stringValue),
+                                                action: String(json[appArguments.listItem.long][index]["action"].stringValue))
                                 )
                 }
             }
@@ -595,6 +596,7 @@ func processCLOptions(json: JSON = getJSON()) {
                 var icon: String = ""
                 var statusText: String = ""
                 var statusIcon: String = ""
+                var action: String = ""
                 for item in items {
                     var itemKeyValuePair = item.split(separator: "=", maxSplits: 1)
                     for _ in itemKeyValuePair.count...2 {
@@ -613,11 +615,13 @@ func processCLOptions(json: JSON = getJSON()) {
                         statusText = itemValue
                     case "status":
                         statusIcon = itemValue
+                    case "action":
+                        action = itemValue
                     default:
                         title = itemName
                     }
                 }
-                userInputState.listItems.append(ListItems(title: title, subTitle: subTitle, icon: icon, statusText: statusText, statusIcon: statusIcon))
+                userInputState.listItems.append(ListItems(title: title, subTitle: subTitle, icon: icon, statusText: statusText, statusIcon: statusIcon, action: action))
             }
         }
         if userInputState.listItems.isEmpty {

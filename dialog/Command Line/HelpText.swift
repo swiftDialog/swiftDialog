@@ -688,7 +688,7 @@ struct SDHelp {
         argument.listItem.helpLong = """
         Multiple items can be added by specifying --\(appArguments.listItem.long) multiple times
 
-        Alternatly, specify a list item with either of the follwoing JSON formats (in conjunction with --\(appArguments.jsonFile.long) or \(appArguments.jsonString.long):
+        Alternatly, specify a list item with either of the following JSON formats (in conjunction with --\(appArguments.jsonFile.long) or \(appArguments.jsonString.long):
         Simple:
         {
           "listitem" : ["Item One", "Item Two", "Item Three", "Item Four", "Item Five"]
