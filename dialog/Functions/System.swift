@@ -302,7 +302,7 @@ func captureQuitKey(keyValue: String) {
         case [.command] where "wnm".contains(event.characters ?? ""):
             writeLog("Detected cmd+w or cmd+n or cmd+m")
             return nil
-        case [.command] where event.characters == "q":
+        case [.command] where event.characters == "q", [.command, .capsLock] where event.characters == "q":
             writeLog("Detected cmd+q")
             if keyValue != "q" {
                 writeLog("cmd+q is disabled")
