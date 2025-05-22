@@ -25,11 +25,11 @@ extension NSWindow {
 extension NSWindow.Position {
 
     enum Horizontal {
-        case left, center, right
+        case left, center, right, explicit(CGFloat)
     }
 
     enum Vertical {
-        case top, center, deadcenter, bottom
+        case top, center, deadcenter, bottom, explicit(CGFloat)
     }
 }
 
@@ -87,13 +87,17 @@ struct WindowAccessor: NSViewRepresentable {
 }
 
 func calculateWindowYPos(screenHeight: CGFloat, position: NSWindow.Position.Vertical, offset: CGFloat) -> CGFloat {
+    let ypos: CGFloat
     switch position {
-    case .top: return screenHeight - offset
+    case .top: ypos = offset
     case .center:
-        return (screenHeight / 2) + (screenHeight * 0.15)
-    case .deadcenter: return screenHeight / 2
-    case .bottom: return offset
+        ypos = (screenHeight / 2) + (screenHeight * 0.15)
+    case .deadcenter: ypos = screenHeight / 2
+    case .bottom: ypos = screenHeight - offset
+    case .explicit(let value):
+        ypos = value
     }
+    return screenHeight - ypos
 }
 
 func calculateWindowXPos(screenWidth: CGFloat, position: NSWindow.Position.Horizontal, offset: CGFloat) -> CGFloat {
@@ -101,6 +105,8 @@ func calculateWindowXPos(screenWidth: CGFloat, position: NSWindow.Position.Horiz
     case .left: return offset
     case .center: return screenWidth / 2
     case .right: return screenWidth - offset
+    case .explicit(let value):
+        return value
     }
 }
 

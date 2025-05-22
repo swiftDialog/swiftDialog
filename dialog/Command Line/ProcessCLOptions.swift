@@ -124,7 +124,18 @@ func processCLOptions(json: JSON = getJSON()) {
     // window location on screen
     if appArguments.position.present {
         writeLog("Window position will be set to \(appArguments.position.value)")
-        (appvars.windowPositionVertical,appvars.windowPositionHorozontal) = windowPosition(appArguments.position.value)
+        let pattern = #"^\b([0-9]{1,4}),([0-9]{1,4})\b$"#
+        let input = appArguments.position.value
+        if let regex = try? NSRegularExpression(pattern: pattern) {
+            let range = NSRange(location: 0, length: input.utf16.count)
+            if regex.firstMatch(in: input, options: [], range: range) != nil {
+                let posx = input.components(separatedBy: ",").first?.floatValue() ?? 0
+                let posy = input.components(separatedBy: ",").last?.floatValue() ?? 0
+                (appvars.windowPositionVertical,appvars.windowPositionHorozontal) = (.explicit(posx),.explicit(posy))
+            } else {
+                (appvars.windowPositionVertical,appvars.windowPositionHorozontal) = windowPosition(appArguments.position.value)
+            }
+        }
     }
     if appArguments.positionOffset.present {
         appvars.windowPositionOffset = appArguments.positionOffset.value.floatValue()

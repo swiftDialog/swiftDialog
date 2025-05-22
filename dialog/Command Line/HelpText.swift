@@ -776,12 +776,15 @@ struct SDHelp {
         Sets the height of the dialog window to the specified height in points
 """
 
-        argument.position.helpShort = "Set dialog window position"
-        argument.position.helpUsage = "[topleft | left | bottomleft | top | center/centre | bottom | topright | right | bottomright]"
+        argument.position.helpShort = "Position the dialog window to the defined location on the screen"
+        argument.position.helpUsage = "[topleft | left | bottomleft | top | center/centre | bottom | topright | right | bottomright | x,y]"
         argument.position.helpLong = """
-        Poitions the dialog window to the defined location on the screen
+        Supply one of the defined keywords or a precise position in x,y format e.g. "100,200"
+          Position is calculated with the screen origin 0,0 and window position anchor at top left
 
-        Default is a visually appealing position slightly towards the top of centre, not dead centre.
+        There is a default edge offset value of \(appvars.windowPositionOffset). This can be adjusted using the --\(arguments.positionOffset.long) argument
+
+        Default is centred with a visually appealing vertical position slightly towards the top of centre, not dead centre.
 """
 
         argument.positionOffset.helpShort = "Set dialog window position offset"
