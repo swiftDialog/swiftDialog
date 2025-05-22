@@ -91,7 +91,7 @@ func calculateWindowYPos(screenHeight: CGFloat, position: NSWindow.Position.Vert
     switch position {
     case .top: ypos = offset
     case .center:
-        ypos = (screenHeight / 2) + (screenHeight * 0.15)
+        ypos = (screenHeight / 2) - (screenHeight * 0.15)
     case .deadcenter: ypos = screenHeight / 2
     case .bottom: ypos = screenHeight - offset
     case .explicit(let value):
