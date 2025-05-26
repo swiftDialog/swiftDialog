@@ -41,10 +41,15 @@ struct TextEntryView: View {
         }
     }
 
-    func openFilePanel(fileType: String, completion: @escaping (String) -> Void) {
+    func openFilePanel(fileType: String, initialPath: String, completion: @escaping (String) -> Void) {
         let panel = NSOpenPanel()
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
+        if initialPath.isEmpty {
+            panel.directoryURL = FileManager.default.homeDirectoryForCurrentUser
+        } else {
+            panel.directoryURL = URL(string: "file://\(initialPath)")
+        }
         if fileType != "" {
             var fileTypesArray: [UTType] = []
             for type in fileType.components(separatedBy: " ") {
@@ -125,7 +130,7 @@ struct TextEntryView: View {
 
                             if textfieldContent[index].fileSelect {
                                 Button("button-select".localized) {
-                                    openFilePanel(fileType: textfieldContent[index].fileType) { selectedPath in
+                                    openFilePanel(fileType: textfieldContent[index].fileType, initialPath: textfieldContent[index].initialPath) { selectedPath in
                                          textfieldContent[index].value = selectedPath
                                     }
                                 }

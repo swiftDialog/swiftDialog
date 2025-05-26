@@ -73,6 +73,7 @@ struct TextFieldState {
     var confirm: Bool     = false
     var validationValue: String = ""
     var requiredTextfieldHighlight: Color = .clear
+    var initialPath: String = ""
     var dictionary: [String: Any] {
             return ["title": title,
                     "name": name,
@@ -81,7 +82,8 @@ struct TextFieldState {
                     "prompt": prompt,
                     "regex": regex,
                     "regexerror": regexError,
-                    "value": value
+                    "value": value,
+                    "path": initialPath
             ]
         }
     var nsDictionary: NSDictionary {

@@ -370,7 +370,8 @@ func processCLOptions(json: JSON = getJSON()) {
                         name: String(json[appArguments.textField.long][index]["name"].stringValue),
                         value: String(json[appArguments.textField.long][index]["value"].stringValue),
                         isDate: Bool(json[appArguments.textField.long][index]["isdate"].boolValue),
-                        confirm: Bool(json[appArguments.textField.long][index]["confirm"].boolValue))
+                        confirm: Bool(json[appArguments.textField.long][index]["confirm"].boolValue),
+                        initialPath: String(json[appArguments.textField.long][index]["path"].stringValue))
                     )
                 }
             }
@@ -391,6 +392,7 @@ func processCLOptions(json: JSON = getJSON()) {
                 var fieldValue: String = ""
                 var fieldIsDate: Bool = false
                 var fieldConfirm: Bool = false
+                var fieldInitialPath: String = ""
                 if items.count > 0 {
                     fieldTitle = items[0]
                     if items.count > 1 {
@@ -426,6 +428,8 @@ func processCLOptions(json: JSON = getJSON()) {
                                 fieldIsDate = true
                             case "confirm":
                                 fieldConfirm = true
+                            case "path":
+                                fieldInitialPath = items[index+1]
                             default: ()
                             }
                         }
@@ -445,7 +449,8 @@ func processCLOptions(json: JSON = getJSON()) {
                             name: fieldName,
                             value: fieldValue,
                             isDate: fieldIsDate,
-                            confirm: fieldConfirm))
+                            confirm: fieldConfirm,
+                            initialPath: fieldInitialPath))
             }
         }
         for index in 0..<userInputState.textFields.count where userInputState.textFields[index].required {

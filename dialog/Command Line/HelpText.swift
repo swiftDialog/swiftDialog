@@ -622,6 +622,7 @@ struct SDHelp {
             confirm    - Will display a duplicate of the textfield who's content needs to match to validate
             regexerror - Specify a custom error to display if regex conditions are not met
             fileselect - Adds a "Select" button and presents a file picker
+            path       - Used with fileselect. Sets initial path for file select dialog
             filetype   - Limits fileselect to the named file extensions. Presented in space separated values
 
         modifiers can be combined e.g. --\(appArguments.textField.long) <text>,secure,required
