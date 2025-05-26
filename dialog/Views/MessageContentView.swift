@@ -97,30 +97,46 @@ struct MessageContent: View {
                             }
                         } else {
                             ScrollView {
-                                Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
-                                    .frame(width: messageGeometry.size.width, alignment: observedData.appProperties.messagePosition)
-                                    .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                                    .lineSpacing(2)
-                                    .fixedSize()
-                                    .background(GeometryReader {child -> Color in
-                                        DispatchQueue.main.async {
-                                            // update on next cycle with calculated height
-                                            self.messageHeight = child.size.height > defaultMessageHeight ? child.size.height : defaultMessageHeight
+                                ForEach(parseMarkdownSections(from: observedData.args.messageOption.value), id: \.id) { section in
+                                    if section.isCollapsible {
+                                        CollapsibleBlock(title: section.title ?? "Details", content: section.content)
+                                        .markdownTextStyle {
+                                            FontSize(appvars.messageFontSize-2)
+                                            ForegroundColor(messageColour)
                                         }
-                                        return Color.clear
-                                    })
-                                    .markdownTheme(.sdMarkdown)
-                                    .markdownTextStyle {
-                                        FontSize(appvars.messageFontSize)
-                                        ForegroundColor(messageColour)
+                                        .padding(.vertical, 2)
+                                        .focusable(false)
+                                    } else {
+                                        Markdown(section.content)
+                                            .frame(width: messageGeometry.size.width, alignment: observedData.appProperties.messagePosition)
+                                            .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                                            .lineSpacing(2)
+                                            .fixedSize()
+                                            /*
+                                             // Leaving this commented out for now just in case we need it back
+                                            .background(GeometryReader {child -> Color in
+                                                DispatchQueue.main.async {
+                                                    // update on next cycle with calculated height
+                                                    self.messageHeight = child.size.height > defaultMessageHeight ? child.size.height : defaultMessageHeight
+                                                }
+                                                return Color.clear
+                                            })
+                                             */
+                                            .markdownTheme(.sdMarkdown)
+                                            .markdownTextStyle {
+                                                FontSize(appvars.messageFontSize)
+                                                ForegroundColor(messageColour)
+                                            }
+                                            .accessibilityHint(observedData.args.messageOption.value)
+                                            .focusable(false)
+                                            .border(observedData.appProperties.debugBorderColour, width: 2)
                                     }
-                                    .accessibilityHint(observedData.args.messageOption.value)
-                                    .focusable(false)
-                                    .border(observedData.appProperties.debugBorderColour, width: 2)
+                                }
                             }
                         }
                 }
-                .frame(minHeight: 30, maxHeight: messageHeight)
+                // Will be interesting is commenting out this line causes issues
+                //.frame(minHeight: 30, maxHeight: messageHeight)
                 if !observedData.args.messageVerticalAlignment.present || ["centre", "center", "top"].contains(observedData.args.messageVerticalAlignment.value) {
                     Spacer()
                 }
@@ -203,3 +219,70 @@ struct PriorityView<Content: View>: View {
             .zIndex(Double(priority))
     }
 }
+
+struct MarkdownSection: Identifiable {
+    let id = UUID()
+    let isCollapsible: Bool
+    let title: String?
+    let content: String
+}
+
+struct CollapsibleBlock: View {
+    let title: String
+    let content: String
+    @State private var isExpanded: Bool = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Button(action: { isExpanded.toggle() }) {
+                HStack {
+                    Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
+                    Text(title)
+                        .font(.headline)
+                    Spacer()
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(PlainButtonStyle())
+
+            if isExpanded {
+                Markdown(content)
+                    .padding(.leading, 16)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+func parseMarkdownSections(from text: String) -> [MarkdownSection] {
+        var sections: [MarkdownSection] = []
+        var lines = text.split(separator: "\n", omittingEmptySubsequences: false)
+        var index = 0
+
+        while index < lines.count {
+                let line = lines[index].trimmingCharacters(in: .whitespaces)
+            if line.starts(with: "::~") {
+                let title = line.replacingOccurrences(of: "::~", with: "").trimmingCharacters(in: .whitespaces)
+                var content = ""
+                index += 1
+                while index < lines.count && !lines[index].trimmingCharacters(in: .whitespaces).starts(with: ":::") {
+                    content += lines[index] + "\n"
+                    index += 1
+                }
+                // Skip the ::: end line
+                index += 1
+                sections.append(.init(isCollapsible: true, title: title, content: content))
+            } else {
+                var content = ""
+                while index < lines.count && !lines[index].trimmingCharacters(in: .whitespaces).starts(with: "::~") {
+                    content += lines[index] + "\n"
+                    index += 1
+                }
+                if !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    sections.append(.init(isCollapsible: false, title: nil, content: content))
+                }
+            }
+        }
+
+        return sections
+    }
