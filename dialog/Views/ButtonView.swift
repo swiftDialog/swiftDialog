@@ -89,6 +89,11 @@ struct ButtonView: View {
                     )
                     .keyboardShortcut(observedData.appProperties.button1DefaultAction)
                     .disabled(buttonCentreStyle ? false : observedData.args.button1Disabled.present)
+                    .onReceive(timer) { _ in
+                            if observedData.args.timerBar.present && !observedData.args.hideTimerBar.present {
+                                observedData.args.button1Disabled.present = false
+                            }
+                    }
                 }
 
                 if observedData.args.button2Option.present || observedData.args.button2TextOption.present {
