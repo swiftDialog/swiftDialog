@@ -64,7 +64,6 @@ struct MessageContent: View {
                     Spacer()
                 }
                 .frame(maxWidth: appvars.windowWidth*0.8)
-                .frame(maxHeight: iconDisplayWidth)
             }
 
             if observedData.args.mainImage.present {
