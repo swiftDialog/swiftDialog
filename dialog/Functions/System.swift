@@ -369,6 +369,13 @@ var isLaptop: Bool {
 
 func activateDialog() {
     DispatchQueue.main.async {
+        // Activate the application more aggressively
         NSApplication.shared.activate(ignoringOtherApps: true)
+
+        // Also try to bring the window to front if it exists
+        if let window = NSApplication.shared.windows.first {
+            window.makeKeyAndOrderFront(nil)
+            window.orderFrontRegardless()
+        }
     }
 }

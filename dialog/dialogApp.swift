@@ -17,7 +17,7 @@ var background = BlurWindowController()
 class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
 
     var monitor: PIDMonitor?
-    
+
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                 didReceive response: UNNotificationResponse,
                 withCompletionHandler completionHandler:
@@ -81,10 +81,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 writeLog("CGSession found. Continuing", logLevel: .debug)
             }
 
-            // Set window level
-            if appArguments.forceOnTop.present || appArguments.blurScreen.present {
+            // Set initial window level
+            if appArguments.forceOnTop.present {
+                window.level = .floating  // Start with floating, will be elevated after positioning
+                writeLog("Window initially set to floating level for force on top", logLevel: .debug)
+            } else if appArguments.blurScreen.present {
                 window.level = .floating
-                writeLog("Window is forced on top", logLevel: .debug)
+                writeLog("Window set to floating level for blur screen", logLevel: .debug)
             } else {
                 window.level = .normal
             }
@@ -93,22 +96,37 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             if appArguments.blurScreen.present && !appArguments.fullScreenWindow.present {
                 writeLog("Blurscreen enabled", logLevel: .debug)
                 blurredScreen.show()
-                //window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
-            } else if appArguments.forceOnTop.present {
-                window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
             } else {
                 background.close()
             }
-            
+
             placeWindow(window, size: CGSize(width: appvars.windowWidth,
                                              height: appvars.windowHeight),
                         vertical: appvars.windowPositionVertical,
                         horozontal: appvars.windowPositionHorozontal,
                         offset: appvars.windowPositionOffset,
                         useFullScreen: appArguments.blurScreen.present || appArguments.forceOnTop.present)
-            
+
             // order to the front
             window.makeKeyAndOrderFront(self)
+
+            // Force on top configuration - apply after window is positioned and visible
+            if appArguments.forceOnTop.present {
+                DispatchQueue.main.async {
+                    // Set the highest possible window level
+                    let maxLevel = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
+                    window.level = maxLevel
+
+                    // Ensure window collection behavior allows it to appear on all spaces
+                    window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+
+                    // Force the window to order front again with new level
+                    window.orderFront(nil)
+
+                    writeLog("Window level elevated to maximum: \(maxLevel.rawValue)", logLevel: .debug)
+                    writeLog("Window collection behavior set for force on top", logLevel: .debug)
+                }
+            }
 
             if appArguments.forceOnTop.present || appArguments.blurScreen.present {
                 writeLog("Activating window", logLevel: .debug)
@@ -224,7 +242,7 @@ struct dialogApp: App {
     }
 
     var body: some Scene {
-        
+
         WindowGroup {
             if !appArguments.notification.present && !appvars.noargs {
                 let _ = appvars.debugMode ? print("DEBUG: Checking modes - mini:\(appArguments.miniMode.present) inspect:\(appArguments.inspectMode.present) presentation:\(appArguments.presentationMode.present)") : ()
@@ -237,7 +255,7 @@ struct dialogApp: App {
                         // Wrap InspectView to delay its initialization
                         let _ = appvars.debugMode ? print("DEBUG: Loading InspectView") : ()
                         InspectView()
-                            .frame(width: observedData.appProperties.windowWidth, 
+                            .frame(width: observedData.appProperties.windowWidth,
                                   height: observedData.appProperties.windowHeight)
                     } else if appArguments.presentationMode.present {
                         let _ = appvars.debugMode ? print("DEBUG: Loading PresentationView") : ()
@@ -263,7 +281,7 @@ struct dialogApp: App {
                             appArguments.movableWindow.present = true
                         }
                     }
-                    
+
                 }
                 .onDisappear {
                     quitDialog(exitCode: appDefaults.exit15.code)
@@ -282,5 +300,3 @@ struct dialogApp: App {
 
 
 }
-
-
