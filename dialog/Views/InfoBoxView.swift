@@ -6,7 +6,8 @@
 //
 
 import SwiftUI
-import MarkdownUI
+import Textual
+
 
 struct InfoBoxView: View {
 
@@ -21,12 +22,9 @@ struct InfoBoxView: View {
 
     var body: some View {
         ZStack {
-            Markdown(observedData.args.infoBox.value, baseURL: URL(string: "http://"))
+            StructuredText(markdown: observedData.args.infoBox.value, baseURL: URL(string: "http://"))
                 .multilineTextAlignment(.leading)
-                .markdownTextStyle {
-                    ForegroundColor(.secondary)
-                }
-                .markdownTheme(Theme().basicWithInfoBoxLinkStyle())
+                .textual.structuredTextStyle(.gitHub)
                 .focusable(false)
                 .lineLimit(nil)
         }

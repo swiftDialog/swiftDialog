@@ -10,6 +10,7 @@
 		41005AA927CEF81A0065F323 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 41005AA827CEF81A0065F323 /* SwiftyJSON */; };
 		41005AAA27CEF8250065F323 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4114E1E827153FEE00388274 /* AVKit.framework */; };
 		41110A2825F9E79E008171D2 /* License.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41110A2725F9E79E008171D2 /* License.swift */; };
+		41132F822F3C7847006BECA2 /* Textual in Frameworks */ = {isa = PBXBuildFile; productRef = 41132F812F3C7847006BECA2 /* Textual */; };
 		4116922C28939B4500A88700 /* CKTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116922B28939B4500A88700 /* CKTitleView.swift */; };
 		4116922F28939C2A00A88700 /* CKWindowProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116922E28939C2A00A88700 /* CKWindowProperties.swift */; };
 		4116923228939DEB00A88700 /* CKSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116923128939DEB00A88700 /* CKSidebarView.swift */; };
@@ -391,6 +392,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				41132F822F3C7847006BECA2 /* Textual in Frameworks */,
 				41BD41C52EA1FAF500DA7124 /* SDWebImageSwiftUI in Frameworks */,
 				41005AAA27CEF8250065F323 /* AVKit.framework in Frameworks */,
 				41005AA927CEF81A0065F323 /* SwiftyJSON in Frameworks */,
@@ -840,6 +842,7 @@
 				41005AA827CEF81A0065F323 /* SwiftyJSON */,
 				41A5A6A328E5468100BD3D5E /* WebViewKit */,
 				41BD41C42EA1FAF500DA7124 /* SDWebImageSwiftUI */,
+				41132F812F3C7847006BECA2 /* Textual */,
 			);
 			productName = dialog;
 			productReference = 4154C2DA25F76BDB00A3D373 /* Dialog.app */;
@@ -969,6 +972,7 @@
 				41A5A6A228E5468100BD3D5E /* XCRemoteSwiftPackageReference "WebViewKit" */,
 				CC72EBA62E1BE48800CF0DA1 /* XCRemoteSwiftPackageReference "swift-argument-parser" */,
 				41BD41C32EA1FAF500DA7124 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+				41132F802F3C7847006BECA2 /* XCRemoteSwiftPackageReference "textual" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4154C2DB25F76BDB00A3D373 /* Products */;
@@ -1388,7 +1392,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"dialog/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = D6G4X4D7C9;
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = PWA5E9TQ59;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = dialog/Info.plist;
@@ -1396,7 +1400,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 3.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.csiro.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1420,7 +1424,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"dialog/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = D6G4X4D7C9;
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = PWA5E9TQ59;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = dialog/Info.plist;
@@ -1428,7 +1432,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 3.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.csiro.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1529,13 +1533,13 @@
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = D6G4X4D7C9;
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = PWA5E9TQ59;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.csiro.dialogcli;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1555,13 +1559,13 @@
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = D6G4X4D7C9;
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = PWA5E9TQ59;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.csiro.dialogcli;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1679,6 +1683,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		41132F802F3C7847006BECA2 /* XCRemoteSwiftPackageReference "textual" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gonzalezreal/textual";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.3.1;
+			};
+		};
 		414CBAE9278913BA00A1A980 /* XCRemoteSwiftPackageReference "SwiftyJSON" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SwiftyJSON/SwiftyJSON.git";
@@ -1734,6 +1746,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 414CBAE9278913BA00A1A980 /* XCRemoteSwiftPackageReference "SwiftyJSON" */;
 			productName = SwiftyJSON;
+		};
+		41132F812F3C7847006BECA2 /* Textual */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 41132F802F3C7847006BECA2 /* XCRemoteSwiftPackageReference "textual" */;
+			productName = Textual;
 		};
 		417DEF1C2E7ACCB600CAB132 /* ArgumentParser */ = {
 			isa = XCSwiftPackageProductDependency;

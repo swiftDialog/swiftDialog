@@ -7,7 +7,7 @@
 
 import Foundation
 import SwiftUI
-import MarkdownUI
+import Textual
 
 struct FullscreenView: View {
 
@@ -158,16 +158,14 @@ struct FullscreenView: View {
                                 .font(.system(size: messageContentFontSize))
                                 .multilineTextAlignment(.center)
                             */
-                            Markdown(observedData.args.messageOption.value, baseURL: URL(string: "http://"))
+                            StructuredText(markdown: observedData.args.messageOption.value, baseURL: URL(string: "http://"))
                                 .frame(alignment: .center)
                                 .multilineTextAlignment(observedData.appProperties.messageAlignment)
                                 .lineSpacing(2)
                                 .fixedSize()
-                                .markdownTheme(.sdMarkdown)
-                                .markdownTextStyle {
-                                    FontSize(messageContentFontSize)
-                                    ForegroundColor(.white)
-                                }
+                                .textual.structuredTextStyle(.gitHub)
+                                .font(Font.system(size: messageContentFontSize))
+                                .foregroundColor(.white)
                                 .accessibilityHint(observedData.args.messageOption.value)
                                 .focusable(false)
                             //.scrollOnOverflow()

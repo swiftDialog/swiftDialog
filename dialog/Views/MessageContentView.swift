@@ -7,7 +7,7 @@
 
 import Foundation
 import SwiftUI
-import MarkdownUI
+import Textual
 
 struct MessageContent: View {
 
@@ -86,12 +86,11 @@ struct MessageContent: View {
                                 List {
                                     Text(observedData.args.messageOption.value)
                                         .font(.system(size: 12, design: .monospaced))
-                                        .background(GeometryReader {child -> Color in
-                                            DispatchQueue.main.async {
-                                                // update on next cycle with calculated height
-                                                self.messageHeight = child.size.height > defaultMessageHeight ? child.size.height : defaultMessageHeight
-                                            }
-                                            return Color.clear
+                                        .background(GeometryReader { child in
+                                            Color.clear
+                                                .onAppear {
+                                                    self.messageHeight = child.size.height > defaultMessageHeight ? child.size.height : defaultMessageHeight
+                                                }
                                         })
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                 }
@@ -101,41 +100,26 @@ struct MessageContent: View {
                             }
                         } else {
                             ScrollView {
-                                ForEach(parseMarkdownSections(from: observedData.args.messageOption.value), id: \.id) { section in
-                                    if section.isCollapsible {
-                                        CollapsibleBlock(title: section.title ?? "Details", content: section.content)
-                                        .markdownTextStyle {
-                                            FontSize(appvars.messageFontSize-2)
-                                            ForegroundColor(messageColour)
+                                
+                                StructuredText(markdown: observedData.args.messageOption.value)
+                                    .frame(width: messageGeometry.size.width, alignment: observedData.appProperties.messagePosition)
+                                    .multilineTextAlignment(observedData.appProperties.messageAlignment)
+                                    .lineSpacing(2)
+                                    .fixedSize()
+                                    .background(GeometryReader {child -> Color in
+                                        DispatchQueue.main.async {
+                                            // update on next cycle with calculated height
+                                            self.messageHeight = child.size.height > defaultMessageHeight ? child.size.height : defaultMessageHeight
                                         }
-                                        .padding(.vertical, 2)
-                                        .focusable(false)
-                                        .task {
-                                            messageHeight = .infinity
-                                        }
-                                    } else {
-                                        Markdown(section.content)
-                                            .frame(width: messageGeometry.size.width, alignment: observedData.appProperties.messagePosition)
-                                            .multilineTextAlignment(observedData.appProperties.messageAlignment)
-                                            .lineSpacing(2)
-                                            .fixedSize()
-                                            .background(GeometryReader {child -> Color in
-                                                DispatchQueue.main.async {
-                                                    // update on next cycle with calculated height
-                                                    self.messageHeight = child.size.height > defaultMessageHeight ? child.size.height : defaultMessageHeight
-                                                }
-                                                return Color.clear
-                                            })
-                                            .markdownTheme(.sdMarkdown)
-                                            .markdownTextStyle {
-                                                FontSize(appvars.messageFontSize)
-                                                ForegroundColor(messageColour)
-                                            }
-                                            .accessibilityHint(observedData.args.messageOption.value)
-                                            .focusable(false)
-                                            .border(observedData.appProperties.debugBorderColour, width: 2)
-                                    }
-                                }
+                                        return Color.clear
+                                    })
+                                    .textual.structuredTextStyle(.gitHub)
+                                    .textual.textSelection(.enabled)
+                                    .font(Font.system(size: appvars.messageFontSize, weight: .regular, design: .default))
+                                    .foregroundColor(messageColour)
+                                    .accessibilityHint(observedData.args.messageOption.value)
+                                    .focusable(false)
+                                    .border(observedData.appProperties.debugBorderColour, width: 2)
                             }
                             .padding(.top, appDefaults.topPadding)
                         }
@@ -257,7 +241,7 @@ struct CollapsibleBlock: View {
             .buttonStyle(PlainButtonStyle())
 
             if isExpanded {
-                Markdown(content)
+                StructuredText(markdown: content)
                     .padding(.leading, 16)
             }
         }

@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import MarkdownUI
+import Textual
 
 struct ErrorView: View {
 
@@ -30,8 +30,8 @@ struct ErrorView: View {
             .padding(appDefaults.sidePadding)
             Text("One or more input fields are incorrect").bold()
                 .padding()
-            Markdown(observedData.sheetErrorMessage)
-                .markdownTheme(.basic)
+            StructuredText(markdown: observedData.sheetErrorMessage)
+                .textual.structuredTextStyle(.gitHub)
             //Text(observedData.sheetErrorMessage)
                 .padding(.leading, appDefaults.sidePadding)
                 .padding(.trailing, appDefaults.sidePadding)
