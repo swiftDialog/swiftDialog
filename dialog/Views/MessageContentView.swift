@@ -101,7 +101,8 @@ struct MessageContent: View {
                         } else {
                             ScrollView {
                                 
-                                StructuredText(markdown: observedData.args.messageOption.value)
+                                StructuredText(observedData.args.messageOption.value,
+                                               parser: ColoredMarkdownParser())
                                     .frame(width: messageGeometry.size.width, alignment: observedData.appProperties.messagePosition)
                                     .multilineTextAlignment(observedData.appProperties.messageAlignment)
                                     .lineSpacing(2)
@@ -115,7 +116,12 @@ struct MessageContent: View {
                                     })
                                     .textual.structuredTextStyle(.gitHub)
                                     .textual.textSelection(.enabled)
-                                    .font(Font.system(size: appvars.messageFontSize, weight: .regular, design: .default))
+                                    .font(
+                                        appvars.messageFontName.isEmpty ?
+                                        Font.system(size: appvars.messageFontSize, weight: appvars.messageFontWeight, design: .default) :
+                                        .custom(appvars.messageFontName, size: appvars.messageFontSize)
+                                    )
+                                    .fontWeight(appvars.messageFontWeight)
                                     .foregroundColor(messageColour)
                                     .accessibilityHint(observedData.args.messageOption.value)
                                     .focusable(false)

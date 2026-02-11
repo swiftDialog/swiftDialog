@@ -11,6 +11,7 @@
 		41005AAA27CEF8250065F323 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4114E1E827153FEE00388274 /* AVKit.framework */; };
 		41110A2825F9E79E008171D2 /* License.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41110A2725F9E79E008171D2 /* License.swift */; };
 		41132F822F3C7847006BECA2 /* Textual in Frameworks */ = {isa = PBXBuildFile; productRef = 41132F812F3C7847006BECA2 /* Textual */; };
+		41132F842F3CA032006BECA2 /* Markdown+Addittions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41132F832F3CA018006BECA2 /* Markdown+Addittions.swift */; };
 		4116922C28939B4500A88700 /* CKTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116922B28939B4500A88700 /* CKTitleView.swift */; };
 		4116922F28939C2A00A88700 /* CKWindowProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116922E28939C2A00A88700 /* CKWindowProperties.swift */; };
 		4116923228939DEB00A88700 /* CKSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116923128939DEB00A88700 /* CKSidebarView.swift */; };
@@ -220,6 +221,7 @@
 
 /* Begin PBXFileReference section */
 		41110A2725F9E79E008171D2 /* License.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = License.swift; sourceTree = "<group>"; };
+		41132F832F3CA018006BECA2 /* Markdown+Addittions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Markdown+Addittions.swift"; sourceTree = "<group>"; };
 		4114E1E827153FEE00388274 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		4114E1EA27154B2200388274 /* VideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoView.swift; sourceTree = "<group>"; };
 		4116922B28939B4500A88700 /* CKTitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKTitleView.swift; sourceTree = "<group>"; };
@@ -758,6 +760,7 @@
 		CC2190532A7BCD3400269525 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				41132F832F3CA018006BECA2 /* Markdown+Addittions.swift */,
 				CC2190542A7BCD5600269525 /* Colour+Additions.swift */,
 				CC2190562A7BCDA800269525 /* String+Additions.swift */,
 				CC2190582A7BCDDD00269525 /* View+Additions.swift */,
@@ -1178,6 +1181,7 @@
 				CC21905D2A7BD7D300269525 /* AppVariables.swift in Sources */,
 				4124EFD229455861003B00F4 /* HelpView.swift in Sources */,
 				CC2190502A7BC9FE00269525 /* Log.swift in Sources */,
+				41132F842F3CA032006BECA2 /* Markdown+Addittions.swift in Sources */,
 				94072E492AFE931300B2A5C3 /* Font+Additions.swift in Sources */,
 				41D81E7925F870A500D1F7E1 /* System.swift in Sources */,
 			);
