@@ -51,42 +51,16 @@ struct BannerImageView: View {
                     .clipped()
             }
             if observedData.args.bannerTitle.present {
-                ZStack {
-                    if observedData.appProperties.titleFontShadow {
-                        if observedData.appProperties.titleFontName == "" {
-                            InlineText(observedData.args.titleOption.value, parser: ColoredMarkdownParser())
-                            //Text(observedData.args.titleOption.value)
-                                .font(.system(size: observedData.appProperties.titleFontSize, weight: observedData.appProperties.titleFontWeight))
-                                .foregroundColor(.black)
-                                .offset(x: blurOffset, y: blurOffset)
-                                .blur(radius: blurRadius)
-                                .opacity(opacity)
-                        } else {
-                            InlineText(observedData.args.titleOption.value, parser: ColoredMarkdownParser())
-                            //Text(observedData.args.titleOption.value)
-                                .font(.custom(observedData.appProperties.titleFontName, size: observedData.appProperties.titleFontSize))
-                                .fontWeight(observedData.appProperties.titleFontWeight)
-                                .foregroundColor(.black)
-                                .offset(x: blurOffset, y: blurOffset)
-                                .blur(radius: blurRadius)
-                                .opacity(opacity)
-                        }
-                    }
-                    if observedData.appProperties.titleFontName == "" {
-                        InlineText(observedData.args.titleOption.value, parser: ColoredMarkdownParser())
-                        //Text(observedData.args.titleOption.value)
-                            .font(.system(size: observedData.appProperties.titleFontSize, weight: observedData.appProperties.titleFontWeight))
-                            .foregroundColor(observedData.appProperties.titleFontColour)
-                            .accessibilityHint(observedData.args.titleOption.value)
-                    } else {
-                        InlineText(observedData.args.titleOption.value, parser: ColoredMarkdownParser())
-                        //Text(observedData.args.titleOption.value)
-                            .font(.custom(observedData.appProperties.titleFontName, size: observedData.appProperties.titleFontSize))
-                            .fontWeight(observedData.appProperties.titleFontWeight)
-                            .foregroundColor(observedData.appProperties.titleFontColour)
-                            .accessibilityHint(observedData.args.titleOption.value)
-                    }
-                }
+                    InlineText(observedData.args.titleOption.value, parser: ColoredMarkdownParser())
+                        .font(
+                            observedData.appProperties.titleFontName.isEmpty ?
+                                .system(size: observedData.appProperties.titleFontSize, weight: observedData.appProperties.titleFontWeight) :
+                                .custom(observedData.appProperties.titleFontName, size: observedData.appProperties.titleFontSize)
+                        )
+                        .fontWeight(observedData.appProperties.titleFontWeight)
+                        .foregroundColor(observedData.appProperties.titleFontColour)
+                        .accessibilityHint(observedData.args.titleOption.value)
+                        .shadow(radius: observedData.appProperties.titleFontShadow ? blurRadius : 0)
                 .padding(appDefaults.topPadding)
                 .frame(alignment: .center)
             }
