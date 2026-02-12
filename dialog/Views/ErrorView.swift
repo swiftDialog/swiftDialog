@@ -30,7 +30,7 @@ struct ErrorView: View {
             .padding(appDefaults.sidePadding)
             Text("One or more input fields are incorrect").bold()
                 .padding()
-            StructuredText(markdown: observedData.sheetErrorMessage)
+            StructuredText(observedData.sheetErrorMessage, parser: ColoredMarkdownParser())
                 .textual.structuredTextStyle(.gitHub)
             //Text(observedData.sheetErrorMessage)
                 .padding(.leading, appDefaults.sidePadding)

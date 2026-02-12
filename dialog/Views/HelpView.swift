@@ -26,7 +26,7 @@ struct HelpView: View {
                 .frame(width: 32, height: 32)
                 .padding(.top, settings.topPadding)
             HStack {
-                StructuredText(markdown: helpMessage, baseURL: URL(string: "http://"))
+                StructuredText(helpMessage, parser: ColoredMarkdownParser())
                     .multilineTextAlignment(alignment)
                     .textual.structuredTextStyle(.gitHub)
                     .padding(32)

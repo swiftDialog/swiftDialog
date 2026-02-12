@@ -22,7 +22,7 @@ struct InfoBoxView: View {
 
     var body: some View {
         ZStack {
-            StructuredText(markdown: observedData.args.infoBox.value, baseURL: URL(string: "http://"))
+            StructuredText(observedData.args.infoBox.value, parser: ColoredMarkdownParser())
                 .multilineTextAlignment(.leading)
                 .textual.structuredTextStyle(.gitHub)
                 .focusable(false)

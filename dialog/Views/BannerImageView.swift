@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import Textual
 
 struct BannerImageView: View {
 
@@ -53,14 +54,16 @@ struct BannerImageView: View {
                 ZStack {
                     if observedData.appProperties.titleFontShadow {
                         if observedData.appProperties.titleFontName == "" {
-                            Text(observedData.args.titleOption.value)
+                            InlineText(observedData.args.titleOption.value, parser: ColoredMarkdownParser())
+                            //Text(observedData.args.titleOption.value)
                                 .font(.system(size: observedData.appProperties.titleFontSize, weight: observedData.appProperties.titleFontWeight))
                                 .foregroundColor(.black)
                                 .offset(x: blurOffset, y: blurOffset)
                                 .blur(radius: blurRadius)
                                 .opacity(opacity)
                         } else {
-                            Text(observedData.args.titleOption.value)
+                            InlineText(observedData.args.titleOption.value, parser: ColoredMarkdownParser())
+                            //Text(observedData.args.titleOption.value)
                                 .font(.custom(observedData.appProperties.titleFontName, size: observedData.appProperties.titleFontSize))
                                 .fontWeight(observedData.appProperties.titleFontWeight)
                                 .foregroundColor(.black)
@@ -70,12 +73,14 @@ struct BannerImageView: View {
                         }
                     }
                     if observedData.appProperties.titleFontName == "" {
-                        Text(observedData.args.titleOption.value)
+                        InlineText(observedData.args.titleOption.value, parser: ColoredMarkdownParser())
+                        //Text(observedData.args.titleOption.value)
                             .font(.system(size: observedData.appProperties.titleFontSize, weight: observedData.appProperties.titleFontWeight))
                             .foregroundColor(observedData.appProperties.titleFontColour)
                             .accessibilityHint(observedData.args.titleOption.value)
                     } else {
-                        Text(observedData.args.titleOption.value)
+                        InlineText(observedData.args.titleOption.value, parser: ColoredMarkdownParser())
+                        //Text(observedData.args.titleOption.value)
                             .font(.custom(observedData.appProperties.titleFontName, size: observedData.appProperties.titleFontSize))
                             .fontWeight(observedData.appProperties.titleFontWeight)
                             .foregroundColor(observedData.appProperties.titleFontColour)

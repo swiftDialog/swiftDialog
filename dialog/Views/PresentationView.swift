@@ -118,7 +118,7 @@ struct PresentationViewMarkdown: View {
     var contentAlignment: TextAlignment
     var contentColour: Color
     var body: some View {
-        StructuredText(markdown: content, baseURL: URL(string: "http://"))
+        StructuredText(content, parser: ColoredMarkdownParser())
             .multilineTextAlignment(contentAlignment)
             .textual.structuredTextStyle(.gitHub)
             .font(Font.system(size: CGFloat(appvars.messageFontSize)))

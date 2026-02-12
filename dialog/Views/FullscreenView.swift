@@ -117,7 +117,8 @@ struct FullscreenView: View {
                 HStack {
                     // the spacers in this section push the title and thus the full screen area across the width of the display
                     Spacer()
-                    Text(observedData.args.titleOption.value)
+                    InlineText(observedData.args.titleOption.value, parser: ColoredMarkdownParser())
+                    //Text(observedData.args.titleOption.value)
                         .foregroundColor(observedData.appProperties.titleFontColour)
                         .bold()
                         .font(.system(size: titleContentFontSize, weight: observedData.appProperties.titleFontWeight))
@@ -158,7 +159,7 @@ struct FullscreenView: View {
                                 .font(.system(size: messageContentFontSize))
                                 .multilineTextAlignment(.center)
                             */
-                            StructuredText(markdown: observedData.args.messageOption.value, baseURL: URL(string: "http://"))
+                            StructuredText(observedData.args.messageOption.value, parser: ColoredMarkdownParser())
                                 .frame(alignment: .center)
                                 .multilineTextAlignment(observedData.appProperties.messageAlignment)
                                 .lineSpacing(2)

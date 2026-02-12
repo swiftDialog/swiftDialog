@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Textual
 
 struct MiniProgressView: View {
 
@@ -44,7 +45,8 @@ struct MiniView: View {
             }
             VStack {
                 if observedData.args.titleOption.value != "none" {
-                    Text(observedData.args.titleOption.value)
+                    InlineText(observedData.args.titleOption.value, parser: ColoredMarkdownParser())
+                    //Text(observedData.args.titleOption.value)
                         .font(.system(size: 18, weight: .semibold))
                         .border(observedData.appProperties.debugBorderColour, width: 2)
                         .padding(.top, 5)
@@ -70,7 +72,8 @@ struct MiniView: View {
                     }
                     VStack {
                         HStack {
-                            Text(observedData.args.messageOption.value)
+                            StructuredText(observedData.args.messageOption.value, parser: ColoredMarkdownParser())
+                            //Text(observedData.args.messageOption.value)
                                 .lineLimit(4)
                                 .font(.system(size: 15))
                                 .frame(maxWidth: .infinity, alignment: .topLeading)
