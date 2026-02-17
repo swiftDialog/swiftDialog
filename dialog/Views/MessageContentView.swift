@@ -145,42 +145,39 @@ struct MessageContent: View {
 
             Group {
                 ForEach(Array(observedData.appProperties.viewOrder.indices), id: \.self) { index in
-                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.textfile.rawValue) == index {
+                    switch index {
+                    case observedData.appProperties.viewOrder.firstIndex(of: ViewType.textfile.rawValue):
                         TextFileView(logFilePath: observedData.args.logFileToTail.value, loadHistory: observedData.args.logFileHistory.present, historyLineLimit: logHistoryLimit)
                             .padding(.bottom, appDefaults.contentPadding)
-                    }
-                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.webcontent.rawValue) == index {
+                    case observedData.appProperties.viewOrder.firstIndex(of: ViewType.webcontent.rawValue):
                         WebContentView(observedDialogContent: observedData, url: observedData.args.webcontent.value)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
                             .padding(.bottom, appDefaults.contentPadding)
-                    }
-                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.listitem.rawValue) == index {
+                    case observedData.appProperties.viewOrder.firstIndex(of: ViewType.listitem.rawValue):
                         ListView(observedDialogContent: observedData)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
                             .padding(.bottom, appDefaults.contentPadding)
-                    }
-                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.checkbox.rawValue) == index {
+                    case observedData.appProperties.viewOrder.firstIndex(of: ViewType.checkbox.rawValue):
                         CheckboxView(observedDialogContent: observedData)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
                             .frame(maxWidth: dataEntryMaxWidth)
-                    }
-                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.textfield.rawValue) == index {
+                    case observedData.appProperties.viewOrder.firstIndex(of: ViewType.textfield.rawValue):
                         TextEntryView(observedDialogContent: observedData, textfieldContent: userInputState.textFields)
                             .padding(.bottom, appDefaults.contentPadding)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
                             .frame(maxWidth: dataEntryMaxWidth)
-                    }
-                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.radiobutton.rawValue) == index {
-                        RadioView(observedDialogContent: observedData)
-                            .padding(.bottom, appDefaults.contentPadding)
-                            .border(observedData.appProperties.debugBorderColour, width: 2)
-                            .frame(maxWidth: dataEntryMaxWidth)
-                    }
-                    if observedData.appProperties.viewOrder.firstIndex(of: ViewType.dropdown.rawValue) == index {
+                    case observedData.appProperties.viewOrder.firstIndex(of: ViewType.dropdown.rawValue):
                         DropdownView(observedDialogContent: observedData)
                             .padding(.bottom, appDefaults.contentPadding)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
                             .frame(maxWidth: dataEntryMaxWidth, alignment: .leading)
+                    case observedData.appProperties.viewOrder.firstIndex(of: ViewType.radiobutton.rawValue):
+                        RadioView(observedDialogContent: observedData)
+                            .padding(.bottom, appDefaults.contentPadding)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .frame(maxWidth: dataEntryMaxWidth)
+                    default:
+                            EmptyView()
                     }
                 }
             }
