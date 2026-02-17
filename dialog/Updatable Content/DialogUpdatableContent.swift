@@ -624,6 +624,14 @@ class FileReader {
                     }
                     NSApp.applicationIconImage = image
                 }
+                
+            // dock icon bounce
+            case "bounce:":
+                if argument == "critical" {
+                    NSApp.requestUserAttention(.criticalRequest)
+                } else {
+                    NSApp.requestUserAttention(.informationalRequest)
+                }
 
             // quit
             case "quit:":
