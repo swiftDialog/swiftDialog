@@ -72,14 +72,20 @@ struct TextFileView: View {
     }
 
     private func startStreamingLogFile() {
-        let fileDescriptor = open(textContentPath, O_EVTONLY)
-        fileMonitor = DispatchSource.makeReadSource(fileDescriptor: fileDescriptor, queue: .global())
-
-        fileMonitor?.setEventHandler { [self] in
-            self.readLogFile()
+        if FileManager.default.fileExists(atPath: textContentPath) {
+            let fileDescriptor = open(textContentPath, O_EVTONLY)
+            fileMonitor = DispatchSource.makeReadSource(fileDescriptor: fileDescriptor, queue: .global())
+            
+            fileMonitor?.setEventHandler { [self] in
+                self.readLogFile()
+            }
+            
+            fileMonitor?.resume()
+        } else {
+            writeLog("Requested displaylog file does not exist at path: \"\(textContentPath)\"", logLevel: .error)
+            quitDialog(exitCode: appDefaults.exit202.code, exitMessage: appDefaults.exit202.message)
         }
-
-        fileMonitor?.resume()
+        
     }
 
     private func readLogFile() {
