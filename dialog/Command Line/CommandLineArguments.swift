@@ -103,6 +103,8 @@ struct CommandLineArguments {
     var notificationIdentifier   = CommandlineArgument(long: "identifier", short: "id")
     var callingPid               = CommandlineArgument(long: "pid", defaultValue: 0)
     var playSound                = CommandlineArgument(long: "sound")
+    var dockIcon                 = CommandlineArgument(long: "dockicon")
+    var dockBadge                = CommandlineArgument(long: "dockiconbadge")
 
     // command line options that take no additional parameters
     var button1Disabled          = CommandlineArgument(long: "button1disabled", isbool: true)
@@ -126,6 +128,7 @@ struct CommandLineArguments {
     var blurScreen               = CommandlineArgument(long: "blurscreen", isbool: true)
     var notification             = CommandlineArgument(long: "notification", isbool: true)
     var verboseLogging           = CommandlineArgument(long: "verbose", short: "vvv", isbool: true)
+    var showDockIcon             = CommandlineArgument(long: "showdockicon", isbool: true)
 
     var constructionKit          = CommandlineArgument(long: "builder", isbool: true)
     var movableWindow            = CommandlineArgument(long: "moveable", short: "o", isbool: true)
@@ -354,6 +357,9 @@ extension CommandLineArguments {
                     case "playSound": self.playSound = argument
                     case "showSoundControls": self.showSoundControls = argument
                     case "hideOtherApps": self.hideOtherApps = argument
+                    case "showDockIcon": self.showDockIcon = argument
+                    case "dockIcon": self.dockIcon = argument
+                    case "dockBadge": self.dockBadge = argument
                     default: break
                     }
                 }

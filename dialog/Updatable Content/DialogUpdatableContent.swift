@@ -592,6 +592,38 @@ class FileReader {
                         observedData.args.webcontent.present = true
                     }
                 }
+                
+            // show dock icon
+            case "\(observedData.args.showDockIcon.long):":
+                if ["enable", "true", "1"].contains(argument) {
+                    NSApp.setActivationPolicy(.regular)
+                } else {
+                    NSApp.setActivationPolicy(.accessory)
+                }
+                
+            // dock icon badge
+            case "\(observedData.args.dockBadge.long):":
+                if ["none", "nil", "remove"].contains(argument) {
+                    NSApp.dockTile.badgeLabel = nil
+                } else {
+                    NSApp.dockTile.badgeLabel = argument
+                }
+                
+            // dock icon image
+            case "\(observedData.args.dockIcon.long):":
+                if ["none", "nil", "default"].contains(argument) {
+                    NSApp.applicationIconImage = nil
+                } else {
+                    let path = argument
+                    var image = NSImage()
+                    switch path {
+                    case _ where ["app", "prefPane", "framework"].contains(path.split(separator: ".").last):
+                        image =  getAppIcon(appPath: argument)
+                    default:
+                        image = getImageFromPath(fileImagePath: argument, returnErrorImage: true)
+                    }
+                    NSApp.applicationIconImage = image
+                }
 
             // quit
             case "quit:":
