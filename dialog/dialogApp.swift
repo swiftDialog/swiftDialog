@@ -291,6 +291,14 @@ struct dialogApp: App {
                     }
                     DebugOverlay(observedData: observedData)
                 }
+                .background(WindowAccessor { window in
+                    if let window {
+                        // on macOS 26 window backgrounds are pure white which sucks for contrast and readability.
+                        if #available(macOS 26, *) {
+                            window.backgroundColor =  NSColor(Color("oldWindowBackgroundColour"))
+                        }
+                    }
+                })
                 .onAppear {
                     // Only show the construction kit once, if needed.
                     if appArguments.constructionKit.present && !observedData.constructionKitShown {

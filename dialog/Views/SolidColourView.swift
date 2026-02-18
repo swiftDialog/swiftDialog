@@ -10,10 +10,12 @@ import SwiftUI
 struct SolidColourView: View {
     var colourValue: String
     var colourComponent: Color = .clear
+    var withGradient: Bool = true
 
-    init(colourValue: String) {
+    init(colourValue: String, withGradient: Bool = true) {
         self.colourValue = colourValue
         colourComponent = Color(argument: colourValue.components(separatedBy: "=").last ?? "clear")
+        self.withGradient = withGradient
     }
 
     var body: some View {
@@ -26,7 +28,7 @@ struct SolidColourView: View {
                         Gradient.Stop(color: colourComponent, location: 0.40),
                         Gradient.Stop(color: .black, location: 0.95)
                     ], startPoint: .top, endPoint: .bottom)
-                .opacity(0.15)
+                .opacity(withGradient ? 0.15 : 0)
             )
     }
 }
