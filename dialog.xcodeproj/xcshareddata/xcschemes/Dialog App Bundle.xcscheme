@@ -32,6 +32,16 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "4154C2EB25F76BDC00A3D373"
+               BuildableName = "dialogTests.xctest"
+               BlueprintName = "dialogTests"
+               ReferencedContainer = "container:dialog.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "4154C2F625F76BDC00A3D373"
                BuildableName = "dialogUITests.xctest"
                BlueprintName = "dialogUITests"
