@@ -21,6 +21,7 @@ struct StatusBadgeView: View {
     let autoColor: Bool
     let customColor: Color?
     let scaleFactor: CGFloat
+    @Environment(\.palette) private var palette
 
     private var stateColor: Color {
         if let customColor = customColor {
@@ -39,15 +40,15 @@ struct StatusBadgeView: View {
 
         // Check if state starts with or contains any success keywords
         if successStates.contains(where: { lowercaseState.hasPrefix($0) || lowercaseState == $0 }) {
-            return .semanticSuccess
+            return palette.success
         }
         // Check if state starts with or contains any fail keywords
         if failStates.contains(where: { lowercaseState.hasPrefix($0) || lowercaseState.contains($0) }) {
-            return .semanticFailure
+            return palette.error
         }
         // Check if state matches any pending keywords
         if pendingStates.contains(where: { lowercaseState.hasPrefix($0) || lowercaseState == $0 }) {
-            return .semanticWarning
+            return palette.warning
         }
 
         return .secondary
@@ -76,13 +77,34 @@ struct StatusBadgeView: View {
         return "circle.fill"
     }
 
+    /// Renders the icon as a file-based image (if path exists on disk) or SF Symbol
+    @ViewBuilder
+    private var statusBadgeIcon: some View {
+        if let iconPath = icon, isFilePath(iconPath),
+           FileManager.default.fileExists(atPath: iconPath),
+           let nsImage = NSImage(contentsOfFile: iconPath) {
+            Image(nsImage: nsImage)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .clipShape(RoundedRectangle(cornerRadius: 4 * scaleFactor))
+        } else {
+            Image(systemName: icon ?? defaultIcon)
+                .font(.system(size: 16 * scaleFactor))
+                .foregroundStyle(stateColor)
+        }
+    }
+
+    /// Check if a string looks like a file path (starts with / or contains a file extension)
+    private func isFilePath(_ value: String) -> Bool {
+        value.hasPrefix("/") || (value.contains(".") && !value.hasPrefix("SF="))
+    }
+
     var body: some View {
         let _ = writeLog("🟡 VIEW: StatusBadgeView rendering label='\(label)' state='\(state)' color=\(stateColor)", logLevel: .debug)
 
         return HStack(spacing: 8 * scaleFactor) {
-            Image(systemName: icon ?? defaultIcon)
-                .font(.system(size: 16 * scaleFactor))
-                .foregroundStyle(stateColor)
+            statusBadgeIcon
+                .frame(width: 20 * scaleFactor, height: 20 * scaleFactor)
 
             VStack(alignment: .leading, spacing: 2 * scaleFactor) {
                 Text(label)
@@ -129,6 +151,7 @@ struct ComparisonTableView: View {
     let actualColor: Color?
     let scaleFactor: CGFloat
     let stateOverride: String?  // Optional: "pass", "fail", "pending" to override auto-match
+    @Environment(\.palette) private var palette
 
     /// Smart comparison that handles common edge cases
     /// Can be overridden by stateOverride for evaluation types like withinSeconds, notExists
@@ -180,7 +203,7 @@ struct ComparisonTableView: View {
             return .secondary
         }
 
-        return isMatch ? .semanticSuccess : .semanticFailure
+        return palette.colorForMatch(isMatch)
     }
 
     /// Effective color for expected column (with override support)
@@ -510,6 +533,7 @@ struct FeatureTableView: View {
     let rows: [InspectConfig.GuidanceContent.FeatureTableRow]
     let style: String?
     let scaleFactor: CGFloat
+    @Environment(\.palette) private var palette
 
     private var isDarkStyle: Bool {
         style == "dark"
@@ -578,7 +602,7 @@ struct FeatureTableView: View {
                         ForEach(Array(row.values.prefix(columns.count).enumerated()), id: \.offset) { _, value in
                             Image(systemName: value ? "checkmark.circle.fill" : "xmark.circle.fill")
                                 .font(.system(size: 18 * scaleFactor))
-                                .foregroundStyle(value ? Color.semanticSuccess : Color.semanticFailure)
+                                .foregroundStyle(value ? palette.success : palette.error)
                                 .frame(width: 80 * scaleFactor)
                         }
                     }
@@ -613,6 +637,7 @@ struct PhaseTrackerView: View {
     let phases: [String]
     let style: String
     let scaleFactor: CGFloat
+    @Environment(\.palette) private var palette
 
     private var defaultPhaseLabels: [String] {
         ["Prepare", "Execute", "Verify", "Complete"]
@@ -644,8 +669,8 @@ struct PhaseTrackerView: View {
                     // Phase circle
                     ZStack {
                         Circle()
-                            .fill(isCompleted ? Color.semanticSuccess :
-                                    isActive ? Color.semanticWarning :
+                            .fill(isCompleted ? palette.success :
+                                    isActive ? palette.warning :
                                   Color.secondary.opacity(0.3))
                             .frame(width: 28 * scaleFactor, height: 28 * scaleFactor)
 
@@ -668,7 +693,7 @@ struct PhaseTrackerView: View {
                     // Connector line (except for last item)
                     if index < phaseLabels.count - 1 {
                         Rectangle()
-                            .fill(phaseNum < currentPhase ? Color.semanticSuccess : Color.secondary.opacity(0.3))
+                            .fill(phaseNum < currentPhase ? palette.success : Color.secondary.opacity(0.3))
                             .frame(width: 20 * scaleFactor, height: 2 * scaleFactor)
                     }
                 }
@@ -694,7 +719,7 @@ struct PhaseTrackerView: View {
 
             ProgressView(value: Double(currentPhase), total: Double(phaseLabels.count))
                 .progressViewStyle(LinearProgressViewStyle())
-                .tint(Color.semanticWarning)
+                .tint(palette.warning)
         }
         .padding(12 * scaleFactor)
     }
@@ -712,8 +737,8 @@ struct PhaseTrackerView: View {
                           isActive ? "square.fill" :
                           "square")
                         .font(.system(size: 16 * scaleFactor))
-                        .foregroundStyle(isCompleted ? Color.semanticSuccess :
-                                       isActive ? Color.semanticWarning : Color.secondary)
+                        .foregroundStyle(isCompleted ? palette.success :
+                                       isActive ? palette.warning : Color.secondary)
 
                     Text(phaseLabels[index])
                         .font(.system(size: 12 * scaleFactor, weight: isActive ? .semibold : .regular))
@@ -726,4 +751,3 @@ struct PhaseTrackerView: View {
         .padding(12 * scaleFactor)
     }
 }
-

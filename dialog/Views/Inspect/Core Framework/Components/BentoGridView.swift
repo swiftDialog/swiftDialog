@@ -4,7 +4,7 @@
 //
 //  Created by Henry Stamerjohann, Declarative IT GmbH, 25/01/2026
 //
-//  Bento-Grid Component for Preset11
+//  Bento-Grid Component for Preset5
 //  CSS Grid-like layouts with variable cell sizes (1x1, 2x1, 1x2, 2x2)
 //
 
@@ -101,6 +101,8 @@ struct BentoCell: View {
     let scaleFactor: CGFloat
     let accentColor: Color
     let iconBasePath: String?
+    let tintColor: Color?
+    let cellIndex: Int
     let onTap: () -> Void
 
     private var cornerRadius: CGFloat {
@@ -110,6 +112,21 @@ struct BentoCell: View {
     private var backgroundColor: Color {
         if let colorHex = config.backgroundColor {
             return Color(hex: colorHex)
+        }
+        if let tint = tintColor {
+            // Blend base color with white at varying ratios for distinct shades
+            // Lower = lighter (more white), higher = darker (more base color)
+            let strengths: [Double] = [0.18, 0.30, 0.12, 0.24, 0.38, 0.15, 0.22, 0.34, 0.14, 0.28]
+            let strength = strengths[cellIndex % strengths.count]
+            let nsColor = NSColor(tint).usingColorSpace(.sRGB) ?? NSColor(tint)
+            let r = nsColor.redComponent
+            let g = nsColor.greenComponent
+            let b = nsColor.blueComponent
+            return Color(
+                red: 1.0 - (1.0 - r) * strength,
+                green: 1.0 - (1.0 - g) * strength,
+                blue: 1.0 - (1.0 - b) * strength
+            )
         }
         return Color(.windowBackgroundColor).opacity(0.6)
     }
@@ -166,6 +183,14 @@ struct BentoCell: View {
     @ViewBuilder
     private var textContent: some View {
         VStack(alignment: .leading, spacing: 4 * scaleFactor) {
+            if let label = config.label {
+                Text(label)
+                    .font(.system(size: 10 * scaleFactor, weight: .semibold))
+                    .textCase(.uppercase)
+                    .tracking(1.2)
+                    .foregroundStyle(textColor.opacity(0.6))
+            }
+
             if let title = config.title {
                 Text(title)
                     .font(titleFont)
@@ -196,12 +221,22 @@ struct BentoCell: View {
                     .foregroundStyle(iconColor)
             }
 
-            if let title = config.title {
-                Text(title)
-                    .font(.system(size: 14 * scaleFactor, weight: .medium))
-                    .foregroundStyle(textColor)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.center)
+            VStack(spacing: 2 * scaleFactor) {
+                if let label = config.label {
+                    Text(label)
+                        .font(.system(size: 10 * scaleFactor, weight: .semibold))
+                        .textCase(.uppercase)
+                        .tracking(1.2)
+                        .foregroundStyle(textColor.opacity(0.6))
+                }
+
+                if let title = config.title {
+                    Text(title)
+                        .font(.system(size: 14 * scaleFactor, weight: .medium))
+                        .foregroundStyle(textColor)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.center)
+                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -256,6 +291,15 @@ struct BentoCell: View {
 
             // Text overlay
             VStack(alignment: .leading, spacing: 2 * scaleFactor) {
+                if let label = config.label {
+                    Text(label)
+                        .font(.system(size: 10 * scaleFactor, weight: .semibold))
+                        .textCase(.uppercase)
+                        .tracking(1.2)
+                        .foregroundStyle(.white.opacity(0.7))
+                        .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
+                }
+
                 if let title = config.title {
                     Text(title)
                         .font(.system(size: mixedTitleSize, weight: .semibold))
@@ -581,6 +625,107 @@ struct BentoDetailView: View {
     }
 }
 
+// MARK: - Bento Inline Detail View
+
+/// Streamlined detail view for inline presentation within the bento grid area.
+/// Fills the entire grid bounds with a spring animation, replacing the cell grid.
+struct BentoInlineDetailView: View {
+    let cellConfig: InspectConfig.GuidanceContent.BentoCellConfig
+    let overlay: InspectConfig.DetailOverlayConfig
+    let gridSize: CGSize
+    let accentColor: Color
+    let iconBasePath: String?
+    @ObservedObject var inspectState: InspectState
+    let onClose: () -> Void
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var headerIcon: String? {
+        overlay.icon ?? cellConfig.sfSymbol
+    }
+
+    private var headerTitle: String {
+        overlay.title ?? cellConfig.title ?? "Details"
+    }
+
+    private var headerSubtitle: String? {
+        overlay.subtitle ?? cellConfig.subtitle
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header with back button
+            HStack(spacing: 12) {
+                Button(action: onClose) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 14, weight: .semibold))
+                        Text("Back")
+                            .font(.system(size: 14, weight: .medium))
+                    }
+                    .foregroundStyle(accentColor)
+                }
+                .buttonStyle(.plain)
+
+                Spacer()
+
+                // Optional icon (right side)
+                if let iconName = headerIcon {
+                    if !iconName.contains("/") && !iconName.contains(".") {
+                        let symbolName = iconName.hasPrefix("sf=") ? String(iconName.dropFirst(3)) : iconName
+                        Image(systemName: symbolName)
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundStyle(accentColor)
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
+
+            Divider()
+
+            // Content area
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    // Title
+                    Text(headerTitle)
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundStyle(.primary)
+
+                    // Subtitle
+                    if let subtitle = headerSubtitle {
+                        Text(subtitle)
+                            .font(.system(size: 14))
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer().frame(height: 4)
+
+                    // Rich content from detailOverlay
+                    if let content = overlay.content, !content.isEmpty {
+                        GuidanceContentView(
+                            contentBlocks: content,
+                            scaleFactor: 1.0,
+                            iconBasePath: iconBasePath,
+                            inspectState: inspectState,
+                            itemId: "bento-inline-\(cellConfig.id)",
+                            onOverlayTap: nil
+                        )
+                    }
+                }
+                .padding(20)
+            }
+        }
+        .frame(width: gridSize.width, height: gridSize.height)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(NSColor.windowBackgroundColor))
+                .shadow(color: .black.opacity(0.15), radius: 20, y: 8)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+}
+
 // MARK: - Bento Grid View
 
 /// Main bento grid container using GeometryReader for precise sizing
@@ -592,10 +737,42 @@ struct BentoGridView: View {
     let scaleFactor: CGFloat
     let accentColor: Color
     let iconBasePath: String?
+    let tintColor: Color?
+    let inlineExpansion: Bool
     @ObservedObject var inspectState: InspectState
 
     @State private var selectedCell: InspectConfig.GuidanceContent.BentoCellConfig?
     @State private var showDetail: Bool = false
+    @State private var expandedCellId: String? = nil
+    @State private var visibleCells: Set<String> = []
+
+    /// Stagger delay between each cell appearing (seconds)
+    private let staggerDelay: Double = 0.12
+
+    /// Backward-compatible initializer (inlineExpansion defaults to false)
+    init(
+        cells: [InspectConfig.GuidanceContent.BentoCellConfig],
+        columns: Int,
+        rowHeight: CGFloat,
+        gap: CGFloat,
+        scaleFactor: CGFloat,
+        accentColor: Color,
+        iconBasePath: String?,
+        tintColor: Color?,
+        inspectState: InspectState,
+        inlineExpansion: Bool = false
+    ) {
+        self.cells = cells
+        self.columns = columns
+        self.rowHeight = rowHeight
+        self.gap = gap
+        self.scaleFactor = scaleFactor
+        self.accentColor = accentColor
+        self.iconBasePath = iconBasePath
+        self.tintColor = tintColor
+        self.inlineExpansion = inlineExpansion
+        self._inspectState = ObservedObject(wrappedValue: inspectState)
+    }
 
     var body: some View {
         GeometryReader { geometry in
@@ -613,10 +790,16 @@ struct BentoGridView: View {
                 rowHeight: rowHeight * scaleFactor,
                 gap: gap * scaleFactor
             )
+            let gridSize = CGSize(width: availableWidth, height: gridHeight)
 
             ZStack(alignment: .topLeading) {
-                ForEach(placements) { placement in
+                // Grid cells
+                ForEach(Array(placements.enumerated()), id: \.element.id) { index, placement in
                     if let cellConfig = cells.first(where: { $0.id == placement.cellId }) {
+                        let isVisible = visibleCells.contains(cellConfig.id)
+                        let isExpanded = expandedCellId == cellConfig.id
+                        let isDimmed = expandedCellId != nil && !isExpanded
+
                         BentoCell(
                             config: cellConfig,
                             width: placement.width,
@@ -624,15 +807,49 @@ struct BentoGridView: View {
                             scaleFactor: scaleFactor,
                             accentColor: accentColor,
                             iconBasePath: iconBasePath,
+                            tintColor: tintColor,
+                            cellIndex: index,
                             onTap: {
                                 if cellConfig.detailOverlay != nil {
-                                    selectedCell = cellConfig
-                                    showDetail = true
+                                    if inlineExpansion {
+                                        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+                                            expandedCellId = cellConfig.id
+                                        }
+                                    } else {
+                                        selectedCell = cellConfig
+                                        showDetail = true
+                                    }
                                 }
                             }
                         )
                         .offset(x: placement.x, y: placement.y)
+                        .opacity(isVisible ? (isDimmed ? 0.3 : 1) : 0)
+                        .scaleEffect(isVisible ? 1 : 0.85)
+                        .animation(.spring(response: 0.45, dampingFraction: 0.8), value: isVisible)
+                        .animation(.spring(response: 0.4, dampingFraction: 0.85), value: isDimmed)
+                        .allowsHitTesting(expandedCellId == nil)
                     }
+                }
+
+                // Inline detail overlay (when inlineExpansion is true)
+                if inlineExpansion, let expandedId = expandedCellId,
+                   let cellConfig = cells.first(where: { $0.id == expandedId }),
+                   let overlay = cellConfig.detailOverlay {
+                    BentoInlineDetailView(
+                        cellConfig: cellConfig,
+                        overlay: overlay,
+                        gridSize: gridSize,
+                        accentColor: accentColor,
+                        iconBasePath: iconBasePath,
+                        inspectState: inspectState,
+                        onClose: {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+                                expandedCellId = nil
+                            }
+                        }
+                    )
+                    .transition(.scale(scale: 0.8).combined(with: .opacity))
+                    .zIndex(100)
                 }
             }
             .frame(width: availableWidth, height: gridHeight, alignment: .topLeading)
@@ -642,6 +859,9 @@ struct BentoGridView: View {
             rowHeight: rowHeight * scaleFactor,
             gap: gap * scaleFactor
         ))
+        .onAppear {
+            staggerCellAppearance()
+        }
         .sheet(isPresented: $showDetail) {
             if let cell = selectedCell, let overlay = cell.detailOverlay {
                 BentoDetailView(
@@ -655,6 +875,23 @@ struct BentoGridView: View {
                         selectedCell = nil
                     }
                 )
+            }
+        }
+    }
+
+    /// Animate cells appearing one by one in reading order (left-to-right, top-to-bottom)
+    private func staggerCellAppearance() {
+        // Sort cells by row then column for natural reading-order entrance
+        let sorted = cells.sorted { a, b in
+            if a.row != b.row { return a.row < b.row }
+            return a.column < b.column
+        }
+
+        for (index, cell) in sorted.enumerated() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + staggerDelay * Double(index)) {
+                withAnimation {
+                    _ = visibleCells.insert(cell.id)
+                }
             }
         }
     }
@@ -686,6 +923,7 @@ struct BentoGridView_Previews: PreviewProvider {
                     iconWeight: nil,
                     backgroundColor: "#E8F4FD",
                     cornerRadius: nil,
+                    label: nil,
                     detailOverlay: nil
                 ),
                 InspectConfig.GuidanceContent.BentoCellConfig(
@@ -707,6 +945,7 @@ struct BentoGridView_Previews: PreviewProvider {
                     iconWeight: nil,
                     backgroundColor: "#F5F5F5",
                     cornerRadius: nil,
+                    label: nil,
                     detailOverlay: nil
                 ),
                 InspectConfig.GuidanceContent.BentoCellConfig(
@@ -728,6 +967,7 @@ struct BentoGridView_Previews: PreviewProvider {
                     iconWeight: nil,
                     backgroundColor: "#E8FDE8",
                     cornerRadius: nil,
+                    label: nil,
                     detailOverlay: nil
                 )
             ],
@@ -737,6 +977,7 @@ struct BentoGridView_Previews: PreviewProvider {
             scaleFactor: 1.0,
             accentColor: .accentColor,
             iconBasePath: nil,
+            tintColor: nil,
             inspectState: InspectState()
         )
         .frame(width: 600, height: 400)

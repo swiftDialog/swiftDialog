@@ -1,5 +1,5 @@
 //
-//  IconCache.swift
+// IconCache.swift
 //  dialog
 //
 //  Created by Henry Stamerjohann, Declarative IT GmbH, 17/01/2026

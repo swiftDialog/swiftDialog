@@ -3,7 +3,7 @@
 //  dialog
 //
 //  Shared override dialog for processing step overrides.
-//  Used by Preset6 and Preset11 when a processing step has been waiting
+//  Used by Preset6 and Preset5 when a processing step has been waiting
 //  for an extended period and the user wants to manually override the result.
 //
 
