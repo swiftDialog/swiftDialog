@@ -71,6 +71,11 @@ struct Preset4View: View, InspectLayoutProtocol {
             advanceToNextItem()
             checkAutoTransitionToSummary()
         }
+        .onChange(of: currentPhase) { _, newPhase in
+            if newPhase == .main {
+                checkAutoTransitionToSummary()
+            }
+        }
         .onChange(of: inspectState.downloadingItems) { _, newDownloading in
             if let nextDownloadingIndex = inspectState.items.firstIndex(where: { newDownloading.contains($0.id) && !inspectState.completedItems.contains($0.id) }) {
                 withAnimation(.easeInOut(duration: 0.25)) {

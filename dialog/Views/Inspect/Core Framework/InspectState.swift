@@ -1183,7 +1183,8 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                                 "icon": "sidebar.leading",
                                 "content": [
                                     { "type": "text", "content": "The classic deployment layout. A sidebar shows a hero icon and overall progress, while the main area lists items with real-time status updates." },
-                                    { "type": "bullets", "items": ["Sidebar with hero icon and progress bar", "Scrollable item list with status indicators", "File-system monitoring via paths array", "Rotating status messages"] }
+                                    { "type": "bullets", "items": ["Sidebar with hero icon and progress bar", "Scrollable item list with status indicators", "File-system monitoring via paths array", "Rotating status messages"] },
+                                    { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "1", "buttonStyle": "borderedProminent" }
                                 ]
                             }
                         },
@@ -1201,7 +1202,8 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                                 "icon": "rectangle.split.3x1",
                                 "content": [
                                     { "type": "text", "content": "Items displayed as cards in a horizontal carousel. Great for visual app catalogs where each card shows an icon, name, and install status." },
-                                    { "type": "bullets", "items": ["Horizontal scrolling card layout", "Large app icons with status badges", "Progress bar across the top", "Auto-advances on completion"] }
+                                    { "type": "bullets", "items": ["Horizontal scrolling card layout", "Large app icons with status badges", "Progress bar across the top", "Auto-advances on completion"] },
+                                    { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "2", "buttonStyle": "borderedProminent" }
                                 ]
                             }
                         },
@@ -1219,7 +1221,8 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                                 "icon": "list.bullet.rectangle",
                                 "content": [
                                     { "type": "text", "content": "A space-efficient list layout with a gradient background. Ideal for quick installations where you want minimal screen footprint." },
-                                    { "type": "bullets", "items": ["Compact item rows", "Gradient background from brand colors", "Small window footprint", "Clean, minimal design"] }
+                                    { "type": "bullets", "items": ["Compact item rows", "Gradient background from brand colors", "Small window footprint", "Clean, minimal design"] },
+                                    { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "3", "buttonStyle": "borderedProminent" }
                                 ]
                             }
                         },
@@ -1237,7 +1240,8 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                                 "icon": "bell.badge",
                                 "content": [
                                     { "type": "text", "content": "A small, unobtrusive toast notification that tracks installations in the corner of the screen. Stays out of the user's way." },
-                                    { "type": "bullets", "items": ["Notification-sized window", "Corner-anchored positioning", "Progress tracking with minimal UI", "Non-intrusive for background installs"] }
+                                    { "type": "bullets", "items": ["Notification-sized window", "Corner-anchored positioning", "Progress tracking with minimal UI", "Non-intrusive for background installs"] },
+                                    { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "4", "buttonStyle": "borderedProminent" }
                                 ]
                             }
                         },
@@ -1255,7 +1259,8 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                                 "icon": "macwindow.on.rectangle",
                                 "content": [
                                     { "type": "text", "content": "A multi-step wizard with 9 step types. Combine intro screens, bento grids, deployment tracking, carousels, guides, and more in a single workflow." },
-                                    { "type": "bullets", "items": ["9 step types: intro, bento, deployment, carousel, guide, showcase, portal, processing, outro", "Linear navigation with back/continue", "55+ content block types", "Branding, forms, compliance checks"] }
+                                    { "type": "bullets", "items": ["9 step types: intro, bento, deployment, carousel, guide, showcase, portal, processing, outro", "Linear navigation with back/continue", "55+ content block types", "Branding, forms, compliance checks"] },
+                                    { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "5", "buttonStyle": "borderedProminent" }
                                 ]
                             }
                         },
@@ -1273,7 +1278,8 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                                 "icon": "sidebar.squares.leading",
                                 "content": [
                                     { "type": "text", "content": "A modern sidebar navigation layout. Users can jump between sections freely rather than following a linear path." },
-                                    { "type": "bullets", "items": ["Sidebar with section navigation", "Non-linear — jump to any section", "Rich guidance content per section", "Great for self-service portals"] }
+                                    { "type": "bullets", "items": ["Sidebar with section navigation", "Non-linear — jump to any section", "Rich guidance content per section", "Great for self-service portals"] },
+                                    { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "6", "buttonStyle": "borderedProminent" }
                                 ]
                             }
                         }

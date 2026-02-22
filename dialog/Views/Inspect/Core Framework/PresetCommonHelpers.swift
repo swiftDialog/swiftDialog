@@ -741,6 +741,11 @@ func handleButtonAction(block: InspectConfig.GuidanceContent, itemId: String, in
 
         writeLog("Button: Request '\(requestId)' sent for item '\(itemId)'", logLevel: .info)
 
+    case "generate":
+        let presetId = block.requestId ?? "5"
+        StarterTemplateService.generateStarter(forPreset: presetId)
+        writeLog("Button: Generated starter for preset \(presetId)", logLevel: .info)
+
     default:
         writeLog("Button: Unknown action '\(action)'", logLevel: .error)
     }

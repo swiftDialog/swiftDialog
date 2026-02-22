@@ -144,6 +144,7 @@
 		CA56BA132F3904C000000003 /* PreferencesModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA56BA032F3904C000000003 /* PreferencesModule.swift */; };
 		CA56BA142F3904C000000004 /* ProcessingStateModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA56BA042F3904C000000004 /* ProcessingStateModule.swift */; };
 		CA56BA162F3904C000000006 /* ComplianceAggregatorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA56BA062F3904C000000006 /* ComplianceAggregatorService.swift */; };
+		CA56BA172F3904C000000007 /* StarterTemplateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA56BA072F3904C000000007 /* StarterTemplateService.swift */; };
 		CA71F1502F38D87900399EE3 /* OverrideDialogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA71F14F2F38D87900399EE3 /* OverrideDialogView.swift */; };
 		CC21904B2A7B994A00269525 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC21904A2A7B994A00269525 /* Preferences.swift */; };
 		CC21904E2A7BC3E000269525 /* Strings.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC21904D2A7BC3E000269525 /* Strings.swift */; };
@@ -370,6 +371,7 @@
 		CA56BA032F3904C000000003 /* PreferencesModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesModule.swift; sourceTree = "<group>"; };
 		CA56BA042F3904C000000004 /* ProcessingStateModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingStateModule.swift; sourceTree = "<group>"; };
 		CA56BA062F3904C000000006 /* ComplianceAggregatorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplianceAggregatorService.swift; sourceTree = "<group>"; };
+		CA56BA072F3904C000000007 /* StarterTemplateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarterTemplateService.swift; sourceTree = "<group>"; };
 		CA71F14F2F38D87900399EE3 /* OverrideDialogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideDialogView.swift; sourceTree = "<group>"; };
 		CC21904A2A7B994A00269525 /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		CC21904D2A7BC3E000269525 /* Strings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Strings.swift; sourceTree = "<group>"; };
@@ -749,6 +751,7 @@
 				CA56BA032F3904C000000003 /* PreferencesModule.swift */,
 				CA56BA042F3904C000000004 /* ProcessingStateModule.swift */,
 				CA10102F3F10100000002B /* SidebarNavigationModule.swift */,
+				CA56BA072F3904C000000007 /* StarterTemplateService.swift */,
 			);
 			path = Modules;
 			sourceTree = "<group>";
@@ -1083,6 +1086,7 @@
 				CA56BA162F3904C000000006 /* ComplianceAggregatorService.swift in Sources */,
 				CA56BA132F3904C000000003 /* PreferencesModule.swift in Sources */,
 				CA56BA142F3904C000000004 /* ProcessingStateModule.swift in Sources */,
+				CA56BA172F3904C000000007 /* StarterTemplateService.swift in Sources */,
 				BA71F1402F38D87900399EE3 /* FooterBar.swift in Sources */,
 				BA71F1412F38D87900399EE3 /* StatusIconView.swift in Sources */,
 				BAE4DDB3152893222E865858 /* DeferralMenuView.swift in Sources */,
