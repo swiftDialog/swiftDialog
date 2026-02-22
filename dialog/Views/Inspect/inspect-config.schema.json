@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/swiftDialog/swiftDialog/inspect-config.schema.json",
   "title": "swiftDialog Inspect Mode Configuration",
-  "description": "Configuration schema for swiftDialog's Inspect mode presets (preset1-preset11)",
+  "description": "Configuration schema for swiftDialog's Inspect mode presets (preset1-preset6)",
   "type": "object",
   "required": ["preset"],
   "properties": {
@@ -20,32 +20,19 @@
         "compact",
         "preset4",
         "4",
-        "compliance",
+        "toast",
+        "compact-installer",
         "preset5",
         "5",
-        "dashboard",
+        "portal",
+        "self-service",
+        "webview-portal",
         "preset6",
         "6",
         "guidance",
-        "modern-sidebar",
-        "preset7",
-        "7",
-        "guide",
-        "preset8",
-        "8",
-        "onboarding",
-        "preset9",
-        "9",
-        "display",
-        "preset10",
-        "10",
-        "preset11",
-        "11",
-        "portal",
-        "self-service",
-        "webview-portal"
+        "modern-sidebar"
       ],
-      "description": "The preset layout to use. Each preset has three aliases: preset1/1/deployment (full layout), preset2/2/cards (card grid), preset3/3/compact (minimal list), preset4/4/compliance (plist monitoring), preset5/5/dashboard (status dashboard), preset6/6/guidance/modern-sidebar (modern sidebar wizard), preset7/7/guide (multi-page guide), preset8/8/onboarding (image carousel), preset9/9/display (detailed content viewer), preset10/10 (reserved), preset11/11/portal (self-service portal with WebView)"
+      "description": "The preset layout to use. Aliases: preset1/1/deployment (sidebar + item list), preset2/2/cards (card carousel), preset3/3/compact (compact list), preset4/4/toast/compact-installer (toast installer), preset5/5/portal/self-service/webview-portal (unified preset), preset6/6/guidance/modern-sidebar (modern sidebar)"
     },
     "title": {
       "type": "string",
@@ -2052,7 +2039,7 @@
         },
         "stateDomain": {
           "type": "string",
-          "description": "UserDefaults domain for state persistence (default: 'com.swiftdialog.preset11')"
+          "description": "UserDefaults domain for state persistence (default: 'com.swiftdialog.preset5')"
         },
         "selfServiceOnly": {
           "type": "boolean",
@@ -2079,6 +2066,26 @@
         "button2Text": {
           "type": "string",
           "description": "Portal-specific secondary button text (overrides global button2text)"
+        },
+        "ephemeralSession": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use non-persistent data store. When true, cookies and session data are discarded on exit. Useful for shared devices or security-sensitive portals."
+        },
+        "errorDetectionPhrases": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "DOM text phrases that indicate an error page (e.g., 'Something went wrong', 'Page not available'). Opt-in: leave empty to disable."
+        },
+        "errorDetectionThreshold": {
+          "type": "integer",
+          "default": 2,
+          "description": "Number of errorDetectionPhrases matches required to trigger error state"
+        },
+        "openExternalLinksInBrowser": {
+          "type": "boolean",
+          "default": true,
+          "description": "Open links to non-portal hosts in the default browser instead of loading inside the webview"
         }
       }
     },
