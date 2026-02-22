@@ -29,6 +29,7 @@ extension InspectLayoutProtocol {
         switch sizeMode {
         case "compact": return 0.85
         case "large": return 1.15
+        case "assistant": return 0.95  // Slightly scaled down from standard (1024 vs 1100 width)
         default: return 1.0  // standard
         }
     }
@@ -103,15 +104,27 @@ extension InspectLayoutProtocol {
     /// This allows for both global customization (e.g., changing "Installed" to "Complete" app-wide)
     /// and item-specific customization (e.g., different terminology for different workflow types)
     func getItemStatus(for item: InspectConfig.ItemConfig) -> String {
-        // Priority 1: Completed items always show completion status
         if inspectState.completedItems.contains(item.id) {
-            // Priority: item-specific > global UILabels > default
-            if let customStatus = item.completedStatus {
+            // Priority: log monitor (completion messages only) > item-specific > global UILabels > default
+            // Skip stale "Installing..." / "Downloading..." statuses left over from the install phase
+            if let logStatus = inspectState.logMonitorStatuses[item.id],
+               logStatus.hasPrefix("Completed") || logStatus.hasPrefix("Installed") {
+                return logStatus
+            } else if let customStatus = item.completedStatus {
                 return customStatus
             } else if let globalStatus = inspectState.config?.uiLabels?.completedStatus {
                 return globalStatus
             } else {
                 return "Completed"
+            }
+        } else if inspectState.failedItems.contains(item.id) {
+            // Priority: log monitor > global UILabels > default
+            if let logStatus = inspectState.logMonitorStatuses[item.id] {
+                return logStatus
+            } else if let globalStatus = inspectState.config?.uiLabels?.failedStatus {
+                return globalStatus
+            } else {
+                return "Failed"
             }
         } else if inspectState.downloadingItems.contains(item.id) {
             // Priority: log monitor > item-specific > global UILabels > default

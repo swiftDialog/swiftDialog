@@ -3,7 +3,7 @@
 //  dialog
 //
 //  Reusable intro/outro screen components for branded setup assistant flows.
-//  Used by Preset6, Preset11, and other presets that support intro screens.
+//  Used by Preset6, Preset5, and other presets that support intro screens.
 //
 //  Created by Henry Stamerjohann, Declarative IT GmbH
 //
@@ -149,32 +149,6 @@ private struct ConditionalClipShape: ViewModifier {
     }
 }
 
-// MARK: - Logo View Component
-
-/// Branding logo for intro/outro footer
-struct IntroLogoView: View {
-    let path: String
-    let maxWidth: Double
-    let maxHeight: Double
-
-    init(path: String, maxWidth: Double = 36, maxHeight: Double = 36) {
-        self.path = path
-        self.maxWidth = maxWidth
-        self.maxHeight = maxHeight
-    }
-
-    var body: some View {
-        if let nsImage = NSImage(contentsOfFile: path) {
-            Image(nsImage: nsImage)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: maxWidth, height: maxHeight)  // Fixed size for consistency
-        } else {
-            EmptyView()
-        }
-    }
-}
-
 // MARK: - Progress Dots Component
 
 /// Step indicator dots for multi-step intro flows
@@ -204,11 +178,9 @@ struct IntroProgressDots: View {
 
 // MARK: - Footer View Component
 
-/// Branded footer with logo, text, and navigation buttons
-struct IntroFooterView: View {
-    let logoPath: String?
-    let logoMaxWidth: Double
-    let logoMaxHeight: Double
+/// Footer bar with text and navigation buttons.
+/// Logo is rendered as a persistent overlay at Preset5 root level — not in the footer.
+struct IntroFooterView<PopoverContent: View>: View {
     let footerText: String?
     let backButtonText: String
     let continueButtonText: String
@@ -217,11 +189,16 @@ struct IntroFooterView: View {
     let onBack: (() -> Void)?
     let onContinue: () -> Void
     let continueDisabled: Bool
+    let popupButtonText: String?
+    let popoverContent: (() -> PopoverContent)?
+    let footerLink: String?
+    let skipButtonText: String?
+    let onSkip: (() -> Void)?
+    let inspectConfig: InspectConfig?
+
+    @State private var showPopover: Bool = false
 
     init(
-        logoPath: String? = nil,
-        logoMaxWidth: Double = 36,
-        logoMaxHeight: Double = 36,
         footerText: String? = nil,
         backButtonText: String = "Back",
         continueButtonText: String = "Continue",
@@ -229,11 +206,14 @@ struct IntroFooterView: View {
         showBackButton: Bool = true,
         onBack: (() -> Void)? = nil,
         onContinue: @escaping () -> Void,
-        continueDisabled: Bool = false
+        continueDisabled: Bool = false,
+        popupButtonText: String? = nil,
+        footerLink: String? = nil,
+        skipButtonText: String? = nil,
+        onSkip: (() -> Void)? = nil,
+        inspectConfig: InspectConfig? = nil,
+        @ViewBuilder popoverContent: @escaping () -> PopoverContent
     ) {
-        self.logoPath = logoPath
-        self.logoMaxWidth = logoMaxWidth
-        self.logoMaxHeight = logoMaxHeight
         self.footerText = footerText
         self.backButtonText = backButtonText
         self.continueButtonText = continueButtonText
@@ -242,42 +222,117 @@ struct IntroFooterView: View {
         self.onBack = onBack
         self.onContinue = onContinue
         self.continueDisabled = continueDisabled
+        self.popupButtonText = popupButtonText
+        self.popoverContent = popoverContent
+        self.footerLink = footerLink
+        self.skipButtonText = skipButtonText
+        self.onSkip = onSkip
+        self.inspectConfig = inspectConfig
     }
 
     var body: some View {
-        HStack(spacing: 12) {
-            // Logo - fixed size container for consistency
-            if let logoPath = logoPath {
-                IntroLogoView(path: logoPath, maxWidth: logoMaxWidth, maxHeight: logoMaxHeight)
+        VStack(spacing: 12) {
+            // Centered footer link (e.g., assistant step privacy/terms link)
+            if let link = footerLink {
+                Button(action: {}) {
+                    Text(link)
+                        .font(.system(size: 13))
+                        .foregroundStyle(accentColor)
+                }
+                .buttonStyle(.plain)
             }
 
-            // Footer text
-            if let footerText = footerText {
-                Text(footerText)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(.primary)
-            }
+            HStack(spacing: 12) {
+                // Footer text (e.g., branding text)
+                if let footerText = footerText {
+                    Text(footerText)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(.primary)
+                }
 
-            Spacer()
+                // Popup button (e.g., "Install Details...")
+                if let popupText = popupButtonText, let content = popoverContent {
+                    Button(popupText) {
+                        showPopover.toggle()
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.blue)
+                    .font(.body)
+                    .popover(isPresented: $showPopover, arrowEdge: .bottom) {
+                        content()
+                    }
+                }
 
-            // Back button
-            if showBackButton, let onBack = onBack {
-                Button(backButtonText, action: onBack)
-                    .buttonStyle(.bordered)
+                Spacer()
+
+                // Deferral menu (right side, next to navigation buttons)
+                if isDeferralEnabled(config: inspectConfig) {
+                    DeferralMenuView(
+                        config: inspectConfig,
+                        accentColor: accentColor,
+                        style: .bordered
+                    )
+                }
+
+                // Back button
+                if showBackButton, let onBack = onBack {
+                    Button(backButtonText, action: onBack)
+                        .buttonStyle(.bordered)
+                        .tint(accentColor)
+                        .controlSize(.large)
+                }
+
+                // Skip button (secondary action)
+                if let skipText = skipButtonText, let onSkip = onSkip {
+                    Button(skipText, action: onSkip)
+                        .buttonStyle(.bordered)
+                        .controlSize(.large)
+                }
+
+                // Continue button
+                Button(continueButtonText, action: onContinue)
+                    .buttonStyle(.borderedProminent)
                     .tint(accentColor)
                     .controlSize(.large)
+                    .disabled(continueDisabled)
             }
-
-            // Continue button
-            Button(continueButtonText, action: onContinue)
-                .buttonStyle(.borderedProminent)
-                .tint(accentColor)
-                .controlSize(.large)
-                .disabled(continueDisabled)
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 16)
         .tint(accentColor)  // Ensure all buttons inherit tint
+    }
+}
+
+// Convenience init without popover (preserves existing call sites)
+extension IntroFooterView where PopoverContent == EmptyView {
+    init(
+        footerText: String? = nil,
+        backButtonText: String = "Back",
+        continueButtonText: String = "Continue",
+        accentColor: Color = .blue,
+        showBackButton: Bool = true,
+        onBack: (() -> Void)? = nil,
+        onContinue: @escaping () -> Void,
+        continueDisabled: Bool = false,
+        footerLink: String? = nil,
+        skipButtonText: String? = nil,
+        onSkip: (() -> Void)? = nil,
+        inspectConfig: InspectConfig? = nil
+    ) {
+        self.footerText = footerText
+        self.backButtonText = backButtonText
+        self.continueButtonText = continueButtonText
+        self.accentColor = accentColor
+        self.showBackButton = showBackButton
+        self.onBack = onBack
+        self.onContinue = onContinue
+        self.continueDisabled = continueDisabled
+        self.popupButtonText = nil
+        self.popoverContent = nil
+        self.footerLink = footerLink
+        self.skipButtonText = skipButtonText
+        self.onSkip = onSkip
+        self.inspectConfig = inspectConfig
     }
 }
 
@@ -438,9 +493,6 @@ struct IntroStepContainer<Content: View>: View {
     @ViewBuilder let content: () -> Content
 
     struct IntroFooterConfig {
-        let logoPath: String?
-        let logoMaxWidth: Double
-        let logoMaxHeight: Double
         let footerText: String?
         let backButtonText: String
         let continueButtonText: String
@@ -448,22 +500,24 @@ struct IntroStepContainer<Content: View>: View {
         let onBack: (() -> Void)?
         let onContinue: () -> Void
         let continueDisabled: Bool
+        let footerLink: String?
+        let skipButtonText: String?
+        let onSkip: (() -> Void)?
+        let inspectConfig: InspectConfig?
 
         init(
-            logoPath: String? = nil,
-            logoMaxWidth: Double = 36,
-            logoMaxHeight: Double = 36,
             footerText: String? = nil,
             backButtonText: String = "Back",
             continueButtonText: String = "Continue",
             showBackButton: Bool = true,
             onBack: (() -> Void)? = nil,
             onContinue: @escaping () -> Void,
-            continueDisabled: Bool = false
+            continueDisabled: Bool = false,
+            footerLink: String? = nil,
+            skipButtonText: String? = nil,
+            onSkip: (() -> Void)? = nil,
+            inspectConfig: InspectConfig? = nil
         ) {
-            self.logoPath = logoPath
-            self.logoMaxWidth = logoMaxWidth
-            self.logoMaxHeight = logoMaxHeight
             self.footerText = footerText
             self.backButtonText = backButtonText
             self.continueButtonText = continueButtonText
@@ -471,6 +525,10 @@ struct IntroStepContainer<Content: View>: View {
             self.onBack = onBack
             self.onContinue = onContinue
             self.continueDisabled = continueDisabled
+            self.footerLink = footerLink
+            self.skipButtonText = skipButtonText
+            self.onSkip = onSkip
+            self.inspectConfig = inspectConfig
         }
     }
 
@@ -513,11 +571,8 @@ struct IntroStepContainer<Content: View>: View {
                 .padding(.bottom, 16)
             }
 
-            // Footer
+            // Footer (logo is a persistent overlay at Preset5 root level)
             IntroFooterView(
-                logoPath: footerConfig.logoPath,
-                logoMaxWidth: footerConfig.logoMaxWidth,
-                logoMaxHeight: footerConfig.logoMaxHeight,
                 footerText: footerConfig.footerText,
                 backButtonText: footerConfig.backButtonText,
                 continueButtonText: footerConfig.continueButtonText,
@@ -525,7 +580,11 @@ struct IntroStepContainer<Content: View>: View {
                 showBackButton: footerConfig.showBackButton,
                 onBack: footerConfig.onBack,
                 onContinue: footerConfig.onContinue,
-                continueDisabled: footerConfig.continueDisabled
+                continueDisabled: footerConfig.continueDisabled,
+                footerLink: footerConfig.footerLink,
+                skipButtonText: footerConfig.skipButtonText,
+                onSkip: footerConfig.onSkip,
+                inspectConfig: footerConfig.inspectConfig
             )
         }
     }
@@ -536,13 +595,9 @@ struct IntroStepContainer<Content: View>: View {
 extension IntroStepContainer.IntroFooterConfig {
     /// Simple initializer for basic use cases
     init(
-        logoPath: String? = nil,
         continueButtonText: String = "Continue",
         onContinue: @escaping () -> Void
     ) {
-        self.logoPath = logoPath
-        self.logoMaxWidth = 36
-        self.logoMaxHeight = 36
         self.footerText = nil
         self.backButtonText = "Back"
         self.continueButtonText = continueButtonText
@@ -550,6 +605,10 @@ extension IntroStepContainer.IntroFooterConfig {
         self.onBack = nil
         self.onContinue = onContinue
         self.continueDisabled = false
+        self.footerLink = nil
+        self.skipButtonText = nil
+        self.onSkip = nil
+        self.inspectConfig = nil
     }
 }
 
@@ -1228,4 +1287,244 @@ struct IntroMediaCarousel: View {
     }
 }
 
-// Note: Wallpaper picker for Preset11 reuses WallpaperPickerView from PresetCommonHelpers.swift
+// MARK: - Brand Picker Components
+
+/// Grid of brand cards for multi-brand onboarding selection
+struct BrandPickerGrid: View {
+    let brands: [InspectConfig.BrandConfig]
+    let columns: Int
+    @Binding var selectedBrandId: String?
+    let accentColor: Color
+
+    init(
+        brands: [InspectConfig.BrandConfig],
+        columns: Int = 2,
+        selectedBrandId: Binding<String?>,
+        accentColor: Color = .blue
+    ) {
+        self.brands = brands
+        self.columns = columns
+        self._selectedBrandId = selectedBrandId
+        self.accentColor = accentColor
+    }
+
+    private var gridColumns: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: 16), count: columns)
+    }
+
+    var body: some View {
+        LazyVGrid(columns: gridColumns, spacing: 16) {
+            ForEach(brands) { brand in
+                BrandCard(
+                    brand: brand,
+                    isSelected: selectedBrandId == brand.id,
+                    accentColor: accentColor
+                ) {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        selectedBrandId = brand.id
+                    }
+                }
+            }
+        }
+        .padding(.horizontal)
+    }
+}
+
+/// Individual brand card showing logo, name, and accent stripe
+struct BrandCard: View {
+    let brand: InspectConfig.BrandConfig
+    let isSelected: Bool
+    let accentColor: Color
+    let onTap: () -> Void
+
+    private var brandColor: Color {
+        if let hex = brand.highlightColor {
+            return Color(hex: hex)
+        }
+        return accentColor
+    }
+
+    var body: some View {
+        Button(action: onTap) {
+            VStack(spacing: 0) {
+                // Accent stripe at top
+                Rectangle()
+                    .fill(brandColor)
+                    .frame(height: 6)
+
+                VStack(spacing: 12) {
+                    Spacer(minLength: 8)
+
+                    // Logo or SF Symbol
+                    brandImage
+                        .frame(width: 64, height: 64)
+
+                    // Display name
+                    Text(brand.displayName)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+
+                    // Subtitle
+                    if let subtitle = brand.subtitle {
+                        Text(subtitle)
+                            .font(.system(size: 12))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+
+                    Spacer(minLength: 8)
+                }
+                .padding(.horizontal, 12)
+            }
+            .frame(minHeight: 160)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(NSColor.controlBackgroundColor))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? brandColor : Color.secondary.opacity(0.2), lineWidth: isSelected ? 3 : 1)
+            )
+            .overlay(
+                isSelected ?
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(brandColor)
+                        .font(.title2)
+                        .padding(8)
+                    : nil,
+                alignment: .topTrailing
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private var brandImage: some View {
+        if let logoPath = brand.logoPath, let nsImage = NSImage(contentsOfFile: logoPath) {
+            Image(nsImage: nsImage)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+        } else if let sfSymbol = brand.sfSymbol {
+            Image(systemName: sfSymbol)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .foregroundStyle(brandColor)
+        } else {
+            Image(systemName: "building.2.fill")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .foregroundStyle(brandColor)
+        }
+    }
+}
+
+// MARK: - Assistant Step Components (Apple Setup Assistant Style)
+
+/// Card cell for Assistant step grid — Apple-style blue selection border, no checkmark badge
+struct AssistantGridCell: View {
+    let item: IntroGridItem
+    let isSelected: Bool
+    let basePath: String?
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            VStack(spacing: 8) {
+                // Image content
+                imageContent
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 120)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+
+                // Title
+                if let title = item.title {
+                    Text(title)
+                        .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+                }
+            }
+            .padding(6)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color(NSColor.windowBackgroundColor))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(
+                        isSelected ? Color.accentColor : Color(NSColor.separatorColor).opacity(0.5),
+                        lineWidth: isSelected ? 3 : 1
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private var imageContent: some View {
+        if let imagePath = item.imagePath {
+            AsyncImageView(
+                iconPath: imagePath,
+                basePath: basePath,
+                maxWidth: 200,
+                maxHeight: 120,
+                fallback: { Color.gray.opacity(0.1) }
+            )
+        } else if let sfSymbol = item.sfSymbol {
+            Image(systemName: sfSymbol)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .foregroundStyle(Color.accentColor)
+                .padding(24)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.accentColor.opacity(0.05))
+        } else {
+            Color.gray.opacity(0.1)
+        }
+    }
+}
+
+/// Grid picker for Assistant steps — reuses selection logic, uses AssistantGridCell
+struct AssistantGridPicker: View {
+    let items: [IntroGridItem]
+    let columns: Int
+    let selectionMode: String
+    @Binding var selectedIds: Set<String>
+    let basePath: String?
+
+    private var gridColumns: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: 16), count: columns)
+    }
+
+    var body: some View {
+        LazyVGrid(columns: gridColumns, spacing: 16) {
+            ForEach(items) { item in
+                AssistantGridCell(
+                    item: item,
+                    isSelected: selectedIds.contains(item.id),
+                    basePath: basePath,
+                    onTap: { toggleSelection(item.id) }
+                )
+            }
+        }
+    }
+
+    private func toggleSelection(_ id: String) {
+        switch selectionMode {
+        case "single":
+            selectedIds = [id]
+        case "multiple":
+            if selectedIds.contains(id) {
+                selectedIds.remove(id)
+            } else {
+                selectedIds.insert(id)
+            }
+        default:
+            break
+        }
+    }
+}
+
+// Note: Wallpaper picker for Preset5 reuses WallpaperPickerView from PresetCommonHelpers.swift

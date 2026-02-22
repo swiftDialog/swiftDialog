@@ -5,7 +5,7 @@
 //  Created by Henry Stamerjohann, Declarative IT GmbH
 //
 //  Generic validation caching utilities for Inspect presets
-//  Consolidates shared caching patterns from Preset8 and Preset9
+//  Consolidates shared caching patterns from legacy presets
 //
 
 import Foundation
@@ -117,7 +117,7 @@ enum ValidationStatusWriter {
 
     /// Write status to plist for external monitoring
     /// - Parameters:
-    ///   - presetName: Name of the preset (e.g., "Preset8", "Preset9")
+    ///   - presetName: Name of the preset (e.g., "Preset5", "Preset6")
     ///   - itemId: ID of the item being validated
     ///   - itemName: Display name of the item
     ///   - result: Validation result

@@ -68,40 +68,18 @@ struct InspectView: View {
 
         switch basePreset {
         case "preset1", "1", "deployment":
-            // Classic sidebar with FSevents progress tracking
             Preset1View(inspectState: inspectState)
         case "preset2", "2", "cards":
-            // Card-based display with carousel, banner
             Preset2View(inspectState: inspectState)
         case "preset3", "3", "compact":
-            // Compact list with gradient background
             Preset3Wrapper(coordinator: inspectState)
-        case "preset4", "4", "compliance":
-            // File/folder/setting checks
+        case "preset4", "4", "toast", "compact-installer":
             Preset4Wrapper(coordinator: inspectState)
-        case "preset5", "5", "dashboard":
-            // Compliance dashboard with plist checks
+        case "preset5", "5", "portal", "self-service", "webview-portal":
             Preset5Wrapper(coordinator: inspectState)
         case "preset6", "6", "guidance", "modern-sidebar":
-            // Modern sidebar variant with clean styling
             Preset6Wrapper(coordinator: inspectState)
-        case "preset7", "7", "guide":
-            // Interactive step-by-step guide with images
-            Preset7Wrapper(coordinator: inspectState)
-        case "preset8", "8", "onboarding":
-            // Minimal onboarding with large images
-            Preset8Wrapper(coordinator: inspectState)
-        case "preset9", "9", "display":
-            // Two-panel info display with sidebar
-            Preset9Wrapper(coordinator: inspectState)
-        case "preset10", "10":
-            // Reserved placeholder
-            Preset10Wrapper(coordinator: inspectState)
-        case "preset11", "11", "portal", "self-service", "webview-portal":
-            // Self-service portal with branded WebView
-            Preset11Wrapper(coordinator: inspectState)
         default:
-            // Default fallback
             Preset1View(inspectState: inspectState)
                 .onAppear {
                     print("WARNING: InspectViewServiceBased: Unknown preset '\(presetName)', using default")
@@ -422,166 +400,12 @@ private struct Preset3Wrapper: View {
     }
 }
 
-// MARK: - Wrapper for Preset4 to use InspectState
-
-private struct Preset4Wrapper: View {
-    @ObservedObject var coordinator: InspectState
-    @StateObject private var inspectState = InspectState()
-    @State private var hasInitialized = false
-
-    var body: some View {
-        Preset4View(inspectState: inspectState)
-            .onAppear {
-                guard !hasInitialized else { return }
-                hasInitialized = true
-
-                // Initialize the InspectState properly
-                inspectState.initialize()
-
-                // Then sync state from coordinator
-                inspectState.items = coordinator.items
-                inspectState.config = coordinator.config
-                inspectState.uiConfiguration = coordinator.uiConfiguration
-                inspectState.backgroundConfiguration = coordinator.backgroundConfiguration
-                inspectState.buttonConfiguration = coordinator.buttonConfiguration
-                inspectState.completedItems = coordinator.completedItems
-                inspectState.downloadingItems = coordinator.downloadingItems
-                inspectState.plistSources = coordinator.plistSources
-                inspectState.colorThresholds = coordinator.colorThresholds
-
-                // Sync validation results
-                inspectState.plistValidationResults = coordinator.plistValidationResults
-            }
-            .onReceive(coordinator.$completedItems) { items in
-                inspectState.completedItems = items
-            }
-            .onReceive(coordinator.$downloadingItems) { items in
-                inspectState.downloadingItems = items
-            }
-            .onReceive(coordinator.$plistValidationResults) { results in
-                inspectState.plistValidationResults = results
-            }
-    }
-}
-
-// MARK: - Wrapper for Preset5 to use InspectState
+// MARK: - Wrapper for Preset5 (Unified Portal)
 
 private struct Preset5Wrapper: View {
     @ObservedObject var coordinator: InspectState
-    @StateObject private var inspectState = InspectState()
-    @State private var hasInitialized = false
 
     var body: some View {
-        Preset5View(inspectState: inspectState)
-            .onAppear {
-                guard !hasInitialized else { return }
-                hasInitialized = true
-
-                // Initialize the InspectState properly
-                inspectState.initialize()
-
-                // Then sync state from coordinator
-                inspectState.items = coordinator.items
-                inspectState.config = coordinator.config
-                inspectState.uiConfiguration = coordinator.uiConfiguration
-                inspectState.backgroundConfiguration = coordinator.backgroundConfiguration
-                inspectState.buttonConfiguration = coordinator.buttonConfiguration
-                inspectState.completedItems = coordinator.completedItems
-                inspectState.downloadingItems = coordinator.downloadingItems
-            }
-            .onReceive(coordinator.$completedItems) { items in
-                inspectState.completedItems = items
-            }
-            .onReceive(coordinator.$downloadingItems) { items in
-                inspectState.downloadingItems = items
-            }
-    }
-}
-
-// MARK: - Wrapper for Preset7 to use InspectState
-
-private struct Preset7Wrapper: View {
-    @ObservedObject var coordinator: InspectState
-    @StateObject private var inspectState = InspectState()
-    @State private var hasInitialized = false
-
-    var body: some View {
-        Preset7View(inspectState: inspectState)
-            .onAppear {
-                guard !hasInitialized else { return }
-                hasInitialized = true
-
-                // Initialize the InspectState properly
-                inspectState.initialize()
-
-                // Then sync state from coordinator
-                inspectState.items = coordinator.items
-                inspectState.config = coordinator.config
-                inspectState.uiConfiguration = coordinator.uiConfiguration
-                inspectState.backgroundConfiguration = coordinator.backgroundConfiguration
-                inspectState.buttonConfiguration = coordinator.buttonConfiguration
-                inspectState.completedItems = coordinator.completedItems
-                inspectState.downloadingItems = coordinator.downloadingItems
-            }
-            .onReceive(coordinator.$completedItems) { items in
-                inspectState.completedItems = items
-            }
-            .onReceive(coordinator.$downloadingItems) { items in
-                inspectState.downloadingItems = items
-            }
-    }
-}
-
-// MARK: - Wrapper for Preset8 to use InspectState
-
-private struct Preset8Wrapper: View {
-    @ObservedObject var coordinator: InspectState
-    @StateObject private var inspectState = InspectState()
-    @State private var hasInitialized = false
-
-    var body: some View {
-        Preset8View(inspectState: inspectState)
-            .onAppear {
-                guard !hasInitialized else { return }
-                hasInitialized = true
-
-                // Initialize the InspectState properly
-                inspectState.initialize()
-
-                // Then sync state from coordinator
-                inspectState.items = coordinator.items
-                inspectState.config = coordinator.config
-                inspectState.uiConfiguration = coordinator.uiConfiguration
-                inspectState.backgroundConfiguration = coordinator.backgroundConfiguration
-                inspectState.buttonConfiguration = coordinator.buttonConfiguration
-                inspectState.completedItems = coordinator.completedItems
-                inspectState.downloadingItems = coordinator.downloadingItems
-            }
-            .onReceive(coordinator.$completedItems) { items in
-                inspectState.completedItems = items
-            }
-            .onReceive(coordinator.$downloadingItems) { items in
-                inspectState.downloadingItems = items
-            }
-    }
-}
-
-// MARK: - Wrapper for Preset9 to use InspectState
-
-private struct Preset9Wrapper: View {
-    @ObservedObject var coordinator: InspectState
-
-    var body: some View {
-        Preset9View(inspectState: coordinator)
-    }
-}
-
-// MARK: - Wrapper for Preset11 to use InspectState
-
-private struct Preset11Wrapper: View {
-    @ObservedObject var coordinator: InspectState
-
-    var body: some View {
-        Preset11View(inspectState: coordinator)
+        Preset5View(inspectState: coordinator)
     }
 }
