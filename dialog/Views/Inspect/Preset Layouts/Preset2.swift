@@ -16,14 +16,101 @@ struct Preset2View: View, InspectLayoutProtocol {
     @State private var showItemDetailOverlay = false
     @State private var selectedItemForDetail: InspectConfig.ItemConfig?
     @StateObject private var iconCache = PresetIconCache()
+    @State private var localizationService = LocalizationService()
     @State private var scrollOffset: Int = 0
     @State private var lastDownloadingItem: String?
+    @State private var currentPhase: PresetPhase = .main
+
+    /// Highlight color derived from config
+    private var primaryColor: Color {
+        Color(hex: inspectState.uiConfiguration.highlightColor)
+    }
 
     init(inspectState: InspectState) {
         self.inspectState = inspectState
     }
 
     var body: some View {
+        Group {
+            switch currentPhase {
+            case .intro:
+                if let introConfig = inspectState.config?.introScreen {
+                    PresetIntroScreenView(
+                        config: introConfig,
+                        highlightColor: primaryColor,
+                        scaleFactor: scaleFactor,
+                        basePath: inspectState.uiConfiguration.iconBasePath,
+                        inspectState: inspectState,
+                        onContinue: {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                currentPhase = .main
+                            }
+                        }
+                    )
+                    .background(Color(NSColor.windowBackgroundColor))
+                }
+            case .main:
+                mainPhaseView
+            case .summary:
+                if let summaryConfig = inspectState.config?.summaryScreen {
+                    PresetSummaryScreenView(
+                        config: summaryConfig,
+                        highlightColor: primaryColor,
+                        scaleFactor: scaleFactor,
+                        basePath: inspectState.uiConfiguration.iconBasePath,
+                        inspectState: inspectState,
+                        onClose: {
+                            writeLog("Preset2View: Summary screen closed", logLevel: .info)
+                            exit(0)
+                        }
+                    )
+                    .background(Color(NSColor.windowBackgroundColor))
+                }
+            }
+        }
+        .onAppear {
+            if inspectState.config?.introScreen != nil {
+                currentPhase = .intro
+            }
+        }
+        .onChange(of: inspectState.completedItems.count) { _, _ in
+            checkAutoTransitionToSummary()
+        }
+        .onChange(of: currentPhase) { _, newPhase in
+            if newPhase == .main {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    checkAutoTransitionToSummary()
+                }
+            }
+        }
+    }
+
+    /// Check if all items are complete and auto-transition to summary
+    private func checkAutoTransitionToSummary() {
+        guard currentPhase == .main,
+              let summaryConfig = inspectState.config?.summaryScreen,
+              summaryConfig.autoTransition != false,
+              !inspectState.items.isEmpty,
+              inspectState.completedItems.count == inspectState.items.count else { return }
+        withAnimation(.easeInOut(duration: 0.3)) {
+            currentPhase = .summary
+        }
+    }
+
+    /// When summaryScreen is configured, button1 transitions to summary instead of exit(0).
+    /// Returns nil when no summary → default exit(0) behavior.
+    private var summaryScreenButtonAction: (() -> Void)? {
+        guard inspectState.config?.summaryScreen != nil else { return nil }
+        return {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                currentPhase = .summary
+            }
+        }
+    }
+
+    // MARK: - Main Phase (Original Preset2 Layout)
+
+    private var mainPhaseView: some View {
         VStack(spacing: 0) {
             // Top section - either banner or icon
             if inspectState.uiConfiguration.bannerImage != nil {
@@ -37,7 +124,7 @@ struct Preset2View: View, InspectLayoutProtocol {
                             .clipped()
 
                         // Optional title overlay on banner
-                        if let bannerTitle = inspectState.uiConfiguration.bannerTitle {
+                        if let bannerTitle = localized("bannerTitle", fallback: inspectState.uiConfiguration.bannerTitle) {
                             Text(bannerTitle)
                                 .font(.largeTitle)
                                 .fontWeight(.bold)
@@ -50,9 +137,8 @@ struct Preset2View: View, InspectLayoutProtocol {
                 .onAppear { iconCache.cacheBannerImage(for: inspectState) }
 
                 // Title below banner
-                Text(inspectState.uiConfiguration.windowTitle)
-                    .font(.title)
-                    .fontWeight(.bold)
+                Text(localized("title", fallback: inspectState.uiConfiguration.windowTitle) ?? "")
+                    .font(.system(size: 26, weight: .bold))
                     .multilineTextAlignment(.center)
                     .padding(.top, 20 * scaleFactor)
                     .padding(.bottom, 20 * scaleFactor)
@@ -70,9 +156,8 @@ struct Preset2View: View, InspectLayoutProtocol {
                     .onAppear { iconCache.cacheMainIcon(for: inspectState) }
 
                     // Title - positioned below icon, centered
-                    Text(inspectState.uiConfiguration.windowTitle)
-                        .font(.title2)
-                        .fontWeight(.semibold)
+                    Text(localized("title", fallback: inspectState.uiConfiguration.windowTitle) ?? "")
+                        .font(.system(size: 26, weight: .bold))
                         .multilineTextAlignment(.center)
                 }
                 .frame(maxWidth: .infinity)
@@ -80,9 +165,9 @@ struct Preset2View: View, InspectLayoutProtocol {
             }
 
             // Rotating side messages - always visible
-            if let currentMessage = inspectState.getCurrentSideMessage() {
+            if let currentMessage = localizedSideMessage() {
                 Text(currentMessage)
-                    .font(.system(size: 11 * scaleFactor))
+                    .font(.system(size: 13))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .lineLimit(4)
@@ -122,6 +207,8 @@ struct Preset2View: View, InspectLayoutProtocol {
                                 scale: scaleFactor,
                                 resolvedIconPath: getIconPathForItem(item),
                                 inspectState: inspectState,
+                                localizedDisplayName: localizedDisplayName(for: item),
+                                localizedStatusOverride: localizedStatusText(for: item),
                                 onInfoTapped: {
                                     selectedItemForDetail = item
                                     showItemDetailOverlay = true
@@ -161,6 +248,7 @@ struct Preset2View: View, InspectLayoutProtocol {
                 }
                 .padding(.horizontal, 40 * scaleFactor)
             }
+            .padding(.top, 16)
 
             Spacer()
                 //.frame(maxHeight: 30 * scaleFactor)
@@ -180,23 +268,23 @@ struct Preset2View: View, InspectLayoutProtocol {
             }
             .padding(.vertical, 16 * scaleFactor)
 
-            // Bottom buttons
+            // Bottom section — info link left, buttons right
             HStack {
-                // Install details button (always visible)
+                // Info link on the left
                 Button(inspectState.uiConfiguration.popupButtonText) {
                     showingAboutPopover.toggle()
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(.blue)
-                .font(.body)
+                .foregroundStyle(primaryColor)
+                .font(.system(size: 13))
                 .popover(isPresented: $showingAboutPopover) {
                     InstallationInfoPopoverView(inspectState: inspectState)
                 }
 
                 Spacer()
 
-                // Action buttons (appear when complete)
-                HStack(spacing: 20 * scaleFactor) {
+                // Action buttons on the right
+                HStack(spacing: 12) {
                     // About button or Button2 if configured
                     if inspectState.buttonConfiguration.button2Visible {
                         Button(action: {
@@ -224,16 +312,22 @@ struct Preset2View: View, InspectLayoutProtocol {
                                          (inspectState.buttonConfiguration.button1Text.isEmpty ? "Continue" : inspectState.buttonConfiguration.button1Text)
 
                     Button(action: {
-                        writeLog("Preset2LayoutServiceBased: User clicked button1 (\(finalButtonText))", logLevel: .info)
-                        exit(0)
+                        if let action = summaryScreenButtonAction {
+                            writeLog("Preset2View: User clicked button1 (\(finalButtonText)) - transition to summary", logLevel: .info)
+                            action()
+                        } else {
+                            writeLog("Preset2View: User clicked button1 (\(finalButtonText)) - exiting with code 0", logLevel: .info)
+                            exit(0)
+                        }
                     }) {
                         Text(finalButtonText)
                     }
                     .keyboardShortcut(.defaultAction)
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)
+                    .tint(primaryColor)
                     .disabled(inspectState.buttonConfiguration.button1Disabled)
-                    .opacity(inspectState.completedItems.count == inspectState.items.count ? 1.0 : 0.0)
+                    .opacity(inspectState.buttonConfiguration.button1Disabled ? 0.0 : 1.0)
                 }
             }
             .padding(.horizontal, 40 * scaleFactor)
@@ -270,7 +364,62 @@ struct Preset2View: View, InspectLayoutProtocol {
             item: selectedItemForDetail
         )
         .onAppear {
+            if let locConfig = inspectState.config?.localization {
+                let basePath = inspectState.uiConfiguration.iconBasePath ?? ""
+                localizationService.loadLanguages(from: locConfig, basePath: basePath)
+            }
             writeLog("Preset2LayoutServiceBased: Using InspectState", logLevel: .info)
+        }
+    }
+
+    // MARK: - Localization
+
+    /// The auto-detected or hardcoded default language (no picker in Preset2)
+    private var effectiveLanguage: String? {
+        guard let locConfig = inspectState.config?.localization else { return nil }
+        return localizationService.resolveDefaultLanguage(from: locConfig)
+    }
+
+    /// Resolve a localized string, falling back to the provided default
+    private func localized(_ key: String, fallback: String?) -> String? {
+        guard let lang = effectiveLanguage else { return fallback }
+        return localizationService.string(forLanguage: lang, key: key) ?? fallback
+    }
+
+    /// Resolve a localized string array, falling back to the provided default
+    private func localizedArray(_ key: String, fallback: [String]?) -> [String]? {
+        guard let lang = effectiveLanguage else { return fallback }
+        return localizationService.stringArray(forLanguage: lang, key: key) ?? fallback
+    }
+
+    /// Get the current side message with localization applied
+    private func localizedSideMessage() -> String? {
+        let messages = localizedArray("sideMessages", fallback: inspectState.uiConfiguration.sideMessages) ?? inspectState.uiConfiguration.sideMessages
+        guard !messages.isEmpty else { return nil }
+        let index = min(inspectState.uiConfiguration.currentSideMessageIndex, messages.count - 1)
+        return messages[index]
+    }
+
+    /// Get localized display name for an item
+    private func localizedDisplayName(for item: InspectConfig.ItemConfig) -> String {
+        localized("\(item.id).displayName", fallback: item.displayName) ?? item.displayName
+    }
+
+    /// Get localized status text for an item
+    private func localizedStatusText(for item: InspectConfig.ItemConfig) -> String? {
+        guard effectiveLanguage != nil else { return nil }
+        if inspectState.failedItems.contains(item.id) {
+            return localized("\(item.id).failedStatus", fallback: nil)
+                ?? localized("failedStatus", fallback: nil)
+        } else if inspectState.completedItems.contains(item.id) {
+            return localized("\(item.id).completedStatus", fallback: nil)
+                ?? localized("completedStatus", fallback: nil)
+        } else if inspectState.downloadingItems.contains(item.id) {
+            return localized("\(item.id).downloadingStatus", fallback: nil)
+                ?? localized("downloadingStatus", fallback: nil)
+        } else {
+            return localized("\(item.id).pendingStatus", fallback: nil)
+                ?? localized("pendingStatus", fallback: nil)
         }
     }
 
@@ -368,7 +517,10 @@ struct Preset2View: View, InspectLayoutProtocol {
         let completed = inspectState.completedItems.count
         let total = inspectState.items.count
 
-        if let template = inspectState.config?.uiLabels?.progressFormat {
+        // Try localized progress format first, then config, then default
+        let template = localized("progressFormat", fallback: inspectState.config?.uiLabels?.progressFormat)
+
+        if let template {
             return template
                 .replacingOccurrences(of: "{completed}", with: "\(completed)")
                 .replacingOccurrences(of: "{total}", with: "\(total)")
@@ -389,9 +541,11 @@ private struct Preset2ItemCardView: View {
     let scale: CGFloat
     let resolvedIconPath: String
     let inspectState: InspectState
+    let localizedDisplayName: String
+    let localizedStatusOverride: String?
     let onInfoTapped: (() -> Void)?
 
-    init(item: InspectConfig.ItemConfig, isCompleted: Bool, isDownloading: Bool, isFailed: Bool = false, highlightColor: String, scale: CGFloat, resolvedIconPath: String, inspectState: InspectState, onInfoTapped: (() -> Void)? = nil) {
+    init(item: InspectConfig.ItemConfig, isCompleted: Bool, isDownloading: Bool, isFailed: Bool = false, highlightColor: String, scale: CGFloat, resolvedIconPath: String, inspectState: InspectState, localizedDisplayName: String? = nil, localizedStatusOverride: String? = nil, onInfoTapped: (() -> Void)? = nil) {
         self.item = item
         self.isCompleted = isCompleted
         self.isDownloading = isDownloading
@@ -400,6 +554,8 @@ private struct Preset2ItemCardView: View {
         self.scale = scale
         self.resolvedIconPath = resolvedIconPath
         self.inspectState = inspectState
+        self.localizedDisplayName = localizedDisplayName ?? item.displayName
+        self.localizedStatusOverride = localizedStatusOverride
         self.onInfoTapped = onInfoTapped
     }
 
@@ -427,6 +583,11 @@ private struct Preset2ItemCardView: View {
             return logStatus
         }
 
+        // Priority 2: Localized status override
+        if let override = localizedStatusOverride {
+            return override
+        }
+
         if isFailed {
             // Use custom failed status if available
             return inspectState.config?.uiLabels?.failedStatus ?? "Failed"
@@ -434,8 +595,6 @@ private struct Preset2ItemCardView: View {
             if hasValidationWarning {
                 // Use custom validation warning text if available, otherwise default
                 return inspectState.config?.uiLabels?.failedStatus ?? "Failed"
-            } else if let bundleInfo = inspectState.getBundleInfoForItem(item) {
-                return bundleInfo
             } else {
                 // Use the new customization system for completed status
                 if let customStatus = item.completedStatus {
@@ -481,7 +640,7 @@ private struct Preset2ItemCardView: View {
 
     var body: some View {
         VStack(spacing: 4 * scale) {
-            // Icon with status overlay
+            // Icon with status overlay — fixed height so text below doesn't shift it
             ZStack {
                 // Item icon - larger size
                 IconView(image: resolvedIconPath, defaultImage: "app.fill", defaultColour: "accent")
@@ -542,28 +701,24 @@ private struct Preset2ItemCardView: View {
                                       "Configuration validation failed - check plist settings" :
                                       "\(getStatusText()) and validated")
                         } else if isDownloading {
-                            // Blue circle with white spinner - matches checkmark style
-                            Circle()
-                                .fill(Color.blue)
+                            ProgressView()
+                                .scaleEffect(0.7)
+                                .tint(Color(hex: highlightColor))
                                 .frame(width: 26 * scale, height: 26 * scale)
-                                .overlay(
-                                    ProgressView()
-                                        .scaleEffect(0.7)
-                                        .tint(Color.white)
-                                        .colorScheme(.dark)  // Makes spinner white
-                                )
                         }
                     }
                     Spacer()
                 }
                 .padding(2 * scale)
             }
+            .frame(height: 90 * scale)
 
-            // App name and status
+            // App name and status — fixed height to prevent icon shifting
             VStack(spacing: 2 * scale) {
-                Text(item.displayName)
+                Text(localizedDisplayName)
                     .font(.system(size: 12 * scale, weight: .medium))
-                    .lineLimit(2)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(isDownloading ? Color(hex: highlightColor) : .primary)
 
@@ -571,8 +726,17 @@ private struct Preset2ItemCardView: View {
                 Text(getStatusText())
                     .font(.system(size: 9 * scale))
                     .foregroundStyle(getStatusColor())
+
+                // Bundle info subtitle (version, identifier, etc.)
+                if let bundleInfo = inspectState.getBundleInfoForItem(item) {
+                    Text(bundleInfo)
+                        .font(.system(size: 8 * scale))
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                }
             }
-            .frame(width: 110 * scale, height: 35 * scale)
+            .frame(width: 110 * scale)
+            .frame(height: 50 * scale)
         }
         .frame(width: 130 * scale, height: 160 * scale)
         .padding(6 * scale)

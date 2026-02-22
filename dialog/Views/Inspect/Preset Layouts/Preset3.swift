@@ -15,6 +15,7 @@ struct Preset3View: View, InspectLayoutProtocol {
     @State private var showItemDetailOverlay = false
     @State private var selectedItemForDetail: InspectConfig.ItemConfig?
     @StateObject private var iconCache = PresetIconCache()
+    @State private var localizationService = LocalizationService()
 
     init(inspectState: InspectState) {
         self.inspectState = inspectState
@@ -30,7 +31,7 @@ struct Preset3View: View, InspectLayoutProtocol {
             VStack(spacing: 0) {
                 // Fixed header with title and button - always visible
                 HStack {
-                    Text(inspectState.uiConfiguration.windowTitle)
+                    Text(localized("title", fallback: inspectState.uiConfiguration.windowTitle) ?? "")
                         .font(.title)
                         .fontWeight(.semibold)
                         .foregroundStyle(textColor)
@@ -78,7 +79,7 @@ struct Preset3View: View, InspectLayoutProtocol {
                                 .clipped()
 
                             // Optional title overlay on banner
-                            if let bannerTitle = inspectState.uiConfiguration.bannerTitle {
+                            if let bannerTitle = localized("bannerTitle", fallback: inspectState.uiConfiguration.bannerTitle) {
                                 Text(bannerTitle)
                                     .font(.title2)
                                     .fontWeight(.bold)
@@ -110,14 +111,14 @@ struct Preset3View: View, InspectLayoutProtocol {
 
                     VStack(alignment: .leading, spacing: 4) {
                         // Add subtitle message if available
-                        if let subtitle = inspectState.uiConfiguration.subtitleMessage {
+                        if let subtitle = localized("subtitle", fallback: inspectState.uiConfiguration.subtitleMessage) {
                             Text(subtitle)
                                 .font(.headline)
                                 .fontWeight(.medium)
                                 .foregroundStyle(textColor)
                         }
 
-                        if let currentMessage = inspectState.getCurrentSideMessage() {
+                        if let currentMessage = localizedSideMessage() {
                             Text(currentMessage)
                                 .font(.subheadline)
                                 .foregroundStyle(textColor.opacity(0.9))
@@ -150,7 +151,7 @@ struct Preset3View: View, InspectLayoutProtocol {
 
                                     // Item name with info button
                                     HStack(spacing: 4) {
-                                        Text(item.displayName)
+                                        Text(localized("\(item.id).displayName", fallback: item.displayName) ?? item.displayName)
                                             .font(.body)
                                             .foregroundStyle(textColor)
 
@@ -232,12 +233,12 @@ struct Preset3View: View, InspectLayoutProtocol {
                     
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
-                            Text(isComplete ? (inspectState.config?.uiLabels?.completionMessage ?? "Installation Complete!") : "Installation Progress")
+                            Text(isComplete ? (localized("completionMessage", fallback: inspectState.config?.uiLabels?.completionMessage) ?? "Installation Complete!") : (localized("installationProgress", fallback: nil) ?? "Installation Progress"))
                                 .font(.headline)
                                 .foregroundStyle(textColor)
                             Spacer()
                             if isComplete {
-                                Text(inspectState.config?.uiLabels?.completionSubtitle ?? "All installations completed successfully")
+                                Text(localized("completionSubtitle", fallback: inspectState.config?.uiLabels?.completionSubtitle) ?? "All installations completed successfully")
                                     .font(.subheadline)
                                     .fontWeight(.semibold)
                                     .foregroundStyle(textColor)
@@ -290,8 +291,10 @@ struct Preset3View: View, InspectLayoutProtocol {
             item: selectedItemForDetail
         )
         .onAppear {
-            // Main icon caching is already handled in the icon's .onAppear
-            // LazyVGrid handles item icon loading as items become visible
+            if let locConfig = inspectState.config?.localization {
+                let basePath = inspectState.uiConfiguration.iconBasePath ?? ""
+                localizationService.loadLanguages(from: locConfig, basePath: basePath)
+            }
         }
     }
 
@@ -370,6 +373,53 @@ struct Preset3View: View, InspectLayoutProtocol {
             return 1 // Completed items second
         } else {
             return 2 // Pending items last
+        }
+    }
+
+    // MARK: - Localization
+
+    private var effectiveLanguage: String? {
+        guard let locConfig = inspectState.config?.localization else { return nil }
+        return localizationService.resolveDefaultLanguage(from: locConfig)
+    }
+
+    private func localized(_ key: String, fallback: String?) -> String? {
+        guard let lang = effectiveLanguage else { return fallback }
+        return localizationService.string(forLanguage: lang, key: key) ?? fallback
+    }
+
+    private func localizedArray(_ key: String, fallback: [String]?) -> [String]? {
+        guard let lang = effectiveLanguage else { return fallback }
+        return localizationService.stringArray(forLanguage: lang, key: key) ?? fallback
+    }
+
+    private func localizedSideMessage() -> String? {
+        let messages = localizedArray("sideMessages", fallback: inspectState.uiConfiguration.sideMessages) ?? inspectState.uiConfiguration.sideMessages
+        guard !messages.isEmpty else { return nil }
+        let index = min(inspectState.uiConfiguration.currentSideMessageIndex, messages.count - 1)
+        return messages[index]
+    }
+
+    private func localizedItemStatus(for item: InspectConfig.ItemConfig) -> String {
+        let baseStatus = getStatusText(for: item)
+        guard effectiveLanguage != nil else { return baseStatus }
+
+        if inspectState.completedItems.contains(item.id) {
+            return localized("\(item.id).completedStatus", fallback: nil)
+                ?? localized("completedStatus", fallback: nil)
+                ?? baseStatus
+        } else if inspectState.downloadingItems.contains(item.id) {
+            return localized("\(item.id).downloadingStatus", fallback: nil)
+                ?? localized("downloadingStatus", fallback: nil)
+                ?? baseStatus
+        } else if inspectState.failedItems.contains(item.id) {
+            return localized("\(item.id).failedStatus", fallback: nil)
+                ?? localized("failedStatus", fallback: nil)
+                ?? baseStatus
+        } else {
+            return localized("\(item.id).pendingStatus", fallback: nil)
+                ?? localized("pendingStatus", fallback: nil)
+                ?? baseStatus
         }
     }
 
@@ -494,7 +544,7 @@ struct Preset3View: View, InspectLayoutProtocol {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundStyle(.red)
                     .font(.caption)
-                Text(getStatusText(for: item))
+                Text(localizedItemStatus(for: item))
                     .font(.caption)
                     .foregroundStyle(.red)
                     .fontWeight(.medium)
@@ -516,36 +566,36 @@ struct Preset3View: View, InspectLayoutProtocol {
                 }
                 .help("Configuration validation failed - check plist settings")
             } else {
-                let _ = print("DEBUG Preset3 UI: Showing '\(getStatusText(for: item))' for '\(item.id)'")
+                let _ = print("DEBUG Preset3 UI: Showing '\(localizedItemStatus(for: item))' for '\(item.id)'")
                 HStack(spacing: 4) {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(.green)
                         .font(.caption)
-                    Text(getStatusText(for: item))
+                    Text(localizedItemStatus(for: item))
                         .font(.caption)
                         .foregroundStyle(.green)
                         .fontWeight(.medium)
                 }
-                .help("\(getStatusText(for: item)) and validated")
+                .help("\(localizedItemStatus(for: item)) and validated")
             }
         } else if inspectState.downloadingItems.contains(item.id) {
-            let _ = print("DEBUG Preset3 UI: Showing '\(getStatusText(for: item))' for '\(item.id)'")
+            let _ = print("DEBUG Preset3 UI: Showing '\(localizedItemStatus(for: item))' for '\(item.id)'")
             HStack(spacing: 4) {
                 ProgressView()
                     .scaleEffect(0.6)
                     .frame(width: 12, height: 12)
-                Text(getStatusText(for: item))
+                Text(localizedItemStatus(for: item))
                     .font(.caption)
                     .foregroundStyle(textColor.opacity(0.7))
                     .fontWeight(.medium)
             }
         } else {
-            let _ = print("DEBUG Preset3 UI: Showing '\(getStatusText(for: item))' for '\(item.id)'")
+            let _ = print("DEBUG Preset3 UI: Showing '\(localizedItemStatus(for: item))' for '\(item.id)'")
             HStack(spacing: 4) {
                 Image(systemName: "clock.fill")
                     .foregroundStyle(textColor.opacity(0.5))
                     .font(.caption)
-                Text(getStatusText(for: item))
+                Text(localizedItemStatus(for: item))
                     .font(.caption)
                     .foregroundStyle(textColor.opacity(0.7))
                     .fontWeight(.medium)
