@@ -5,7 +5,7 @@
 //  Created by Henry Stamerjohann, Declarative IT GmbH, 25/01/2026
 //
 //  Preset6: Modern Sidebar Variant
-//  Modern sidebar navigation with Preset11-style clean design.
+//  Modern sidebar navigation with Preset5-style clean design.
 //
 //  Features:
 //  - Vertical sidebar navigation
@@ -31,6 +31,7 @@ struct Preset6State: InspectPersistableState {
 
 struct Preset6View: View, InspectLayoutProtocol {
     @ObservedObject var inspectState: InspectState
+    @Environment(\.palette) private var palette
 
     // MARK: - Module Services
 
@@ -48,6 +49,9 @@ struct Preset6View: View, InspectLayoutProtocol {
     @State private var processingTimer: Timer?
     @State private var failedSteps: [String: String] = [:]
     @State private var skippedSteps: Set<String> = []
+
+    // MDM branding
+    @State private var mdmOverrides: MDMBrandingOverrides?
 
     // File monitoring
     @State private var fileMonitorSource: DispatchSourceFileSystemObject?
@@ -68,6 +72,9 @@ struct Preset6View: View, InspectLayoutProtocol {
     // Persistence
     private let persistenceService = InspectPersistence<Preset6State>(presetName: "preset6")
 
+    // Localization
+    @State private var localizationService = LocalizationService()
+
     // MARK: - Type Aliases
 
     typealias ProcessingState = InspectProcessingState
@@ -76,17 +83,96 @@ struct Preset6View: View, InspectLayoutProtocol {
 
     // MARK: - Computed Properties
 
-    /// Highlight color from config
+    private var branding: BrandingResolver {
+        BrandingResolver(config: inspectState.config, mdmOverrides: mdmOverrides)
+    }
+
+    // MARK: - Localization
+
+    /// The language code selected by the user (from a dropdown/radio in guidance content),
+    /// falling back to the default language (auto-detected or hardcoded) if no manual selection exists.
+    private var selectedLanguageCode: String? {
+        if let manual = manualLanguageSelection { return manual }
+        if let locConfig = inspectState.config?.localization {
+            return localizationService.resolveDefaultLanguage(from: locConfig)
+        }
+        return nil
+    }
+
+    /// Manual language selection from form element (dropdown/radio)
+    private var manualLanguageSelection: String? {
+        let key = inspectState.config?.localization?.selectionKey ?? "preferredLanguage"
+        guard let item = inspectState.items.first(where: { item in
+            item.guidanceContent?.contains { $0.id == key } ?? false
+        }),
+        let formState = inspectState.guidanceFormInputs[item.id] else { return nil }
+        return formState.dropdowns[key] ?? formState.radios[key]
+    }
+
+    /// Whether the current language was manually selected (vs auto-detected default)
+    private var isManualLanguageSelection: Bool {
+        manualLanguageSelection != nil
+    }
+
+    /// Index of the item that contains the language selection form element
+    private var languagePickerStepIndex: Int? {
+        let key = inspectState.config?.localization?.selectionKey ?? "preferredLanguage"
+        return inspectState.items.firstIndex { item in
+            item.guidanceContent?.contains { $0.id == key } ?? false
+        }
+    }
+
+    /// Resolve a localized string for an item property.
+    /// With manual selection: only applies to the picker step and steps after it.
+    /// With default language (auto/hardcoded): applies to ALL items.
+    private func localized(_ property: String, forItem item: InspectConfig.ItemConfig, fallback: String?) -> String? {
+        guard let lang = selectedLanguageCode,
+              localizationService.hasLanguage(lang) else {
+            return fallback
+        }
+        if isManualLanguageSelection {
+            guard let pickerIndex = languagePickerStepIndex,
+                  let itemIndex = inspectState.items.firstIndex(where: { $0.id == item.id }),
+                  itemIndex >= pickerIndex else {
+                return fallback
+            }
+        }
+        return localizationService.string(forLanguage: lang, key: "\(item.id).\(property)") ?? fallback
+    }
+
+    /// Copy a GuidanceContent block with localized text applied.
+    /// With manual selection: only applies after the language picker step.
+    /// With default language: applies to ALL items.
+    private func localizedContentBlock(_ block: InspectConfig.GuidanceContent, itemId: String, blockIndex: Int) -> InspectConfig.GuidanceContent {
+        guard let lang = selectedLanguageCode,
+              localizationService.hasLanguage(lang) else { return block }
+        if isManualLanguageSelection {
+            guard let pickerIndex = languagePickerStepIndex,
+                  let itemIndex = inspectState.items.firstIndex(where: { $0.id == itemId }),
+                  itemIndex >= pickerIndex else { return block }
+        }
+        let prefix = "\(itemId).content.\(blockIndex)"
+        var localized = block
+        if let val = localizationService.string(forLanguage: lang, key: "\(prefix).content") { localized.content = val }
+        if let val = localizationService.stringArray(forLanguage: lang, key: "\(prefix).items") { localized.items = val }
+        if let val = localizationService.string(forLanguage: lang, key: "\(prefix).caption") { localized.caption = val }
+        if let val = localizationService.string(forLanguage: lang, key: "\(prefix).helpText") { localized.helpText = val }
+        if let val = localizationService.string(forLanguage: lang, key: "\(prefix).placeholder") { localized.placeholder = val }
+        if let val = localizationService.string(forLanguage: lang, key: "\(prefix).label") { localized.label = val }
+        return localized
+    }
+
+    /// Highlight color from config (MDM > JSON > uiConfiguration fallback)
     private var highlightColor: Color {
-        if let colorHex = inspectState.config?.highlightColor ?? inspectState.uiConfiguration.highlightColor.nilIfEmpty {
-            return Color(hex: colorHex)
+        if let hex = branding.effectiveHighlightColor ?? inspectState.uiConfiguration.highlightColor.nilIfEmpty {
+            return Color(hex: hex)
         }
         return .accentColor
     }
 
     /// Sidebar width from config (using default as property isn't in InspectConfig)
     private var sidebarWidth: CGFloat {
-        180  // Default sidebar width (narrower for compact design)
+        220  // Wider to avoid truncating step names like "Enrollment Status"
     }
 
     /// Show step numbers in sidebar (default true)
@@ -118,20 +204,6 @@ struct Preset6View: View, InspectLayoutProtocol {
         return !allowNav
     }
 
-    /// Logo path for sidebar
-    private var sidebarLogoPath: String? {
-        inspectState.config?.logoConfig?.imagePath
-    }
-
-    /// Footer logo path
-    private var footerLogoPath: String? {
-        inspectState.config?.logoConfig?.imagePath
-    }
-
-    /// Footer text
-    private var footerText: String? {
-        inspectState.config?.footerText
-    }
 
     /// Whether current step is an intro step
     private var isIntroStep: Bool {
@@ -217,13 +289,28 @@ struct Preset6View: View, InspectLayoutProtocol {
             } else {
                 mainLayout
             }
+
+            // Persistent logo overlay (bottom-left, all views)
+            if let logoConfig = inspectState.config?.logoConfig {
+                BrandedLogoView(
+                    logoConfig: logoConfig,
+                    basePath: inspectState.uiConfiguration.iconBasePath
+                )
+            }
         }
+        .environment(\.palette, ResolvedPalette(from: inspectState.config?.brandPalette, primaryColor: branding.primaryColor))
         .onAppear {
+            mdmOverrides = AppConfigService.shared.loadMDMOverrides(source: inspectState.config?.appConfigSource)
+            if let locConfig = inspectState.config?.localization {
+                let basePath = inspectState.uiConfiguration.iconBasePath ?? ""
+                localizationService.loadLanguages(from: locConfig, basePath: basePath)
+            }
             writeLog("Preset6: View appearing, loading state...", logLevel: .info)
             loadPersistedState()
             setupFileMonitoring()
             startComplianceMonitoring()
             startIntroStepMonitoring()
+            writeReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath)
             writeInteractionLog("launched", step: "preset6")
             logPreset6Event("view_appeared", details: [
                 "totalSteps": inspectState.items.count,
@@ -246,10 +333,11 @@ struct Preset6View: View, InspectLayoutProtocol {
         }
         .sheet(isPresented: $showOverrideDialog) {
             if let stepId = processingState.stepId {
+                let cancelText = branding.button2Text ?? "Cancel"
                 OverrideDialogView(
                     isPresented: $showOverrideDialog,
                     stepId: stepId,
-                    cancelButtonText: inspectState.config?.button2Text ?? "Cancel",
+                    cancelButtonText: cancelText,
                     onAction: { action in
                         handleOverrideAction(action: action, stepId: stepId)
                     }
@@ -278,10 +366,57 @@ struct Preset6View: View, InspectLayoutProtocol {
 
     private var mainLayout: some View {
         VStack(spacing: 0) {
-            // Accent border at top
-            Rectangle()
-                .fill(highlightColor)
-                .frame(height: 4)
+            // Banner image OR accent border at top
+            if let bannerPath = inspectState.uiConfiguration.bannerImage {
+                let bannerH = CGFloat(inspectState.uiConfiguration.bannerHeight) * scaleFactor
+                ZStack(alignment: .bottomLeading) {
+                    AsyncImageView(
+                        iconPath: bannerPath,
+                        basePath: inspectState.uiConfiguration.iconBasePath,
+                        maxWidth: .infinity,
+                        maxHeight: bannerH,
+                        imageFit: .fill
+                    ) {
+                        Rectangle()
+                            .fill(highlightColor.opacity(0.15))
+                            .frame(height: bannerH)
+                    }
+
+                    // Apple-style bottom fade for clean transition into content
+                    LinearGradient(
+                        colors: [.clear, Color.black.opacity(0.5)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: bannerH * 0.5)
+
+                    // Title/subtitle overlay on banner
+                    VStack(alignment: .leading, spacing: 2) {
+                        if let bannerTitle = inspectState.uiConfiguration.bannerTitle {
+                            Text(bannerTitle)
+                                .font(.title3.bold())
+                                .foregroundStyle(.white)
+                                .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
+                        }
+                        if let message = inspectState.uiConfiguration.subtitleMessage {
+                            Text(message)
+                                .font(.subheadline)
+                                .foregroundStyle(.white.opacity(0.85))
+                                .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 10)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: bannerH)
+                .clipShape(UnevenRoundedRectangle(topLeadingRadius: 10, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: 10, style: .continuous))
+                .ignoresSafeArea(edges: .top)
+            } else {
+                Rectangle()
+                    .fill(highlightColor)
+                    .frame(height: 4)
+            }
 
             // Main content area
             HStack(spacing: 0) {
@@ -322,20 +457,6 @@ struct Preset6View: View, InspectLayoutProtocol {
     @ViewBuilder
     private var contentPanel: some View {
         VStack(spacing: 0) {
-            // Banner (if configured)
-            if hasBanner {
-                InspectBannerView(
-                    bannerImage: inspectState.uiConfiguration.bannerImage,
-                    bannerHeight: CGFloat(inspectState.uiConfiguration.bannerHeight),
-                    bannerTitle: inspectState.uiConfiguration.bannerTitle,
-                    iconBasePath: inspectState.uiConfiguration.iconBasePath,
-                    accentColor: highlightColor,
-                    scaleFactor: scaleFactor,
-                    stepText: "Step \(currentStep + 1) of \(inspectState.items.count)",
-                    onOptionClick: { resetSteps() }
-                )
-            }
-
             if let currentItem = inspectState.items[safe: currentStep] {
                 // Content area
                 ScrollView(.vertical, showsIndicators: true) {
@@ -345,9 +466,10 @@ struct Preset6View: View, InspectLayoutProtocol {
 
                         // Guidance content blocks
                         if let guidanceContent = currentItem.guidanceContent, !guidanceContent.isEmpty {
-                            // Apply dynamic content updates to guidance blocks
+                            // Apply localization then dynamic content updates to guidance blocks
                             let updatedContent = guidanceContent.enumerated().map { index, block in
-                                applyDynamicUpdates(to: block, index: index, itemId: currentItem.id)
+                                let locBlock = localizedContentBlock(block, itemId: currentItem.id, blockIndex: index)
+                                return applyDynamicUpdates(to: locBlock, index: index, itemId: currentItem.id)
                             }
 
                             GuidanceContentView(
@@ -394,13 +516,13 @@ struct Preset6View: View, InspectLayoutProtocol {
     private func stepHeading(for item: InspectConfig.ItemConfig) -> some View {
         VStack(alignment: .leading, spacing: 8 * scaleFactor) {
             HStack(spacing: 8) {
-                if let guidanceTitle = item.guidanceTitle {
+                if let guidanceTitle = localized("guidanceTitle", forItem: item, fallback: item.guidanceTitle) {
                     Text(guidanceTitle)
-                        .font(.system(size: 22 * scaleFactor, weight: .bold))
+                        .font(.title.bold())
                         .foregroundStyle(.primary)
                 } else {
                     Text(item.displayName)
-                        .font(.system(size: 22 * scaleFactor, weight: .bold))
+                        .font(.title.bold())
                         .foregroundStyle(.primary)
                 }
 
@@ -411,7 +533,7 @@ struct Preset6View: View, InspectLayoutProtocol {
                         showItemDetailOverlay = true
                     }) {
                         Image(systemName: "info.circle.fill")
-                            .font(.system(size: 16 * scaleFactor))
+                            .font(.system(size: 16))
                             .foregroundStyle(.blue)
                     }
                     .buttonStyle(.plain)
@@ -431,19 +553,19 @@ struct Preset6View: View, InspectLayoutProtocol {
 
     @ViewBuilder
     private func statusBadge(completed: Bool, failed: Bool) -> some View {
-        let statusColor = failed ? Color.semanticFailure : Color.semanticSuccess
+        let statusColor = failed ? palette.error : palette.success
         HStack(spacing: 6) {
             StatusIconView(failed ? .failure : .success, size: 12)
 
             Text(failed ? "Failed" : "Completed")
-                .font(.system(size: 12, weight: .medium))
+                .font(.caption.weight(.medium))
                 .foregroundStyle(statusColor)
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 4)
         .background(
             Capsule()
-                .fill(failed ? Color.failureBackground : Color.successBackground)
+                .fill(failed ? palette.errorBackground : palette.successBackground)
         )
     }
 
@@ -466,7 +588,7 @@ struct Preset6View: View, InspectLayoutProtocol {
             // Description from paths
             if let description = item.paths.first, !description.isEmpty {
                 Text(description)
-                    .font(.system(size: 14 * scaleFactor))
+                    .font(.body)
                     .foregroundStyle(.secondary)
             }
         }
@@ -505,7 +627,7 @@ struct Preset6View: View, InspectLayoutProtocol {
                 }()
 
                 Text(displayMessage)
-                    .font(.system(size: 14 * scaleFactor, weight: .medium))
+                    .font(.body.weight(.medium))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             }
@@ -534,7 +656,7 @@ struct Preset6View: View, InspectLayoutProtocol {
                 .animation(.linear(duration: 1.0), value: remaining)
 
             Text("\(max(0, remaining))")
-                .font(.system(size: 32 * scaleFactor, weight: .bold, design: .rounded))
+                .font(.system(size: 32, weight: .bold, design: .rounded))
                 .foregroundStyle(highlightColor)
         }
     }
@@ -550,7 +672,7 @@ struct Preset6View: View, InspectLayoutProtocol {
                     .foregroundStyle(.orange)
 
                 Text("Waiting for \(waitTime) seconds...")
-                    .font(.system(size: 13 * scaleFactor))
+                    .font(.subheadline)
                     .foregroundStyle(.primary)
 
                 Spacer()
@@ -568,17 +690,17 @@ struct Preset6View: View, InspectLayoutProtocol {
                 .foregroundStyle(.white)
                 .padding(.horizontal, isLarge ? 20 : 16)
                 .padding(.vertical, isLarge ? 10 : 8)
-                .background(Color.orange)
+                .background(palette.warning)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
             }
             .buttonStyle(.plain)
         }
         .padding(12 * scaleFactor)
-        .background(Color.orange.opacity(0.1))
+        .background(palette.warningBackground)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                .stroke(palette.warning.opacity(0.3), lineWidth: 1)
         )
     }
 
@@ -598,11 +720,11 @@ struct Preset6View: View, InspectLayoutProtocol {
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text(item.failureMessage ?? "Step Failed")
-                            .font(.system(size: 14 * scaleFactor, weight: .semibold))
+                            .font(.body.weight(.semibold))
 
                         if let reason = failedSteps[item.id] {
                             Text(reason)
-                                .font(.system(size: 12 * scaleFactor))
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -610,11 +732,11 @@ struct Preset6View: View, InspectLayoutProtocol {
                     Spacer()
                 }
                 .padding(12 * scaleFactor)
-                .background(Color.failureBackground)
+                .background(palette.errorBackground)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.semanticFailure.opacity(0.3), lineWidth: 1)
+                        .stroke(palette.error.opacity(0.3), lineWidth: 1)
                 )
             } else if wasSkipped {
                 // Skipped banner
@@ -622,12 +744,12 @@ struct Preset6View: View, InspectLayoutProtocol {
                     StatusIconView(.warning, size: 20 * scaleFactor)
 
                     Text("Step Skipped")
-                        .font(.system(size: 14 * scaleFactor, weight: .semibold))
+                        .font(.body.weight(.semibold))
 
                     Spacer()
                 }
                 .padding(12 * scaleFactor)
-                .background(Color.warningBackground)
+                .background(palette.warningBackground)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
             } else if let successMessage = item.successMessage {
                 // Success banner
@@ -635,12 +757,12 @@ struct Preset6View: View, InspectLayoutProtocol {
                     StatusIconView(.success, size: 20 * scaleFactor)
 
                     Text(successMessage)
-                        .font(.system(size: 14 * scaleFactor, weight: .semibold))
+                        .font(.body.weight(.semibold))
 
                     Spacer()
                 }
                 .padding(12 * scaleFactor)
-                .background(Color.successBackground)
+                .background(palette.successBackground)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
             }
         }
@@ -656,10 +778,10 @@ struct Preset6View: View, InspectLayoutProtocol {
             StatusIconView(.success, size: 60 * scaleFactor)
 
             Text(inspectState.config?.uiLabels?.completionMessage ?? "All Steps Complete")
-                .font(.system(size: 24 * scaleFactor, weight: .bold))
+                .font(.system(size: 24, weight: .bold))
 
             Text(inspectState.config?.uiLabels?.completionSubtitle ?? "Your setup is now complete!")
-                .font(.system(size: 16 * scaleFactor))
+                .font(.title3)
                 .foregroundStyle(.secondary)
 
             Spacer()
@@ -672,26 +794,10 @@ struct Preset6View: View, InspectLayoutProtocol {
     @ViewBuilder
     private var footerBar: some View {
         HStack(spacing: 12) {
-            // Logo area with extra space
-            if let logoPath = footerLogoPath {
-                HStack(spacing: 8) {
-                    IntroHeroImage(
-                        path: logoPath,
-                        shape: "none",
-                        size: inspectState.config?.logoConfig?.maxHeight ?? 28,
-                        accentColor: highlightColor
-                    )
-
-                    if let text = footerText {
-                        Text(text)
-                            .font(.system(size: 12 * scaleFactor))
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .padding(.leading, 20)
-            } else if let text = footerText {
+            // Footer text only (logo is now a persistent BrandedLogoView overlay)
+            if let text = branding.footerText {
                 Text(text)
-                    .font(.system(size: 12 * scaleFactor))
+                    .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.leading, 20)
             }
@@ -700,7 +806,7 @@ struct Preset6View: View, InspectLayoutProtocol {
 
             // Step counter with Option-click reset (centered area)
             Text("Step \(currentStep + 1) of \(inspectState.items.count)")
-                .font(.system(size: 11 * scaleFactor))
+                .font(.caption2)
                 .foregroundStyle(.tertiary)
                 .onTapGesture {
                     if NSEvent.modifierFlags.contains(.option) {
@@ -714,7 +820,12 @@ struct Preset6View: View, InspectLayoutProtocol {
             // Buttons
             HStack(spacing: 12) {
                 if canGoBack {
-                    Button(inspectState.config?.button2Text ?? "Back") {
+                    let backText: String = {
+                        if let item = inspectState.items[safe: currentStep],
+                           let loc = localized("backButtonText", forItem: item, fallback: nil) { return loc }
+                        return branding.button2Text ?? "Back"
+                    }()
+                    Button(backText) {
                         goToPreviousStep()
                     }
                     .buttonStyle(.bordered)
@@ -756,11 +867,18 @@ struct Preset6View: View, InspectLayoutProtocol {
     private func getContinueButtonText() -> String {
         // Check if we're on the last step
         if currentStep >= inspectState.items.count - 1 {
-            return inspectState.config?.button1Text ?? "Finish"
+            if let item = inspectState.items.last,
+               let locText = localized("continueButtonText", forItem: item, fallback: nil) {
+                return locText
+            }
+            return branding.button1Text ?? "Finish"
         }
 
-        // Check for item-specific button text
+        // Check for item-specific button text (localization > config)
         if let currentItem = inspectState.items[safe: currentStep] {
+            if let locText = localized("continueButtonText", forItem: currentItem, fallback: nil) {
+                return locText
+            }
             if let customText = currentItem.continueButtonText {
                 return customText
             }
@@ -771,7 +889,7 @@ struct Preset6View: View, InspectLayoutProtocol {
             }
         }
 
-        return inspectState.config?.button1Text ?? "Continue"
+        return branding.button1Text ?? "Continue"
     }
 
     // MARK: - Intro/Outro View
@@ -788,12 +906,19 @@ struct Preset6View: View, InspectLayoutProtocol {
             currentStep: 0,
             totalSteps: 1,
             footerConfig: IntroStepContainer.IntroFooterConfig(
-                logoPath: layoutConfig?.logoImage ?? footerLogoPath,
-                logoMaxWidth: layoutConfig?.logoMaxWidth ?? inspectState.config?.logoConfig?.maxWidth ?? 36,
-                logoMaxHeight: inspectState.config?.logoConfig?.maxHeight ?? 36,
-                footerText: footerText,
-                backButtonText: inspectState.config?.button2Text ?? "Back",
-                continueButtonText: item?.continueButtonText ?? (isOutro ? "Finish" : "Continue"),
+                footerText: branding.footerText,
+                backButtonText: {
+                    if let item = item, let locText = localized("backButtonText", forItem: item, fallback: nil) {
+                        return locText
+                    }
+                    return branding.button2Text ?? "Back"
+                }(),
+                continueButtonText: {
+                    if let item = item, let locText = localized("continueButtonText", forItem: item, fallback: nil) {
+                        return locText
+                    }
+                    return item?.continueButtonText ?? (isOutro ? "Finish" : "Continue")
+                }(),
                 showBackButton: isOutro && currentStep > 0,
                 onBack: isOutro ? goToPreviousStep : nil,
                 onContinue: {
@@ -816,7 +941,7 @@ struct Preset6View: View, InspectLayoutProtocol {
                 if let iconPath = item?.icon {
                     IntroHeroImage(
                         path: iconPath,
-                        shape: layoutConfig?.heroImageShape ?? "circle",
+                        shape: "none",
                         size: layoutConfig?.heroImageSize ?? 180,
                         accentColor: highlightColor
                     )
@@ -824,21 +949,25 @@ struct Preset6View: View, InspectLayoutProtocol {
                 }
 
                 // Title
-                if let title = item?.guidanceTitle {
+                if let title = item.flatMap({ localized("guidanceTitle", forItem: $0, fallback: $0.guidanceTitle) }) ?? item?.guidanceTitle {
                     Text(title)
-                        .font(.system(size: 28 * scaleFactor, weight: .bold))
+                        .font(.system(size: 28, weight: .bold))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
                 }
 
                 // Content blocks (delegate all types to GuidanceContentView)
                 if let content = item?.guidanceContent, !content.isEmpty {
+                    let itemId = item?.id ?? "intro"
+                    let localizedBlocks = content.enumerated().map { index, block in
+                        localizedContentBlock(block, itemId: itemId, blockIndex: index)
+                    }
                     GuidanceContentView(
-                        contentBlocks: content,
+                        contentBlocks: localizedBlocks,
                         scaleFactor: scaleFactor,
                         iconBasePath: inspectState.uiConfiguration.iconBasePath,
                         inspectState: inspectState,
-                        itemId: item?.id ?? "intro",
+                        itemId: itemId,
                         accentColor: highlightColor,
                         contentAlignment: .center
                     )
@@ -1060,6 +1189,16 @@ struct Preset6View: View, InspectLayoutProtocol {
         writeFinalTriggerFile()
         savePersistedState()
 
+        // Write structured result file and clean up readiness signal
+        let stepInfos = inspectState.items.map { ResultStepInfo(id: $0.id, stepType: $0.stepType ?? "info") }
+        writeResultFile(
+            config: inspectState.config, exitCode: Int(appDefaults.exit0.code),
+            steps: stepInfos, completedSteps: completedSteps,
+            failedSteps: failedSteps, skippedSteps: skippedSteps,
+            currentStepIndex: currentStep
+        )
+        cleanupReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath)
+
         writeLog("Preset6: Completing with exit code 0", logLevel: .info)
         quitDialog(exitCode: appDefaults.exit0.code)
     }
@@ -1222,13 +1361,21 @@ struct Preset6View: View, InspectLayoutProtocol {
                 }
             }
 
-            if completedCurrentStep && currentStep < inspectState.items.count - 1 {
+            if completedCurrentStep {
                 if let currentItem = inspectState.items[safe: currentStep] {
                     let stepType = currentItem.stepType ?? "info"
-                    let nextStepWaits = inspectState.items[safe: currentStep + 1]?.waitForExternalTrigger ?? false
 
-                    if stepType != "processing" && !nextStepWaits {
-                        shouldAutoNavigate = true
+                    if stepType == "processing" && processingState.isActive {
+                        // Complete the active processing step via its normal completion path
+                        handleCompletionTrigger(stepId: currentItem.id, result: .success(message: currentItem.successMessage))
+                        return
+                    }
+
+                    if currentStep < inspectState.items.count - 1 {
+                        let nextStepWaits = inspectState.items[safe: currentStep + 1]?.waitForExternalTrigger ?? false
+                        if !nextStepWaits {
+                            shouldAutoNavigate = true
+                        }
                     }
                 }
             }
@@ -1743,6 +1890,7 @@ struct Preset6View: View, InspectLayoutProtocol {
             type: block.type,
             content: dynamicState.dynamicGuidanceContent[itemId]?[index] ?? block.content,
             items: block.items,
+            numbered: block.numbered,
             color: props["color"] ?? block.color,
             bold: props["bold"].flatMap { Bool($0) } ?? block.bold,
             visible: props["visible"].flatMap { Bool($0) } ?? block.visible,
@@ -1835,6 +1983,7 @@ struct Preset6View: View, InspectLayoutProtocol {
             bentoColumns: block.bentoColumns,
             bentoRowHeight: block.bentoRowHeight,
             bentoGap: block.bentoGap,
+            bentoTintColor: block.bentoTintColor,
             bentoCells: block.bentoCells
         )
     }
