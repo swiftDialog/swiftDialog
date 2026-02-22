@@ -14,7 +14,7 @@
 //  - Success/failure result banners
 //  - Full-screen overlay variants for frameless presets
 //
-//  Used by: Preset6, Preset11 (and future presets)
+//  Used by: Preset6, Preset5 (and future presets)
 //
 
 import SwiftUI
@@ -25,7 +25,7 @@ import SwiftUI
 enum ProcessingDisplayStyle {
     /// Inline display within content flow (default for Preset6)
     case inline
-    /// Full-screen overlay with blur background (for frameless presets like Preset11)
+    /// Full-screen overlay with blur background (for frameless presets like Preset5)
     case overlay
     /// Compact card style
     case card
@@ -325,7 +325,7 @@ struct ProcessingResultBanner: View {
 /// Full-screen processing overlay for frameless presets
 ///
 /// Displays processing state as an overlay with blurred background.
-/// Used by frameless presets like Preset11 that need processing feedback
+/// Used by frameless presets like Preset5 that need processing feedback
 /// without a traditional windowed interface.
 struct ProcessingOverlayView: View {
     let state: InspectProcessingState

@@ -14,7 +14,7 @@
 //  Use Case Flow:
 //  Intro Step (picker/form) → PreferencesModule → Plist file → osquery reads → Device labeled
 //
-//  Used by: Preset11 (and future presets with preference collection)
+//  Used by: Preset5 (and future presets with preference collection)
 //
 
 import Foundation

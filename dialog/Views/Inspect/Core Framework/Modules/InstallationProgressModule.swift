@@ -10,9 +10,9 @@
 //  - Item cards with icon, name, status, and progress bar
 //  - List and grid layouts for multiple items
 //  - Summary view for overall progress
-//  - Frameless overlay variants for Preset11
+//  - Frameless overlay variants for Preset5
 //
-//  Used by: Preset6, Preset11 (and future presets)
+//  Used by: Preset6, Preset5 (and future presets)
 //
 
 import SwiftUI
@@ -714,7 +714,7 @@ struct CircularProgressIndicator: View {
 
 /// Full-screen installation progress overlay for frameless presets
 ///
-/// Used by Preset11 and other frameless presets to display installation
+/// Used by Preset5 and other frameless presets to display installation
 /// progress as an overlay on top of existing content.
 struct InstallationOverlayView: View {
     let items: [InstallationItemData]

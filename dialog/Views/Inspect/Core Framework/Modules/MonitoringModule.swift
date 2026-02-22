@@ -13,7 +13,7 @@
 //  - Installation status tracking
 //
 //  Builds on existing services: LogMonitorService, FileMonitor, Monitoring
-//  Used by: Preset6, Preset11 (and future presets)
+//  Used by: Preset6, Preset5 (and future presets)
 //
 
 import Foundation
@@ -142,6 +142,8 @@ class UnifiedMonitoringService: ObservableObject {
     private let fileSystemCache = FileSystemCache()
     private var statusCheckTimer: Timer?
     private var cachePaths: [String] = []
+    private var plistBaselines: [String: String?] = [:]  // Change detection baselines
+    private var plistBaselinesInitialized: Set<String> = []
 
     // MARK: - Plist Monitor Task
 
@@ -278,6 +280,21 @@ class UnifiedMonitoringService: ObservableObject {
         }
     }
 
+    /// Set item status from external trigger command (generic version of markCompleted/markFailed)
+    func setItemStatus(_ itemId: String, status: MonitoringItemStatus) {
+        DispatchQueue.main.async { [weak self] in
+            self?.itemStatuses[itemId] = status
+            writeLog("UnifiedMonitoringService: Item '\(itemId)' set to \(status.simpleStatus) (trigger)", logLevel: .info)
+        }
+    }
+
+    /// Set a custom status message for an item
+    func setStatusMessage(_ itemId: String, message: String) {
+        DispatchQueue.main.async { [weak self] in
+            self?.statusMessages[itemId] = message
+        }
+    }
+
     /// Update progress for an item
     func updateProgress(_ itemId: String, progress: Double, message: String? = nil) {
         DispatchQueue.main.async { [weak self] in
@@ -305,21 +322,68 @@ class UnifiedMonitoringService: ObservableObject {
 
             let wasCompleted = itemStatuses[item.id] == .completed
 
-            // Check if installed
-            let isInstalled = item.paths.first { path in
+            // Check if file exists at path
+            let fileExists = item.paths.first { path in
                 FileManager.default.fileExists(atPath: path)
             } != nil
+
+            // If item has plist validation (plistKey + evaluation), require it to pass
+            // before marking as completed. This prevents items that monitor plist VALUES
+            // (e.g., Dark Mode detection) from completing just because the plist file exists.
+            let isInstalled: Bool
+            if fileExists, let plistKey = item.plistKey, !plistKey.isEmpty, item.evaluation != nil {
+                if item.evaluation == "changed" {
+                    // Change detection: read current value and compare to baseline
+                    let plistPath = item.paths.first { $0.hasSuffix(".plist") } ?? item.paths.first ?? ""
+                    let currentValue: String?
+                    if item.useUserDefaults == true {
+                        let expandedPath = (plistPath as NSString).expandingTildeInPath
+                        let domain = expandedPath.contains("/") ?
+                            ((expandedPath as NSString).lastPathComponent as NSString).deletingPathExtension :
+                            expandedPath
+                        if domain == ".GlobalPreferences" {
+                            currentValue = UserDefaults.standard.string(forKey: plistKey)
+                        } else {
+                            currentValue = UserDefaults(suiteName: domain)?.string(forKey: plistKey)
+                        }
+                    } else if let plist = PlistHelper.readPlist(at: plistPath) {
+                        currentValue = plist.value(forKeyPath: plistKey).map { String(describing: $0) }
+                    } else {
+                        currentValue = nil
+                    }
+                    if !plistBaselinesInitialized.contains(item.id) {
+                        plistBaselines[item.id] = currentValue
+                        plistBaselinesInitialized.insert(item.id)
+                        writeLog("MonitoringModule: Plist baseline for \(item.id): \(currentValue ?? "nil")", logLevel: .debug)
+                        isInstalled = false
+                    } else {
+                        let baseline = plistBaselines[item.id] ?? nil
+                        let changed = (baseline != currentValue)
+                        if changed {
+                            writeLog("MonitoringModule: Plist value changed for \(item.id): \(baseline ?? "nil") → \(currentValue ?? "nil")", logLevel: .info)
+                        }
+                        isInstalled = changed
+                    }
+                } else {
+                    let result = validatePlistValue(
+                        at: item.paths.first { $0.hasSuffix(".plist") } ?? item.paths.first ?? "",
+                        key: plistKey,
+                        expectedValue: item.expectedValue,
+                        evaluation: item.evaluation
+                    )
+                    isInstalled = result.isValid
+                    DispatchQueue.main.async { [weak self] in
+                        self?.validationResults[item.id] = result
+                    }
+                }
+            } else {
+                isInstalled = fileExists
+            }
 
             if isInstalled && !wasCompleted {
                 DispatchQueue.main.async { [weak self] in
                     self?.itemStatuses[item.id] = .completed
                     writeLog("UnifiedMonitoringService: Item '\(item.displayName)' detected as installed", logLevel: .info)
-
-                    // Validate if plist config exists
-                    if item.plistKey != nil {
-                        let result = self?.validateItem(item) ?? .unknown
-                        self?.validationResults[item.id] = result
-                    }
                 }
             } else if !isInstalled && wasCompleted {
                 // Item was removed
@@ -405,12 +469,18 @@ class UnifiedMonitoringService: ObservableObject {
     }
 
     private func checkPlistValue(for item: InspectConfig.ItemConfig, at plistPath: String, key plistKey: String) {
-        let result = validatePlistValue(
-            at: plistPath,
-            key: plistKey,
-            expectedValue: item.expectedValue,
-            evaluation: item.evaluation
-        )
+        // Support useUserDefaults for cached/instant reads (e.g., global preferences)
+        let result: MonitoringValidationResult
+        if item.useUserDefaults == true {
+            result = validatePlistValueViaUserDefaults(for: item, at: plistPath, key: plistKey)
+        } else {
+            result = validatePlistValue(
+                at: plistPath,
+                key: plistKey,
+                expectedValue: item.expectedValue,
+                evaluation: item.evaluation
+            )
+        }
 
         DispatchQueue.main.async { [weak self] in
             let oldResult = self?.validationResults[item.id]
@@ -418,8 +488,58 @@ class UnifiedMonitoringService: ObservableObject {
 
             if oldResult?.isValid != result.isValid {
                 writeLog("UnifiedMonitoringService: Validation changed for \(item.id): \(result.isValid)", logLevel: .info)
+
+                // Drive item completion/reset based on plist validation
+                if result.isValid {
+                    self?.itemStatuses[item.id] = .completed
+                    writeLog("UnifiedMonitoringService: Item '\(item.displayName)' completed via plist validation", logLevel: .info)
+                } else if self?.itemStatuses[item.id] == .completed {
+                    self?.itemStatuses[item.id] = .pending
+                    writeLog("UnifiedMonitoringService: Item '\(item.displayName)' reset to pending (plist validation no longer passes)", logLevel: .info)
+                }
             }
         }
+    }
+
+    /// Read plist value via UserDefaults for faster/cached reads (especially global preferences)
+    private func validatePlistValueViaUserDefaults(for item: InspectConfig.ItemConfig, at plistPath: String, key plistKey: String) -> MonitoringValidationResult {
+        let expandedPath = (plistPath as NSString).expandingTildeInPath
+
+        // Derive domain from path: ~/Library/Preferences/com.example.plist → com.example
+        let filename = (expandedPath as NSString).lastPathComponent
+        let domain = (filename as NSString).deletingPathExtension
+
+        let actualValue: String?
+        if domain == ".GlobalPreferences" {
+            // Global preferences: use UserDefaults.standard which includes the global domain
+            actualValue = UserDefaults.standard.string(forKey: plistKey)
+        } else {
+            actualValue = UserDefaults(suiteName: domain)?.string(forKey: plistKey)
+        }
+
+        let evaluationType = item.evaluation ?? "equals"
+        let isValid: Bool
+        switch evaluationType {
+        case "exists":
+            isValid = actualValue != nil && !(actualValue?.isEmpty ?? true)
+        case "boolean":
+            isValid = actualValue == "1" || actualValue?.lowercased() == "true"
+        case "contains":
+            isValid = actualValue?.contains(item.expectedValue ?? "") ?? false
+        case "range":
+            if let actual = Int(actualValue ?? ""),
+               let parts = item.expectedValue?.split(separator: "-"),
+               parts.count == 2,
+               let lo = Int(parts[0]), let hi = Int(parts[1]) {
+                isValid = actual >= lo && actual <= hi
+            } else {
+                isValid = false
+            }
+        default: // "equals"
+            isValid = actualValue == item.expectedValue
+        }
+
+        return MonitoringValidationResult(isValid: isValid, actualValue: actualValue, message: isValid ? "Validated" : "Not yet valid")
     }
 
     private func validatePlistValue(at path: String, key: String, expectedValue: String?, evaluation: String?) -> MonitoringValidationResult {
