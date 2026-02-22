@@ -980,7 +980,7 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         writeLog("InspectState: Parsing command line: \(line)", logLevel: .debug)
 
         // Format 2: "item:itemId:status" or "item:itemId:status:message"
-        // This is the modern format that works with both Preset 1 and Preset 11
+        // This is the modern format that works with both Preset 1 and Preset 5
         if line.hasPrefix("item:") {
             let parts = line.dropFirst(5).split(separator: ":", maxSplits: 2)
             guard parts.count >= 2 else {

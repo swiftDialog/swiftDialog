@@ -66,7 +66,7 @@ class InspectPersistence<T: InspectPersistableState> {
 
     /// Initialize persistence for a specific preset
     /// - Parameters:
-    ///   - presetName: Unique preset identifier (e.g., "preset7", "preset3")
+    ///   - presetName: Unique preset identifier (e.g., "preset5", "preset3")
     ///   - customFileName: Optional custom filename (overrides default naming)
     ///
     /// **Filename Resolution Priority:**

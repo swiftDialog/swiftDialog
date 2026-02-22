@@ -230,7 +230,7 @@
     },
     "skipPortal": {
       "type": "boolean",
-      "description": "Skip portal phase entirely (Preset11) - go directly from intro to outro"
+      "description": "Skip portal phase entirely (Preset5) - go directly from intro to outro"
     },
     "debugMode": {
       "type": "boolean",
@@ -238,12 +238,12 @@
     },
     "items": {
       "type": "array",
-      "description": "Array of item configurations (used by preset1-9)",
+      "description": "Array of item configurations (used by preset1-6)",
       "items": { "$ref": "#/definitions/ItemConfig" }
     },
     "introSteps": {
       "type": "array",
-      "description": "Array of intro steps for Preset11 intro wizard flow",
+      "description": "Array of intro steps for Preset5 intro wizard flow",
       "items": { "$ref": "#/definitions/IntroStep" }
     },
     "plistSources": {
@@ -465,11 +465,11 @@
           "type": "string",
           "enum": ["compact", "balanced", "generous"],
           "default": "balanced",
-          "description": "Vertical spacing mode for Preset7"
+          "description": "Vertical spacing mode"
         },
         "keyPointsText": {
           "type": "string",
-          "description": "Custom paragraph text for Key Points section (Preset9)"
+          "description": "Custom paragraph text for Key Points section"
         },
         "highlightColor": {
           "type": "string",
@@ -2212,7 +2212,7 @@
     "IntroStep": {
       "type": "object",
       "required": ["id"],
-      "description": "An intro wizard step for Preset11",
+      "description": "An intro wizard step for Preset5",
       "properties": {
         "id": {
           "type": "string",

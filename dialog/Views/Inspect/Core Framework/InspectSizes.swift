@@ -66,7 +66,7 @@ public enum InspectSizes {
             }
 
         case "preset4":
-            // Compact toast installer (was preset10)
+            // Compact toast installer
             switch mode {
             case "compact": return (480, 100)
             case "large": return (600, 130)
@@ -74,7 +74,7 @@ public enum InspectSizes {
             }
 
         case "preset5":
-            // Unified portal / self-service (was preset11)
+            // Unified portal / self-service
             switch mode {
             case "compact": return (1024, 640)   // Minimum/default
             case "large": return (1200, 800)     // Maximum
