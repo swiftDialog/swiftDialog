@@ -1,24 +1,6 @@
 {
-  "originHash" : "d18090bc57df027f6b3446e43aee415b5df72e591d86b04db7cde410e1aefdd5",
+  "originHash" : "000f46498a18f16c055120d903f09e9de6fe0fa321f73a0e0ad7cde5ab2d6187",
   "pins" : [
-    {
-      "identity" : "markdownui",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/gonzalezreal/MarkdownUI",
-      "state" : {
-        "revision" : "5f613358148239d0292c0cef674a3c2314737f9e",
-        "version" : "2.4.1"
-      }
-    },
-    {
-      "identity" : "networkimage",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/gonzalezreal/NetworkImage",
-      "state" : {
-        "revision" : "2849f5323265386e200484b0d0f896e73c3411b9",
-        "version" : "6.0.1"
-      }
-    },
     {
       "identity" : "sdwebimage",
       "kind" : "remoteSourceControl",
@@ -47,12 +29,21 @@
       }
     },
     {
-      "identity" : "swift-cmark",
+      "identity" : "swift-concurrency-extras",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/swiftlang/swift-cmark",
+      "location" : "https://github.com/pointfreeco/swift-concurrency-extras",
       "state" : {
-        "revision" : "5d9bdaa4228b381639fff09403e39a04926e2dbe",
-        "version" : "0.7.1"
+        "revision" : "5a3825302b1a0d744183200915a47b508c828e6f",
+        "version" : "1.3.2"
+      }
+    },
+    {
+      "identity" : "swiftui-math",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/gonzalezreal/swiftui-math",
+      "state" : {
+        "revision" : "0b5c2cfaaec8d6193db206f675048eeb5ce95f71",
+        "version" : "0.1.0"
       }
     },
     {
@@ -62,6 +53,15 @@
       "state" : {
         "revision" : "af76cf3ef710b6ca5f8c05f3a31307d44a3c5828",
         "version" : "5.0.2"
+      }
+    },
+    {
+      "identity" : "textual",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/gonzalezreal/textual",
+      "state" : {
+        "revision" : "5b06b811c0f5313b6b84bbef98c635a630638c38",
+        "version" : "0.3.1"
       }
     },
     {

@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import MarkdownUI
+import Textual
 
 struct PresentationView: View {
 
@@ -118,17 +118,12 @@ struct PresentationViewMarkdown: View {
     var contentAlignment: TextAlignment
     var contentColour: Color
     var body: some View {
-        Markdown(content, baseURL: URL(string: "http://"))
+        StructuredText(content, parser: ColoredMarkdownParser())
             .multilineTextAlignment(contentAlignment)
-            .markdownTheme(.sdMarkdown)
-            .markdownTextStyle {
-                FontSize(appvars.messageFontSize)
-            }
+            .textual.structuredTextStyle(.gitHub)
+            .font(Font.system(size: CGFloat(appvars.messageFontSize)))
+            .foregroundColor(contentColour)
             .focusable(false)
-            .markdownTextStyle {
-                FontSize(appvars.messageFontSize)
-                ForegroundColor(contentColour)
-            }
             .truncationMode(.tail)
             .padding(.all, 15)
             .frame(maxWidth: .infinity, maxHeight: .infinity)

@@ -10,6 +10,8 @@
 		41005AA927CEF81A0065F323 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 41005AA827CEF81A0065F323 /* SwiftyJSON */; };
 		41005AAA27CEF8250065F323 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4114E1E827153FEE00388274 /* AVKit.framework */; };
 		41110A2825F9E79E008171D2 /* License.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41110A2725F9E79E008171D2 /* License.swift */; };
+		41132F822F3C7847006BECA2 /* Textual in Frameworks */ = {isa = PBXBuildFile; productRef = 41132F812F3C7847006BECA2 /* Textual */; };
+		41132F842F3CA032006BECA2 /* Markdown+Addittions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41132F832F3CA018006BECA2 /* Markdown+Addittions.swift */; };
 		4116922C28939B4500A88700 /* CKTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116922B28939B4500A88700 /* CKTitleView.swift */; };
 		4116922F28939C2A00A88700 /* CKWindowProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116922E28939C2A00A88700 /* CKWindowProperties.swift */; };
 		4116923228939DEB00A88700 /* CKSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116923128939DEB00A88700 /* CKSidebarView.swift */; };
@@ -52,7 +54,6 @@
 		418A7B572759949B00E4D6F1 /* ProcessCLOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415934D726DB1B44009C9C3A /* ProcessCLOptions.swift */; };
 		418A7B582759949B00E4D6F1 /* NSWindow+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415934D926DB7604009C9C3A /* NSWindow+Additions.swift */; };
 		418A7B592759949B00E4D6F1 /* HelpText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A44EB126F4C43A00FEE1AC /* HelpText.swift */; };
-		418A7B5D275994BB00E4D6F1 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 418A7B5C275994BB00E4D6F1 /* MarkdownUI */; };
 		418AE4232667A17A001E3423 /* DropdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418AE4222667A17A001E3423 /* DropdownView.swift */; };
 		419D11462E73E62400298C8C /* IndeterminateProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419D11452E73E62400298C8C /* IndeterminateProgressView.swift */; };
 		41A5A6A428E5468100BD3D5E /* WebViewKit in Frameworks */ = {isa = PBXBuildFile; productRef = 41A5A6A328E5468100BD3D5E /* WebViewKit */; };
@@ -159,7 +160,6 @@
 		CC72EBA82E1BE48800CF0DA1 /* ArgumentParser in Frameworks */ = {isa = PBXBuildFile; productRef = CC72EBA72E1BE48800CF0DA1 /* ArgumentParser */; };
 		CC7D43CF2B972976004B9E65 /* PresentationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC7D43CE2B972976004B9E65 /* PresentationView.swift */; };
 		CC7D44082B9C6FB5004B9E65 /* ImageFader.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC7D44072B9C6FB5004B9E65 /* ImageFader.swift */; };
-		CC8D96302A01CCAB00CC84C6 /* Theme+sdMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC8D962F2A01CCAB00CC84C6 /* Theme+sdMarkdown.swift */; };
 		CC9F8FEF2A5EC76400802A88 /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC9F8FEE2A5EC76400802A88 /* ImageProcessing.swift */; };
 		CCB334702B2320F20079FB83 /* SolidColourView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB3346F2B2320F20079FB83 /* SolidColourView.swift */; };
 		CCB35CB42BCFF4460041A701 /* SystemInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB35CB32BCFF4460041A701 /* SystemInfo.swift */; };
@@ -225,6 +225,7 @@
 
 /* Begin PBXFileReference section */
 		41110A2725F9E79E008171D2 /* License.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = License.swift; sourceTree = "<group>"; };
+		41132F832F3CA018006BECA2 /* Markdown+Addittions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Markdown+Addittions.swift"; sourceTree = "<group>"; };
 		4114E1E827153FEE00388274 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		4114E1EA27154B2200388274 /* VideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoView.swift; sourceTree = "<group>"; };
 		4116922B28939B4500A88700 /* CKTitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKTitleView.swift; sourceTree = "<group>"; };
@@ -387,7 +388,6 @@
 		CC72EBA12E1BE43400CF0DA1 /* dialogcli.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dialogcli.swift; sourceTree = "<group>"; };
 		CC7D43CE2B972976004B9E65 /* PresentationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationView.swift; sourceTree = "<group>"; };
 		CC7D44072B9C6FB5004B9E65 /* ImageFader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageFader.swift; sourceTree = "<group>"; };
-		CC8D962F2A01CCAB00CC84C6 /* Theme+sdMarkdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Theme+sdMarkdown.swift"; sourceTree = "<group>"; };
 		CC9F8FEE2A5EC76400802A88 /* ImageProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageProcessing.swift; sourceTree = "<group>"; };
 		CCB3346F2B2320F20079FB83 /* SolidColourView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SolidColourView.swift; sourceTree = "<group>"; };
 		CCB35CB32BCFF4460041A701 /* SystemInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemInfo.swift; sourceTree = "<group>"; };
@@ -403,10 +403,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				41132F822F3C7847006BECA2 /* Textual in Frameworks */,
 				41BD41C52EA1FAF500DA7124 /* SDWebImageSwiftUI in Frameworks */,
 				41005AAA27CEF8250065F323 /* AVKit.framework in Frameworks */,
 				41005AA927CEF81A0065F323 /* SwiftyJSON in Frameworks */,
-				418A7B5D275994BB00E4D6F1 /* MarkdownUI in Frameworks */,
 				41A5A6A428E5468100BD3D5E /* WebViewKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -774,10 +774,10 @@
 		CC2190532A7BCD3400269525 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				41132F832F3CA018006BECA2 /* Markdown+Addittions.swift */,
 				CC2190542A7BCD5600269525 /* Colour+Additions.swift */,
 				CC2190562A7BCDA800269525 /* String+Additions.swift */,
 				CC2190582A7BCDDD00269525 /* View+Additions.swift */,
-				CC8D962F2A01CCAB00CC84C6 /* Theme+sdMarkdown.swift */,
 				415934D926DB7604009C9C3A /* NSWindow+Additions.swift */,
 				94072E482AFE931300B2A5C3 /* Font+Additions.swift */,
 			);
@@ -854,10 +854,10 @@
 			);
 			name = Dialog;
 			packageProductDependencies = (
-				418A7B5C275994BB00E4D6F1 /* MarkdownUI */,
 				41005AA827CEF81A0065F323 /* SwiftyJSON */,
 				41A5A6A328E5468100BD3D5E /* WebViewKit */,
 				41BD41C42EA1FAF500DA7124 /* SDWebImageSwiftUI */,
+				41132F812F3C7847006BECA2 /* Textual */,
 			);
 			productName = dialog;
 			productReference = 4154C2DA25F76BDB00A3D373 /* Dialog.app */;
@@ -982,11 +982,11 @@
 			mainGroup = 4154C2D125F76BDB00A3D373;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				41E4BC9526AEDB130042A0A3 /* XCRemoteSwiftPackageReference "MarkdownUI" */,
 				414CBAE9278913BA00A1A980 /* XCRemoteSwiftPackageReference "SwiftyJSON" */,
 				41A5A6A228E5468100BD3D5E /* XCRemoteSwiftPackageReference "WebViewKit" */,
 				CC72EBA62E1BE48800CF0DA1 /* XCRemoteSwiftPackageReference "swift-argument-parser" */,
 				41BD41C32EA1FAF500DA7124 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+				41132F802F3C7847006BECA2 /* XCRemoteSwiftPackageReference "textual" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4154C2DB25F76BDB00A3D373 /* Products */;
@@ -1181,7 +1181,6 @@
 				BA2812082EBA183A00384582 /* Preset6.swift in Sources */,
 				CC2190592A7BCDDD00269525 /* View+Additions.swift in Sources */,
 				41D81E6C25F8209F00D1F7E1 /* CLOptions.swift in Sources */,
-				CC8D96302A01CCAB00CC84C6 /* Theme+sdMarkdown.swift in Sources */,
 				41D81E7125F845D200D1F7E1 /* AppState.swift in Sources */,
 				BA05AF1A2F1C2B9B001367A5 /* PortalWebView.swift in Sources */,
 				BA05AF1C2F1C2B9B001367A5 /* AppConfigService.swift in Sources */,
@@ -1197,6 +1196,7 @@
 				CC21905D2A7BD7D300269525 /* AppVariables.swift in Sources */,
 				4124EFD229455861003B00F4 /* HelpView.swift in Sources */,
 				CC2190502A7BC9FE00269525 /* Log.swift in Sources */,
+				41132F842F3CA032006BECA2 /* Markdown+Addittions.swift in Sources */,
 				94072E492AFE931300B2A5C3 /* Font+Additions.swift in Sources */,
 				41D81E7925F870A500D1F7E1 /* System.swift in Sources */,
 			);
@@ -1412,7 +1412,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"dialog/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = D6G4X4D7C9;
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = PWA5E9TQ59;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = dialog/Info.plist;
@@ -1420,7 +1420,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 3.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.csiro.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1444,7 +1444,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"dialog/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = D6G4X4D7C9;
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = PWA5E9TQ59;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = dialog/Info.plist;
@@ -1452,7 +1452,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 3.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.csiro.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1553,13 +1553,13 @@
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = D6G4X4D7C9;
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = PWA5E9TQ59;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.csiro.dialogcli;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1579,13 +1579,13 @@
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=macosx*]" = D6G4X4D7C9;
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = PWA5E9TQ59;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = au.csiro.dialogcli;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1703,6 +1703,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		41132F802F3C7847006BECA2 /* XCRemoteSwiftPackageReference "textual" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gonzalezreal/textual";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.3.1;
+			};
+		};
 		414CBAE9278913BA00A1A980 /* XCRemoteSwiftPackageReference "SwiftyJSON" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SwiftyJSON/SwiftyJSON.git";
@@ -1735,14 +1743,6 @@
 				minimumVersion = 3.1.3;
 			};
 		};
-		41E4BC9526AEDB130042A0A3 /* XCRemoteSwiftPackageReference "MarkdownUI" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/gonzalezreal/MarkdownUI";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.3.1;
-			};
-		};
 		CC72EBA62E1BE48800CF0DA1 /* XCRemoteSwiftPackageReference "swift-argument-parser" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-argument-parser.git";
@@ -1759,15 +1759,15 @@
 			package = 414CBAE9278913BA00A1A980 /* XCRemoteSwiftPackageReference "SwiftyJSON" */;
 			productName = SwiftyJSON;
 		};
+		41132F812F3C7847006BECA2 /* Textual */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 41132F802F3C7847006BECA2 /* XCRemoteSwiftPackageReference "textual" */;
+			productName = Textual;
+		};
 		417DEF1C2E7ACCB600CAB132 /* ArgumentParser */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 417DEF1D2E7ACCB600CAB132 /* XCRemoteSwiftPackageReference "swift-argument-parser" */;
 			productName = ArgumentParser;
-		};
-		418A7B5C275994BB00E4D6F1 /* MarkdownUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 41E4BC9526AEDB130042A0A3 /* XCRemoteSwiftPackageReference "MarkdownUI" */;
-			productName = MarkdownUI;
 		};
 		41A5A6A328E5468100BD3D5E /* WebViewKit */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -7,7 +7,7 @@
 //
 
 import SwiftUI
-import MarkdownUI
+import Textual
 
 struct HelpView: View {
     var helpMessage: String
@@ -26,16 +26,9 @@ struct HelpView: View {
                 .frame(width: 32, height: 32)
                 .padding(.top, settings.topPadding)
             HStack {
-                Markdown(helpMessage, baseURL: URL(string: "http://"))
+                StructuredText(helpMessage, parser: ColoredMarkdownParser())
                     .multilineTextAlignment(alignment)
-                    .markdownTextStyle {
-                        FontSize(appvars.messageFontSize)
-                        ForegroundColor(.primary)
-                    }
-                    .markdownTextStyle(\.link) {
-                        FontSize(appvars.messageFontSize)
-                        ForegroundColor(.link)
-                    }
+                    .textual.structuredTextStyle(.gitHub)
                     .padding(32)
                     .focusable(false)
                 if !helpImagePath.isEmpty {

@@ -564,6 +564,9 @@ struct SDHelp {
             webcontent: <url>
             video: <path/url>
             blurscreen: [enable/disable]
+            showdockicon: [enable/disable]
+            dockicon: <file|url>
+            dockiconbadge: <text>
             activate:
             hide:
             show:
@@ -1146,7 +1149,33 @@ struct SDHelp {
 
         This property is implied when using --\(argument.forceOnTop.long)
 """
+        
+        argument.showDockIcon.helpShort = "Dialog app icon will be visible on the Dock"
+        argument.showDockIcon.helpUsage = ""
+        argument.showDockIcon.helpLong = """
+        When swiftDialog is running, the app icon will appear on the macOS Dock
 
+        In addition to the Dock icon, the menu bar will display the Dialog app name and about menu when swiftDialog is the foreground app
+        This setting is implied when using --\(argument.dockIcon.long)
+"""
+
+        argument.dockIcon.helpShort = "Dialog app icon will be visible on the Dock set to the specified value"
+        argument.dockIcon.helpUsage = "<file|url>"
+        argument.dockIcon.helpLong = """
+        When swiftDialog is running, the app icon will appear on the macOS Dock using the specified image
+
+        In addition to the Dock icon, the menu bar will display the Dialog app name and about menu when swiftDialog is the foreground app
+        This setting implies --\(argument.showDockIcon.long)
+"""
+        
+        argument.dockBadge.helpShort = "Shows the specified value as a badge on the dock icon when visible"
+        argument.dockBadge.helpUsage = "<text>"
+        argument.dockBadge.helpLong = """
+        When the dock icon is visible using --\(argument.showDockIcon.long) or --\(argument.dockIcon.long), display <text> as the badge
+
+        e.g. "--\(argument.dockBadge.long) 10" 
+"""
+        
         argument.loginWindow.helpShort = "Enable the dialog window to be shown at login"
         argument.loginWindow.helpUsage = ""
         argument.loginWindow.helpLong = """
