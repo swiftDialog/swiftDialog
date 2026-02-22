@@ -23,7 +23,8 @@ struct PresetCommonViews {
         width: CGFloat = 250,
         height: CGFloat = 4,
         showLabel: Bool = true,
-        labelSize: CGFloat = 11
+        labelSize: CGFloat = 11,
+        tintColor: Color? = nil
     ) -> some View {
         let progress = state.items.isEmpty ? 0.0 :
             Double(state.completedItems.count) / Double(state.items.count)
@@ -33,6 +34,7 @@ struct PresetCommonViews {
                 .progressViewStyle(LinearProgressViewStyle())
                 .frame(width: width)
                 .frame(height: height)
+                .tint(tintColor)
 
             if showLabel {
                 Text(getProgressText(state: state))
@@ -69,7 +71,9 @@ struct PresetCommonViews {
     static func buttonArea(
         state: InspectState,
         spacing: CGFloat = 12,
-        controlSize: ControlSize = .large
+        controlSize: ControlSize = .large,
+        tintColor: Color? = nil,
+        onButton1Action: (() -> Void)? = nil
     ) -> some View {
         // Check if all items are completed and auto-enable is configured
         let allItemsCompleted = !state.items.isEmpty && state.completedItems.count == state.items.count
@@ -106,12 +110,18 @@ struct PresetCommonViews {
 
             // Button 1 (Primary) - uses finalButtonText with fallback chain
             Button(finalButtonText) {
-                writeLog("Preset: User clicked button1 (\(finalButtonText)) - exiting with code 0", logLevel: .info)
-                exit(0)
+                if let action = onButton1Action {
+                    writeLog("Preset: User clicked button1 (\(finalButtonText)) - custom action", logLevel: .info)
+                    action()
+                } else {
+                    writeLog("Preset: User clicked button1 (\(finalButtonText)) - exiting with code 0", logLevel: .info)
+                    exit(0)
+                }
             }
             .keyboardShortcut(.defaultAction)
             .buttonStyle(.borderedProminent)
             .controlSize(controlSize)
+            .tint(tintColor)
             .disabled(state.buttonConfiguration.button1Disabled)
         }
     }
@@ -731,6 +741,11 @@ func handleButtonAction(block: InspectConfig.GuidanceContent, itemId: String, in
 
         writeLog("Button: Request '\(requestId)' sent for item '\(itemId)'", logLevel: .info)
 
+    case "generate":
+        let presetId = block.requestId ?? "5"
+        StarterTemplateService.generateStarter(forPreset: presetId)
+        writeLog("Button: Generated starter for preset \(presetId)", logLevel: .info)
+
     default:
         writeLog("Button: Unknown action '\(action)'", logLevel: .error)
     }
@@ -1100,5 +1115,237 @@ struct PositionedHelpButton: View {
         default: return .bottomTrailing
         }
     }
+}
+
+// MARK: - IPC Helpers (ignitecli Integration)
+
+/// Resolve readiness file path from config or trigger file path
+func resolveReadinessFilePath(config: InspectConfig?, triggerFilePath: String) -> String {
+    config?.readinessFile ?? "\(triggerFilePath).ready"
+}
+
+/// Write a readiness signal JSON file so external launchers can detect Dialog is ready.
+/// Call after monitoring/command file setup is complete.
+func writeReadinessFile(config: InspectConfig?, triggerFilePath: String) {
+    let path = resolveReadinessFilePath(config: config, triggerFilePath: triggerFilePath)
+    let json: [String: Any] = [
+        "pid": ProcessInfo.processInfo.processIdentifier,
+        "triggerFile": triggerFilePath,
+        "timestamp": ISO8601DateFormatter().string(from: Date())
+    ]
+    if let data = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted) {
+        FileManager.default.createFile(atPath: (path as NSString).expandingTildeInPath, contents: data)
+        print("[SWIFTDIALOG] readiness_file: \(path)")
+        writeLog("IPC: Readiness file written to \(path)", logLevel: .info)
+    }
+}
+
+/// Delete the readiness file on exit.
+func cleanupReadinessFile(config: InspectConfig?, triggerFilePath: String) {
+    let path = resolveReadinessFilePath(config: config, triggerFilePath: triggerFilePath)
+    try? FileManager.default.removeItem(atPath: (path as NSString).expandingTildeInPath)
+    writeLog("IPC: Readiness file cleaned up at \(path)", logLevel: .debug)
+}
+
+/// Lightweight step identity for result file output (avoids coupling to full IntroStep/ItemConfig)
+struct ResultStepInfo {
+    let id: String
+    let stepType: String
+}
+
+/// Write a structured JSON result file on exit with step statuses, selections, and form values.
+func writeResultFile(
+    config: InspectConfig?,
+    exitCode: Int,
+    steps: [ResultStepInfo] = [],
+    completedSteps: Set<String> = [],
+    failedSteps: [String: String] = [:],
+    skippedSteps: Set<String> = [],
+    currentStepIndex: Int = 0,
+    formValues: [String: String] = [:],
+    selections: [String: Set<String>] = [:],
+    selectedBrand: String? = nil
+) {
+    guard let resultPath = config?.resultFile else { return }
+
+    var result: [String: Any] = [
+        "exitCode": exitCode,
+        "timestamp": ISO8601DateFormatter().string(from: Date()),
+        "pid": ProcessInfo.processInfo.processIdentifier,
+        "lastStepIndex": currentStepIndex,
+        "totalSteps": steps.count
+    ]
+
+    // Build step statuses
+    if !steps.isEmpty {
+        let stepArray: [[String: Any]] = steps.map { step in
+            var entry: [String: Any] = [
+                "id": step.id,
+                "stepType": step.stepType
+            ]
+            if completedSteps.contains(step.id) {
+                entry["status"] = "completed"
+                entry["result"] = failedSteps[step.id] != nil ? "failure" : "success"
+            } else if skippedSteps.contains(step.id) {
+                entry["status"] = "skipped"
+            } else {
+                entry["status"] = "pending"
+            }
+            if let reason = failedSteps[step.id] {
+                entry["failureReason"] = reason
+            }
+            return entry
+        }
+        result["steps"] = stepArray
+    }
+
+    // Selections (convert Set<String> to [String] for JSON)
+    if !selections.isEmpty {
+        result["selections"] = selections.mapValues { Array($0) }
+    }
+
+    // Form values
+    if !formValues.isEmpty {
+        result["formValues"] = formValues
+    }
+
+    // Selected brand
+    if let brand = selectedBrand {
+        result["selectedBrand"] = brand
+    }
+
+    let expandedPath = (resultPath as NSString).expandingTildeInPath
+    if let data = try? JSONSerialization.data(withJSONObject: result, options: [.prettyPrinted, .sortedKeys]) {
+        FileManager.default.createFile(atPath: expandedPath, contents: data)
+        print("[SWIFTDIALOG] result_file: \(resultPath)")
+        writeLog("IPC: Result file written to \(resultPath) (exitCode: \(exitCode))", logLevel: .info)
+    }
+}
+
+// MARK: - Shared Deferral System
+
+/// Perform a user-initiated deferral: write result file, print to stdout, exit.
+/// Compatible with ignitecli's deferral protocol (exit code 10, duration format).
+///
+/// - Parameters:
+///   - duration: ignitecli duration string (e.g. "3m", "1h", "4h", "1d", "tomorrow")
+///   - config: InspectConfig for result file path
+func performDeferral(duration: String, config: InspectConfig?) {
+    let seconds = parseDeferralDuration(duration)
+    let exitCode = config?.deferralConfig?.exitCode ?? 10
+
+    writeLog("Deferral: User deferred for \(duration) (\(seconds)s), exitCode=\(exitCode)", logLevel: .info)
+
+    // Write structured result file for IPC callers
+    // Resolution order: config.resultFile > SD_RESULT_FILE env var
+    let resultPath = config?.resultFile
+        ?? ProcessInfo.processInfo.environment["SD_RESULT_FILE"]
+    if let resultPath, !resultPath.isEmpty {
+        let result: [String: Any] = [
+            "exitCode": exitCode,
+            "deferDuration": duration,
+            "deferSeconds": seconds,
+            "timestamp": ISO8601DateFormatter().string(from: Date()),
+            "pid": ProcessInfo.processInfo.processIdentifier
+        ]
+        let expandedPath = (resultPath as NSString).expandingTildeInPath
+        if let data = try? JSONSerialization.data(withJSONObject: result, options: [.prettyPrinted, .sortedKeys]) {
+            FileManager.default.createFile(atPath: expandedPath, contents: data)
+            writeLog("Deferral: Result file written to \(expandedPath)", logLevel: .info)
+        }
+    } else {
+        writeLog("Deferral: No resultFile configured, skipping result file write", logLevel: .debug)
+    }
+
+    // Stdout for backward-compatible script parsing
+    print("defer:\(seconds)")
+
+    exit(Int32(exitCode))
+}
+
+/// Parse ignitecli-compatible duration string into seconds.
+/// Supports: "30m", "1h", "4h", "1d", "3d", "tomorrow" (9 AM next day).
+func parseDeferralDuration(_ s: String) -> Int {
+    let trimmed = s.trimmingCharacters(in: .whitespaces).lowercased()
+
+    if trimmed == "tomorrow" {
+        // Seconds until next 9:00 AM local
+        let cal = Calendar.current
+        let now = Date()
+        var components = cal.dateComponents([.year, .month, .day], from: now)
+        components.hour = 9
+        components.minute = 0
+        components.second = 0
+        if let target9AM = cal.date(from: components) {
+            let candidate = target9AM > now ? target9AM : cal.date(byAdding: .day, value: 1, to: target9AM)!
+            return max(60, Int(candidate.timeIntervalSince(now)))
+        }
+        return 86400 // fallback: 24 hours
+    }
+
+    let suffixes: [(String, Int)] = [("d", 86400), ("h", 3600), ("m", 60), ("s", 1)]
+    for (suffix, multiplier) in suffixes {
+        if let numStr = trimmed.hasSuffix(suffix) ? String(trimmed.dropLast(suffix.count)) : nil,
+           let num = Int(numStr), num > 0 {
+            return num * multiplier
+        }
+    }
+
+    // Fallback: try raw seconds
+    return Int(trimmed) ?? 3600
+}
+
+/// Generate a human-readable label from an ignitecli duration string.
+/// "3m" → "3 Minutes", "1h" → "1 Hour", "4h" → "4 Hours", "1d" → "1 Day", "tomorrow" → "Tomorrow"
+func deferralLabel(for duration: String) -> String {
+    let trimmed = duration.trimmingCharacters(in: .whitespaces).lowercased()
+
+    if trimmed == "tomorrow" { return "Tomorrow" }
+
+    let units: [(String, String, String)] = [
+        ("d", "Day", "Days"),
+        ("h", "Hour", "Hours"),
+        ("m", "Minute", "Minutes"),
+        ("s", "Second", "Seconds")
+    ]
+
+    for (suffix, singular, plural) in units {
+        if let numStr = trimmed.hasSuffix(suffix) ? String(trimmed.dropLast(suffix.count)) : nil,
+           let num = Int(numStr), num > 0 {
+            return "\(num) \(num == 1 ? singular : plural)"
+        }
+    }
+
+    return duration // passthrough if unrecognized
+}
+
+/// Resolve the effective deferral options by merging config with ignitecli env vars.
+/// Priority: config.deferralConfig.options > IGNITECLI_DEFER_OPTIONS env > defaults
+func resolvedDeferralOptions(config: InspectConfig?) -> [InspectConfig.DeferOption] {
+    // 1. Explicit config options take priority
+    if let options = config?.deferralConfig?.options, !options.isEmpty {
+        return options
+    }
+
+    // 2. ignitecli env var fallback
+    if let envOptions = ProcessInfo.processInfo.environment["IGNITECLI_DEFER_OPTIONS"],
+       !envOptions.isEmpty {
+        return envOptions.components(separatedBy: ",").map { duration in
+            InspectConfig.DeferOption(duration: duration.trimmingCharacters(in: .whitespaces), label: nil)
+        }
+    }
+
+    // 3. Sensible defaults
+    return [
+        InspectConfig.DeferOption(duration: "1h", label: nil),
+        InspectConfig.DeferOption(duration: "4h", label: nil),
+        InspectConfig.DeferOption(duration: "tomorrow", label: nil)
+    ]
+}
+
+/// Whether deferral is enabled (config or ignitecli env var).
+func isDeferralEnabled(config: InspectConfig?) -> Bool {
+    if config?.deferralConfig?.enabled == true { return true }
+    return ProcessInfo.processInfo.environment["IGNITECLI_DEFER_ENABLED"] == "true"
 }
 

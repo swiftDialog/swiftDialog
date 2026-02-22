@@ -1,7 +1,7 @@
 //
 //  InspectSizes.swift
 //  dialog
-//  
+//
 //  Created by Henry Stamerjohann, Declarative IT GmbH, 22/09/2025
 //
 //  This file serves as the source for ech preset optimized window size
@@ -17,15 +17,17 @@ public enum InspectSizes {
     /// - Parameter preset: Preset name (e.g., "6" or "preset6")
     /// - Returns: Canonical preset name (e.g., "preset6")
     private static func normalizePreset(_ preset: String) -> String {
-        if let number = Int(preset), number >= 1 && number <= 11 {
+        if let number = Int(preset), number >= 1 && number <= 6 {
             return "preset\(number)"
         }
         // Handle named aliases
         let lowercased = preset.lowercased()
         switch lowercased {
         case "portal", "self-service", "webview-portal":
-            return "preset11"
-        case "bento", "modern-sidebar":
+            return "preset5"
+        case "toast", "compact-installer":
+            return "preset4"
+        case "guidance", "modern-sidebar":
             return "preset6"
         default:
             return lowercased
@@ -64,63 +66,28 @@ public enum InspectSizes {
             }
 
         case "preset4":
+            // Compact toast installer
             switch mode {
-            case "compact": return (750, 450)
-            case "large": return (1100, 650)
-            default: return (900, 550)  // standard
+            case "compact": return (480, 100)
+            case "large": return (600, 130)
+            default: return (550, 110)  // standard
             }
 
         case "preset5":
+            // Unified portal / self-service
             switch mode {
-            case "compact": return (900, 600)
-            case "large": return (1400, 900)
-            default: return (1200, 750)  // standard
+            case "compact": return (1024, 640)   // Minimum/default
+            case "large": return (1200, 800)     // Maximum
+            case "assistant": return (1024, 700)  // Apple-size inspired
+            default: return (1100, 700)          // Ideal
             }
 
         case "preset6":
-            // Modern Sidebar Variant
+            // Modern sidebar navigation
             switch mode {
             case "compact": return (720, 480)
             case "large": return (960, 640)
             default: return (800, 560)  // standard
-            }
-
-        case "preset7":
-            switch mode {
-            case "compact": return (900, 600)
-            case "large": return (1000, 700)
-            default: return (1000, 640)  // standard
-            }
-
-        case "preset8":
-            switch mode {
-            case "compact": return (900, 600)
-            case "large": return (1000, 700)
-            default: return (1000, 640)  // standard
-            }
-            
-        case "preset9":
-            // Modern Two-Panel Onboarding Flow (formerly Preset11)
-            switch mode {
-            case "compact": return (1000, 680)
-            case "large": return (1400, 950)
-            default: return (1200, 750)  // standard - increased for better text balance
-            }
-
-        case "preset10":
-            // Reserved placeholder
-            return (500, 300)
-
-        case "preset11":
-            // Onboarding / Self-Service Portal
-            // Fixed window sizes for consistent experience:
-            // - Compact/default: 1024×640 (minimum)
-            // - Standard: 1100×700 (ideal)
-            // - Large: 1200×800 (maximum)
-            switch mode {
-            case "compact": return (1024, 640)   // Minimum/default
-            case "large": return (1200, 800)     // Maximum
-            default: return (1100, 700)          // Ideal
             }
 
         default:

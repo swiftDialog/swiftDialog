@@ -1,5 +1,5 @@
 //
-//  InspectBannerView.swift
+// InspectBannerView.swift
 //  dialog
 //
 //  Created by Henry Stamerjohann, Declarative IT GmbH

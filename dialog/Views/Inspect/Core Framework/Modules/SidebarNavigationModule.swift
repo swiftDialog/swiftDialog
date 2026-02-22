@@ -5,7 +5,7 @@
 //  Created by Henry Stamerjohann, Declarative IT GmbH, 25/01/2026
 //
 //  Reusable sidebar navigation module for step-based workflows.
-//  Provides a modern vertical stepper with clean Preset11-style aesthetics.
+//  Provides a modern vertical stepper with clean Preset5-style aesthetics.
 //
 //  Used by: Preset6 (modern sidebar variant)
 //
@@ -136,7 +136,7 @@ struct SidebarNavigationModule: View {
             // Title
             if let title = title, !title.isEmpty {
                 Text(title)
-                    .font(.system(size: 14 * scaleFactor, weight: .semibold))
+                    .font(.headline)
                     .foregroundStyle(.primary)
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
@@ -172,7 +172,7 @@ struct SidebarNavigationModule: View {
 
             // Step counter text
             Text("\(completedCount) of \(totalRealSteps) completed")
-                .font(.system(size: 11 * scaleFactor))
+                .font(.caption2)
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
         }
@@ -199,7 +199,7 @@ struct SidebarNavigationModule: View {
 // MARK: - Modern Step Row
 
 /// A single step row in the sidebar navigation.
-/// Clean, minimal design matching Preset11's aesthetics.
+/// Clean, minimal design matching Preset5's aesthetics.
 struct ModernStepRow: View {
     let index: Int
     let item: InspectConfig.ItemConfig
@@ -227,14 +227,14 @@ struct ModernStepRow: View {
             // Step content
             VStack(alignment: .leading, spacing: 2 * scaleFactor) {
                 Text(item.displayName)
-                    .font(.system(size: 13 * scaleFactor, weight: isActive ? .semibold : .regular))
+                    .font(.subheadline.weight(isActive ? .semibold : .regular))
                     .foregroundStyle(isActive ? .primary : .secondary)
                     .lineLimit(1)
 
                 // Optional subtitle (status or description)
                 if let subtitle = stepSubtitle {
                     Text(subtitle)
-                        .font(.system(size: 11 * scaleFactor))
+                        .font(.caption2)
                         .foregroundStyle(subtitleColor)
                         .lineLimit(1)
                 }
@@ -267,7 +267,7 @@ struct ModernStepRow: View {
                 Circle()
                     .fill(Color.green)
                 Image(systemName: "checkmark")
-                    .font(.system(size: 12 * scaleFactor, weight: .bold))
+                    .font(.caption.bold())
                     .foregroundStyle(.white)
             } else if isDownloading {
                 // Downloading/processing state - spinner
@@ -281,7 +281,7 @@ struct ModernStepRow: View {
                     .fill(accentColor)
                 if showStepNumber {
                     Text("\(displayStepNumber)")
-                        .font(.system(size: 12 * scaleFactor, weight: .bold))
+                        .font(.caption.bold())
                         .foregroundStyle(.white)
                 }
             } else {
@@ -290,7 +290,7 @@ struct ModernStepRow: View {
                     .strokeBorder(Color.secondary.opacity(0.3), lineWidth: 1.5)
                 if showStepNumber {
                     Text("\(displayStepNumber)")
-                        .font(.system(size: 12 * scaleFactor, weight: .medium))
+                        .font(.caption.weight(.medium))
                         .foregroundStyle(.secondary)
                 }
             }

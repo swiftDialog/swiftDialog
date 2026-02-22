@@ -425,4 +425,3 @@ struct ComplianceCardView: View {
         .id("compliance-card-\(categoryName)-\(passed)-\(total)-\(checkDetails ?? "")")  // Force re-render on data change
     }
 }
-

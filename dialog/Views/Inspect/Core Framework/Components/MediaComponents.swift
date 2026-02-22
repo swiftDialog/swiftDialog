@@ -14,7 +14,7 @@ import SwiftUI
 // MARK: - AsyncImageView (Shared Component)
 
 /// Asynchronous image loader with loading states and fallback support
-/// Extracted from Preset8 for reuse across all presets
+/// Extracted for reuse across all presets
 struct AsyncImageView<Fallback: View>: View {
     let iconPath: String
     let basePath: String?
@@ -25,6 +25,27 @@ struct AsyncImageView<Fallback: View>: View {
 
     @State private var imageState: ImageLoadState = .loading
     @State private var loadedImage: NSImage?
+
+    /// Detect GIF files by extension for animated rendering
+    private var isGIF: Bool {
+        iconPath.lowercased().hasSuffix(".gif")
+    }
+
+    /// Resolve the icon path to a file URL for GIF playback
+    private var resolvedFileURL: URL? {
+        if iconPath.hasPrefix("http://") || iconPath.hasPrefix("https://") {
+            return URL(string: iconPath)
+        }
+        let fullPath: String
+        if iconPath.hasPrefix("/") {
+            fullPath = iconPath
+        } else if let basePath = basePath {
+            fullPath = (basePath as NSString).appendingPathComponent(iconPath)
+        } else {
+            fullPath = iconPath
+        }
+        return URL(fileURLWithPath: fullPath)
+    }
 
     enum ImageLoadState: Equatable {
         case loading
@@ -81,13 +102,20 @@ struct AsyncImageView<Fallback: View>: View {
                 .clipped()
 
             case .loaded(let nsImage):
-                // Successfully loaded image
-                Image(nsImage: nsImage)
-                    .resizable()
-                    .aspectRatio(contentMode: imageFit)
-                    .frame(width: maxWidth, height: maxHeight)
-                    .clipped()
-                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                // Use AnimatedGIFViewBlocked for GIFs (WKWebView-based), static Image for everything else
+                if isGIF, let gifURL = resolvedFileURL {
+                    AnimatedGIFViewBlocked(url: gifURL)
+                        .frame(width: maxWidth, height: maxHeight)
+                        .clipped()
+                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                } else {
+                    Image(nsImage: nsImage)
+                        .resizable()
+                        .aspectRatio(contentMode: imageFit)
+                        .frame(width: maxWidth, height: maxHeight)
+                        .clipped()
+                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                }
 
             case .failed:
                 // Failed to load, show fallback
@@ -112,23 +140,39 @@ struct AsyncImageView<Fallback: View>: View {
 
     @MainActor
     private func loadImage() async {
-        // Resolve the full path
+        // URL loading — fetch remote image over HTTP(S)
+        if iconPath.hasPrefix("http://") || iconPath.hasPrefix("https://") {
+            guard let url = URL(string: iconPath) else {
+                withAnimation(.easeInOut(duration: 0.3)) { imageState = .failed }
+                return
+            }
+            do {
+                let (data, _) = try await URLSession.shared.data(from: url)
+                if let nsImage = NSImage(data: data) {
+                    withAnimation(.easeInOut(duration: 0.3)) { imageState = .loaded(nsImage) }
+                } else {
+                    writeLog("AsyncImageView: Invalid image data from URL: \(iconPath)", logLevel: .error)
+                    withAnimation(.easeInOut(duration: 0.3)) { imageState = .failed }
+                }
+            } catch {
+                writeLog("AsyncImageView: Failed to fetch URL: \(iconPath) — \(error.localizedDescription)", logLevel: .error)
+                withAnimation(.easeInOut(duration: 0.3)) { imageState = .failed }
+            }
+            return
+        }
+
+        // Resolve local file path
         let fullPath: String
         if iconPath.hasPrefix("/") {
-            // Absolute path
             fullPath = iconPath
         } else if let basePath = basePath {
-            // Relative path with base
             fullPath = (basePath as NSString).appendingPathComponent(iconPath)
         } else {
-            // Relative path without base
             fullPath = iconPath
         }
 
-        // Add small delay to show loading state
         try? await Task.sleep(for: .milliseconds(100))
 
-        // Try to load the image
         if let nsImage = NSImage(contentsOfFile: fullPath) {
             withAnimation(.easeInOut(duration: 0.3)) {
                 imageState = .loaded(nsImage)
@@ -1023,4 +1067,3 @@ struct GallerySideContentBlock: View {
 
 // NOTE: DetailOverlayView is defined in dialog/Views/Inspect/Utilities/DetailOverlayView.swift
 // with proper system info styling including device icon
-

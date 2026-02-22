@@ -12,10 +12,10 @@ import SwiftUI
 import AVKit
 import WebViewKit
 
-// MARK: - Guidance Content View (Shared from Preset9)
+// MARK: - Guidance Content View (Shared content renderer)
 
 /// Renders rich guidance content for Migration Assistant-style workflows
-/// Originally from Preset9, now shared across all presets for consistent rich content display
+/// Shared across all presets for consistent rich content display
 struct GuidanceContentView: View {
     let contentBlocks: [InspectConfig.GuidanceContent]
     let scaleFactor: CGFloat
@@ -24,7 +24,8 @@ struct GuidanceContentView: View {
     let itemId: String
     let onOverlayTap: (() -> Void)?  // Optional callback when a block with opensOverlay=true is tapped
     let accentColor: Color?              // Optional branded accent (arrow icons, highlight, explainer, button tint, radio selection)
-    let contentAlignment: HorizontalAlignment  // Text block alignment (.leading default, .center for Preset11 intro)
+    let contentAlignment: HorizontalAlignment  // Text block alignment (.leading default, .center for Preset5 intro)
+    @Environment(\.palette) private var palette
 
     // Initialize with required parameters for interactive form support
     init(contentBlocks: [InspectConfig.GuidanceContent], scaleFactor: CGFloat, iconBasePath: String? = nil, inspectState: InspectState, itemId: String, onOverlayTap: (() -> Void)? = nil, accentColor: Color? = nil, contentAlignment: HorizontalAlignment = .leading) {
@@ -85,7 +86,7 @@ struct GuidanceContentView: View {
 
         return groups
     }
-    
+
     private func attributedMarkdown(_ markdown: String) -> AttributedString {
         do {
             return try AttributedString(
@@ -188,7 +189,7 @@ struct GuidanceContentView: View {
             HStack(alignment: .top, spacing: 8 * scaleFactor) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.system(size: 13 * scaleFactor))
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(palette.warning)
                 Text(block.content ?? "")
                     .font(.system(size: 13 * scaleFactor))
                     .foregroundStyle(.secondary)
@@ -198,14 +199,14 @@ struct GuidanceContentView: View {
             .padding(10 * scaleFactor)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.orange.opacity(0.1))
+                    .fill(palette.warningBackground)
             )
 
         case "info":
             HStack(alignment: .top, spacing: 8 * scaleFactor) {
                 Image(systemName: "info.circle.fill")
                     .font(.system(size: 13 * scaleFactor))
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(palette.info)
                 Text(block.content ?? "")
                     .font(.system(size: 13 * scaleFactor))
                     .foregroundStyle(.secondary)
@@ -215,14 +216,14 @@ struct GuidanceContentView: View {
             .padding(10 * scaleFactor)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.blue.opacity(0.1))
+                    .fill(palette.infoBackground)
             )
 
         case "success":
             HStack(alignment: .top, spacing: 8 * scaleFactor) {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 13 * scaleFactor))
-                    .foregroundStyle(.green)
+                    .foregroundStyle(palette.success)
                 Text(block.content ?? "")
                     .font(.system(size: 13 * scaleFactor))
                     .foregroundStyle(.secondary)
@@ -232,7 +233,7 @@ struct GuidanceContentView: View {
             .padding(10 * scaleFactor)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.green.opacity(0.1))
+                    .fill(palette.successBackground)
             )
 
         case "explainer":
@@ -245,11 +246,11 @@ struct GuidanceContentView: View {
             let (icon, iconColor, backgroundColor): (String?, Color, Color) = {
                 switch explainerStyle {
                 case "info":
-                    return ("info.circle.fill", .blue, Color.blue.opacity(0.1))
+                    return ("info.circle.fill", palette.info, palette.infoBackground)
                 case "warning":
-                    return ("exclamationmark.triangle.fill", .orange, Color.orange.opacity(0.1))
+                    return ("exclamationmark.triangle.fill", palette.warning, palette.warningBackground)
                 case "success":
-                    return ("checkmark.circle.fill", .green, Color.green.opacity(0.1))
+                    return ("checkmark.circle.fill", palette.success, palette.successBackground)
                 default: // "plain"
                     if let accent = accentColor {
                         return (block.icon, accent, accent.opacity(0.06))
@@ -289,15 +290,26 @@ struct GuidanceContentView: View {
 
         case "bullets":
             if let items = block.items {
-                VStack(alignment: .leading, spacing: 6 * scaleFactor) {
-                    ForEach(items, id: \.self) { item in
+                VStack(alignment: .leading, spacing: 8 * scaleFactor) {
+                    ForEach(Array(items.enumerated()), id: \.offset) { index, item in
                         if !item.isEmpty {
                             HStack(alignment: .top, spacing: 8 * scaleFactor) {
-                                Text("•")
-                                    .font(.system(size: 13 * scaleFactor))
-                                    .foregroundStyle(.secondary)
+                                if block.numbered == true {
+                                    // Numbered mode: 1.circle.fill, 2.circle.fill, etc. (up to 50)
+                                    Image(systemName: "\(index + 1).circle.fill")
+                                        .font(.system(size: 15 * scaleFactor))
+                                        .foregroundStyle(accentColor ?? .blue)
+                                } else if let sfIcon = block.icon {
+                                    Image(systemName: sfIcon)
+                                        .font(.system(size: 13 * scaleFactor))
+                                        .foregroundStyle(accentColor ?? .secondary)
+                                } else {
+                                    Text("•")
+                                        .font(.system(size: 13 * scaleFactor))
+                                        .foregroundStyle(.secondary)
+                                }
                                 Text(item)
-                                    .font(.system(size: 13 * scaleFactor))
+                                    .font(.system(size: 13 * scaleFactor, weight: (block.numbered == true || block.icon != nil) ? .medium : .regular))
                                     .foregroundStyle(.primary)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
@@ -335,9 +347,9 @@ struct GuidanceContentView: View {
             let (labelColor, valueFontSize, showBullet): (Color, CGFloat, Bool) = {
                 switch style {
                 case "success":
-                    return (.semanticSuccess, 15, true)  // Green labels, larger values, with bullet
+                    return (palette.success, 15, true)  // Green labels, larger values, with bullet
                 case "table":
-                    return (.semanticSuccess, 15, false)  // Green labels, larger values, no bullet
+                    return (palette.success, 15, false)  // Green labels, larger values, no bullet
                 default:
                     return (.secondary, 13, true)  // Default: grey labels, normal size, with bullet
                 }
@@ -386,6 +398,18 @@ struct GuidanceContentView: View {
                                 .multilineTextAlignment(.center)
                                 .padding(.top, 2 * scaleFactor)
                         }
+                    } else if contentPath.lowercased().hasSuffix(".gif") {
+                        // Animated GIF — use AsyncImageView which handles GIF playback
+                        let imageWidth = CGFloat(block.imageWidth ?? 400) * scaleFactor
+                        AsyncImageView(
+                            iconPath: contentPath,
+                            basePath: nil,
+                            maxWidth: imageWidth,
+                            maxHeight: imageWidth * 0.75,
+                            imageFit: .fit,
+                            fallback: { EmptyView() }
+                        )
+                        .padding(.vertical, 4 * scaleFactor)
                     } else if let image = loadInstructionalImage(path: contentPath) {
                         let imageWidth = CGFloat(block.imageWidth ?? 400) * scaleFactor
                         let shape = block.imageShape ?? "rectangle"
@@ -502,6 +526,10 @@ struct GuidanceContentView: View {
                         url: url,
                         customHeaders: customHeaders,
                         userAgent: userAgent,
+                        ephemeralSession: inspectState.config?.portalConfig?.ephemeralSession ?? false,
+                        errorDetectionPhrases: inspectState.config?.portalConfig?.errorDetectionPhrases ?? [],
+                        errorDetectionThreshold: inspectState.config?.portalConfig?.errorDetectionThreshold ?? 2,
+                        openExternalLinksInBrowser: inspectState.config?.portalConfig?.openExternalLinksInBrowser ?? true,
                         height: portalHeight
                     )
                     .id("portal-\(url.absoluteString)")  // Force recreation on URL change
@@ -563,7 +591,7 @@ struct GuidanceContentView: View {
                 if block.required == true {
                     Text("* Required")
                         .font(.system(size: 11 * scaleFactor))
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(palette.warning)
                         .italic()
                 }
             }
@@ -626,7 +654,7 @@ struct GuidanceContentView: View {
                 if block.required == true {
                     Text("* Required")
                         .font(.system(size: 11 * scaleFactor))
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(palette.warning)
                         .italic()
                 }
             }
@@ -694,7 +722,7 @@ struct GuidanceContentView: View {
                 if block.required == true {
                     Text("* Required")
                         .font(.system(size: 11 * scaleFactor))
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(palette.warning)
                         .italic()
                 }
             }
@@ -893,7 +921,7 @@ struct GuidanceContentView: View {
                 if block.required == true {
                     Text("* Required")
                         .font(.system(size: 11 * scaleFactor))
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(palette.warning)
                         .italic()
                 }
             }
@@ -1140,15 +1168,26 @@ struct GuidanceContentView: View {
 
         case "install-list":
             // Traditional installation progress list with app icons and status indicators
+            // Dynamically resolves status from inspectState when installItem.itemId links to items[]
             if let installItems = block.installItems, !installItems.isEmpty {
                 VStack(alignment: .leading, spacing: 8 * scaleFactor) {
                     ForEach(installItems.indices, id: \.self) { index in
                         let item = installItems[index]
+                        let resolvedStatus: String = {
+                            if let linkedId = item.itemId {
+                                if inspectState.completedItems.contains(linkedId) {
+                                    return "success"
+                                } else if inspectState.downloadingItems.contains(linkedId) {
+                                    return "progress"
+                                }
+                            }
+                            return item.status ?? "pending"
+                        }()
                         InstallListRowView(
                             title: item.title,
                             subtitle: item.subtitle,
                             icon: item.icon,
-                            status: item.status ?? "pending",
+                            status: resolvedStatus,
                             progress: item.progress ?? 0,
                             scaleFactor: scaleFactor,
                             iconBasePath: iconBasePath
@@ -1184,6 +1223,7 @@ struct GuidanceContentView: View {
                     scaleFactor: scaleFactor,
                     accentColor: accentColor,
                     iconBasePath: iconBasePath,
+                    tintColor: block.bentoTintColor.flatMap { Color(hex: $0) },
                     inspectState: inspectState
                 )
             } else if appvars.debugMode {
@@ -1417,11 +1457,12 @@ struct InstallListRowView: View {
     let progress: Double
     let scaleFactor: CGFloat
     let iconBasePath: String?
+    @Environment(\.palette) private var palette
 
     private var statusColor: Color {
         switch status {
-        case "success": return .green
-        case "fail": return .red
+        case "success": return palette.success
+        case "fail": return palette.error
         case "wait", "pending": return .gray
         default: return .gray
         }
@@ -1501,12 +1542,12 @@ struct InstallListRowView: View {
         case "success":
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 22 * scaleFactor))
-                .foregroundStyle(.green)
+                .foregroundStyle(palette.success)
 
         case "fail":
             Image(systemName: "xmark.circle.fill")
                 .font(.system(size: 22 * scaleFactor))
-                .foregroundStyle(.red)
+                .foregroundStyle(palette.error)
 
         case "wait":
             ProgressView()
@@ -1542,4 +1583,3 @@ struct InstallListRowView: View {
         return NSImage(contentsOfFile: fullPath)
     }
 }
-

@@ -4,12 +4,27 @@
 //
 //  Created by Henry Stamerjohann, Declarative IT GmbH, 17/01/2026
 //
-//  WKWebView wrapper for self-service portal display (Preset11)
+//  WKWebView wrapper for self-service portal display (Preset5)
 //  Supports optional authentication headers and offline caching
 //
 
 import SwiftUI
 import WebKit
+
+// MARK: - Download Constants
+
+private let downloadableExtensions: Set<String> = [
+    "mobileconfig", "pkg", "dmg", "zip", "tar", "gz", "pdf"
+]
+private let downloadableMIMETypes: Set<String> = [
+    "application/x-apple-aspen-config",
+    "application/octet-stream",
+    "application/zip",
+    "application/x-tar",
+    "application/gzip",
+    "application/pdf",
+    "application/vnd.apple.installer+xml"
+]
 
 // MARK: - Load State
 
@@ -55,11 +70,20 @@ struct PortalWebView: NSViewRepresentable {
     var authHeaders: [String: String]?
     var customHeaders: [String: String]?  // Includes branding key and any user-defined headers
     var userAgent: String?
+    var ephemeralSession: Bool = false
+    var errorDetectionPhrases: [String] = []
+    var errorDetectionThreshold: Int = 2
+    var openExternalLinksInBrowser: Bool = true
     var onLoadStateChange: ((PortalLoadState) -> Void)?
     var onNavigationError: ((Error) -> Void)?
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(self)
+        let coordinator = Coordinator(self)
+        coordinator.portalHost = url.host
+        coordinator.errorDetectionPhrases = errorDetectionPhrases
+        coordinator.errorDetectionThreshold = errorDetectionThreshold
+        coordinator.openExternalLinksInBrowser = openExternalLinksInBrowser
+        return coordinator
     }
 
     func makeNSView(context: Context) -> WKWebView {
@@ -70,14 +94,20 @@ struct PortalWebView: NSViewRepresentable {
         // Enable JavaScript using modern API
         configuration.defaultWebpagePreferences.allowsContentJavaScript = true
 
-        // Configure data store (use default for caching)
-        configuration.websiteDataStore = WKWebsiteDataStore.default()
+        // Configure data store (ephemeral or persistent)
+        if ephemeralSession {
+            configuration.websiteDataStore = .nonPersistent()
+            writeLog("PortalWebView: Using non-persistent (ephemeral) data store", logLevel: .debug)
+        } else {
+            configuration.websiteDataStore = .default()
+        }
 
         // Add script message handler if we need JS communication
         configuration.userContentController.add(context.coordinator, name: "portalMessage")
 
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
+        webView.uiDelegate = context.coordinator
         webView.allowsBackForwardNavigationGestures = true
 
         // Set custom User-Agent if provided
@@ -192,7 +222,7 @@ struct PortalWebView: NSViewRepresentable {
 
     // MARK: - Coordinator
 
-    class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler, WKHTTPCookieStoreObserver {
+    class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler, WKHTTPCookieStoreObserver, WKDownloadDelegate, WKUIDelegate {
         var parent: PortalWebView
 
         // Track URLs we've already injected headers for (to avoid infinite loops)
@@ -204,6 +234,20 @@ struct PortalWebView: NSViewRepresentable {
         // Track the URL that failed to prevent infinite reload loops
         // (internal access to allow updateNSView to check before reloading)
         var failedURL: URL?
+
+        // SSO flow tracking (Gap 2)
+        private var ssoFlowActive = false
+        var portalHost: String?
+
+        // DOM error detection (Gap 3)
+        var errorDetectionPhrases: [String] = []
+        var errorDetectionThreshold: Int = 2
+
+        // External link handling (Gap 4)
+        var openExternalLinksInBrowser: Bool = true
+
+        // Track whether initial page load completed (suppress loading overlay during SSO redirects)
+        private var hasCompletedInitialLoad = false
 
         // Combined headers (auth + custom) for injection
         var headersToInject: [String: String] {
@@ -245,14 +289,51 @@ struct PortalWebView: NSViewRepresentable {
         // MARK: - WKNavigationDelegate
 
         func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-            parent.onLoadStateChange?(.loading)
+            // Only show loading spinner before the first successful load.
+            // After that, suppress it so SSO redirects don't flash the overlay
+            // over already-visible content.
+            if !hasCompletedInitialLoad {
+                parent.onLoadStateChange?(.loading)
+            }
         }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             hasReportedError = false  // Reset on successful load
+            hasCompletedInitialLoad = true  // Suppress loading overlay for subsequent navigations
             failedURL = nil  // Clear failed URL on successful load
+
+            // Reset SSO if we're back on the portal host
+            if webView.url?.host == portalHost {
+                ssoFlowActive = false
+            }
+
             parent.onLoadStateChange?(.loaded)
             writeLog("PortalWebView: Content loaded for \(webView.url?.absoluteString ?? "unknown")", logLevel: .info)
+
+            // DOM error detection (Gap 3)
+            if !errorDetectionPhrases.isEmpty {
+                let phraseChecks = errorDetectionPhrases.map { phrase in
+                    let escaped = phrase.replacingOccurrences(of: "'", with: "\\'")
+                    return "if (body.indexOf('\(escaped)') !== -1) errors++;"
+                }.joined(separator: "\n")
+
+                let js = """
+                (function() {
+                    var body = document.body ? document.body.innerText : '';
+                    var errors = 0;
+                    \(phraseChecks)
+                    return errors >= \(errorDetectionThreshold) ? 'error' : 'ok';
+                })();
+                """
+                webView.evaluateJavaScript(js) { [weak self] result, _ in
+                    if let status = result as? String, status == "error" {
+                        DispatchQueue.main.async {
+                            self?.parent.onLoadStateChange?(.error("Portal returned an error page"))
+                            writeLog("PortalWebView: DOM error detection triggered", logLevel: .error)
+                        }
+                    }
+                }
+            }
         }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
@@ -264,54 +345,109 @@ struct PortalWebView: NSViewRepresentable {
         }
 
         func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-            guard let url = navigationAction.request.url else {
+            guard let requestURL = navigationAction.request.url else {
                 decisionHandler(.cancel)
                 return
             }
 
-            // Handle different URL schemes
-            switch url.scheme {
-            case "mailto", "tel":
-                // Open in default handler
-                NSWorkspace.shared.open(url)
-                decisionHandler(.cancel)
+            let scheme = requestURL.scheme?.lowercased()
 
-            case "https", "http":
-                // Check if we need to inject headers for top-level navigations
+            // Handle non-HTTP schemes
+            if scheme == "mailto" || scheme == "tel" {
+                NSWorkspace.shared.open(requestURL)
+                decisionHandler(.cancel)
+                return
+            }
+
+            guard scheme == "https" || scheme == "http" else {
+                decisionHandler(.cancel)
+                return
+            }
+
+            // 1. Same-host navigation — always allow (with header injection)
+            if requestURL.host == portalHost || scheme == "about" {
+                if ssoFlowActive {
+                    ssoFlowActive = false
+                    writeLog("PortalWebView: SSO flow ended — returned to portal host", logLevel: .debug)
+                }
+
+                // Header injection for same-host top-level navigations
                 let headers = headersToInject
                 if !headers.isEmpty && navigationAction.targetFrame?.isMainFrame == true {
-                    // Check if this is our re-injected request (we just set pendingHeaderInjection)
-                    if let pending = pendingHeaderInjection, pending.absoluteString == url.absoluteString {
-                        // This is our reload with headers - allow it
+                    if let pending = pendingHeaderInjection, pending.absoluteString == requestURL.absoluteString {
                         pendingHeaderInjection = nil
-                        writeLog("PortalWebView: Allowing header-injected request for \(url.absoluteString)", logLevel: .debug)
+                        writeLog("PortalWebView: Allowing header-injected request for \(requestURL.absoluteString)", logLevel: .debug)
                         decisionHandler(.allow)
                     } else {
-                        // First time seeing this URL - cancel and reload with headers
                         decisionHandler(.cancel)
-                        pendingHeaderInjection = url
+                        pendingHeaderInjection = requestURL
 
-                        var newRequest = URLRequest(url: url)
+                        var newRequest = URLRequest(url: requestURL)
                         for (key, value) in headers {
                             newRequest.setValue(value, forHTTPHeaderField: key)
-                            writeLog("PortalWebView: Injecting header \(key): \(value)", logLevel: .debug)
                         }
                         newRequest.cachePolicy = .returnCacheDataElseLoad
-
-                        writeLog("PortalWebView: Intercepted navigation, re-loading with headers for \(url.absoluteString)", logLevel: .debug)
+                        writeLog("PortalWebView: Intercepted navigation, re-loading with headers for \(requestURL.absoluteString)", logLevel: .debug)
                         webView.load(newRequest)
                     }
                 } else {
-                    // No headers to inject or not main frame, allow
                     decisionHandler(.allow)
                 }
-
-            default:
-                decisionHandler(.cancel)
+                return
             }
+
+            // 2. During active SSO flow — allow HTTPS only
+            if ssoFlowActive {
+                if scheme == "https" {
+                    writeLog("PortalWebView: SSO flow — allowing cross-origin HTTPS to \(requestURL.host ?? "?")", logLevel: .debug)
+                    decisionHandler(.allow)
+                } else {
+                    writeLog("PortalWebView: SSO flow — blocking non-HTTPS URL", logLevel: .info)
+                    ssoFlowActive = false
+                    decisionHandler(.cancel)
+                }
+                return
+            }
+
+            // 3. Detect SSO start: server redirect or form submission from portal host
+            if navigationAction.navigationType == .other || navigationAction.navigationType == .formSubmitted {
+                if navigationAction.sourceFrame.request.url?.host == portalHost,
+                   scheme == "https" {
+                    ssoFlowActive = true
+                    writeLog("PortalWebView: SSO flow started — redirect to \(requestURL.host ?? "?")", logLevel: .debug)
+                    decisionHandler(.allow)
+                    return
+                }
+            }
+
+            // 4. External link handling (Gap 4)
+            if openExternalLinksInBrowser {
+                let allowedSchemes: Set<String> = ["https", "http", "mailto", "tel"]
+                if let urlScheme = scheme, allowedSchemes.contains(urlScheme) {
+                    writeLog("PortalWebView: Opening external link in browser: \(requestURL.absoluteString)", logLevel: .debug)
+                    NSWorkspace.shared.open(requestURL)
+                }
+                decisionHandler(.cancel)
+                return
+            }
+
+            // Fallback: allow in webview (if external link handling is disabled)
+            decisionHandler(.allow)
         }
 
         func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+            // Check if response should trigger a download (Gap 1)
+            let mimeType = navigationResponse.response.mimeType ?? ""
+            let ext = navigationResponse.response.url?.pathExtension.lowercased() ?? ""
+
+            if downloadableMIMETypes.contains(mimeType)
+                || downloadableExtensions.contains(ext)
+                || !navigationResponse.canShowMIMEType {
+                writeLog("PortalWebView: Triggering download for \(navigationResponse.response.url?.absoluteString ?? "?") (mime=\(mimeType), ext=\(ext))", logLevel: .info)
+                decisionHandler(.download)
+                return
+            }
+
             guard let httpResponse = navigationResponse.response as? HTTPURLResponse else {
                 decisionHandler(.allow)
                 return
@@ -322,26 +458,25 @@ struct PortalWebView: NSViewRepresentable {
                 decisionHandler(.allow)
 
             case 401:
-                // Unauthorized - might need to refresh token
-                failedURL = httpResponse.url  // Track failed URL to prevent reload loop
+                failedURL = httpResponse.url
                 decisionHandler(.cancel)
                 parent.onLoadStateChange?(.error("Session expired"))
                 writeLog("PortalWebView: 401 Unauthorized", logLevel: .error)
 
             case 403:
-                failedURL = httpResponse.url  // Track failed URL to prevent reload loop
+                failedURL = httpResponse.url
                 decisionHandler(.cancel)
                 parent.onLoadStateChange?(.error("Access denied"))
                 writeLog("PortalWebView: 403 Forbidden", logLevel: .error)
 
             case 404:
-                failedURL = httpResponse.url  // Track failed URL to prevent reload loop
+                failedURL = httpResponse.url
                 decisionHandler(.cancel)
                 parent.onLoadStateChange?(.error("Page not found"))
                 writeLog("PortalWebView: 404 Not Found", logLevel: .error)
 
             case 500...599:
-                failedURL = httpResponse.url  // Track failed URL to prevent reload loop
+                failedURL = httpResponse.url
                 decisionHandler(.cancel)
                 parent.onLoadStateChange?(.error("Server error"))
                 writeLog("PortalWebView: Server error \(httpResponse.statusCode)", logLevel: .error)
@@ -349,6 +484,72 @@ struct PortalWebView: NSViewRepresentable {
             default:
                 decisionHandler(.allow)
             }
+        }
+
+        // MARK: - Download Delegate Assignment (Gap 1)
+
+        func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) {
+            download.delegate = self
+        }
+
+        func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
+            download.delegate = self
+        }
+
+        // MARK: - WKDownloadDelegate (Gap 1)
+
+        func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String, completionHandler: @escaping (URL?) -> Void) {
+            let downloadsDir = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
+            var destinationURL = downloadsDir.appendingPathComponent(suggestedFilename)
+
+            // Duplicate avoidance: append (1), (2), etc.
+            if FileManager.default.fileExists(atPath: destinationURL.path) {
+                let nameWithoutExt = destinationURL.deletingPathExtension().lastPathComponent
+                let ext = destinationURL.pathExtension
+                for i in 1...999 {
+                    let newName = ext.isEmpty ? "\(nameWithoutExt) (\(i))" : "\(nameWithoutExt) (\(i)).\(ext)"
+                    let newURL = downloadsDir.appendingPathComponent(newName)
+                    if !FileManager.default.fileExists(atPath: newURL.path) {
+                        destinationURL = newURL
+                        break
+                    }
+                }
+            }
+
+            writeLog("PortalWebView: Download destination: \(destinationURL.path)", logLevel: .info)
+            completionHandler(destinationURL)
+        }
+
+        func downloadDidFinish(_ download: WKDownload) {
+            writeLog("PortalWebView: Download finished", logLevel: .info)
+
+            // Auto-open .mobileconfig files (MDM enrollment profiles)
+            if let url = download.progress.fileURL,
+               url.pathExtension.lowercased() == "mobileconfig" {
+                writeLog("PortalWebView: Auto-opening .mobileconfig: \(url.path)", logLevel: .info)
+                NSWorkspace.shared.open(url)
+            }
+        }
+
+        func download(_ download: WKDownload, didFailWithError error: Error, resumeData: Data?) {
+            writeLog("PortalWebView: Download failed - \(error.localizedDescription)", logLevel: .error)
+        }
+
+        // MARK: - WKUIDelegate (Gap 4 — target="_blank" links)
+
+        func webView(_ webView: WKWebView,
+                     createWebViewWith configuration: WKWebViewConfiguration,
+                     for navigationAction: WKNavigationAction,
+                     windowFeatures: WKWindowFeatures) -> WKWebView? {
+            if let url = navigationAction.request.url {
+                if url.host == portalHost || ssoFlowActive {
+                    // Load portal/SSO URLs in the same webview
+                    webView.load(URLRequest(url: url))
+                } else if openExternalLinksInBrowser {
+                    NSWorkspace.shared.open(url)
+                }
+            }
+            return nil
         }
 
         // Track if we've already reported an error (to prevent overwriting)
@@ -378,6 +579,8 @@ struct PortalWebView: NSViewRepresentable {
                 errorMessage = error.localizedDescription
             }
 
+            ssoFlowActive = false  // Reset SSO on errors
+            hasCompletedInitialLoad = false  // Show loading on retry
             hasReportedError = true
             failedURL = parent.url  // Track failed URL to prevent reload loop
             parent.onLoadStateChange?(.error(errorMessage))
@@ -595,6 +798,10 @@ struct EmbeddedPortalWebView: View {
     let url: URL
     var customHeaders: [String: String]?
     var userAgent: String?
+    var ephemeralSession: Bool = false
+    var errorDetectionPhrases: [String] = []
+    var errorDetectionThreshold: Int = 2
+    var openExternalLinksInBrowser: Bool = true
     var height: CGFloat = 400
 
     @State private var loadState: PortalLoadState = .initializing
@@ -612,6 +819,10 @@ struct EmbeddedPortalWebView: View {
                 authHeaders: nil,
                 customHeaders: customHeaders,
                 userAgent: userAgent,
+                ephemeralSession: ephemeralSession,
+                errorDetectionPhrases: errorDetectionPhrases,
+                errorDetectionThreshold: errorDetectionThreshold,
+                openExternalLinksInBrowser: openExternalLinksInBrowser,
                 onLoadStateChange: { state in
                     withAnimation(.easeInOut(duration: 0.2)) {
                         loadState = state

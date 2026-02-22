@@ -98,11 +98,23 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
 
     /// Determines if presets should skip completed steps on subsequent launches.
     /// Returns `false` (don't skip) when debug mode is active via:
-    /// 1. `DIALOG_DEBUG_MODE=1` environment variable
-    /// 2. `debugMode: true` in config JSON
+    /// 1. `--debug` CLI flag
+    /// 2. `DIALOG_DEBUG_MODE=1` environment variable
+    /// 3. `debugMode: true` in config JSON
+    /// 4. `--inspect-mode` (always fresh start for development/testing)
     /// This allows testing/demo scenarios to always start from step 1 while preserving form values.
     var shouldSkipCompletedSteps: Bool {
-        // Environment variable override takes priority
+        // CLI --debug flag
+        if appvars.debugMode {
+            writeLog("InspectState: Debug mode enabled via --debug CLI flag", logLevel: .info)
+            return false
+        }
+        // Inspect mode always implies debug mode (fresh start every launch)
+        if !appvars.inspectConfigPath.isEmpty {
+            writeLog("InspectState: Debug mode enabled via --inspect-mode (always fresh start)", logLevel: .info)
+            return false
+        }
+        // Environment variable override
         if ProcessInfo.processInfo.environment["DIALOG_DEBUG_MODE"] != nil {
             writeLog("InspectState: Debug mode enabled via DIALOG_DEBUG_MODE environment variable", logLevel: .info)
             return false
@@ -160,7 +172,7 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
     // MARK: - Wallpaper Selection State (Preset6 wallpaper-picker)
     @Published var wallpaperSelection: [String: String] = [:]  // selectionKey → full image path
 
-    // MARK: - Form Input State (Preset9 and other guidance content)
+    // MARK: - Form Input State (guidance content)
     @Published var guidanceFormInputs: [String: GuidanceFormInputState] = [:]
 
     // MARK: - Log Monitor State (Cross-Preset)
@@ -181,6 +193,10 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
     private var sideMessageTimer: Timer?
     private var debouncedUpdater = DebouncedUpdater()
     private let fileSystemCache = FileSystemCache()
+
+    // Plist change detection baselines - stores initial values for "changed" evaluation
+    private var plistBaselines: [String: String?] = [:]  // itemId -> initial plist value (nil = key absent)
+    private var plistBaselinesInitialized: Set<String> = []
 
     // FSEvents priority tracking - prevent timer interference
     private var fsEventsTimestamps: [String: Date] = [:]
@@ -425,36 +441,36 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         // Configure the service
         LogMonitorService.shared.configure(with: config)
 
-        // Subscribe to status changes
+        // Subscribe to status changes — only react to NEW or CHANGED statuses
+        // Without this guard, Combine publishes the entire dictionary on every change,
+        // causing stale "Installing..." statuses to demote already-completed items.
+        var previousStatuses: [String: String] = [:]
         logMonitorCancellable = LogMonitorService.shared.$latestStatuses
             .receive(on: DispatchQueue.main)
             .sink { [weak self] statuses in
                 guard let self = self else { return }
                 self.logMonitorStatuses = statuses
 
-                // Update failed/completed/updating items based on log monitor status
+                // Only process items whose status actually changed
                 for (itemId, status) in statuses {
+                    guard status != previousStatuses[itemId] else { continue }
+                    previousStatuses[itemId] = status
+
                     if status.hasPrefix("Failed") {
-                        // Mark as failed, remove from other states
                         self.failedItems.insert(itemId)
                         self.downloadingItems.remove(itemId)
-                        // Don't remove from completedItems - failure after completion is still failed
                         writeLog("InspectState: Item '\(itemId)' marked as failed from log monitor", logLevel: .info)
                     } else if status == "Completed" {
-                        // Mark as completed (from log monitor, e.g., "Touched bundle")
                         self.completedItems.insert(itemId)
                         self.downloadingItems.remove(itemId)
                         self.failedItems.remove(itemId)
                         writeLog("InspectState: Item '\(itemId)' marked as completed from log monitor", logLevel: .info)
                     } else if self.isUpdatingStatus(status) {
-                        // Updating/reinstalling: move from completed to downloading to show progress
-                        // This handles the case where an app is already installed but being updated
                         if self.completedItems.contains(itemId) {
                             self.completedItems.remove(itemId)
                             self.downloadingItems.insert(itemId)
                             writeLog("InspectState: Item '\(itemId)' moved to updating state from log monitor: \(status)", logLevel: .info)
                         } else if !self.downloadingItems.contains(itemId) {
-                            // Not completed and not downloading - add to downloading
                             self.downloadingItems.insert(itemId)
                             writeLog("InspectState: Item '\(itemId)' marked as downloading from log monitor: \(status)", logLevel: .info)
                         }
@@ -585,35 +601,36 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
     
     private func checkCommandFileForUpdates() {
         let commandFilePath = InspectConstants.commandFilePath
-        
+
         guard FileManager.default.fileExists(atPath: commandFilePath) else {
             return
         }
-        
+
         do {
             let content = try String(contentsOfFile: commandFilePath, encoding: .utf8)
             let currentSize = content.count
-            let lines = content.components(separatedBy: .newlines)
-            let currentLineCount = lines.count
-            
-            // Only process if file has actually changed
-            if currentSize != lastCommandFileSize || currentLineCount != lastProcessedLineCount {
-                
-                // Process only new lines since last check (more efficient)
-                let newLines = Array(lines.dropFirst(max(0, lastProcessedLineCount)))
-                
-                if !newLines.isEmpty {
-                    writeLog("InspectState: Processing \(newLines.count) new command lines", logLevel: .debug)
-                    
-                    for line in newLines where !line.isEmpty {
-                            parseCommandLine(line)
-                    }
+
+            // Only process if file has actually changed (byte-level check)
+            guard currentSize != lastCommandFileSize else { return }
+
+            // Filter empty lines before counting — trailing newlines from echo/append
+            // produce empty strings that caused an off-by-one: lastProcessedLineCount
+            // included the trailing "" element, so dropFirst() would skip real content.
+            let lines = content.components(separatedBy: .newlines).filter { !$0.isEmpty }
+
+            let newLines = Array(lines.dropFirst(max(0, lastProcessedLineCount)))
+
+            if !newLines.isEmpty {
+                writeLog("InspectState: Processing \(newLines.count) new command lines", logLevel: .debug)
+
+                for line in newLines {
+                    parseCommandLine(line)
                 }
-                
-                lastCommandFileSize = currentSize
-                lastProcessedLineCount = currentLineCount
-                writeLog("InspectState: Command file updated (size: \(currentSize), lines: \(currentLineCount))", logLevel: .debug)
             }
+
+            lastCommandFileSize = currentSize
+            lastProcessedLineCount = lines.count
+            writeLog("InspectState: Command file updated (size: \(currentSize), lines: \(lines.count))", logLevel: .debug)
         } catch {
             writeLog("InspectState: Error reading command file: \(error)", logLevel: .error)
         }
@@ -636,30 +653,82 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
             let wasDownloading = downloadingItems.contains(item.id)
             
             // Path checking - stop at first found path
-            let isInstalled = item.paths.first { path in
+            let fileExists = item.paths.first { path in
                 FileManager.default.fileExists(atPath: path)
             } != nil
-            
+
+            // If item has plist validation (plistKey + evaluation), require it to pass
+            // before marking as completed. This prevents items that monitor plist VALUES
+            // (e.g., Dark Mode detection) from completing just because the plist file exists.
+            let isInstalled: Bool
+            if fileExists, let plistKey = item.plistKey, !plistKey.isEmpty, let evaluation = item.evaluation {
+                // Read plist value directly (thread-safe, no actor isolation needed)
+                let plistPath = item.paths.first { $0.hasSuffix(".plist") } ?? item.paths.first ?? ""
+                let expandedPath = (plistPath as NSString).expandingTildeInPath
+                let actualValue: String?
+                if item.useUserDefaults == true {
+                    // UserDefaults-based read (faster for system preferences)
+                    let domain = expandedPath.contains("/") ?
+                        ((expandedPath as NSString).lastPathComponent as NSString).deletingPathExtension :
+                        expandedPath
+                    if domain == ".GlobalPreferences" {
+                        actualValue = UserDefaults.standard.string(forKey: plistKey)
+                    } else {
+                        actualValue = UserDefaults(suiteName: domain)?.string(forKey: plistKey)
+                    }
+                } else if let plist = NSDictionary(contentsOfFile: expandedPath) {
+                    actualValue = plist.value(forKeyPath: plistKey).map { String(describing: $0) }
+                } else {
+                    actualValue = nil
+                }
+                // Evaluate condition
+                switch evaluation {
+                case "changed":
+                    // Change detection: record baseline on first check, complete when value differs
+                    if !plistBaselinesInitialized.contains(item.id) {
+                        plistBaselines[item.id] = actualValue
+                        plistBaselinesInitialized.insert(item.id)
+                        writeLog("InspectState: Plist baseline for \(item.id): \(actualValue ?? "nil")", logLevel: .debug)
+                        isInstalled = false
+                    } else {
+                        let baseline = plistBaselines[item.id] ?? nil
+                        let changed = (baseline != actualValue)
+                        if changed {
+                            writeLog("InspectState: Plist value changed for \(item.id): \(baseline ?? "nil") → \(actualValue ?? "nil")", logLevel: .info)
+                        }
+                        isInstalled = changed
+                    }
+                case "exists":
+                    isInstalled = actualValue != nil && !actualValue!.isEmpty
+                case "boolean":
+                    isInstalled = actualValue == "1" || actualValue?.lowercased() == "true"
+                case "contains":
+                    isInstalled = actualValue?.contains(item.expectedValue ?? "") ?? false
+                case "range":
+                    if let actual = Int(actualValue ?? ""),
+                       let parts = item.expectedValue?.split(separator: "-"),
+                       parts.count == 2,
+                       let lo = Int(parts[0]), let hi = Int(parts[1]) {
+                        isInstalled = actual >= lo && actual <= hi
+                    } else {
+                        isInstalled = false
+                    }
+                default: // "equals"
+                    isInstalled = actualValue == item.expectedValue
+                }
+            } else {
+                isInstalled = fileExists
+            }
+
             // Only check cache if not already installed (for performance optimization)
             let isDownloading = !isInstalled && checkCacheForItem(item)
-            
+
             // Apply changes only if status actually changed
             if isInstalled && !wasCompleted {
                 self.debouncedUpdater.debounce(key: "item-install-\(item.id)") { [weak self] in
                     guard let self = self else { return }
                     self.completedItems.insert(item.id)
                     self.downloadingItems.remove(item.id)
-                    
-                    // Re-validate the completed item if it has plist configuration
-                    if item.plistKey != nil || self.plistSources?.contains(where: { source in
-                        item.paths.contains(source.path)
-                    }) == true {
-                        DispatchQueue.main.async { [weak self] in
-                            guard let self = self else { return }
-                            let isValid = self.validatePlistItem(item)
-                            writeLog("InspectState: Re-validated \(item.displayName) after completion: \(isValid)", logLevel: .info)
-                        }
-                    }
                     
                     // Check if this was the last item to complete
                     if self.completedItems.count == self.items.count {
@@ -703,8 +772,11 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                 
             } else if !isDownloading && !isInstalled && (wasDownloading || wasCompleted) {
                 // Simplified state management - single source of truth
-                // Only reset to pending if cache file doesn't exist
-                if !checkCacheForItem(item) {
+                // Only reset to pending if cache file doesn't exist AND logMonitor
+                // doesn't have an active status for this item (logMonitor is authoritative
+                // for download/install state, especially with itemIds routing)
+                let hasLogMonitorStatus = self.logMonitorStatuses[item.id] != nil
+                if !checkCacheForItem(item) && !hasLogMonitorStatus {
                     self.debouncedUpdater.debounce(key: "item-pending-\(item.id)") { [weak self] in
                         guard let self = self else { return }
                         self.downloadingItems.remove(item.id)
@@ -906,19 +978,64 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
     private func parseCommandLine(_ line: String) {
         // Enhanced parsing to handle multiple command formats from AppInspector
         writeLog("InspectState: Parsing command line: \(line)", logLevel: .debug)
-        
-        // Try to extract index from various command formats
+
+        // Format 2: "item:itemId:status" or "item:itemId:status:message"
+        // This is the modern format that works with both Preset 1 and Preset 5
+        if line.hasPrefix("item:") {
+            let parts = line.dropFirst(5).split(separator: ":", maxSplits: 2)
+            guard parts.count >= 2 else {
+                writeLog("InspectState: Invalid item command format: \(line)", logLevel: .error)
+                return
+            }
+            let itemId = String(parts[0])
+            let status = String(parts[1]).lowercased()
+            let message = parts.count > 2 ? String(parts[2]) : nil
+
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                switch status {
+                case "pending":
+                    self.completedItems.remove(itemId)
+                    self.downloadingItems.remove(itemId)
+                    self.failedItems.remove(itemId)
+                case "downloading", "installing":
+                    self.downloadingItems.insert(itemId)
+                    self.completedItems.remove(itemId)
+                    self.failedItems.remove(itemId)
+                case "success", "completed":
+                    self.completedItems.insert(itemId)
+                    self.downloadingItems.remove(itemId)
+                    self.failedItems.remove(itemId)
+                    // Check if all items now complete — enable button if autoEnableButton is on
+                    if self.completedItems.count == self.items.count {
+                        self.checkAndUpdateButtonState()
+                    }
+                case "failed", "error":
+                    self.failedItems.insert(itemId)
+                    self.downloadingItems.remove(itemId)
+                default:
+                    writeLog("InspectState: Unknown item status '\(status)' for '\(itemId)'", logLevel: .debug)
+                    return
+                }
+                if let message = message {
+                    self.logMonitorStatuses[itemId] = message
+                }
+                writeLog("InspectState: Item '\(itemId)' → \(status)\(message.map { ": \($0)" } ?? "")", logLevel: .info)
+            }
+            return
+        }
+
+        // Format 1: "listitem: index: X, status: Y, statustext: Z" (legacy)
         var appIndex: Int?
         var status: String?
         var statusText: String?
-        
-        // Format 1: "listitem: index: X, status: Y, statustext: Z"
+
         if let indexRange = line.range(of: "index: "),
            let commaRange = line.range(of: ",", range: indexRange.upperBound..<line.endIndex) {
             let indexStr = String(line[indexRange.upperBound..<commaRange.lowerBound])
             appIndex = Int(indexStr)
         }
-        
+
         // Extract status
         if let statusRange = line.range(of: "status: "),
            let nextCommaRange = line.range(of: ",", range: statusRange.upperBound..<line.endIndex) {
@@ -926,20 +1043,20 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         } else if let statusRange = line.range(of: "status: ") {
             status = String(line[statusRange.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
         }
-        
+
         // Extract status text
         if let statusTextRange = line.range(of: "statustext: ") {
             statusText = String(line[statusTextRange.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
         }
-        
+
         // Apply updates based on parsed information
         guard let index = appIndex, index < items.count else {
             writeLog("InspectState: Invalid or missing index in command: \(line)", logLevel: .debug)
             return
         }
-        
+
         let app = items[index]
-        
+
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             if let status = status {
@@ -947,29 +1064,27 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                 case "success":
                     self.completedItems.insert(app.id)
                     self.downloadingItems.remove(app.id)
-                    writeLog("InspectState: \(app.displayName) installation completed (from command)", logLevel: .info)
+                    self.failedItems.remove(app.id)
+                    writeLog("InspectState: \(app.displayName) completed (from command)", logLevel: .info)
                 case "wait":
                     self.downloadingItems.insert(app.id)
                     writeLog("InspectState: \(app.displayName) downloading (from command)", logLevel: .info)
                 case "pending":
                     self.downloadingItems.remove(app.id)
                     self.completedItems.remove(app.id)
+                    self.failedItems.remove(app.id)
                     writeLog("InspectState: \(app.displayName) pending (from command)", logLevel: .info)
+                case "fail", "error":
+                    self.failedItems.insert(app.id)
+                    self.downloadingItems.remove(app.id)
+                    writeLog("InspectState: \(app.displayName) failed (from command)", logLevel: .info)
                 default:
                     writeLog("InspectState: Unknown status '\(status)' for \(app.displayName)", logLevel: .debug)
                 }
             }
-            
-            // Also check for German status texts in case status field is missing
+
             if let statusText = statusText {
-                if statusText.contains("Installed") || statusText.contains("Complete") || statusText.contains("erfolgreich") {
-                    self.completedItems.insert(app.id)
-                    self.downloadingItems.remove(app.id)
-                    writeLog("InspectState: \(app.displayName) installation completed (from status text)", logLevel: .info)
-                } else if statusText.contains("Downloading") || statusText.contains("Installing") || statusText.contains("heruntergeladen") {
-                    self.downloadingItems.insert(app.id)
-                    writeLog("InspectState: \(app.displayName) downloading (from status text)", logLevel: .info)
-                }
+                self.logMonitorStatuses[app.id] = statusText
             }
         }
     }
@@ -1011,7 +1126,9 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         return uiConfiguration.sideMessages[index]
     }
     
-    /// Create a sample configuration file on Desktop when in demo mode
+    /// Create a sample Preset 5 configuration file and print launch instructions.
+    /// Called automatically in `.testData` mode. Writes a 3-step workflow
+    /// (intro → bento → deployment) using only SF Symbols — no external assets needed.
     func createSampleConfiguration() {
         // Only works in test data mode
         guard configurationSource == .testData else {
@@ -1021,47 +1138,196 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
 
         let sampleConfig = """
         {
-            "title": "My Installation",
-            "message": "Installing required applications",
-            "preset": "preset2",
-            "icon": "sf=app.badge.checkmark.fill",
-            "iconBasePath": "/Users/Shared/dialog/icons",
-            "cachePaths": ["/Users/Shared/dialog/icons"],
-            "button1text": "OK",
-            "button2text": "Cancel",
-            "items": [
+            "preset": "5",
+            "width": 1000,
+            "height": 650,
+            "highlightColor": "#007AFF",
+            "introSteps": [
                 {
-                    "id": "app1",
-                    "displayName": "Application 1",
-                    "guiIndex": 0,
-                    "paths": ["/Applications/App1.app"],
-                    "icon": "app1.png"
+                    "id": "welcome",
+                    "stepType": "intro",
+                    "title": "swiftDialog — Inspect Mode",
+                    "subtitle": "A sample configuration to get you started.",
+                    "heroImage": "SF=macbook.gen2",
+                    "heroImageSize": 180,
+                    "content": [
+                        {
+                            "type": "text",
+                            "content": "This is a Preset 5 workflow. Each step uses a different layout — intro, bento grid, and deployment — to demonstrate what's possible."
+                        }
+                    ],
+                    "continueButtonText": "Explore",
+                    "showBackButton": false
                 },
                 {
-                    "id": "app2",
-                    "displayName": "Application 2",
-                    "guiIndex": 1,
-                    "paths": ["/Applications/App2.app"],
-                    "icon": "app2.png"
+                    "id": "presets-overview",
+                    "stepType": "bento",
+                    "bentoLayout": "grid",
+                    "title": "6 Preset Layouts",
+                    "subtitle": "Tap any card to learn more",
+                    "bentoColumns": 3,
+                    "bentoRowHeight": 140,
+                    "bentoGap": 12,
+                    "bentoCells": [
+                        {
+                            "id": "preset1",
+                            "column": 0, "row": 0, "columnSpan": 1, "rowSpan": 1,
+                            "contentType": "icon",
+                            "sfSymbol": "sidebar.leading",
+                            "iconSize": 36,
+                            "title": "Preset 1",
+                            "label": "DEPLOYMENT",
+                            "detailOverlay": {
+                                "title": "Preset 1 — Deployment",
+                                "subtitle": "Sidebar + scrollable item list",
+                                "icon": "sidebar.leading",
+                                "content": [
+                                    { "type": "text", "content": "The classic deployment layout. A sidebar shows a hero icon and overall progress, while the main area lists items with real-time status updates." },
+                                    { "type": "bullets", "items": ["Sidebar with hero icon and progress bar", "Scrollable item list with status indicators", "File-system monitoring via paths array", "Rotating status messages"] },
+                                    { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "1", "buttonStyle": "borderedProminent" }
+                                ]
+                            }
+                        },
+                        {
+                            "id": "preset2",
+                            "column": 1, "row": 0, "columnSpan": 1, "rowSpan": 1,
+                            "contentType": "icon",
+                            "sfSymbol": "rectangle.split.3x1",
+                            "iconSize": 36,
+                            "title": "Preset 2",
+                            "label": "CARDS",
+                            "detailOverlay": {
+                                "title": "Preset 2 — Cards",
+                                "subtitle": "Horizontal card carousel",
+                                "icon": "rectangle.split.3x1",
+                                "content": [
+                                    { "type": "text", "content": "Items displayed as cards in a horizontal carousel. Great for visual app catalogs where each card shows an icon, name, and install status." },
+                                    { "type": "bullets", "items": ["Horizontal scrolling card layout", "Large app icons with status badges", "Progress bar across the top", "Auto-advances on completion"] },
+                                    { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "2", "buttonStyle": "borderedProminent" }
+                                ]
+                            }
+                        },
+                        {
+                            "id": "preset3",
+                            "column": 2, "row": 0, "columnSpan": 1, "rowSpan": 1,
+                            "contentType": "icon",
+                            "sfSymbol": "list.bullet.rectangle",
+                            "iconSize": 36,
+                            "title": "Preset 3",
+                            "label": "COMPACT",
+                            "detailOverlay": {
+                                "title": "Preset 3 — Compact",
+                                "subtitle": "Compact list with gradient background",
+                                "icon": "list.bullet.rectangle",
+                                "content": [
+                                    { "type": "text", "content": "A space-efficient list layout with a gradient background. Ideal for quick installations where you want minimal screen footprint." },
+                                    { "type": "bullets", "items": ["Compact item rows", "Gradient background from brand colors", "Small window footprint", "Clean, minimal design"] },
+                                    { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "3", "buttonStyle": "borderedProminent" }
+                                ]
+                            }
+                        },
+                        {
+                            "id": "preset4",
+                            "column": 0, "row": 1, "columnSpan": 1, "rowSpan": 1,
+                            "contentType": "icon",
+                            "sfSymbol": "bell.badge",
+                            "iconSize": 36,
+                            "title": "Preset 4",
+                            "label": "TOAST",
+                            "detailOverlay": {
+                                "title": "Preset 4 — Toast Installer",
+                                "subtitle": "Compact notification-style installer",
+                                "icon": "bell.badge",
+                                "content": [
+                                    { "type": "text", "content": "A small, unobtrusive toast notification that tracks installations in the corner of the screen. Stays out of the user's way." },
+                                    { "type": "bullets", "items": ["Notification-sized window", "Corner-anchored positioning", "Progress tracking with minimal UI", "Non-intrusive for background installs"] },
+                                    { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "4", "buttonStyle": "borderedProminent" }
+                                ]
+                            }
+                        },
+                        {
+                            "id": "preset5",
+                            "column": 1, "row": 1, "columnSpan": 1, "rowSpan": 1,
+                            "contentType": "icon",
+                            "sfSymbol": "macwindow.on.rectangle",
+                            "iconSize": 36,
+                            "title": "Preset 5",
+                            "label": "UNIFIED",
+                            "detailOverlay": {
+                                "title": "Preset 5 — Unified Portal",
+                                "subtitle": "The most flexible preset (this sample)",
+                                "icon": "macwindow.on.rectangle",
+                                "content": [
+                                    { "type": "text", "content": "A multi-step wizard with 9 step types. Combine intro screens, bento grids, deployment tracking, carousels, guides, and more in a single workflow." },
+                                    { "type": "bullets", "items": ["9 step types: intro, bento, deployment, carousel, guide, showcase, portal, processing, outro", "Linear navigation with back/continue", "55+ content block types", "Branding, forms, compliance checks"] },
+                                    { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "5", "buttonStyle": "borderedProminent" }
+                                ]
+                            }
+                        },
+                        {
+                            "id": "preset6",
+                            "column": 2, "row": 1, "columnSpan": 1, "rowSpan": 1,
+                            "contentType": "icon",
+                            "sfSymbol": "sidebar.squares.leading",
+                            "iconSize": 36,
+                            "title": "Preset 6",
+                            "label": "GUIDANCE",
+                            "detailOverlay": {
+                                "title": "Preset 6 — Modern Sidebar",
+                                "subtitle": "Sidebar navigation with guided content",
+                                "icon": "sidebar.squares.leading",
+                                "content": [
+                                    { "type": "text", "content": "A modern sidebar navigation layout. Users can jump between sections freely rather than following a linear path." },
+                                    { "type": "bullets", "items": ["Sidebar with section navigation", "Non-linear — jump to any section", "Rich guidance content per section", "Great for self-service portals"] },
+                                    { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "6", "buttonStyle": "borderedProminent" }
+                                ]
+                            }
+                        }
+                    ],
+                    "continueButtonText": "Continue",
+                    "backButtonText": "Back"
+                },
+                {
+                    "id": "apps",
+                    "stepType": "deployment",
+                    "title": "App Installation",
+                    "subtitle": "Simulated deployment step with progress tracking.",
+                    "heroImage": "SF=arrow.down.app.fill",
+                    "items": [
+                        { "id": "safari", "displayName": "Safari", "guiIndex": 0, "icon": "/Applications/Safari.app", "paths": ["/Applications/Safari.app"] },
+                        { "id": "calculator", "displayName": "Calculator", "guiIndex": 1, "icon": "/System/Applications/Calculator.app", "paths": ["/System/Applications/Calculator.app"] },
+                        { "id": "textedit", "displayName": "TextEdit", "guiIndex": 2, "icon": "/System/Applications/TextEdit.app", "paths": ["/System/Applications/TextEdit.app"] }
+                    ],
+                    "continueButtonText": "Finish",
+                    "showBackButton": true
                 }
             ]
         }
         """
 
-        let configPath = "/Users/Shared/inspect-config-sample.json"
+        let configPath = NSTemporaryDirectory() + "inspect-config-sample.json"
+        let divider = String(repeating: "━", count: 66)
 
         do {
             try sampleConfig.write(toFile: configPath, atomically: true, encoding: .utf8)
             writeLog("InspectState: Sample configuration created at: \(configPath)", logLevel: .info)
 
-            // Show instructions in terminal
-            print("\nSample configuration created at: \(configPath)")
-            print("\nTo use this configuration:")
-            print("1. Edit the file to match your needs")
-            print("2. Place icon files in /Users/Shared/dialog/icons/ (PNG format recommended)")
-            print("3. Export the environment variable:")
-            print("   export DIALOG_INSPECT_CONFIG=\"\(configPath)\"")
-            print("4. Run swiftDialog with --inspect flag")
+            print("")
+            print(divider)
+            print("  Sample Configuration Created")
+            print(divider)
+            print("")
+            print("  ✓ Preset: 5 (unified)")
+            print("  ✓ Steps:  3 (intro → bento → deployment)")
+            print("  ✓ File:   \(configPath)")
+            print("")
+            print("  Launch it:")
+            print("  → dialogcli --inspect-config \"\(configPath)\" --inspect-mode")
+            print("")
+            print("  Or copy and customize:")
+            print("  → cp \"\(configPath)\" ~/Desktop/my-config.json")
+            print("")
+            print(divider)
             print("")
 
             // Exit with special code to indicate config was created
@@ -2174,7 +2440,7 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         sideMessageTimer?.invalidate()
         sideMessageTimer = nil
 
-        // Stop all plist monitoring 
+        // Stop all plist monitoring
         stopAllPlistMonitors()
         
         // Stop DispatchSource monitoring

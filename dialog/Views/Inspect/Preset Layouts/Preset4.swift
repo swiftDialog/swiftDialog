@@ -1,797 +1,339 @@
 //
-//  Preset4View.swift
+//  Preset4.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 19/07/2025
+//  Created by Henry Stamerjohann, Declarative IT GmbH
 //
-//  File inspection layout for common type of file/folder/setting checks
-//  Use cases: App presence, Font installation, template files, configs settings
+//  Preset4: Compact Toast Installer
+//  Minimal ~550×180 window showing one item at a time.
+//  Supports intro → items → summary flow, all in the same compact window.
+//
+//  Progress modes:
+//    "shared"  — Single progress bar showing "X of Y completed" (default)
+//    "perItem" — Indeterminate progress per item, auto-advances on completion
 //
 
 import SwiftUI
 
 struct Preset4View: View, InspectLayoutProtocol {
     @ObservedObject var inspectState: InspectState
-    @State private var showingDetailPopover = false
-    @State private var showDetailOverlay = false
-    @State private var showItemDetailOverlay = false
-    @State private var selectedItem: InspectConfig.ItemConfig?
-    @State private var selectedItemForDetail: InspectConfig.ItemConfig?
     @StateObject private var iconCache = PresetIconCache()
 
-    // scaleFactor is now provided by InspectLayoutProtocol extension
+    @State private var currentPhase: PresetPhase = .main
+    @State private var currentItemIndex: Int = 0
 
-    // MARK: - Trigger File Configuration
+    // MARK: - Derived properties
 
-    /// Final button trigger file path (Preset4 only outputs final triggers)
-    private var finalTriggerFilePath: String {
-        if let customPath = inspectState.config?.triggerFile {
-            let url = URL(fileURLWithPath: customPath)
-            let ext = url.pathExtension
-            let base = url.deletingPathExtension().path
-            return ext.isEmpty ? "\(customPath)_final" : "\(base)_final.\(ext)"
-        }
-        if appArguments.inspectMode.present {
-            return "/tmp/swiftdialog_dev_preset4_final.trigger"
-        }
-        return "/tmp/swiftdialog_\(ProcessInfo.processInfo.processIdentifier)_preset4_final.trigger"
+    private var primaryColor: Color {
+        Color(hex: inspectState.uiConfiguration.highlightColor)
     }
 
+    private var progressMode: String {
+        inspectState.config?.progressMode ?? "shared"
+    }
+
+    private var basePath: String? {
+        inspectState.uiConfiguration.iconBasePath
+    }
+
+    private var currentItem: InspectConfig.ItemConfig? {
+        guard !inspectState.items.isEmpty,
+              currentItemIndex >= 0,
+              currentItemIndex < inspectState.items.count else { return nil }
+        return inspectState.items[currentItemIndex]
+    }
+
+    // MARK: - Body
+
     var body: some View {
-        VStack(spacing: 0) {
-            // Simple Header
-            headerSection
-            
-            // Main Content Area
-            GeometryReader { geometry in
-                ScrollView {
-                    VStack(spacing: 20 * scaleFactor) {
-                        // Compact Status Summary
-                        simpleStatusSummary
-                            .padding(.top, 5 * scaleFactor)
-                        
-                        // Clean Grid with improved layout
-                        simpleInspectionGrid(geometry: geometry)
-                        
-                        // Simple Buttons with proper spacing
-                        buttonArea()
-                            .padding(.top, 10 * scaleFactor)
-                    }
-                    .padding(.horizontal, 30 * scaleFactor)
-                    .padding(.vertical, 20 * scaleFactor)
-                }
+        ZStack {
+            Color(NSColor.windowBackgroundColor)
+
+            switch currentPhase {
+            case .intro:
+                compactIntroView
+            case .main:
+                mainPhaseView
+            case .summary:
+                compactSummaryView
             }
         }
-        .background(customBackground())
+        .ignoresSafeArea()
         .onAppear {
-            // Icons are cached on-demand via lazy loading
             iconCache.cacheMainIcon(for: inspectState)
+            iconCache.cacheItemIcons(for: inspectState)
+
+            if inspectState.config?.introScreen != nil {
+                currentPhase = .intro
+            }
         }
         .onChange(of: inspectState.completedItems) { _, _ in
-            // Re-validate when items complete
-            inspectState.validateAllItems()
+            advanceToNextItem()
+            checkAutoTransitionToSummary()
         }
-        .onChange(of: inspectState.downloadingItems) { _, _ in
-            // Re-validate when download states change
-            inspectState.validateAllItems()
-        }
-        .overlay {
-            // Help button (positioned according to config)
-            // Supports action types: overlay (default), url, custom
-            if let helpButtonConfig = inspectState.config?.helpButton,
-               helpButtonConfig.enabled ?? true {
-                PositionedHelpButton(
-                    config: helpButtonConfig,
-                    action: {
-                        handleHelpButtonAction(
-                            config: helpButtonConfig,
-                            showOverlay: $showDetailOverlay
-                        )
-                    },
-                    padding: 16
-                )
+        .onChange(of: currentPhase) { _, newPhase in
+            if newPhase == .main {
+                checkAutoTransitionToSummary()
             }
         }
-        .detailOverlay(
-            inspectState: inspectState,
-            isPresented: $showDetailOverlay,
-            config: inspectState.config?.detailOverlay
-        )
-        .itemDetailOverlay(
-            inspectState: inspectState,
-            isPresented: $showItemDetailOverlay,
-            item: selectedItemForDetail
-        )
-    }
-
-    // MARK: - Icon Resolution Methods
-
-    // Icon caching now handled by PresetIconCache
-
-    private func getMainIconPath() -> String {
-        return iconCache.getMainIconPath(for: inspectState)
-    }
-
-    private func getItemIconPath(for item: InspectConfig.ItemConfig) -> String {
-        return iconCache.getItemIconPath(for: item, state: inspectState)
-    }
-    
-    // MARK: - Header Section
-    
-    private var headerSection: some View {
-        VStack(spacing: 8 * scaleFactor) {
-            HStack(spacing: 15 * scaleFactor) {
-                // Compact logo
-                IconView(
-                    image: getMainIconPath(),
-                    overlay: iconCache.getOverlayIconPath(for: inspectState),
-                    defaultImage: "apps.iphone.badge.plus",
-                    defaultColour: "accent"
-                )
-                .frame(width: 40 * scaleFactor, height: 40 * scaleFactor)
-                .onAppear { iconCache.cacheMainIcon(for: inspectState) }
-
-                // Compact title only
-                Text(inspectState.uiConfiguration.windowTitle)
-                    .font(.title2.weight(.semibold))
-                    .foregroundStyle(.primary)
-                
-                Spacer()
-            }
-            
-            // Message if available
-            if let message = inspectState.uiConfiguration.subtitleMessage, !message.isEmpty {
-                Text(message)
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-        }
-        .padding(.horizontal, 40 * scaleFactor)
-        .padding(.vertical, 15 * scaleFactor)
-        .background(.regularMaterial)
-        .overlay(
-            Rectangle()
-                .frame(height: 1)
-                .foregroundStyle(.secondary.opacity(0.2)),
-            alignment: .bottom
-        )
-    }
-    
-    // MARK: - Status Summary
-    
-    private var simpleStatusSummary: some View {
-        let totalItems = inspectState.items.count
-        let presentItems = inspectState.plistValidationResults.values.filter { $0 }.count
-        let missingItems = totalItems - presentItems
-        let progress = totalItems == 0 ? 0.0 : Double(presentItems) / Double(totalItems)
-        
-        return HStack(spacing: 20 * scaleFactor) {
-            // Compact progress info
-            HStack(spacing: 12 * scaleFactor) {
-                Text("\(presentItems)/\(totalItems)")
-                    .font(.title3.weight(.bold))
-                    .foregroundStyle(.primary)
-                
-                ProgressView(value: progress)
-                    .progressViewStyle(LinearProgressViewStyle(tint: inspectState.colorThresholds.getColor(for: progress)))
-                    .frame(width: 120 * scaleFactor, height: 6 * scaleFactor)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 3 * scaleFactor)
-                            .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                    )
-            }
-            
-            // Compact status counts
-            HStack(spacing: 15 * scaleFactor) {
-                CompactStatusCount(count: presentItems, label: inspectState.colorThresholds.getLabel(for: 1.0), color: inspectState.colorThresholds.getColor(for: 1.0), scaleFactor: scaleFactor)
-                CompactStatusCount(count: missingItems, label: inspectState.colorThresholds.getLabel(for: 0.0), color: inspectState.colorThresholds.getColor(for: 0.0), scaleFactor: scaleFactor)
-            }
-            
-            Spacer()
-            
-            // Inspection Details button
-            Button("Details...") {
-                showingDetailPopover = true
-            }
-            .buttonStyle(.plain)
-            .font(.caption)
-            .foregroundStyle(Color.accentColor)
-            .popover(isPresented: $showingDetailPopover) {
-                InspectionDetailPopover(
-                    items: inspectState.items,
-                    validationResults: inspectState.plistValidationResults,
-                    downloadingItems: inspectState.downloadingItems,
-                    scaleFactor: scaleFactor,
-                    hideSystemDetails: inspectState.config?.hideSystemDetails ?? false,
-                    inspectState: inspectState
-                )
-            }
-        }
-        .padding(.horizontal, 20 * scaleFactor)
-        .padding(.vertical, 12 * scaleFactor)
-        .background(.thickMaterial)
-        .clipShape(.rect(cornerRadius: 8 * scaleFactor))
-    }
-    
-    // MARK: - Simple Grid
-    
-    private func simpleInspectionGrid(geometry: GeometryProxy) -> some View {
-        let columns = calculateColumns(for: geometry.size.width)
-        let showInfoButtons = inspectState.config?.detailOverlay != nil
-
-        return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 18 * scaleFactor), count: columns),
-                         spacing: 18 * scaleFactor) {
-            ForEach(inspectState.items, id: \.id) { item in
-                SimpleInspectionTile(
-                    title: item.displayName,
-                    icon: getItemIconPath(for: item),
-                    isPresent: inspectState.plistValidationResults[item.id] ?? false,
-                    isChecking: inspectState.downloadingItems.contains(item.id),
-                    scaleFactor: scaleFactor,
-                    colorThresholds: inspectState.colorThresholds,
-                    item: item,
-                    onInfoTapped: showInfoButtons || item.itemOverlay != nil ? {
-                        selectedItemForDetail = item
-                        showItemDetailOverlay = true
-                    } : nil
-                )
-            }
-        }
-    }
-    
-    // MARK: - Helper Functions
-    
-    private func calculateColumns(for width: CGFloat) -> Int {
-        let minTileWidth: CGFloat = 220 * scaleFactor
-        let spacing: CGFloat = 18 * scaleFactor
-        let padding: CGFloat = 80 * scaleFactor // Total horizontal padding
-        
-        let availableWidth = width - padding
-        let maxColumns = Int((availableWidth + spacing) / (minTileWidth + spacing))
-        
-        return max(2, min(maxColumns, 5)) // 2-5 columns for better balance
-    }
-    
-    // MARK: - Background Customization
-    
-    @ViewBuilder
-    private func customBackground() -> some View {
-        GeometryReader { geometry in
-            ZStack {
-                // Base background
-                Color(NSColor.controlBackgroundColor)
-                
-                // Custom background from config
-                if let config = inspectState.config {
-                    // Gradient background
-                    if let gradientColors = config.gradientColors, gradientColors.count >= 2 {
-                        LinearGradient(
-                            colors: gradientColors.compactMap { Color(hex: $0) },
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                        .opacity(config.backgroundOpacity ?? 1.0)
-                    }
-                    // Solid color background
-                    else if let backgroundColor = config.backgroundColor {
-                        Color(hex: backgroundColor)
-                            .opacity(config.backgroundOpacity ?? 1.0)
-                    }
-                    // Background image
-                    else if let backgroundImage = config.backgroundImage {
-                        if FileManager.default.fileExists(atPath: backgroundImage) {
-                            if let nsImage = NSImage(contentsOfFile: backgroundImage) {
-                                Image(nsImage: nsImage)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(width: geometry.size.width, height: geometry.size.height)
-                                    .clipped()
-                                    .opacity(config.backgroundOpacity ?? 1.0)
-                            }
-                        }
-                    }
+        .onChange(of: inspectState.downloadingItems) { _, newDownloading in
+            if let nextDownloadingIndex = inspectState.items.firstIndex(where: { newDownloading.contains($0.id) && !inspectState.completedItems.contains($0.id) }) {
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    currentItemIndex = nextDownloadingIndex
                 }
             }
         }
-        .ignoresSafeArea(.all)
-    }
-    
-    // MARK: - Button Area
-    
-    private func buttonArea() -> some View {
-        let finalButtonText = inspectState.config?.finalButtonText ??
-                             inspectState.config?.button1Text ??
-                             (inspectState.buttonConfiguration.button1Text.isEmpty ? "Continue" : inspectState.buttonConfiguration.button1Text)
-
-        return HStack(spacing: 12 * scaleFactor) {
-            Button(finalButtonText) {
-                handleFinalButtonPress(buttonText: finalButtonText)
-            }
-            .keyboardShortcut(.defaultAction)
-            .buttonStyle(.borderedProminent)
-
-            Button("Show Details") {
-                showingDetailPopover = true
-            }
-            .buttonStyle(.bordered)
-        }
     }
 
-    /// Handle final button press with safe callback mechanisms
-    private func handleFinalButtonPress(buttonText: String) {
-        writeLog("Preset4: User clicked final button (\(buttonText))", logLevel: .info)
+    // MARK: - Main Phase
 
-        // Write to interaction log
-        let logPath = "/tmp/preset4_interaction.log"
-        let logEntry = "final_button:clicked:\(buttonText)\n"
-        if let data = logEntry.data(using: .utf8) {
-            if FileManager.default.fileExists(atPath: logPath) {
-                if let fileHandle = try? FileHandle(forWritingTo: URL(fileURLWithPath: logPath)) {
-                    _ = try? fileHandle.seekToEnd()
-                    _ = try? fileHandle.write(contentsOf: data)
-                    try? fileHandle.close()
-                }
-            } else {
-                try? data.write(to: URL(fileURLWithPath: logPath))
-            }
-        }
+    private var mainPhaseView: some View {
+        HStack(spacing: 14) {
+            cachedIcon(
+                for: currentItem.flatMap { iconCache.getItemIconPath(for: $0, state: inspectState) } ?? "",
+                fallbackSymbol: "app.fill"
+            )
 
-        // Create trigger file
-        let timestamp = ISO8601DateFormatter().string(from: Date())
-        let triggerContent = "button_text=\(buttonText)\ntimestamp=\(timestamp)\nstatus=completed\n"
-        if let data = triggerContent.data(using: .utf8) {
-            try? data.write(to: URL(fileURLWithPath: finalTriggerFilePath), options: .atomic)
-        }
+            VStack(alignment: .leading, spacing: 4) {
+                Text(currentItem?.displayName ?? inspectState.config?.title ?? "Installing...")
+                    .font(.system(size: 14, weight: .semibold))
+                    .lineLimit(1)
 
-        // Write plist
-        let plistPath = "/tmp/preset4_interaction.plist"
-        let plistData: [String: Any] = [
-            "finalButtonPressed": true,
-            "buttonText": buttonText,
-            "timestamp": timestamp
-        ]
-        if let data = try? PropertyListSerialization.data(fromPropertyList: plistData, format: .xml, options: 0) {
-            try? data.write(to: URL(fileURLWithPath: plistPath), options: .atomic)
-        }
-
-        usleep(100000) // 100ms delay
-        exit(0)
-    }
-    
-    // MARK: - Validation Results Caching
-    
-    
-    // MARK: - Plist Compliance Checking (Legacy - kept for reference)
-    
-    private func checkItemCompliance(item: InspectConfig.ItemConfig) -> Bool {
-        // Use unified validation service for all items
-        return inspectState.validatePlistItem(item)
-    }
-}
-
-// MARK: - Compact Status Count Component
-
-struct CompactStatusCount: View {
-    let count: Int
-    let label: String
-    let color: Color
-    let scaleFactor: CGFloat
-    
-    var body: some View {
-        HStack(spacing: 4 * scaleFactor) {
-            Circle()
-                .fill(color)
-                .frame(width: 6 * scaleFactor, height: 6 * scaleFactor)
-            
-            Text("\(count)")
-                .font(.caption.weight(.bold))
-                .foregroundStyle(color)
-        }
-    }
-}
-
-// MARK: - Simple Inspection Tile (Horizontal Layout)
-
-struct SimpleInspectionTile: View {
-    let title: String
-    let icon: String?
-    let isPresent: Bool
-    let isChecking: Bool
-    let scaleFactor: CGFloat
-    let colorThresholds: InspectConfig.ColorThresholds
-    let item: InspectConfig.ItemConfig? // Add item context for plist validation
-    let onInfoTapped: (() -> Void)?
-
-    var body: some View {
-        HStack(spacing: 15 * scaleFactor) {
-            // Item icon (from config)
-            Group {
-                IconView(image: icon ?? "", defaultImage: getSystemIcon(for: title), defaultColour: "accent")
-            }
-            .frame(width: 48 * scaleFactor, height: 48 * scaleFactor)
-            .id("icon-\(item?.id ?? title)") // Stable ID to prevent recreation
-
-            // Content with status - fixed height container
-            VStack(alignment: .leading, spacing: 4 * scaleFactor) {
-                HStack(spacing: 4) {
-                    Text(title)
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(.primary)
-                        .multilineTextAlignment(.leading)
-                        .lineLimit(2)
-
-                    // Info button (only show if callback is provided)
-                    if let onInfoTapped = onInfoTapped, let item = item {
-                        ItemInfoButton(item: item, action: onInfoTapped, size: 12 * scaleFactor)
-                    }
-                }
-                .frame(minHeight: 20 * scaleFactor, alignment: .top)
-
-                // Status text instead of icon overlay
-                Text(getStatusText())
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(getStatusColor())
-                    .frame(minHeight: 14 * scaleFactor, alignment: .top)
-            }
-            .frame(minHeight: 40 * scaleFactor, alignment: .top)
-
-            Spacer()
-            
-            // Status indicator (smaller, on the right)
-            Group {
-                if isChecking {
+                if progressMode == "perItem" {
                     ProgressView()
-                        .scaleEffect(0.7)
-                        .frame(width: 16 * scaleFactor, height: 16 * scaleFactor)
-                } else if isPresent {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.body)
-                        .foregroundStyle(colorThresholds.getColor(for: 1.0))
+                        .progressViewStyle(.linear)
+                        .tint(primaryColor)
                 } else {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.body)
-                        .foregroundStyle(colorThresholds.getColor(for: 0.0))
+                    let total = max(inspectState.items.count, 1)
+                    let completed = inspectState.completedItems.count
+                    ProgressView(value: Double(completed), total: Double(total))
+                        .progressViewStyle(.linear)
+                        .tint(primaryColor)
+                        .animation(.easeInOut(duration: 0.3), value: completed)
+                }
+
+                if let item = currentItem {
+                    Text(getItemStatus(for: item))
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                } else if progressMode == "shared" {
+                    Text("\(inspectState.completedItems.count) of \(inspectState.items.count) completed")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
                 }
             }
-            .frame(width: 20 * scaleFactor, height: 20 * scaleFactor)
-        }
-        .frame(minHeight: 72 * scaleFactor) // Fixed minimum height for all cards
-        .padding(.horizontal, 18 * scaleFactor)
-        .padding(.vertical, 16 * scaleFactor)
-        .background(Color(NSColor.controlBackgroundColor))
-        .overlay(
-            RoundedRectangle(cornerRadius: 8 * scaleFactor)
-                .stroke(isPresent ? colorThresholds.getColor(for: 1.0) : 
-                       isChecking ? Color.blue : 
-                       colorThresholds.getColor(for: 0.0), 
-                       lineWidth: 2)
-        )
-        .clipShape(.rect(cornerRadius: 8 * scaleFactor))
-        .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
-    }
-    
-    private func getSystemIcon(for title: String) -> String {
-        let lowercaseTitle = title.lowercased()
-        
-        // Font-related
-        if lowercaseTitle.contains("font") || lowercaseTitle.contains("arial") || lowercaseTitle.contains("helvetica") {
-            return "textformat"
-        }
-        // Template-related  
-        if lowercaseTitle.contains("template") || lowercaseTitle.contains("powerpoint") {
-            return "doc.richtext"
-        }
-        // Security-related
-        if lowercaseTitle.contains("security") || lowercaseTitle.contains("policy") {
-            return "shield.checkered"
-        }
-        // VPN-related
-        if lowercaseTitle.contains("vpn") || lowercaseTitle.contains("network") {
-            return "network"
-        }
-        // Antivirus-related
-        if lowercaseTitle.contains("antivirus") || lowercaseTitle.contains("virus") {
-            return "checkmark.shield"
-        }
-        // Backup-related
-        if lowercaseTitle.contains("backup") {
-            return "externaldrive"
-        }
-        // Certificate-related
-        if lowercaseTitle.contains("certificate") || lowercaseTitle.contains("keychain") {
-            return "key"
-        }
-        // Printer-related
-        if lowercaseTitle.contains("print") {
-            return "printer"
-        }
-        // Default
-        return "gear"
-    }
-    
-    private func getStatusText() -> String {
-        if isChecking {
-            return "Checking..."
-        } else if let item = item, item.plistKey != nil {
-            // For plist validation, use compliance terminology
-            return isPresent ? (colorThresholds.excellentLabel ?? "Compliant") : (colorThresholds.criticalLabel ?? "Non-Compliant")
-        } else {
-            // For file existence, use present/missing terminology
-            return isPresent ? "Present" : "Missing"
-        }
-    }
-    
-    private func getStatusColor() -> Color {
-        if isChecking {
-            return .blue
-        } else if isPresent {
-            return colorThresholds.getColor(for: 1.0)
-        } else {
-            return colorThresholds.getColor(for: 0.0)
-        }
-    }
-}
 
-// MARK: - Inspection Detail Popover
+            Spacer()
+        }
+        .padding(.horizontal, 20)
+    }
 
-struct InspectionDetailPopover: View {
-    let items: [InspectConfig.ItemConfig]
-    let validationResults: [String: Bool]
-    let downloadingItems: Set<String>
-    let scaleFactor: CGFloat
-    let hideSystemDetails: Bool
-    let inspectState: InspectState
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            // Header
-            HStack {
-                Text("Inspection Details")
-                    .font(.title2.weight(.semibold))
-                    .foregroundStyle(.primary)
-                Spacer()
-                Text("\(validationResults.values.filter { $0 }.count)/\(items.count) Present")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.secondary)
+    // MARK: - Compact Intro Phase
+
+    private var compactIntroView: some View {
+        HStack(spacing: 14) {
+            let heroPath = inspectState.config?.introScreen?.heroImage
+                ?? inspectState.uiConfiguration.iconPath ?? ""
+            toastIcon(path: heroPath, fallbackSymbol: "info.circle.fill")
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(inspectState.config?.introScreen?.title ?? inspectState.config?.title ?? "Welcome")
+                    .font(.system(size: 14, weight: .semibold))
+                    .lineLimit(1)
+
+                if let subtitle = inspectState.config?.introScreen?.subtitle {
+                    Text(subtitle)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
             }
-            
-            Divider()
-            
-            // Scrollable list of items
-            ScrollView {
-                LazyVStack(spacing: 12) {
-                    ForEach(items, id: \.id) { item in
-                        InspectionDetailItem(
-                            item: item,
-                            isPresent: validationResults[item.id] ?? false,
-                            isChecking: downloadingItems.contains(item.id),
-                            scaleFactor: scaleFactor,
-                            hideSystemDetails: hideSystemDetails,
-                            inspectState: inspectState
-                        )
+
+            Spacer()
+
+            HStack(spacing: 8) {
+                // Defer menu — shared deferral pattern (exit code 10, result file, ignitecli env)
+                if inspectState.buttonConfiguration.button2Visible || isDeferralEnabled(config: inspectState.config) {
+                    DeferralMenuView(
+                        config: inspectState.config,
+                        accentColor: primaryColor,
+                        buttonText: inspectState.buttonConfiguration.button2Text.isEmpty
+                            ? nil : inspectState.buttonConfiguration.button2Text,
+                        style: .compact
+                    )
+                }
+
+                Button(inspectState.config?.introScreen?.buttonText ?? "Continue") {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        currentPhase = .main
                     }
                 }
-                .padding(.vertical, 8)
+                .buttonStyle(.borderedProminent)
+                .tint(primaryColor)
+                .controlSize(.small)
             }
-            .frame(maxHeight: 400)
         }
-        .padding(20)
-        .frame(width: 500)
+        .padding(.horizontal, 20)
     }
-}
 
-// MARK: - Individual Detail Item
+    // MARK: - Compact Summary Phase
 
-struct InspectionDetailItem: View {
-    let item: InspectConfig.ItemConfig
-    let isPresent: Bool
-    let isChecking: Bool
-    let scaleFactor: CGFloat
-    let hideSystemDetails: Bool
-    let inspectState: InspectState
-    @State private var showFullPaths = false
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Item header with status
-            HStack {
-                // Status indicator
-                Circle()
-                    .fill(isPresent ? inspectState.colorThresholds.getColor(for: 1.0) : isChecking ? Color.blue : inspectState.colorThresholds.getColor(for: 0.0))
-                    .frame(width: 8, height: 8)
-                
-                // Item name
-                Text(item.displayName)
-                    .font(.headline.weight(.medium))
-                    .foregroundStyle(.primary)
-                
-                Spacer()
-                
-                // Status text
-                Text(getStatusText())
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(getStatusColor())
-            }
-            
-            // Paths section (conditionally shown)
-            if !hideSystemDetails {
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack {
-                        Text("Checked Paths:")
-                            .font(.subheadline.weight(.medium))
+    private var compactSummaryView: some View {
+        HStack(spacing: 14) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 36))
+                .foregroundStyle(.green)
+                .frame(width: 48, height: 48)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(inspectState.config?.summaryScreen?.title ?? "Installation Complete")
+                    .font(.system(size: 14, weight: .semibold))
+                    .lineLimit(1)
+
+                if let subtitle = inspectState.config?.summaryScreen?.subtitle {
+                    Text(subtitle)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                } else {
+                    let failedCount = inspectState.failedItems.count
+                    if failedCount > 0 {
+                        Text("\(inspectState.completedItems.count) installed, \(failedCount) failed")
+                            .font(.system(size: 11))
                             .foregroundStyle(.secondary)
-                        
-                        Spacer()
-                        
-                        if item.paths.count > 1 {
-                            Button(showFullPaths ? "Show Less" : "Show All (\(item.paths.count))") {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    showFullPaths.toggle()
-                                }
-                            }
-                            .buttonStyle(.plain)
-                            .font(.caption)
-                            .foregroundStyle(Color.accentColor)
-                        }
-                    }
-                    
-                    let pathsToShow = showFullPaths ? item.paths : Array(item.paths.prefix(1))
-                    
-                    ForEach(Array(pathsToShow.enumerated()), id: \.offset) { _, path in
-                        HStack(alignment: .top, spacing: 8) {
-                            // Path indicator
-                            Circle()
-                                .fill(Color.secondary.opacity(0.5))
-                                .frame(width: 4, height: 4)
-                                .padding(.top, 6)
-                            
-                            // Path text with word wrapping
-                            Text(path)
-                                .font(.system(.caption, design: .monospaced))
-                                .foregroundStyle(.secondary)
-                                .textSelection(.enabled)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .lineLimit(showFullPaths ? nil : 2)
-                        }
-                    }
-                    
-                    if !showFullPaths && item.paths.count > 1 {
-                        HStack(spacing: 8) {
-                            Circle()
-                                .fill(Color.secondary.opacity(0.3))
-                                .frame(width: 4, height: 4)
-                                .padding(.top, 6)
-                            
-                            Text("... and \(item.paths.count - 1) more path\(item.paths.count - 1 == 1 ? "" : "s")")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .italic()
-                        }
+                    } else {
+                        Text("\(inspectState.completedItems.count) items installed successfully")
+                            .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
                     }
                 }
-                .padding(.leading, 12)
-            } else {
-                // Show generic info when paths are hidden
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Path Details Hidden")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(.secondary)
-                    
-                    Text("Checking \(item.paths.count) configured location\(item.paths.count == 1 ? "" : "s")")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .italic()
-                }
-                .padding(.leading, 12)
             }
-            
-            // NEW: Plist Key and Value Information (shown when plist validation is configured)
-            if let plistKey = item.plistKey {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Plist Validation:")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(.secondary)
-                    
-                    // Plist key
-                    HStack(alignment: .top, spacing: 8) {
-                        Circle()
-                            .fill(Color.blue.opacity(0.5))
-                            .frame(width: 4, height: 4)
-                            .padding(.top, 6)
-                        
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Key:")
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(.secondary)
-                            Text(plistKey)
-                                .font(.system(.caption, design: .monospaced))
-                                .foregroundStyle(.primary)
-                                .textSelection(.enabled)
-                        }
-                    }
-                    
-                    // Expected value (if configured)
-                    if let expectedValue = item.expectedValue {
-                        HStack(alignment: .top, spacing: 8) {
-                            Circle()
-                                .fill(Color.orange.opacity(0.5))
-                                .frame(width: 4, height: 4)
-                                .padding(.top, 6)
-                            
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Expected:")
-                                    .font(.caption.weight(.medium))
-                                    .foregroundStyle(.secondary)
-                                Text(expectedValue)
-                                    .font(.system(.caption, design: .monospaced))
-                                    .foregroundStyle(.orange)
-                                    .textSelection(.enabled)
-                            }
-                        }
-                    }
-                    
-                    // Actual value (from plist)
-                    HStack(alignment: .top, spacing: 8) {
-                        Circle()
-                            .fill(inspectState.colorThresholds.getValidationColor(isValid: isPresent))
-                            .frame(width: 4, height: 4)
-                            .padding(.top, 6)
-                        
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Actual:")
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(.secondary)
-                            
-                            if let actualValue = inspectState.getPlistValueForDisplay(item: item) {
-                                Text(actualValue)
-                                    .font(.system(.caption, design: .monospaced))
-                                    .foregroundStyle(isPresent ? inspectState.colorThresholds.getColor(for: 1.0) : inspectState.colorThresholds.getColor(for: 0.0))
-                                    .textSelection(.enabled)
-                            } else {
-                                Text("Key not found or file missing")
-                                    .font(.caption)
-                                    .foregroundStyle(inspectState.colorThresholds.getColor(for: 0.0))
-                                    .italic()
-                            }
-                        }
-                    }
-                }
-                .padding(.leading, 12)
+
+            Spacer()
+
+            Button(inspectState.config?.summaryScreen?.buttonText ?? "Close") {
+                writeLog("Preset4View: Summary closed", logLevel: .info)
+                exit(0)
             }
+            .buttonStyle(.borderedProminent)
+            .tint(primaryColor)
+            .controlSize(.small)
         }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color(NSColor.controlBackgroundColor))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(isPresent ? inspectState.colorThresholds.getColor(for: 1.0).opacity(0.3) : 
-                       isChecking ? Color.blue.opacity(0.3) : 
-                       inspectState.colorThresholds.getColor(for: 0.0).opacity(0.3), 
-                       lineWidth: 1)
-        )
+        .padding(.horizontal, 20)
     }
-    
-    private func getStatusText() -> String {
-        if isChecking {
-            return "Checking..."
-        } else if isPresent {
-            return "Present"
+
+    // MARK: - Icon helpers
+
+    /// Synchronous icon from already-cached path — no loading spinner
+    @ViewBuilder
+    private func cachedIcon(for path: String, fallbackSymbol: String) -> some View {
+        let resolvedPath = resolvePath(path)
+        if let resolvedPath, let nsImage = NSImage(contentsOfFile: resolvedPath) {
+            Image(nsImage: nsImage)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 48, height: 48)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
         } else {
-            return "Missing"
+            Image(systemName: fallbackSymbol)
+                .font(.system(size: 28))
+                .foregroundStyle(primaryColor.opacity(0.6))
+                .frame(width: 48, height: 48)
         }
     }
-    
-    private func getStatusColor() -> Color {
-        if isChecking {
-            return .blue
-        } else if isPresent {
-            return inspectState.colorThresholds.getColor(for: 1.0)
+
+    /// Async icon for intro (loads once, spinner acceptable)
+    @ViewBuilder
+    private func toastIcon(path: String, fallbackSymbol: String) -> some View {
+        if !path.isEmpty {
+            AsyncImageView(
+                iconPath: path,
+                basePath: basePath,
+                maxWidth: 48,
+                maxHeight: 48,
+                imageFit: .fit
+            ) {
+                Image(systemName: fallbackSymbol)
+                    .font(.system(size: 28))
+                    .foregroundStyle(primaryColor.opacity(0.6))
+                    .frame(width: 48, height: 48)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 10))
         } else {
-            return inspectState.colorThresholds.getColor(for: 0.0)
+            Image(systemName: fallbackSymbol)
+                .font(.system(size: 28))
+                .foregroundStyle(primaryColor.opacity(0.6))
+                .frame(width: 48, height: 48)
         }
+    }
+
+    /// Resolve relative path against basePath
+    private func resolvePath(_ path: String) -> String? {
+        guard !path.isEmpty else { return nil }
+        if path.hasPrefix("/") { return path }
+        guard let base = basePath else { return path }
+        return (base as NSString).appendingPathComponent(path)
+    }
+
+    // MARK: - Deferral (uses shared performDeferral() from PresetCommonHelpers)
+
+    // MARK: - Auto-Advance Logic
+
+    private func advanceToNextItem() {
+        guard currentPhase == .main, !inspectState.items.isEmpty else { return }
+
+        if let item = currentItem,
+           !inspectState.completedItems.contains(item.id),
+           !inspectState.failedItems.contains(item.id) {
+            return
+        }
+
+        if let nextIdx = inspectState.items.firstIndex(where: {
+            inspectState.downloadingItems.contains($0.id) && !inspectState.completedItems.contains($0.id)
+        }) {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                currentItemIndex = nextIdx
+            }
+            return
+        }
+
+        if let nextIdx = inspectState.items.firstIndex(where: {
+            !inspectState.completedItems.contains($0.id) &&
+            !inspectState.downloadingItems.contains($0.id) &&
+            !inspectState.failedItems.contains($0.id)
+        }) {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                currentItemIndex = nextIdx
+            }
+            return
+        }
+    }
+
+    private func checkAutoTransitionToSummary() {
+        guard currentPhase == .main,
+              !inspectState.items.isEmpty,
+              inspectState.completedItems.count == inspectState.items.count else { return }
+
+        if inspectState.config?.summaryScreen != nil {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                currentPhase = .summary
+            }
+        } else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                writeLog("Preset4View: All items complete, auto-exiting", logLevel: .info)
+                exit(0)
+            }
+        }
+    }
+}
+
+// MARK: - Preset4 Wrapper
+
+struct Preset4Wrapper: View {
+    @ObservedObject var coordinator: InspectState
+
+    var body: some View {
+        Preset4View(inspectState: coordinator)
     }
 }

@@ -20,11 +20,12 @@ struct LogPatternPreset {
     let captureGroup: Int
 
     static let presets: [String: LogPatternPreset] = [
-        // Installomator: [timestamp] INFO: message
+        // Installomator: "2026-02-22 15:23:13 : INFO  : microsoftword : Downloading https://..."
+        // Format: timestamp : LEVEL : label : message
         // Captures: Downloading/Mounting/Copying/Installing/Verifying/Removing/Running + path, version info
         // Auto-match works because paths contain app names (e.g., "googlechrome.dmg", "Google Chrome.app")
         "installomator": LogPatternPreset(
-            pattern: #"\] (?:INFO|DEBUG): ((?:Downloading|Mounting|Verifying|Copying|Installing|Unpacking|Removing|Running|Extracting)\s+.+?(?:\.dmg|\.pkg|\.zip|\.app|$)|(?:Installed|Downloaded) version: [\d.]+|\d+%)"#,
+            pattern: #": (?:INFO|DEBUG|REQ|WARN)\s+: \w+ : ((?:Downloading|Mounted|Mounting|Verifying|Copy|Copying|Installing|Unpacking|Removing|Running|Extracting)\s+.+?(?:\.dmg|\.pkg|\.zip|\.app|$)|(?:Installed|Downloaded) version: [\d.]+|\d+%)"#,
             captureGroup: 1
         ),
         // Jamf Pro: [timestamp] LEVEL - message
@@ -83,7 +84,7 @@ struct LogPatternPreset {
 
         // Simplify verbose log messages
         if trimmed.hasPrefix("Downloading ") { return "Downloading..." }
-        if trimmed.hasPrefix("Mounting ") { return "Mounting..." }
+        if trimmed.hasPrefix("Mounting ") || trimmed.hasPrefix("Mounted ") { return "Mounting..." }
         if trimmed.hasPrefix("Unpacking ") { return "Unpacking..." }
         if trimmed.hasPrefix("Extracting ") { return "Extracting..." }
         if trimmed.hasPrefix("Removing ") { return "Cleaning up..." }
@@ -91,9 +92,13 @@ struct LogPatternPreset {
         if trimmed.contains("installed successfully") { return "Completed" }
         if trimmed == "Installation completed" { return "Completed" }
 
-        // Copying: extract app name
-        if trimmed.hasPrefix("Copying ") {
-            let parts = trimmed.replacingOccurrences(of: "Copying ", with: "").components(separatedBy: " to ")
+        // Copy/Copying: extract app name
+        // Installomator uses "Copy Microsoft Word.app to /Applications"
+        if trimmed.hasPrefix("Copy ") || trimmed.hasPrefix("Copying ") {
+            let stripped = trimmed.hasPrefix("Copy ") ?
+                trimmed.replacingOccurrences(of: "Copy ", with: "") :
+                trimmed.replacingOccurrences(of: "Copying ", with: "")
+            let parts = stripped.components(separatedBy: " to ")
             if let appName = parts.first { return "Copying \(appName)..." }
             return "Copying..."
         }
@@ -101,18 +106,32 @@ struct LogPatternPreset {
         // .app bundle touched = complete
         if trimmed.hasSuffix(".app") { return "Completed" }
 
-        // .pkg extraction: parse package name
+        // .pkg extraction: parse package name and preserve phase keyword
         if trimmed.contains(".pkg") {
-            var pkgName = trimmed
-            if let hashIndex = trimmed.lastIndex(of: "#") {
-                pkgName = String(trimmed[trimmed.index(after: hashIndex)...])
+            // Detect leading phase keyword (e.g., "Installing foo.pkg" or "Verifying: foo.pkg")
+            var phase = "Installing"
+            var remainder = trimmed
+            for keyword in ["Installing", "Verifying", "Downloading"] {
+                if trimmed.hasPrefix(keyword) {
+                    phase = keyword
+                    remainder = String(trimmed.dropFirst(keyword.count))
+                        .trimmingCharacters(in: CharacterSet(charactersIn: ": "))
+                    break
+                }
+            }
+
+            var pkgName = remainder
+            if let hashIndex = remainder.lastIndex(of: "#") {
+                pkgName = String(remainder[remainder.index(after: hashIndex)...])
             }
             pkgName = pkgName
                 .replacingOccurrences(of: ".pkg", with: "")
                 .replacingOccurrences(of: "_Internal", with: "")
                 .replacingOccurrences(of: "_Installer", with: "")
                 .replacingOccurrences(of: "_", with: " ")
-            return "Installing \(pkgName)..."
+                .components(separatedBy: " to ").first ?? pkgName  // Strip " to /" suffix
+                .trimmingCharacters(in: .whitespaces)
+            return "\(phase) \(pkgName)..."
         }
 
         // Failure detection
@@ -297,11 +316,20 @@ class LogMonitorService: ObservableObject {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
 
-            // Apply status cleanup
+            // Apply status cleanup for display
             let cleanedStatus = LogPatternPreset.cleanupStatus(status)
             guard !cleanedStatus.isEmpty else { return }
 
             self.globalStatus = cleanedStatus
+
+            // If explicit itemIds configured, route to all listed items
+            if let itemIds = config.itemIds, !itemIds.isEmpty {
+                for id in itemIds {
+                    self.latestStatuses[id] = cleanedStatus
+                }
+                writeLog("LogMonitorService: Status '\(cleanedStatus)' routed to itemIds: \(itemIds.joined(separator: ", "))", logLevel: .debug)
+                return
+            }
 
             // If explicit itemId configured, use it directly
             if let itemId = itemId ?? config.itemId {
@@ -311,14 +339,16 @@ class LogMonitorService: ObservableObject {
             }
 
             // Auto-match against item displayNames and IDs
+            // Use RAW status for matching (cleanupStatus strips displayNames like
+            // "Downloading Microsoft Word …" → "Downloading..." which breaks auto-match)
             if config.autoMatch ?? true {
-                let targetItems = self.findMatchingItems(for: cleanedStatus)
+                let targetItems = self.findMatchingItems(for: status)
                 for targetId in targetItems {
                     self.latestStatuses[targetId] = cleanedStatus
                 }
 
                 if targetItems.isEmpty {
-                    writeLog("LogMonitorService: Status '\(cleanedStatus)' not matched to any item", logLevel: .debug)
+                    writeLog("LogMonitorService: Status '\(cleanedStatus)' not matched to any item (raw: '\(status)')", logLevel: .debug)
                 } else {
                     writeLog("LogMonitorService: Status '\(cleanedStatus)' routed to: \(targetItems.joined(separator: ", "))", logLevel: .debug)
                 }

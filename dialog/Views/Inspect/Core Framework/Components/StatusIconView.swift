@@ -18,6 +18,7 @@ struct StatusIconView: View {
     let status: StatusIconType
     let size: CGFloat
     let filled: Bool
+    @Environment(\.palette) private var palette
 
     init(_ status: StatusIconType, size: CGFloat = 16, filled: Bool = true) {
         self.status = status
@@ -57,15 +58,15 @@ struct StatusIconView: View {
     private var iconColor: Color {
         switch status {
         case .success, .complete, .pass:
-            return .semanticSuccess
+            return palette.success
         case .failure, .error, .fail:
-            return .semanticFailure
+            return palette.error
         case .warning, .caution:
-            return .semanticWarning
+            return palette.warning
         case .pending, .waiting, .unknown:
             return .secondary
         case .active, .inProgress, .info:
-            return .semanticInfo
+            return palette.info
         case .empty:
             return .secondary.opacity(0.5)
         case .custom(_, let color):
@@ -208,7 +209,7 @@ struct StatusSpinnerView: View {
     let size: CGFloat
     let color: Color
 
-    init(size: CGFloat = 16, color: Color = .semanticInfo) {
+    init(size: CGFloat = 16, color: Color = .blue) {
         self.size = size
         self.color = color
     }

@@ -21,6 +21,9 @@ class ImageResolver {
         "/Users/Shared/dialog/icons/"
     ]
 
+    /// Set once from config's iconBasePath — used as fallback when callers don't pass basePath
+    var configBasePath: String?
+
     private var imageCache: [String: String] = [:]
     private let cacheQueue = DispatchQueue(label: "dialog.inspect.imagecache", attributes: .concurrent)
 
@@ -70,7 +73,8 @@ class ImageResolver {
         }
 
         // 2. If we have a basePath and path is relative, try combining them
-        if resolvedPath == nil, let basePath = basePath, !path.hasPrefix("/") {
+        let effectiveBasePath = basePath ?? configBasePath
+        if resolvedPath == nil, let basePath = effectiveBasePath, !path.hasPrefix("/") {
             let combined = (basePath as NSString).appendingPathComponent(path)
             writeLog("ImageResolver: Checking combined path: \(combined)", logLevel: .debug)
             if FileManager.default.fileExists(atPath: combined) {

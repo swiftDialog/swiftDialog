@@ -8,7 +8,7 @@
 //
 
 import XCTest
-@testable import dialog
+@testable import Dialog
 
 final class LogMonitorServiceTests: XCTestCase {
 
@@ -45,7 +45,7 @@ final class LogMonitorServiceTests: XCTestCase {
         let preset = LogPatternPreset.presets["installomator"]!
         let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
 
-        let testLine = "[2023-10-05 14:32:45] INFO: Downloading https://dl.google.com/chrome/mac/stable/CHFA/googlechrome.dmg"
+        let testLine = "2026-02-22 15:23:13 : REQ   : googlechrome : Downloading https://dl.google.com/chrome/mac/stable/CHFA/googlechrome.dmg"
         let range = NSRange(testLine.startIndex..., in: testLine)
         let match = regex.firstMatch(in: testLine, range: range)
 
@@ -59,11 +59,27 @@ final class LogMonitorServiceTests: XCTestCase {
         }
     }
 
+    func testInstallomatorPresetMatchesDownloadingPKG() {
+        let preset = LogPatternPreset.presets["installomator"]!
+        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
+
+        let testLine = "2026-02-22 15:36:22 : REQ   : microsoftoutlook : Downloading https://go.microsoft.com/fwlink/?linkid=525137 to Microsoft Outlook.pkg"
+        let range = NSRange(testLine.startIndex..., in: testLine)
+        let match = regex.firstMatch(in: testLine, range: range)
+
+        XCTAssertNotNil(match, "Should match downloading .pkg line")
+        if let match = match {
+            let captureRange = Range(match.range(at: preset.captureGroup), in: testLine)!
+            let captured = String(testLine[captureRange])
+            XCTAssertTrue(captured.contains("Microsoft Outlook.pkg"))
+        }
+    }
+
     func testInstallomatorPresetMatchesMounting() {
         let preset = LogPatternPreset.presets["installomator"]!
         let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
 
-        let testLine = "[2023-10-05 14:33:12] INFO: Mounting /var/folders/abc/googlechrome.dmg"
+        let testLine = "2026-02-22 15:33:12 : INFO  : googlechrome : Mounting /var/folders/abc/googlechrome.dmg"
         let range = NSRange(testLine.startIndex..., in: testLine)
         let match = regex.firstMatch(in: testLine, range: range)
 
@@ -74,26 +90,22 @@ final class LogMonitorServiceTests: XCTestCase {
         }
     }
 
-    func testInstallomatorPresetMatchesAppIdentification() {
+    func testInstallomatorPresetMatchesMounted() {
         let preset = LogPatternPreset.presets["installomator"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
+        let regex = try! NSRegularExpression(pattern: preset.pattern, options: .anchorsMatchLines)
 
-        let testLine = "[2023-10-05 14:32:21] INFO: ################## App: googlechrome"
+        let testLine = "2026-02-22 15:33:12 : INFO  : googlechrome : Mounted /Volumes/Google Chrome.app"
         let range = NSRange(testLine.startIndex..., in: testLine)
         let match = regex.firstMatch(in: testLine, range: range)
 
-        XCTAssertNotNil(match)
-        if let match = match {
-            let captureRange = Range(match.range(at: preset.captureGroup), in: testLine)!
-            XCTAssertTrue(String(testLine[captureRange]).contains("googlechrome"))
-        }
+        XCTAssertNotNil(match, "Should match 'Mounted' line")
     }
 
     func testInstallomatorPresetMatchesInstalledVersion() {
         let preset = LogPatternPreset.presets["installomator"]!
         let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
 
-        let testLine = "[2023-10-05 14:33:15] INFO: Installed version: 117.0.5938.132"
+        let testLine = "2026-02-22 15:33:15 : INFO  : googlechrome : Installed version: 117.0.5938.132"
         let range = NSRange(testLine.startIndex..., in: testLine)
         let match = regex.firstMatch(in: testLine, range: range)
 
@@ -104,15 +116,16 @@ final class LogMonitorServiceTests: XCTestCase {
         }
     }
 
-    func testInstallomatorPresetMatchesCopying() {
+    func testInstallomatorPresetMatchesCopy() {
         let preset = LogPatternPreset.presets["installomator"]!
         let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
 
-        let testLine = "[2023-10-05 14:34:00] INFO: Copying Google Chrome.app to /Applications"
+        // Installomator uses "Copy" not "Copying": printlog "Copy $appPath to $targetDir"
+        let testLine = "2026-02-22 15:34:00 : INFO  : googlechrome : Copy Google Chrome.app to /Applications"
         let range = NSRange(testLine.startIndex..., in: testLine)
         let match = regex.firstMatch(in: testLine, range: range)
 
-        XCTAssertNotNil(match)
+        XCTAssertNotNil(match, "Should match 'Copy' (Installomator's verb)")
         if let match = match {
             let captureRange = Range(match.range(at: preset.captureGroup), in: testLine)!
             XCTAssertTrue(String(testLine[captureRange]).contains("Google Chrome.app"))
@@ -123,11 +136,33 @@ final class LogMonitorServiceTests: XCTestCase {
         let preset = LogPatternPreset.presets["installomator"]!
         let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
 
-        let testLine = "[2023-10-05 14:34:05] INFO: Verifying signature"
+        let testLine = "2026-02-22 15:34:05 : INFO  : microsoftoutlook : Verifying: Microsoft Outlook.pkg"
         let range = NSRange(testLine.startIndex..., in: testLine)
         let match = regex.firstMatch(in: testLine, range: range)
 
         XCTAssertNotNil(match)
+    }
+
+    func testInstallomatorPresetMatchesInstallingPKG() {
+        let preset = LogPatternPreset.presets["installomator"]!
+        let regex = try! NSRegularExpression(pattern: preset.pattern, options: .anchorsMatchLines)
+
+        let testLine = "2026-02-22 15:38:41 : INFO  : microsoftoutlook : Installing Microsoft Outlook.pkg to /"
+        let range = NSRange(testLine.startIndex..., in: testLine)
+        let match = regex.firstMatch(in: testLine, range: range)
+
+        XCTAssertNotNil(match, "Should match 'Installing .pkg' line")
+    }
+
+    func testInstallomatorPresetMatchesRunningMsupdate() {
+        let preset = LogPatternPreset.presets["installomator"]!
+        let regex = try! NSRegularExpression(pattern: preset.pattern, options: .anchorsMatchLines)
+
+        let testLine = "2026-02-22 15:36:10 : INFO  : microsoftoutlook : Running msupdate --list"
+        let range = NSRange(testLine.startIndex..., in: testLine)
+        let match = regex.firstMatch(in: testLine, range: range)
+
+        XCTAssertNotNil(match, "Should match 'Running' line")
     }
 
     func testInstallomatorPresetDoesNotMatchStartEnd() {
@@ -135,11 +170,53 @@ final class LogMonitorServiceTests: XCTestCase {
         let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
 
         // Should NOT match the start/end banners (no useful status info)
-        let startLine = "[2023-10-05 14:32:21] INFO: ################## Start Installomator v.10.6beta"
-        let endLine = "[2023-10-05 14:33:16] INFO: ################## End Installomator, exit code 0"
+        let startLine = "2026-02-22 15:23:00 : REQ   : microsoftword : ################## Start Installomator v. 10.9beta, date 2026-01-29"
+        let endLine = "2026-02-22 15:39:33 : REQ   : microsoftoutlook : ################## End Installomator, exit code 0"
 
         XCTAssertNil(regex.firstMatch(in: startLine, range: NSRange(startLine.startIndex..., in: startLine)))
         XCTAssertNil(regex.firstMatch(in: endLine, range: NSRange(endLine.startIndex..., in: endLine)))
+    }
+
+    func testInstallomatorPresetDoesNotMatchInfoLines() {
+        let preset = LogPatternPreset.presets["installomator"]!
+        let regex = try! NSRegularExpression(pattern: preset.pattern, options: .anchorsMatchLines)
+
+        // Should NOT match these non-actionable info lines
+        let testLines = [
+            "2026-02-22 15:23:13 : INFO  : microsoftword : Label type: pkg",
+            "2026-02-22 15:23:13 : INFO  : microsoftword : archiveName: Microsoft Word.pkg",
+            "2026-02-22 15:23:13 : INFO  : microsoftword : name: Microsoft Word, appName: Microsoft Word.app",
+            "2026-02-22 15:23:13 : WARN  : microsoftword : No previous app found",
+            "2026-02-22 15:23:13 : INFO  : microsoftword : Latest version of Microsoft Word is 16.106",
+            "2026-02-22 15:39:33 : REQ   : microsoftoutlook : All done!",
+        ]
+
+        for testLine in testLines {
+            let range = NSRange(testLine.startIndex..., in: testLine)
+            let match = regex.firstMatch(in: testLine, range: range)
+            XCTAssertNil(match, "Should not match: \(testLine)")
+        }
+    }
+
+    func testInstallomatorPresetMatchesAllLogLevels() {
+        let preset = LogPatternPreset.presets["installomator"]!
+        let regex = try! NSRegularExpression(pattern: preset.pattern, options: .anchorsMatchLines)
+
+        // REQ (3 chars, 2 spaces padding)
+        let reqLine = "2026-02-22 15:23:13 : REQ   : microsoftword : Downloading https://example.com/word.pkg"
+        XCTAssertNotNil(regex.firstMatch(in: reqLine, range: NSRange(reqLine.startIndex..., in: reqLine)), "Should match REQ level")
+
+        // INFO (4 chars, 1 space padding)
+        let infoLine = "2026-02-22 15:23:13 : INFO  : microsoftword : Mounting /var/folders/abc/word.dmg"
+        XCTAssertNotNil(regex.firstMatch(in: infoLine, range: NSRange(infoLine.startIndex..., in: infoLine)), "Should match INFO level")
+
+        // DEBUG (5 chars, no padding)
+        let debugLine = "2026-02-22 15:23:13 : DEBUG : microsoftword : Extracting word.zip"
+        XCTAssertNotNil(regex.firstMatch(in: debugLine, range: NSRange(debugLine.startIndex..., in: debugLine)), "Should match DEBUG level")
+
+        // WARN (4 chars, 1 space padding)
+        let warnLine = "2026-02-22 15:23:13 : WARN  : microsoftword : Removing /tmp/old.app"
+        XCTAssertNotNil(regex.firstMatch(in: warnLine, range: NSRange(warnLine.startIndex..., in: warnLine)), "Should match WARN level")
     }
 
     func testShellPresetMatchesStatusFormat() {
@@ -231,6 +308,55 @@ final class LogMonitorServiceTests: XCTestCase {
         }
     }
 
+    // MARK: - cleanupStatus Tests
+
+    func testCleanupStatusDownloading() {
+        XCTAssertEqual(LogPatternPreset.cleanupStatus("Downloading https://example.com/word.pkg"), "Downloading...")
+    }
+
+    func testCleanupStatusMounting() {
+        XCTAssertEqual(LogPatternPreset.cleanupStatus("Mounting /var/folders/abc/word.dmg"), "Mounting...")
+        XCTAssertEqual(LogPatternPreset.cleanupStatus("Mounted /Volumes/Word"), "Mounting...")
+    }
+
+    func testCleanupStatusCopy() {
+        // Installomator uses "Copy" not "Copying"
+        XCTAssertEqual(LogPatternPreset.cleanupStatus("Copy Microsoft Word.app to /Applications"), "Copying Microsoft Word.app...")
+        XCTAssertEqual(LogPatternPreset.cleanupStatus("Copying Google Chrome.app to /Applications"), "Copying Google Chrome.app...")
+    }
+
+    func testCleanupStatusInstalled() {
+        XCTAssertEqual(LogPatternPreset.cleanupStatus("Installed version: 16.106"), "Installed (v16.106)")
+        XCTAssertEqual(LogPatternPreset.cleanupStatus("Downloaded version: 117.0"), "Installed (v117.0)")
+    }
+
+    func testCleanupStatusCompleted() {
+        XCTAssertEqual(LogPatternPreset.cleanupStatus("installed successfully"), "Completed")
+        XCTAssertEqual(LogPatternPreset.cleanupStatus("Installation completed"), "Completed")
+        XCTAssertEqual(LogPatternPreset.cleanupStatus("Microsoft Word.app"), "Completed")
+    }
+
+    func testCleanupStatusVerifying() {
+        XCTAssertEqual(LogPatternPreset.cleanupStatus("Verifying: Microsoft Outlook.pkg"), "Verifying Microsoft Outlook...")
+    }
+
+    func testCleanupStatusInstallingPKG() {
+        XCTAssertEqual(LogPatternPreset.cleanupStatus("Installing Microsoft Outlook.pkg to /"), "Installing Microsoft Outlook...")
+    }
+
+    func testCleanupStatusRunning() {
+        XCTAssertEqual(LogPatternPreset.cleanupStatus("Running msupdate --list"), "Running script...")
+    }
+
+    func testCleanupStatusFailure() {
+        let result = LogPatternPreset.cleanupStatus("ERROR: not running as root, exiting")
+        XCTAssertTrue(result.hasPrefix("Failed"), "Should detect failure: \(result)")
+    }
+
+    func testCleanupStatusBundleIDSkipped() {
+        XCTAssertEqual(LogPatternPreset.cleanupStatus("com.microsoft.Word"), "")
+    }
+
     // MARK: - Pattern Edge Cases
 
     func testInstallomatorPresetDoesNotMatchUnrelatedLines() {
@@ -287,7 +413,7 @@ final class LogMonitorServiceTests: XCTestCase {
 
         // Monitor should start from end, not trigger for existing content
         let monitor = LogFileMonitor(config: config, path: testLogPath)
-        monitor.onStatusExtracted = { _, _ in
+        monitor.onStatusExtracted = { _ in
             expectation.fulfill()
         }
         monitor.start()
@@ -312,7 +438,7 @@ final class LogMonitorServiceTests: XCTestCase {
         )
 
         let monitor = LogFileMonitor(config: config, path: testLogPath)
-        monitor.onStatusExtracted = { status, _ in
+        monitor.onStatusExtracted = { status in
             extractedStatus = status
             expectation.fulfill()
         }
@@ -336,7 +462,7 @@ final class LogMonitorServiceTests: XCTestCase {
         try existingContent.write(toFile: testLogPath, atomically: true, encoding: .utf8)
 
         let expectation = XCTestExpectation(description: "Status extracted")
-        var extractedStatus: String?
+        var extractedStatuses: [String] = []
 
         let config = createMockLogMonitorConfig(
             path: testLogPath,
@@ -345,16 +471,20 @@ final class LogMonitorServiceTests: XCTestCase {
         )
 
         let monitor = LogFileMonitor(config: config, path: testLogPath)
-        monitor.onStatusExtracted = { status, _ in
-            extractedStatus = status
+        monitor.onStatusExtracted = { status in
+            extractedStatuses.append(status)
             expectation.fulfill()
         }
         monitor.start()
 
-        // The monitor should process existing content immediately
-        await fulfillment(of: [expectation], timeout: 1.0)
+        // Monitor only processes on FS events, so trigger a write
+        try await Task.sleep(nanoseconds: 100_000_000)
+        try "[STATUS] New message\n".appendToFile(at: testLogPath)
 
-        XCTAssertEqual(extractedStatus, "Existing message")
+        await fulfillment(of: [expectation], timeout: 2.0)
+
+        // With startFromEnd=false, the existing content should be read first
+        XCTAssertTrue(extractedStatuses.contains("Existing message"), "Should have processed existing content from beginning")
         monitor.stop()
     }
 
@@ -400,7 +530,7 @@ final class LogMonitorServiceTests: XCTestCase {
         let preset = LogPatternPreset.presets["macos-installer"]!
         let regex = regexForPreset(preset: preset, options: .anchorsMatchLines))
 
-        let testLine = "2026-01-21 02:37:33+01 dev-mini installd[74805]: PackageKit: Extracting file://localhost/Users/henry/Downloads/Microsoft_365.pkg#Microsoft_Word_Internal.pkg (destination=/Applications)"
+        let testLine = "2026-01-21 02:37:33+01 dev-mini installd[74805]: PackageKit: Extracting file://localhost/Users/admin/Downloads/Microsoft_365.pkg#Microsoft_Word_Internal.pkg (destination=/Applications)"
         let range = NSRange(testLine.startIndex..., in: testLine)
         let match = regex.firstMatch(in: testLine, range: range)
 
@@ -429,36 +559,12 @@ final class LogMonitorServiceTests: XCTestCase {
         XCTAssertNotNil(match, "Should match Installed line")
     }
 
-    // MARK: - Status Transform Tests
+    // MARK: - cleanupStatus Tests for macOS Installer Patterns
 
-    func testMacOSInstallerTransformPKGToInstalling() {
-        let preset = LogPatternPreset.presets["macos-installer"]!
-        let transform = preset.statusTransform!
-
-        let raw = "Microsoft_365_and_Office_16.105.26011018_Installer.pkg#Microsoft_Word_Internal.pkg"
-        let result = transform(raw)
-
-        XCTAssertEqual(result, "Installing Microsoft Word...")
-    }
-
-    func testMacOSInstallerTransformAppToCompleted() {
-        let preset = LogPatternPreset.presets["macos-installer"]!
-        let transform = preset.statusTransform!
-
-        let raw = "Microsoft Word.app"
-        let result = transform(raw)
-
-        XCTAssertEqual(result, "Completed")
-    }
-
-    func testMacOSInstallerTransformSimplePKG() {
-        let preset = LogPatternPreset.presets["macos-installer"]!
-        let transform = preset.statusTransform!
-
-        let raw = "StreamDeck.pkg"
-        let result = transform(raw)
-
-        XCTAssertEqual(result, "Installing StreamDeck...")
+    func testCleanupStatusPKGInstalling() {
+        // cleanupStatus handles .pkg patterns from macOS installer log
+        let result = LogPatternPreset.cleanupStatus("Installing Microsoft Outlook.pkg to /")
+        XCTAssertEqual(result, "Installing Microsoft Outlook...")
     }
 
     // MARK: - macOS Installer Failure Tests
@@ -496,42 +602,94 @@ final class LogMonitorServiceTests: XCTestCase {
         XCTAssertNotNil(match, "Should match installer Error line")
     }
 
-    func testMacOSInstallerTransformFailedWithMessage() {
-        let preset = LogPatternPreset.presets["macos-installer"]!
-        let transform = preset.statusTransform!
-
-        let raw = "Package requires restart"
-        let result = transform(raw)
-
-        // Since this doesn't contain "fail" or "error", it should return raw
-        // But if we pass an actual error message containing those words:
-        let errorRaw = "Error Domain=PKInstallErrorDomain Code=102"
-        let errorResult = transform(errorRaw)
-
-        XCTAssertTrue(errorResult.hasPrefix("Failed:"), "Should transform error message to Failed status")
+    func testCleanupStatusFailedWithErrorMessage() {
+        let result = LogPatternPreset.cleanupStatus("Error Domain=PKInstallErrorDomain Code=102")
+        XCTAssertTrue(result.hasPrefix("Failed:"), "Should transform error message to Failed status")
     }
 
-    func testMacOSInstallerTransformFailedEmpty() {
-        let preset = LogPatternPreset.presets["macos-installer"]!
-        let transform = preset.statusTransform!
-
-        // Test with just "failed" indicator
-        let raw = "Install failed"
-        let result = transform(raw)
-
+    func testCleanupStatusInstallFailed() {
+        let result = LogPatternPreset.cleanupStatus("Install failed")
         XCTAssertTrue(result.hasPrefix("Failed"), "Should show Failed status")
     }
 
-    func testMacOSInstallerTransformFailedTruncatesLongMessage() {
-        let preset = LogPatternPreset.presets["macos-installer"]!
-        let transform = preset.statusTransform!
-
+    func testCleanupStatusFailedTruncatesLongMessage() {
         let longError = "Error: This is a very long error message that should be truncated because it exceeds fifty characters"
-        let result = transform(longError)
+        let result = LogPatternPreset.cleanupStatus(longError)
 
         XCTAssertTrue(result.hasPrefix("Failed:"), "Should show Failed prefix")
         XCTAssertTrue(result.hasSuffix("..."), "Should truncate with ellipsis")
         XCTAssertLessThan(result.count, longError.count, "Result should be shorter than original")
+    }
+
+    // MARK: - Real Installomator Session Tests
+    // Validates regex + cleanupStatus against actual Installomator log output
+
+    func testRealInstallomatorSessionFullFlow() {
+        let preset = LogPatternPreset.presets["installomator"]!
+        let regex = try! NSRegularExpression(pattern: preset.pattern, options: .anchorsMatchLines)
+
+        // Real log lines from an actual microsoftonenote install session
+        let logLines: [(line: String, shouldMatch: Bool, expectedCleanup: String?)] = [
+            // Non-matching info lines
+            ("2026-02-22 16:29:34 : INFO  : microsoftonenote : setting variable from argument DEBUG=0", false, nil),
+            ("2026-02-22 16:29:34 : REQ   : microsoftonenote : ################## Start Installomator v. 10.9beta, date 2026-01-29", false, nil),
+            ("2026-02-22 16:29:34 : INFO  : microsoftonenote : ################## microsoftonenote", false, nil),
+            ("2026-02-22 16:29:47 : INFO  : microsoftonenote : Label type: pkg", false, nil),
+            ("2026-02-22 16:29:47 : INFO  : microsoftonenote : archiveName: Microsoft OneNote.pkg", false, nil),
+            ("2026-02-22 16:29:47 : INFO  : microsoftonenote : name: Microsoft OneNote, appName: Microsoft OneNote.app", false, nil),
+            ("2026-02-22 16:29:47 : INFO  : microsoftonenote : Latest version of Microsoft OneNote is 16.106", false, nil),
+            ("2026-02-22 16:30:01 : REQ   : microsoftonenote : All done!", false, nil),
+            ("2026-02-22 16:30:01 : REQ   : microsoftonenote : ################## End Installomator, exit code 0", false, nil),
+
+            // Matching action lines
+            ("2026-02-22 16:29:35 : INFO  : microsoftonenote : Running msupdate --list", true, "Running script..."),
+            ("2026-02-22 16:30:01 : REQ   : microsoftonenote : Installed Microsoft OneNote, version 16.106", false, nil),
+            // Note: "Installed Microsoft OneNote, version 16.106" does NOT match the regex because
+            // "Installed" is not in the action verbs list, and the version pattern expects "Installed version: X.Y"
+        ]
+
+        for (line, shouldMatch, expectedCleanup) in logLines {
+            let range = NSRange(line.startIndex..., in: line)
+            let match = regex.firstMatch(in: line, range: range)
+
+            if shouldMatch {
+                XCTAssertNotNil(match, "Should match: \(line)")
+                if let match = match, let expectedCleanup = expectedCleanup {
+                    let captureRange = Range(match.range(at: preset.captureGroup), in: line)!
+                    let captured = String(line[captureRange])
+                    let cleaned = LogPatternPreset.cleanupStatus(captured)
+                    XCTAssertEqual(cleaned, expectedCleanup, "Cleanup mismatch for: \(captured)")
+                }
+            } else {
+                XCTAssertNil(match, "Should NOT match: \(line)")
+            }
+        }
+    }
+
+    func testRealInstallomatorDownloadAndInstallFlow() {
+        let preset = LogPatternPreset.presets["installomator"]!
+        let regex = try! NSRegularExpression(pattern: preset.pattern, options: .anchorsMatchLines)
+
+        // Real download+install flow from microsoftoutlook
+        let actionLines: [(line: String, expectedCleanup: String)] = [
+            ("2026-02-22 15:36:22 : REQ   : microsoftoutlook : Downloading https://go.microsoft.com/fwlink/?linkid=525137 to Microsoft Outlook.pkg", "Downloading..."),
+            ("2026-02-22 15:38:41 : REQ   : microsoftoutlook : Installing Microsoft Outlook", "Installing Microsoft Outlook..."),
+            ("2026-02-22 15:38:41 : INFO  : microsoftoutlook : Verifying: Microsoft Outlook.pkg", "Installing Microsoft Outlook..."),
+            ("2026-02-22 15:38:41 : INFO  : microsoftoutlook : Installing Microsoft Outlook.pkg to /", "Installing Microsoft Outlook..."),
+        ]
+
+        for (line, expectedCleanup) in actionLines {
+            let range = NSRange(line.startIndex..., in: line)
+            let match = regex.firstMatch(in: line, range: range)
+
+            XCTAssertNotNil(match, "Should match: \(line)")
+            if let match = match {
+                let captureRange = Range(match.range(at: preset.captureGroup), in: line)!
+                let captured = String(line[captureRange])
+                let cleaned = LogPatternPreset.cleanupStatus(captured)
+                XCTAssertEqual(cleaned, expectedCleanup, "Cleanup mismatch for captured: '\(captured)'")
+            }
+        }
     }
 
     // MARK: - JSON Format Tests
@@ -546,7 +704,6 @@ final class LogMonitorServiceTests: XCTestCase {
 
         let expectation = XCTestExpectation(description: "Status extracted")
         var extractedStatus: String?
-        var extractedItemId: String?
 
         let config = createMockLogMonitorConfig(
             path: jsonPath,
@@ -556,9 +713,8 @@ final class LogMonitorServiceTests: XCTestCase {
         )
 
         let monitor = LogFileMonitor(config: config, path: jsonPath)
-        monitor.onStatusExtracted = { status, itemId in
+        monitor.onStatusExtracted = { status in
             extractedStatus = status
-            extractedItemId = itemId
             expectation.fulfill()
         }
         monitor.start()
@@ -572,7 +728,6 @@ final class LogMonitorServiceTests: XCTestCase {
         await fulfillment(of: [expectation], timeout: 2.0)
 
         XCTAssertEqual(extractedStatus, "Installing")
-        XCTAssertEqual(extractedItemId, "Firefox")
         monitor.stop()
     }
 
@@ -585,7 +740,6 @@ final class LogMonitorServiceTests: XCTestCase {
 
         let expectation = XCTestExpectation(description: "Status extracted")
         var extractedStatus: String?
-        var extractedItemId: String?
 
         let config = createMockLogMonitorConfig(
             path: jsonPath,
@@ -594,9 +748,8 @@ final class LogMonitorServiceTests: XCTestCase {
         )
 
         let monitor = LogFileMonitor(config: config, path: jsonPath)
-        monitor.onStatusExtracted = { status, itemId in
+        monitor.onStatusExtracted = { status in
             extractedStatus = status
-            extractedItemId = itemId
             expectation.fulfill()
         }
         monitor.start()
@@ -608,7 +761,6 @@ final class LogMonitorServiceTests: XCTestCase {
         await fulfillment(of: [expectation], timeout: 2.0)
 
         XCTAssertEqual(extractedStatus, "Processing...")
-        XCTAssertNil(extractedItemId)
         monitor.stop()
     }
 
@@ -630,7 +782,7 @@ final class LogMonitorServiceTests: XCTestCase {
         )
 
         let monitor = LogFileMonitor(config: config, path: jsonPath)
-        monitor.onStatusExtracted = { status, _ in
+        monitor.onStatusExtracted = { status in
             extractedStatus = status
             expectation.fulfill()
         }

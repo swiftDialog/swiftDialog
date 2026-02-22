@@ -14,7 +14,7 @@ import Combine
 
 /// Observable state manager for Inspect preset dynamic content updates
 /// Replaces problematic @State nested dictionaries with proper @Published properties
-/// Used across multiple presets (Preset6, Preset7, Preset8, Preset9, etc.)
+/// Used across multiple presets (Preset5, Preset6, etc.)
 class InspectDynamicState: ObservableObject {
 
     // MARK: - Published State (Triggers SwiftUI Updates)

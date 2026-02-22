@@ -105,9 +105,9 @@ struct InspectConfig: Codable {
     let categoryHelp: [CategoryHelp]?       // Optional help popovers for categories - used in compliance dashboards like preset5
     let uiLabels: UILabels?                 // Optional UI text customization (cross-preset status/progress/completion text)
     let complianceLabels: ComplianceLabels? // Optional compliance-specific text customization (Preset5)
-    let pickerConfig: PickerConfig?         // Optional picker mode configuration (Preset8, Preset9, etc.)
+    let pickerConfig: PickerConfig?         // Optional picker mode configuration (legacy presets, etc.)
     let instructionBanner: InstructionBannerConfig? // Optional instruction banner (all presets)
-    let pickerLabels: PickerLabels?         // Optional picker mode text customization (Preset8, Preset9, etc.)
+    let pickerLabels: PickerLabels?         // Optional picker mode text customization (legacy presets, etc.)
 
     let iconBasePath: String?                // Icon base path for relative loading icon paths
     let overlayicon: String?                  // Overlay icon for brand identity badges
@@ -117,14 +117,21 @@ struct InspectConfig: Codable {
     let imageSyncMode: String?              // "manual" | "sync" | "auto"
     let stepStyle: String?                  // "plain" | "colored" | "cards"
     let listIndicatorStyle: String?         // "letters" | "numbers" | "roman" - list indicator format
+    let progressMode: String?                // "shared" (single bar, X of Y) | "perItem" (indeterminate per item) — Preset4 toast installer
     let progressBarConfig: ProgressBarConfig? // Optional progress bar visual configuration
-    let logoConfig: LogoConfig?             // Optional logo overlay configuration (Preset9, etc.)
+    let logoConfig: LogoConfig?             // Optional logo overlay configuration (legacy presets)
     let detailOverlay: DetailOverlayConfig? // Optional detail flyout overlay configuration
     let helpButton: HelpButtonConfig?       // Optional help button configuration
     let actionPipe: String?                 // Optional FIFO path for instant script request delivery
     let triggerFile: String?                // Custom trigger file path (overrides dev/prod defaults)
-    let skipPortal: Bool?                   // Skip portal phase entirely (Preset11) - go directly from intro to outro
+    let skipPortal: Bool?                   // Skip portal phase entirely (Preset5) - go directly from intro to outro
     let debugMode: Bool?                    // Debug/testing mode - ignore completion flags, always start from step 1 (preserves form values)
+
+    // MARK: - IPC (ignitecli Integration)
+    let readinessFile: String?              // Path to write readiness signal JSON (default: "{triggerFile}.ready")
+    let resultFile: String?                 // Path to write JSON result on exit (selections, form values, step statuses)
+    let eventFile: String?                   // Path to write JSONL step events (step_started, step_completed)
+    let deferralConfig: DeferralConfig?     // User-initiated deferral menu configuration
 
     // MARK: - Log Monitoring Configuration (Cross-Preset)
     let logMonitor: LogMonitorConfig?       // Single log monitor configuration
@@ -135,13 +142,20 @@ struct InspectConfig: Codable {
     // For custom installs, use a log file approach: the installer script writes progress
     // to a log file, then swiftDialog monitors that file using logMonitor config with a matching preset.
 
-    // MARK: - Portal/WebView Configuration (Preset11)
+    // MARK: - Portal/WebView Configuration (Preset5)
     let portalConfig: PortalConfig?         // Self-service portal configuration (supports any authenticated web portal)
     let appConfigSource: AppConfigSource?   // MDM managed preference source for dynamic branding (overrides JSON values)
-    let introSteps: [IntroStep]?            // Optional intro/outro screens before/after portal (Preset11)
+    let introSteps: [IntroStep]?            // Optional intro/outro screens before/after portal (Preset5)
 
     // MARK: - Preferences Output Configuration (Modular Architecture)
     let preferencesOutput: PreferencesOutputConfig? // Plist output for user preference collection (osquery/MDM labeling)
+
+    // MARK: - Brand Selection (Multi-Brand Onboarding)
+    let brands: [BrandConfig]?              // Available brand options for brand picker step
+    let brandSelectionKey: String?          // Persistence key for selected brand (default: "selectedBrand")
+
+    // MARK: - Localization (Intro Step Text)
+    let localization: LocalizationConfig?   // Language sidecar files for translating intro step text
 
     // MARK: - Brand Palette (Cross-Preset Theming)
     let brandPalette: BrandPalette?         // Named color tokens and logo presets for consistent theming
@@ -154,6 +168,10 @@ struct InspectConfig: Codable {
     let footerText: String?                 // Text displayed in footer area
     let copyrightText: String?              // Optional copyright line in footer
     let supportText: String?                // Optional support contact text in footer
+
+    // MARK: - Preset1/2 Multi-Screen Flow (Optional)
+    let introScreen: PresetIntroScreen?     // Optional intro screen before items view (Preset1/2 only)
+    let summaryScreen: PresetSummaryScreen? // Optional summary screen after items complete (Preset1/2 only)
 
     var items: [ItemConfig]
 
@@ -191,14 +209,30 @@ struct InspectConfig: Codable {
 
     // Logo overlay configuration for preset layouts
     struct LogoConfig: Codable {
-        let imagePath: String                   // Path to logo image file
+        let imagePath: String                   // Path to logo image file (light mode / default)
+        let imagePathDark: String?              // Dark mode variant (falls back to imagePath if nil)
         let position: String?                   // "topleft" | "topright" | "bottomleft" | "bottomright" (default: "topleft")
         let padding: Double?                    // Padding from edges in points (default: 20)
         let maxWidth: Double?                   // Maximum width in points (default: 80)
         let maxHeight: Double?                  // Maximum height in points (default: 80)
+        let opacity: Double?                    // Logo opacity 0.0-1.0 (default: 0.6 for bottom, 1.0 for top)
         let backgroundColor: String?            // Background tint color in hex (default: nil/transparent)
         let backgroundOpacity: Double?          // Background opacity 0.0-1.0 (default: 0.2)
         let cornerRadius: Double?               // Corner radius for background (default: 8)
+    }
+
+    // User-initiated deferral configuration (shared across presets)
+    // Integrates with ignitecli's deferral system: env vars, exit code 10, result file
+    struct DeferralConfig: Codable {
+        let enabled: Bool?                      // Show defer menu (default: false; also enabled if IGNITECLI_DEFER_ENABLED=true)
+        let buttonText: String?                 // Menu button label (default: "Not Now")
+        let options: [DeferOption]?             // Deferral options; falls back to IGNITECLI_DEFER_OPTIONS env var
+        let exitCode: Int?                      // Exit code on deferral (default: 10, ignitecli standard)
+    }
+
+    struct DeferOption: Codable {
+        let duration: String                    // ignitecli duration format: "3m", "20m", "1h", "4h", "1d", "tomorrow"
+        let label: String?                      // Human-readable label override; auto-generated from duration if nil
     }
 
     /// Configuration for intro/outro full-screen layout styling
@@ -209,6 +243,39 @@ struct InspectConfig: Codable {
         let logoImage: String?                  // Bottom branding logo path
         let logoPosition: String?               // "bottomLeft" (default) | "bottomRight"
         let logoMaxWidth: Double?               // Maximum logo width in points (default: 120)
+    }
+
+    // MARK: - Preset1/2 Multi-Screen Flow
+
+    /// Lightweight intro screen shown before the items view in Preset1/2
+    /// Reuses GuidanceContentView for rich content rendering
+    struct PresetIntroScreen: Codable {
+        let title: String?                      // Main heading
+        let subtitle: String?                   // Smaller text below title
+        let heroImage: String?                  // Path, URL, or "sf=symbolname"
+        let heroImageShape: String?             // "circle" | "roundedSquare" | "none" (default: "none")
+        let heroImageSize: Double?              // Size in points (default: 200)
+        let content: [GuidanceContent]?         // Rich content blocks (text, bullets, info, etc.)
+        let buttonText: String?                 // Continue button label (default: "Get Started")
+        let showBackButton: Bool?               // Show back button (default: false — it's the first screen)
+    }
+
+    /// Lightweight summary/bento screen shown after items complete in Preset1/2
+    /// Supports both rich content and bento grid layouts
+    struct PresetSummaryScreen: Codable {
+        let title: String?                      // Main heading
+        let subtitle: String?                   // Smaller text below title
+        let heroImage: String?                  // Path, URL, or "sf=symbolname"
+        let heroImageShape: String?             // "circle" | "roundedSquare" | "none" (default: "none")
+        let heroImageSize: Double?              // Size in points (default: 120)
+        let content: [GuidanceContent]?         // Rich content blocks
+        let bentoLayout: String?                // "2x2" | "3x2" | "grid" (enables bento grid)
+        let bentoCells: [GuidanceContent.BentoCellConfig]?  // Bento cell definitions
+        let bentoColumns: Int?                  // Grid columns (default: 2)
+        let bentoRowHeight: Double?             // Row height in points (default: 120)
+        let bentoGap: Double?                   // Gap between cells (default: 12)
+        let buttonText: String?                 // Final button label (default: "Close")
+        let autoTransition: Bool?               // Auto-show when all items complete (default: true)
     }
 
     // MARK: - Shared Wallpaper Types
@@ -238,13 +305,24 @@ struct InspectConfig: Codable {
         let staticValues: [String: String]?     // Static key-value pairs to always include
     }
 
-    // MARK: - Intro Steps Configuration (Preset11)
+    // MARK: - Localization Config
 
-    /// Configuration for steps in preset11's linear step flow
+    /// Configuration for language sidecar files that provide translated intro step text
+    /// Language files are flat JSON with keys like "{stepId}.title", "{stepId}.content.0.content"
+    struct LocalizationConfig: Codable {
+        let languages: [String: String]   // langCode → relative file path, e.g. "de": "lang/de.json"
+        let selectionKey: String?         // gridSelectionKey holding the choice (default: "preferredLanguage")
+        let defaultLanguage: String?      // "auto" = system locale, "de" = hardcoded, nil = no default
+        let languagePicker: Bool?         // true = show language selection page in legacy presets onboarding
+    }
+
+    // MARK: - Intro Steps Configuration (Preset5)
+
+    /// Configuration for steps in preset5's linear step flow
     /// Supports branded setup assistant screens with portal as a step type
     struct IntroStep: Codable, Identifiable {
         let id: String
-        let stepType: String?                   // "intro" | "processing" | "outro" | "portal" (default: "intro")
+        let stepType: String?                   // "intro" | "processing" | "outro" | "portal" | "assistant" (default: "intro")
 
         // Hero Image Configuration
         let heroImage: String?                  // Path or "SF=symbolname" for SF Symbol
@@ -306,6 +384,17 @@ struct InspectConfig: Codable {
         let autoAdvanceOnComplete: Bool?        // Auto-navigate to next step when all items complete (default: false)
         let processingMessage: String?          // Message shown during installation
 
+        // Deployment Step Configuration (stepType: "deployment" — Preset1-style sidebar layout)
+        let sideMessages: [String]?             // Rotating messages shown in content area (step-level, independent of global sideMessage)
+        let sideMessageInterval: Int?           // Rotation interval in seconds (default: 8)
+        let popupButtonText: String?            // Sidebar popup button text (e.g., "Install Details...")
+        let autoEnableButton: Bool?             // Disable Continue until all items complete (default: true)
+        let autoEnableButtonText: String?       // Continue button text when all complete (default: "Done")
+
+        // Carousel Step Configuration (stepType: "carousel" — Preset2-style horizontal card carousel)
+        let bannerHeight: Int?                  // Banner image height when heroImage is a file/URL (default: 100)
+        let progressFormat: String?             // Progress text template: "{completed} of {total} completed"
+
         // Processing Step Type (countdown timer with visual feedback)
         let processingDuration: Int?            // Countdown duration in seconds (triggers processing step type)
         let processingMode: String?             // "simple" (auto-advance at 0) | "progressive" (wait for external trigger)
@@ -329,9 +418,74 @@ struct InspectConfig: Codable {
         // Dynamic Updates - Plist monitoring for live content updates
         let plistMonitors: [PlistMonitor]?      // Array of plist monitors that auto-update content blocks
         let monitorRefreshInterval: Double?     // Global refresh interval in seconds (default: 1.0)
+        let completionMode: String?             // "any" (default) | "all" — how multiple completionTriggers combine
 
         // Portal Step Configuration (for stepType: "portal")
         let portalConfig: PortalConfig?         // Per-step portal config (overrides global portalConfig)
+
+        // Showcase Step Configuration (stepType: "showcase")
+        let showcaseGradientColors: [String]?   // Hex colors for gradient background (fallback: highlightColor)
+        let showcaseTextColor: String?          // Hex color for overlay text (fallback: white 90%)
+        let showcaseImageHeight: Double?        // Image area height ratio 0.0-1.0 (default: 0.6)
+
+        // Guide Step Configuration (stepType: "guide")
+        let guideGradientColors: [String]?      // Hex colors for left panel gradient (fallback: highlightColor)
+        let guideImageRatio: Double?            // Left panel width ratio 0.0-1.0 (default: 0.65)
+        let guideCategoryIcon: String?          // Category icon for sidebar header (SF symbol name)
+        let guideStepBadge: String?             // Badge text in sidebar header (e.g., "REQUIRED")
+        let guideKeyPoints: String?             // Key points text block for sidebar
+        let guideBulletPoints: [String]?        // Bullet point list for sidebar
+
+        // Bento Step Configuration (stepType: "bento")
+        let bentoLayout: String?                // "split" | "grid" (default: "grid")
+        let bentoSidebarRatio: Double?          // 0.25-0.45 (default: 0.35), split mode only
+        let bentoCells: [GuidanceContent.BentoCellConfig]?  // Cell definitions (step-level)
+        let bentoColumns: Int?                  // Grid columns (default: 4)
+        let bentoRowHeight: Double?             // Base row height in pts (default: 140)
+        let bentoGap: Double?                   // Gap between cells in pts (default: 12)
+        let bentoTintColor: String?             // Base hex for auto-tinting cells
+        let bentoSidebarContent: [GuidanceContent]?  // Rich content for split sidebar
+
+        // Assistant Step Configuration (stepType: "assistant" — Apple Setup Assistant style)
+        let assistantImageHeight: Double?       // Hero image area ratio 0.0-1.0 (default: 0.4)
+        let heroBackgroundColor: String?        // Hex color for hero image background area (e.g. "#05164D")
+        let skipButtonText: String?             // Secondary button label left of Continue (e.g., "Set Up Later")
+        let footerLink: String?                 // Centered privacy/info link text (e.g., "About Privacy...")
+
+        // Monitoring fields (used by guide steps with filesystem validation)
+        let paths: [String]?                    // Filesystem paths to check for existence
+        let plistKey: String?                   // Plist key for condition checking
+        let expectedValue: String?              // Expected plist value
+        let evaluation: String?                 // "equals" | "boolean" | "exists" | "contains"
+
+        // Picker mode (per-step flag — global pickerConfig controls mode)
+        let selectable: Bool?                   // Whether this step participates in picker selection
+    }
+
+    // MARK: - Brand Config (Multi-Brand Onboarding)
+
+    /// Brand definition for brand picker step
+    /// Each brand can override branding fields (colors, logos, text) when selected
+    struct BrandConfig: Codable, Identifiable {
+        let id: String
+        let displayName: String
+        let subtitle: String?
+        let logoPath: String?           // Card logo (shown on picker)
+        let sfSymbol: String?           // Alternative to logoPath
+
+        // Branding overrides (applied when selected)
+        let highlightColor: String?
+        let accentBorderColor: String?
+        let footerBackgroundColor: String?
+        let footerTextColor: String?
+        let footerText: String?
+        let logoConfigPath: String?     // Active logo (footer/sidebar, overrides logoConfig.imagePath)
+        let button1Text: String?
+        let button2Text: String?
+        let introTitle: String?
+        let outroTitle: String?
+        let introButtonText: String?
+        let outroButtonText: String?
     }
 
     /// Grid item for picker screens (wallpaper, theme selection, etc.)
@@ -404,10 +558,10 @@ struct InspectConfig: Codable {
         let bentoSize: String?          // Card size: "small", "medium", "large", "wide", "tall" (default: "medium")
         let cardLayout: String?         // Card layout: "vertical-image-below", "horizontal-image-left", "horizontal-image-right", "pattern", "gradient" (default: "vertical-image-below")
         let gradientColors: [String]?   // Custom gradient colors for this card (hex strings like ["#9AA5A4", "#66bb6a"])
-        let verticalSpacing: String?    // Vertical spacing mode for Preset7: "compact" (150pt text, 32pt gap), "balanced" (200pt text, 60pt gap - default), "generous" (250pt text, 80pt gap)
+        let verticalSpacing: String?    // Vertical spacing mode for guide layout: "compact" (150pt text, 32pt gap), "balanced" (200pt text, 60pt gap - default), "generous" (250pt text, 80pt gap)
 
-        // Preset9 custom content
-        let keyPointsText: String?      // Custom paragraph text for "Key Points" section in Preset9 (appears above bullet points)
+        // Guide custom content
+        let keyPointsText: String?      // Custom paragraph text for "Key Points" section in guide steps (appears above bullet points)
         let highlightColor: String?     // Per-item accent/highlight color (hex string like "#61BB46") - overrides global highlightColor
 
         // Preset6 success/failure handling (Option 3 - Hybrid approach)
@@ -430,6 +584,7 @@ struct InspectConfig: Codable {
 
         // Multiple plist monitors for automatic status component updates
         let plistMonitors: [PlistMonitor]? // Array of plist monitors that auto-update guidance components
+        let completionMode: String?        // "any" (default) | "all" — how multiple completionTriggers combine
 
         // Multiple JSON monitors for automatic status component updates
         let jsonMonitors: [JsonMonitor]? // Array of JSON monitors that auto-update guidance components
@@ -517,6 +672,7 @@ struct InspectConfig: Codable {
             self.autoResult = nil
             self.waitForExternalTrigger = nil
             self.plistMonitors = nil
+            self.completionMode = nil
             self.jsonMonitors = nil
             self.itemOverlay = nil
             self.validationTargetBadge = nil
@@ -543,7 +699,7 @@ struct InspectConfig: Codable {
             case waitWarningTime, waitSmallOverrideTime, waitLargeOverrideTime
             case overrideButtonText, allowOverride, allowNavigationDuringProcessing
             case processingMode, autoAdvance, autoResult, waitForExternalTrigger
-            case plistMonitors, jsonMonitors, itemOverlay, validationTargetBadge, introLayoutConfig
+            case plistMonitors, completionMode, jsonMonitors, itemOverlay, validationTargetBadge, introLayoutConfig
             case showBundleInfo
         }
 
@@ -605,6 +761,7 @@ struct InspectConfig: Codable {
             autoResult = try container.decodeIfPresent(String.self, forKey: .autoResult)
             waitForExternalTrigger = try container.decodeIfPresent(Bool.self, forKey: .waitForExternalTrigger)
             plistMonitors = try container.decodeIfPresent([PlistMonitor].self, forKey: .plistMonitors)
+            completionMode = try container.decodeIfPresent(String.self, forKey: .completionMode)
             jsonMonitors = try container.decodeIfPresent([JsonMonitor].self, forKey: .jsonMonitors)
             itemOverlay = try container.decodeIfPresent(DetailOverlayConfig.self, forKey: .itemOverlay)
             validationTargetBadge = try container.decodeIfPresent(ValidationTargetBadge.self, forKey: .validationTargetBadge)
@@ -657,6 +814,7 @@ struct InspectConfig: Codable {
         let predicate: String?                   // Filter: only process lines containing this string (e.g., "com.example.installer")
         let captureGroup: Int?                   // Capture group index (default: 1)
         let itemId: String?                      // Single target item ID (simple case)
+        let itemIds: [String]?                   // Multiple target item IDs (bundle case — routes to all)
         let autoMatch: Bool?                     // Auto-match status to items by displayName (default: true)
         let startFromEnd: Bool?                  // Start from EOF (default: true)
     }
@@ -664,8 +822,9 @@ struct InspectConfig: Codable {
     // Guidance content blocks for rich text display eg. used in Preset6
     struct GuidanceContent: Codable {
         let type: String                // "text" | "highlight" | "warning" | "info" | "success" | "bullets" | "arrow" | "image" | "image-carousel" | "video" | "webcontent" | "portal-webview" | "checkbox" | "dropdown" | "radio" | "toggle" | "slider" | "textfield" | "button" | "status-badge" | "comparison-table" | "phase-tracker" | "progress-bar" | "compliance-card" | "compliance-header" | "feature-table" | "bento-grid"
-        let content: String?            // The actual text content (or button label for type="button") - optional for status monitoring types
-        let items: [String]?            // Array of items - e.g. bullets
+        var content: String?            // The actual text content (or button label for type="button") - optional for status monitoring types
+        var items: [String]?            // Array of items - e.g. bullets
+        let numbered: Bool?             // For bullets: use numbered circle icons (1.circle.fill, 2.circle.fill, ...) instead of a single icon
         let color: String?              // Optional color override (hex format)
         let bold: Bool?                 // Whether to display in bold
         let visible: Bool?              // Show/hide this block dynamically (default: true) - can be updated via plistMonitor or update_guidance command
@@ -674,7 +833,7 @@ struct InspectConfig: Codable {
         let imageShape: String?         // "rectangle" | "square" | "circle" - shape/clipping for the image
         let imageWidth: Double?         // Custom width in points (default: 400)
         let imageBorder: Bool?          // Show border/shadow around image (default: true)
-        let caption: String?            // Caption text displayed below the image
+        var caption: String?            // Caption text displayed below the image
 
         // Video-specific fields (for type="video")
         let autoplay: Bool?             // Auto-play video on load (default: false)
@@ -700,7 +859,7 @@ struct InspectConfig: Codable {
         let required: Bool?             // Whether this input is required for step completion
         let options: [String]?          // Options for dropdown/radio selections
         let value: String?              // Default/current value (for checkbox, toggle, dropdown, radio) or numeric value as string for slider
-        let helpText: String?           // Optional help text displayed in info popover (i icon)
+        var helpText: String?           // Optional help text displayed in info popover (i icon)
 
         // Slider-specific fields (for type="slider")
         let min: Double?                // Minimum value for slider (default: 0)
@@ -716,7 +875,7 @@ struct InspectConfig: Codable {
         }
 
         // Textfield-specific fields (for type="textfield")
-        let placeholder: String?        // Placeholder text when empty
+        var placeholder: String?        // Placeholder text when empty
         let secure: Bool?               // Password mode (hide characters)
         let inherit: String?            // Value source: "plist:path:key", "defaults:domain:key", "env:NAME", "field:itemId.fieldId"
         let regex: String?              // Validation pattern (regex)
@@ -744,7 +903,7 @@ struct InspectConfig: Codable {
         let opensOverlay: Bool?         // When true, clicking this content block opens the item's overlay (default: false)
 
         // Status monitoring fields (for type="status-badge" | "comparison-table" | "phase-tracker" | "progress-bar")
-        let label: String?              // Display label for status components
+        var label: String?              // Display label for status components
         let state: String?              // Current state (e.g., "enabled", "disabled", "active", "enrolled")
         let icon: String?               // SF Symbol icon name for status-badge
         let autoColor: Bool?            // Auto-assign colors based on state (default: true)
@@ -818,8 +977,9 @@ struct InspectConfig: Codable {
             let title: String               // App/item name (e.g., "Microsoft Teams")
             let subtitle: String?           // Optional subtitle (e.g., "Installing...")
             let icon: String?               // Icon path or SF Symbol name
-            let status: String?             // "pending" | "wait" | "success" | "fail" | "progress"
+            let status: String?             // "pending" | "wait" | "success" | "fail" | "progress" (static fallback)
             let progress: Double?           // Progress value 0-100 (for status="progress")
+            let itemId: String?             // Links to items[] entry for dynamic status from completedItems/downloadingItems
         }
 
         // Bento grid fields (for type="bento-grid")
@@ -827,6 +987,7 @@ struct InspectConfig: Codable {
         let bentoColumns: Int?              // Grid columns (default: 4)
         let bentoRowHeight: Double?         // Base row height in points (default: 140)
         let bentoGap: Double?               // Gap between cells in points (default: 12)
+        let bentoTintColor: String?         // Base hex color for auto-tinting cells without explicit backgroundColor
         let bentoCells: [BentoCellConfig]?  // Cell definitions
 
         // Bento cell configuration for bento-grid type
@@ -859,6 +1020,9 @@ struct InspectConfig: Codable {
             // Cell styling
             let backgroundColor: String?    // Hex color for cell background
             let cornerRadius: Double?       // Corner radius (default: 12)
+
+            // Category label — small-caps text above the title (e.g. "SECURITY", "APPS")
+            let label: String?
 
             // Interaction - opens detail overlay when tapped
             let detailOverlay: DetailOverlayConfig?
@@ -925,14 +1089,14 @@ struct InspectConfig: Codable {
         let sectionHeaderPending: String?    // Pending section header (default: "Pending Installation")
         let sectionHeaderFailed: String?     // Failed section header (default: "Installation Failed")
 
-        // Step/Item workflow status labels (used in Preset8 onboarding and multi-step flows)
+        // Step/Item workflow status labels (used in onboarding and multi-step flows)
         let statusConditionMet: String?     // Status when validation passes (default: "Condition Met")
         let statusConditionNotMet: String?  // Status when validation fails (default: "Condition Not Met")
         let statusChecking: String?         // Status during validation/download (default: "Checking...")
         let statusReadyToStart: String?     // Initial state status (default: "Ready to Start")
         let statusInProgress: String?       // Active step status (default: "In Progress")
 
-        // MARK: - Preset9 Guide Layout Labels
+        // MARK: - Guide Layout Labels
         // Welcome screen customization
         let welcomeTitle: String?           // Welcome page title (default: "Welcome")
         let welcomeBadge: String?           // Welcome badge text (default: "GETTING STARTED")
@@ -967,7 +1131,7 @@ struct InspectConfig: Codable {
 
     /// Picker configuration (Global - all presets with picker support)
     /// Enables presets to function as single or multi-select pickers
-    /// Used by Preset8, Preset9, and future presets that support picker mode
+    /// Used by legacy presets, and future presets that support picker mode
     struct PickerConfig: Codable {
         let selectionMode: String?          // "single" | "multi" | "none" (default: "none" = standard mode)
         let returnSelections: Bool?         // Write selections to output plist (default: false)
@@ -987,7 +1151,7 @@ struct InspectConfig: Codable {
 
     /// Picker mode labels (Global - all presets with picker support)
     /// Used when a preset operates in single-select or multi-select picker mode
-    /// This provides consistent picker UI text across Preset8, Preset9, and future presets
+    /// This provides consistent picker UI text across legacy presets, and future presets
     struct PickerLabels: Codable {
         // Selection action buttons
         let selectButtonText: String?       // Selection button text (default: "Select This")
@@ -1130,7 +1294,7 @@ struct InspectConfig: Codable {
         }
     }
 
-    // MARK: - Portal/WebView Configuration (Preset11)
+    // MARK: - Portal/WebView Configuration (Preset5)
 
     /// Self-service portal configuration with authenticated WebView
     /// Enables embedding IT self-service portals with token-based authentication
@@ -1157,7 +1321,7 @@ struct InspectConfig: Codable {
         let cacheContentForOffline: Bool?       // Cache HTML for offline viewing (default: true)
         let cacheDuration: Int?                 // Cache validity in seconds (default: 86400 = 24 hours)
         let userAgent: String?                  // Custom User-Agent for web requests (e.g., "swiftdialog.self-service/1.0")
-        let stateDomain: String?                // UserDefaults domain for state persistence (default: "com.swiftdialog.preset11")
+        let stateDomain: String?                // UserDefaults domain for state persistence (default: "com.swiftdialog.preset5")
         let selfServiceOnly: Bool?              // Skip outro screens, go directly to exit after portal (default: false)
         let brandingKey: String?                // Branding identifier value (e.g., "corporate", "division-a", "tenant-123")
         let brandingHeaderName: String?         // Header name for branding (default: "X-Brand-ID", or "X-Tenant-ID", "X-Org-ID", "X-Theme-ID", etc.)
@@ -1165,6 +1329,10 @@ struct InspectConfig: Codable {
         let clientCertSubject: String?          // Client certificate subject for mTLS
         let button1Text: String?                // Portal-specific primary button text (overrides global button1text)
         let button2Text: String?                // Portal-specific secondary button text (overrides global button2text)
+        let ephemeralSession: Bool?             // Use non-persistent data store (default: false — persistent, backwards-compatible)
+        let errorDetectionPhrases: [String]?    // DOM phrases that indicate an error page (opt-in, default: empty)
+        let errorDetectionThreshold: Int?       // Number of phrase matches to trigger error state (default: 2)
+        let openExternalLinksInBrowser: Bool?   // Open non-portal links in default browser (default: true)
 
         /// Authentication source configuration - where to find credentials
         struct AuthSources: Codable {
@@ -1219,6 +1387,8 @@ struct InspectConfig: Codable {
         let introButtonTextKey: String?         // MDM key → intro continue button text
         let outroTitleKey: String?              // MDM key → outro screen title
         let outroButtonTextKey: String?         // MDM key → outro close button text
+
+        let allowedBrandsKey: String?              // MDM key → array of allowed brand IDs (for brand picker filtering)
 
         let customKeys: [String: String]?       // Additional key mappings for extension
     }
@@ -1467,6 +1637,9 @@ struct InspectConfig: Codable {
         // Portal/WebView configuration
         try container.encodeIfPresent(portalConfig, forKey: .portalConfig)
         try container.encodeIfPresent(appConfigSource, forKey: .appConfigSource)
+        // Brand selection (multi-brand onboarding)
+        try container.encodeIfPresent(brands, forKey: .brands)
+        try container.encodeIfPresent(brandSelectionKey, forKey: .brandSelectionKey)
         // Brand palette configuration
         try container.encodeIfPresent(brandPalette, forKey: .brandPalette)
         // Footer branding
@@ -1507,7 +1680,12 @@ struct InspectConfig: Codable {
         sideInterval = try container.decodeIfPresent(Int.self, forKey: .sideInterval)
         style = try container.decodeIfPresent(String.self, forKey: .style)
         liststyle = try container.decodeIfPresent(String.self, forKey: .liststyle)
-        preset = try container.decode(String.self, forKey: .preset)
+        // Accept both "11" (string) and 11 (int) for preset
+        if let stringValue = try? container.decode(String.self, forKey: .preset) {
+            preset = stringValue
+        } else {
+            preset = String(try container.decode(Int.self, forKey: .preset))
+        }
         popupButton = try container.decodeIfPresent(String.self, forKey: .popupButton)
         highlightColor = try container.decodeIfPresent(String.self, forKey: .highlightColor)
         secondaryColor = try container.decodeIfPresent(String.self, forKey: .secondaryColor)
@@ -1558,6 +1736,7 @@ struct InspectConfig: Codable {
         imageSyncMode = try container.decodeIfPresent(String.self, forKey: .imageSyncMode)
         stepStyle = try container.decodeIfPresent(String.self, forKey: .stepStyle)
         listIndicatorStyle = try container.decodeIfPresent(String.self, forKey: .listIndicatorStyle)
+        progressMode = try container.decodeIfPresent(String.self, forKey: .progressMode)
         progressBarConfig = try container.decodeIfPresent(ProgressBarConfig.self, forKey: .progressBarConfig)
         logoConfig = try container.decodeIfPresent(LogoConfig.self, forKey: .logoConfig)
         detailOverlay = try container.decodeIfPresent(DetailOverlayConfig.self, forKey: .detailOverlay)
@@ -1566,6 +1745,12 @@ struct InspectConfig: Codable {
         triggerFile = try container.decodeIfPresent(String.self, forKey: .triggerFile)
         skipPortal = try container.decodeIfPresent(Bool.self, forKey: .skipPortal)
         debugMode = try container.decodeIfPresent(Bool.self, forKey: .debugMode)
+
+        // IPC (ignitecli integration)
+        readinessFile = try container.decodeIfPresent(String.self, forKey: .readinessFile)
+        resultFile = try container.decodeIfPresent(String.self, forKey: .resultFile)
+        eventFile = try container.decodeIfPresent(String.self, forKey: .eventFile)
+        deferralConfig = try container.decodeIfPresent(DeferralConfig.self, forKey: .deferralConfig)
 
         // Log monitoring configuration
         logMonitor = try container.decodeIfPresent(LogMonitorConfig.self, forKey: .logMonitor)
@@ -1577,6 +1762,13 @@ struct InspectConfig: Codable {
 
         // Preferences output configuration
         preferencesOutput = try container.decodeIfPresent(PreferencesOutputConfig.self, forKey: .preferencesOutput)
+
+        // Brand selection (multi-brand onboarding)
+        brands = try container.decodeIfPresent([BrandConfig].self, forKey: .brands)
+        brandSelectionKey = try container.decodeIfPresent(String.self, forKey: .brandSelectionKey)
+
+        // Localization (intro step text)
+        localization = try container.decodeIfPresent(LocalizationConfig.self, forKey: .localization)
 
         // Brand palette configuration
         brandPalette = try container.decodeIfPresent(BrandPalette.self, forKey: .brandPalette)
@@ -1592,8 +1784,12 @@ struct InspectConfig: Codable {
         // Default to empty array if items not provided
         items = try container.decodeIfPresent([ItemConfig].self, forKey: .items) ?? []
 
-        // Intro/outro screens (Preset11)
+        // Intro/outro screens (Preset5)
         introSteps = try container.decodeIfPresent([IntroStep].self, forKey: .introSteps)
+
+        // Preset1/2 multi-screen flow
+        introScreen = try container.decodeIfPresent(PresetIntroScreen.self, forKey: .introScreen)
+        summaryScreen = try container.decodeIfPresent(PresetSummaryScreen.self, forKey: .summaryScreen)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -1623,21 +1819,31 @@ struct InspectConfig: Codable {
         case introSteps
         // Preset6 specific properties
         case iconBasePath, overlayicon, rotatingImages, imageRotationInterval, imageShape, imageSyncMode, stepStyle, listIndicatorStyle
+        // Progress mode (Preset4 toast installer)
+        case progressMode
         // Progress bar configuration
         case progressBarConfig
         // Logo overlay configuration
         case logoConfig
         // Detail overlay, help button, action pipe, trigger file, skip portal, and debug mode configuration
         case detailOverlay, helpButton, actionPipe, triggerFile, skipPortal, debugMode
+        // IPC (ignitecli integration)
+        case readinessFile, resultFile, eventFile, deferralConfig
         // Log monitoring configuration
         case logMonitor, logMonitors
         // Portal/WebView configuration
         case portalConfig, appConfigSource
         // Preferences output configuration
         case preferencesOutput
+        // Brand selection (multi-brand onboarding)
+        case brands, brandSelectionKey
+        // Localization (intro step text)
+        case localization
         // Brand palette configuration
         case brandPalette
         // Footer branding
         case accentBorderColor, footerBackgroundColor, footerTextColor, footerText, copyrightText, supportText
+        // Preset1/2 multi-screen flow
+        case introScreen, summaryScreen
     }
 }

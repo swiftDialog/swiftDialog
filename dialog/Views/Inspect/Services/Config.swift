@@ -260,7 +260,7 @@ enum ConfigurationError: Error, LocalizedError {
         case "guiIndex":
             return "Add \"guiIndex\": 0 to each item. This determines the display order (0 = first)."
         case "preset":
-            return "Add \"preset\": \"preset1\" at the root level. Valid: preset1-9, or named: deployment, cards, compact, compliance, dashboard, guidance, guide, onboarding, display."
+            return "Add \"preset\": \"preset1\" at the root level. Valid: preset1-6, or named: deployment, cards, compact, toast, portal, self-service, guidance."
         case "items":
             return "Add \"items\": [] at the root level. This array contains the items to display."
         case "title":
@@ -605,11 +605,12 @@ class Config {
                         {
                             "type": "bullets",
                             "items": [
-                                "Preset 1-5: Classic list-based installation monitors",
-                                "Preset 6: Step-by-step wizard with side navigation",
-                                "Preset 7: Grid-based app launcher style",
-                                "Preset 8-9: Compliance and validation dashboards",
-                                "Preset 10-11: Modern guided onboarding flows"
+                                "Preset 1: Sidebar deployment with item list",
+                                "Preset 2: Card carousel layout",
+                                "Preset 3: Compact list with gradient",
+                                "Preset 4: Compact toast installer",
+                                "Preset 5: Unified portal with intro wizard",
+                                "Preset 6: Modern sidebar navigation"
                             ]
                         }
                     ],
@@ -879,14 +880,12 @@ class Config {
         
         let validPresets = [
             // Full names
-            "preset1", "preset2", "preset3", "preset4", "preset5",
-            "preset6", "preset7", "preset8", "preset9", "preset11",
+            "preset1", "preset2", "preset3", "preset4", "preset5", "preset6",
             // Numeric shorthand
-            "1", "2", "3", "4", "5", "6", "7", "8", "9", "11",
-            // Marketing names
-            "deployment", "cards", "compact", "compliance",
-            "dashboard", "guidance", "guide", "onboarding", "display",
-            "portal", "self-service", "webview-portal"
+            "1", "2", "3", "4", "5", "6",
+            // Aliases
+            "deployment", "cards", "compact", "toast", "compact-installer",
+            "portal", "self-service", "webview-portal", "guidance", "modern-sidebar"
         ]
         if !validPresets.contains(config.preset.lowercased()) {
             warnings.append("Unknown preset '\(config.preset)' - will default to preset1")
@@ -1094,7 +1093,7 @@ class Config {
             }
         }
 
-        // Preset8/9 (Picker): Should have pickerConfig
+        // legacy presets (Picker): Should have pickerConfig
         if preset == "8" || preset == "9" {
             if config.pickerConfig == nil {
                 warnings.append("⚠️ Preset\(preset): Missing 'pickerConfig' - recommended for picker mode")
@@ -1323,6 +1322,7 @@ class Config {
         // Preset6 specific properties
         if let iconBasePath = config.iconBasePath {
             uiConfig.iconBasePath = iconBasePath
+            ImageResolver.shared.configBasePath = iconBasePath
         }
 
         if let overlayicon = config.overlayicon {

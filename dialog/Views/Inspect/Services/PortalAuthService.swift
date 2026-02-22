@@ -4,7 +4,7 @@
 //
 //  Created by Henry Stamerjohann, Declarative IT GmbH, 17/01/2026
 //
-//  Generic authentication service for self-service portal integration (Preset11)
+//  Generic authentication service for self-service portal integration (Preset5)
 //  Supports pluggable authentication providers for different portal types
 //
 

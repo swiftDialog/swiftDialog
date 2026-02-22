@@ -31,7 +31,7 @@ struct WallpaperPickerView: View {
     let confirmButtonText: String?  // Optional confirm button text
     let multiSelectCount: Int  // Number of monitors (0 = single select)
     let scaleFactor: CGFloat
-    var centered: Bool = false  // Center-align content (for Preset11)
+    var centered: Bool = false  // Center-align content (for Preset5)
     var layout: WallpaperLayout = .categories  // Layout mode (default: categories for backwards compatibility)
     @ObservedObject var inspectState: InspectState
     let itemId: String
@@ -252,9 +252,16 @@ struct WallpaperPickerView: View {
                 .padding(.top, 8 * scaleFactor)
             }
         }
+        .onDisappear {
+            // Auto-commit any pending selections when the step transitions away
+            if !isConfirmed && !pendingSelections.isEmpty {
+                confirmSelection()
+            }
+        }
     }
 
     private func handleTileSelection(_ path: String) {
+        writeLog("WallpaperPicker: handleTileSelection '\(path)' confirmButton=\(confirmButtonText ?? "nil") multiSelect=\(isMultiSelect)", logLevel: .debug)
         if isMultiSelect {
             // Multi-select: assign to current monitor
             // Same wallpaper can be assigned to multiple monitors

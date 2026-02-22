@@ -1,10 +1,10 @@
 //
-//  ContentBlockRenderer.swift
+// ContentBlockRenderer.swift
 //  Dialog
 //
 //  Created by Henry Stamerjohann, Declarative IT GmbH
 //
-//  Shared content block renderer for Preset6 and Preset11
+//  Shared content block renderer for Preset6 and Preset5
 //  Provides consistent rendering of GuidanceContent blocks across presets
 //
 
@@ -13,7 +13,7 @@ import SwiftUI
 // MARK: - Content Block Renderer
 
 /// Main dispatcher for rendering GuidanceContent blocks
-/// Used by Preset6 and Preset11 for consistent content rendering
+/// Used by Preset6 and Preset5 for consistent content rendering
 struct ContentBlockRenderer {
     let accentColor: Color
     let maxWidth: CGFloat
