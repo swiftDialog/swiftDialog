@@ -1126,7 +1126,9 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         return uiConfiguration.sideMessages[index]
     }
     
-    /// Create a sample configuration file on Desktop when in demo mode
+    /// Create a sample Preset 5 configuration file and print launch instructions.
+    /// Called automatically in `.testData` mode. Writes a 3-step workflow
+    /// (intro → bento → deployment) using only SF Symbols — no external assets needed.
     func createSampleConfiguration() {
         // Only works in test data mode
         guard configurationSource == .testData else {
@@ -1136,47 +1138,190 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
 
         let sampleConfig = """
         {
-            "title": "My Installation",
-            "message": "Installing required applications",
-            "preset": "preset2",
-            "icon": "sf=app.badge.checkmark.fill",
-            "iconBasePath": "\(NSTemporaryDirectory())dialog/icons",
-            "cachePaths": ["\(NSTemporaryDirectory())dialog/icons"],
-            "button1text": "OK",
-            "button2text": "Cancel",
-            "items": [
+            "preset": "5",
+            "width": 1000,
+            "height": 650,
+            "highlightColor": "#007AFF",
+            "introSteps": [
                 {
-                    "id": "app1",
-                    "displayName": "Application 1",
-                    "guiIndex": 0,
-                    "paths": ["/Applications/App1.app"],
-                    "icon": "app1.png"
+                    "id": "welcome",
+                    "stepType": "intro",
+                    "title": "swiftDialog — Inspect Mode",
+                    "subtitle": "A sample configuration to get you started.",
+                    "heroImage": "SF=macbook.gen2",
+                    "heroImageSize": 180,
+                    "content": [
+                        {
+                            "type": "text",
+                            "content": "This is a Preset 5 workflow. Each step uses a different layout — intro, bento grid, and deployment — to demonstrate what's possible."
+                        }
+                    ],
+                    "continueButtonText": "Explore",
+                    "showBackButton": false
                 },
                 {
-                    "id": "app2",
-                    "displayName": "Application 2",
-                    "guiIndex": 1,
-                    "paths": ["/Applications/App2.app"],
-                    "icon": "app2.png"
+                    "id": "presets-overview",
+                    "stepType": "bento",
+                    "bentoLayout": "grid",
+                    "title": "6 Preset Layouts",
+                    "subtitle": "Tap any card to learn more",
+                    "bentoColumns": 3,
+                    "bentoRowHeight": 140,
+                    "bentoGap": 12,
+                    "bentoCells": [
+                        {
+                            "id": "preset1",
+                            "column": 0, "row": 0, "columnSpan": 1, "rowSpan": 1,
+                            "contentType": "icon",
+                            "sfSymbol": "sidebar.leading",
+                            "iconSize": 36,
+                            "title": "Preset 1",
+                            "label": "DEPLOYMENT",
+                            "detailOverlay": {
+                                "title": "Preset 1 — Deployment",
+                                "subtitle": "Sidebar + scrollable item list",
+                                "icon": "sidebar.leading",
+                                "content": [
+                                    { "type": "text", "content": "The classic deployment layout. A sidebar shows a hero icon and overall progress, while the main area lists items with real-time status updates." },
+                                    { "type": "bullets", "items": ["Sidebar with hero icon and progress bar", "Scrollable item list with status indicators", "File-system monitoring via paths array", "Rotating status messages"] }
+                                ]
+                            }
+                        },
+                        {
+                            "id": "preset2",
+                            "column": 1, "row": 0, "columnSpan": 1, "rowSpan": 1,
+                            "contentType": "icon",
+                            "sfSymbol": "rectangle.split.3x1",
+                            "iconSize": 36,
+                            "title": "Preset 2",
+                            "label": "CARDS",
+                            "detailOverlay": {
+                                "title": "Preset 2 — Cards",
+                                "subtitle": "Horizontal card carousel",
+                                "icon": "rectangle.split.3x1",
+                                "content": [
+                                    { "type": "text", "content": "Items displayed as cards in a horizontal carousel. Great for visual app catalogs where each card shows an icon, name, and install status." },
+                                    { "type": "bullets", "items": ["Horizontal scrolling card layout", "Large app icons with status badges", "Progress bar across the top", "Auto-advances on completion"] }
+                                ]
+                            }
+                        },
+                        {
+                            "id": "preset3",
+                            "column": 2, "row": 0, "columnSpan": 1, "rowSpan": 1,
+                            "contentType": "icon",
+                            "sfSymbol": "list.bullet.rectangle",
+                            "iconSize": 36,
+                            "title": "Preset 3",
+                            "label": "COMPACT",
+                            "detailOverlay": {
+                                "title": "Preset 3 — Compact",
+                                "subtitle": "Compact list with gradient background",
+                                "icon": "list.bullet.rectangle",
+                                "content": [
+                                    { "type": "text", "content": "A space-efficient list layout with a gradient background. Ideal for quick installations where you want minimal screen footprint." },
+                                    { "type": "bullets", "items": ["Compact item rows", "Gradient background from brand colors", "Small window footprint", "Clean, minimal design"] }
+                                ]
+                            }
+                        },
+                        {
+                            "id": "preset4",
+                            "column": 0, "row": 1, "columnSpan": 1, "rowSpan": 1,
+                            "contentType": "icon",
+                            "sfSymbol": "bell.badge",
+                            "iconSize": 36,
+                            "title": "Preset 4",
+                            "label": "TOAST",
+                            "detailOverlay": {
+                                "title": "Preset 4 — Toast Installer",
+                                "subtitle": "Compact notification-style installer",
+                                "icon": "bell.badge",
+                                "content": [
+                                    { "type": "text", "content": "A small, unobtrusive toast notification that tracks installations in the corner of the screen. Stays out of the user's way." },
+                                    { "type": "bullets", "items": ["Notification-sized window", "Corner-anchored positioning", "Progress tracking with minimal UI", "Non-intrusive for background installs"] }
+                                ]
+                            }
+                        },
+                        {
+                            "id": "preset5",
+                            "column": 1, "row": 1, "columnSpan": 1, "rowSpan": 1,
+                            "contentType": "icon",
+                            "sfSymbol": "macwindow.on.rectangle",
+                            "iconSize": 36,
+                            "title": "Preset 5",
+                            "label": "UNIFIED",
+                            "detailOverlay": {
+                                "title": "Preset 5 — Unified Portal",
+                                "subtitle": "The most flexible preset (this sample)",
+                                "icon": "macwindow.on.rectangle",
+                                "content": [
+                                    { "type": "text", "content": "A multi-step wizard with 9 step types. Combine intro screens, bento grids, deployment tracking, carousels, guides, and more in a single workflow." },
+                                    { "type": "bullets", "items": ["9 step types: intro, bento, deployment, carousel, guide, showcase, portal, processing, outro", "Linear navigation with back/continue", "55+ content block types", "Branding, forms, compliance checks"] }
+                                ]
+                            }
+                        },
+                        {
+                            "id": "preset6",
+                            "column": 2, "row": 1, "columnSpan": 1, "rowSpan": 1,
+                            "contentType": "icon",
+                            "sfSymbol": "sidebar.squares.leading",
+                            "iconSize": 36,
+                            "title": "Preset 6",
+                            "label": "GUIDANCE",
+                            "detailOverlay": {
+                                "title": "Preset 6 — Modern Sidebar",
+                                "subtitle": "Sidebar navigation with guided content",
+                                "icon": "sidebar.squares.leading",
+                                "content": [
+                                    { "type": "text", "content": "A modern sidebar navigation layout. Users can jump between sections freely rather than following a linear path." },
+                                    { "type": "bullets", "items": ["Sidebar with section navigation", "Non-linear — jump to any section", "Rich guidance content per section", "Great for self-service portals"] }
+                                ]
+                            }
+                        }
+                    ],
+                    "continueButtonText": "Continue",
+                    "backButtonText": "Back"
+                },
+                {
+                    "id": "apps",
+                    "stepType": "deployment",
+                    "title": "App Installation",
+                    "subtitle": "Simulated deployment step with progress tracking.",
+                    "heroImage": "SF=arrow.down.app.fill",
+                    "items": [
+                        { "id": "safari", "displayName": "Safari", "guiIndex": 0, "icon": "/Applications/Safari.app", "paths": ["/Applications/Safari.app"] },
+                        { "id": "calculator", "displayName": "Calculator", "guiIndex": 1, "icon": "/System/Applications/Calculator.app", "paths": ["/System/Applications/Calculator.app"] },
+                        { "id": "textedit", "displayName": "TextEdit", "guiIndex": 2, "icon": "/System/Applications/TextEdit.app", "paths": ["/System/Applications/TextEdit.app"] }
+                    ],
+                    "continueButtonText": "Finish",
+                    "showBackButton": true
                 }
             ]
         }
         """
 
         let configPath = NSTemporaryDirectory() + "inspect-config-sample.json"
+        let divider = String(repeating: "━", count: 66)
 
         do {
             try sampleConfig.write(toFile: configPath, atomically: true, encoding: .utf8)
             writeLog("InspectState: Sample configuration created at: \(configPath)", logLevel: .info)
 
-            // Show instructions in terminal
-            print("\nSample configuration created at: \(configPath)")
-            print("\nTo use this configuration:")
-            print("1. Edit the file to match your needs")
-            print("2. Place icon files in \(NSTemporaryDirectory())dialog/icons/ (PNG format recommended)")
-            print("3. Export the environment variable:")
-            print("   export DIALOG_INSPECT_CONFIG=\"\(configPath)\"")
-            print("4. Run swiftDialog with --inspect flag")
+            print("")
+            print(divider)
+            print("  Sample Configuration Created")
+            print(divider)
+            print("")
+            print("  ✓ Preset: 5 (unified)")
+            print("  ✓ Steps:  3 (intro → bento → deployment)")
+            print("  ✓ File:   \(configPath)")
+            print("")
+            print("  Launch it:")
+            print("  → dialogcli --inspect-config \"\(configPath)\" --inspect-mode")
+            print("")
+            print("  Or copy and customize:")
+            print("  → cp \"\(configPath)\" ~/Desktop/my-config.json")
+            print("")
+            print(divider)
             print("")
 
             // Exit with special code to indicate config was created
