@@ -1,5 +1,5 @@
 //
-//  IntroStepMonitorService.swift
+// IntroStepMonitorService.swift
 //  Dialog
 //
 //  Created by Henry Stamerjohann, Declarative IT GmbH
@@ -55,6 +55,8 @@ class IntroStepMonitorService: ObservableObject {
     private var completionCallback: CompletionTriggerCallback?
     private var currentStepId: String = ""
     private var triggeredMonitors: Set<Int> = []  // Track which monitors have already triggered (by guidanceBlockIndex)
+    private var completionMode: String = "any"    // "any" (default) | "all" — how multiple completionTriggers combine
+    private var monitorsWithTriggers: Int = 0     // Count of monitors that have a completionTrigger configured
 
     // MARK: - Initialization
 
@@ -85,6 +87,8 @@ class IntroStepMonitorService: ObservableObject {
         completionCallback = onCompletionTrigger
         currentStepId = step.id
         triggeredMonitors.removeAll()
+        completionMode = step.completionMode ?? "any"
+        monitorsWithTriggers = plistMonitors.filter { $0.completionTrigger != nil }.count
 
         // Initialize content states for each monitored block
         for monitor in monitors {
@@ -122,6 +126,8 @@ class IntroStepMonitorService: ObservableObject {
         completionCallback = onCompletionTrigger
         currentStepId = item.id
         triggeredMonitors.removeAll()
+        completionMode = item.completionMode ?? "any"
+        monitorsWithTriggers = plistMonitors.filter { $0.completionTrigger != nil }.count
 
         for monitor in monitors {
             if contentStates[monitor.guidanceBlockIndex] == nil {
@@ -147,6 +153,8 @@ class IntroStepMonitorService: ObservableObject {
         monitors.removeAll()
         completionCallback = nil
         triggeredMonitors.removeAll()
+        completionMode = "any"
+        monitorsWithTriggers = 0
         writeLog("IntroStepMonitorService: Stopped monitoring", logLevel: .debug)
     }
 
@@ -236,21 +244,26 @@ class IntroStepMonitorService: ObservableObject {
                 // Mark this monitor as triggered (only fires once)
                 triggeredMonitors.insert(monitor.guidanceBlockIndex)
 
-                let delay = trigger.delay ?? 0
-                let stepId = currentStepId
-                let callback = completionCallback
+                // In "all" mode, wait until every monitor with a trigger has fired
+                if completionMode == "all" && triggeredMonitors.count < monitorsWithTriggers {
+                    writeLog("IntroStepMonitorService: Trigger fired for monitor \(monitor.guidanceBlockIndex) (\(triggeredMonitors.count)/\(monitorsWithTriggers)), waiting for all", logLevel: .debug)
+                } else {
+                    let delay = trigger.delay ?? 0
+                    let stepId = currentStepId
+                    let callback = completionCallback
 
-                writeLog("IntroStepMonitorService: Completion trigger fired for step '\(stepId)' with result '\(trigger.result)', delay: \(delay)s", logLevel: .info)
+                    writeLog("IntroStepMonitorService: Completion trigger fired for step '\(stepId)' with result '\(trigger.result)', delay: \(delay)s (mode: \(completionMode))", logLevel: .info)
 
-                // Fire callback after optional delay
-                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                    let result: CompletionTriggerResult
-                    if trigger.result.lowercased() == "success" {
-                        result = .success(message: trigger.message)
-                    } else {
-                        result = .failure(message: trigger.message)
+                    // Fire callback after optional delay
+                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                        let result: CompletionTriggerResult
+                        if trigger.result.lowercased() == "success" {
+                            result = .success(message: trigger.message)
+                        } else {
+                            result = .failure(message: trigger.message)
+                        }
+                        callback?(stepId, result)
                     }
-                    callback?(stepId, result)
                 }
             }
         }
