@@ -293,17 +293,17 @@ class InspectPersistence<T: InspectPersistableState> {
 /// Example state structure for reference
 /// Presets should define their own states conforming to InspectPersistableState
 ///
-/// **Example 1: Basic Preset State (Preset7)**
+/// **Example 1: Basic Preset State**
 /// ```swift
-/// struct Preset7State: InspectPersistableState {
+/// struct PresetState: InspectPersistableState {
 ///     let completedSteps: Set<String>
 ///     let currentPage: Int
 ///     let currentStep: Int
 ///     let timestamp: Date
 /// }
 ///
-/// // Default filename: preset7_state.plist
-/// let persistence = InspectPersistence<Preset7State>(presetName: "preset7")
+/// // Default filename: preset5_state.plist
+/// let persistence = InspectPersistence<PresetState>(presetName: "preset5")
 /// ```
 ///
 /// **Example 2: Custom Filename for Multi-Instance Support**

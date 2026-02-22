@@ -188,6 +188,35 @@ class AppConfigService: ObservableObject {
         return mdm?.logoPath ?? jsonValue
     }
 
+    // MARK: - Array Preference Reading (Brand Picker)
+
+    /// Read a managed array preference (checks MDM forced, then falls back to simple)
+    func readManagedArrayPreference(domain: String, key: String) -> [String]? {
+        if UserDefaults.standard.objectIsForced(forKey: key, inDomain: domain) {
+            if let value = CFPreferencesCopyAppValue(key as CFString, domain as CFString),
+               let array = value as? [String] {
+                return array
+            }
+        }
+        return readSimpleArrayPreference(domain: domain, key: key)
+    }
+
+    /// Read an array preference without checking if managed (for testing/debugging)
+    func readSimpleArrayPreference(domain: String, key: String) -> [String]? {
+        if let value = CFPreferencesCopyAppValue(key as CFString, domain as CFString),
+           let array = value as? [String] {
+            return array
+        }
+        return nil
+    }
+
+    /// Load allowed brand IDs from MDM managed preferences
+    func loadAllowedBrandIds(source: InspectConfig.AppConfigSource?) -> [String]? {
+        guard let source = source, let key = source.allowedBrandsKey else { return nil }
+        let domain = source.domain ?? Bundle.main.bundleIdentifier ?? "com.dialog.branding"
+        return readManagedArrayPreference(domain: domain, key: key)
+    }
+
     // MARK: - Private Helpers
 
     /// Read a managed preference value using CFPreferences (reads from /Library/Managed Preferences/)

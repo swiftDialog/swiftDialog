@@ -880,7 +880,7 @@ class Config {
         let validPresets = [
             // Full names
             "preset1", "preset2", "preset3", "preset4", "preset5",
-            "preset6", "preset7", "preset8", "preset9", "preset11",
+            "preset6", "preset7", "preset8", "preset9", "preset5",
             // Numeric shorthand
             "1", "2", "3", "4", "5", "6", "7", "8", "9", "11",
             // Marketing names
@@ -1094,7 +1094,7 @@ class Config {
             }
         }
 
-        // Preset8/9 (Picker): Should have pickerConfig
+        // legacy presets (Picker): Should have pickerConfig
         if preset == "8" || preset == "9" {
             if config.pickerConfig == nil {
                 warnings.append("⚠️ Preset\(preset): Missing 'pickerConfig' - recommended for picker mode")
@@ -1323,6 +1323,7 @@ class Config {
         // Preset6 specific properties
         if let iconBasePath = config.iconBasePath {
             uiConfig.iconBasePath = iconBasePath
+            ImageResolver.shared.configBasePath = iconBasePath
         }
 
         if let overlayicon = config.overlayicon {
