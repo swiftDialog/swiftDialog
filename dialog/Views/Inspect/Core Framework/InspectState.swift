@@ -1140,8 +1140,8 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
             "message": "Installing required applications",
             "preset": "preset2",
             "icon": "sf=app.badge.checkmark.fill",
-            "iconBasePath": "/Users/Shared/dialog/icons",
-            "cachePaths": ["/Users/Shared/dialog/icons"],
+            "iconBasePath": "\(NSTemporaryDirectory())dialog/icons",
+            "cachePaths": ["\(NSTemporaryDirectory())dialog/icons"],
             "button1text": "OK",
             "button2text": "Cancel",
             "items": [
@@ -1163,7 +1163,7 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         }
         """
 
-        let configPath = "/Users/Shared/inspect-config-sample.json"
+        let configPath = NSTemporaryDirectory() + "inspect-config-sample.json"
 
         do {
             try sampleConfig.write(toFile: configPath, atomically: true, encoding: .utf8)
@@ -1173,7 +1173,7 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
             print("\nSample configuration created at: \(configPath)")
             print("\nTo use this configuration:")
             print("1. Edit the file to match your needs")
-            print("2. Place icon files in /Users/Shared/dialog/icons/ (PNG format recommended)")
+            print("2. Place icon files in \(NSTemporaryDirectory())dialog/icons/ (PNG format recommended)")
             print("3. Export the environment variable:")
             print("   export DIALOG_INSPECT_CONFIG=\"\(configPath)\"")
             print("4. Run swiftDialog with --inspect flag")
