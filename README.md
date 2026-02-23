@@ -4,14 +4,14 @@
 
 # swiftDialog
 
-swiftDialog is an [open source](https://github.com/bartreardon/Dialog/blob/main/LICENSE.md) admin utility for macOS 15 or later written in SwiftUI that presents custom dialogs, displays informative messages or can be used as a form to request user input.
- - For macOS 14 or earlier, use [v2.6.5](https://github.com/swiftDialog/swiftDialog/releases/tag/v2.5.6)
+swiftDialog is an [open source](https://github.com/bartreardon/Dialog/blob/main/LICENSE.md) admin utility for macOS 15 or later written in <img src="https://developer.apple.com/assets/elements/icons/swift/swift-64x64_2x.png" width=16>Swift and <img src="https://developer.apple.com/assets/elements/icons/swiftui/swiftui-256x256_2x.png" width=16>SwiftUI that presents custom dialogs, displays informative messages or can be used as a form to request user input.
+ - ⚠️ For macOS 14 or earlier, use [v2.6.5](https://github.com/swiftDialog/swiftDialog/releases/tag/v2.5.6)
 
 Latest releases can be found on the [Releases](https://github.com/bartreardon/Dialog/releases) page
 
 Detailed documentation and information can be found at [https://swiftdialog.app](https://swiftdialog.app/getting-started/introduction/)
 
-<img width="500" alt="swiftDialog Hero" src="https://github.com/user-attachments/assets/c4fadcbb-fd81-4e00-9a38-73a6b4000d99" />
+<img width="600" alt="swiftDialog Hero" src="https://github.com/user-attachments/assets/c4fadcbb-fd81-4e00-9a38-73a6b4000d99" />
 
 ## Appearance
 Every aspect of swiftDialog's appearance can be modified.
@@ -23,11 +23,6 @@ At the most simple level you need only give swiftDialog a [Title](https://swiftd
  * [Add Images](https://swiftdialog.app/basic-use/images/)
  * and lots more...
 
-## Commandline Options
-
-swiftDialog's interface is fully customised from a set of command line options.
-
-For details on all the available options, please read the [Command Line Options](https://github.com/bartreardon/Dialog/wiki/Command-Line-Options) page on the wiki.
 
 ****
 
