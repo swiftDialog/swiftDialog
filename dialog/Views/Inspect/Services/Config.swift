@@ -798,10 +798,8 @@ class Config {
     /// Get category from key prefix
     private func getCategoryFromKey(_ key: String, categoryPrefix: [String: String]?) -> String {
         if let prefixes = categoryPrefix {
-            for (prefix, category) in prefixes {
-                if key.hasPrefix(prefix) {
-                    return category
-                }
+            for (prefix, category) in prefixes where key.hasPrefix(prefix) {
+                return category
             }
         }
 
@@ -823,11 +821,9 @@ class Config {
 
         // Remove known prefixes
         let prefixes = ["audit_", "auth_", "icloud_", "os_", "pwpolicy_", "system_settings_", "sysprefs_"]
-        for prefix in prefixes {
-            if name.hasPrefix(prefix) {
-                name = String(name.dropFirst(prefix.count))
-                break
-            }
+        for prefix in prefixes where name.hasPrefix(prefix) {
+            name = String(name.dropFirst(prefix.count))
+            break
         }
 
         // Replace underscores with spaces and title case
@@ -988,21 +984,19 @@ class Config {
 
                 // Validate guidance content blocks
                 if let guidanceContent = item.guidanceContent {
-                    for (index, block) in guidanceContent.enumerated() {
-                        // Check button actions
-                        if block.type == "button" {
-                            if let action = block.action {
-                                if !validActions.contains(action.lowercased()) {
-                                    warnings.append("⚠️ \(itemPrefix): guidanceContent[\(index)] has invalid button action '\(action)' - expected one of: \(validActions.joined(separator: ", "))")
-                                }
-                                // Check request action has requestId
-                                if action.lowercased() == "request" && (block.requestId == nil || block.requestId?.isEmpty == true) {
-                                    warnings.append("⚠️ \(itemPrefix): guidanceContent[\(index)] button action='request' but no requestId provided")
-                                }
-                                // Check url action has url
-                                if action.lowercased() == "url" && (block.url == nil || block.url?.isEmpty == true) {
-                                    warnings.append("⚠️ \(itemPrefix): guidanceContent[\(index)] button action='url' but no url provided")
-                                }
+                    // Check button actions
+                    for (index, block) in guidanceContent.enumerated() where block.type == "button" {
+                        if let action = block.action {
+                            if !validActions.contains(action.lowercased()) {
+                                warnings.append("⚠️ \(itemPrefix): guidanceContent[\(index)] has invalid button action '\(action)' - expected one of: \(validActions.joined(separator: ", "))")
+                            }
+                            // Check request action has requestId
+                            if action.lowercased() == "request" && (block.requestId == nil || block.requestId?.isEmpty == true) {
+                                warnings.append("⚠️ \(itemPrefix): guidanceContent[\(index)] button action='request' but no requestId provided")
+                            }
+                            // Check url action has url
+                            if action.lowercased() == "url" && (block.url == nil || block.url?.isEmpty == true) {
+                                warnings.append("⚠️ \(itemPrefix): guidanceContent[\(index)] button action='url' but no url provided")
                             }
                         }
                     }

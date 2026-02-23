@@ -1078,33 +1078,31 @@ struct Preset6View: View, InspectLayoutProtocol {
                 // Check if form is filled
                 if let formState = inspectState.guidanceFormInputs[item.id] {
                     // Check for required fields
-                    for block in guidanceContent {
-                        if block.required == true {
-                            let fieldId = block.id ?? "field_\(guidanceContent.firstIndex(where: { $0.id == block.id }) ?? 0)"
+                    for block in guidanceContent where block.required == true {
+                        let fieldId = block.id ?? "field_\(guidanceContent.firstIndex(where: { $0.id == block.id }) ?? 0)"
 
-                            // Check based on input type
-                            let hasValue: Bool
-                            switch block.type {
-                            case "text_input":
-                                hasValue = formState.textfields[fieldId]?.isEmpty == false
-                            case "dropdown":
-                                hasValue = formState.dropdowns[fieldId]?.isEmpty == false
-                            case "slider":
-                                hasValue = formState.sliders[fieldId] != nil
-                            case "toggle":
-                                hasValue = formState.toggles[fieldId] != nil
-                            case "checkbox_group":
-                                hasValue = formState.checkboxes.keys.contains { $0.hasPrefix(fieldId) }
-                            case "radio_group":
-                                hasValue = formState.radios[fieldId]?.isEmpty == false
-                            default:
-                                hasValue = true
-                            }
+                        // Check based on input type
+                        let hasValue: Bool
+                        switch block.type {
+                        case "text_input":
+                            hasValue = formState.textfields[fieldId]?.isEmpty == false
+                        case "dropdown":
+                            hasValue = formState.dropdowns[fieldId]?.isEmpty == false
+                        case "slider":
+                            hasValue = formState.sliders[fieldId] != nil
+                        case "toggle":
+                            hasValue = formState.toggles[fieldId] != nil
+                        case "checkbox_group":
+                            hasValue = formState.checkboxes.keys.contains { $0.hasPrefix(fieldId) }
+                        case "radio_group":
+                            hasValue = formState.radios[fieldId]?.isEmpty == false
+                        default:
+                            hasValue = true
+                        }
 
-                            if !hasValue {
-                                writeLog("Preset6: Auto-start blocked - required field '\(fieldId)' not filled", logLevel: .debug)
-                                return
-                            }
+                        if !hasValue {
+                            writeLog("Preset6: Auto-start blocked - required field '\(fieldId)' not filled", logLevel: .debug)
+                            return
                         }
                     }
                 } else {

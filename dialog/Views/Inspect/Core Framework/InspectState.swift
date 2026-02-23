@@ -494,10 +494,8 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
             "Running script"
         ]
 
-        for prefix in updatingPrefixes {
-            if status.hasPrefix(prefix) {
-                return true
-            }
+        for prefix in updatingPrefixes where status.hasPrefix(prefix) {
+            return true
         }
 
         // Also check for percentage progress (e.g., "Downloading 45%")

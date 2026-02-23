@@ -91,10 +91,8 @@ class IntroStepMonitorService: ObservableObject {
         monitorsWithTriggers = plistMonitors.filter { $0.completionTrigger != nil }.count
 
         // Initialize content states for each monitored block
-        for monitor in monitors {
-            if contentStates[monitor.guidanceBlockIndex] == nil {
-                contentStates[monitor.guidanceBlockIndex] = DynamicContentState()
-            }
+        for monitor in monitors where contentStates[monitor.guidanceBlockIndex] == nil {
+            contentStates[monitor.guidanceBlockIndex] = DynamicContentState()
         }
 
         // Start polling timer
@@ -129,10 +127,8 @@ class IntroStepMonitorService: ObservableObject {
         completionMode = item.completionMode ?? "any"
         monitorsWithTriggers = plistMonitors.filter { $0.completionTrigger != nil }.count
 
-        for monitor in monitors {
-            if contentStates[monitor.guidanceBlockIndex] == nil {
-                contentStates[monitor.guidanceBlockIndex] = DynamicContentState()
-            }
+        for monitor in monitors where contentStates[monitor.guidanceBlockIndex] == nil {
+            contentStates[monitor.guidanceBlockIndex] = DynamicContentState()
         }
 
         let timer = Timer.scheduledTimer(withTimeInterval: refreshInterval, repeats: true) { [weak self] _ in

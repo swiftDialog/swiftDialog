@@ -193,10 +193,8 @@ class UnifiedMonitoringService: ObservableObject {
         writeLog("UnifiedMonitoringService: Starting monitoring for \(items.count) items", logLevel: .info)
 
         // Initialize all items as pending
-        for item in items {
-            if itemStatuses[item.id] == nil {
-                itemStatuses[item.id] = .pending
-            }
+        for item in items where itemStatuses[item.id] == nil {
+            itemStatuses[item.id] = .pending
         }
 
         // Set items for LogMonitorService

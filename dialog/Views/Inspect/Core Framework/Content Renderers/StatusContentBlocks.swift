@@ -570,9 +570,13 @@ struct ComplianceAllDetailsSheet: View {
     }
 
     private var statusColor: Color {
-        if overallPercentage >= 0.9 { return .green }
-        else if overallPercentage >= 0.7 { return .orange }
-        else { return .red }
+        if overallPercentage >= 0.9 {
+            return .green
+        } else if overallPercentage >= 0.7 {
+            return .orange
+        }else {
+            return .red
+        }
     }
 
     private var lastCheckFormatted: String {
@@ -908,9 +912,13 @@ private struct CategorySummaryCard: View {
     let onSelect: () -> Void
 
     private var statusColor: Color {
-        if category.score >= 0.9 { return .green }
-        else if category.score >= 0.7 { return .orange }
-        else { return .red }
+        if category.score >= 0.9 {
+            return .green
+        } else if category.score >= 0.7 {
+            return .orange
+        } else {
+            return .red
+        }
     }
 
     var body: some View {
@@ -1060,11 +1068,9 @@ private struct ComplianceItemRow: View {
         // Remove common prefixes
         var cleanId = id
         let prefixes = ["audit_", "os_", "pwpolicy_", "system_settings_", "system_", "auth_", "icloud_"]
-        for prefix in prefixes {
-            if cleanId.hasPrefix(prefix) {
-                cleanId = String(cleanId.dropFirst(prefix.count))
-                break
-            }
+        for prefix in prefixes where cleanId.hasPrefix(prefix) {
+            cleanId = String(cleanId.dropFirst(prefix.count))
+            break
         }
         return cleanId.replacingOccurrences(of: "_", with: " ").capitalized
     }
