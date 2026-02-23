@@ -1300,6 +1300,7 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                         { "id": "chrome", "displayName": "Google Chrome", "guiIndex": 4, "icon": "/Applications/Google Chrome.app", "paths": ["/Applications/Google Chrome.app"], "showBundleInfo": "all" }
                     ],
                     "autoEnableButton": false,
+                    "allowOverride": true,
                     "continueButtonText": "Finish",
                     "showBackButton": true
                 }
@@ -1324,7 +1325,7 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
             print("  ✓ File:   \(configPath)")
             print("")
             print("  Launch it:")
-            print("  → dialogcli --inspect-config \"\(configPath)\" --inspect-mode")
+            print("  → dialog --inspect-config \"\(configPath)\" --inspect-mode")
             print("")
             print("  Or copy and customize:")
             print("  → cp \"\(configPath)\" ~/Desktop/my-config.json")

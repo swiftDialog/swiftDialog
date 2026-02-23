@@ -261,7 +261,7 @@ struct StarterTemplateService {
         rm -f /var/tmp/dialog.log /var/tmp/dialog-inspect-trigger.txt
 
         # Launch
-        dialogcli --inspect-config "$SCRIPT_DIR/config.json" --inspect-mode
+        dialog --inspect-config "$SCRIPT_DIR/config.json" --inspect-mode
         """
     }
 

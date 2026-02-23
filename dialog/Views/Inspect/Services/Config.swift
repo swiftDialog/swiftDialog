@@ -669,6 +669,7 @@ class Config {
                         { "id": "chrome", "displayName": "Google Chrome", "guiIndex": 4, "icon": "/Applications/Google Chrome.app", "paths": ["/Applications/Google Chrome.app"], "showBundleInfo": "all" }
                     ],
                     "autoEnableButton": false,
+                    "allowOverride": true,
                     "continueButtonText": "Finish",
                     "showBackButton": true
                 }
