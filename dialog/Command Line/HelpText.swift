@@ -79,6 +79,8 @@ struct SDHelp {
             name=<fontname>           - accepts a font name or family
                                         list of available names can be determined with --\(appArguments.listFonts.long)
 
+            alignment=[left | right]  - Set the Title text alignment. Default is centred.
+
             weight=[thin | light | regular | medium | heavy | bold]
                 default is bold
 
@@ -515,6 +517,8 @@ struct SDHelp {
         To update progress text send "progresstext: <text>" command to the dialog command file
 
         Progress text is displayed underneath the progress bar
+
+        Use \(argument.progressTextAlignment.long) [left|right] to change the progress text alignment. Default is centred.
 """
 
         argument.statusLogFile.helpShort = "Set command file path"

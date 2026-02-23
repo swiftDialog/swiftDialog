@@ -19,7 +19,15 @@ struct TaskProgressView: View {
                         .progressViewStyle(TaskProgressViewStyle())
                 }
                 if observedData.args.progressText.present {
-                    Text(observedData.args.progressText.value)
+                    HStack {
+                        if observedData.args.progressTextAlignment.value.lowercased() == "right" {
+                            Spacer()
+                        }
+                        Text(observedData.args.progressText.value)
+                        if observedData.args.progressTextAlignment.value.lowercased() == "left" {
+                            Spacer()
+                        }
+                    }
                 }
             }
             .padding(.leading,appDefaults.sidePadding)

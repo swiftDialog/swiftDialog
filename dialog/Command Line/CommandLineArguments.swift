@@ -69,6 +69,7 @@ struct CommandLineArguments {
     var timerBar                 = CommandlineArgument(long: "timer", defaultValue: appDefaults.timerDefaultSeconds)
     var progressBar              = CommandlineArgument(long: "progress")
     var progressText             = CommandlineArgument(long: "progresstext", defaultValue: " ")
+    var progressTextAlignment    = CommandlineArgument(long: "progresstextalignment", defaultValue: " ")
     var mainImage                = CommandlineArgument(long: "image", short: "g")
     var mainImageCaption         = CommandlineArgument(long: "imagecaption")
     var windowWidth              = CommandlineArgument(long: "width", defaultValue: appvars.windowWidth)
@@ -274,6 +275,7 @@ extension CommandLineArguments {
                     case "timerBar": self.timerBar = argument
                     case "progressBar": self.progressBar = argument
                     case "progressText": self.progressText = argument
+                    case "progressTextAlignment": self.progressTextAlignment = argument
                     case "mainImage": self.mainImage = argument
                     case "mainImageCaption": self.mainImageCaption = argument
                     case "windowWidth": self.windowWidth = argument

@@ -17,8 +17,16 @@ struct MiniProgressView: View {
             VStack {
                 ProgressView(value: observedData.progressValue, total: observedData.progressTotal)
                     .progressViewStyle(TaskProgressViewStyle())
-                Text(observedData.args.progressText.value)
-                    .lineLimit(1)
+                HStack {
+                    if observedData.args.progressTextAlignment.value.lowercased() == "right" {
+                        Spacer()
+                    }
+                    Text(observedData.args.progressText.value)
+                        .lineLimit(1)
+                    if observedData.args.progressTextAlignment.value.lowercased() == "left" {
+                        Spacer()
+                    }
+                }
             }
         }
     }
@@ -45,12 +53,20 @@ struct MiniView: View {
             }
             VStack {
                 if observedData.args.titleOption.value != "none" {
-                    InlineText(observedData.args.titleOption.value, parser: ColoredMarkdownParser())
-                    //Text(observedData.args.titleOption.value)
-                        .font(.system(size: 18, weight: .semibold))
-                        .border(observedData.appProperties.debugBorderColour, width: 2)
-                        .padding(.top, 5)
-                        .lineLimit(1)
+                    HStack {
+                        if observedData.appProperties.titleFontAlignment.lowercased() == "right" {
+                            Spacer()
+                        }
+                        InlineText(observedData.args.titleOption.value, parser: ColoredMarkdownParser())
+                        //Text(observedData.args.titleOption.value)
+                            .font(.system(size: 18, weight: .semibold))
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .padding(.top, 5)
+                            .lineLimit(1)
+                        if observedData.appProperties.titleFontAlignment.lowercased() == "left" {
+                            Spacer()
+                        }
+                    }
 
                     Divider()
                         .frame(height: 1)
