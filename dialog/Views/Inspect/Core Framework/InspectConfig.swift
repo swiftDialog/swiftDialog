@@ -163,6 +163,7 @@ struct InspectConfig: Codable {
     // MARK: - Footer Branding (Cross-Preset)
     // These fields extend existing branding (highlightColor, logoConfig) with footer-specific options
     let accentBorderColor: String?          // Top accent border color (defaults to highlightColor if nil)
+    let showAccentBorder: Bool?             // Show top accent border ribbon (default: true)
     let footerBackgroundColor: String?      // Footer background color (hex)
     let footerTextColor: String?            // Footer text color (hex, for dark backgrounds)
     let footerText: String?                 // Text displayed in footer area
@@ -1644,6 +1645,7 @@ struct InspectConfig: Codable {
         try container.encodeIfPresent(brandPalette, forKey: .brandPalette)
         // Footer branding
         try container.encodeIfPresent(accentBorderColor, forKey: .accentBorderColor)
+        try container.encodeIfPresent(showAccentBorder, forKey: .showAccentBorder)
         try container.encodeIfPresent(footerBackgroundColor, forKey: .footerBackgroundColor)
         try container.encodeIfPresent(footerTextColor, forKey: .footerTextColor)
         try container.encodeIfPresent(footerText, forKey: .footerText)
@@ -1775,6 +1777,7 @@ struct InspectConfig: Codable {
 
         // Footer branding (cross-preset)
         accentBorderColor = try container.decodeIfPresent(String.self, forKey: .accentBorderColor)
+        showAccentBorder = try container.decodeIfPresent(Bool.self, forKey: .showAccentBorder)
         footerBackgroundColor = try container.decodeIfPresent(String.self, forKey: .footerBackgroundColor)
         footerTextColor = try container.decodeIfPresent(String.self, forKey: .footerTextColor)
         footerText = try container.decodeIfPresent(String.self, forKey: .footerText)
@@ -1842,7 +1845,7 @@ struct InspectConfig: Codable {
         // Brand palette configuration
         case brandPalette
         // Footer branding
-        case accentBorderColor, footerBackgroundColor, footerTextColor, footerText, copyrightText, supportText
+        case accentBorderColor, showAccentBorder, footerBackgroundColor, footerTextColor, footerText, copyrightText, supportText
         // Preset1/2 multi-screen flow
         case introScreen, summaryScreen
     }

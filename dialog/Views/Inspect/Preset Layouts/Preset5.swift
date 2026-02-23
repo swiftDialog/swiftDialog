@@ -442,11 +442,13 @@ struct Preset5View: View {
             mainContent
 
             // Persistent accent ribbon at top — stays across step transitions
-            VStack(spacing: 0) {
-                Rectangle()
-                    .fill(branding.primaryColor)
-                    .frame(height: 4)
-                Spacer()
+            if config?.showAccentBorder ?? true {
+                VStack(spacing: 0) {
+                    Rectangle()
+                        .fill(branding.primaryColor)
+                        .frame(height: 4)
+                    Spacer()
+                }
             }
 
             // Floating help button (if configured)
