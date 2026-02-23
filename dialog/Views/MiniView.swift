@@ -63,6 +63,8 @@ struct MiniView: View {
                             .border(observedData.appProperties.debugBorderColour, width: 2)
                             .padding(.top, 5)
                             .lineLimit(1)
+                            .padding([.leading, .trailing], 15)
+                            .foregroundColor(observedData.appProperties.titleFontColour)
                         if observedData.appProperties.titleFontAlignment.lowercased() == "left" {
                             Spacer()
                         }
