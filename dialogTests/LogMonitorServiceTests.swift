@@ -34,16 +34,19 @@ final class LogMonitorServiceTests: XCTestCase {
     // MARK: - LogPatternPreset Tests (Installomator)
     // Installomator log format: [YYYY-MM-DD HH:MM:SS] LEVEL: message
     
-    func regexForPreset(forPreset preset: LogPatternPreset, options: NSRegularExpression.MatchingOptions = []) -> String {
+    func regexForPreset(forPreset preset: LogPatternPreset, options: NSRegularExpression.Options = []) -> NSRegularExpression? {
         guard let regex = try? NSRegularExpression(pattern: preset.pattern, options: options) else {
             fputs("Invalid regex pattern: \(preset.pattern)", stderr)
-            return
+            return nil
         }
+        return regex
     }
 
     func testInstallomatorPresetMatchesDownloading() {
         let preset = LogPatternPreset.presets["installomator"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLine = "2026-02-22 15:23:13 : REQ   : googlechrome : Downloading https://dl.google.com/chrome/mac/stable/CHFA/googlechrome.dmg"
         let range = NSRange(testLine.startIndex..., in: testLine)
@@ -61,7 +64,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testInstallomatorPresetMatchesDownloadingPKG() {
         let preset = LogPatternPreset.presets["installomator"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLine = "2026-02-22 15:36:22 : REQ   : microsoftoutlook : Downloading https://go.microsoft.com/fwlink/?linkid=525137 to Microsoft Outlook.pkg"
         let range = NSRange(testLine.startIndex..., in: testLine)
@@ -77,7 +82,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testInstallomatorPresetMatchesMounting() {
         let preset = LogPatternPreset.presets["installomator"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLine = "2026-02-22 15:33:12 : INFO  : googlechrome : Mounting /var/folders/abc/googlechrome.dmg"
         let range = NSRange(testLine.startIndex..., in: testLine)
@@ -92,7 +99,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testInstallomatorPresetMatchesMounted() {
         let preset = LogPatternPreset.presets["installomator"]!
-        let regex = try! NSRegularExpression(pattern: preset.pattern, options: .anchorsMatchLines)
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLine = "2026-02-22 15:33:12 : INFO  : googlechrome : Mounted /Volumes/Google Chrome.app"
         let range = NSRange(testLine.startIndex..., in: testLine)
@@ -103,7 +112,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testInstallomatorPresetMatchesInstalledVersion() {
         let preset = LogPatternPreset.presets["installomator"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLine = "2026-02-22 15:33:15 : INFO  : googlechrome : Installed version: 117.0.5938.132"
         let range = NSRange(testLine.startIndex..., in: testLine)
@@ -118,7 +129,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testInstallomatorPresetMatchesCopy() {
         let preset = LogPatternPreset.presets["installomator"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+           return
+       }
 
         // Installomator uses "Copy" not "Copying": printlog "Copy $appPath to $targetDir"
         let testLine = "2026-02-22 15:34:00 : INFO  : googlechrome : Copy Google Chrome.app to /Applications"
@@ -134,7 +147,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testInstallomatorPresetMatchesVerifying() {
         let preset = LogPatternPreset.presets["installomator"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLine = "2026-02-22 15:34:05 : INFO  : microsoftoutlook : Verifying: Microsoft Outlook.pkg"
         let range = NSRange(testLine.startIndex..., in: testLine)
@@ -145,7 +160,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testInstallomatorPresetMatchesInstallingPKG() {
         let preset = LogPatternPreset.presets["installomator"]!
-        let regex = try! NSRegularExpression(pattern: preset.pattern, options: .anchorsMatchLines)
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLine = "2026-02-22 15:38:41 : INFO  : microsoftoutlook : Installing Microsoft Outlook.pkg to /"
         let range = NSRange(testLine.startIndex..., in: testLine)
@@ -156,7 +173,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testInstallomatorPresetMatchesRunningMsupdate() {
         let preset = LogPatternPreset.presets["installomator"]!
-        let regex = try! NSRegularExpression(pattern: preset.pattern, options: .anchorsMatchLines)
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLine = "2026-02-22 15:36:10 : INFO  : microsoftoutlook : Running msupdate --list"
         let range = NSRange(testLine.startIndex..., in: testLine)
@@ -167,7 +186,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testInstallomatorPresetDoesNotMatchStartEnd() {
         let preset = LogPatternPreset.presets["installomator"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         // Should NOT match the start/end banners (no useful status info)
         let startLine = "2026-02-22 15:23:00 : REQ   : microsoftword : ################## Start Installomator v. 10.9beta, date 2026-01-29"
@@ -179,7 +200,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testInstallomatorPresetDoesNotMatchInfoLines() {
         let preset = LogPatternPreset.presets["installomator"]!
-        let regex = try! NSRegularExpression(pattern: preset.pattern, options: .anchorsMatchLines)
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         // Should NOT match these non-actionable info lines
         let testLines = [
@@ -188,7 +211,7 @@ final class LogMonitorServiceTests: XCTestCase {
             "2026-02-22 15:23:13 : INFO  : microsoftword : name: Microsoft Word, appName: Microsoft Word.app",
             "2026-02-22 15:23:13 : WARN  : microsoftword : No previous app found",
             "2026-02-22 15:23:13 : INFO  : microsoftword : Latest version of Microsoft Word is 16.106",
-            "2026-02-22 15:39:33 : REQ   : microsoftoutlook : All done!",
+            "2026-02-22 15:39:33 : REQ   : microsoftoutlook : All done!"
         ]
 
         for testLine in testLines {
@@ -200,7 +223,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testInstallomatorPresetMatchesAllLogLevels() {
         let preset = LogPatternPreset.presets["installomator"]!
-        let regex = try! NSRegularExpression(pattern: preset.pattern, options: .anchorsMatchLines)
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         // REQ (3 chars, 2 spaces padding)
         let reqLine = "2026-02-22 15:23:13 : REQ   : microsoftword : Downloading https://example.com/word.pkg"
@@ -221,7 +246,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testShellPresetMatchesStatusFormat() {
         let preset = LogPatternPreset.presets["shell"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLine = "[STATUS] Installing dependencies"
         let range = NSRange(testLine.startIndex..., in: testLine)
@@ -236,7 +263,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testJamfPresetMatchesInfoLines() {
         let preset = LogPatternPreset.presets["jamf"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLine = "[2024-01-20 10:30:45] INFO - Running policy: Install Firefox"
         let range = NSRange(testLine.startIndex..., in: testLine)
@@ -247,7 +276,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testJamfPresetMatchesDebugLines() {
         let preset = LogPatternPreset.presets["jamf"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLine = "[2024-01-20 10:30:45] DEBUG - Checking policy scope"
         let range = NSRange(testLine.startIndex..., in: testLine)
@@ -258,7 +289,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testMunkiPresetMatchesInfoLines() {
         let preset = LogPatternPreset.presets["munki"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLine = "INFO: Installing Firefox-123.0.pkg"
         let range = NSRange(testLine.startIndex..., in: testLine)
@@ -275,36 +308,42 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testCustomPatternExtraction() {
         let pattern = #"^>>> (.+)$"#
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
-        
-        let testLine = ">>> Custom status message"
-        let range = NSRange(testLine.startIndex..., in: testLine)
-        let match = regex.firstMatch(in: testLine, range: range)
+        do {
+            let regex = try NSRegularExpression(pattern: pattern, options: .anchorsMatchLines)
+            let testLine = ">>> Custom status message"
+            let range = NSRange(testLine.startIndex..., in: testLine)
+            let match = regex.firstMatch(in: testLine, range: range)
 
-        XCTAssertNotNil(match)
-        if let match = match {
-            let captureRange = Range(match.range(at: 1), in: testLine)!
-            XCTAssertEqual(String(testLine[captureRange]), "Custom status message")
+            XCTAssertNotNil(match)
+            if let match = match {
+                let captureRange = Range(match.range(at: 1), in: testLine)!
+                XCTAssertEqual(String(testLine[captureRange]), "Custom status message")
+            }
+        } catch {
+            fputs("Invalid regex pattern: \(pattern) - \(error)", stderr)
         }
     }
 
     func testCustomPatternWithMultipleCaptureGroups() {
         let pattern = #"^\[(\w+)\]\s+(.+)$"#
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines)
+        do {
+            let regex = try NSRegularExpression(pattern: pattern, options: .anchorsMatchLines)
+            let testLine = "[INFO] Application started successfully"
+            let range = NSRange(testLine.startIndex..., in: testLine)
+            let match = regex.firstMatch(in: testLine, range: range)
 
-        let testLine = "[INFO] Application started successfully"
-        let range = NSRange(testLine.startIndex..., in: testLine)
-        let match = regex.firstMatch(in: testLine, range: range)
+            XCTAssertNotNil(match)
+            if let match = match {
+                // First capture group (level)
+                let levelRange = Range(match.range(at: 1), in: testLine)!
+                XCTAssertEqual(String(testLine[levelRange]), "INFO")
 
-        XCTAssertNotNil(match)
-        if let match = match {
-            // First capture group (level)
-            let levelRange = Range(match.range(at: 1), in: testLine)!
-            XCTAssertEqual(String(testLine[levelRange]), "INFO")
-
-            // Second capture group (message)
-            let messageRange = Range(match.range(at: 2), in: testLine)!
-            XCTAssertEqual(String(testLine[messageRange]), "Application started successfully")
+                // Second capture group (message)
+                let messageRange = Range(match.range(at: 2), in: testLine)!
+                XCTAssertEqual(String(testLine[messageRange]), "Application started successfully")
+            }
+        } catch {
+            fputs("Invalid regex pattern: \(pattern) - \(error)", stderr)
         }
     }
 
@@ -361,7 +400,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testInstallomatorPresetDoesNotMatchUnrelatedLines() {
         let preset = LogPatternPreset.presets["installomator"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines))
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLines = [
             "2024-01-20 10:30:45: Starting script",
@@ -379,7 +420,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testShellPresetDoesNotMatchMalformedLines() {
         let preset = LogPatternPreset.presets["shell"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines))
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLines = [
             "STATUS Installing dependencies",  // Missing brackets
@@ -518,8 +561,7 @@ final class LogMonitorServiceTests: XCTestCase {
 
         guard let jsonData = try? JSONSerialization.data(withJSONObject: json),
               let config = try? JSONDecoder().decode(InspectConfig.LogMonitorConfig.self, from: jsonData) else {
-            fputs("Failed to parse log monitor config\n", stderr)
-            return nil
+            fatalError("Failed to parse log monitor config")
         }
         return config
     }
@@ -528,7 +570,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testMacOSInstallerPresetMatchesExtractingPKG() {
         let preset = LogPatternPreset.presets["macos-installer"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines))
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLine = "2026-01-21 02:37:33+01 dev-mini installd[74805]: PackageKit: Extracting file://localhost/Users/admin/Downloads/Microsoft_365.pkg#Microsoft_Word_Internal.pkg (destination=/Applications)"
         let range = NSRange(testLine.startIndex..., in: testLine)
@@ -539,7 +583,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testMacOSInstallerPresetMatchesTouchedBundle() {
         let preset = LogPatternPreset.presets["macos-installer"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines))
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLine = "2026-01-21 02:00:08+01 dev-mini installd[1068]: PackageKit: Touched bundle /Applications/Microsoft Word.app"
         let range = NSRange(testLine.startIndex..., in: testLine)
@@ -550,7 +596,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testMacOSInstallerPresetMatchesInstalled() {
         let preset = LogPatternPreset.presets["macos-installer"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines))
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLine = "2026-01-21 02:37:35+01 dev-mini installd[74805]: Installed \"Stream Deck\" ()"
         let range = NSRange(testLine.startIndex..., in: testLine)
@@ -571,7 +619,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testMacOSInstallerPresetMatchesInstallFailed() {
         let preset = LogPatternPreset.presets["macos-installer"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines))
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLine = "2026-01-21 02:37:35+01 dev-mini installd[74805]: Install failed: Package requires restart"
         let range = NSRange(testLine.startIndex..., in: testLine)
@@ -582,7 +632,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testMacOSInstallerPresetMatchesPackageKitInstallFailed() {
         let preset = LogPatternPreset.presets["macos-installer"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines))
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLine = "2026-01-21 02:37:35+01 dev-mini installd[74805]: PackageKit: Install Failed: Error Domain=PKInstallErrorDomain Code=102"
         let range = NSRange(testLine.startIndex..., in: testLine)
@@ -593,7 +645,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testMacOSInstallerPresetMatchesInstallerError() {
         let preset = LogPatternPreset.presets["macos-installer"]!
-        let regex = regexForPreset(preset: preset, options: .anchorsMatchLines))
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         let testLine = "2026-01-21 02:37:35+01 dev-mini installer[74805]: installer: Error: Unable to verify package signature"
         let range = NSRange(testLine.startIndex..., in: testLine)
@@ -626,7 +680,9 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testRealInstallomatorSessionFullFlow() {
         let preset = LogPatternPreset.presets["installomator"]!
-        let regex = try! NSRegularExpression(pattern: preset.pattern, options: .anchorsMatchLines)
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         // Real log lines from an actual microsoftonenote install session
         let logLines: [(line: String, shouldMatch: Bool, expectedCleanup: String?)] = [
@@ -643,7 +699,7 @@ final class LogMonitorServiceTests: XCTestCase {
 
             // Matching action lines
             ("2026-02-22 16:29:35 : INFO  : microsoftonenote : Running msupdate --list", true, "Running script..."),
-            ("2026-02-22 16:30:01 : REQ   : microsoftonenote : Installed Microsoft OneNote, version 16.106", false, nil),
+            ("2026-02-22 16:30:01 : REQ   : microsoftonenote : Installed Microsoft OneNote, version 16.106", false, nil)
             // Note: "Installed Microsoft OneNote, version 16.106" does NOT match the regex because
             // "Installed" is not in the action verbs list, and the version pattern expects "Installed version: X.Y"
         ]
@@ -668,14 +724,16 @@ final class LogMonitorServiceTests: XCTestCase {
 
     func testRealInstallomatorDownloadAndInstallFlow() {
         let preset = LogPatternPreset.presets["installomator"]!
-        let regex = try! NSRegularExpression(pattern: preset.pattern, options: .anchorsMatchLines)
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
 
         // Real download+install flow from microsoftoutlook
         let actionLines: [(line: String, expectedCleanup: String)] = [
             ("2026-02-22 15:36:22 : REQ   : microsoftoutlook : Downloading https://go.microsoft.com/fwlink/?linkid=525137 to Microsoft Outlook.pkg", "Downloading..."),
             ("2026-02-22 15:38:41 : REQ   : microsoftoutlook : Installing Microsoft Outlook", "Installing Microsoft Outlook..."),
             ("2026-02-22 15:38:41 : INFO  : microsoftoutlook : Verifying: Microsoft Outlook.pkg", "Installing Microsoft Outlook..."),
-            ("2026-02-22 15:38:41 : INFO  : microsoftoutlook : Installing Microsoft Outlook.pkg to /", "Installing Microsoft Outlook..."),
+            ("2026-02-22 15:38:41 : INFO  : microsoftoutlook : Installing Microsoft Outlook.pkg to /", "Installing Microsoft Outlook...")
         ]
 
         for (line, expectedCleanup) in actionLines {

@@ -65,8 +65,12 @@ final class PlistEvaluationTests: XCTestCase {
         if let useUserDefaults = useUserDefaults { json["useUserDefaults"] = useUserDefaults }
         if let waitForExternalTrigger = waitForExternalTrigger { json["waitForExternalTrigger"] = waitForExternalTrigger }
 
-        let data = try! JSONSerialization.data(withJSONObject: json)
-        return try! JSONDecoder().decode(InspectConfig.ItemConfig.self, from: data)
+        do {
+            let data = try JSONSerialization.data(withJSONObject: json)
+            return try JSONDecoder().decode(InspectConfig.ItemConfig.self, from: data)
+        } catch {
+            fatalError("Failed to create mock ItemConfig: \(error)")
+        }
     }
 
     // MARK: - Evaluation: "exists"
