@@ -1,10 +1,11 @@
 #!/bin/bash
 
-dialog_root="$3/Library/Application Support/Dialog"
+dialog_root="${3}Library/Application Support/Dialog"
 iconfile="${dialog_root}/Dialog.png"
 dialogbundle="${dialog_root}/Dialog.app"
 localisedbundle="${dialog_root}/Dialog.localized/Dialog.app"
 dialogbinary="${dialogbundle}/Contents/MacOS/Dialog"
+dialogcli="${dialogbundle}/Contents/MacOS/dialogcli"
 log_file="${dialog_root}/postinstall.log"
 
 write_to_log() {
@@ -14,7 +15,20 @@ write_to_log() {
 }
 
 write_to_log "swiftDialog postinstall started"
-write_to_log "swiftDialog $("${dialogbinary}" --version)"
+write_to_log "Installed version: $("${dialogbinary}" --version)"
+
+# Check what the latest available version is and records it in the install log
+# fetches json from swiftdialog.app
+# json format is {"version":"x.y.z","released":"yyyy-mm-ddThh:mm:ssZ"}
+sd_json_data=$(/usr/bin/curl -sL https://beta.swiftdialog.app/version.json)
+sd_latest_version=$(echo $sd_json_data | /usr/bin/jq -r '.version' 2>/dev/null)
+sd_release_date=$(echo $sd_json_data | /usr/bin/jq -r '.released' 2>/dev/null)
+if [[ -n $sd_latest_version ]]; then
+    write_to_log "Latest release : $sd_latest_version"
+    write_to_log "Release date   : $(date -jf "%Y-%m-%dT%H:%M:%SZ" "$sd_release_date" "+%Y-%m-%d")"
+else
+    write_to_log "Latest version could not be determined."
+fi
 
 # Check for Dialog.localized. If it exists we need to move a few things
 
@@ -39,5 +53,8 @@ if [[ -e "${iconfile}" ]] && [[ -e "${dialogbundle}" ]]; then
         write_to_log "Icon update failed"
     fi
 fi
+
+# create /usr/local/bin/dialog symlink
+"${dialogcli}" --link >> "${log_file}"
 
 write_to_log "swiftDialog postinstall complete"

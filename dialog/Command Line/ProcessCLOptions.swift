@@ -48,6 +48,19 @@ func getJSON() -> JSON {
         json = processJSON(jsonFilePath: CLOptionText(optionName: appArguments.jsonFile))
     }
 
+    if CLOptionPresent(optionName: appArguments.inspectConfig) {
+        // read json in from inspect config
+        json = processJSON(jsonFilePath: CLOptionText(optionName: appArguments.inspectConfig))
+        writeLog("Inspect Mode: Config path from command line argument", logLevel: .debug)
+    }
+
+    if let envConfigPath = ProcessInfo.processInfo.environment["DIALOG_INSPECT_CONFIG"],
+       !envConfigPath.isEmpty {
+        json = processJSON(jsonFilePath: envConfigPath)
+        writeLog("Inspect Mode: Config path found in environment variable: \(envConfigPath)", logLevel: .debug)
+    }
+
+
     if CLOptionPresent(optionName: appArguments.jsonString) {
         // read json in from text string
         json = processJSONString(jsonString: CLOptionText(optionName: appArguments.jsonString))
@@ -102,6 +115,95 @@ func processCLOptions(json: JSON = getJSON()) {
     //this method goes through the arguments that are present and performs any processing required before use
     writeLog("Processing Options")
 
+    // Monitor Mode - Use InspectView for all monitor scenarios (with or without config)
+    if appvars.debugMode { print("DEBUG: inspectMode.present = \(appArguments.inspectMode.present)") }
+    if appArguments.inspectMode.present {
+        writeLog("Inspect Mode activated", logLevel: .info)
+        writeLog("Inspect Mode: Activated", logLevel: .info)
+        writeLog("Inspect Mode: Config can be provided via:", logLevel: .info)
+        writeLog("  1. Environment variable: DIALOG_INSPECT_CONFIG=/path/to/config.json", logLevel: .info)
+        writeLog("  2. Standard location: /var/tmp/dialog-inspect-config.json", logLevel: .info)
+        writeLog("  3. Command line: --inspect-config (may cause hang with certain SwiftUI versions)", logLevel: .info)
+
+        // Determine config path using same priority as InspectView
+        var configPath: String?
+
+        // Priority 1: Check environment variable DIALOG_INSPECT_CONFIG
+        if let envConfigPath = ProcessInfo.processInfo.environment["DIALOG_INSPECT_CONFIG"],
+           !envConfigPath.isEmpty {
+            configPath = envConfigPath
+            writeLog("Inspect Mode: Config path found in environment variable: \(configPath!)", logLevel: .info)
+        }
+        // Priority 2: Check standard config location
+        else if FileManager.default.fileExists(atPath: "/var/tmp/dialog-inspect-config.json") {
+            configPath = "/var/tmp/dialog-inspect-config.json"
+            writeLog("Inspect Mode: Using standard config location: \(configPath!)", logLevel: .info)
+        }
+        // Priority 3: Check command line argument
+        else if appArguments.inspectConfig.present {
+            configPath = appArguments.inspectConfig.value
+            writeLog("Inspect Mode: Config path from command line: \(configPath!)", logLevel: .info)
+        }
+
+        // Store the config path for InspectView to access
+        if let configPath = configPath {
+            appvars.inspectConfigPath = configPath
+
+            // Load the config to determine preset and apply appropriate window dimensions
+            if FileManager.default.fileExists(atPath: configPath) {
+                do {
+                    let data = try Data(contentsOf: URL(fileURLWithPath: configPath))
+                    let decoder = JSONDecoder()
+
+                    // Read config for sizing
+                    struct MinimalInspectConfig: Codable {
+                        let preset: String?
+                        let size: String?
+                        let width: Int?
+                        let height: Int?
+                    }
+
+                    let config = try decoder.decode(MinimalInspectConfig.self, from: data)
+
+                    // Priority 1: Explicit width/height
+                    if let w = config.width, let h = config.height {
+                        appvars.windowWidth = CGFloat(w)
+                        appvars.windowHeight = CGFloat(h)
+                        writeLog("Inspect Mode: Custom size \(w)×\(h)", logLevel: .info)
+                    }
+                    // Priority 2: Use shared sizing definitions
+                    else if let preset = config.preset {
+                        let sizeMode = config.size ?? "standard"
+                        let (width, height) = InspectSizes.getSize(preset: preset, mode: sizeMode)
+                        appvars.windowWidth = width
+                        appvars.windowHeight = height
+                        writeLog("Inspect Mode: \(preset) \(sizeMode) (\(Int(width))×\(Int(height)))", logLevel: .info)
+                    }
+                    // Priority 3: Default
+                    else {
+                        let (width, height) = InspectSizes.defaultSize
+                        appvars.windowWidth = width
+                        appvars.windowHeight = height
+                        writeLog("Inspect Mode: Using default size (\(Int(width))×\(Int(height)))", logLevel: .info)
+                    }
+                } catch {
+                    writeLog("Inspect Mode: Error loading config for dimensions: \(error)", logLevel: .error)
+                    // Default to standard size on error
+                    appvars.windowWidth = 1000
+                    appvars.windowHeight = 600
+                }
+            }
+        } else {
+            // No config file — will use built-in sample config (Preset 5 bento grid)
+            appvars.windowWidth = 800
+            appvars.windowHeight = 600
+            writeLog("Inspect Mode: No config file, using built-in sample size (1000×650)", logLevel: .info)
+        }
+
+        // InspectView handles all its own state and configuration - no presentation mode needed
+        writeLog("Inspect Mode: InspectView will handle all config loading and presentation", logLevel: .info)
+    }
+
     if appArguments.messageAlignmentOld.present {
         appArguments.messageAlignment.present = appArguments.messageAlignmentOld.present
         appArguments.messageAlignment.value = appArguments.messageAlignmentOld.value
@@ -124,7 +226,24 @@ func processCLOptions(json: JSON = getJSON()) {
     // window location on screen
     if appArguments.position.present {
         writeLog("Window position will be set to \(appArguments.position.value)")
-        (appvars.windowPositionVertical,appvars.windowPositionHorozontal) = windowPosition(appArguments.position.value)
+        let pattern = #"^\b([0-9]{1,4}),([0-9]{1,4})\b$"#
+        let input = appArguments.position.value
+        if let regex = try? NSRegularExpression(pattern: pattern) {
+            let range = NSRange(location: 0, length: input.utf16.count)
+            if regex.firstMatch(in: input, options: [], range: range) != nil {
+                let posx = input.components(separatedBy: ",").first?.floatValue() ?? 0
+                let posy = input.components(separatedBy: ",").last?.floatValue() ?? 0
+                (appvars.windowPositionVertical,appvars.windowPositionHorozontal) = (.explicit(posy),.explicit(posx))
+            } else {
+                (appvars.windowPositionVertical,appvars.windowPositionHorozontal) = windowPosition(appArguments.position.value)
+            }
+        }
+    }
+
+    // Monitor mode: Always center horizontally (left-to-right)
+    if appArguments.inspectMode.present {
+        appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
+        writeLog("Inspect Mode: Forcing horizontal position to center", logLevel: .info)
     }
     if appArguments.positionOffset.present {
         appvars.windowPositionOffset = appArguments.positionOffset.value.floatValue()
@@ -184,6 +303,86 @@ func processCLOptions(json: JSON = getJSON()) {
         }
         quitDialog(exitCode: appDefaults.exitNow.code)
     }
+    if appArguments.inspectSchema.present {
+        writeLog("\(appArguments.inspectSchema.long) called", logLevel: .info)
+
+        guard let schemaURL = Bundle.main.url(forResource: "inspect-config.schema", withExtension: "json"),
+              let schemaData = try? Data(contentsOf: schemaURL),
+              let schemaString = String(data: schemaData, encoding: .utf8) else {
+            print("Error: Schema file not found in bundle")
+            quitDialog(exitCode: appDefaults.exitNow.code)
+            return
+        }
+
+        if appArguments.inspectSchema.value.isEmpty {
+            // Print to stdout
+            print(schemaString)
+        } else {
+            // Save to file
+            do {
+                try schemaString.write(toFile: appArguments.inspectSchema.value, atomically: true, encoding: .utf8)
+                print("Schema written to: \(appArguments.inspectSchema.value)")
+            } catch {
+                print("Error writing schema: \(error.localizedDescription)")
+            }
+        }
+        quitDialog(exitCode: appDefaults.exitNow.code)
+    }
+    if appArguments.schemaValidate.present {
+        writeLog("\(appArguments.schemaValidate.long) called", logLevel: .info)
+
+        let configPath = appArguments.schemaValidate.value
+        guard !configPath.isEmpty else {
+            print("❌ Error: No config file specified")
+            print("Usage: --schema-validate /path/to/config.json")
+            quitDialog(exitCode: appDefaults.exit201.code)
+            return
+        }
+
+        guard FileManager.default.fileExists(atPath: configPath) else {
+            print("❌ Error: Config file not found: \(configPath)")
+            quitDialog(exitCode: appDefaults.exit201.code)
+            return
+        }
+
+        // Load and validate the config
+        let configService = Config()
+        let result = configService.loadConfiguration(fromFile: configPath)
+
+        switch result {
+        case .success(let configResult):
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            print("  Config Validation: \(configPath)")
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            print("")
+            print("✓ JSON syntax: Valid")
+            print("✓ Preset: \(configResult.config.preset)")
+            print("✓ Items: \(configResult.config.items.count)")
+            print("")
+
+            if configResult.warnings.isEmpty {
+                print("✅ No warnings - config looks good!")
+            } else {
+                print("⚠️  Warnings (\(configResult.warnings.count)):")
+                for warning in configResult.warnings {
+                    print("  • \(warning)")
+                }
+            }
+            print("")
+            quitDialog(exitCode: configResult.warnings.isEmpty ? appDefaults.exit0.code : appDefaults.exit3.code)
+
+        case .failure(let error):
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            print("  Config Validation: \(configPath)")
+            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            print("")
+            print("❌ Validation failed:")
+            print("  \(error.localizedDescription)")
+            print("")
+            quitDialog(exitCode: appDefaults.exit201.code)
+        }
+        return
+    }
     if appArguments.getVersion.present {
         writeLog("\(appArguments.getVersion.long) called")
         printVersionString()
@@ -211,6 +410,8 @@ func processCLOptions(json: JSON = getJSON()) {
         writeLog("Auth key is required", logLevel: .debug)
         quitDialog(exitCode: appDefaults.exit30.code, exitMessage: appDefaults.exit30.message)
     }
+
+    appvars.authorised = appArguments.authkey.present && !dialogAuthorisationKey().isEmpty && dialogIsAuthorised
 
     // hash a key value
     if appArguments.hash.present {
@@ -265,6 +466,10 @@ func processCLOptions(json: JSON = getJSON()) {
 
     if appArguments.buttonSize.present {
         appvars.buttonSize = appDefaults.buttonSizeStates[appArguments.buttonSize.value] ?? .regular
+    }
+
+    if appArguments.buttonTextSize.present {
+        appvars.buttonTextSize = appArguments.buttonTextSize.value.floatValue()
     }
 
     if appArguments.dropdownValues.present {
@@ -324,6 +529,10 @@ func processCLOptions(json: JSON = getJSON()) {
                             dropdownRequired = true
                         case "radio":
                             dropdownStyle = "radio"
+                        case "searchable":
+                            dropdownStyle = "searchable"
+                        case "multiselect":
+                            dropdownStyle = "multiselect"
                         case "name":
                             dropdownName = itemValue
                         default: ()
@@ -359,7 +568,8 @@ func processCLOptions(json: JSON = getJSON()) {
                         name: String(json[appArguments.textField.long][index]["name"].stringValue),
                         value: String(json[appArguments.textField.long][index]["value"].stringValue),
                         isDate: Bool(json[appArguments.textField.long][index]["isdate"].boolValue),
-                        confirm: Bool(json[appArguments.textField.long][index]["confirm"].boolValue))
+                        confirm: Bool(json[appArguments.textField.long][index]["confirm"].boolValue),
+                        initialPath: String(json[appArguments.textField.long][index]["path"].stringValue))
                     )
                 }
             }
@@ -380,10 +590,11 @@ func processCLOptions(json: JSON = getJSON()) {
                 var fieldValue: String = ""
                 var fieldIsDate: Bool = false
                 var fieldConfirm: Bool = false
+                var fieldInitialPath: String = ""
                 if items.count > 0 {
                     fieldTitle = items[0]
                     if items.count > 1 {
-                        fieldRegexError = "\"\(fieldTitle)\" "+"no-pattern".localized
+                        fieldRegexError = "\"\(fieldTitle)\" "+"doesn't match the required format".localized
                         for index in 1...items.count-1 {
                             switch items[index].lowercased()
                                 .replacingOccurrences(of: ",", with: "")
@@ -415,6 +626,8 @@ func processCLOptions(json: JSON = getJSON()) {
                                 fieldIsDate = true
                             case "confirm":
                                 fieldConfirm = true
+                            case "path":
+                                fieldInitialPath = items[index+1]
                             default: ()
                             }
                         }
@@ -434,7 +647,8 @@ func processCLOptions(json: JSON = getJSON()) {
                             name: fieldName,
                             value: fieldValue,
                             isDate: fieldIsDate,
-                            confirm: fieldConfirm))
+                            confirm: fieldConfirm,
+                            initialPath: fieldInitialPath))
             }
         }
         for index in 0..<userInputState.textFields.count where userInputState.textFields[index].required {
@@ -566,11 +780,15 @@ func processCLOptions(json: JSON = getJSON()) {
                 if json[appArguments.listItem.long][index]["title"].stringValue == "" {
                     userInputState.listItems.append(ListItems(title: String(json[appArguments.listItem.long][index].stringValue)))
                 } else {
+                    let iconAlpha: CGFloat = CGFloat(json[appArguments.listItem.long][index]["iconalpha"].exists() ?
+                                                     json[appArguments.listItem.long][index]["iconalpha"].floatValue : 1.0)
                     userInputState.listItems.append(ListItems(title: String(json[appArguments.listItem.long][index]["title"].stringValue),
                                                subTitle: String(json[appArguments.listItem.long][index]["subtitle"].stringValue),
                                                icon: String(json[appArguments.listItem.long][index]["icon"].stringValue),
+                                               iconAlpha: iconAlpha,
                                                statusText: String(json[appArguments.listItem.long][index]["statustext"].stringValue),
-                                               statusIcon: String(json[appArguments.listItem.long][index]["status"].stringValue))
+                                               statusIcon: String(json[appArguments.listItem.long][index]["status"].stringValue),
+                                                action: String(json[appArguments.listItem.long][index]["action"].stringValue))
                                 )
                 }
             }
@@ -582,8 +800,10 @@ func processCLOptions(json: JSON = getJSON()) {
                 var title: String = ""
                 var subTitle: String = ""
                 var icon: String = ""
+                var iconAlpha: CGFloat = 1
                 var statusText: String = ""
                 var statusIcon: String = ""
+                var action: String = ""
                 for item in items {
                     var itemKeyValuePair = item.split(separator: "=", maxSplits: 1)
                     for _ in itemKeyValuePair.count...2 {
@@ -598,15 +818,19 @@ func processCLOptions(json: JSON = getJSON()) {
                         subTitle = itemValue
                     case "icon":
                         icon = itemValue
+                    case "iconalpha":
+                        iconAlpha = itemValue.floatValue()
                     case "statustext":
                         statusText = itemValue
                     case "status":
                         statusIcon = itemValue
+                    case "action":
+                        action = itemValue
                     default:
                         title = itemName
                     }
                 }
-                userInputState.listItems.append(ListItems(title: title, subTitle: subTitle, icon: icon, statusText: statusText, statusIcon: statusIcon))
+                userInputState.listItems.append(ListItems(title: title, subTitle: subTitle, icon: icon, iconAlpha: iconAlpha, statusText: statusText, statusIcon: statusIcon, action: action))
             }
         }
         if userInputState.listItems.isEmpty {
@@ -704,6 +928,9 @@ func processCLOptions(json: JSON = getJSON()) {
             if json[appArguments.titleFont.long]["name"].exists() {
                 appvars.titleFontName = json[appArguments.titleFont.long]["name"].stringValue
             }
+            if json[appArguments.titleFont.long]["alignment"].exists() {
+                appvars.titleFontAlignment = json[appArguments.titleFont.long]["alignment"].stringValue
+            }
         } else {
             writeLog("titleFont.value : \(appArguments.titleFont.value)")
             let fontCLValues = appArguments.titleFont.value
@@ -730,6 +957,9 @@ func processCLOptions(json: JSON = getJSON()) {
                     case  "shadow":
                         appvars.titleFontShadow = item[1].boolValue
                         writeLog("titleFontShadow : \(appvars.titleFontShadow)")
+                    case  "alignment":
+                        appvars.titleFontAlignment = item[1]
+                        writeLog("titleFontAlignment : \(appvars.titleFontAlignment)")
                     default:
                         writeLog("Unknown paramater \(item[0])")
                 }
@@ -811,6 +1041,9 @@ func processCLOptions(json: JSON = getJSON()) {
                 userInputState.iconItems.append(Icons(value: iconOption))
             }
         }
+        if userInputState.iconItems.isEmpty {
+            userInputState.iconItems.append(Icons(value: "default"))
+        }
     }
 
     // hide the icon if asked to or if banner image is present
@@ -869,8 +1102,6 @@ func processCLOptions(json: JSON = getJSON()) {
     }
 
     if appArguments.windowResizable.present {
-        appvars.windowWidth = .infinity
-        appvars.windowHeight = .infinity
         appArguments.movableWindow.present = true
     }
 
@@ -884,5 +1115,5 @@ func processCLOptions(json: JSON = getJSON()) {
         appArguments.button1Disabled.present = true
     }
 
+    writeLog("ProcessCLOptions: Completed successfully", logLevel: .info)
 }
-

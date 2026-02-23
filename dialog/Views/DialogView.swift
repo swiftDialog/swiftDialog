@@ -69,6 +69,7 @@ struct DialogView: View {
                         Spacer()
                         MessageContent(observedDialogContent: observedData)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
+                        Spacer()
                     }
             }
             TaskProgressView(observedData: observedData)

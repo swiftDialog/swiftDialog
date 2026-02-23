@@ -130,3 +130,18 @@ struct OverflowContentViewModifier: ViewModifier {
         }
     }
 }
+
+enum glassType {
+    case clear
+    case regular
+}
+
+extension View {
+    func useClearGlassEffect(_ type: glassType = .regular) -> some View {
+        if #available(macOS 26.0, *) {
+            return type == .clear ? glassEffect(.clear) : glassEffect(.regular)
+        } else {
+            return self
+        }
+    }
+}

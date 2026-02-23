@@ -56,6 +56,7 @@ struct RadioView: View {
                                     .frame(alignment: .leading)
                                 Spacer()
                             }
+                            .padding(.bottom, 8)
                             HStack {
                                 Picker("", selection: $selectedOption[index]) {
                                     ForEach(userInputState.dropdownItems[index].values, id: \.self) {
@@ -63,9 +64,9 @@ struct RadioView: View {
                                             .font(.system(size: observedData.appProperties.labelFontSize))
                                     }
                                 }
-                                .onChange(of: selectedOption[index], perform: { selectedOption in
+                                .onChange(of: selectedOption[index]) { _, selectedOption in
                                     userInputState.dropdownItems[index].selectedValue = selectedOption
-                                })
+                                }
                                 .pickerStyle(RadioGroupPickerStyle())
                                 Spacer()
                             }

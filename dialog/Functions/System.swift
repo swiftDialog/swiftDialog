@@ -121,7 +121,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                 if exitCode == 0 {
                     if textfieldRequired && textfieldValue == "" { // && userInputState.textFields[index].regex.isEmpty {
                         NSSound.beep()
-                        requiredString += "  - \"\(textfieldTitle)\" \("is-required".localized)<br>"
+                        requiredString += "  - \"\(textfieldTitle)\" \("is required".localized)<br>"
                         userInputState.textFields[index].requiredTextfieldHighlight = Color.red
                         dontQuit = true
                         writeLog("Required text field \(textfieldName) has no value")
@@ -137,7 +137,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                         writeLog("Textfield \(textfieldTitle) value \(textfieldValue) does not meet regex requirements \(String(describing: textField.regex))")
                     } else if textfieldValidation && textFieldValidationValue != textfieldValue {
                         NSSound.beep()
-                        requiredString += "  - \"\(textfieldTitle)\" \("confirmation-failed".localized)<br>"
+                        requiredString += "  - \"\(textfieldTitle)\" \("confirmation failed  <br>values do not match".localized)<br>"
                         userInputState.textFields[index].requiredTextfieldHighlight = Color.red
                         dontQuit = true
                         writeLog("Text field \(textfieldName) confirmation failed")
@@ -177,7 +177,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
 
                 if exitCode == 0 && dropdownItemRequired && dropdownItemSelectedValue == "" {
                     NSSound.beep()
-                    requiredString += "  - \"\(dropdownItem.title)\" \("is-required".localized)<br>"
+                    requiredString += "  - \"\(dropdownItem.title)\" \("is required".localized)<br>"
                     userInputState.dropdownItems[index].requiredfieldHighlight = Color.red
                     dontQuit = true
                     writeLog("Required select item \(dropdownItem.title) has no value")
@@ -186,6 +186,13 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                     outputArray.append("\"\(dropdownItemName)\" index : \"\(dropdownItemValues.firstIndex(of: dropdownItemSelectedValue) ?? -1)\"")
                     json[dropdownItemName] = ["selectedValue": dropdownItemSelectedValue, "selectedIndex": dropdownItemValues.firstIndex(of: dropdownItemSelectedValue) ?? -1]
                 }
+            }
+        }
+        
+        if observedObject?.args.listSelectionEnabled.present ?? false {
+            for item in userInputState.listItems {
+                outputArray.append("\"\(item.title)\" : \"\(item.selected)\"")
+                json[item.title].bool = item.selected
             }
         }
 
@@ -217,6 +224,10 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
             }
         }
     }
+    if appArguments.hideOtherApps.present {
+        NSApp.unhideAllApplications(nil)
+    }
+    
     exit(exitCode)
 }
 
@@ -302,7 +313,7 @@ func captureQuitKey(keyValue: String) {
         case [.command] where "wnm".contains(event.characters ?? ""):
             writeLog("Detected cmd+w or cmd+n or cmd+m")
             return nil
-        case [.command] where event.characters == "q":
+        case [.command] where event.characters == "q", [.command, .capsLock] where event.characters == "q":
             writeLog("Detected cmd+q")
             if keyValue != "q" {
                 writeLog("cmd+q is disabled")
@@ -345,4 +356,49 @@ var dialogIsAuthorised: Bool {
         return checkAuthorisationKey(key: authKey.sha256Hash)
     }
     return true
+}
+
+func getModelIdentifier() -> String? {
+    var size: Int = 0
+    sysctlbyname("hw.model", nil, &size, nil, 0)
+    var model = [CChar](repeating: 0, count: size)
+    let result = sysctlbyname("hw.model", &model, &size, nil, 0)
+    if result == 0 {
+        return String(cString: model)
+    }
+    return nil
+}
+
+var isLaptop: Bool {
+    guard let modelIdentifier = getModelIdentifier() else {
+        return false // default to desktop if unknown
+    }
+
+    // MacBook model identifiers typically start with "MacBook"
+    return modelIdentifier.hasPrefix("MacBook")
+}
+
+func activateDialog() {
+    DispatchQueue.main.async {
+        NSApplication.shared.activate(ignoringOtherApps: true)
+    }
+}
+
+func hideAllApps(_ hideApps: Bool = false) {
+    if !hideApps {
+        return
+    }
+    
+    NSApp.hideOtherApplications(nil)
+    
+    // Get parent process ID
+    let parentPID = getppid()
+    
+    // Find and hide the parent application
+    let runningApps = NSWorkspace.shared.runningApplications
+    if let parentApp = runningApps.first(where: {
+        $0.processIdentifier == parentPID
+    }) {
+        parentApp.hide()
+    }
 }

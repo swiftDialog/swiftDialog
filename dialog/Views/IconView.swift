@@ -58,7 +58,7 @@ struct IconView: View {
 
     let argRegex = String("(,? ?[a-zA-Z1-9]+=|(,\\s?editor)|(,\\s?fileselect))|(,\\s?passwordfill)|(,\\s?required)|(,\\s?secure)")
 
-    init(image: String = "", overlay: String = "", alpha: Double = 1.0, padding: Double = 0, sfPaddingEnabled: Bool = true, corners: Bool = true) {
+    init(image: String = "", overlay: String = "", alpha: Double = 1.0, padding: Double = 0, sfPaddingEnabled: Bool = true, corners: Bool = true, defaultImage: String = "bubble.left.circle.fill", defaultColour: String = "primary") {
 
         mainImageAlpha = alpha
         messageUserImagePath = image
@@ -67,6 +67,9 @@ struct IconView: View {
 
         framePadding = padding
         sfSymbolPadding = sfPaddingEnabled
+
+        builtInIconName = defaultImage
+        builtInIconColour = Color(argument: defaultColour)
 
         writeLog("Displaying icon image \(image), alpha \(alpha)")
         if !iconOverlay.isEmpty {
@@ -227,9 +230,8 @@ struct IconView: View {
             writeLog("Using default info icon")
             builtInIconName = "person.fill.questionmark"
             builtInIconPresent = true
-        } else if messageUserImagePath == "default" || (!builtInIconPresent && !FileManager.default.fileExists(atPath: messageUserImagePath) && !imgFromURL && !imgFromBase64 && !imgFromText && !textToQR) {
+        } else if messageUserImagePath == "default" || messageUserImagePath.isEmpty || (!builtInIconPresent && !imgFromURL && !imgFromBase64 && !imgFromText && !textToQR && !FileManager.default.fileExists(atPath: messageUserImagePath)) {
             writeLog("Icon not specified - using default icon")
-            builtInIconName = "bubble.left.circle.fill"
             iconRenderingMode = Image.TemplateRenderingMode.template //force monochrome
             builtInIconPresent = true
         }
@@ -265,13 +267,8 @@ struct IconView: View {
                                 .foregroundColor(Color.white)
                         }
                         if messageUserImagePath == "default" {
-                            Image(systemName: builtInIconName)
+                            Image(nsImage: NSImage(named: "AppIcon") ?? NSImage())
                                 .resizable()
-                                .renderingMode(iconRenderingMode)
-                                .font(Font.title.weight(builtInIconWeight))
-                                .symbolRenderingMode(.monochrome)
-                                .symbolAnimation(effect: sfSymbolAnimation)
-                                .foregroundColor(builtInIconColour)
                         } else if messageUserImagePath == "computer" {
                             Image(nsImage: NSImage(named: NSImage.computerName) ?? NSImage())
                                 .resizable()
@@ -335,6 +332,8 @@ struct IconView: View {
 
         }
         .padding(framePadding)
+        .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
+        .contentTransition(.symbolEffect(.replace))
 
     }
 }

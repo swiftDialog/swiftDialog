@@ -33,7 +33,7 @@ class FileReader {
     var dataAvailable: NSObjectProtocol?
     var dataReady: NSObjectProtocol?
 
-    init(observedData: DialogUpdatableContent, fileURL: URL) {
+    init(observedData: DialogUpdatableContent = .shared, fileURL: URL) {
         self.observedData = observedData
         self.fileURL = fileURL
     }
@@ -98,7 +98,8 @@ class FileReader {
         placeWindow(observedData.mainWindow ?? NSApp.windows[0], size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
             vertical: observedData.appProperties.windowPositionVertical,
             horozontal: observedData.appProperties.windowPositionHorozontal,
-            offset: observedData.args.positionOffset.value.floatValue())
+            offset: observedData.args.positionOffset.value.floatValue(),
+            useFullScreen: observedData.args.blurScreen.present || observedData.args.forceOnTop.present)
     }
 
     private func writeToLog(_ message: String, logLevel: OSLogType = .info) {
@@ -109,8 +110,10 @@ class FileReader {
         var title: String = ""
         var subtitle: String = ""
         var icon: String = ""
+        var iconAlpha: CGFloat = 1.0
         var statusText: String = ""
         var statusIcon: String = ""
+        var clickAction: String = ""
         let statusTypeArray = ["wait","success","fail","error","pending","progress"]
         var listProgressValue: CGFloat = 0
         var deleteRow: Bool = false
@@ -164,6 +167,8 @@ class FileReader {
                     case "icon":
                         icon = action[1].trimmingCharacters(in: .whitespaces)
                         iconIsSet = true
+                    case "iconalpha":
+                        iconAlpha = action[1].trimmingCharacters(in: .whitespaces).floatValue()
                     case "statustext":
                         statusText = action[1].trimmingCharacters(in: .whitespaces)
                         statusTextIsSet = true
@@ -171,10 +176,12 @@ class FileReader {
                         statusIcon = action[1].trimmingCharacters(in: .whitespaces)
                         statusIsSet = true
                     case "progress":
-                    listProgressValue = action[1].trimmingCharacters(in: .whitespaces).floatValue()
+                        listProgressValue = action[1].trimmingCharacters(in: .whitespaces).floatValue()
                         statusIcon = "progress"
                         progressIsSet = true
                         statusIsSet = true
+                    case "action":
+                        clickAction = action[1].trimmingCharacters(in: .whitespaces)
                     case "delete":
                         deleteRow = true
                     case "add":
@@ -191,10 +198,11 @@ class FileReader {
                     writeToLog("deleted row at index \(row)")
                 } else {
                     if subTitleIsSet { userInputState.listItems[row].subTitle = subtitle }
-                    if iconIsSet { userInputState.listItems[row].icon = icon }
+                    if iconIsSet { userInputState.listItems[row].icon = icon; userInputState.listItems[row].iconAlpha = iconAlpha }
                     if statusIsSet { userInputState.listItems[row].statusIcon = statusIcon }
                     if statusTextIsSet { userInputState.listItems[row].statusText = statusText }
                     if progressIsSet { userInputState.listItems[row].progress = listProgressValue }
+                    if !clickAction.isEmpty { userInputState.listItems[row].action = clickAction }
                     observedData.listItemUpdateRow = row
                     writeToLog("updated row at index \(row)")
                 }
@@ -207,7 +215,7 @@ class FileReader {
 
             // add to the list items array
             if addRow {
-                userInputState.listItems.append(ListItems(title: title, subTitle: subtitle, icon: icon, statusText: statusText, statusIcon: statusIcon, progress: listProgressValue))
+                userInputState.listItems.append(ListItems(title: title, subTitle: subtitle, icon: icon, statusText: statusText, statusIcon: statusIcon, progress: listProgressValue, action: clickAction))
                 writeToLog("row added with \(title) \(subtitle) \(icon) \(statusText) \(statusIcon)")
                 // update the view if visible
                 if observedData.args.listItem.present {
@@ -241,7 +249,7 @@ class FileReader {
                 (observedData.appProperties.windowPositionVertical,
                  observedData.appProperties.windowPositionHorozontal) = windowPosition(argument)
                 processWindow()
-                NSApp.activate(ignoringOtherApps: true)
+                activateDialog()
 
             case "width:":
                 if argument.isNumeric {
@@ -295,7 +303,7 @@ class FileReader {
                 }
                 observedData.args.mainImage.present = false
                 observedData.args.mainImageCaption.present = false
-                observedData.args.listItem.present = false
+                // observedData.args.listItem.present = false
 
             // Message Position
             case "alignment:":
@@ -520,18 +528,24 @@ class FileReader {
             // activate
             case "activate:":
                 writeToLog("activating window")
-                NSApp.activate(ignoringOtherApps: true)
+                activateDialog()
 
             // hide
             case "hide:":
                 writeToLog("hiding windows")
+                if observedData.args.blurScreen.present {
+                    blurredScreen.hide()
+                }
                 NSApp.hide(self)
 
             // hide
             case "show:":
                 writeToLog("Showing windows")
+                if observedData.args.blurScreen.present {
+                    blurredScreen.show()
+                }
                 NSApp.unhide(self)
-                NSApp.activate(ignoringOtherApps: true)
+                activateDialog()
 
             // icon alpha
             case "\(observedData.args.iconAlpha.long):":
@@ -557,14 +571,14 @@ class FileReader {
                     writeToLog("enabling blur screen")
                     observedData.args.blurScreen.present = true
                     blurredScreen.show()
-                    NSApp.activate(ignoringOtherApps: true)
+                    activateDialog()
                 default:
                     observedData.args.blurScreen.present = false
                     blurredScreen.hide()
                     if !observedData.args.forceOnTop.present {
                         NSApp.windows.first?.level = .normal
                     }
-                    NSApp.activate(ignoringOtherApps: true)
+                    activateDialog()
                 }
 
             // web content
@@ -577,6 +591,46 @@ class FileReader {
                         observedData.args.webcontent.value = argument
                         observedData.args.webcontent.present = true
                     }
+                }
+                
+            // show dock icon
+            case "\(observedData.args.showDockIcon.long):":
+                if ["enable", "true", "1"].contains(argument) {
+                    NSApp.setActivationPolicy(.regular)
+                } else {
+                    NSApp.setActivationPolicy(.accessory)
+                }
+                
+            // dock icon badge
+            case "\(observedData.args.dockBadge.long):":
+                if ["none", "nil", "remove"].contains(argument) {
+                    NSApp.dockTile.badgeLabel = nil
+                } else {
+                    NSApp.dockTile.badgeLabel = argument
+                }
+                
+            // dock icon image
+            case "\(observedData.args.dockIcon.long):":
+                if ["none", "nil", "default"].contains(argument) {
+                    NSApp.applicationIconImage = nil
+                } else {
+                    let path = argument
+                    var image = NSImage()
+                    switch path {
+                    case _ where ["app", "prefPane", "framework"].contains(path.split(separator: ".").last):
+                        image =  getAppIcon(appPath: argument)
+                    default:
+                        image = getImageFromPath(fileImagePath: argument, returnErrorImage: true)
+                    }
+                    NSApp.applicationIconImage = image
+                }
+                
+            // dock icon bounce
+            case "bounce:":
+                if argument == "critical" {
+                    NSApp.requestUserAttention(.criticalRequest)
+                } else {
+                    NSApp.requestUserAttention(.informationalRequest)
                 }
 
             // quit
@@ -591,7 +645,9 @@ class FileReader {
     }
 }
 
-class DialogUpdatableContent: ObservableObject {
+final class DialogUpdatableContent: ObservableObject {
+
+    static let shared = DialogUpdatableContent()
 
     // set up some defaults
 
@@ -611,6 +667,10 @@ class DialogUpdatableContent: ObservableObject {
     @Published var iconAlpha: Double
 
     @Published var imageArray: [MainImage]
+    @Published var textFieldArray: [TextFieldState]
+    @Published var dropdownArray: [DropDownItems]
+    @Published var observedUserInputState: UserInputState
+    
 
     @Published var listItemsArray: [ListItems]
     @Published var listItemUpdateRow: Int
@@ -654,8 +714,11 @@ class DialogUpdatableContent: ObservableObject {
         iconAlpha = Double(appArguments.iconAlpha.value) ?? 1.0
 
         imageArray = appvars.imageArray
-
+        textFieldArray = userInputState.textFields
+        dropdownArray = userInputState.dropdownItems
         listItemsArray = userInputState.listItems
+        
+        observedUserInputState = userInputState
 
         requiredFieldsPresent = false
 

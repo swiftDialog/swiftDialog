@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import MarkdownUI
+import Textual
 
 struct ErrorView: View {
 
@@ -28,10 +28,10 @@ struct ErrorView: View {
             }
             .frame(width: 64, height: 64)
             .padding(appDefaults.sidePadding)
-            Text("invalid-input").bold()
+            Text("One or more input fields are incorrect").bold()
                 .padding()
-            Markdown(observedData.sheetErrorMessage)
-                .markdownTheme(.basic)
+            StructuredText(observedData.sheetErrorMessage, parser: ColoredMarkdownParser())
+                .textual.structuredTextStyle(.gitHub)
             //Text(observedData.sheetErrorMessage)
                 .padding(.leading, appDefaults.sidePadding)
                 .padding(.trailing, appDefaults.sidePadding)
@@ -41,7 +41,7 @@ struct ErrorView: View {
                 observedData.showSheet = false
                 observedData.sheetErrorMessage = ""
             }, label: {
-                Text("button-ok".localized)
+                Text("OK".localized)
             })
             .padding(appDefaults.sidePadding)
         }

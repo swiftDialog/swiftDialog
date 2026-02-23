@@ -33,7 +33,7 @@ struct CommandLineArguments {
     var messageVerticalAlignment = CommandlineArgument(long: "messageposition")
     var helpMessage              = CommandlineArgument(long: "helpmessage")
     var helpImage                = CommandlineArgument(long: "helpimage")
-    var helpSheetButton          = CommandlineArgument(long: "helpsheetbuttontext", defaultValue: "button-ok".localized)
+    var helpSheetButton          = CommandlineArgument(long: "helpsheetbuttontext", defaultValue: "OK".localized)
     var iconOption               = CommandlineArgument(long: "icon", short: "i", defaultValue: "default", overrideDefaultIfNill: true)
     var iconSize                 = CommandlineArgument(long: "iconsize", defaultValue: appvars.iconWidth)
     var iconAlpha                = CommandlineArgument(long: "iconalpha", defaultValue: "1.0")
@@ -46,12 +46,16 @@ struct CommandLineArguments {
     var button1TextOption        = CommandlineArgument(long: "button1text", defaultValue: appDefaults.button1Default, overrideDefaultIfNill: true)
     var button1ActionOption      = CommandlineArgument(long: "button1action")
     var button1ShellActionOption = CommandlineArgument(long: "button1shellaction",short: "")
+    var button1Symbol            = CommandlineArgument(long: "button1symbol")
     var button2TextOption        = CommandlineArgument(long: "button2text", defaultValue: appDefaults.button2Default)
     var button2ActionOption      = CommandlineArgument(long: "button2action")
+    var button2Symbol            = CommandlineArgument(long: "button2symbol")
     var buttonInfoTextOption     = CommandlineArgument(long: "infobuttontext", defaultValue: appDefaults.buttonInfoDefault)
     var buttonInfoActionOption   = CommandlineArgument(long: "infobuttonaction")
+    var buttonInfoSymbol         = CommandlineArgument(long: "infobuttonsymbol")
     var buttonStyle              = CommandlineArgument(long: "buttonstyle")
     var buttonSize               = CommandlineArgument(long: "buttonsize", defaultValue: "regular")
+    var buttonTextSize           = CommandlineArgument(long: "buttontextsize")
     var dropdownTitle            = CommandlineArgument(long: "selecttitle")
     var dropdownValues           = CommandlineArgument(long: "selectvalues")
     var dropdownDefault          = CommandlineArgument(long: "selectdefault")
@@ -65,6 +69,7 @@ struct CommandLineArguments {
     var timerBar                 = CommandlineArgument(long: "timer", defaultValue: appDefaults.timerDefaultSeconds)
     var progressBar              = CommandlineArgument(long: "progress")
     var progressText             = CommandlineArgument(long: "progresstext", defaultValue: " ")
+    var progressTextAlignment    = CommandlineArgument(long: "progresstextalignment", defaultValue: " ")
     var mainImage                = CommandlineArgument(long: "image", short: "g")
     var mainImageCaption         = CommandlineArgument(long: "imagecaption")
     var windowWidth              = CommandlineArgument(long: "width", defaultValue: appvars.windowWidth)
@@ -84,6 +89,7 @@ struct CommandLineArguments {
     var statusLogFile            = CommandlineArgument(long: "commandfile")
     var listItem                 = CommandlineArgument(long: "listitem")
     var listStyle                = CommandlineArgument(long: "liststyle")
+    var listSelectionEnabled     = CommandlineArgument(long: "enablelistselect", isbool: true)
     var infoText                 = CommandlineArgument(long: "infotext", defaultValue: "swiftDialog \(getVersionString())")
     var infoBox                  = CommandlineArgument(long: "infobox")
     var quitKey                  = CommandlineArgument(long: "quitkey", defaultValue: appvars.quitKeyCharacter)
@@ -91,10 +97,15 @@ struct CommandLineArguments {
     var authkey                  = CommandlineArgument(long: "key", short: "k")
     var hash                     = CommandlineArgument(long: "checksum")
     var logFileToTail            = CommandlineArgument(long: "displaylog")
+    var logFileHistory           = CommandlineArgument(long: "loghistory", defaultValue: appvars.logFileHistory)
     var preferredViewOrder       = CommandlineArgument(long: "vieworder")
     var preferredAppearance      = CommandlineArgument(long: "appearance")
     var setAppIcon               = CommandlineArgument(long: "seticon")
     var notificationIdentifier   = CommandlineArgument(long: "identifier", short: "id")
+    var callingPid               = CommandlineArgument(long: "pid", defaultValue: 0)
+    var playSound                = CommandlineArgument(long: "sound")
+    var dockIcon                 = CommandlineArgument(long: "dockicon")
+    var dockBadge                = CommandlineArgument(long: "dockiconbadge")
 
     // command line options that take no additional parameters
     var button1Disabled          = CommandlineArgument(long: "button1disabled", isbool: true)
@@ -118,6 +129,7 @@ struct CommandLineArguments {
     var blurScreen               = CommandlineArgument(long: "blurscreen", isbool: true)
     var notification             = CommandlineArgument(long: "notification", isbool: true)
     var verboseLogging           = CommandlineArgument(long: "verbose", short: "vvv", isbool: true)
+    var showDockIcon             = CommandlineArgument(long: "showdockicon", isbool: true)
 
     var constructionKit          = CommandlineArgument(long: "builder", isbool: true)
     var movableWindow            = CommandlineArgument(long: "moveable", short: "o", isbool: true)
@@ -141,6 +153,14 @@ struct CommandLineArguments {
     var hideDefaultKeyboardAction = CommandlineArgument(long: "hidedefaultkeyboardaction", isbool: true)
     var alwaysReturnUserInput      = CommandlineArgument(long: "alwaysreturninput", isbool: true)
     var removeNotification        = CommandlineArgument(long: "remove", isbool: true)
+    var showSoundControls         = CommandlineArgument(long: "showsoundcontrols", isbool: true)
+    var hideOtherApps            = CommandlineArgument(long: "hideotherapps", isbool: true)
+
+    // Inspect Mode Arguments
+    var inspectMode               = CommandlineArgument(long: "inspect-mode", isbool: true)
+    var inspectConfig             = CommandlineArgument(long: "inspect-config")
+    var inspectSchema             = CommandlineArgument(long: "inspect-schema")
+    var schemaValidate            = CommandlineArgument(long: "schema-validate")
 }
 
 extension CommandlineArgument {
@@ -231,13 +251,17 @@ extension CommandLineArguments {
                     case "bannerHeight": self.bannerHeight = argument
                     case "button1TextOption": self.button1TextOption = argument
                     case "button1ActionOption": self.button1ActionOption = argument
+                    case "button1Symbol": self.button1Symbol = argument
                     case "button1ShellActionOption": self.button1ShellActionOption = argument
                     case "button2TextOption": self.button2TextOption = argument
                     case "button2ActionOption": self.button2ActionOption = argument
+                    case "button2Symbol": self.button2Symbol = argument
                     case "buttonInfoTextOption": self.buttonInfoTextOption = argument
                     case "buttonInfoActionOption": self.buttonInfoActionOption = argument
+                    case "buttonInfoSymbol": self.buttonInfoSymbol = argument
                     case "buttonStyle": self.buttonStyle = argument
                     case "buttonSize": self.buttonSize = argument
+                    case "buttonTextSize": self.buttonTextSize = argument
                     case "dropdownTitle": self.dropdownTitle = argument
                     case "dropdownValues": self.dropdownValues = argument
                     case "dropdownDefault": self.dropdownDefault = argument
@@ -251,6 +275,7 @@ extension CommandLineArguments {
                     case "timerBar": self.timerBar = argument
                     case "progressBar": self.progressBar = argument
                     case "progressText": self.progressText = argument
+                    case "progressTextAlignment": self.progressTextAlignment = argument
                     case "mainImage": self.mainImage = argument
                     case "mainImageCaption": self.mainImageCaption = argument
                     case "windowWidth": self.windowWidth = argument
@@ -270,6 +295,7 @@ extension CommandLineArguments {
                     case "statusLogFile": self.statusLogFile = argument
                     case "listItem": self.listItem = argument
                     case "listStyle": self.listStyle = argument
+                    case "listSelectionEnabled": self.listSelectionEnabled = argument
                     case "infoText": self.infoText = argument
                     case "infoBox": self.infoBox = argument
                     case "quitKey": self.quitKey = argument
@@ -277,6 +303,7 @@ extension CommandLineArguments {
                     case "authkey": self.authkey = argument
                     case "hash": self.hash = argument
                     case "logFileToTail": self.logFileToTail = argument
+                    case "logFileHistory": self.logFileHistory = argument
                     case "preferredViewOrder": self.preferredViewOrder = argument
                     case "preferredAppearance": self.preferredAppearance = argument
                     case "button1Disabled": self.button1Disabled = argument
@@ -324,6 +351,17 @@ extension CommandLineArguments {
                     case "setAppIcon": self.setAppIcon = argument
                     case "removeNotification": self.removeNotification = argument
                     case "notificationIdentifier": self.notificationIdentifier = argument
+                    case "inspectMode": self.inspectMode = argument
+                    case "inspectConfig": self.inspectConfig = argument
+                    case "inspectSchema": self.inspectSchema = argument
+                    case "schemaValidate": self.schemaValidate = argument
+                    case "callingPid": self.callingPid = argument
+                    case "playSound": self.playSound = argument
+                    case "showSoundControls": self.showSoundControls = argument
+                    case "hideOtherApps": self.hideOtherApps = argument
+                    case "showDockIcon": self.showDockIcon = argument
+                    case "dockIcon": self.dockIcon = argument
+                    case "dockBadge": self.dockBadge = argument
                     default: break
                     }
                 }

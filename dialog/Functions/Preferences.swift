@@ -7,6 +7,8 @@
 
 import Foundation
 
+// MARK: - Dialog Preferences
+
 struct DialogPreferences: Codable {
     var authorisationKey: String = ""
 }

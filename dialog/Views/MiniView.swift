@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Textual
 
 struct MiniProgressView: View {
 
@@ -16,8 +17,16 @@ struct MiniProgressView: View {
             VStack {
                 ProgressView(value: observedData.progressValue, total: observedData.progressTotal)
                     .progressViewStyle(TaskProgressViewStyle())
-                Text(observedData.args.progressText.value)
-                    .lineLimit(1)
+                HStack {
+                    if observedData.args.progressTextAlignment.value.lowercased() == "right" {
+                        Spacer()
+                    }
+                    Text(observedData.args.progressText.value)
+                        .lineLimit(1)
+                    if observedData.args.progressTextAlignment.value.lowercased() == "left" {
+                        Spacer()
+                    }
+                }
             }
         }
     }
@@ -36,7 +45,7 @@ struct MiniView: View {
                 VStack {
                     Spacer() //push button bar to the bottom of the window
                     HStack {
-                        ButtonView(observedDialogContent: observedData)
+                        ButtonBarView(observedDialogContent: observedData)
                             .padding(.bottom, appDefaults.bottomPadding)
                             .padding(.trailing, appDefaults.sidePadding)
                     }
@@ -44,11 +53,22 @@ struct MiniView: View {
             }
             VStack {
                 if observedData.args.titleOption.value != "none" {
-                    Text(observedData.args.titleOption.value)
-                        .font(.system(size: 18, weight: .semibold))
-                        .border(observedData.appProperties.debugBorderColour, width: 2)
-                        .padding(.top, 5)
-                        .lineLimit(1)
+                    HStack {
+                        if observedData.appProperties.titleFontAlignment.lowercased() == "right" {
+                            Spacer()
+                        }
+                        InlineText(observedData.args.titleOption.value, parser: ColoredMarkdownParser())
+                        //Text(observedData.args.titleOption.value)
+                            .font(.system(size: 18, weight: .semibold))
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .padding(.top, 5)
+                            .lineLimit(1)
+                            .padding([.leading, .trailing], 15)
+                            .foregroundColor(observedData.appProperties.titleFontColour)
+                        if observedData.appProperties.titleFontAlignment.lowercased() == "left" {
+                            Spacer()
+                        }
+                    }
 
                     Divider()
                         .frame(height: 1)
@@ -70,7 +90,8 @@ struct MiniView: View {
                     }
                     VStack {
                         HStack {
-                            Text(observedData.args.messageOption.value)
+                            StructuredText(observedData.args.messageOption.value, parser: ColoredMarkdownParser())
+                            //Text(observedData.args.messageOption.value)
                                 .lineLimit(4)
                                 .font(.system(size: 15))
                                 .frame(maxWidth: .infinity, alignment: .topLeading)

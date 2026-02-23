@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import Textual
 
 struct BannerImageView: View {
 
@@ -50,40 +51,26 @@ struct BannerImageView: View {
                     .clipped()
             }
             if observedData.args.bannerTitle.present {
-                ZStack {
-                    if observedData.appProperties.titleFontShadow {
-                        if observedData.appProperties.titleFontName == "" {
-                            Text(observedData.args.titleOption.value)
-                                .font(.system(size: observedData.appProperties.titleFontSize, weight: observedData.appProperties.titleFontWeight))
-                                .foregroundColor(.black)
-                                .offset(x: blurOffset, y: blurOffset)
-                                .blur(radius: blurRadius)
-                                .opacity(opacity)
-                        } else {
-                            Text(observedData.args.titleOption.value)
-                                .font(.custom(observedData.appProperties.titleFontName, size: observedData.appProperties.titleFontSize))
-                                .fontWeight(observedData.appProperties.titleFontWeight)
-                                .foregroundColor(.black)
-                                .offset(x: blurOffset, y: blurOffset)
-                                .blur(radius: blurRadius)
-                                .opacity(opacity)
-                        }
+                HStack {
+                    if observedData.appProperties.titleFontAlignment.lowercased() == "right" {
+                        Spacer()
                     }
-                    if observedData.appProperties.titleFontName == "" {
-                        Text(observedData.args.titleOption.value)
-                            .font(.system(size: observedData.appProperties.titleFontSize, weight: observedData.appProperties.titleFontWeight))
-                            .foregroundColor(observedData.appProperties.titleFontColour)
-                            .accessibilityHint(observedData.args.titleOption.value)
-                    } else {
-                        Text(observedData.args.titleOption.value)
-                            .font(.custom(observedData.appProperties.titleFontName, size: observedData.appProperties.titleFontSize))
-                            .fontWeight(observedData.appProperties.titleFontWeight)
-                            .foregroundColor(observedData.appProperties.titleFontColour)
-                            .accessibilityHint(observedData.args.titleOption.value)
+                    InlineText(observedData.args.titleOption.value, parser: ColoredMarkdownParser())
+                        .font(
+                            observedData.appProperties.titleFontName.isEmpty ?
+                                .system(size: observedData.appProperties.titleFontSize, weight: observedData.appProperties.titleFontWeight) :
+                                    .custom(observedData.appProperties.titleFontName, size: observedData.appProperties.titleFontSize)
+                        )
+                        .fontWeight(observedData.appProperties.titleFontWeight)
+                        .foregroundColor(observedData.appProperties.titleFontColour)
+                        .accessibilityHint(observedData.args.titleOption.value)
+                        .shadow(radius: observedData.appProperties.titleFontShadow ? blurRadius : 0)
+                        .padding(appDefaults.topPadding)
+                        .frame(alignment: .center)
+                    if observedData.appProperties.titleFontAlignment.lowercased() == "left" {
+                        Spacer()
                     }
                 }
-                .padding(appDefaults.topPadding)
-                .frame(alignment: .center)
             }
         }
     }

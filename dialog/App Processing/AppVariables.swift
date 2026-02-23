@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct AppDefaults {
-    let cliversion                      = "2.5.6"
+    let cliversion                      = "2.6.0"
     let launchTime                      = Date.now
     // message default strings
     let titleDefault                    = String("default-title".localized)
@@ -23,15 +23,16 @@ struct AppDefaults {
                                                       "right": .trailing,
                                                       "centre": .center,
                                                       "center": .center]
-    let button1Default                  = String("button-ok".localized)
-    let button2Default                  = String("button-cancel".localized)
-    let buttonInfoDefault               = String("button-more-info".localized)
+    let button1Default                  = String("OK".localized)
+    let button2Default                  = String("Cancel".localized)
+    let buttonInfoDefault               = String("More Information".localized)
     let buttonInfoActionDefault         = String("")
     let buttonSizeStates: [String: ControlSize] = ["mini": .mini,
                                                       "small": .small,
                                                       "regular": .regular,
                                                       "large": .large]
     let buttonSize                      = String("regular")
+    //let buttonFontSize: CGFloat?
 
 
     // Content padding
@@ -57,8 +58,10 @@ struct AppDefaults {
     let exit4                           = (code: Int32(4),   message: String(""))
     let exit5                           = (code: Int32(5),   message: String("")) // quit via command file
     let exit10                          = (code: Int32(10),  message: String("")) // quit via command + quitKey
+    let exit15                          = (code: Int32(15),  message: String("")) // quit via window close button
     let exit20                          = (code: Int32(20),  message: String("Timeout Exceeded"))
     let exit30                          = (code: Int32(30),  message: String("Key authorisation required"))
+    let exit40                          = (code: Int32(40),  message: String("SIGTERM received"))
     let exit201                         = (code: Int32(201), message: String("ERROR: Image resource cannot be found :"))
     let exit202                         = (code: Int32(202), message: String("ERROR: File not found :"))
     let exit203                         = (code: Int32(203), message: String("ERROR: Invalid Colour Value Specified. Use format #000000 :"))
@@ -92,8 +95,9 @@ struct AppVariables {
     // work out how to define a default width button that does what you tell it to. in the meantime, diry hack with spaces
     var button1DefaultAction            = KeyboardShortcut.defaultAction
     var button2DefaultAction            = KeyboardShortcut.cancelAction
+    var buttonTextSize: CGFloat?
 
-    var helpButtonHoverText             = String("help-hover".localized)
+    var helpButtonHoverText             = String("Click for additional information".localized)
 
     // Window Sizes
     var windowWidth                     = CGFloat(820)      // set default dialog width
@@ -101,6 +105,8 @@ struct AppVariables {
 
     var windowBackgroundColour          = Color.clear
 
+    // logFileHistory
+    var logFileHistory                  = Int(100)
 
     // Screen Size
     var screenWidth                     = CGFloat(0)
@@ -132,6 +138,7 @@ struct AppVariables {
     var titleFontWeight                 = Font.Weight.bold
     var titleFontName                   = ""
     var titleFontShadow                 = Bool(false)
+    var titleFontAlignment              = ""
     var messageFontSize                 = CGFloat(20)
     var messageFontColour               = Color.primary
     var messageFontWeight               = Font.Weight.regular
@@ -168,4 +175,7 @@ struct AppVariables {
     // debug flag
     var debugMode                       = Bool(false)
     var debugBorderColour               = Color.clear
+    
+    // inspect mode config path
+    var inspectConfigPath               = String("")
 }

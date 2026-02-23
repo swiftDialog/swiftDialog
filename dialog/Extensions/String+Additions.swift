@@ -7,6 +7,7 @@
 
 import Foundation
 import CryptoKit
+import SwiftUI
 
 extension String {
 
@@ -76,5 +77,46 @@ extension CGFloat {
         formatter.minimumFractionDigits = 0
         formatter.maximumFractionDigits = 0
         return formatter.string(from: self as NSNumber) ?? "0"
+    }
+}
+
+extension String {
+    var toSymbolRenderingMode: SymbolRenderingMode? {
+        switch self.lowercased() {
+        case "hierarchical":
+            return .hierarchical
+        case "monochrome":
+            return .monochrome
+        case "multicolor", "multicolour":
+            return .multicolor
+        case "palette":
+            return .palette
+        default:
+            return nil
+        }
+    }
+}
+
+enum IconPosition {
+    case leading
+    case top
+    case bottom
+    case trailing
+}
+
+extension String {
+    var toSymbolPosition: IconPosition? {
+        switch self.lowercased() {
+        case "leading":
+            return .leading
+        case "top":
+            return .top
+        case "bottom":
+            return .bottom
+        case "trailing":
+            return .trailing
+        default:
+            return nil
+        }
     }
 }

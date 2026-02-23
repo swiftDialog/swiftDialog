@@ -9,7 +9,8 @@ import Foundation
 import Combine
 import SwiftUI
 //import WebViewKit
-//import WebKit
+import WebKit
+import SDWebImageSwiftUI
 
 enum ImageSource {
     case remote(url: URL?)
@@ -86,13 +87,11 @@ struct DisplayImage: View {
                     Image(nsImage: legacyImage)
                         .resizable()
                         .interpolation(.high)
-                /* Reserved for future use
+                // Reserved for future use
                 } else if ["gif"].contains(imgPath.split(separator: ".").last) {
-                    WebView(url: asyncURL) { webView in
-                        webView.configuration.websiteDataStore = WKWebsiteDataStore.nonPersistent()
-                    }
-                    .frame(width: .infinity, height: .infinity)
-                */
+                    AnimatedImage(url: asyncURL)
+                        .resizable()
+                        .scaledToFit()
                 } else {
                     AsyncImage(url: asyncURL) { phase in
                         if let image = phase.image {
@@ -147,3 +146,56 @@ struct DisplayImage: View {
     }
 }
 
+struct AnimatedGIFView: NSViewRepresentable {
+    let url: URL
+    
+    func makeNSView(context: Context) -> WKWebView {
+        let webView = WKWebView()
+        webView.setValue(false, forKey: "drawsBackground")
+        webView.allowsMagnification = false
+        return webView
+    }
+    
+    func updateNSView(_ webView: WKWebView, context: Context) {
+        if url.isFileURL {
+            webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
+        } else {
+            webView.load(URLRequest(url: url))
+        }
+    }
+}
+
+struct AnimatedGIFViewBlocked: View {
+    let url: URL
+    private let imageSize: CGSize?
+    
+    init(url: URL) {
+        self.url = url
+        self.imageSize = Self.getGIFSize(from: url)
+    }
+    
+    var body: some View {
+        ZStack {
+            AnimatedGIFView(url: url)
+            
+            Color.clear
+                .contentShape(Rectangle())
+        }
+        .aspectRatio(imageSize ?? CGSize(width: 1, height: 1), contentMode: .fit)
+    }
+    
+    private static func getGIFSize(from url: URL) -> CGSize? {
+        guard let imageSource = CGImageSourceCreateWithURL(url as CFURL, nil) else {
+            return nil
+        }
+        
+        guard let properties = CGImageSourceCopyPropertiesAtIndex(imageSource, 0, nil) as? [String: Any] else {
+            return nil
+        }
+        
+        let width = properties[kCGImagePropertyPixelWidth as String] as? CGFloat ?? 0
+        let height = properties[kCGImagePropertyPixelHeight as String] as? CGFloat ?? 0
+        
+        return CGSize(width: width, height: height)
+    }
+}

@@ -16,81 +16,26 @@ struct CKSidebarView: View {
     }
 
     var body: some View {
-        VStack { // icon and icon overlay
+        ScrollView { // infoBox
             VStack {
-                LabelView(label: "ck-icon".localized)
+                LabelView(label: "Infobox".localized)
+                Text("Use markdown formatting to style the text")
+                    .frame(width: .infinity, alignment: .leading)
                 HStack {
-                    Toggle("ck-visible".localized, isOn: $observedData.args.iconOption.present)
-                        .toggleStyle(.switch)
-                    Toggle("ck-centred".localized, isOn: $observedData.args.centreIcon.present)
-                        .toggleStyle(.switch)
-                    Button("ck-select".localized) {
-                            let panel = NSOpenPanel()
-                            panel.allowsMultipleSelection = false
-                            panel.canChooseDirectories = false
-                            panel.allowedContentTypes = [.image, .application, .systemPreferencesPane]
-                            if panel.runModal() == .OK {
-                                observedData.args.iconOption.value = panel.url?.path ?? "<none>"
-                            }
-                          }
-                    TextField("", text: $observedData.args.iconOption.value)
-                }
-                HStack {
-                    Button(action: {
-                        observedData.args.iconOption.value = "SF=\(observedData.args.iconOption.value)"
-                    }, label: {
-                        Text("SF Symbol")
-                    })
-                    Spacer()
-                }
-                LabelView(label: "ck-iconsize".localized)
-                HStack {
-                    Slider(value: $observedData.iconSize, in: 0...400)
-                    //Text("Current value: \(observedDialogContent.iconSize, specifier: "%.0f")")
-                    TextField("Size value:", value: $observedData.iconSize, formatter: displayAsInt)
-                        .frame(width: 50)
-                }
-                LabelView(label: "Icon Alpha")
-                HStack {
-                    Slider(value: $observedData.iconAlpha, in: 0.0...1.0)
-                    TextField("Alpha value:", value: $observedData.iconAlpha,
-                              formatter: displayAsDouble)
-                        .frame(width: 50)
-                }
-            }
-            VStack {
-                LabelView(label: "ck-overlay".localized)
-                HStack {
-                    Toggle("ck-visible".localized, isOn: $observedData.args.overlayIconOption.present)
-                        .toggleStyle(.switch)
-                    Button("ck-select".localized) {
-                            let panel = NSOpenPanel()
-                            panel.allowsMultipleSelection = false
-                            panel.canChooseDirectories = false
-                            panel.allowedContentTypes = [.image]
-                            if panel.runModal() == .OK {
-                                observedData.args.overlayIconOption.value = panel.url?.path ?? "<none>"
-                            }
-                          }
-                    TextField("", text: $observedData.args.overlayIconOption.value)
-                }
-            }
-            VStack {
-                LabelView(label: "ck-infobox".localized)
-                HStack {
-                    Toggle("ck-visible".localized, isOn: $observedData.args.infoBox.present)
+                    Toggle("Visible".localized, isOn: $observedData.args.infoBox.present)
                         .toggleStyle(.switch)
                     TextEditor(text: $observedData.args.infoBox.value)
                         .frame(height: 100)
                         .background(Color("editorBackgroundColour"))
+                        .border(.primary, width: 0.5)
                 }
             }
             VStack {
-                LabelView(label: "ck-infotext".localized)
+                LabelView(label: "Infotext".localized)
                 HStack {
-                    Toggle("ck-visible".localized, isOn: $observedData.args.infoText.present)
+                    Toggle("Visible".localized, isOn: $observedData.args.infoText.present)
                         .toggleStyle(.switch)
-                    TextField("ck-infotext".localized, text: $observedData.args.infoText.value)
+                    TextField("Infotext".localized, text: $observedData.args.infoText.value)
                 }
             }
 

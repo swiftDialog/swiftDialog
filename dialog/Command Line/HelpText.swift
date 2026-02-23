@@ -79,6 +79,8 @@ struct SDHelp {
             name=<fontname>           - accepts a font name or family
                                         list of available names can be determined with --\(appArguments.listFonts.long)
 
+            alignment=[left | right]  - Set the Title text alignment. Default is centred.
+
             weight=[thin | light | regular | medium | heavy | bold]
                 default is bold
 
@@ -201,6 +203,11 @@ struct SDHelp {
         argument.buttonSize.helpLong = """
         Adjusts the size of the buttons at the bottom of the window.
         Default: regular
+"""
+        argument.buttonTextSize.helpShort = "Set the font sized used on buttons"
+        argument.buttonTextSize.helpUsage = "<num>"
+        argument.buttonTextSize.helpLong = """
+        The font size of button text will be set to the specified value. Default is system font default. 
 """
 
         argument.webcontent.helpShort = "Display a web page"
@@ -348,7 +355,24 @@ struct SDHelp {
 
         If the text \"none\" is used, the button will be hidden.
 """
+        
+        argument.button1Symbol.helpShort = "Set the symbol for Button1"
+        argument.button1Symbol.helpUsage = "<sf symbol name>[,position,rendering mode,size,color]"
+        argument.button1Symbol.helpLong = """
+        Sets the SF Symbol to use in addition to the button label
 
+        Takes SF Symbol name as the argument
+        
+        Optional properties supplied as comma seperated values (in any order):
+          position: one of leading, trailing, top, bottom - default leading
+          rendering mode: one of hierarchical, monochrome, multicolour, palette - default monochrome
+            palette: add two or three colours in the format palette=colour1-colour2-colour3
+                     e.g. palette=red-green-blue
+          size: in the format size=<num>
+          color: in the format color=<text|hex> - if multicolour rendering mode is set, color is ignored
+
+"""
+        
         argument.button1ActionOption.helpShort = "Set the Button1 action"
         argument.button1ActionOption.helpUsage = "<url>"
         argument.button1ActionOption.helpLong = """
@@ -378,6 +402,9 @@ struct SDHelp {
         Bound to <ESC> key
         Return code when actioned is 2
 """
+        argument.button2Symbol.helpShort = "Set the symbol for Button2"
+        argument.button2Symbol.helpUsage = argument.button1Symbol.helpUsage
+        argument.button2Symbol.helpLong = argument.button1Symbol.helpLong
 
         argument.button2ActionOption.helpShort = "Custom Actions For Button 2 Is Not Implemented"
         argument.button2ActionOption.helpLong = """
@@ -402,6 +429,9 @@ struct SDHelp {
         If not specified, Info button will not be displayed
         Return code when actioned is 3
 """
+        argument.buttonInfoSymbol.helpShort = "Set the symbol for Info Button"
+        argument.buttonInfoSymbol.helpUsage = argument.button1Symbol.helpUsage
+        argument.buttonInfoSymbol.helpLong = argument.button1Symbol.helpLong
 
         argument.buttonInfoActionOption.helpShort = "Set the info button action"
         argument.buttonInfoActionOption.helpUsage = "<url>"
@@ -410,7 +440,6 @@ struct SDHelp {
         button from triggering a dialog exit
         Default action if not specified is to exit with return code 3
 """
-
 
         argument.infoText.helpShort = "Display <text> in place of info button"
         argument.infoText.helpLong = """
@@ -462,6 +491,16 @@ struct SDHelp {
 
         All other functions are available but the user is prevented from interacting with any other app until swiftDialog is exited.
 """
+        
+        argument.hideOtherApps.helpShort = "Hide all other apps when launching a dialog window"
+        argument.hideOtherApps.helpUsage = ""
+        argument.hideOtherApps.helpLong = """
+        This mode will hide all other apps when dialog launches.
+
+        When dialog exits, unhidden apps will re-appear*
+
+        * Note: previously hidden apps are not tracked so the unhide action will make all apps unhide, including apps that were hidden prior to dialog launching.
+"""
 
         argument.progressBar.helpShort = "Enable interactive progress bar"
         argument.progressBar.helpUsage = "[<int>]"
@@ -478,6 +517,8 @@ struct SDHelp {
         To update progress text send "progresstext: <text>" command to the dialog command file
 
         Progress text is displayed underneath the progress bar
+
+        Use \(argument.progressTextAlignment.long) [left|right] to change the progress text alignment. Default is centred.
 """
 
         argument.statusLogFile.helpShort = "Set command file path"
@@ -491,12 +532,15 @@ struct SDHelp {
 
         Available commands:
             title: <text>
+            titlefont: <fontname>
             message: (+)<text>
-            image: <path/url>
+            alignment: [left | center | right]
+            image: [show | hide | clear | <path/url>]
             imagecaption: <text>
             progress: <int>/<text>
             progress: hide/show
             progresstext: <text>
+            helpmessage: <text>
             list: <text/csv>
             list: clear
             listitem: <item>: [<text>/wait]
@@ -507,18 +551,29 @@ struct SDHelp {
             button2: [disable/enable]
             button1text: (+)<text>
             button2text: (+)<text>
+            buttonsize: [mini | small | regular | large]
             infobuttontext: <text>
+            infotext: <text>
             infobox: <text>
             icon: <path/url/SF Symbol>
             icon: <centre/center/left/default>
             icon: size: <num>
+            iconalpha: <float> (0.0 -> 1.0)
+            overlayicon: <path/url/SF Symbol>
+            bannerimage: <path/url>
+            bannertext: [enable | disable | shadow | <text>]
             width: <num>
             height: <num>
             position: <position>
             webcontent: <url>
             video: <path/url>
             blurscreen: [enable/disable]
+            showdockicon: [enable/disable]
+            dockicon: <file|url>
+            dockiconbadge: <text>
             activate:
+            hide:
+            show:
             quit:
 """
 
@@ -548,7 +603,7 @@ struct SDHelp {
 """
 
         argument.dropdownTitle.helpShort = "Select list name"
-        argument.dropdownTitle.helpUsage = "<text>(,radio|required,name=\"<text>\")"
+        argument.dropdownTitle.helpUsage = "<text>(,radio|required|searchable|multiselect|name=\"<text>\")"
         argument.dropdownTitle.helpLong = """
         Sets the name for a dropdown select list.
 
@@ -583,6 +638,9 @@ struct SDHelp {
             radio      - Change the select list to display a group with radio buttons. When using radio with no default
                          item specified, the first entry in the list will become the default selected item.
             required   - Make that particular list a required item that must have a value before swiftDialog will exit
+            searchable - Marks the List as searchable. Typing in the provided textfield will filter the list of results. Useful
+                         for long lists or lists with similar items.
+            multiselect- Allows mulltiple options to be selected
 """
 
         argument.dropdownValues.helpShort = "Select list values"
@@ -619,9 +677,11 @@ struct SDHelp {
             prompt     - Pre-fill the field with some prompt text
             value      - Pre-fill the field with a specific value
             regex      - Specify a regular expression that the field must satisfy for the content to be accepted.
+                         include --\(argument.textFieldLiveValidation) for live regex checking.
             confirm    - Will display a duplicate of the textfield who's content needs to match to validate
             regexerror - Specify a custom error to display if regex conditions are not met
             fileselect - Adds a "Select" button and presents a file picker
+            path       - Used with fileselect. Sets initial path for file select dialog
             filetype   - Limits fileselect to the named file extensions. Presented in space separated values
 
         modifiers can be combined e.g. --\(appArguments.textField.long) <text>,secure,required
@@ -631,6 +691,15 @@ struct SDHelp {
         (secure fields cannot have the prompt modifier applied)
 """
 
+        argument.textFieldLiveValidation.helpShort = "Enable live validation of textfield regex requirements"
+        argument.textFieldLiveValidation.helpUsage = ""
+        argument.textFieldLiveValidation.helpLong = """
+        When using --\(appArguments.textField.long) with a regex property, setting this flag
+        will cause any textfields to show a green or red overlay while content is being entered
+        as an indicator that the content does or does not meet any regex requirements on that field. 
+        
+"""
+        
         argument.checkbox.helpShort = "Enable a checkbox with the specified label"
         argument.checkbox.helpLong = """
         When swiftDialog exits the status of the checkbox will be presented as <text> : [true|false]
@@ -688,7 +757,7 @@ struct SDHelp {
         argument.listItem.helpLong = """
         Multiple items can be added by specifying --\(appArguments.listItem.long) multiple times
 
-        Alternatly, specify a list item with either of the follwoing JSON formats (in conjunction with --\(appArguments.jsonFile.long) or \(appArguments.jsonString.long):
+        Alternatly, specify a list item with either of the following JSON formats (in conjunction with --\(appArguments.jsonFile.long) or \(appArguments.jsonString.long):
         Simple:
         {
           "listitem" : ["Item One", "Item Two", "Item Three", "Item Four", "Item Five"]
@@ -702,9 +771,24 @@ struct SDHelp {
           ]
         }
 
-        <status> can be one of "wait", "success", "fail", "error" or "pending"
+        <status> can be one of the provided keywords "wait", "success", "fail", "error" or "pending"
         and will display an appropriate icon in the status area.
+        Alternatly specify a desired SF symbol name and optional colour seperated by a hyphen
+        Example:
+            lock.shield.fill-green
 
+        You can include a URL action to perform when a list item is clicked with the "action" property
+        Example:
+            --\(appArguments.listItem.long) "<title>",action="<url>"
+        or as json:
+            {
+              "listitem" : [
+                {"title" : "<text>", "action" : "<url>"}
+              ]
+            }
+
+        If --\(argument.listSelectionEnabled.long) is used, actions will be ignored.
+        
         Updates to items in the list can be sent to the command file specified by --\(appArguments.statusLogFile.long):
         Clear an existing list:
             list: clear
@@ -727,6 +811,23 @@ struct SDHelp {
         argument.listStyle.helpShort = "Set list style [expanded|compact]"
         argument.listStyle.helpLong = """
         When presenting a list, use of this argument will adjust the vertical spacing between each row.
+"""
+        
+        argument.listSelectionEnabled.helpShort = "Enable list selection behabiour"
+        argument.listSelectionEnabled.helpLong = """
+        When presenting a list, use of this argument will enable list items to be selected.
+
+        The results of the selection will be returned to stdout in the form <title> : <selected state>. 
+        Example:
+            "Item One" : "true"
+            "Item Two" : "false"
+            "Item Three" : "true"
+        or as json:
+            {
+              "Item One" : true,
+              "Item Two" : false,
+              "Item Three" : true
+            }
 """
 
         argument.watermarkImage.helpShort = "Set a dialog background image"
@@ -776,12 +877,15 @@ struct SDHelp {
         Sets the height of the dialog window to the specified height in points
 """
 
-        argument.position.helpShort = "Set dialog window position"
-        argument.position.helpUsage = "[topleft | left | bottomleft | top | center/centre | bottom | topright | right | bottomright]"
+        argument.position.helpShort = "Position the dialog window to the defined location on the screen"
+        argument.position.helpUsage = "[topleft | left | bottomleft | top | center/centre | bottom | topright | right | bottomright | x,y]"
         argument.position.helpLong = """
-        Poitions the dialog window to the defined location on the screen
+        Supply one of the defined keywords or a precise position in x,y format e.g. "100,200"
+          Position is calculated with the screen origin 0,0 and window position anchor at top left
 
-        Default is a visually appealing position slightly towards the top of centre, not dead centre.
+        There is a default edge offset value of \(appvars.windowPositionOffset). This can be adjusted using the --\(arguments.positionOffset.long) argument
+
+        Default is centred with a visually appealing vertical position slightly towards the top of centre, not dead centre.
 """
 
         argument.positionOffset.helpShort = "Set dialog window position offset"
@@ -808,6 +912,17 @@ struct SDHelp {
         argument.logFileToTail.helpUsage = "<file>"
         argument.logFileToTail.helpLong = """
         Open a file and display the contents as it is being written
+
+        Can be used with \(argument.logFileHistory.long) to display additional log history for context before watching the file for changes
+"""
+        
+        argument.logFileHistory.helpShort = "Display log file history when used with --\(argument.logFileToTail.long)"
+        argument.logFileHistory.helpUsage = "[<int>]"
+        argument.logFileHistory.helpLong = """
+        When file contents are being observed for changes, adding this option will pre-populate the display with the previous <int> lines of history.
+        Default value is 100
+
+        * Note * - Loading a large history may cause a short visual delay as the lines are being loaded in depending on the value. 
 """
 
 
@@ -1038,7 +1153,33 @@ struct SDHelp {
 
         This property is implied when using --\(argument.forceOnTop.long)
 """
+        
+        argument.showDockIcon.helpShort = "Dialog app icon will be visible on the Dock"
+        argument.showDockIcon.helpUsage = ""
+        argument.showDockIcon.helpLong = """
+        When swiftDialog is running, the app icon will appear on the macOS Dock
 
+        In addition to the Dock icon, the menu bar will display the Dialog app name and about menu when swiftDialog is the foreground app
+        This setting is implied when using --\(argument.dockIcon.long)
+"""
+
+        argument.dockIcon.helpShort = "Dialog app icon will be visible on the Dock set to the specified value"
+        argument.dockIcon.helpUsage = "<file|url>"
+        argument.dockIcon.helpLong = """
+        When swiftDialog is running, the app icon will appear on the macOS Dock using the specified image
+
+        In addition to the Dock icon, the menu bar will display the Dialog app name and about menu when swiftDialog is the foreground app
+        This setting implies --\(argument.showDockIcon.long)
+"""
+        
+        argument.dockBadge.helpShort = "Shows the specified value as a badge on the dock icon when visible"
+        argument.dockBadge.helpUsage = "<text>"
+        argument.dockBadge.helpLong = """
+        When the dock icon is visible using --\(argument.showDockIcon.long) or --\(argument.dockIcon.long), display <text> as the badge
+
+        e.g. "--\(argument.dockBadge.long) 10" 
+"""
+        
         argument.loginWindow.helpShort = "Enable the dialog window to be shown at login"
         argument.loginWindow.helpUsage = ""
         argument.loginWindow.helpLong = """
@@ -1054,6 +1195,27 @@ struct SDHelp {
         Supports standard dialogs with or without --\(argument.blurScreen.long)
 
         This option also implies the --\(argument.forceOnTop.long) flag
+"""
+        
+        argument.playSound.helpShort = "Play an audio file on launch"
+        argument.playSound.helpUsage = "<file|url>"
+        argument.playSound.helpLong = """
+        The specified audio file will start playing when swiftDialog launches
+        If the file is sourced from a URL then it will start playing once the file has downloaded.
+
+        example:
+            --\(argument.playSound.long) /System/Library/Sounds/Glass.aiff
+        json:
+            '{"\(argument.playSound.long)" : "/System/Library/Sounds/Glass.aiff"}'
+"""
+        
+        argument.showSoundControls.helpShort = "Show sound playback controls"
+        argument.showSoundControls.helpUsage = ""
+        argument.showSoundControls.helpLong = """
+        When used with --\(argument.playSound.long), playback controls will be shown containing
+        play/pause, mute and audio timeline. Playback position can be changed by clicking the timeline.
+        
+        This may be useful when playing longer audio files.
 """
 
         argument.debug.helpShort = "Enable debug mode"

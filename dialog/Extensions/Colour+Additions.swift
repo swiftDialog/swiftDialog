@@ -77,33 +77,37 @@ extension Color {
 }
 
 extension Color {
+    init(hex: String) {
+        // Handle hex strings with or without the # prefix
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (255, 0, 0, 0)
+        }
+
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue: Double(b) / 255,
+            opacity: Double(a) / 255
+        )
+    }
+}
+
+extension Color {
     static let background = Color(NSColor.windowBackgroundColor)
     static let secondaryBackground = Color(NSColor.underPageBackgroundColor)
-    static let tertiaryBackground = Color(NSColor.controlBackgroundColor)
-
-    static let code = Color(
-        light: Color(rgba: 0xdc1c_50ff), dark: Color(rgba: 0xdb58_7bff)
-    )
-    static let text = Color(
-        light: Color(rgba: 0x0606_06ff), dark: Color(rgba: 0xfbfb_fcff)
-    )
-    static let secondaryText = Color(
-        light: Color(rgba: 0x6b6e_7bff), dark: Color(rgba: 0x9294_a0ff)
-    )
-    static let tertiaryText = Color(
-        light: Color(rgba: 0x6b6e_7bff), dark: Color(rgba: 0x6d70_7dff)
-    )
-    static let link = Color(
-        light: Color(rgba: 0x2c65_cfff), dark: Color(rgba: 0x4c8e_f8ff)
-    )
-    static let border = Color(
-        light: Color(rgba: 0xe4e4_e8ff), dark: Color(rgba: 0x4244_4eff)
-    )
-    static let divider = Color(
-        light: Color(rgba: 0xd0d0_d3ff), dark: Color(rgba: 0x3334_38ff)
-    )
-    static let checkbox = Color(rgba: 0xb9b9_bbff)
-    static let checkboxBackground = Color(rgba: 0xeeee_efff)
+    static let tertiaryBackground = Color(NSColor.controlBackgroundColor)    
 }
 
 extension Color {

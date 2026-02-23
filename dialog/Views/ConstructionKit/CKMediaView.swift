@@ -17,17 +17,17 @@ struct CKMediaView: View {
     }
 
     var body: some View {
-        VStack { //buttons
+        ScrollView { //buttons
             VStack {
                 LabelView(label: "Video")
                 HStack {
-                    Toggle("ck-enable".localized, isOn: $observedData.args.video.present)
+                    Toggle("Enable".localized, isOn: $observedData.args.video.present)
                         .toggleStyle(.switch)
-                    Toggle("ck-autoplay".localized, isOn: $observedData.args.autoPlay.present)
+                    Toggle("AutoPlay".localized, isOn: $observedData.args.autoPlay.present)
                         .toggleStyle(.switch)
                     Spacer()
                 }
-                Button("ck-select".localized) {
+                Button("Select".localized) {
                         let panel = NSOpenPanel()
                         panel.allowsMultipleSelection = false
                         panel.canChooseDirectories = false
@@ -36,20 +36,21 @@ struct CKMediaView: View {
                             observedData.args.video.value = panel.url?.path ?? "<none>"
                         }
                       }
-                TextField("ck-filename".localized, text: $observedData.args.video.value)
-                TextField("ck-caption".localized, text: $observedData.args.videoCaption.value)
+                TextField("Filename".localized, text: $observedData.args.video.value)
+                TextField("Caption".localized, text: $observedData.args.videoCaption.value)
 
             }
             VStack {
-                LabelView(label: "ck-web".localized)
+                LabelView(label: "Web".localized)
                 HStack {
-                    Toggle("ck-disabled".localized, isOn: $observedData.args.webcontent.present)
+                    Toggle("Disabled".localized, isOn: $observedData.args.webcontent.present)
                         .toggleStyle(.switch)
                     Spacer()
                 }
-                TextField("ck-url".localized, text: $observedData.args.webcontent.value)
+                TextField("URL".localized, text: $observedData.args.webcontent.value)
             }
         }
+        .padding(20)
     }
 }
 

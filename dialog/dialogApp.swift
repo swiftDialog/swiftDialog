@@ -16,6 +16,8 @@ var background = BlurWindowController()
 // AppDelegate and extension used for notifications
 class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
 
+    var monitor: PIDMonitor?
+    
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                 didReceive response: UNNotificationResponse,
                 withCompletionHandler completionHandler:
@@ -44,7 +46,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        //var blurredScreen = [BlurWindowController]()
+
+        // Check for calling app pid
+        if appArguments.callingPid.present {
+            monitor = PIDMonitor(pid: Int32(appArguments.callingPid.value) ?? 0) {
+                quitDialog(exitCode: 40, exitMessage: "dialog quit becasue calling process was terminated")
+            }
+            writeLog("Monitoring for calling pid \(appArguments.callingPid.value)", logLevel: .debug)
+        }
 
         if let window = NSApplication.shared.windows.first {
             window.standardWindowButton(.closeButton)?.isHidden = !appArguments.windowButtonsEnabled.present
@@ -90,18 +99,46 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             } else {
                 background.close()
             }
-
-            placeWindow(window, size: window.frame.size,
+            
+            placeWindow(window, size: CGSize(width: appvars.windowWidth,
+                                             height: appvars.windowHeight),
                         vertical: appvars.windowPositionVertical,
-                horozontal: appvars.windowPositionHorozontal,
-                        offset: appvars.windowPositionOffset)
-
+                        horozontal: appvars.windowPositionHorozontal,
+                        offset: appvars.windowPositionOffset,
+                        useFullScreen: appArguments.blurScreen.present || appArguments.forceOnTop.present)
+            
             // order to the front
             window.makeKeyAndOrderFront(self)
+            
+            // show Dock icon
+            NSApp.setActivationPolicy((appArguments.showDockIcon.present || appArguments.dockIcon.present) ? .regular : .accessory)
+            
+            // Set Dock Icon
+            if appArguments.dockIcon.present {
+                let path = appArguments.dockIcon.value
+                var image = NSImage()
+                switch path {
+                case _ where ["app", "prefPane", "framework"].contains(path.split(separator: ".").last):
+                    image =  getAppIcon(appPath: path)
+                default:
+                    image = getImageFromPath(fileImagePath: path, returnErrorImage: true)
+                }
+                NSApp.applicationIconImage = image
+            }
+            
+            // Set Dock Badge
+            NSApp.dockTile.badgeLabel = appArguments.dockBadge.present ? appArguments.dockBadge.value : nil
+            
+            // Hide menu items (only visible if dock icon is visible)
+            DispatchQueue.main.async {
+                NSApp.mainMenu?.items.removeAll { item in
+                    ["File", "Edit", "View", "Window", "Help"].contains(item.title)
+                }
+            }
 
             if appArguments.forceOnTop.present || appArguments.blurScreen.present {
                 writeLog("Activating window", logLevel: .debug)
-                NSApp.activate(ignoringOtherApps: true)
+                activateDialog()
             }
         }
     }
@@ -111,7 +148,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         }
 }
 
-@available(OSX 12.0, *)
 @main
 struct dialogApp: App {
 
@@ -192,7 +228,7 @@ struct dialogApp: App {
         }
 
         // Create main dialog state object
-        observedData = DialogUpdatableContent()
+        observedData = DialogUpdatableContent.shared
 
         if appArguments.fullScreenWindow.present {
             FullscreenView(observedData: observedData).showFullScreen()
@@ -208,23 +244,44 @@ struct dialogApp: App {
         } else {
             // bring to front on launch
             writeLog("Activating", logLevel: .debug)
-            NSApp.activate(ignoringOtherApps: true)
+            activateDialog()
             writeLog("Activated", logLevel: .debug)
         }
+        
+        // If an audio file is passed in, play it
+        if appArguments.playSound.present {
+            AudioManager.shared.playAudio(from: appArguments.playSound.value)
+        }
+        
+        hideAllApps(appArguments.hideOtherApps.present)
     }
 
     var body: some Scene {
-
+        
         WindowGroup {
             if !appArguments.notification.present && !appvars.noargs {
+                let _ = appvars.debugMode ? print("DEBUG: Checking modes - mini:\(appArguments.miniMode.present) inspect:\(appArguments.inspectMode.present) presentation:\(appArguments.presentationMode.present)") : ()
                 ZStack {
                     if appArguments.miniMode.present {
+                        let _ = appvars.debugMode ? print("DEBUG: Loading MiniView") : ()
                         MiniView(observedDialogContent: observedData)
                             .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
+                    } else if appArguments.inspectMode.present {
+                        // Wrap InspectView to delay its initialization
+                        let _ = appvars.debugMode ? print("DEBUG: Loading InspectView") : ()
+                        if appArguments.windowResizable.present {
+                            InspectView()
+                        } else {
+                            InspectView()
+                                .frame(width: observedData.appProperties.windowWidth,
+                                       height: observedData.appProperties.windowHeight)
+                        }
                     } else if appArguments.presentationMode.present {
+                        let _ = appvars.debugMode ? print("DEBUG: Loading PresentationView") : ()
                         PresentationView(observedData: observedData)
                             .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
                     } else {
+                        let _ = appvars.debugMode ? print("DEBUG: Loading default ContentView") : ()
                         if appArguments.windowResizable.present {
                             ContentView(observedDialogContent: observedData)
                         } else {
@@ -234,6 +291,14 @@ struct dialogApp: App {
                     }
                     DebugOverlay(observedData: observedData)
                 }
+                .background(WindowAccessor { window in
+                    if let window {
+                        // on macOS 26 window backgrounds are pure white which sucks for contrast and readability.
+                        if #available(macOS 26, *) {
+                            window.backgroundColor =  NSColor(Color("oldWindowBackgroundColour"))
+                        }
+                    }
+                })
                 .onAppear {
                     // Only show the construction kit once, if needed.
                     if appArguments.constructionKit.present && !observedData.constructionKitShown {
@@ -243,6 +308,10 @@ struct dialogApp: App {
                             appArguments.movableWindow.present = true
                         }
                     }
+                    
+                }
+                .onDisappear {
+                    quitDialog(exitCode: appDefaults.exit15.code)
                 }
                 .preferredColorScheme(observedData.args.preferredAppearance.present &&
                                       observedData.args.preferredAppearance.value.lowercased() == "dark" ? .dark
@@ -252,11 +321,59 @@ struct dialogApp: App {
             }
         }
         // Hide Title Bar
-        .windowStyle(HiddenTitleBarWindowStyle())
-        .windowResizabilityContentSize()
+        .windowStyle(.hiddenTitleBar)
+        .windowResizability(.contentSize)
+        .commands {
+            // Replace the default About menu item
+            CommandGroup(replacing: .appInfo) {
+                Button("About swiftDialog") {
+                    showAboutWindow()
+                }
+            }
+
+            // Hide menus we don't need
+            /*
+            CommandGroup(replacing: .newItem) { }        // File > New
+            CommandGroup(replacing: .pasteboard) { }     // Edit menu (copy/paste)
+            CommandGroup(replacing: .undoRedo) { }       // Edit menu (undo/redo)
+            CommandGroup(replacing: .windowList) { }     // Window menu
+            CommandGroup(replacing: .help) { }           // Help menu
+            CommandGroup(replacing: .textEditing) { }    // Text editing commands
+            CommandGroup(replacing: .textFormatting) { } // Text formatting
+             */
+        }
+        
+        WindowGroup("Constriction Kt", id: "ConstructionKit") {
+            ConstructionKitView(observedDialogContent: observedData)
+        }
+        .windowResizability(.contentSize)
     }
+    
+    func showAboutWindow() {
+            let aboutView = NSHostingController(rootView: AboutView())
+            let window = NSWindow(contentViewController: aboutView)
+            window.title = "About swiftDialog"
+            window.styleMask = [.titled, .closable]
+            //window.setContentSize(NSSize(width: 300, height: 200))
+            window.center()
+            window.makeKeyAndOrderFront(nil)
+        }
 
 
 }
 
-
+struct AboutView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(nsImage: NSApp.applicationIconImage)
+                .resizable()
+                .frame(width: 64, height: 64)
+            Text("swiftDialog")
+                .font(.title)
+            Text(getVersionString())
+                .foregroundColor(.secondary)
+        }
+        .frame(width: 300, height: 200)
+        .padding(30)
+    }
+}

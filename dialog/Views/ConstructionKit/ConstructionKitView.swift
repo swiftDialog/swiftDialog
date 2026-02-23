@@ -27,114 +27,20 @@ struct LabelView: View {
 struct WelcomeView: View {
     var body: some View {
         VStack {
-            Image(systemName: "bubble.left.circle.fill")
-                .resizable()
-                .frame(width: 150, height: 150)
+            ZStack {
+                IconView(image: "default")
+                //Image(systemName: "bubble.left.circle.fill")
+                //    .resizable()
 
-            Text("ck-welcome")
+                IconView(image: "sf=wrench.and.screwdriver.fill", alpha: 0.5, defaultColour: "white")
+            }
+            .frame(width: 150, height: 150)
+            
+            Text("Welcome to the swiftDialog builder".localized)
                 .font(.largeTitle)
             Divider()
-            Text("ck-welcomeinfo")
+            Text("Select properties on the left to modify. swiftDialog will update to show the changes in realtime".localized)
                 .foregroundColor(.secondary)
-        }
-    }
-}
-
-struct JSONView: View {
-    @ObservedObject var observedDialogContent: DialogUpdatableContent
-
-    @State private var jsonText: String = ""
-
-    private func exportJSON(debug: Bool = false) -> String {
-        var json = JSON()
-        var jsonDEBUG = JSON()
-
-        // copy modifyable objects into args
-        observedDialogContent.args.iconSize.value = "\(observedDialogContent.iconSize)"
-        observedDialogContent.args.windowWidth.value = "\(observedDialogContent.appProperties.windowWidth)"
-        observedDialogContent.args.windowHeight.value = "\(observedDialogContent.appProperties.windowHeight)"
-
-        let mirroredAppArguments = Mirror(reflecting: observedDialogContent.args)
-        for (_, attr) in mirroredAppArguments.children.enumerated() {
-            if let propertyValue = attr.value as? CommandlineArgument {
-                if propertyValue.present { //}&& propertyValue.value != "" {
-                    if propertyValue.value != "" {
-                        json[propertyValue.long].string = propertyValue.value
-                    } else if propertyValue.isbool {
-                        json[propertyValue.long].string = "\(propertyValue.present)"
-                    }
-                }
-                jsonDEBUG[propertyValue.long].string = propertyValue.value
-                jsonDEBUG["\(propertyValue.long)-present"].bool = propertyValue.present
-            }
-        }
-
-        if observedDialogContent.listItemsArray.count > 0 {
-            json[appArguments.listItem.long].arrayObject = Array(repeating: 0, count: observedDialogContent.listItemsArray.count)
-            for index in 0..<observedDialogContent.listItemsArray.count {
-                if observedDialogContent.listItemsArray[index].title.isEmpty {
-                    observedDialogContent.listItemsArray[index].title = "Item \(index)"
-                }
-                // print(observedDialogContent.listItemsArray[i].dictionary)
-                json[appArguments.listItem.long][index].dictionaryObject = observedDialogContent.listItemsArray[index].dictionary
-            }
-        }
-
-        if observedDialogContent.imageArray.count > 0 {
-            json[appArguments.mainImage.long].arrayObject = Array(repeating: 0, count: observedDialogContent.imageArray.count)
-            for index in 0..<observedDialogContent.imageArray.count {
-                json[appArguments.mainImage.long][index].dictionaryObject = observedDialogContent.imageArray[index].dictionary
-            }
-        }
-
-        // message font stuff
-        if observedDialogContent.appProperties.messageFontColour != .primary {
-            json[appArguments.messageFont.long].dictionaryObject = ["colour": observedDialogContent.appProperties.messageFontColour.hexValue]
-        }
-
-        if observedDialogContent.appProperties.titleFontColour != .primary {
-            json[appArguments.titleFont.long].dictionaryObject = ["colour": observedDialogContent.appProperties.titleFontColour.hexValue]
-        }
-
-        if observedDialogContent.appProperties.buttonSize != .regular {
-            json[appArguments.buttonSize.long].string = observedDialogContent.args.buttonSize.value
-        }
-
-        // convert the JSON to a raw String
-        jsonFormattedOutout = json.rawString() ?? "json is nil"
-
-        if debug {
-            jsonFormattedOutout = jsonDEBUG.rawString() ?? ""
-        }
-        return jsonFormattedOutout
-    }
-
-    init (observedDialogContent: DialogUpdatableContent) {
-        self.observedDialogContent = observedDialogContent
-    }
-
-    var body: some View {
-        VStack {
-            HStack {
-                Button("Generate") {
-                    jsonText = exportJSON()
-                }
-                Button("Copy to clipboard") {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.writeObjects([NSString(string: exportJSON())])
-                }
-                Spacer()
-            }
-            .padding(.top, 10)
-            .padding(.leading, 10)
-            Divider()
-            HStack {
-                Text(jsonText)
-                Spacer()
-            }
-            .padding(.top, 10)
-            .padding(.leading, 10)
-            Spacer()
         }
     }
 }
@@ -156,6 +62,7 @@ struct ConstructionKitView: View {
         observedDialogContent.args.button1TextOption.present = true
         observedDialogContent.args.windowWidth.present = true
         observedDialogContent.args.windowHeight.present = true
+        observedDialogContent.args.movableWindow.present = true
 
     }
 
@@ -166,50 +73,65 @@ struct ConstructionKitView: View {
             contentRect: NSRect(x: 0, y: 0, width: 0, height: 0),
                styleMask: [.titled, .closable, .miniaturizable, .resizable],
                backing: .buffered, defer: false)
-        window.title = "swiftDialog Construction Kit (ALPHA)"
+        window.title = "swiftDialog Construction Kit"
         window.makeKeyAndOrderFront(self)
         window.isReleasedWhenClosed = false
         window.center()
         window.contentView = NSHostingView(rootView: ConstructionKitView(observedDialogContent: observedData))
-
+        placeWindow(window, size: CGSize(width: 700,
+                                         height: 900), vertical: .center, horozontal: .right, offset: 10)
     }
 
     var body: some View {
 
         NavigationView {
             List {
-                Section(header: Text("ck-basic".localized)) {
-                    NavigationLink(destination: CKBasicsView(observedDialogContent: observedData)) {
-                        Text("ck-content".localized)
+                Section(header: Text("Basic".localized)) {
+                    NavigationLink(destination: CKTitleView(observedDialogContent: observedData)) {
+                        Text("Title Bar".localized)
+                    }
+                    NavigationLink(destination: CKMessageView(observedDialogContent: observedData)) {
+                        Text("Message".localized)
                     }
                     NavigationLink(destination: CKWindowProperties(observedDialogContent: observedData)) {
-                        Text("ck-window".localized)
+                        Text("Window".localized)
+                    }
+                    NavigationLink(destination: CKIconView(observedDialogContent: observedData)) {
+                        Text("Icon".localized)
                     }
                     NavigationLink(destination: CKSidebarView(observedDialogContent: observedData)) {
-                        Text("ck-sidebar".localized)
-                    }
-                    NavigationLink(destination: CKDataEntryView(observedDialogContent: observedData)) {
-                        Text("ck-dataentry".localized)
+                        Text("Sidebar".localized)
                     }
                     NavigationLink(destination: CKButtonView(observedDialogContent: observedData)) {
-                        Text("ck-buttons".localized)
+                        Text("Buttons".localized)
                     }
                 }
-                Section(header: Text("ck-advanced".localized)) {
+                Section(header: Text("Data Entry")) {
+                    NavigationLink(destination: CKTextEntryView(observedDialogContent: observedData)) {
+                        Text("Text Fields".localized)
+                    }
+                    //NavigationLink(destination: CKSelectListsView(observedDialogContent: observedData)) {
+                    //    Text("Select Lists".localized)
+                    //}
+                    NavigationLink(destination: CKCheckBoxesView(observedDialogContent: observedData)) {
+                        Text("Checkboxes".localized)
+                    }
+                }
+                Section(header: Text("Advanced".localized)) {
                     NavigationLink(destination: CKListView(observedDialogContent: observedData)) {
-                        Text("ck-listitems".localized)
+                        Text("List Items".localized)
                     }
                     NavigationLink(destination: CKImageView(observedDialogContent: observedData)) {
-                        Text("ck-images".localized)
+                        Text("Images".localized)
                     }
                     NavigationLink(destination: CKMediaView(observedDialogContent: observedData)) {
-                        Text("ck-media".localized)
+                        Text("Media".localized)
                     }
                 }
                 Spacer()
-                Section(header: Text("ck-output".localized)) {
+                Section(header: Text("Output".localized)) {
                     NavigationLink(destination: JSONView(observedDialogContent: observedData) ) {
-                        Text("ck-jsonoutput".localized)
+                        Text("JSON Output".localized)
                     }
                 }
             }
@@ -218,7 +140,7 @@ struct ConstructionKitView: View {
             WelcomeView()
         }
         .listStyle(SidebarListStyle())
-        .frame(minWidth: 800, minHeight: 800)
+        //.frame(minWidth: 800, height: 800)
         Divider()
         ZStack {
             Spacer()
@@ -228,7 +150,7 @@ struct ConstructionKitView: View {
                 }
                 Spacer()
                 .disabled(false)
-                Button("ck-exportcommand".localized) {}
+                Button("Export Command".localized) {}
                     .disabled(true)
             }
         }

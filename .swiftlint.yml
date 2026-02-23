@@ -1,9 +1,11 @@
 disabled_rules: # rule identifiers turned on by default to exclude from running
   - line_length
+  - large_tuple
+  - identifier_name
   - redundant_discardable_let
   - cyclomatic_complexity
   - function_body_length
-  # - trailing_whitespace
+  - trailing_whitespace
   - vertical_whitespace
   - file_length
   # - colon
@@ -23,9 +25,10 @@ disabled_rules: # rule identifiers turned on by default to exclude from running
   - syntactic_sugar
   # - empty_parentheses_with_trailing_closure
   # - legacy_constructor
-  # - multiple_closures_with_trailing_closure
+  - multiple_closures_with_trailing_closure
   - unused_enumerated
   # - redundant_void_return
   # - for_where
   - vertical_parameter_alignment
   - type_name
+  - nesting

@@ -8,7 +8,7 @@
 import Foundation
 
 // returns array of multiple option values
-func CLOptionMultiOptions (optionName: String) -> Array<String> {
+func CLOptionMultiOptions(optionName: String) -> Array<String> {
     // return an array that contains of all the --textfield options that are passed in
     var optionsArray: Array = [String]()
     var argIndex = 0
@@ -16,7 +16,14 @@ func CLOptionMultiOptions (optionName: String) -> Array<String> {
     for argument in CLArguments {
 
         if argument == "--\(optionName)" {
-            optionsArray.append(CLArguments[argIndex+1])
+            switch optionName {
+            case "image":
+                // Accept as comma seperate values
+                let argArray = CLArguments[argIndex+1].components(separatedBy: ",")
+                optionsArray += argArray
+            default:
+                optionsArray.append(CLArguments[argIndex+1])
+            }
         }
         argIndex+=1
     }

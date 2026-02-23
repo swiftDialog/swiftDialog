@@ -26,6 +26,7 @@ struct StatusImage: View {
             .scaledToFit()
             .frame(width: statusSize, height: statusSize)
             .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
+            .contentTransition(.symbolEffect(.replace))
     }
 }
 
@@ -33,6 +34,10 @@ struct ListView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
 
+    @State var isHovering = false
+    //@State private var selection = Set<String>()
+    @State private var selection = Set<Int>()
+    
     var rowHeight: CGFloat
     var rowStatusHeight: CGFloat
     var rowFontSize: CGFloat
@@ -68,87 +73,140 @@ struct ListView: View {
         }
     }
 
+    func handleClick(_ item: String) {
+        if !item.isEmpty {
+            writeLog("User clicked list link \(item)", logLevel: .info)
+            openSpecifiedURL(urlToOpen: item)
+        }
+    }
+
 
     var body: some View {
         if observedData.args.listItem.present {
             let _ = writeLog("Displaying listitems")
             ScrollViewReader { proxy in
                 VStack {
-                    List(0..<userInputState.listItems.count, id: \.self) {index in
-                        VStack {
-                            HStack {
-                                if !userInputState.listItems[index].icon.isEmpty {
-                                    let _ = writeLog("Switch index \(index): Displaying icon \(userInputState.listItems[index].icon)")
-                                    IconView(image: userInputState.listItems[index].icon, overlay: "", sfPaddingEnabled: false, corners: false)
-                                        .frame(maxHeight: rowHeight)
-                                        .frame(width: rowHeight)
+                    List(0..<userInputState.listItems.count, id: \.self, selection: $selection) {index in
+                        Button(action: {
+                            if observedData.args.listSelectionEnabled.present {
+                                if selection.contains(index) {
+                                    selection.remove(index)
+                                    userInputState.listItems[index].selected = false
+                                } else {
+                                    selection.insert(index)
+                                    userInputState.listItems[index].selected = true
                                 }
-                                VStack {
-                                    HStack {
-                                        Text(userInputState.listItems[index].title)
-                                            .font(.system(size: rowFontSize))
-                                            .id(index)
-                                        Spacer()
+                            } else {
+                                selection.remove(index)
+                                handleClick(userInputState.listItems[index].action)
+                            }
+                        }) {
+                            VStack {
+                                HStack {
+                                    if !userInputState.listItems[index].icon.isEmpty {
+                                        let _ = writeLog("Switch index \(index): Displaying icon \(userInputState.listItems[index].icon)")
+                                        IconView(image: userInputState.listItems[index].icon, overlay: "", alpha: userInputState.listItems[index].iconAlpha, sfPaddingEnabled: false, corners: false)
+                                            .frame(maxHeight: rowHeight)
+                                            .frame(width: rowHeight)
                                     }
-                                    if subtitlePresent {
+                                    VStack {
                                         HStack {
-                                            Text(userInputState.listItems[index].subTitle)
-                                                .lineLimit(2)
-                                                .font(.system(size: rowFontSize-4))
-                                                .foregroundStyle(.secondary)
-                                            //.padding(.top, 1)
+                                            Text(userInputState.listItems[index].title)
+                                                .font(.system(size: rowFontSize))
+                                                .id(index)
                                             Spacer()
                                         }
+                                        if subtitlePresent {
+                                            HStack {
+                                                Text(userInputState.listItems[index].subTitle)
+                                                    .lineLimit(2)
+                                                    .font(.system(size: rowFontSize-4))
+                                                    .foregroundStyle(.secondary)
+                                                //.padding(.top, 1)
+                                                Spacer()
+                                            }
+                                        }
+                                    }
+                                    Spacer()
+                                    HStack {
+                                        if userInputState.listItems[index].statusText != "" {
+                                            Text(userInputState.listItems[index].statusText)
+                                                .font(.system(size: rowFontSize))
+                                                .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
+                                        }
+                                        StatusView(status: userInputState.listItems[index].statusIcon, size: rowStatusHeight, progress: userInputState.listItems[index].progress)
                                     }
                                 }
-                                Spacer()
-                                HStack {
-                                    if userInputState.listItems[index].statusText != "" {
-                                        Text(userInputState.listItems[index].statusText)
-                                            .font(.system(size: rowFontSize))
-                                            .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
-                                    }
-
-                                    switch userInputState.listItems[index].statusIcon {
-                                    case "progress":
-                                        ProgressView("", value: userInputState.listItems[index].progress, total: 100)
-                                            .progressViewStyle(CircularPercentageProgressViewStyle())
-                                            .frame(width: rowStatusHeight, height: rowStatusHeight-5)
-                                            .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
-                                    case "wait":
-                                        ProgressView()
-                                            .progressViewStyle(.circular)
-                                            .scaleEffect(0.8, anchor: .trailing)
-                                            .frame(height: rowStatusHeight)
-                                            .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
-                                    case "success":
-                                        StatusImage(name: "checkmark.circle.fill", colour: .green, size: rowStatusHeight)
-                                    case "fail":
-                                        StatusImage(name: "xmark.circle.fill", colour: .red, size: rowStatusHeight)
-                                    case "pending":
-                                        StatusImage(name: "ellipsis.circle.fill", colour: .gray, size: rowStatusHeight)
-                                    case "error":
-                                        StatusImage(name: "exclamationmark.circle.fill", colour: .yellow, size: rowStatusHeight)
-                                    default:
-                                        EmptyView()
-                                    }
+                                .frame(maxHeight: rowHeight)
+                                Divider()
+                            }
+                            .contentShape(Rectangle())
+                            .onHover { hovering in
+                                if hovering && !userInputState.listItems[index].action.isEmpty {
+                                    isHovering = hovering
+                                    NSCursor.pointingHand.push()
+                                } else {
+                                    isHovering = false
+                                    NSCursor.pop()
                                 }
                             }
-                            .frame(maxHeight: rowHeight)
-                            Divider()
                         }
+                        .buttonStyle(PlainButtonStyle())
+                        //.listRowBackground(
+                        //    selection.contains(index) ? Color.accentColor.opacity(0.3) : Color.clear
+                        //)
                     }
-                    .background(Color("editorBackgroundColour"))
-                    .listStyle(SidebarListStyle())
+                    .background(Color("listBackgroundColour"))
+                    .listStyle(.sidebar)
+                    //.listStyle(.plain)
+                    
                 }
-                .onChange(of: observedData.listItemUpdateRow, perform: { _ in
+                .onChange(of: observedData.listItemUpdateRow) {
                     DispatchQueue.main.async {
-                        withAnimation(.easeInOut(duration: 0.5)) {
-                            proxy.scrollTo(observedData.listItemUpdateRow)
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            proxy.scrollTo(observedData.listItemUpdateRow, anchor: .center)
                         }
                     }
-                })
+                }
                 .clipShape(RoundedRectangle(cornerRadius: clipRadius))
+            }
+        }
+    }
+}
+
+struct StatusView: View {
+    
+    var status: String
+    var size: CGFloat
+    var progress: CGFloat = 0
+    
+    var body: some View {
+        Group {
+            switch status {
+            case "progress":
+                ProgressView("", value: progress, total: 100)
+                    .progressViewStyle(CircularPercentageProgressViewStyle())
+                    .frame(width: size, height: size-5)
+            case "wait":
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .scaleEffect(0.8, anchor: .trailing)
+                    .frame(height: size)
+            case "success":
+                StatusImage(name: "checkmark.circle.fill", colour: .green, size: size)
+            case "fail":
+                StatusImage(name: "xmark.circle.fill", colour: .red, size: size)
+            case "pending":
+                StatusImage(name: "ellipsis.circle.fill", colour: .gray, size: size)
+            case "error":
+                StatusImage(name: "exclamationmark.circle.fill", colour: .yellow, size: size)
+            case "":
+                EmptyView()
+            default:
+                let statusParts = status.split(separator: "-")
+                let name = statusParts.first?.lowercased() ?? ""
+                let colour = statusParts.count > 1 ? Color(argument: statusParts[1].lowercased()) : .primary
+                StatusImage(name: name, colour: colour, size: size)
             }
         }
     }
