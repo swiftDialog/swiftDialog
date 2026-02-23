@@ -47,19 +47,19 @@ func getJSON() -> JSON {
         // read json in from file
         json = processJSON(jsonFilePath: CLOptionText(optionName: appArguments.jsonFile))
     }
-    
+
     if CLOptionPresent(optionName: appArguments.inspectConfig) {
         // read json in from inspect config
         json = processJSON(jsonFilePath: CLOptionText(optionName: appArguments.inspectConfig))
         writeLog("Inspect Mode: Config path from command line argument", logLevel: .debug)
     }
-    
+
     if let envConfigPath = ProcessInfo.processInfo.environment["DIALOG_INSPECT_CONFIG"],
        !envConfigPath.isEmpty {
         json = processJSON(jsonFilePath: envConfigPath)
         writeLog("Inspect Mode: Config path found in environment variable: \(envConfigPath)", logLevel: .debug)
     }
-    
+
 
     if CLOptionPresent(optionName: appArguments.jsonString) {
         // read json in from text string
@@ -114,7 +114,7 @@ func processCLOptions(json: JSON = getJSON()) {
 
     //this method goes through the arguments that are present and performs any processing required before use
     writeLog("Processing Options")
-    
+
     // Monitor Mode - Use InspectView for all monitor scenarios (with or without config)
     if appvars.debugMode { print("DEBUG: inspectMode.present = \(appArguments.inspectMode.present)") }
     if appArguments.inspectMode.present {
@@ -124,10 +124,10 @@ func processCLOptions(json: JSON = getJSON()) {
         writeLog("  1. Environment variable: DIALOG_INSPECT_CONFIG=/path/to/config.json", logLevel: .info)
         writeLog("  2. Standard location: /var/tmp/dialog-inspect-config.json", logLevel: .info)
         writeLog("  3. Command line: --inspect-config (may cause hang with certain SwiftUI versions)", logLevel: .info)
-        
+
         // Determine config path using same priority as InspectView
         var configPath: String?
-        
+
         // Priority 1: Check environment variable DIALOG_INSPECT_CONFIG
         if let envConfigPath = ProcessInfo.processInfo.environment["DIALOG_INSPECT_CONFIG"],
            !envConfigPath.isEmpty {
@@ -144,17 +144,17 @@ func processCLOptions(json: JSON = getJSON()) {
             configPath = appArguments.inspectConfig.value
             writeLog("Inspect Mode: Config path from command line: \(configPath!)", logLevel: .info)
         }
-        
+
         // Store the config path for InspectView to access
         if let configPath = configPath {
             appvars.inspectConfigPath = configPath
-            
+
             // Load the config to determine preset and apply appropriate window dimensions
             if FileManager.default.fileExists(atPath: configPath) {
                 do {
                     let data = try Data(contentsOf: URL(fileURLWithPath: configPath))
                     let decoder = JSONDecoder()
-                    
+
                     // Read config for sizing
                     struct MinimalInspectConfig: Codable {
                         let preset: String?
@@ -193,8 +193,13 @@ func processCLOptions(json: JSON = getJSON()) {
                     appvars.windowHeight = 600
                 }
             }
+        } else {
+            // No config file — will use built-in sample config (Preset 5 bento grid)
+            appvars.windowWidth = 800
+            appvars.windowHeight = 600
+            writeLog("Inspect Mode: No config file, using built-in sample size (1000×650)", logLevel: .info)
         }
-        
+
         // InspectView handles all its own state and configuration - no presentation mode needed
         writeLog("Inspect Mode: InspectView will handle all config loading and presentation", logLevel: .info)
     }
@@ -234,7 +239,7 @@ func processCLOptions(json: JSON = getJSON()) {
             }
         }
     }
-    
+
     // Monitor mode: Always center horizontally (left-to-right)
     if appArguments.inspectMode.present {
         appvars.windowPositionHorozontal = NSWindow.Position.Horizontal.center
@@ -405,7 +410,7 @@ func processCLOptions(json: JSON = getJSON()) {
         writeLog("Auth key is required", logLevel: .debug)
         quitDialog(exitCode: appDefaults.exit30.code, exitMessage: appDefaults.exit30.message)
     }
-    
+
     appvars.authorised = appArguments.authkey.present && !dialogAuthorisationKey().isEmpty && dialogIsAuthorised
 
     // hash a key value
@@ -462,7 +467,7 @@ func processCLOptions(json: JSON = getJSON()) {
     if appArguments.buttonSize.present {
         appvars.buttonSize = appDefaults.buttonSizeStates[appArguments.buttonSize.value] ?? .regular
     }
-    
+
     if appArguments.buttonTextSize.present {
         appvars.buttonTextSize = appArguments.buttonTextSize.value.floatValue()
     }
@@ -1112,4 +1117,3 @@ func processCLOptions(json: JSON = getJSON()) {
 
     writeLog("ProcessCLOptions: Completed successfully", logLevel: .info)
 }
-

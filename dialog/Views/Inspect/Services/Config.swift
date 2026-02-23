@@ -501,145 +501,176 @@ class Config {
     }
     
     /// Fallback for Demo: Create test configuration for development/fallback
+    /// Shows a 3-step Preset 5 workflow: intro → bento grid (6 preset cards with Generate Starter) → deployment demo
     func createTestConfiguration() -> Result<ConfigurationResult, ConfigurationError> {
         let testConfigJSON = """
         {
-            "preset": "11",
-            "windowTitle": "swiftDialog Inspect Mode",
-            "windowWidth": 950,
-            "windowHeight": 700,
-            "highlightColor": "#5856D6",
-            "footerText": "swiftDialog Demo",
-            "debugMode": true,
-            "brandPalette": {
-                "primary": "#5856D6",
-                "secondary": "#AF52DE",
-                "accent": "#FF9500",
-                "background": "#F2F2F7"
-            },
+            "preset": "5",
+            "width": 1000,
+            "height": 650,
+            "highlightColor": "#007AFF",
+            "showAccentBorder": false,
             "introSteps": [
                 {
                     "id": "welcome",
                     "stepType": "intro",
-                    "heroImage": "SF=wand.and.stars",
-                    "heroImageShape": "circle",
-                    "heroImageSize": 100,
-                    "heroImageColor": "#5856D6",
-                    "title": "swiftDialog Inspect Mode",
-                    "subtitle": "Powerful dialogs for macOS management",
+                    "title": "swiftDialog — Inspect Mode",
+                    "subtitle": "A sample configuration to get you started.",
+                    "heroImage": "SF=macbook.gen2",
+                    "heroImageSize": 180,
                     "content": [
                         {
-                            "type": "paragraph",
-                            "content": "You are running swiftDialog in Inspect Mode, a development environment for building and testing dialog configurations."
-                        },
-                        {
-                            "type": "bullets",
-                            "items": [
-                                "Guided onboarding experiences",
-                                "Interactive setup wizards",
-                                "Real-time installation monitoring",
-                                "Compliance check interfaces"
-                            ]
+                            "type": "text",
+                            "content": "This is a Preset 5 workflow. Each step uses a different layout — intro, bento grid, and deployment — to demonstrate what's possible."
                         }
                     ],
-                    "continueButtonText": "Explore Features"
+                    "continueButtonText": "Explore",
+                    "showBackButton": false
                 },
                 {
-                    "id": "install-demo",
-                    "stepType": "info",
-                    "heroImage": "/System/Applications/App Store.app",
-                    "heroImageShape": "roundedSquare",
-                    "heroImageSize": 90,
-                    "title": "App Installation Monitoring",
-                    "subtitle": "Real-time file system detection",
-                    "content": [
+                    "id": "presets-overview",
+                    "stepType": "bento",
+                    "bentoLayout": "grid",
+                    "title": "6 Preset Layouts",
+                    "subtitle": "Tap any card to learn more",
+                    "bentoColumns": 3,
+                    "bentoRowHeight": 140,
+                    "bentoGap": 12,
+                    "bentoCells": [
                         {
-                            "type": "paragraph",
-                            "content": "swiftDialog monitors your file system in real-time, detecting app installations as they happen. Here is a live view of common applications:"
+                            "id": "preset1",
+                            "column": 0, "row": 0, "columnSpan": 1, "rowSpan": 1,
+                            "contentType": "icon",
+                            "sfSymbol": "sidebar.leading",
+                            "iconSize": 36,
+                            "title": "Preset 1",
+                            "label": "DEPLOYMENT",
+                            "detailOverlay": {
+                                "title": "Preset 1 — Deployment",
+                                "subtitle": "Sidebar + scrollable item list",
+                                "icon": "sidebar.leading",
+                                "content": [
+                                    { "type": "text", "content": "The classic deployment layout. A sidebar shows a hero icon and overall progress, while the main area lists items with real-time status updates." },
+                                    { "type": "bullets", "items": ["Sidebar with hero icon and progress bar", "Scrollable item list with status indicators", "File-system monitoring via paths array", "Rotating status messages"] },
+                                    { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "1", "buttonStyle": "borderedProminent" }
+                                ]
+                            }
+                        },
+                        {
+                            "id": "preset2",
+                            "column": 1, "row": 0, "columnSpan": 1, "rowSpan": 1,
+                            "contentType": "icon",
+                            "sfSymbol": "rectangle.split.3x1",
+                            "iconSize": 36,
+                            "title": "Preset 2",
+                            "label": "CARDS",
+                            "detailOverlay": {
+                                "title": "Preset 2 — Cards",
+                                "subtitle": "Horizontal card carousel",
+                                "icon": "rectangle.split.3x1",
+                                "content": [
+                                    { "type": "text", "content": "Items displayed as cards in a horizontal carousel. Great for visual app catalogs where each card shows an icon, name, and install status." },
+                                    { "type": "bullets", "items": ["Horizontal scrolling card layout", "Large app icons with status badges", "Progress bar across the top", "Auto-advances on completion"] },
+                                    { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "2", "buttonStyle": "borderedProminent" }
+                                ]
+                            }
+                        },
+                        {
+                            "id": "preset3",
+                            "column": 2, "row": 0, "columnSpan": 1, "rowSpan": 1,
+                            "contentType": "icon",
+                            "sfSymbol": "list.bullet.rectangle",
+                            "iconSize": 36,
+                            "title": "Preset 3",
+                            "label": "COMPACT",
+                            "detailOverlay": {
+                                "title": "Preset 3 — Compact",
+                                "subtitle": "Compact list with gradient background",
+                                "icon": "list.bullet.rectangle",
+                                "content": [
+                                    { "type": "text", "content": "A space-efficient list layout with a gradient background. Ideal for quick installations where you want minimal screen footprint." },
+                                    { "type": "bullets", "items": ["Compact item rows", "Gradient background from brand colors", "Small window footprint", "Clean, minimal design"] },
+                                    { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "3", "buttonStyle": "borderedProminent" }
+                                ]
+                            }
+                        },
+                        {
+                            "id": "preset4",
+                            "column": 0, "row": 1, "columnSpan": 1, "rowSpan": 1,
+                            "contentType": "icon",
+                            "sfSymbol": "bell.badge",
+                            "iconSize": 36,
+                            "title": "Preset 4",
+                            "label": "TOAST",
+                            "detailOverlay": {
+                                "title": "Preset 4 — Toast Installer",
+                                "subtitle": "Compact notification-style installer",
+                                "icon": "bell.badge",
+                                "content": [
+                                    { "type": "text", "content": "A small, unobtrusive toast notification that tracks installations in the corner of the screen. Stays out of the user's way." },
+                                    { "type": "bullets", "items": ["Notification-sized window", "Corner-anchored positioning", "Progress tracking with minimal UI", "Non-intrusive for background installs"] },
+                                    { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "4", "buttonStyle": "borderedProminent" }
+                                ]
+                            }
+                        },
+                        {
+                            "id": "preset5",
+                            "column": 1, "row": 1, "columnSpan": 1, "rowSpan": 1,
+                            "contentType": "icon",
+                            "sfSymbol": "macwindow.on.rectangle",
+                            "iconSize": 36,
+                            "title": "Preset 5",
+                            "label": "UNIFIED",
+                            "detailOverlay": {
+                                "title": "Preset 5 — Unified Portal",
+                                "subtitle": "The most flexible preset (this sample)",
+                                "icon": "macwindow.on.rectangle",
+                                "content": [
+                                    { "type": "text", "content": "A multi-step wizard with 9 step types. Combine intro screens, bento grids, deployment tracking, carousels, guides, and more in a single workflow." },
+                                    { "type": "bullets", "items": ["9 step types: intro, bento, deployment, carousel, guide, showcase, portal, processing, outro", "Linear navigation with back/continue", "55+ content block types", "Branding, forms, compliance checks"] },
+                                    { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "5", "buttonStyle": "borderedProminent" }
+                                ]
+                            }
+                        },
+                        {
+                            "id": "preset6",
+                            "column": 2, "row": 1, "columnSpan": 1, "rowSpan": 1,
+                            "contentType": "icon",
+                            "sfSymbol": "sidebar.squares.leading",
+                            "iconSize": 36,
+                            "title": "Preset 6",
+                            "label": "GUIDANCE",
+                            "detailOverlay": {
+                                "title": "Preset 6 — Modern Sidebar",
+                                "subtitle": "Sidebar navigation with guided content",
+                                "icon": "sidebar.squares.leading",
+                                "content": [
+                                    { "type": "text", "content": "A modern sidebar navigation layout. Users can jump between sections freely rather than following a linear path." },
+                                    { "type": "bullets", "items": ["Sidebar with section navigation", "Non-linear — jump to any section", "Rich guidance content per section", "Great for self-service portals"] },
+                                    { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "6", "buttonStyle": "borderedProminent" }
+                                ]
+                            }
                         }
                     ],
+                    "continueButtonText": "Continue",
+                    "backButtonText": "Back"
+                },
+                {
+                    "id": "apps",
+                    "stepType": "deployment",
+                    "title": "App Installation",
+                    "subtitle": "Simulated deployment step with progress tracking.",
+                    "heroImage": "SF=arrow.down.app.fill",
                     "items": [
-                        {
-                            "id": "word",
-                            "displayName": "Microsoft Word",
-                            "icon": "/Applications/Microsoft Word.app",
-                            "paths": ["/Applications/Microsoft Word.app"]
-                        },
-                        {
-                            "id": "excel",
-                            "displayName": "Microsoft Excel",
-                            "icon": "/Applications/Microsoft Excel.app",
-                            "paths": ["/Applications/Microsoft Excel.app"]
-                        },
-                        {
-                            "id": "1password",
-                            "displayName": "1Password",
-                            "icon": "/Applications/1Password.app",
-                            "paths": ["/Applications/1Password.app"]
-                        },
-                        {
-                            "id": "slack",
-                            "displayName": "Slack",
-                            "icon": "/Applications/Slack.app",
-                            "paths": ["/Applications/Slack.app"]
-                        },
-                        {
-                            "id": "chrome",
-                            "displayName": "Google Chrome",
-                            "icon": "/Applications/Google Chrome.app",
-                            "paths": ["/Applications/Google Chrome.app"]
-                        }
+                        { "id": "word", "displayName": "Microsoft Word", "guiIndex": 0, "icon": "/Applications/Microsoft Word.app", "paths": ["/Applications/Microsoft Word.app"], "showBundleInfo": "all" },
+                        { "id": "excel", "displayName": "Microsoft Excel", "guiIndex": 1, "icon": "/Applications/Microsoft Excel.app", "paths": ["/Applications/Microsoft Excel.app"], "showBundleInfo": "all" },
+                        { "id": "1password", "displayName": "1Password", "guiIndex": 2, "icon": "/Applications/1Password.app", "paths": ["/Applications/1Password.app"], "showBundleInfo": "all" },
+                        { "id": "slack", "displayName": "Slack", "guiIndex": 3, "icon": "/Applications/Slack.app", "paths": ["/Applications/Slack.app"], "showBundleInfo": "all" },
+                        { "id": "chrome", "displayName": "Google Chrome", "guiIndex": 4, "icon": "/Applications/Google Chrome.app", "paths": ["/Applications/Google Chrome.app"], "showBundleInfo": "all" }
                     ],
-                    "continueButtonText": "Continue"
-                },
-                {
-                    "id": "presets",
-                    "stepType": "info",
-                    "heroImage": "SF=square.grid.3x3.fill",
-                    "heroImageShape": "roundedSquare",
-                    "heroImageSize": 80,
-                    "heroImageColor": "#AF52DE",
-                    "title": "Multiple Preset Layouts",
-                    "subtitle": "Choose the perfect style for your workflow",
-                    "content": [
-                        {
-                            "type": "bullets",
-                            "items": [
-                                "Preset 1: Sidebar deployment with item list",
-                                "Preset 2: Card carousel layout",
-                                "Preset 3: Compact list with gradient",
-                                "Preset 4: Compact toast installer",
-                                "Preset 5: Unified portal with intro wizard",
-                                "Preset 6: Modern sidebar navigation"
-                            ]
-                        }
-                    ],
-                    "continueButtonText": "Continue"
-                },
-                {
-                    "id": "complete",
-                    "stepType": "outro",
-                    "heroImage": "SF=checkmark.circle.fill",
-                    "heroImageShape": "circle",
-                    "heroImageSize": 100,
-                    "heroImageColor": "#34C759",
-                    "title": "Ready to Build",
-                    "subtitle": "Create your first configuration",
-                    "content": [
-                        {
-                            "type": "paragraph",
-                            "content": "Create a JSON config file and provide it via:"
-                        },
-                        {
-                            "type": "arrow",
-                            "content": "DIALOG_INSPECT_CONFIG=/path/to/config.json"
-                        },
-                        {
-                            "type": "arrow",
-                            "content": "Or place at /var/tmp/dialog-inspect-config.json"
-                        }
-                    ],
-                    "continueButtonText": "Close"
+                    "autoEnableButton": false,
+                    "continueButtonText": "Finish",
+                    "showBackButton": true
                 }
             ]
         }

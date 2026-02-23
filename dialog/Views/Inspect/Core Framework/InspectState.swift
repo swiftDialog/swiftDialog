@@ -1140,6 +1140,7 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
             "width": 1000,
             "height": 650,
             "highlightColor": "#007AFF",
+            "showAccentBorder": false,
             "introSteps": [
                 {
                     "id": "welcome",
@@ -1292,10 +1293,13 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                     "subtitle": "Simulated deployment step with progress tracking.",
                     "heroImage": "SF=arrow.down.app.fill",
                     "items": [
-                        { "id": "safari", "displayName": "Safari", "guiIndex": 0, "icon": "/Applications/Safari.app", "paths": ["/Applications/Safari.app"] },
-                        { "id": "calculator", "displayName": "Calculator", "guiIndex": 1, "icon": "/System/Applications/Calculator.app", "paths": ["/System/Applications/Calculator.app"] },
-                        { "id": "textedit", "displayName": "TextEdit", "guiIndex": 2, "icon": "/System/Applications/TextEdit.app", "paths": ["/System/Applications/TextEdit.app"] }
+                        { "id": "word", "displayName": "Microsoft Word", "guiIndex": 0, "icon": "/Applications/Microsoft Word.app", "paths": ["/Applications/Microsoft Word.app"], "showBundleInfo": "all" },
+                        { "id": "excel", "displayName": "Microsoft Excel", "guiIndex": 1, "icon": "/Applications/Microsoft Excel.app", "paths": ["/Applications/Microsoft Excel.app"], "showBundleInfo": "all" },
+                        { "id": "1password", "displayName": "1Password", "guiIndex": 2, "icon": "/Applications/1Password.app", "paths": ["/Applications/1Password.app"], "showBundleInfo": "all" },
+                        { "id": "slack", "displayName": "Slack", "guiIndex": 3, "icon": "/Applications/Slack.app", "paths": ["/Applications/Slack.app"], "showBundleInfo": "all" },
+                        { "id": "chrome", "displayName": "Google Chrome", "guiIndex": 4, "icon": "/Applications/Google Chrome.app", "paths": ["/Applications/Google Chrome.app"], "showBundleInfo": "all" }
                     ],
+                    "autoEnableButton": false,
                     "continueButtonText": "Finish",
                     "showBackButton": true
                 }
