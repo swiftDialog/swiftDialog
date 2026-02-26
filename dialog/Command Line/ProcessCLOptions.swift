@@ -71,9 +71,10 @@ func getJSON() -> JSON {
         writeLog("Cards array detected in JSON configuration")
         if cardState.loadCards(from: json) {
             writeLog("Cards mode activated with \(cardState.totalCards) cards")
-            // Return the first card's configuration for initial setup
+            // Return the merged configuration (global defaults + first card) for initial setup
+            // This ensures window properties like height, width, ontop, moveable are applied
             if let firstCard = cardState.currentCard {
-                return firstCard.configuration
+                return cardState.getMergedConfiguration(for: firstCard)
             }
         }
     }

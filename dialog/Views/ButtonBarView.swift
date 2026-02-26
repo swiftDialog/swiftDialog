@@ -281,6 +281,15 @@ struct NewButton: View {
             Button(action: {
                 // Handle cards mode navigation
                 if isCardsNextButton && cardState.isCardsMode {
+                    // Validate required fields before advancing or finishing
+                    let validation = validateRequiredFields(observedObject: observedData)
+                    if !validation.isValid {
+                        // Show validation error sheet
+                        observedData.sheetErrorMessage = validation.errorMessage
+                        observedData.showSheet = true
+                        return
+                    }
+                    
                     // Next button in cards mode
                     if cardState.isLastCard {
                         // On last card, collect input and quit
@@ -290,7 +299,7 @@ struct NewButton: View {
                         _ = observedData.advanceToNextCard()
                     }
                 } else if isCardsPreviousButton && cardState.isCardsMode {
-                    // Previous button in cards mode - go back
+                    // Previous button in cards mode - go back (no validation needed)
                     _ = observedData.goToPreviousCard()
                 } else {
                     // Normal mode - original behavior
