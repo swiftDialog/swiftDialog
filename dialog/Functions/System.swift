@@ -57,7 +57,7 @@ func checkRegexPattern(regexPattern: String, textToValidate: String) -> Bool {
     return  returnValue
 }
 
-func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQuit: Bool = true, observedObject: DialogUpdatableContent) {
+func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQuit: Bool = true, observedObject: DialogUpdatableContent, isCardsMode: Bool = false) {
     writeLog("processing button action \(action)")
     if action != "" {
         if executeShell {
@@ -67,6 +67,10 @@ func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQui
         }
     }
     if shouldQuit {
+        // In cards mode, store final card input before quitting
+        if isCardsMode && cardState.isCardsMode {
+            cardState.storeCurrentCardInput(observedObject.collectCurrentUserInput())
+        }
         quitDialog(exitCode: exitCode, observedObject: observedObject)
     }
 }
@@ -216,17 +220,71 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
         }
 
         // print the output
-        if observedObject?.args.jsonOutPut.present ?? false {
-            print(json)
+        if cardState.isCardsMode {
+            // Cards mode: output all accumulated input from all cards
+            writeLog("Cards mode: outputting accumulated input from \(cardState.totalCards) cards")
+            
+            if observedObject?.args.jsonOutPut.present ?? false {
+                // JSON output for cards mode - include current card's input plus accumulated
+                var cardsJson = JSON()
+                let allInput = cardState.getAllAccumulatedInput()
+                
+                // Add all accumulated input to the JSON
+                for (key, value) in allInput {
+                    if let dictValue = value as? [String: Any] {
+                        cardsJson[key] = JSON(dictValue)
+                    } else if let boolValue = value as? Bool {
+                        cardsJson[key].bool = boolValue
+                    } else if let stringValue = value as? String {
+                        cardsJson[key].string = stringValue
+                    } else {
+                        cardsJson[key] = JSON(value)
+                    }
+                }
+                
+                // Merge current card's json output
+                for (key, value) in json {
+                    cardsJson[key] = value
+                }
+                
+                print(cardsJson)
+            } else {
+                // Plain text output for cards mode
+                let allInput = cardState.getAllAccumulatedInput()
+                for (key, value) in allInput {
+                    if let dictValue = value as? [String: Any] {
+                        if let selectedValue = dictValue["selectedValue"] {
+                            print("\"\(key)\" : \"\(selectedValue)\"")
+                        }
+                        if let selectedIndex = dictValue["selectedIndex"] {
+                            print("\"\(key)\" index : \"\(selectedIndex)\"")
+                        }
+                    } else {
+                        print("\"\(key)\" : \"\(value)\"")
+                    }
+                }
+                // Also print current card's output
+                for index in 0..<outputArray.count {
+                    print(outputArray[index])
+                }
+            }
         } else {
-            for index in 0..<outputArray.count {
-                print(outputArray[index])
+            // Normal mode: original output behavior
+            if observedObject?.args.jsonOutPut.present ?? false {
+                print(json)
+            } else {
+                for index in 0..<outputArray.count {
+                    print(outputArray[index])
+                }
             }
         }
     }
     if appArguments.hideOtherApps.present {
         NSApp.unhideAllApplications(nil)
     }
+    
+    // Reset card state on exit
+    cardState.reset()
     
     exit(exitCode)
 }

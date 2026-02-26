@@ -65,6 +65,19 @@ func getJSON() -> JSON {
         // read json in from text string
         json = processJSONString(jsonString: CLOptionText(optionName: appArguments.jsonString))
     }
+    
+    // Check for cards mode and load cards if present
+    if json["cards"].exists() && json["cards"].type == .array && !json["cards"].arrayValue.isEmpty {
+        writeLog("Cards array detected in JSON configuration")
+        if cardState.loadCards(from: json) {
+            writeLog("Cards mode activated with \(cardState.totalCards) cards")
+            // Return the first card's configuration for initial setup
+            if let firstCard = cardState.currentCard {
+                return firstCard.configuration
+            }
+        }
+    }
+    
     return json
 }
 

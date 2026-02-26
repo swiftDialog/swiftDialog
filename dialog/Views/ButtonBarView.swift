@@ -77,24 +77,34 @@ struct ButtonBarView: View {
             // Additional Buttons can go here if we implement it
            
             // Define an array of buttons for display
+            // In cards mode: button1 = Next (or Finish on last card), button2 = Previous
             let buttonArray: [AnyView]   = [
-                // Default Cancel button
-                AnyView(NewButton(label: observedData.args.button2TextOption.value == "nil" ? "" : observedData.args.button2TextOption.value,
-                          isVisible: (observedData.args.button2Option.present || observedData.args.button2TextOption.present),
-                          isDisabled: observedData.args.button2Disabled.present,
+                // Button 2: Cancel in normal mode, Previous in cards mode
+                AnyView(NewButton(label: cardState.isCardsMode
+                          ? (cardState.isFirstCard ? "" : "Previous".localized)
+                          : (observedData.args.button2TextOption.value == "nil" ? "" : observedData.args.button2TextOption.value),
+                          isVisible: cardState.isCardsMode
+                          ? !cardState.isFirstCard
+                          : (observedData.args.button2Option.present || observedData.args.button2TextOption.present),
+                          isDisabled: cardState.isCardsMode
+                          ? false
+                          : observedData.args.button2Disabled.present,
                           enableOnChangeOf: $observedData.args.button2Disabled.present,
                           isStacked: buttonStackStyle,
-                          symbolName: observedData.args.button2Symbol.value,
-                          symbolIsVisible: observedData.args.button2Symbol.present,
+                          symbolName: cardState.isCardsMode ? "" : observedData.args.button2Symbol.value,
+                          symbolIsVisible: cardState.isCardsMode ? false : observedData.args.button2Symbol.present,
                           keyboardShortcut: .cancelAction,
                           buttonFontSize: observedData.appProperties.buttonTextSize,
                           buttonStyle: observedData.appProperties.buttonSize,
-                          shouldQuit: true,
+                          isCardsPreviousButton: cardState.isCardsMode && !cardState.isFirstCard,
+                          shouldQuit: cardState.isCardsMode ? false : true,
                           exitCode: 2,
                           observedData: observedData
                 )),
-                // Default Primary button
-                AnyView(NewButton(label: observedData.args.button1TextOption.value == "nil" ? "" : observedData.args.button1TextOption.value,
+                // Button 1: OK in normal mode, Next/Finish in cards mode
+                AnyView(NewButton(label: cardState.isCardsMode
+                          ? (cardState.isLastCard ? (observedData.args.button1TextOption.value == appDefaults.button1Default ? "Finish".localized : observedData.args.button1TextOption.value) : "Next".localized)
+                          : (observedData.args.button1TextOption.value == "nil" ? "" : observedData.args.button1TextOption.value),
                           isVisible: (observedData.args.button1TextOption.value != "none"),
                           isDisabled: observedData.args.button1Disabled.present,
                           enableOnTimer: (observedData.args.timerBar.present && !observedData.args.hideTimerBar.present),
@@ -105,7 +115,8 @@ struct ButtonBarView: View {
                           keyboardShortcut: .defaultAction,
                           buttonFontSize: observedData.appProperties.buttonTextSize,
                           buttonStyle: observedData.appProperties.buttonSize,
-                          shouldQuit: true,
+                          isCardsNextButton: cardState.isCardsMode,
+                          shouldQuit: cardState.isCardsMode ? cardState.isLastCard : true,
                           exitCode: 0,
                           observedData: observedData
                 ))
@@ -214,6 +225,8 @@ struct NewButton: View {
     var buttonStyle: ControlSize = .regular
     var action: String = ""
     var isShellCommand: Bool = false
+    var isCardsNextButton: Bool = false      // Cards mode: this is the Next/Finish button
+    var isCardsPreviousButton: Bool = false  // Cards mode: this is the Previous button
     var shouldQuit: Bool = false
     var exitCode: Int32 = 0
     @ObservedObject var observedData: DialogUpdatableContent
@@ -266,7 +279,23 @@ struct NewButton: View {
             let symbolLayout = (symbolPosition == .top || symbolPosition == .bottom) ? AnyLayout(VStackLayout()) : AnyLayout(HStackLayout())
             
             Button(action: {
-                buttonAction(action: action, exitCode: exitCode, executeShell: isShellCommand, shouldQuit: shouldQuit, observedObject: observedData)
+                // Handle cards mode navigation
+                if isCardsNextButton && cardState.isCardsMode {
+                    // Next button in cards mode
+                    if cardState.isLastCard {
+                        // On last card, collect input and quit
+                        buttonAction(action: action, exitCode: exitCode, executeShell: isShellCommand, shouldQuit: true, observedObject: observedData, isCardsMode: true)
+                    } else {
+                        // Advance to next card
+                        _ = observedData.advanceToNextCard()
+                    }
+                } else if isCardsPreviousButton && cardState.isCardsMode {
+                    // Previous button in cards mode - go back
+                    _ = observedData.goToPreviousCard()
+                } else {
+                    // Normal mode - original behavior
+                    buttonAction(action: action, exitCode: exitCode, executeShell: isShellCommand, shouldQuit: shouldQuit, observedObject: observedData)
+                }
             }, label: {
                 symbolLayout {
                     if !label.isEmpty && (symbolPosition == .bottom) {

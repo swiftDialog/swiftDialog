@@ -22,6 +22,7 @@
 		411FC34628E2DDFD003EA2C2 /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411FC34528E2DDFD003EA2C2 /* Notifications.swift */; };
 		4124EFD229455861003B00F4 /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4124EFD129455861003B00F4 /* HelpView.swift */; };
 		412B26AF289CE02100493EFF /* MiniView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 412B26AE289CE02100493EFF /* MiniView.swift */; };
+		413563AA2F50231B006D177B /* CardState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413563A92F50231B006D177B /* CardState.swift */; };
 		414550AA27C799D000D756E3 /* BackgroundBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414550A927C799D000D756E3 /* BackgroundBlur.swift */; };
 		41512CC2286C77F200F22B86 /* ConstructionKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41512CC1286C77F200F22B86 /* ConstructionKitView.swift */; };
 		4153784E2604B71800AA0E76 /* TitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153784D2604B71800AA0E76 /* TitleView.swift */; };
@@ -240,6 +241,7 @@
 		411FC34528E2DDFD003EA2C2 /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Notifications.swift; path = dialog/Functions/Notifications.swift; sourceTree = SOURCE_ROOT; };
 		4124EFD129455861003B00F4 /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
 		412B26AE289CE02100493EFF /* MiniView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniView.swift; sourceTree = "<group>"; };
+		413563A92F50231B006D177B /* CardState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardState.swift; sourceTree = "<group>"; };
 		414550A927C799D000D756E3 /* BackgroundBlur.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundBlur.swift; sourceTree = "<group>"; };
 		41512CC1286C77F200F22B86 /* ConstructionKitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstructionKitView.swift; sourceTree = "<group>"; };
 		4153784D2604B71800AA0E76 /* TitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleView.swift; sourceTree = "<group>"; };
@@ -795,6 +797,7 @@
 				41D6FE8426DB11BA0083BE61 /* jamfHelper.swift */,
 				A4F660819C6A4FBC8F1D8BAB /* DebouncedUpdater.swift */,
 				F9F647DDE9CB42EBA9D931B9 /* FileSystemCache.swift */,
+				413563A92F50231B006D177B /* CardState.swift */,
 			);
 			path = "App Processing";
 			sourceTree = "<group>";
@@ -1191,6 +1194,7 @@
 				B4608E5B819446BC9AADDC8F /* FileSystemCache.swift in Sources */,
 				412B26AF289CE02100493EFF /* MiniView.swift in Sources */,
 				41BD41C02EA1B6E000DA7124 /* AudioManager.swift in Sources */,
+				413563AA2F50231B006D177B /* CardState.swift in Sources */,
 				BA2812002EBA161C00384582 /* InspectPersistence.swift in Sources */,
 				41BD41C22EA1B71200DA7124 /* AudioControl.swift in Sources */,
 				CC21905D2A7BD7D300269525 /* AppVariables.swift in Sources */,

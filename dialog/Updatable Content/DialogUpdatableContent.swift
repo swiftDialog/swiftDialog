@@ -784,4 +784,115 @@ final class DialogUpdatableContent: ObservableObject {
             }
         }
     }
+    
+    // MARK: - Cards Mode Support
+    
+    /// Collect current user input from all input fields
+    /// Returns a dictionary of field names to their values
+    func collectCurrentUserInput() -> [String: Any] {
+        var input: [String: Any] = [:]
+        
+        // Collect text field values
+        for textField in userInputState.textFields {
+            let key = textField.name.isEmpty ? textField.title : textField.name
+            input[key] = textField.value
+        }
+        
+        // Collect dropdown selections
+        for dropdown in userInputState.dropdownItems {
+            let key = dropdown.name.isEmpty ? dropdown.title : dropdown.name
+            input[key] = [
+                "selectedValue": dropdown.selectedValue,
+                "selectedIndex": dropdown.values.firstIndex(of: dropdown.selectedValue) ?? -1
+            ]
+        }
+        
+        // Collect checkbox values
+        for checkbox in userInputState.checkBoxes {
+            let key = checkbox.name.isEmpty ? checkbox.label : checkbox.name
+            input[key] = checkbox.checked
+        }
+        
+        // Collect list selections if enabled
+        if args.listSelectionEnabled.present {
+            for item in userInputState.listItems {
+                input[item.title] = item.selected
+            }
+        }
+        
+        return input
+    }
+    
+    /// Clear user input state for a fresh card
+    func clearUserInputState() {
+        userInputState.textFields.removeAll()
+        userInputState.dropdownItems.removeAll()
+        userInputState.checkBoxes.removeAll()
+        userInputState.listItems.removeAll()
+        
+        // Update observed arrays
+        textFieldArray = []
+        dropdownArray = []
+        listItemsArray = []
+    }
+    
+    /// Apply a card's configuration to the current dialog state
+    /// - Parameter card: The card configuration to apply
+    func applyCardConfiguration(_ card: DialogCard) {
+        writeLog("Applying card \(card.id) configuration")
+        
+        // Clear previous user input state
+        clearUserInputState()
+        
+        // Update appArguments with the card's configuration
+        appArguments.updateAllItems(with: card.configuration)
+        
+        // Refresh our local args reference
+        args = appArguments
+        
+        // Re-process options that need special handling
+        processCLOptions(json: card.configuration)
+        
+        // Update the observed arrays from the global state
+        textFieldArray = userInputState.textFields
+        dropdownArray = userInputState.dropdownItems
+        listItemsArray = userInputState.listItems
+        
+        // Force UI update
+        objectWillChange.send()
+    }
+    
+    /// Advance to the next card
+    /// - Returns: True if advanced, false if on last card (should exit)
+    func advanceToNextCard() -> Bool {
+        // Store current input before advancing
+        cardState.storeCurrentCardInput(collectCurrentUserInput())
+        
+        // Try to advance
+        if cardState.nextCard() {
+            if let nextCard = cardState.currentCard {
+                applyCardConfiguration(nextCard)
+                return true
+            }
+        }
+        
+        return false
+    }
+    
+    /// Go back to the previous card
+    /// - Returns: True if moved back, false if on first card
+    func goToPreviousCard() -> Bool {
+        // Store current input before going back
+        cardState.storeCurrentCardInput(collectCurrentUserInput())
+        
+        // Try to go back
+        if cardState.previousCard() {
+            if let prevCard = cardState.currentCard {
+                applyCardConfiguration(prevCard)
+                return true
+            }
+        }
+        
+        return false
+    }
 }
