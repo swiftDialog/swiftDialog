@@ -682,6 +682,9 @@ final class DialogUpdatableContent: ObservableObject {
 
     @Published var updateView: Bool = true
     @Published var constructionKitShown: Bool = false
+    
+    /// Current card index for cards mode - used to force view recreation
+    @Published var currentCardIndex: Int = 0
 
     var status: StatusState
 
@@ -830,10 +833,11 @@ final class DialogUpdatableContent: ObservableObject {
         userInputState.checkBoxes.removeAll()
         userInputState.listItems.removeAll()
         
-        // Update observed arrays
+        // Update observed arrays and state
         textFieldArray = []
         dropdownArray = []
         listItemsArray = []
+        observedUserInputState = userInputState
     }
     
     /// Apply a card's configuration to the current dialog state
@@ -844,22 +848,107 @@ final class DialogUpdatableContent: ObservableObject {
         // Clear previous user input state
         clearUserInputState()
         
-        // Update appArguments with the card's configuration
-        appArguments.updateAllItems(with: card.configuration)
+        // Reset appArguments to defaults first
+        // This ensures properties not specified in the card revert to defaults
+        appArguments.resetToDefaults()
         
-        // Refresh our local args reference
+        // Get the merged configuration (global defaults + card overrides)
+        let mergedConfig = cardState.getMergedConfiguration(for: card)
+        
+        // Get card input variables for substitution in text fields
+        // This allows using {fieldname} syntax to reference values from previous cards
+        let cardInputVariables = cardState.getInputAsVariables()
+        
+        // Merge card input variables with system info for text processing
+        var combinedTags = appvars.systemInfo
+        for (key, value) in cardInputVariables {
+            combinedTags[key] = value
+        }
+        
+        // Update appArguments with the merged configuration (global + card)
+        appArguments.updateAllItems(with: mergedConfig)
+        
+        // Re-process options that need special handling (uses merged config)
+        // This must happen BEFORE variable substitution as it sets up dropdowns, checkboxes, etc.
+        processCLOptions(json: mergedConfig)
+        
+        // Apply variable substitution to text fields that support it
+        // Title, subtitle, message, etc. can use {fieldname} from previous cards
+        if !cardInputVariables.isEmpty {
+            appArguments.titleOption.value = processTextString(appArguments.titleOption.value, tags: combinedTags)
+            appArguments.subTitleOption.value = processTextString(appArguments.subTitleOption.value, tags: combinedTags)
+            appArguments.messageOption.value = processTextString(appArguments.messageOption.value, tags: combinedTags)
+            appArguments.button1TextOption.value = processTextString(appArguments.button1TextOption.value, tags: combinedTags)
+            appArguments.button2TextOption.value = processTextString(appArguments.button2TextOption.value, tags: combinedTags)
+            appArguments.infoBox.value = processTextString(appArguments.infoBox.value, tags: combinedTags)
+            appArguments.helpMessage.value = processTextString(appArguments.helpMessage.value, tags: combinedTags)
+        }
+        
+        // Refresh our local args reference AFTER processCLOptions
+        // This ensures dropdownValues.present, checkbox.present etc. are correctly set
         args = appArguments
         
-        // Re-process options that need special handling
-        processCLOptions(json: card.configuration)
+        // Check if we have stored input for this card (user navigated back)
+        // and restore the values
+        if let storedInput = cardState.getStoredInput(for: cardState.currentCardIndex) {
+            restoreUserInput(from: storedInput)
+        }
         
-        // Update the observed arrays from the global state
+        // Update the observed arrays and state from the global state
         textFieldArray = userInputState.textFields
         dropdownArray = userInputState.dropdownItems
         listItemsArray = userInputState.listItems
+        observedUserInputState = userInputState
+        
+        // Update current card index - this triggers view recreation via .id() modifier
+        currentCardIndex = cardState.currentCardIndex
         
         // Force UI update
         objectWillChange.send()
+    }
+    
+    /// Restore user input values from stored data (when navigating back)
+    /// - Parameter storedInput: Dictionary of field names to their stored values
+    private func restoreUserInput(from storedInput: [String: Any]) {
+        writeLog("Restoring user input for card \(cardState.currentCardIndex + 1)")
+        
+        // Restore text field values
+        for index in 0..<userInputState.textFields.count {
+            let key = userInputState.textFields[index].name.isEmpty 
+                ? userInputState.textFields[index].title 
+                : userInputState.textFields[index].name
+            if let value = storedInput[key] as? String {
+                userInputState.textFields[index].value = value
+            }
+        }
+        
+        // Restore dropdown selections
+        for index in 0..<userInputState.dropdownItems.count {
+            let key = userInputState.dropdownItems[index].name.isEmpty 
+                ? userInputState.dropdownItems[index].title 
+                : userInputState.dropdownItems[index].name
+            if let dictValue = storedInput[key] as? [String: Any],
+               let selectedValue = dictValue["selectedValue"] as? String {
+                userInputState.dropdownItems[index].selectedValue = selectedValue
+            }
+        }
+        
+        // Restore checkbox values
+        for index in 0..<userInputState.checkBoxes.count {
+            let key = userInputState.checkBoxes[index].name.isEmpty 
+                ? userInputState.checkBoxes[index].label 
+                : userInputState.checkBoxes[index].name
+            if let checked = storedInput[key] as? Bool {
+                userInputState.checkBoxes[index].checked = checked
+            }
+        }
+        
+        // Restore list selections
+        for index in 0..<userInputState.listItems.count {
+            if let selected = storedInput[userInputState.listItems[index].title] as? Bool {
+                userInputState.listItems[index].selected = selected
+            }
+        }
     }
     
     /// Advance to the next card
