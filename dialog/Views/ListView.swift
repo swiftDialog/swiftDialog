@@ -82,12 +82,16 @@ struct ListView: View {
 
 
     var body: some View {
-        if observedData.args.listItem.present {
+        // Guard against array access during card transitions
+        let listCount = userInputState.listItems.count
+        if observedData.args.listItem.present && listCount > 0 {
             let _ = writeLog("Displaying listitems")
             ScrollViewReader { proxy in
                 VStack {
-                    List(0..<userInputState.listItems.count, id: \.self, selection: $selection) {index in
+                    List(0..<listCount, id: \.self, selection: $selection) {index in
                         Button(action: {
+                            // Extra bounds check for safety during card transitions
+                            guard index < userInputState.listItems.count else { return }
                             if observedData.args.listSelectionEnabled.present {
                                 if selection.contains(index) {
                                     selection.remove(index)

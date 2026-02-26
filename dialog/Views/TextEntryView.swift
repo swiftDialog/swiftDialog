@@ -81,9 +81,11 @@ struct TextEntryView: View {
     }
 
     var body: some View {
-        if observedData.args.textField.present {
+        // Guard against array size mismatch during card transitions
+        let textFieldCount = observedData.textFieldArray.count
+        if observedData.args.textField.present && textFieldCount == userInputState.textFields.count && textFieldCount == datepickerID.count - 1 {
             VStack {
-                ForEach(0..<observedData.textFieldArray.count, id: \.self) {index in
+                ForEach(0..<textFieldCount, id: \.self) {index in
                     if observedData.textFieldArray[index].editor {
                         VStack {
                             HStack {

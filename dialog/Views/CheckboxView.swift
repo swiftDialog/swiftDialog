@@ -30,10 +30,13 @@ struct RenderToggles: View {
     }
 
     var body: some View {
-        VStack {
-            ForEach(0..<observedData.observedUserInputState.checkBoxes.count, id: \.self) {index in
-                HStack {
-                    if observedData.appProperties.checkboxControlStyle == "switch" {
+        // Guard against array size mismatch during card transitions
+        let checkboxCount = observedData.observedUserInputState.checkBoxes.count
+        if checkboxCount > 0 && checkboxCount == userInputState.checkBoxes.count {
+            VStack {
+                ForEach(0..<checkboxCount, id: \.self) {index in
+                    HStack {
+                        if observedData.appProperties.checkboxControlStyle == "switch" {
                         let _ = writeLog("Displaying switches instead of checkboxes")
                         if iconPresent {
                             if observedData.observedUserInputState.checkBoxes[index].icon != "" {
@@ -79,11 +82,12 @@ struct RenderToggles: View {
                     Divider().opacity(0.5)
                 }
             }
+            }
+            .font(.system(size: observedData.appProperties.labelFontSize))
+            .padding(10)
+            .background(Color.background.opacity(0.5))
+            .cornerRadius(8)
         }
-        .font(.system(size: observedData.appProperties.labelFontSize))
-        .padding(10)
-        .background(Color.background.opacity(0.5))
-        .cornerRadius(8)
     }
 }
 

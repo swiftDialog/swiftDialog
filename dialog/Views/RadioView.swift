@@ -46,7 +46,9 @@ struct RadioView: View {
     }
 
     var body: some View {
-        if observedData.args.dropdownValues.present && radioCount > 0 {
+        // Guard against array size mismatch during card transitions
+        // When cards change, userInputState may have different count than @State selectedOption
+        if observedData.args.dropdownValues.present && radioCount > 0 && selectedOption.count == userInputState.dropdownItems.count {
             VStack {
                 ForEach(0..<userInputState.dropdownItems.count, id: \.self) {index in
                     if userInputState.dropdownItems[index].style == "radio" {

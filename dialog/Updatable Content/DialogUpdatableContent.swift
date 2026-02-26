@@ -845,12 +845,24 @@ final class DialogUpdatableContent: ObservableObject {
     func applyCardConfiguration(_ card: DialogCard) {
         writeLog("Applying card \(card.id) configuration")
         
+        // Update current card index FIRST and force UI update
+        // This triggers view recreation via .id() modifier BEFORE data changes
+        // Critical: this must happen before clearing/updating userInputState to avoid index out of range
+        currentCardIndex = cardState.currentCardIndex
+        objectWillChange.send()
+        
         // Clear previous user input state
         clearUserInputState()
         
         // Reset appArguments to defaults first
         // This ensures properties not specified in the card revert to defaults
         appArguments.resetToDefaults()
+        
+        // Reset appvars window dimensions to defaults
+        // processCLOptions only updates these if the arguments are present,
+        // so we need to reset them before processing the new card config
+        appvars.windowWidth = 820  // Default from AppVariables
+        appvars.windowHeight = 380 // Default from AppVariables
         
         // Get the merged configuration (global defaults + card overrides)
         let mergedConfig = cardState.getMergedConfiguration(for: card)
@@ -888,6 +900,24 @@ final class DialogUpdatableContent: ObservableObject {
         // This ensures dropdownValues.present, checkbox.present etc. are correctly set
         args = appArguments
         
+        // Sync window properties from appvars (updated by processCLOptions)
+        // This allows cards to specify different window sizes
+        let windowSizeChanged = appProperties.windowWidth != appvars.windowWidth || 
+                                appProperties.windowHeight != appvars.windowHeight
+        appProperties.windowWidth = appvars.windowWidth
+        appProperties.windowHeight = appvars.windowHeight
+        
+        // Resize window if dimensions changed
+        if windowSizeChanged, let window = mainWindow ?? NSApp.windows.first {
+            writeLog("Card resizing window to \(appvars.windowWidth) x \(appvars.windowHeight)")
+            placeWindow(window, 
+                       size: CGSize(width: appProperties.windowWidth, height: appProperties.windowHeight + 28),
+                       vertical: appProperties.windowPositionVertical,
+                       horozontal: appProperties.windowPositionHorozontal,
+                       offset: args.positionOffset.value.floatValue(),
+                       useFullScreen: args.blurScreen.present || args.forceOnTop.present)
+        }
+        
         // Check if we have stored input for this card (user navigated back)
         // and restore the values
         if let storedInput = cardState.getStoredInput(for: cardState.currentCardIndex) {
@@ -900,10 +930,7 @@ final class DialogUpdatableContent: ObservableObject {
         listItemsArray = userInputState.listItems
         observedUserInputState = userInputState
         
-        // Update current card index - this triggers view recreation via .id() modifier
-        currentCardIndex = cardState.currentCardIndex
-        
-        // Force UI update
+        // Force final UI update
         objectWillChange.send()
     }
     

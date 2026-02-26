@@ -155,6 +155,7 @@ struct MessageContent: View {
                             .padding(.bottom, appDefaults.contentPadding)
                     case observedData.appProperties.viewOrder.firstIndex(of: ViewType.listitem.rawValue):
                         ListView(observedDialogContent: observedData)
+                            .id(observedData.currentCardIndex)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
                             .padding(.bottom, appDefaults.contentPadding)
                     case observedData.appProperties.viewOrder.firstIndex(of: ViewType.checkbox.rawValue):
@@ -164,6 +165,7 @@ struct MessageContent: View {
                             .frame(maxWidth: dataEntryMaxWidth)
                     case observedData.appProperties.viewOrder.firstIndex(of: ViewType.textfield.rawValue):
                         TextEntryView(observedDialogContent: observedData, textfieldContent: userInputState.textFields)
+                            .id(observedData.currentCardIndex)
                             .padding(.bottom, appDefaults.contentPadding)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
                             .frame(maxWidth: dataEntryMaxWidth)
