@@ -290,6 +290,25 @@ struct NewButton: View {
                         return
                     }
                     
+                    // Execute onAdvance callback if configured
+                    if appArguments.onAdvance.present && !appArguments.onAdvance.value.isEmpty {
+                        let currentInput = observedData.collectCurrentUserInput()
+                        let cardId = cardState.currentCard?.configuration["cardId"].string
+                        let callbackResult = executeOnAdvanceCallback(
+                            command: appArguments.onAdvance.value,
+                            cardIndex: cardState.currentCardIndex,
+                            cardId: cardId,
+                            input: currentInput
+                        )
+                        
+                        if !callbackResult.success {
+                            // Callback failed - show error and don't advance
+                            observedData.sheetErrorMessage = callbackResult.errorMessage
+                            observedData.showSheet = true
+                            return
+                        }
+                    }
+                    
                     // Next button in cards mode
                     if cardState.isLastCard {
                         // On last card, collect input and quit

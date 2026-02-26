@@ -58,7 +58,7 @@ class FileReader {
         }
         fileHandle?.waitForDataInBackgroundAndNotify()
 
-        dataAvailable = NotificationCenter.default.addObserver(forName: NSNotification.Name.NSFileHandleDataAvailable, object: self.fileHandle, queue: nil) { _ in
+        dataAvailable = NotificationCenter.default.addObserver(forName: NSNotification.Name.NSFileHandleDataAvailable, object: self.fileHandle, queue: .main) { _ in
             if let data = self.fileHandle?.availableData,
                data.count > 0 {
                 self.parseAndPrint(data: data)
@@ -899,6 +899,15 @@ final class DialogUpdatableContent: ObservableObject {
         // Refresh our local args reference AFTER processCLOptions
         // This ensures dropdownValues.present, checkbox.present etc. are correctly set
         args = appArguments
+        
+        // Update progress bar settings if present in card config
+        if args.progressBar.present {
+            progressTotal = Double(args.progressBar.value) ?? 100
+            // Start with indeterminate progress (nil) - value is set via command file
+            // The "progress" JSON key sets the total, not the current value
+            progressValue = nil
+            writeLog("Card progress bar: total=\(progressTotal), starting indeterminate")
+        }
         
         // Sync window properties from appvars (updated by processCLOptions)
         // This allows cards to specify different window sizes

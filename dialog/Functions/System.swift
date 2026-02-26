@@ -124,6 +124,84 @@ func validateRequiredFields(observedObject: DialogUpdatableContent) -> (isValid:
     return (isValid, requiredString.replacingOccurrences(of: "<br>", with: "\n"))
 }
 
+/// Executes the onAdvance callback command with card input as JSON on stdin
+/// - Parameters:
+///   - command: The shell command to execute
+///   - cardIndex: The current card index
+///   - cardId: The current card ID (from JSON config, if specified)
+///   - input: The user input from the current card
+/// - Returns: A tuple of (success, errorMessage) where success is true if callback returned 0
+func executeOnAdvanceCallback(command: String, cardIndex: Int, cardId: String?, input: [String: Any]) -> (success: Bool, errorMessage: String) {
+    writeLog("Executing onAdvance callback: \(command)")
+    
+    // Build JSON payload
+    var payload: [String: Any] = [
+        "cardIndex": cardIndex,
+        "input": input
+    ]
+    if let cardId = cardId {
+        payload["cardId"] = cardId
+    }
+    
+    // Convert to JSON string
+    guard let jsonData = try? JSONSerialization.data(withJSONObject: payload, options: []),
+          let jsonString = String(data: jsonData, encoding: .utf8) else {
+        writeLog("Failed to serialize callback payload to JSON", logLevel: .error)
+        return (false, "Internal error: failed to serialize callback data")
+    }
+    
+    writeLog("Callback JSON payload: \(jsonString)", logLevel: .debug)
+    
+    let task = Process()
+    let inputPipe = Pipe()
+    let outputPipe = Pipe()
+    let errorPipe = Pipe()
+    
+    task.standardInput = inputPipe
+    task.standardOutput = outputPipe
+    task.standardError = errorPipe
+    task.arguments = ["-c", command]
+    task.launchPath = "/bin/zsh"
+    
+    do {
+        try task.run()
+        
+        // Write JSON to stdin
+        inputPipe.fileHandleForWriting.write(jsonString.data(using: .utf8)!)
+        inputPipe.fileHandleForWriting.closeFile()
+        
+        task.waitUntilExit()
+        
+        let exitCode = task.terminationStatus
+        writeLog("onAdvance callback exited with code: \(exitCode)")
+        
+        if exitCode == 0 {
+            return (true, "")
+        } else {
+            // Read stderr for error message
+            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+            var errorMessage = String(data: errorData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            
+            // If no error message, read stdout
+            if errorMessage.isEmpty {
+                let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+                errorMessage = String(data: outputData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            }
+            
+            // Default error message if none provided
+            if errorMessage.isEmpty {
+                errorMessage = "Callback command returned non-zero exit code (\(exitCode))"
+            }
+            
+            writeLog("onAdvance callback failed: \(errorMessage)", logLevel: .error)
+            return (false, errorMessage)
+        }
+    } catch {
+        writeLog("Failed to execute onAdvance callback: \(error.localizedDescription)", logLevel: .error)
+        return (false, "Failed to execute callback: \(error.localizedDescription)")
+    }
+}
+
 func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQuit: Bool = true, observedObject: DialogUpdatableContent, isCardsMode: Bool = false) {
     writeLog("processing button action \(action)")
     if action != "" {

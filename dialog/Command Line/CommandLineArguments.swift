@@ -106,6 +106,7 @@ struct CommandLineArguments {
     var playSound                = CommandlineArgument(long: "sound")
     var dockIcon                 = CommandlineArgument(long: "dockicon")
     var dockBadge                = CommandlineArgument(long: "dockiconbadge")
+    var onAdvance                = CommandlineArgument(long: "onadvance")
 
     // command line options that take no additional parameters
     var button1Disabled          = CommandlineArgument(long: "button1disabled", isbool: true)
@@ -362,6 +363,7 @@ extension CommandLineArguments {
                     case "showDockIcon": self.showDockIcon = argument
                     case "dockIcon": self.dockIcon = argument
                     case "dockBadge": self.dockBadge = argument
+                    case "onAdvance": self.onAdvance = argument
                     default: break
                     }
                 }
@@ -493,6 +495,7 @@ extension CommandLineArguments {
                 case "showDockIcon": self.showDockIcon = argument
                 case "dockIcon": self.dockIcon = argument
                 case "dockBadge": self.dockBadge = argument
+                case "onAdvance": self.onAdvance = argument
                 default: break
                 }
             }

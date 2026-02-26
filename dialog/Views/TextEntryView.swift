@@ -185,12 +185,54 @@ struct TextEntryView: View {
                                         }
                                         .onSubmit {
                                             userInputState.textFields[index].value = observedData.textFieldArray[index].value
-                                            // Call the same action as Button1
-                                            let button1action = observedData.args.button1ShellActionOption.present ?
-                                                observedData.args.button1ShellActionOption.value :
-                                                (observedData.args.button1ActionOption.present ? observedData.args.button1ActionOption.value : "")
-                                            let buttonShellAction = observedData.args.button1ShellActionOption.present
-                                            buttonAction(action: button1action, exitCode: 0, executeShell: buttonShellAction, observedObject: observedData)
+                                            
+                                            // Handle cards mode - advance to next card instead of exiting
+                                            if cardState.isCardsMode {
+                                                // Validate required fields first
+                                                let validation = validateRequiredFields(observedObject: observedData)
+                                                if !validation.isValid {
+                                                    observedData.sheetErrorMessage = validation.errorMessage
+                                                    observedData.showSheet = true
+                                                    return
+                                                }
+                                                
+                                                // Execute onAdvance callback if configured
+                                                if appArguments.onAdvance.present && !appArguments.onAdvance.value.isEmpty {
+                                                    let currentInput = observedData.collectCurrentUserInput()
+                                                    let cardId = cardState.currentCard?.configuration["cardId"].string
+                                                    let callbackResult = executeOnAdvanceCallback(
+                                                        command: appArguments.onAdvance.value,
+                                                        cardIndex: cardState.currentCardIndex,
+                                                        cardId: cardId,
+                                                        input: currentInput
+                                                    )
+                                                    
+                                                    if !callbackResult.success {
+                                                        observedData.sheetErrorMessage = callbackResult.errorMessage
+                                                        observedData.showSheet = true
+                                                        return
+                                                    }
+                                                }
+                                                
+                                                if cardState.isLastCard {
+                                                    // On last card, exit with collected input
+                                                    let button1action = observedData.args.button1ShellActionOption.present ?
+                                                        observedData.args.button1ShellActionOption.value :
+                                                        (observedData.args.button1ActionOption.present ? observedData.args.button1ActionOption.value : "")
+                                                    let buttonShellAction = observedData.args.button1ShellActionOption.present
+                                                    buttonAction(action: button1action, exitCode: 0, executeShell: buttonShellAction, shouldQuit: true, observedObject: observedData, isCardsMode: true)
+                                                } else {
+                                                    // Advance to next card
+                                                    _ = observedData.advanceToNextCard()
+                                                }
+                                            } else {
+                                                // Normal mode - original behavior
+                                                let button1action = observedData.args.button1ShellActionOption.present ?
+                                                    observedData.args.button1ShellActionOption.value :
+                                                    (observedData.args.button1ActionOption.present ? observedData.args.button1ActionOption.value : "")
+                                                let buttonShellAction = observedData.args.button1ShellActionOption.present
+                                                buttonAction(action: button1action, exitCode: 0, executeShell: buttonShellAction, observedObject: observedData)
+                                            }
                                         }
                                         .submitLabel(.done)
                                     
