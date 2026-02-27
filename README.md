@@ -5,7 +5,7 @@
 # swiftDialog
 
 swiftDialog is an [open source](https://github.com/bartreardon/Dialog/blob/main/LICENSE.md) admin utility for macOS 15 or later written in <img src="https://developer.apple.com/assets/elements/icons/swift/swift-64x64_2x.png" width=16>Swift and <img src="https://developer.apple.com/assets/elements/icons/swiftui/swiftui-256x256_2x.png" width=16>SwiftUI that presents custom dialogs, displays informative messages or can be used as a form to request user input.
- - ⚠️ For macOS 14 or earlier, use [v2.6.5](https://github.com/swiftDialog/swiftDialog/releases/tag/v2.5.6)
+ - ⚠️ For macOS 14 or earlier, use [v2.5.6](https://github.com/swiftDialog/swiftDialog/releases/tag/v2.5.6)
 
 Latest releases can be found on the [Releases](https://github.com/bartreardon/Dialog/releases) page
 
