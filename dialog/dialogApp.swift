@@ -132,7 +132,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             // Hide menu items (only visible if dock icon is visible)
             DispatchQueue.main.async {
                 NSApp.mainMenu?.items.removeAll { item in
-                    ["File", "Edit", "View", "Window", "Help"].contains(item.title)
+                    ["File", "View", "Window", "Help"].contains(item.title)
                 }
             }
 
