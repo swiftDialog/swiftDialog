@@ -264,7 +264,13 @@ func getVideoStreamingURLFromID(videoid: String, autoplay: Bool = false) -> Stri
     case "youtubeid":
         writeLog("Youtube ID detected")
         let youTubeID = videoid.replacingOccurrences(of: "youtubeid=", with: "")
-        let youtubeURL = "https://www.youtube.com/embed/\(youTubeID)?autoplay=\(autoplay ? 1 : 0)&controls=0&showinfo=0"
+        // Use youtube-nocookie.com for better embed compatibility
+        // Include enablejsapi and playsinline for proper WKWebView support
+        var params = "enablejsapi=1&playsinline=1&rel=0"
+        if autoplay {
+            params += "&autoplay=1&mute=1"  // Autoplay requires mute
+        }
+        let youtubeURL = "https://www.youtube-nocookie.com/embed/\(youTubeID)?\(params)"
         fullURL = youtubeURL
     case "vimeoid":
         let vimeoID = videoid.replacingOccurrences(of: "vimeoid=", with: "")
