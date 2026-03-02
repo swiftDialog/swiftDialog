@@ -76,18 +76,18 @@ public enum InspectSizes {
         case "preset5":
             // Unified portal / self-service
             switch mode {
-            case "compact": return (1024, 640)   // Minimum/default
+            case "compact": return (1024, 640)   // Portal / self-service
             case "large": return (1200, 800)     // Maximum
             case "assistant": return (1024, 700)  // Apple-size inspired
-            default: return (1100, 700)          // Ideal
+            case "portal": return (1100, 700)    // Wide portal layout
+            default: return (800, 600)           // Apple Setup Assistant (default)
             }
 
         case "preset6":
-            // Modern sidebar navigation
+            // Modern sidebar navigation — 220pt sidebar + content panel
             switch mode {
-            case "compact": return (720, 480)
-            case "large": return (960, 640)
-            default: return (800, 560)  // standard
+            case "large": return (1100, 700)
+            default: return (860, 620)  // standard (sidebar 220 + content 640)
             }
 
         default:
@@ -99,5 +99,24 @@ public enum InspectSizes {
     /// Get the default size for Inspect Mode when no preset is specified
     public static var defaultSize: (CGFloat, CGFloat) {
         return (1000, 600)
+    }
+
+    /// Canonical spacing values for setup-size (800×600) step layouts.
+    /// All step types should use these instead of hardcoded values.
+    public enum SetupSpacing {
+        /// Horizontal padding on main content area (40pt)
+        static let contentPadH: CGFloat = 40
+        /// Max width for text-heavy content columns (480pt)
+        static let contentMaxW: CGFloat = 480
+        /// Minimum spacer height for breathing room (20pt)
+        static let breathingRoom: CGFloat = 20
+        /// Gap between title and subtitle — tight semantic pair (8pt)
+        static let titleSubtitle: CGFloat = 8
+        /// Gap between content blocks (12pt)
+        static let blockGap: CGFloat = 12
+        /// Gap between major sections (20pt)
+        static let sectionGap: CGFloat = 20
+        /// Top inset from container edge to first element (16pt)
+        static let topInset: CGFloat = 16
     }
 }

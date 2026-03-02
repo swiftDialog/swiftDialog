@@ -5,7 +5,7 @@
 //  Created by Henry Stamerjohann on 19/7/2025.
 //
 
-import Foundation
+import SwiftUI
 
 /// Central configuration constants for inspect functionality
 struct InspectConstants {
@@ -28,6 +28,8 @@ struct InspectConstants {
     static let standardAnimationDuration: TimeInterval = 0.3
     static let longAnimationDuration: TimeInterval = 0.5
     static let scaleAnimationDuration: TimeInterval = 0.2
+    static let stepTransition: Animation = .interpolatingSpring(mass: 2, stiffness: 300, damping: 50)
+    static let snappyExit: Animation = .interpolatingSpring(mass: 0.75, stiffness: 350, damping: 20)
     
     // MARK: - Performance Limits
     static let maxRetryAttempts = 3
