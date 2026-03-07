@@ -29,6 +29,7 @@ class Monitoring {
 
     private var items: [InspectConfig.ItemConfig] = []
     private var cachePaths: [String] = []
+    private var cacheExtensions: [String] = [".download", ".pkg", ".dmg"]
 
     // Monitoring components
     private var updateTimer: Timer?
@@ -51,9 +52,10 @@ class Monitoring {
 
     // MARK: - Public API
 
-    func startMonitoring(items: [InspectConfig.ItemConfig], cachePaths: [String]) {
+    func startMonitoring(items: [InspectConfig.ItemConfig], cachePaths: [String], cacheExtensions: [String]? = nil) {
         self.items = items
         self.cachePaths = cachePaths
+        self.cacheExtensions = cacheExtensions ?? [".download", ".pkg", ".dmg"]
 
         writeLog("MonitoringService: Starting monitoring for \(items.count) items", logLevel: .info)
 
@@ -111,7 +113,7 @@ class Monitoring {
 
         // Setup FileMonitor delegate and start monitoring
         fileMonitor.delegate = self
-        fileMonitor.startMonitoring(items: items, cachePaths: cachePaths)
+        fileMonitor.startMonitoring(items: items, cachePaths: cachePaths, cacheExtensions: cacheExtensions)
 
         writeLog("MonitoringService: File monitoring delegated to FileMonitor", logLevel: .info)
     }
@@ -178,12 +180,7 @@ class Monitoring {
 
     private func isDownloadFile(_ filename: String) -> Bool {
         let lowercased = filename.lowercased()
-        // Check for common download/package extensions and patterns
-        return lowercased.hasSuffix(".download") ||
-               lowercased.hasSuffix(".pkg") ||
-               lowercased.hasSuffix(".dmg") ||
-               lowercased.hasSuffix(".zip") ||
-               lowercased.hasSuffix(".app") ||
+        return cacheExtensions.contains { lowercased.hasSuffix($0) } ||
                lowercased.contains("installer") ||
                lowercased.contains("setup") ||
                lowercased.contains(".partial") ||

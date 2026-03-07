@@ -24,6 +24,9 @@ struct SidebarNavigationModule: View {
     let accentColor: Color
     let logoPath: String?
     let title: String?
+    let subtitle: String?
+    let iconPath: String?
+    let iconBasePath: String?
     let showStepNumbers: Bool
     let showCompletionMarks: Bool
     let width: CGFloat
@@ -39,6 +42,9 @@ struct SidebarNavigationModule: View {
         accentColor: Color = .blue,
         logoPath: String? = nil,
         title: String? = nil,
+        subtitle: String? = nil,
+        iconPath: String? = nil,
+        iconBasePath: String? = nil,
         showStepNumbers: Bool = true,
         showCompletionMarks: Bool = true,
         width: CGFloat = 220,
@@ -53,6 +59,9 @@ struct SidebarNavigationModule: View {
         self.accentColor = accentColor
         self.logoPath = logoPath
         self.title = title
+        self.subtitle = subtitle
+        self.iconPath = iconPath
+        self.iconBasePath = iconBasePath
         self.showStepNumbers = showStepNumbers
         self.showCompletionMarks = showCompletionMarks
         self.width = width
@@ -130,14 +139,49 @@ struct SidebarNavigationModule: View {
 
     // MARK: - Header Section
 
+    /// Resolved icon: static `iconPath` from config, or dynamic from the current step's icon.
+    private var resolvedHeaderIcon: String? {
+        if let iconPath = iconPath { return iconPath }
+        return items[safe: currentStep]?.icon
+    }
+
+    /// Whether the header icon is present (static or dynamic).
+    private var hasHeaderIcon: Bool { resolvedHeaderIcon != nil }
+
     @ViewBuilder
     private var headerSection: some View {
         VStack(spacing: 8 * scaleFactor) {
+            // Prominent icon — static (config-level) or dynamic (current step's icon)
+            if let icon = resolvedHeaderIcon {
+                AsyncImageView(
+                    iconPath: icon,
+                    basePath: iconBasePath,
+                    maxWidth: 64 * scaleFactor,
+                    maxHeight: 64 * scaleFactor,
+                    imageFit: .fit
+                ) {
+                    EmptyView()
+                }
+                .frame(width: 64 * scaleFactor, height: 64 * scaleFactor)
+                .id(icon) // crossfade when the icon changes between steps
+                .transition(.opacity)
+                .animation(.easeInOut(duration: 0.25), value: icon)
+            }
+
             // Title
             if let title = title, !title.isEmpty {
                 Text(title)
-                    .font(.headline)
+                    .font(hasHeaderIcon ? .title3.bold() : .headline)
                     .foregroundStyle(.primary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+            }
+
+            // Subtitle
+            if let subtitle = subtitle, !subtitle.isEmpty {
+                Text(subtitle)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
             }
@@ -336,6 +380,8 @@ struct SidebarNavigationModule_Previews: PreviewProvider {
             completedSteps: ["step1"],
             accentColor: .blue,
             title: "Setup Assistant",
+            subtitle: "Configure your new Mac!",
+            iconPath: "sf=checklist",
             onStepSelected: { _ in }
         )
         .frame(height: 400)

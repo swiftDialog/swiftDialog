@@ -142,6 +142,7 @@ class UnifiedMonitoringService: ObservableObject {
     private let fileSystemCache = FileSystemCache()
     private var statusCheckTimer: Timer?
     private var cachePaths: [String] = []
+    private var cacheExtensions: [String] = [".download", ".pkg", ".dmg"]
     private var plistBaselines: [String: String?] = [:]  // Change detection baselines
     private var plistBaselinesInitialized: Set<String> = []
 
@@ -186,9 +187,10 @@ class UnifiedMonitoringService: ObservableObject {
     /// - Parameters:
     ///   - items: Items to monitor
     ///   - cachePaths: Optional cache paths for download detection
-    func startMonitoring(items: [InspectConfig.ItemConfig], cachePaths: [String] = []) {
+    func startMonitoring(items: [InspectConfig.ItemConfig], cachePaths: [String] = [], cacheExtensions: [String]? = nil) {
         self.items = items
         self.cachePaths = cachePaths
+        self.cacheExtensions = cacheExtensions ?? [".download", ".pkg", ".dmg"]
 
         writeLog("UnifiedMonitoringService: Starting monitoring for \(items.count) items", logLevel: .info)
 
@@ -418,10 +420,7 @@ class UnifiedMonitoringService: ObservableObject {
 
     private func isDownloadFile(_ filename: String) -> Bool {
         let lowercased = filename.lowercased()
-        return lowercased.hasSuffix(".download") ||
-               lowercased.hasSuffix(".pkg") ||
-               lowercased.hasSuffix(".dmg") ||
-               lowercased.hasSuffix(".zip") ||
+        return cacheExtensions.contains { lowercased.hasSuffix($0) } ||
                lowercased.contains(".partial") ||
                lowercased.contains(".tmp")
     }

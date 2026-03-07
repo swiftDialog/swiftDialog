@@ -1587,7 +1587,7 @@ struct Preset5View: View {
         }
 
         writeLog("Preset5: Starting installation monitoring for \(items.count) items", logLevel: .info)
-        monitoringService.startMonitoring(items: items)
+        monitoringService.startMonitoring(items: items, cachePaths: config?.cachePaths ?? [], cacheExtensions: config?.resolvedCacheExtensions)
 
         // Also start log monitoring if configured at the top level
         if let config = config {

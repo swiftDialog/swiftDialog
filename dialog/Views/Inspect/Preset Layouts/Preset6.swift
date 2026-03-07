@@ -306,6 +306,7 @@ struct Preset6View: View, InspectLayoutProtocol {
                     logoConfig: logoConfig,
                     basePath: inspectState.uiConfiguration.iconBasePath
                 )
+                .transaction { $0.animation = nil }
             }
         }
         .environment(\.palette, ResolvedPalette(from: inspectState.config?.brandPalette, primaryColor: branding.primaryColor))
@@ -439,6 +440,9 @@ struct Preset6View: View, InspectLayoutProtocol {
                     accentColor: highlightColor,
                     logoPath: nil,  // Logo in footer instead
                     title: inspectState.uiConfiguration.windowTitle,
+                    subtitle: inspectState.uiConfiguration.subtitleMessage,
+                    iconPath: inspectState.uiConfiguration.iconPath,
+                    iconBasePath: inspectState.uiConfiguration.iconBasePath,
                     showStepNumbers: showStepNumbers,
                     showCompletionMarks: showCompletionMarks,
                     width: sidebarWidth,
@@ -446,15 +450,17 @@ struct Preset6View: View, InspectLayoutProtocol {
                     onStepSelected: handleStepSelection,
                     isNavigationBlocked: shouldBlockNavigation
                 )
+                .zIndex(1)
 
                 // Divider
                 Rectangle()
                     .fill(Color.secondary.opacity(0.2))
                     .frame(width: 1)
 
-                // Right: Content panel
+                // Right: Content panel (clipped so slide transitions don't bleed under sidebar)
                 contentPanel
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .clipped()
             }
 
             // Footer bar
@@ -474,11 +480,6 @@ struct Preset6View: View, InspectLayoutProtocol {
                         ScrollView(.vertical, showsIndicators: true) {
                             let sp = InspectSizes.SetupSpacing.self
                             VStack(alignment: .leading, spacing: sp.sectionGap) {
-                                // Inline back button (scrolls with content, above heading)
-                                if canGoBack && useInlineBackButton {
-                                    inlineBackButton
-                                }
-
                                 // Step heading
                                 stepHeading(for: currentItem)
 
@@ -866,18 +867,28 @@ struct Preset6View: View, InspectLayoutProtocol {
 
     @ViewBuilder
     private var footerBar: some View {
-        HStack(spacing: 12) {
-            // Footer text only (logo is now a persistent BrandedLogoView overlay)
-            if let text = branding.footerText {
-                Text(text)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.leading, 20)
-            }
+        let backText: String = {
+            if let item = inspectState.items[safe: currentStep],
+               let loc = localized("backButtonText", forItem: item, fallback: nil) { return loc }
+            return branding.button2Text ?? "Back"
+        }()
 
-            Spacer()
-
-            // Step counter with Option-click reset (centered area)
+        IntroFooterView(
+            footerText: branding.footerText,
+            backButtonText: backText,
+            continueButtonText: getContinueButtonText(),
+            accentColor: highlightColor,
+            showBackButton: canGoBack,
+            onBack: goToPreviousStep,
+            onContinue: handleContinue,
+            continueDisabled: isContinueDisabled,
+            inspectConfig: inspectState.config,
+            buttonControlSize: .large,
+            footerVerticalPadding: 16
+        )
+        .background(Color(NSColor.windowBackgroundColor))
+        .overlay(alignment: .center) {
+            // Step counter with Option-click reset
             Text("Step \(currentStep + 1) of \(inspectState.items.count)")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
@@ -887,40 +898,8 @@ struct Preset6View: View, InspectLayoutProtocol {
                     }
                 }
                 .help("Option-click to reset progress")
-
-            Spacer()
-
-            // Buttons (back button appears here only when backButtonStyle is "footer")
-            HStack(spacing: 12) {
-                if canGoBack && !useInlineBackButton {
-                    let backText: String = {
-                        if let item = inspectState.items[safe: currentStep],
-                           let loc = localized("backButtonText", forItem: item, fallback: nil) { return loc }
-                        return branding.button2Text ?? "Back"
-                    }()
-                    Button(action: { goToPreviousStep() }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(.secondary)
-                            .frame(width: 28, height: 28)
-                            .background(Circle().fill(.quaternary))
-                    }
-                    .buttonStyle(.plain)
-                    .help(backText)
-                    .accessibilityLabel(backText)
-                }
-
-                Button(getContinueButtonText()) {
-                    handleContinue()
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(highlightColor)
-                .disabled(isContinueDisabled)
-            }
-            .padding(.trailing, 20)
         }
-        .padding(.vertical, 12)
-        .background(Color(NSColor.windowBackgroundColor))
+        .transaction { $0.animation = nil } // Prevent footer from springing during step transitions
     }
 
     // MARK: - Button Logic

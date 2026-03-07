@@ -28,6 +28,7 @@ class AppInspector {
         }
         let apps: [App]
         let cachePaths: [String]?
+        let cacheExtensions: [String]?
     }
     
     // MARK: - Properties
@@ -86,22 +87,28 @@ class AppInspector {
         return false
     }
     
+    private var resolvedCacheExtensions: [String] {
+        let extensions = config?.cacheExtensions ?? ["download", "pkg", "dmg"]
+        return extensions.map { ext in
+            ext.hasPrefix(".") ? ext.lowercased() : ".\(ext.lowercased())"
+        }
+    }
+
     private func checkCacheForApp(_ app: AppConfig.App) -> Bool {
         guard let cachePaths = config?.cachePaths else { return false }
-        
+
         let appIdLower = app.id.lowercased()
         let appNameLower = app.displayName.lowercased().replacingOccurrences(of: " ", with: "")
-        
-        // Use the optimized containsMatchingFile method to avoid unnecessary memory allocations  
+        let extensions = resolvedCacheExtensions
+
+        // Use the optimized containsMatchingFile method to avoid unnecessary memory allocations
         for cachePath in cachePaths {
             let hasMatchingFile = fileSystemCache.containsMatchingFile(in: cachePath) { file in
                 let lowercaseFile = file.lowercased()
                 let appIdMatch = lowercaseFile.contains(appIdLower)
                 let nameMatch = lowercaseFile.contains(appNameLower)
-                let isDownloadFile = lowercaseFile.hasSuffix(".download") || 
-                                    lowercaseFile.hasSuffix(".pkg") || 
-                                    lowercaseFile.hasSuffix(".dmg")
-                
+                let isDownloadFile = extensions.contains { lowercaseFile.hasSuffix($0) }
+
                 return (appIdMatch || nameMatch) && isDownloadFile
             }
             

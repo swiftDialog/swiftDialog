@@ -77,6 +77,7 @@ struct InspectConfig: Codable {
     let size: String?  // Refactored into preset-specific sizing- we use "compact", "standard", or "large" -> see InspectSizes.swift
     let scanInterval: Int?
     let cachePaths: [String]?
+    let cacheExtensions: [String]?
     let sideMessage: [String]?
     let sideInterval: Int?
     let style: String?
@@ -176,6 +177,15 @@ struct InspectConfig: Codable {
     let summaryScreen: PresetSummaryScreen? // Optional summary screen after items complete (Preset1/2 only)
 
     var items: [ItemConfig]
+
+    /// Resolved cache file extensions with dot prefix, e.g. [".download", ".pkg", ".dmg"]
+    /// Uses `cacheExtensions` from config if provided, otherwise defaults to ["download", "pkg", "dmg"]
+    var resolvedCacheExtensions: [String] {
+        let extensions = cacheExtensions ?? ["download", "pkg", "dmg"]
+        return extensions.map { ext in
+            ext.hasPrefix(".") ? ext.lowercased() : ".\(ext.lowercased())"
+        }
+    }
 
     // Progress bar configuration for status visualization
     struct ProgressBarConfig: Codable {
@@ -1592,6 +1602,7 @@ struct InspectConfig: Codable {
         try container.encodeIfPresent(size, forKey: .size)
         try container.encodeIfPresent(scanInterval, forKey: .scanInterval)
         try container.encodeIfPresent(cachePaths, forKey: .cachePaths)
+        try container.encodeIfPresent(cacheExtensions, forKey: .cacheExtensions)
         try container.encodeIfPresent(sideMessage, forKey: .sideMessage)
         try container.encodeIfPresent(sideInterval, forKey: .sideInterval)
         try container.encodeIfPresent(style, forKey: .style)
@@ -1683,6 +1694,7 @@ struct InspectConfig: Codable {
         size = try container.decodeIfPresent(String.self, forKey: .size)
         scanInterval = try container.decodeIfPresent(Int.self, forKey: .scanInterval)
         cachePaths = try container.decodeIfPresent([String].self, forKey: .cachePaths)
+        cacheExtensions = try container.decodeIfPresent([String].self, forKey: .cacheExtensions)
         sideMessage = try container.decodeIfPresent([String].self, forKey: .sideMessage)
         sideInterval = try container.decodeIfPresent(Int.self, forKey: .sideInterval)
         style = try container.decodeIfPresent(String.self, forKey: .style)
@@ -1803,7 +1815,7 @@ struct InspectConfig: Codable {
 
     private enum CodingKeys: String, CodingKey {
         case title, message, infobox, icon, iconsize, banner, bannerHeight, bannerTitle
-        case width, height, size, scanInterval, cachePaths
+        case width, height, size, scanInterval, cachePaths, cacheExtensions
         case sideMessage, sideInterval, style, liststyle, preset, popupButton
         case highlightColor, secondaryColor, backgroundColor, backgroundImage, backgroundOpacity
         case textOverlayColor, gradientColors
