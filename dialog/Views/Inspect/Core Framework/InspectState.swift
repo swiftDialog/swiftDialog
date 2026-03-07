@@ -721,6 +721,13 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
             // Only check cache if not already installed (for performance optimization)
             let isDownloading = !isInstalled && checkCacheForItem(item)
 
+            // Keep plistValidationResults in sync with plist evaluation to prevent
+            // race condition where completedItems and plistValidationResults disagree,
+            // causing items to briefly flash "Failed" (orange) before async validation catches up
+            if item.plistKey != nil && item.evaluation != nil {
+                self.plistValidationResults[item.id] = isInstalled
+            }
+
             // Apply changes only if status actually changed
             if isInstalled && !wasCompleted {
                 self.debouncedUpdater.debounce(key: "item-install-\(item.id)") { [weak self] in
