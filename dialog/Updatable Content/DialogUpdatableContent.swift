@@ -537,8 +537,8 @@ class FileReader {
                     blurredScreen.hide()
                 }
                 NSApp.hide(self)
-
-            // hide
+                
+            // show
             case "show:":
                 writeToLog("Showing windows")
                 if observedData.args.blurScreen.present {
@@ -546,6 +546,25 @@ class FileReader {
                 }
                 NSApp.unhide(self)
                 activateDialog()
+
+            // minimize
+            case "miniaturize:":
+                writeToLog("minimizing windows")
+                if observedData.args.blurScreen.present {
+                    blurredScreen.hide()
+                }
+                NSApp.keyWindow?.setIsMiniaturized(true)
+
+            // deminimize
+            case "deminiaturize:":
+                writeToLog("deminimizing windows")
+                if observedData.args.blurScreen.present {
+                    blurredScreen.show()
+                }
+                // Find all minimized windows, ordered by recentness (0 is frontmost)
+                let minimizedWindows = NSApp.windows.filter { $0.isMiniaturized }
+                // Deminimize the first one found (most recent)
+                minimizedWindows.first?.deminiaturize(nil)
 
             // icon alpha
             case "\(observedData.args.iconAlpha.long):":
