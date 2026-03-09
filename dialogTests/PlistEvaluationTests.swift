@@ -413,6 +413,75 @@ final class PlistEvaluationTests: XCTestCase {
         XCTAssertTrue(changed, "Should detect change from nil to empty string")
     }
 
+    // MARK: - Bug Report: "equals" with state transition (not_installed → installed)
+
+    /// Reproduces the reported bug where expectedValue: "not_installed" with evaluation: "equals"
+    /// causes items to show as "failed" when the plist value changes to "installed".
+    /// The user's intent is to detect when installation completes, so expectedValue should be "installed".
+    func testEqualsEvaluation_StateTransition_NotInstalledToInstalled() {
+        // User's config: expectedValue = "not_installed", evaluation = "equals"
+        // This means: item is "installed" when plist value EQUALS "not_installed"
+        let expectedValue = "not_installed"
+
+        // Initial state: plist says "not_installed" — matches expectedValue
+        writePlist(["state": "not_installed"])
+        let initialValue = readPlistValue(key: "state")
+        XCTAssertEqual(initialValue, "not_installed")
+        let initialIsInstalled = initialValue == expectedValue
+        XCTAssertTrue(initialIsInstalled, "Item incorrectly shows as complete BEFORE installation")
+
+        // After installation: plist says "installed" — does NOT match expectedValue
+        writePlist(["state": "installed"])
+        let updatedValue = readPlistValue(key: "state")
+        XCTAssertEqual(updatedValue, "installed")
+        let updatedIsInstalled = updatedValue == expectedValue
+        XCTAssertFalse(updatedIsInstalled, "Item shows as NOT complete AFTER installation — config is backwards")
+    }
+
+    /// Shows the correct config: expectedValue: "installed" detects completion properly
+    func testEqualsEvaluation_CorrectConfig_DetectsInstallation() {
+        // Correct config: expectedValue = "installed", evaluation = "equals"
+        let expectedValue = "installed"
+
+        // Before installation: plist says "not_installed"
+        writePlist(["state": "not_installed"])
+        let initialValue = readPlistValue(key: "state")
+        let initialIsInstalled = initialValue == expectedValue
+        XCTAssertFalse(initialIsInstalled, "Item should not be complete before installation")
+
+        // After installation: plist says "installed"
+        writePlist(["state": "installed"])
+        let updatedValue = readPlistValue(key: "state")
+        let updatedIsInstalled = updatedValue == expectedValue
+        XCTAssertTrue(updatedIsInstalled, "Item should be complete after installation")
+    }
+
+    /// The "changed" evaluation is an alternative that detects ANY value change from baseline
+    func testChangedEvaluation_AlternativeForStateTransition() {
+        var baselines: [String: String?] = [:]
+        var initialized: Set<String> = []
+        let itemId = "companyportal"
+
+        // Initial state: record baseline
+        writePlist(["state": "not_installed"])
+        let initialValue = readPlistValue(key: "state")
+        baselines[itemId] = initialValue
+        initialized.insert(itemId)
+
+        // Same value: not yet installed
+        let sameValue = readPlistValue(key: "state")
+        let baseline1 = baselines[itemId] ?? nil
+        XCTAssertFalse(baseline1 != sameValue, "Should not trigger before value changes")
+
+        // After installation: value changed
+        writePlist(["state": "installed"])
+        let changedValue = readPlistValue(key: "state")
+        let baseline2 = baselines[itemId] ?? nil
+        XCTAssertTrue(baseline2 != changedValue, "Should detect state change from not_installed to installed")
+    }
+
+    // MARK: - Edge Cases (continued)
+
     func testChangedEvaluation_MultipleItemsIndependent() {
         var baselines: [String: String?] = [:]
         var initialized: Set<String> = []

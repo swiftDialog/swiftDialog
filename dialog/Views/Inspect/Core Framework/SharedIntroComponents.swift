@@ -22,6 +22,7 @@ struct IntroHeroImage: View {
     let sfSymbolColor: Color?
     let sfSymbolWeight: Font.Weight
     let basePath: String?
+    let padding: Double?            // nil = auto, 0 = none, >0 = explicit inset
 
     init(
         path: String,
@@ -30,7 +31,8 @@ struct IntroHeroImage: View {
         accentColor: Color = .blue,
         sfSymbolColor: Color? = nil,
         sfSymbolWeight: Font.Weight = .medium,
-        basePath: String? = nil
+        basePath: String? = nil,
+        padding: Double? = nil
     ) {
         self.path = path
         self.shape = shape
@@ -39,6 +41,14 @@ struct IntroHeroImage: View {
         self.sfSymbolColor = sfSymbolColor
         self.sfSymbolWeight = sfSymbolWeight
         self.basePath = basePath
+        self.padding = padding
+    }
+
+    /// Resolved padding: explicit value wins, SF symbols default to 0, images get proportional inset
+    private var effectivePadding: Double {
+        if let padding = padding { return padding }
+        if path.hasPrefix("SF=") { return 0 }
+        return size * 0.04
     }
 
     var body: some View {
@@ -52,33 +62,38 @@ struct IntroHeroImage: View {
                 imageFileView(path: path)
             }
         }
+        .frame(width: size, height: size)
         .modifier(ConditionalClipShape(shape: shape, size: size))
         .shadow(color: .black.opacity(0.1), radius: 10, y: 5)
     }
 
     @ViewBuilder
     private func sfSymbolView(symbolName: String) -> some View {
+        let contentSize = size - 2 * effectivePadding
         Image(systemName: symbolName)
             .resizable()
             .aspectRatio(contentMode: .fit)
-            .font(.system(size: size * 0.5, weight: sfSymbolWeight))
-            .frame(width: size, height: size)
+            .font(.system(size: contentSize * 0.5, weight: sfSymbolWeight))
+            .frame(width: contentSize, height: contentSize)
             .foregroundStyle(sfSymbolColor ?? accentColor)
     }
 
     @ViewBuilder
     private func imageFileView(path: String) -> some View {
+        let contentSize = size - 2 * effectivePadding
+        let usesFit = shape.lowercased() == "none"
         if let nsImage = loadImage(path: path) {
             Image(nsImage: nsImage)
                 .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: size, height: size)
+                .aspectRatio(contentMode: usesFit ? .fit : .fill)
+                .frame(width: max(contentSize, 10), height: max(contentSize, 10))
+                .clipped()
         } else {
             // Fallback placeholder
             Image(systemName: "photo")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(width: size, height: size)
+                .frame(width: max(contentSize, 10), height: max(contentSize, 10))
                 .foregroundStyle(.secondary)
         }
     }
@@ -195,6 +210,9 @@ struct IntroFooterView<PopoverContent: View>: View {
     let skipButtonText: String?
     let onSkip: (() -> Void)?
     let inspectConfig: InspectConfig?
+    let buttonControlSize: ControlSize
+    let footerVerticalPadding: CGFloat
+    let showDeferral: Bool
 
     @State private var showPopover: Bool = false
 
@@ -212,6 +230,9 @@ struct IntroFooterView<PopoverContent: View>: View {
         skipButtonText: String? = nil,
         onSkip: (() -> Void)? = nil,
         inspectConfig: InspectConfig? = nil,
+        buttonControlSize: ControlSize = .large,
+        footerVerticalPadding: CGFloat = 16,
+        showDeferral: Bool = true,
         @ViewBuilder popoverContent: @escaping () -> PopoverContent
     ) {
         self.footerText = footerText
@@ -228,6 +249,9 @@ struct IntroFooterView<PopoverContent: View>: View {
         self.skipButtonText = skipButtonText
         self.onSkip = onSkip
         self.inspectConfig = inspectConfig
+        self.buttonControlSize = buttonControlSize
+        self.footerVerticalPadding = footerVerticalPadding
+        self.showDeferral = showDeferral
     }
 
     var body: some View {
@@ -250,7 +274,9 @@ struct IntroFooterView<PopoverContent: View>: View {
                         .foregroundStyle(.primary)
                 }
 
-                // Popup button (e.g., "Install Details...")
+                Spacer()
+
+                // Popup button centered between logo and nav buttons
                 if let popupText = popupButtonText, let content = popoverContent {
                     Button(popupText) {
                         showPopover.toggle()
@@ -266,7 +292,7 @@ struct IntroFooterView<PopoverContent: View>: View {
                 Spacer()
 
                 // Deferral menu (right side, next to navigation buttons)
-                if isDeferralEnabled(config: inspectConfig) {
+                if showDeferral && isDeferralEnabled(config: inspectConfig) {
                     DeferralMenuView(
                         config: inspectConfig,
                         accentColor: accentColor,
@@ -276,29 +302,35 @@ struct IntroFooterView<PopoverContent: View>: View {
 
                 // Back button
                 if showBackButton, let onBack = onBack {
-                    Button(backButtonText, action: onBack)
-                        .buttonStyle(.bordered)
-                        .tint(accentColor)
-                        .controlSize(.large)
+                    Button(action: onBack) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundStyle(.secondary)
+                            .frame(width: 28, height: 28)
+                            .background(Circle().fill(.quaternary))
+                    }
+                    .buttonStyle(.plain)
+                    .help(backButtonText)
+                    .accessibilityLabel(backButtonText)
                 }
 
                 // Skip button (secondary action)
                 if let skipText = skipButtonText, let onSkip = onSkip {
                     Button(skipText, action: onSkip)
                         .buttonStyle(.bordered)
-                        .controlSize(.large)
+                        .controlSize(buttonControlSize)
                 }
 
                 // Continue button
                 Button(continueButtonText, action: onContinue)
                     .buttonStyle(.borderedProminent)
                     .tint(accentColor)
-                    .controlSize(.large)
+                    .controlSize(buttonControlSize)
                     .disabled(continueDisabled)
             }
         }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 16)
+        .padding(.horizontal, 20)
+        .padding(.vertical, footerVerticalPadding)
         .tint(accentColor)  // Ensure all buttons inherit tint
     }
 }
@@ -317,7 +349,10 @@ extension IntroFooterView where PopoverContent == EmptyView {
         footerLink: String? = nil,
         skipButtonText: String? = nil,
         onSkip: (() -> Void)? = nil,
-        inspectConfig: InspectConfig? = nil
+        inspectConfig: InspectConfig? = nil,
+        buttonControlSize: ControlSize = .large,
+        footerVerticalPadding: CGFloat = 16,
+        showDeferral: Bool = true
     ) {
         self.footerText = footerText
         self.backButtonText = backButtonText
@@ -333,6 +368,9 @@ extension IntroFooterView where PopoverContent == EmptyView {
         self.skipButtonText = skipButtonText
         self.onSkip = onSkip
         self.inspectConfig = inspectConfig
+        self.buttonControlSize = buttonControlSize
+        self.footerVerticalPadding = footerVerticalPadding
+        self.showDeferral = showDeferral
     }
 }
 
@@ -504,6 +542,9 @@ struct IntroStepContainer<Content: View>: View {
         let skipButtonText: String?
         let onSkip: (() -> Void)?
         let inspectConfig: InspectConfig?
+        let buttonControlSize: ControlSize
+        let footerVerticalPadding: CGFloat
+        let showDeferral: Bool
 
         init(
             footerText: String? = nil,
@@ -516,7 +557,10 @@ struct IntroStepContainer<Content: View>: View {
             footerLink: String? = nil,
             skipButtonText: String? = nil,
             onSkip: (() -> Void)? = nil,
-            inspectConfig: InspectConfig? = nil
+            inspectConfig: InspectConfig? = nil,
+            buttonControlSize: ControlSize = .large,
+            footerVerticalPadding: CGFloat = 16,
+            showDeferral: Bool = true
         ) {
             self.footerText = footerText
             self.backButtonText = backButtonText
@@ -529,6 +573,9 @@ struct IntroStepContainer<Content: View>: View {
             self.skipButtonText = skipButtonText
             self.onSkip = onSkip
             self.inspectConfig = inspectConfig
+            self.buttonControlSize = buttonControlSize
+            self.footerVerticalPadding = footerVerticalPadding
+            self.showDeferral = showDeferral
         }
     }
 
@@ -584,7 +631,10 @@ struct IntroStepContainer<Content: View>: View {
                 footerLink: footerConfig.footerLink,
                 skipButtonText: footerConfig.skipButtonText,
                 onSkip: footerConfig.onSkip,
-                inspectConfig: footerConfig.inspectConfig
+                inspectConfig: footerConfig.inspectConfig,
+                buttonControlSize: footerConfig.buttonControlSize,
+                footerVerticalPadding: footerConfig.footerVerticalPadding,
+                showDeferral: footerConfig.showDeferral
             )
         }
     }
@@ -609,6 +659,9 @@ extension IntroStepContainer.IntroFooterConfig {
         self.skipButtonText = nil
         self.onSkip = nil
         self.inspectConfig = nil
+        self.buttonControlSize = .large
+        self.footerVerticalPadding = 16
+        self.showDeferral = true
     }
 }
 
@@ -1427,6 +1480,7 @@ struct AssistantGridCell: View {
     let item: IntroGridItem
     let isSelected: Bool
     let basePath: String?
+    var accentColor: Color = .accentColor
     let onTap: () -> Void
 
     var body: some View {
@@ -1454,7 +1508,7 @@ struct AssistantGridCell: View {
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
                     .stroke(
-                        isSelected ? Color.accentColor : Color(NSColor.separatorColor).opacity(0.5),
+                        isSelected ? accentColor : Color(NSColor.separatorColor).opacity(0.5),
                         lineWidth: isSelected ? 3 : 1
                     )
             )
@@ -1476,10 +1530,10 @@ struct AssistantGridCell: View {
             Image(systemName: sfSymbol)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .foregroundStyle(Color.accentColor)
+                .foregroundStyle(accentColor)
                 .padding(24)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.accentColor.opacity(0.05))
+                .background(accentColor.opacity(0.05))
         } else {
             Color.gray.opacity(0.1)
         }
@@ -1493,6 +1547,7 @@ struct AssistantGridPicker: View {
     let selectionMode: String
     @Binding var selectedIds: Set<String>
     let basePath: String?
+    var accentColor: Color = .accentColor
 
     private var gridColumns: [GridItem] {
         Array(repeating: GridItem(.flexible(), spacing: 16), count: columns)
@@ -1505,6 +1560,7 @@ struct AssistantGridPicker: View {
                     item: item,
                     isSelected: selectedIds.contains(item.id),
                     basePath: basePath,
+                    accentColor: accentColor,
                     onTap: { toggleSelection(item.id) }
                 )
             }
@@ -1524,6 +1580,153 @@ struct AssistantGridPicker: View {
         default:
             break
         }
+    }
+}
+
+// MARK: - Scroll Hint Overlay
+
+/// Tracks content height inside a ScrollView and reports whether the content overflows.
+/// Use with `ScrollHintOverlay` to show a bottom fade + chevron cue.
+struct ScrollContentHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
+/// A subtle bottom fade gradient + chevron that appears when scrollable content
+/// overflows the visible area. Disappears once the user scrolls near the bottom.
+///
+/// Usage: wrap the ScrollView in a ZStack and overlay this view.
+struct ScrollHintOverlay: View {
+    let containerHeight: CGFloat
+    let contentHeight: CGFloat
+    let scrollOffset: CGFloat
+
+    private var contentOverflows: Bool {
+        contentHeight > containerHeight + 10
+    }
+
+    private var isNearBottom: Bool {
+        // scrollOffset is typically negative as you scroll down.
+        // Content is near bottom when: |offset| + containerHeight >= contentHeight - threshold
+        let scrolled = -scrollOffset
+        return scrolled + containerHeight >= contentHeight - 20
+    }
+
+    private var shouldShow: Bool {
+        contentOverflows && !isNearBottom
+    }
+
+    var body: some View {
+        if shouldShow {
+            VStack(spacing: 0) {
+                Spacer()
+                ZStack(alignment: .bottom) {
+                    LinearGradient(
+                        colors: [
+                            Color(NSColor.windowBackgroundColor).opacity(0),
+                            Color(NSColor.windowBackgroundColor).opacity(0.85),
+                            Color(NSColor.windowBackgroundColor)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: 48)
+
+                    Image(systemName: "chevron.compact.down")
+                        .font(.system(size: 20, weight: .light))
+                        .foregroundStyle(.secondary.opacity(0.6))
+                        .padding(.bottom, 6)
+                }
+            }
+            .allowsHitTesting(false)
+            .transition(.opacity)
+            .animation(.easeInOut(duration: 0.25), value: shouldShow)
+        }
+    }
+}
+
+/// Preference key for tracking vertical scroll offset within a named coordinate space.
+struct ScrollOffsetKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
+/// View modifier that adds scroll overflow detection + hint overlay to a ScrollView.
+/// Attach to a GeometryReader that wraps a ScrollView for automatic content overflow hints.
+struct ScrollHintModifier: ViewModifier {
+    let coordinateSpaceName: String
+    @State private var contentHeight: CGFloat = 0
+    @State private var scrollOffset: CGFloat = 0
+
+    func body(content: Content) -> some View {
+        GeometryReader { containerGeo in
+            ZStack(alignment: .bottom) {
+                content
+                    .environment(\.scrollHintCoordinateSpace, coordinateSpaceName)
+                    .environment(\.scrollHintContainerHeight, containerGeo.size.height)
+                    .onPreferenceChange(ScrollContentHeightKey.self) { height in
+                        contentHeight = height
+                    }
+                    .onPreferenceChange(ScrollOffsetKey.self) { offset in
+                        scrollOffset = offset
+                    }
+
+                ScrollHintOverlay(
+                    containerHeight: containerGeo.size.height,
+                    contentHeight: contentHeight,
+                    scrollOffset: scrollOffset
+                )
+            }
+        }
+    }
+}
+
+// Environment keys for passing scroll hint context to inner views
+private struct ScrollHintCoordinateSpaceKey: EnvironmentKey {
+    static let defaultValue: String = "scrollHint"
+}
+
+private struct ScrollHintContainerHeightKey: EnvironmentKey {
+    static let defaultValue: CGFloat = 0
+}
+
+extension EnvironmentValues {
+    var scrollHintCoordinateSpace: String {
+        get { self[ScrollHintCoordinateSpaceKey.self] }
+        set { self[ScrollHintCoordinateSpaceKey.self] = newValue }
+    }
+
+    var scrollHintContainerHeight: CGFloat {
+        get { self[ScrollHintContainerHeightKey.self] }
+        set { self[ScrollHintContainerHeightKey.self] = newValue }
+    }
+}
+
+/// View extension to easily add scroll tracking to a ScrollView's inner content VStack.
+extension View {
+    /// Reports content height and scroll offset for scroll hint overlay detection.
+    /// Place this on the VStack inside a ScrollView that uses `.scrollHintOverlay()`.
+    func trackScrollForHint(coordinateSpace: String = "scrollHint") -> some View {
+        self
+            .background(GeometryReader { innerGeo in
+                Color.clear
+                    .preference(key: ScrollContentHeightKey.self, value: innerGeo.size.height)
+            })
+            .background(GeometryReader { innerGeo in
+                Color.clear
+                    .preference(key: ScrollOffsetKey.self,
+                                value: innerGeo.frame(in: .named(coordinateSpace)).minY)
+            })
+    }
+
+    /// Adds a scroll hint overlay that shows a bottom fade + chevron when content overflows.
+    /// Use together with `.trackScrollForHint()` on the inner content.
+    func scrollHintOverlay(coordinateSpace: String = "scrollHint") -> some View {
+        self.modifier(ScrollHintModifier(coordinateSpaceName: coordinateSpace))
     }
 }
 

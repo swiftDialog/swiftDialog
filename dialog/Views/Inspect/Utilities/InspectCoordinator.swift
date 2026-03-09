@@ -165,7 +165,8 @@ class InspectStateCoordinator: ObservableObject {
         // Start monitoring service
         monitoringService.startMonitoring(
             items: items,
-            cachePaths: config.cachePaths ?? []
+            cachePaths: config.cachePaths ?? [],
+            cacheExtensions: config.resolvedCacheExtensions
         )
 
         // Simulate downloading state for pending items

@@ -34,6 +34,7 @@ class FileMonitor {
     private var fsEventStream: FSEventStreamRef?
     private var monitoredItems: [InspectConfig.ItemConfig] = []
     private var cachePaths: [String] = []
+    private var cacheExtensions: [String] = [".download", ".pkg", ".dmg"]
     private var eventDebouncer = EventDebouncer()
     private var pathToItemMap: [String: String] = [:] // path -> itemId mapping
 
@@ -49,9 +50,10 @@ class FileMonitor {
 
     // MARK: - Public Interface
 
-    func startMonitoring(items: [InspectConfig.ItemConfig], cachePaths: [String]) {
+    func startMonitoring(items: [InspectConfig.ItemConfig], cachePaths: [String], cacheExtensions: [String]? = nil) {
         self.monitoredItems = items
         self.cachePaths = cachePaths
+        self.cacheExtensions = cacheExtensions ?? [".download", ".pkg", ".dmg"]
 
         buildPathMappings()
         setupFSEvents()
@@ -399,22 +401,14 @@ class FileMonitor {
     
     private func isCacheFile(_ path: String) -> Bool {
         let lowercasePath = path.lowercased()
-        return lowercasePath.hasSuffix(".pkg") ||
-               lowercasePath.hasSuffix(".dmg") ||
-               lowercasePath.hasSuffix(".download") ||
-               lowercasePath.hasSuffix(".zip") ||
-               lowercasePath.hasSuffix(".app") ||
+        return cacheExtensions.contains { lowercasePath.hasSuffix($0) } ||
                lowercasePath.contains(".partial") ||
                lowercasePath.contains(".tmp")
     }
 
     private func isDownloadFile(_ filename: String) -> Bool {
         let lowercased = filename.lowercased()
-        return lowercased.hasSuffix(".download") ||
-               lowercased.hasSuffix(".pkg") ||
-               lowercased.hasSuffix(".dmg") ||
-               lowercased.hasSuffix(".zip") ||
-               lowercased.hasSuffix(".app") ||
+        return cacheExtensions.contains { lowercased.hasSuffix($0) } ||
                lowercased.contains("installer") ||
                lowercased.contains("setup") ||
                lowercased.contains(".partial") ||

@@ -77,6 +77,7 @@ struct InspectConfig: Codable {
     let size: String?  // Refactored into preset-specific sizing- we use "compact", "standard", or "large" -> see InspectSizes.swift
     let scanInterval: Int?
     let cachePaths: [String]?
+    let cacheExtensions: [String]?
     let sideMessage: [String]?
     let sideInterval: Int?
     let style: String?
@@ -115,6 +116,7 @@ struct InspectConfig: Codable {
     let imageRotationInterval: Double?      // set interval for auto-rotation
     let imageShape: String?                  // rectangle, square, circle - used in preset6
     let imageSyncMode: String?              // "manual" | "sync" | "auto"
+    let backButtonStyle: String?             // "inline" (inside scroll, default) | "footer" (in footer bar)
     let stepStyle: String?                  // "plain" | "colored" | "cards"
     let listIndicatorStyle: String?         // "letters" | "numbers" | "roman" - list indicator format
     let progressMode: String?                // "shared" (single bar, X of Y) | "perItem" (indeterminate per item) — Preset4 toast installer
@@ -175,6 +177,15 @@ struct InspectConfig: Codable {
     let summaryScreen: PresetSummaryScreen? // Optional summary screen after items complete (Preset1/2 only)
 
     var items: [ItemConfig]
+
+    /// Resolved cache file extensions with dot prefix, e.g. [".download", ".pkg", ".dmg"]
+    /// Uses `cacheExtensions` from config if provided, otherwise defaults to ["download", "pkg", "dmg"]
+    var resolvedCacheExtensions: [String] {
+        let extensions = cacheExtensions ?? ["download", "pkg", "dmg"]
+        return extensions.map { ext in
+            ext.hasPrefix(".") ? ext.lowercased() : ".\(ext.lowercased())"
+        }
+    }
 
     // Progress bar configuration for status visualization
     struct ProgressBarConfig: Codable {
@@ -241,6 +252,7 @@ struct InspectConfig: Codable {
     struct IntroLayoutConfig: Codable {
         let heroImageShape: String?             // "circle" (default) | "roundedSquare" | "square"
         let heroImageSize: Double?              // Size in points (default: 200)
+        let heroImagePadding: Double?           // Inset padding in points (nil = auto ~4%, 0 = none)
         let logoImage: String?                  // Bottom branding logo path
         let logoPosition: String?               // "bottomLeft" (default) | "bottomRight"
         let logoMaxWidth: Double?               // Maximum logo width in points (default: 120)
@@ -331,6 +343,7 @@ struct InspectConfig: Codable {
         let heroImageSize: Double?              // Default: 200
         let heroImageSFSymbolColor: String?     // Hex color for SF Symbol (defaults to accentColor)
         let heroImageSFSymbolWeight: String?    // "regular" | "medium" | "bold" (default: "medium")
+        let heroImagePadding: Double?           // Inset padding in points (nil = auto ~4%, 0 = none)
 
         // Content
         let title: String?
@@ -366,6 +379,7 @@ struct InspectConfig: Codable {
         let progressPosition: String?           // "bottom" | "top" (default: "bottom")
 
         // Button Configuration
+        let actionButtonText: String?           // Custom button text during processing (e.g., "Processing…", "Installing…")
         let continueButtonText: String?         // Default: "Continue"
         let backButtonText: String?             // Default: "Back"
         let showBackButton: Bool?               // Default: true (except first step)
@@ -859,7 +873,7 @@ struct InspectConfig: Codable {
         let id: String?                 // Unique identifier for storing user input
         let required: Bool?             // Whether this input is required for step completion
         let options: [String]?          // Options for dropdown/radio selections
-        let value: String?              // Default/current value (for checkbox, toggle, dropdown, radio) or numeric value as string for slider
+        var value: String?              // Default/current value (for checkbox, toggle, dropdown, radio) or numeric value as string for slider
         var helpText: String?           // Optional help text displayed in info popover (i icon)
 
         // Slider-specific fields (for type="slider")
@@ -1588,6 +1602,7 @@ struct InspectConfig: Codable {
         try container.encodeIfPresent(size, forKey: .size)
         try container.encodeIfPresent(scanInterval, forKey: .scanInterval)
         try container.encodeIfPresent(cachePaths, forKey: .cachePaths)
+        try container.encodeIfPresent(cacheExtensions, forKey: .cacheExtensions)
         try container.encodeIfPresent(sideMessage, forKey: .sideMessage)
         try container.encodeIfPresent(sideInterval, forKey: .sideInterval)
         try container.encodeIfPresent(style, forKey: .style)
@@ -1625,6 +1640,7 @@ struct InspectConfig: Codable {
         try container.encodeIfPresent(imageRotationInterval, forKey: .imageRotationInterval)
         try container.encodeIfPresent(imageShape, forKey: .imageShape)
         try container.encodeIfPresent(imageSyncMode, forKey: .imageSyncMode)
+        try container.encodeIfPresent(backButtonStyle, forKey: .backButtonStyle)
         try container.encodeIfPresent(stepStyle, forKey: .stepStyle)
         try container.encodeIfPresent(listIndicatorStyle, forKey: .listIndicatorStyle)
         try container.encodeIfPresent(progressBarConfig, forKey: .progressBarConfig)
@@ -1678,6 +1694,7 @@ struct InspectConfig: Codable {
         size = try container.decodeIfPresent(String.self, forKey: .size)
         scanInterval = try container.decodeIfPresent(Int.self, forKey: .scanInterval)
         cachePaths = try container.decodeIfPresent([String].self, forKey: .cachePaths)
+        cacheExtensions = try container.decodeIfPresent([String].self, forKey: .cacheExtensions)
         sideMessage = try container.decodeIfPresent([String].self, forKey: .sideMessage)
         sideInterval = try container.decodeIfPresent(Int.self, forKey: .sideInterval)
         style = try container.decodeIfPresent(String.self, forKey: .style)
@@ -1736,6 +1753,7 @@ struct InspectConfig: Codable {
         imageRotationInterval = try container.decodeIfPresent(Double.self, forKey: .imageRotationInterval)
         imageShape = try container.decodeIfPresent(String.self, forKey: .imageShape)
         imageSyncMode = try container.decodeIfPresent(String.self, forKey: .imageSyncMode)
+        backButtonStyle = try container.decodeIfPresent(String.self, forKey: .backButtonStyle)
         stepStyle = try container.decodeIfPresent(String.self, forKey: .stepStyle)
         listIndicatorStyle = try container.decodeIfPresent(String.self, forKey: .listIndicatorStyle)
         progressMode = try container.decodeIfPresent(String.self, forKey: .progressMode)
@@ -1797,7 +1815,7 @@ struct InspectConfig: Codable {
 
     private enum CodingKeys: String, CodingKey {
         case title, message, infobox, icon, iconsize, banner, bannerHeight, bannerTitle
-        case width, height, size, scanInterval, cachePaths
+        case width, height, size, scanInterval, cachePaths, cacheExtensions
         case sideMessage, sideInterval, style, liststyle, preset, popupButton
         case highlightColor, secondaryColor, backgroundColor, backgroundImage, backgroundOpacity
         case textOverlayColor, gradientColors
@@ -1821,7 +1839,7 @@ struct InspectConfig: Codable {
         // Intro/outro screens
         case introSteps
         // Preset6 specific properties
-        case iconBasePath, overlayicon, rotatingImages, imageRotationInterval, imageShape, imageSyncMode, stepStyle, listIndicatorStyle
+        case iconBasePath, overlayicon, rotatingImages, imageRotationInterval, imageShape, imageSyncMode, backButtonStyle, stepStyle, listIndicatorStyle
         // Progress mode (Preset4 toast installer)
         case progressMode
         // Progress bar configuration

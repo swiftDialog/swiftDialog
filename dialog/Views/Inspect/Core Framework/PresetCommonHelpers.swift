@@ -201,6 +201,7 @@ struct PresetSizing {
         switch sizeMode {
         case "compact": return 0.85
         case "large": return 1.15
+        case "setup": return 0.80  // Apple Setup Assistant (800×600)
         default: return 1.0  // standard
         }
     }

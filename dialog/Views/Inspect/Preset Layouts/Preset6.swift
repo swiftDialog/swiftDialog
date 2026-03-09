@@ -27,6 +27,10 @@ struct Preset6State: InspectPersistableState {
     let timestamp: Date
 }
 
+// MARK: - Navigation Direction
+
+private enum NavigationDirection { case forward, backward }
+
 // MARK: - Preset6 View
 
 struct Preset6View: View, InspectLayoutProtocol {
@@ -44,6 +48,7 @@ struct Preset6View: View, InspectLayoutProtocol {
     @State private var completedSteps: Set<String> = []
     @State private var downloadingItems: Set<String> = []
     @State private var currentStep: Int = 0
+    @State private var navigationDirection: NavigationDirection = .forward
     @State private var processingState: InspectProcessingState = .idle
     @State private var processingCountdown: Int = 0
     @State private var processingTimer: Timer?
@@ -56,7 +61,7 @@ struct Preset6View: View, InspectLayoutProtocol {
     // File monitoring
     @State private var fileMonitorSource: DispatchSourceFileSystemObject?
     @State private var commandFileMonitorTimer: Timer?
-    @State private var lastProcessedCommandContent: String = ""
+    @State private var lastProcessedLineCount: Int = 0  // Line-offset tracking for trigger file (never clear, only advance)
 
     // Auto-navigation
     @State private var autoNavigationWorkItem: DispatchWorkItem?
@@ -68,6 +73,10 @@ struct Preset6View: View, InspectLayoutProtocol {
 
     // Override dialog
     @State private var showOverrideDialog: Bool = false
+
+    // Scroll hint overlay state (tracks content overflow for bottom fade indicator)
+    @State private var contentPanelContentHeight: CGFloat = 0
+    @State private var contentPanelScrollOffset: CGFloat = 0
 
     // Persistence
     private let persistenceService = InspectPersistence<Preset6State>(presetName: "preset6")
@@ -170,10 +179,11 @@ struct Preset6View: View, InspectLayoutProtocol {
         return .accentColor
     }
 
-    /// Sidebar width from config (using default as property isn't in InspectConfig)
-    private var sidebarWidth: CGFloat {
-        220  // Wider to avoid truncating step names like "Enrollment Status"
-    }
+    /// Fixed sidebar width — sized to avoid truncating step names like "Enrollment Status".
+    /// This value is added to Preset5-equivalent content width to determine window size (see InspectSizes).
+    private static let sidebarWidthConstant: CGFloat = 220
+
+    private var sidebarWidth: CGFloat { Self.sidebarWidthConstant }
 
     /// Show step numbers in sidebar (default true)
     private var showStepNumbers: Bool {
@@ -296,6 +306,7 @@ struct Preset6View: View, InspectLayoutProtocol {
                     logoConfig: logoConfig,
                     basePath: inspectState.uiConfiguration.iconBasePath
                 )
+                .transaction { $0.animation = nil }
             }
         }
         .environment(\.palette, ResolvedPalette(from: inspectState.config?.brandPalette, primaryColor: branding.primaryColor))
@@ -429,6 +440,9 @@ struct Preset6View: View, InspectLayoutProtocol {
                     accentColor: highlightColor,
                     logoPath: nil,  // Logo in footer instead
                     title: inspectState.uiConfiguration.windowTitle,
+                    subtitle: inspectState.uiConfiguration.subtitleMessage,
+                    iconPath: inspectState.uiConfiguration.iconPath,
+                    iconBasePath: inspectState.uiConfiguration.iconBasePath,
                     showStepNumbers: showStepNumbers,
                     showCompletionMarks: showCompletionMarks,
                     width: sidebarWidth,
@@ -436,15 +450,17 @@ struct Preset6View: View, InspectLayoutProtocol {
                     onStepSelected: handleStepSelection,
                     isNavigationBlocked: shouldBlockNavigation
                 )
+                .zIndex(1)
 
                 // Divider
                 Rectangle()
                     .fill(Color.secondary.opacity(0.2))
                     .frame(width: 1)
 
-                // Right: Content panel
+                // Right: Content panel (clipped so slide transitions don't bleed under sidebar)
                 contentPanel
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .clipped()
             }
 
             // Footer bar
@@ -458,50 +474,74 @@ struct Preset6View: View, InspectLayoutProtocol {
     private var contentPanel: some View {
         VStack(spacing: 0) {
             if let currentItem = inspectState.items[safe: currentStep] {
-                // Content area
-                ScrollView(.vertical, showsIndicators: true) {
-                    VStack(alignment: .leading, spacing: 16 * scaleFactor) {
-                        // Step heading
-                        stepHeading(for: currentItem)
+                // Content area with scroll hint overlay for long-form steps
+                GeometryReader { contentGeo in
+                    ZStack(alignment: .bottom) {
+                        ScrollView(.vertical, showsIndicators: true) {
+                            let sp = InspectSizes.SetupSpacing.self
+                            VStack(alignment: .leading, spacing: sp.sectionGap) {
+                                // Step heading
+                                stepHeading(for: currentItem)
 
-                        // Guidance content blocks
-                        if let guidanceContent = currentItem.guidanceContent, !guidanceContent.isEmpty {
-                            // Apply localization then dynamic content updates to guidance blocks
-                            let updatedContent = guidanceContent.enumerated().map { index, block in
-                                let locBlock = localizedContentBlock(block, itemId: currentItem.id, blockIndex: index)
-                                return applyDynamicUpdates(to: locBlock, index: index, itemId: currentItem.id)
+                                // Guidance content blocks
+                                if let guidanceContent = currentItem.guidanceContent, !guidanceContent.isEmpty {
+                                    // Apply localization then dynamic content updates to guidance blocks
+                                    let updatedContent = guidanceContent.enumerated().map { index, block in
+                                        let locBlock = localizedContentBlock(block, itemId: currentItem.id, blockIndex: index)
+                                        return applyDynamicUpdates(to: locBlock, index: index, itemId: currentItem.id)
+                                    }
+
+                                    GuidanceContentView(
+                                        contentBlocks: updatedContent,
+                                        scaleFactor: scaleFactor,
+                                        iconBasePath: inspectState.uiConfiguration.iconBasePath,
+                                        inspectState: inspectState,
+                                        itemId: currentItem.id,
+                                        onOverlayTap: currentItem.itemOverlay != nil ? {
+                                            selectedItemForDetail = currentItem
+                                            showItemDetailOverlay = true
+                                        } : nil,
+                                        accentColor: highlightColor
+                                    )
+                                    // Force re-render when dynamic properties change for this item
+                                    .id("guidance-\(currentItem.id)-\(dynamicState.dynamicGuidanceProperties[currentItem.id]?.hashValue ?? 0)")
+                                } else {
+                                    // Fallback for items without guidanceContent
+                                    fallbackContentView(for: currentItem)
+                                }
+
+                                // Processing state display
+                                if isProcessing && processingState.stepId == currentItem.id {
+                                    processingStateView(for: currentItem)
+                                }
+
+                                // Success/Failure banner
+                                resultBanner(for: currentItem)
                             }
-
-                            GuidanceContentView(
-                                contentBlocks: updatedContent,
-                                scaleFactor: scaleFactor,
-                                iconBasePath: inspectState.uiConfiguration.iconBasePath,
-                                inspectState: inspectState,
-                                itemId: currentItem.id,
-                                onOverlayTap: currentItem.itemOverlay != nil ? {
-                                    selectedItemForDetail = currentItem
-                                    showItemDetailOverlay = true
-                                } : nil,
-                                accentColor: highlightColor
-                            )
-                            // Force re-render when dynamic properties change for this item
-                            .id("guidance-\(currentItem.id)-\(dynamicState.dynamicGuidanceProperties[currentItem.id]?.hashValue ?? 0)")
-                        } else {
-                            // Fallback for items without guidanceContent
-                            fallbackContentView(for: currentItem)
+                            .frame(maxWidth: 420, alignment: .leading)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.horizontal, sp.contentPadH)
+                            .padding(.vertical, sp.sectionGap)
+                            .trackScrollForHint(coordinateSpace: "preset6Content")
                         }
+                        .coordinateSpace(name: "preset6Content")
 
-                        // Processing state display
-                        if isProcessing && processingState.stepId == currentItem.id {
-                            processingStateView(for: currentItem)
-                        }
-
-                        // Success/Failure banner
-                        resultBanner(for: currentItem)
+                        ScrollHintOverlay(
+                            containerHeight: contentGeo.size.height,
+                            contentHeight: contentPanelContentHeight,
+                            scrollOffset: contentPanelScrollOffset
+                        )
                     }
-                    .padding(.horizontal, 24 * scaleFactor)
-                    .padding(.vertical, 20 * scaleFactor)
+                    .onPreferenceChange(ScrollContentHeightKey.self) { contentPanelContentHeight = $0 }
+                    .onPreferenceChange(ScrollOffsetKey.self) { contentPanelScrollOffset = $0 }
                 }
+                .id(currentStep)
+                .transition(.asymmetric(
+                    insertion: .move(edge: navigationDirection == .forward ? .trailing : .leading)
+                               .combined(with: .opacity),
+                    removal:   .move(edge: navigationDirection == .forward ? .leading : .trailing)
+                               .combined(with: .opacity)
+                ))
             } else {
                 // Completion state
                 completionView
@@ -510,11 +550,44 @@ struct Preset6View: View, InspectLayoutProtocol {
         .background(Color(NSColor.windowBackgroundColor))
     }
 
+    // MARK: - Inline Back Button
+
+    /// Whether to show the back button inline (inside scroll, above heading) vs in the footer bar.
+    /// Controlled by config `backButtonStyle`: "inline" (default) or "footer".
+    private var useInlineBackButton: Bool {
+        let style = inspectState.config?.backButtonStyle ?? "inline"
+        return style == "inline"
+    }
+
+    @ViewBuilder
+    private var inlineBackButton: some View {
+        let backText: String = {
+            if let item = inspectState.items[safe: currentStep],
+               let loc = localized("backButtonText", forItem: item, fallback: nil) { return loc }
+            return branding.button2Text ?? "Back"
+        }()
+
+        HStack {
+            Button(action: { goToPreviousStep() }) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 26, height: 26)
+                    .background(Circle().fill(.quaternary))
+            }
+            .buttonStyle(.plain)
+            .help(backText)
+            .accessibilityLabel(backText)
+
+            Spacer()
+        }
+    }
+
     // MARK: - Step Heading
 
     @ViewBuilder
     private func stepHeading(for item: InspectConfig.ItemConfig) -> some View {
-        VStack(alignment: .leading, spacing: 8 * scaleFactor) {
+        VStack(alignment: .leading, spacing: InspectSizes.SetupSpacing.titleSubtitle) {
             HStack(spacing: 8) {
                 if let guidanceTitle = localized("guidanceTitle", forItem: item, fallback: item.guidanceTitle) {
                     Text(guidanceTitle)
@@ -548,7 +621,7 @@ struct Preset6View: View, InspectLayoutProtocol {
                 statusBadge(completed: true, failed: failedSteps[item.id] != nil)
             }
         }
-        .padding(.bottom, 8 * scaleFactor)
+        .padding(.bottom, InspectSizes.SetupSpacing.titleSubtitle)
     }
 
     @ViewBuilder
@@ -573,7 +646,7 @@ struct Preset6View: View, InspectLayoutProtocol {
 
     @ViewBuilder
     private func fallbackContentView(for item: InspectConfig.ItemConfig) -> some View {
-        VStack(alignment: .leading, spacing: 16 * scaleFactor) {
+        VStack(alignment: .leading, spacing: InspectSizes.SetupSpacing.sectionGap) {
             // Icon
             if let icon = item.icon {
                 IntroHeroImage(
@@ -598,7 +671,7 @@ struct Preset6View: View, InspectLayoutProtocol {
 
     @ViewBuilder
     private func processingStateView(for item: InspectConfig.ItemConfig) -> some View {
-        VStack(spacing: 16 * scaleFactor) {
+        VStack(spacing: InspectSizes.SetupSpacing.sectionGap) {
             // Countdown or spinner
             if case .countdown(_, let remaining, _) = processingState {
                 countdownRing(remaining: remaining, total: item.processingDuration ?? 5)
@@ -638,7 +711,7 @@ struct Preset6View: View, InspectLayoutProtocol {
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 16 * scaleFactor)
+        .padding(.vertical, InspectSizes.SetupSpacing.topInset)
     }
 
     @ViewBuilder
@@ -666,8 +739,8 @@ struct Preset6View: View, InspectLayoutProtocol {
         let isLarge = currentOverrideLevel == .large
         let waitTime = processingState.waitElapsed
 
-        VStack(spacing: 12 * scaleFactor) {
-            HStack(spacing: 8 * scaleFactor) {
+        VStack(spacing: InspectSizes.SetupSpacing.blockGap) {
+            HStack(spacing: InspectSizes.SetupSpacing.titleSubtitle) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(.orange)
 
@@ -695,7 +768,7 @@ struct Preset6View: View, InspectLayoutProtocol {
             }
             .buttonStyle(.plain)
         }
-        .padding(12 * scaleFactor)
+        .padding(InspectSizes.SetupSpacing.blockGap)
         .background(palette.warningBackground)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(
@@ -713,9 +786,10 @@ struct Preset6View: View, InspectLayoutProtocol {
         let wasSkipped = skippedSteps.contains(item.id)
 
         if isCompleted && !isProcessing {
+            let sp = InspectSizes.SetupSpacing.self
             if hasFailed {
                 // Failure banner
-                HStack(spacing: 12 * scaleFactor) {
+                HStack(spacing: sp.blockGap) {
                     StatusIconView(.failure, size: 20 * scaleFactor)
 
                     VStack(alignment: .leading, spacing: 4) {
@@ -731,7 +805,7 @@ struct Preset6View: View, InspectLayoutProtocol {
 
                     Spacer()
                 }
-                .padding(12 * scaleFactor)
+                .padding(sp.blockGap)
                 .background(palette.errorBackground)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(
@@ -740,7 +814,7 @@ struct Preset6View: View, InspectLayoutProtocol {
                 )
             } else if wasSkipped {
                 // Skipped banner
-                HStack(spacing: 12 * scaleFactor) {
+                HStack(spacing: sp.blockGap) {
                     StatusIconView(.warning, size: 20 * scaleFactor)
 
                     Text("Step Skipped")
@@ -748,12 +822,12 @@ struct Preset6View: View, InspectLayoutProtocol {
 
                     Spacer()
                 }
-                .padding(12 * scaleFactor)
+                .padding(sp.blockGap)
                 .background(palette.warningBackground)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
             } else if let successMessage = item.successMessage {
                 // Success banner
-                HStack(spacing: 12 * scaleFactor) {
+                HStack(spacing: sp.blockGap) {
                     StatusIconView(.success, size: 20 * scaleFactor)
 
                     Text(successMessage)
@@ -761,7 +835,7 @@ struct Preset6View: View, InspectLayoutProtocol {
 
                     Spacer()
                 }
-                .padding(12 * scaleFactor)
+                .padding(sp.blockGap)
                 .background(palette.successBackground)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
             }
@@ -772,7 +846,7 @@ struct Preset6View: View, InspectLayoutProtocol {
 
     @ViewBuilder
     private var completionView: some View {
-        VStack(spacing: 20 * scaleFactor) {
+        VStack(spacing: InspectSizes.SetupSpacing.sectionGap) {
             Spacer()
 
             StatusIconView(.success, size: 60 * scaleFactor)
@@ -781,7 +855,7 @@ struct Preset6View: View, InspectLayoutProtocol {
                 .font(.system(size: 24, weight: .bold))
 
             Text(inspectState.config?.uiLabels?.completionSubtitle ?? "Your setup is now complete!")
-                .font(.title3)
+                .font(.system(size: 13))
                 .foregroundStyle(.secondary)
 
             Spacer()
@@ -793,18 +867,28 @@ struct Preset6View: View, InspectLayoutProtocol {
 
     @ViewBuilder
     private var footerBar: some View {
-        HStack(spacing: 12) {
-            // Footer text only (logo is now a persistent BrandedLogoView overlay)
-            if let text = branding.footerText {
-                Text(text)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.leading, 20)
-            }
+        let backText: String = {
+            if let item = inspectState.items[safe: currentStep],
+               let loc = localized("backButtonText", forItem: item, fallback: nil) { return loc }
+            return branding.button2Text ?? "Back"
+        }()
 
-            Spacer()
-
-            // Step counter with Option-click reset (centered area)
+        IntroFooterView(
+            footerText: branding.footerText,
+            backButtonText: backText,
+            continueButtonText: getContinueButtonText(),
+            accentColor: highlightColor,
+            showBackButton: canGoBack,
+            onBack: goToPreviousStep,
+            onContinue: handleContinue,
+            continueDisabled: isContinueDisabled,
+            inspectConfig: inspectState.config,
+            buttonControlSize: .large,
+            footerVerticalPadding: 16
+        )
+        .background(Color(NSColor.windowBackgroundColor))
+        .overlay(alignment: .center) {
+            // Step counter with Option-click reset
             Text("Step \(currentStep + 1) of \(inspectState.items.count)")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
@@ -814,34 +898,8 @@ struct Preset6View: View, InspectLayoutProtocol {
                     }
                 }
                 .help("Option-click to reset progress")
-
-            Spacer()
-
-            // Buttons
-            HStack(spacing: 12) {
-                if canGoBack {
-                    let backText: String = {
-                        if let item = inspectState.items[safe: currentStep],
-                           let loc = localized("backButtonText", forItem: item, fallback: nil) { return loc }
-                        return branding.button2Text ?? "Back"
-                    }()
-                    Button(backText) {
-                        goToPreviousStep()
-                    }
-                    .buttonStyle(.bordered)
-                }
-
-                Button(getContinueButtonText()) {
-                    handleContinue()
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(highlightColor)
-                .disabled(isContinueDisabled)
-            }
-            .padding(.trailing, 20)
         }
-        .padding(.vertical, 12)
-        .background(Color(NSColor.windowBackgroundColor))
+        .transaction { $0.animation = nil } // Prevent footer from springing during step transitions
     }
 
     // MARK: - Button Logic
@@ -934,48 +992,56 @@ struct Preset6View: View, InspectLayoutProtocol {
                 }
             )
         ) {
-            VStack(spacing: 24) {
-                Spacer()
+            GeometryReader { geometry in
+                ScrollView {
+                    VStack(spacing: 24) {
+                        Spacer(minLength: 0)
 
-                // Hero image
-                if let iconPath = item?.icon {
-                    IntroHeroImage(
-                        path: iconPath,
-                        shape: "none",
-                        size: layoutConfig?.heroImageSize ?? 180,
-                        accentColor: highlightColor
-                    )
-                    .padding(.bottom, 8)
-                }
+                        // Hero image
+                        if let iconPath = item?.icon {
+                            let proportionalSize = min(max(geometry.size.height * 0.28, 100), 180)
+                            IntroHeroImage(
+                                path: iconPath,
+                                shape: "none",
+                                size: layoutConfig?.heroImageSize ?? proportionalSize,
+                                accentColor: highlightColor,
+                                padding: layoutConfig?.heroImagePadding
+                            )
+                            .padding(.bottom, InspectSizes.SetupSpacing.titleSubtitle)
+                        }
 
-                // Title
-                if let title = item.flatMap({ localized("guidanceTitle", forItem: $0, fallback: $0.guidanceTitle) }) ?? item?.guidanceTitle {
-                    Text(title)
-                        .font(.system(size: 28, weight: .bold))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 40)
-                }
+                        // Title
+                        if let title = item.flatMap({ localized("guidanceTitle", forItem: $0, fallback: $0.guidanceTitle) }) ?? item?.guidanceTitle {
+                            Text(title)
+                                .font(.system(size: 28, weight: .bold))
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, InspectSizes.SetupSpacing.contentPadH)
+                        }
 
-                // Content blocks (delegate all types to GuidanceContentView)
-                if let content = item?.guidanceContent, !content.isEmpty {
-                    let itemId = item?.id ?? "intro"
-                    let localizedBlocks = content.enumerated().map { index, block in
-                        localizedContentBlock(block, itemId: itemId, blockIndex: index)
+                        // Content blocks (delegate all types to GuidanceContentView)
+                        if let content = item?.guidanceContent, !content.isEmpty {
+                            let itemId = item?.id ?? "intro"
+                            let localizedBlocks = content.enumerated().map { index, block in
+                                localizedContentBlock(block, itemId: itemId, blockIndex: index)
+                            }
+                            GuidanceContentView(
+                                contentBlocks: localizedBlocks,
+                                scaleFactor: scaleFactor,
+                                iconBasePath: inspectState.uiConfiguration.iconBasePath,
+                                inspectState: inspectState,
+                                itemId: itemId,
+                                accentColor: highlightColor,
+                                contentAlignment: .center
+                            )
+                            .frame(maxWidth: InspectSizes.SetupSpacing.contentMaxW)
+                            .padding(.horizontal, InspectSizes.SetupSpacing.contentPadH)
+                        }
+
+                        Spacer(minLength: 0)
                     }
-                    GuidanceContentView(
-                        contentBlocks: localizedBlocks,
-                        scaleFactor: scaleFactor,
-                        iconBasePath: inspectState.uiConfiguration.iconBasePath,
-                        inspectState: inspectState,
-                        itemId: itemId,
-                        accentColor: highlightColor,
-                        contentAlignment: .center
-                    )
-                    .frame(maxWidth: 420)
-                    .padding(.horizontal, 40)
+                    .frame(maxWidth: .infinity, minHeight: geometry.size.height)
                 }
-
-                Spacer()
+                .scrollIndicators(.automatic)
             }
         }
     }
@@ -1002,7 +1068,8 @@ struct Preset6View: View, InspectLayoutProtocol {
             return
         }
 
-        withAnimation(.easeInOut(duration: 0.3)) {
+        navigationDirection = index > currentStep ? .forward : .backward
+        withAnimation(InspectConstants.stepTransition) {
             currentStep = index
         }
 
@@ -1036,7 +1103,8 @@ struct Preset6View: View, InspectLayoutProtocol {
         guard currentStep < inspectState.items.count - 1 else { return }
 
         let oldStep = currentStep
-        withAnimation(.easeInOut(duration: 0.3)) {
+        navigationDirection = .forward
+        withAnimation(InspectConstants.stepTransition) {
             currentStep += 1
         }
 
@@ -1120,7 +1188,8 @@ struct Preset6View: View, InspectLayoutProtocol {
         guard canGoBack else { return }
 
         let oldStep = currentStep
-        withAnimation(.easeInOut(duration: 0.3)) {
+        navigationDirection = .backward
+        withAnimation(InspectConstants.stepTransition) {
             currentStep -= 1
         }
 
@@ -1168,10 +1237,10 @@ struct Preset6View: View, InspectLayoutProtocol {
         // Clear persistence
         persistenceService.clearState()
 
-        // Clear trigger file
+        // Reset trigger file line offset (truncate file and reset counter together)
         if FileManager.default.fileExists(atPath: triggerFilePath) {
-            // Truncate instead of delete so DispatchSource file descriptor stays valid
             try? "".write(toFile: triggerFilePath, atomically: false, encoding: .utf8)
+            lastProcessedLineCount = 0
         }
 
         writeLog("Preset6: All progress reset", logLevel: .info)
@@ -1436,6 +1505,11 @@ struct Preset6View: View, InspectLayoutProtocol {
             FileManager.default.createFile(atPath: triggerFilePath, contents: nil, attributes: nil)
         }
 
+        // Skip past any stale content from a previous run
+        if let existing = try? String(contentsOfFile: triggerFilePath, encoding: .utf8) {
+            lastProcessedLineCount = existing.components(separatedBy: .newlines).count
+        }
+
         // Open file descriptor
         let fileDescriptor = open(triggerFilePath, O_EVTONLY)
         guard fileDescriptor >= 0 else {
@@ -1471,17 +1545,26 @@ struct Preset6View: View, InspectLayoutProtocol {
         writeLog("Preset6: File monitoring started with DispatchSource at \(triggerFilePath) (mode: \(triggerMode), zero-latency)", logLevel: .info)
     }
 
+    /// Uses line-offset tracking: reads all lines, processes only new ones, never clears the file.
+    /// This eliminates the read-then-clear race where commands appended between read and clear were lost.
     private func checkForExternalTrigger() {
         guard let content = try? String(contentsOfFile: triggerFilePath, encoding: .utf8) else { return }
 
-        let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty, trimmed != lastProcessedCommandContent else { return }
+        let lines = content.components(separatedBy: .newlines)
+        let totalLines = lines.count
 
-        lastProcessedCommandContent = trimmed
-        processExternalCommands(trimmed)
+        guard totalLines > lastProcessedLineCount else { return }
 
-        // Truncate instead of delete so DispatchSource file descriptor stays valid
-        try? "".write(toFile: triggerFilePath, atomically: false, encoding: .utf8)
+        let newLines = Array(lines.dropFirst(lastProcessedLineCount))
+        for line in newLines {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            guard !trimmed.isEmpty else { continue }
+
+            writeLog("Preset6: Received trigger command: \(trimmed)", logLevel: .info)
+            processExternalCommands(trimmed)
+        }
+
+        lastProcessedLineCount = totalLines
     }
 
     private func processExternalCommands(_ content: String) {

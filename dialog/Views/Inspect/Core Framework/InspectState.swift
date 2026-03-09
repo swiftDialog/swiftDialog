@@ -420,7 +420,7 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         
         // Set up FSEvents monitor with our delegate pattern
         fsEventsMonitor.delegate = self
-        fsEventsMonitor.startMonitoring(items: items, cachePaths: cachePaths)
+        fsEventsMonitor.startMonitoring(items: items, cachePaths: cachePaths, cacheExtensions: config?.resolvedCacheExtensions)
         
         writeLog("FSEvents monitoring active", logLevel: .info)
     }
@@ -721,6 +721,13 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
             // Only check cache if not already installed (for performance optimization)
             let isDownloading = !isInstalled && checkCacheForItem(item)
 
+            // Keep plistValidationResults in sync with plist evaluation to prevent
+            // race condition where completedItems and plistValidationResults disagree,
+            // causing items to briefly flash "Failed" (orange) before async validation catches up
+            if item.plistKey != nil && item.evaluation != nil {
+                self.plistValidationResults[item.id] = isInstalled
+            }
+
             // Apply changes only if status actually changed
             if isInstalled && !wasCompleted {
                 self.debouncedUpdater.debounce(key: "item-install-\(item.id)") { [weak self] in
@@ -814,6 +821,9 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
             if let cachePaths = config.cachePaths {
                 appInspectConfig["cachePaths"] = cachePaths
             }
+            if let cacheExtensions = config.cacheExtensions {
+                appInspectConfig["cacheExtensions"] = cacheExtensions
+            }
             
             // Convert to JSON data and write to a temporary file for AppInspector to load
             let jsonData = try JSONSerialization.data(withJSONObject: appInspectConfig, options: [])
@@ -854,18 +864,18 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                 writeLog("InspectState:   Files in cache (\(cacheContents.count) total): \(cacheContents.prefix(3).joined(separator: ", "))\(cacheContents.count > 3 ? "..." : "")", logLevel: .debug)
             }
 
-            // Filter for download files
+            // Filter for download files using configured extensions
+            let extensions = config.resolvedCacheExtensions
             let downloadFiles = cacheContents.filter { file in
                 // Skip hidden files like .DS_Store
                 guard !file.hasPrefix(".") else { return false }
 
-                return file.lowercased().hasSuffix(".download") ||
-                       file.lowercased().hasSuffix(".pkg") ||
-                       file.lowercased().hasSuffix(".dmg")
+                let lowercased = file.lowercased()
+                return extensions.contains { lowercased.hasSuffix($0) }
             }
 
             if downloadFiles.isEmpty {
-                writeLog("InspectState:   No package files found (looked for .pkg, .dmg, .download)", logLevel: .debug)
+                writeLog("InspectState:   No package files found (looked for \(extensions.joined(separator: ", ")))", logLevel: .debug)
             } else {
                 for file in downloadFiles {
                     writeLog("InspectState:   Found package: '\(file)'", logLevel: .debug)

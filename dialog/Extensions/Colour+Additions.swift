@@ -120,4 +120,41 @@ extension Color {
         let lum = 0.2126 * red + 0.7152 * green + 0.0722 * blue
         return lum < 0.5
     }
+
+    /// Relative luminance (0 = black, 1 = white) per WCAG 2.0
+    var luminance: CGFloat {
+        let components = self.cgColor?.components
+        let r: CGFloat = components?[0] ?? 0.0
+        let g: CGFloat = components?[1] ?? 0.0
+        let b: CGFloat = components?[2] ?? 0.0
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b
+    }
+
+    /// Lighten the color by a factor (0 = unchanged, 1 = white).
+    /// Preserves hue by mixing toward white in RGB space.
+    func lightened(by factor: CGFloat) -> Color {
+        let components = self.cgColor?.components
+        let r: CGFloat = components?[0] ?? 0.0
+        let g: CGFloat = components?[1] ?? 0.0
+        let b: CGFloat = components?[2] ?? 0.0
+        return Color(
+            .sRGB,
+            red: Double(r + (1 - r) * factor),
+            green: Double(g + (1 - g) * factor),
+            blue: Double(b + (1 - b) * factor)
+        )
+    }
+
+    /// Returns a version of this color that's guaranteed visible on dark backgrounds.
+    /// Very dark brand colors (luminance < 0.15) get lightened so they remain legible
+    /// on macOS dark mode surfaces. Brighter colors pass through unchanged.
+    var darkModeAdapted: Color {
+        let lum = self.luminance
+        if lum < 0.08 {
+            return self.lightened(by: 0.55) // very dark → significant lift
+        } else if lum < 0.15 {
+            return self.lightened(by: 0.40) // dark → moderate lift
+        }
+        return self
+    }
 }

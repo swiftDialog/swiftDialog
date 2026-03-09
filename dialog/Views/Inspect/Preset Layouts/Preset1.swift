@@ -43,7 +43,7 @@ struct Preset1View: View, InspectLayoutProtocol {
                         basePath: inspectState.uiConfiguration.iconBasePath,
                         inspectState: inspectState,
                         onContinue: {
-                            withAnimation(.easeInOut(duration: 0.3)) {
+                            withAnimation(InspectConstants.stepTransition) {
                                 currentPhase = .main
                             }
                         }
@@ -81,6 +81,9 @@ struct Preset1View: View, InspectLayoutProtocol {
             checkAutoTransitionToSummary()
         }
         .onChange(of: currentPhase) { _, newPhase in
+            // Emit phase event so IPC consumers (scripts) can react
+            writePhaseEvent(newPhase)
+
             // When entering main, check if items already completed during intro
             if newPhase == .main {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -97,7 +100,7 @@ struct Preset1View: View, InspectLayoutProtocol {
               summaryConfig.autoTransition != false,
               !inspectState.items.isEmpty,
               inspectState.completedItems.count == inspectState.items.count else { return }
-        withAnimation(.easeInOut(duration: 0.3)) {
+        withAnimation(InspectConstants.stepTransition) {
             currentPhase = .summary
         }
     }
@@ -107,7 +110,7 @@ struct Preset1View: View, InspectLayoutProtocol {
     private var summaryScreenButtonAction: (() -> Void)? {
         guard inspectState.config?.summaryScreen != nil else { return nil }
         return {
-            withAnimation(.easeInOut(duration: 0.3)) {
+            withAnimation(InspectConstants.stepTransition) {
                 currentPhase = .summary
             }
         }
@@ -424,6 +427,36 @@ struct Preset1View: View, InspectLayoutProtocol {
             baseText = inspectState.config?.uiLabels?.sectionHeaderFailed ?? "Installation Failed"
             return localized("sectionHeaderFailed", fallback: baseText) ?? baseText
         }
+    }
+
+    // MARK: - IPC Event Emission
+
+    /// Write a phase-change event to the JSONL event file for IPC consumers.
+    /// Event file path: explicit `eventFile`, or derived from `readinessFile` (.ready → .events).
+    private func writePhaseEvent(_ phase: PresetPhase) {
+        let eventPath: String? = inspectState.config?.eventFile ?? inspectState.config?.readinessFile.map {
+            (($0 as NSString).deletingPathExtension) + ".events"
+        }
+        guard let path = eventPath else { return }
+
+        let entry: [String: Any] = [
+            "event": "phase_changed",
+            "phase": "\(phase)",
+            "timestamp": ISO8601DateFormatter().string(from: Date())
+        ]
+        guard let data = try? JSONSerialization.data(withJSONObject: entry),
+              let line = String(data: data, encoding: .utf8) else { return }
+
+        let expandedPath = (path as NSString).expandingTildeInPath
+        let lineData = (line + "\n").data(using: .utf8)!
+        if let handle = FileHandle(forWritingAtPath: expandedPath) {
+            handle.seekToEndOfFile()
+            handle.write(lineData)
+            handle.closeFile()
+        } else {
+            FileManager.default.createFile(atPath: expandedPath, contents: lineData)
+        }
+        writeLog("Preset1View: Phase event emitted — \(phase)", logLevel: .info)
     }
 
     // MARK: - Validation Support

@@ -14,6 +14,7 @@ import SwiftUI
 struct CarouselCardView: View {
     let item: InstallationItemData
     let accentColor: Color
+    var compact: Bool = false
 
     private var isActive: Bool {
         if case .downloading = item.status { return true }
@@ -21,19 +22,27 @@ struct CarouselCardView: View {
         return false
     }
 
+    private var iconSize: CGFloat { compact ? 56 : 90 }
+    private var cornerRadius: CGFloat { compact ? 12 : 16 }
+    private var cardWidth: CGFloat { compact ? 100 : 130 }
+    private var cardHeight: CGFloat { compact ? 110 : 160 }
+    private var textWidth: CGFloat { compact ? 90 : 110 }
+    private var textHeight: CGFloat { compact ? 28 : 35 }
+    private var badgeSize: CGFloat { compact ? 20 : 26 }
+
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: compact ? 3 : 4) {
             // Icon with status overlay
             ZStack {
                 IconView(image: item.icon ?? item.iconPath ?? "SF=app.fill", defaultImage: "app.fill", defaultColour: "accent")
-                    .frame(width: 90, height: 90)
-                    .clipShape(.rect(cornerRadius: 16))
+                    .frame(width: iconSize, height: iconSize)
+                    .clipShape(.rect(cornerRadius: cornerRadius))
 
                 // Status indicator overlay (top-right)
                 VStack {
                     HStack {
                         Spacer()
-                        CarouselStatusBadge(status: item.status, accentColor: accentColor)
+                        CarouselStatusBadge(status: item.status, accentColor: accentColor, size: badgeSize)
                     }
                     Spacer()
                 }
@@ -43,19 +52,19 @@ struct CarouselCardView: View {
             // Name and status text
             VStack(spacing: 2) {
                 Text(item.displayName)
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: compact ? 11 : 12, weight: .medium))
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(isActive ? accentColor : .primary)
 
                 Text(carouselStatusText(for: item))
-                    .font(.system(size: 9))
+                    .font(.system(size: compact ? 8 : 9))
                     .foregroundStyle(carouselStatusColor(for: item))
             }
-            .frame(width: 110, height: 35)
+            .frame(width: textWidth, height: textHeight)
         }
-        .frame(width: 130, height: 160)
-        .padding(6)
+        .frame(width: cardWidth, height: cardHeight)
+        .padding(compact ? 4 : 6)
         .background(
             RoundedRectangle(cornerRadius: 10)
                 .fill(Color(NSColor.controlBackgroundColor))
@@ -78,7 +87,9 @@ struct CarouselCardView: View {
 struct CarouselStatusBadge: View {
     let status: MonitoringItemStatus
     let accentColor: Color
-    private let size: CGFloat = 26
+    var size: CGFloat = 26
+
+    private var iconSize: CGFloat { size * 0.46 }
 
     var body: some View {
         switch status {
@@ -88,7 +99,7 @@ struct CarouselStatusBadge: View {
                 .frame(width: size, height: size)
                 .overlay(
                     Image(systemName: "xmark")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(size: iconSize, weight: .bold))
                         .foregroundStyle(.white)
                 )
         case .completed:
@@ -97,12 +108,12 @@ struct CarouselStatusBadge: View {
                 .frame(width: size, height: size)
                 .overlay(
                     Image(systemName: "checkmark")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(size: iconSize, weight: .bold))
                         .foregroundStyle(.white)
                 )
         case .downloading, .installing:
             ProgressView()
-                .scaleEffect(0.7)
+                .scaleEffect(size < 24 ? 0.55 : 0.7)
                 .tint(accentColor)
                 .frame(width: size, height: size)
         case .pending:
@@ -115,18 +126,20 @@ struct CarouselStatusBadge: View {
 
 /// Empty card slot for when carousel doesn't fill all visible positions
 struct CarouselPlaceholderCardView: View {
+    var compact: Bool = false
+
     var body: some View {
         VStack(spacing: 4) {
-            RoundedRectangle(cornerRadius: 14)
+            RoundedRectangle(cornerRadius: compact ? 10 : 14)
                 .fill(Color.gray.opacity(0.05))
-                .frame(width: 72, height: 72)
+                .frame(width: compact ? 48 : 72, height: compact ? 48 : 72)
 
             RoundedRectangle(cornerRadius: 4)
                 .fill(Color.gray.opacity(0.05))
-                .frame(width: 70, height: 10)
+                .frame(width: compact ? 50 : 70, height: compact ? 8 : 10)
         }
-        .frame(width: 110, height: 120)
-        .padding(6)
+        .frame(width: compact ? 90 : 110, height: compact ? 90 : 120)
+        .padding(compact ? 4 : 6)
     }
 }
 
@@ -138,6 +151,7 @@ struct CarouselProgressBarView: View {
     let total: Int
     let accentColor: Color
     let progressFormat: String?
+    var compact: Bool = false
 
     private var fraction: Double {
         guard total > 0 else { return 0 }
@@ -145,17 +159,17 @@ struct CarouselProgressBarView: View {
     }
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: compact ? 6 : 12) {
             ProgressView(value: Double(completed), total: Double(total))
                 .progressViewStyle(.linear)
-                .frame(width: 600)
+                .frame(maxWidth: compact ? 480 : 600)
                 .tint(accentColor)
 
             Text(formatProgressText())
-                .font(.caption)
+                .font(compact ? .caption2 : .caption)
                 .foregroundStyle(.secondary)
         }
-        .padding(.vertical, 16)
+        .padding(.vertical, compact ? 8 : 16)
     }
 
     private func formatProgressText() -> String {

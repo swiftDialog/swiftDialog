@@ -55,40 +55,49 @@ struct BentoGridStepLayout: View {
     @ObservedObject var inspectState: InspectState
 
     var body: some View {
-        VStack(spacing: 16) {
-            // Title
-            if let title = config.title {
-                Text(title)
-                    .font(.system(size: 26, weight: .bold))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-                    .padding(.top, 24)
-            }
+        let sp = InspectSizes.SetupSpacing.self
 
-            // Subtitle
-            if let subtitle = config.subtitle {
-                Text(subtitle)
-                    .font(.title3)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-            }
+        GeometryReader { geometry in
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: sp.sectionGap) {
+                    Spacer()
 
-            // Bento grid — full width with horizontal padding
-            BentoGridView(
-                cells: config.cells,
-                columns: config.columns,
-                rowHeight: config.rowHeight,
-                gap: config.gap,
-                scaleFactor: 1.0,
-                accentColor: accentColor,
-                iconBasePath: iconBasePath,
-                tintColor: config.tintColor,
-                inspectState: inspectState,
-                inlineExpansion: true
-            )
-            .padding(.horizontal, 24)
-            .padding(.top, 8)
+                    // Title
+                    if let title = config.title {
+                        Text(title)
+                            .font(.system(size: 26, weight: .bold))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, sp.contentPadH)
+                    }
+
+                    // Subtitle
+                    if let subtitle = config.subtitle {
+                        Text(subtitle)
+                            .font(.system(size: 13))
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, sp.contentPadH)
+                    }
+
+                    // Bento grid — full width with horizontal padding
+                    BentoGridView(
+                        cells: config.cells,
+                        columns: config.columns,
+                        rowHeight: config.rowHeight,
+                        gap: config.gap,
+                        scaleFactor: 1.0,
+                        accentColor: accentColor,
+                        iconBasePath: iconBasePath,
+                        tintColor: config.tintColor,
+                        inspectState: inspectState,
+                        inlineExpansion: true
+                    )
+                    .padding(.horizontal, 24)
+
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, minHeight: geometry.size.height)
+            }
         }
     }
 }

@@ -18,14 +18,17 @@ struct BrandingResolver {
     let config: InspectConfig?
     let mdmOverrides: MDMBrandingOverrides?
     let selectedBrand: InspectConfig.BrandConfig?
+    let colorScheme: ColorScheme
 
     private var service: AppConfigService { AppConfigService.shared }
 
     init(config: InspectConfig?, mdmOverrides: MDMBrandingOverrides?,
-         selectedBrand: InspectConfig.BrandConfig? = nil) {
+         selectedBrand: InspectConfig.BrandConfig? = nil,
+         colorScheme: ColorScheme = .light) {
         self.config = config
         self.mdmOverrides = mdmOverrides
         self.selectedBrand = selectedBrand
+        self.colorScheme = colorScheme
     }
 
     // MARK: - Color Hex Strings (MDM > Brand > JSON)
@@ -48,16 +51,25 @@ struct BrandingResolver {
 
     // MARK: - Resolved SwiftUI Colors
 
-    var primaryColor: Color {
+    /// The raw brand color without dark mode adaptation
+    var rawPrimaryColor: Color {
         if let hex = effectiveHighlightColor {
             return Color(hex: hex)
         }
         return .accentColor
     }
 
+    /// Primary color auto-adapted for the current color scheme.
+    /// Dark brand colors (e.g. Lufthansa #05164D) are auto-lightened in dark mode.
+    var primaryColor: Color {
+        let color = rawPrimaryColor
+        return colorScheme == .dark ? color.darkModeAdapted : color
+    }
+
     var accentColor: Color {
         if let hex = effectiveHighlightColor ?? effectiveAccentBorderColor {
-            return Color(hex: hex)
+            let color = Color(hex: hex)
+            return colorScheme == .dark ? color.darkModeAdapted : color
         }
         return Color.accentColor
     }

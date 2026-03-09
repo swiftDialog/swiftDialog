@@ -30,6 +30,7 @@ extension InspectLayoutProtocol {
         case "compact": return 0.85
         case "large": return 1.15
         case "assistant": return 0.95  // Slightly scaled down from standard (1024 vs 1100 width)
+        case "setup": return 0.80         // Apple Setup Assistant (800×600)
         default: return 1.0  // standard
         }
     }
