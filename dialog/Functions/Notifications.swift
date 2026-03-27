@@ -78,7 +78,8 @@ func checkForDialogNotificationMode(_ arguments: CommandLineArguments) -> Bool {
                 button2Label: button2Label,
                 button2Action: arguments.button2ActionOption.value,
                 style: pseudoStyle,
-                soundEnabled: arguments.notificationGoPing.present
+                soundEnabled: arguments.notificationGoPing.present,
+                dismissTimerSeconds: (arguments.timerBar.present ? Double(arguments.timerBar.value) : nil) ?? 6.0
             )
             sendPseudoNotification(config: config)
             // Don't quit immediately — the pseudo notification runs its own window and

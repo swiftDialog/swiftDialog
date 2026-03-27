@@ -33,6 +33,7 @@ struct PseudoNotificationConfig {
     var button2Action: String = ""
     var style: PseudoNotificationStyle = .banner
     var soundEnabled: Bool = false
+    var dismissTimerSeconds: Double = 6.0
 
     /// The action bar is shown when button2 has a label or an action.
     var showActionBar: Bool {
@@ -262,7 +263,7 @@ class PseudoNotificationWindowController {
 
             // Start position: just off the right edge, near the top
             let startX = visibleFrame.maxX + 10
-            let topY = visibleFrame.maxY - estimatedHeight - 12
+            let topY = visibleFrame.maxY - estimatedHeight - 5
 
             let panel = NSPanel(
                 contentRect: NSRect(x: startX, y: topY, width: notificationWidth, height: estimatedHeight),
@@ -337,7 +338,7 @@ class PseudoNotificationWindowController {
             // Auto-dismiss for banner style
             if config.style == .banner {
                 autoDismissTimer = Timer.scheduledTimer(
-                    withTimeInterval: 6.0,
+                    withTimeInterval: config.dismissTimerSeconds,
                     repeats: false
                 ) { [weak self] _ in
                     self?.slideOutAndQuit()

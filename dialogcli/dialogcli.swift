@@ -69,10 +69,25 @@ struct DialogLauncher: ParsableCommand {
         if argPresent("--notification", in: passthroughArgs) && notificationStyle != nil {
             let style = notificationStyle!
 
-            // Pseudo notification styles are handled by the main Dialog binary,
-            // not a helper app. Fall through to the normal launch path.
+            // Pseudo notification styles are self-contained — launch the app
+            // in the background and exit immediately. No need to capture output
+            // or return codes; button actions are handled internally.
             if style.hasPrefix("pseudo") {
-                // Don't intercept — let the main Dialog binary handle it.
+                guard let appBundle = findAppBundlePath() else {
+                    fputs("ERROR: Could not locate app bundle\n", stderr)
+                    throw ExitCode(255)
+                }
+
+                // Build args from passthrough args only — pseudo notifications are
+                // self-contained and don't need --pid or --commandfile.
+                let filteredPseudoArgs = passthroughArgs.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+                let pseudoArgs = reorderArguments(filteredPseudoArgs)
+
+                var openArgs = ["-n", "-g", appBundle.path, "--args"]
+                openArgs.append(contentsOf: pseudoArgs)
+                launchInBackground(binary: "/usr/bin/open", args: openArgs)
+
+                throw ExitCode(0)
             } else {
 
             let helperName: String
@@ -321,6 +336,20 @@ struct DialogLauncher: ParsableCommand {
             // Handle failure to run the process
             stderrHandle.readabilityHandler = nil
             return CommandResult(status: 255, stdout: "", stderr: "Failed to run process: \(error)")
+        }
+    }
+
+    // Fire-and-forget: launch a process without waiting for it to exit.
+    func launchInBackground(binary: String, args: [String]) {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: binary)
+        process.arguments = args
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+        do {
+            try process.run()
+        } catch {
+            fputs("ERROR: Failed to launch background process: \(error)\n", stderr)
         }
     }
 
