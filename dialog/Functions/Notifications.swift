@@ -32,12 +32,6 @@ func checkForDialogNotificationMode(_ arguments: CommandLineArguments) -> Bool {
     // check if we are sending a notification
     if arguments.notification.present && dialogIsAuthorised {
 
-        if arguments.removeNotification.present {
-            writeLog("Removing notifications")
-            removeNotification(identifier: arguments.notificationIdentifier.value)
-            return true
-        }
-
         var notificationIcon = ""
         if appArguments.iconOption.present {
             notificationIcon = appArguments.iconOption.value
@@ -45,8 +39,21 @@ func checkForDialogNotificationMode(_ arguments: CommandLineArguments) -> Bool {
 
         // Pseudo notification — renders a custom SwiftUI window instead of UNUserNotification.
         // Triggered by: --notification --style pseudo
+        // Check pseudo style FIRST so --remove routes to distributed notification IPC
+        // instead of the legacy UNUserNotification removal path.
         let styleLower = arguments.notificationStyle.value.lowercased()
         if styleLower == "pseudo" || styleLower == "pseudo-banner" || styleLower == "pseudo-alert" {
+
+            // Handle --remove for pseudo notifications via distributed notification IPC.
+            if arguments.removeNotification.present {
+                let identifier = arguments.notificationIdentifier.value
+                writeLog("Removing pseudo notification(s)" + (identifier.isEmpty ? "" : " with identifier: \(identifier)"))
+                removePseudoNotification(identifier: identifier.isEmpty ? nil : identifier)
+                // Brief pause to allow the distributed notification to be delivered
+                usleep(200000)
+                return true
+            }
+
             writeLog("Sending pseudo notification")
             appvars.isPseudoNotificationMode = true
 
@@ -67,7 +74,17 @@ func checkForDialogNotificationMode(_ arguments: CommandLineArguments) -> Bool {
                 button2Label = arguments.button2TextOption.value
             }
 
+            let identifier = arguments.notificationIdentifier.value
+
+            // If an identifier is specified, dismiss any existing notification with the same ID
+            // before showing the replacement.
+            if !identifier.isEmpty {
+                removePseudoNotification(identifier: identifier)
+                usleep(300000)
+            }
+
             let config = PseudoNotificationConfig(
+                identifier: identifier,
                 icon: notificationIcon,
                 title: arguments.titleOption.value,
                 subtitle: arguments.subTitleOption.value,
@@ -85,6 +102,13 @@ func checkForDialogNotificationMode(_ arguments: CommandLineArguments) -> Bool {
             // Don't quit immediately — the pseudo notification runs its own window and
             // handles exit via user interaction or auto-dismiss timer.
             return false
+        }
+
+        // Legacy --remove for native UNUserNotifications
+        if arguments.removeNotification.present {
+            writeLog("Removing notifications")
+            removeNotification(identifier: arguments.notificationIdentifier.value)
+            return true
         }
 
         // Native UNUserNotification path (legacy)

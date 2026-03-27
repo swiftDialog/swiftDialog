@@ -22,6 +22,7 @@ enum PseudoNotificationStyle {
 
 /// Bundles all parameters needed to display a pseudo notification.
 struct PseudoNotificationConfig {
+    var identifier: String = ""
     var icon: String = ""
     var title: String = ""
     var subtitle: String = ""
@@ -38,6 +39,30 @@ struct PseudoNotificationConfig {
     /// The action bar is shown when button2 has a label or an action.
     var showActionBar: Bool {
         !button2Label.isEmpty || !button2Action.isEmpty
+    }
+}
+
+// MARK: - Distributed Notification Constants
+
+private let pseudoDismissPrefix = "com.swiftdialog.pseudo.dismiss."
+private let pseudoDismissAll = "com.swiftdialog.pseudo.dismiss.all"
+
+/// Post a distributed notification to dismiss a pseudo notification by identifier.
+func removePseudoNotification(identifier: String?) {
+    if let id = identifier, !id.isEmpty {
+        DistributedNotificationCenter.default().postNotificationName(
+            NSNotification.Name(pseudoDismissPrefix + id),
+            object: nil,
+            userInfo: nil,
+            deliverImmediately: true
+        )
+    } else {
+        DistributedNotificationCenter.default().postNotificationName(
+            NSNotification.Name(pseudoDismissAll),
+            object: nil,
+            userInfo: nil,
+            deliverImmediately: true
+        )
     }
 }
 
@@ -251,10 +276,40 @@ class PseudoNotificationWindowController {
     private var window: NSPanel?
     private var hostingView: NSHostingView<AnyView>?
     private var autoDismissTimer: Timer?
+    private var dismissObservers: [NSObjectProtocol] = []
+
+    deinit {
+        for observer in dismissObservers {
+            DistributedNotificationCenter.default().removeObserver(observer)
+        }
+    }
 
     /// Show the pseudo notification, sliding in from the right edge of the screen.
     func show(config: PseudoNotificationConfig) {
         DispatchQueue.main.async { [self] in
+            // Listen for distributed dismiss notifications
+            let center = DistributedNotificationCenter.default()
+
+            // Always listen for "dismiss all"
+            let allObserver = center.addObserver(
+                forName: NSNotification.Name(pseudoDismissAll),
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                self?.slideOutAndQuit()
+            }
+            dismissObservers.append(allObserver)
+
+            // Listen for identifier-specific dismiss if we have one
+            let identifier = config.identifier.isEmpty ? UUID().uuidString : config.identifier
+            let idObserver = center.addObserver(
+                forName: NSNotification.Name(pseudoDismissPrefix + identifier),
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                self?.slideOutAndQuit()
+            }
+            dismissObservers.append(idObserver)
             let notificationWidth: CGFloat = 345
             let estimatedHeight: CGFloat = 120
 
@@ -381,11 +436,34 @@ class PseudoNotificationWindowController {
 // MARK: - Public entry point
 
 /// Sends a pseudo notification that renders as a custom SwiftUI window.
+/// Pre-fetches any remote resources before displaying so the window sizes correctly
+/// and we don't end up with an invisible orphaned process.
 func sendPseudoNotification(config: PseudoNotificationConfig) {
     let controller = PseudoNotificationWindowController()
     // Keep a strong reference so it doesn't get deallocated
     pseudoNotificationController = controller
-    controller.show(config: config)
+
+    // Pre-fetch remote resources on a background thread so the window
+    // is created only after images are available (avoids sizing issues
+    // and orphaned processes when AsyncImage loads slowly).
+    DispatchQueue.global(qos: .userInitiated).async {
+        // Pre-warm icon if it's a URL or file path that needs loading
+        if !config.icon.isEmpty && !config.icon.lowercased().hasPrefix("sf=")
+            && config.icon != "default" && !config.icon.hasSuffix(".app")
+            && !config.icon.hasSuffix("prefPane") {
+            _ = getImageFromPath(fileImagePath: config.icon, returnErrorImage: true)
+        }
+
+        // Pre-warm attached image
+        if !config.imagePath.isEmpty {
+            _ = getImageFromPath(fileImagePath: config.imagePath, returnErrorImage: true)
+        }
+
+        // Now show on main thread — resources are cached and ready
+        DispatchQueue.main.async {
+            controller.show(config: config)
+        }
+    }
 }
 
 /// Global reference to keep the window controller alive.
