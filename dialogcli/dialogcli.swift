@@ -68,6 +68,13 @@ struct DialogLauncher: ParsableCommand {
         let notificationStyle = argValue("--style", in: passthroughArgs)?.lowercased()
         if argPresent("--notification", in: passthroughArgs) && notificationStyle != nil {
             let style = notificationStyle!
+
+            // Pseudo notification styles are handled by the main Dialog binary,
+            // not a helper app. Fall through to the normal launch path.
+            if style.hasPrefix("pseudo") {
+                // Don't intercept — let the main Dialog binary handle it.
+            } else {
+
             let helperName: String
             switch style {
             case "alert":
@@ -107,6 +114,7 @@ struct DialogLauncher: ParsableCommand {
             let result = runCommand(binary: binary, args: notifierArgs)
             fputs(result.stderr, stderr)
             throw ExitCode(result.status)
+            } // end else (non-pseudo styles)
         }
         // --- End notification routing ---
 

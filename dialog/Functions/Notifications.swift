@@ -31,42 +31,84 @@ func checkNotificationAuthorisation(notificationPresent: Bool) {
 func checkForDialogNotificationMode(_ arguments: CommandLineArguments) -> Bool {
     // check if we are sending a notification
     if arguments.notification.present && dialogIsAuthorised {
-        // Deprecation notice: sending notifications via the main Dialog app bundle is deprecated.
-        // Admins should migrate to using `--style banner` or `--style alert` via dialogcli,
-        // which routes to dedicated helper apps with separate bundle IDs.
-        // This legacy path will be removed in a future major version.
-        fputs("WARNING: Sending notifications via Dialog.app is deprecated. Use --style banner or --style alert for new deployments.\n", stderr)
+
         if arguments.removeNotification.present {
             writeLog("Removing notifications")
             removeNotification(identifier: arguments.notificationIdentifier.value)
-        } else {
-            writeLog("Sending a notification")
-
-            var notificationIcon = ""
-            if appArguments.iconOption.present {
-                notificationIcon = appArguments.iconOption.value
-            }
-
-            var acceptActionLabel: String = ""
-            var declineActionLabel: String = ""
-            if arguments.button1TextOption.present {
-                acceptActionLabel = arguments.button1TextOption.value
-            }
-            if arguments.button2TextOption.present {
-                declineActionLabel = arguments.button2TextOption.value
-            }
-            sendNotification(title: arguments.titleOption.value,
-                             subtitle: arguments.subTitleOption.value,
-                             message: arguments.messageOption.value,
-                             image: notificationIcon,
-                             identifier: arguments.notificationIdentifier.value,
-                             acceptString: acceptActionLabel,
-                             acceptAction: arguments.button1ActionOption.value,
-                             declineString: declineActionLabel,
-                             declineAction: arguments.button2ActionOption.value,
-                             notificationSoundEnabled: arguments.notificationGoPing.present)
-            usleep(100000)
+            return true
         }
+
+        var notificationIcon = ""
+        if appArguments.iconOption.present {
+            notificationIcon = appArguments.iconOption.value
+        }
+
+        // Pseudo notification — renders a custom SwiftUI window instead of UNUserNotification.
+        // Triggered by: --notification --style pseudo
+        let styleLower = arguments.notificationStyle.value.lowercased()
+        if styleLower == "pseudo" || styleLower == "pseudo-banner" || styleLower == "pseudo-alert" {
+            writeLog("Sending pseudo notification")
+            appvars.isPseudoNotificationMode = true
+
+            let pseudoStyle: PseudoNotificationStyle = (styleLower == "pseudo-alert") ? .alert : .banner
+
+            var imagePath = ""
+            if arguments.mainImage.present {
+                imagePath = arguments.mainImage.value
+            }
+
+            var button1Label = appDefaults.button1Default
+            if arguments.button1TextOption.present {
+                button1Label = arguments.button1TextOption.value
+            }
+
+            var button2Label = ""
+            if arguments.button2TextOption.present {
+                button2Label = arguments.button2TextOption.value
+            }
+
+            let config = PseudoNotificationConfig(
+                icon: notificationIcon,
+                title: arguments.titleOption.value,
+                subtitle: arguments.subTitleOption.value,
+                message: arguments.messageOption.value,
+                imagePath: imagePath,
+                button1Label: button1Label,
+                button1Action: arguments.button1ActionOption.value,
+                button2Label: button2Label,
+                button2Action: arguments.button2ActionOption.value,
+                style: pseudoStyle,
+                soundEnabled: arguments.notificationGoPing.present
+            )
+            sendPseudoNotification(config: config)
+            // Don't quit immediately — the pseudo notification runs its own window and
+            // handles exit via user interaction or auto-dismiss timer.
+            return false
+        }
+
+        // Native UNUserNotification path (legacy)
+        fputs("WARNING: Sending notifications via Dialog.app is deprecated. Use --style banner or --style alert for new deployments.\n", stderr)
+        writeLog("Sending a notification")
+
+        var acceptActionLabel: String = ""
+        var declineActionLabel: String = ""
+        if arguments.button1TextOption.present {
+            acceptActionLabel = arguments.button1TextOption.value
+        }
+        if arguments.button2TextOption.present {
+            declineActionLabel = arguments.button2TextOption.value
+        }
+        sendNotification(title: arguments.titleOption.value,
+                         subtitle: arguments.subTitleOption.value,
+                         message: arguments.messageOption.value,
+                         image: notificationIcon,
+                         identifier: arguments.notificationIdentifier.value,
+                         acceptString: acceptActionLabel,
+                         acceptAction: arguments.button1ActionOption.value,
+                         declineString: declineActionLabel,
+                         declineAction: arguments.button2ActionOption.value,
+                         notificationSoundEnabled: arguments.notificationGoPing.present)
+        usleep(100000)
     } else {
         return false
     }

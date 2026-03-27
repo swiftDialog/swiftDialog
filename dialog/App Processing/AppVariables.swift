@@ -165,6 +165,7 @@ struct AppVariables {
     var imageCaptionArray               = [String]()
 
     var isProcessingNotification        = false
+    var isPseudoNotificationMode        = false
     var noargs                          = false
 
     var quitKeyCharacter                = String("q")

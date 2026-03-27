@@ -81,6 +81,7 @@
 		41D892E32F754F3000FA4E01 /* CommandRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D892E02F754F3000FA4E01 /* CommandRouter.swift */; };
 		41D892E52F754FBC00FA4E01 /* DistributedNotificationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D892E42F754FBC00FA4E01 /* DistributedNotificationsTests.swift */; };
 		41D892E72F754FCA00FA4E01 /* PlistEvaluationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D892E62F754FCA00FA4E01 /* PlistEvaluationTests.swift */; };
+		41D892E92F76085A00FA4E01 /* PseudoNotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D892E82F76085A00FA4E01 /* PseudoNotificationView.swift */; };
 		41FCF1F32EA8553700E3C47D /* CKJSONView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FCF1F22EA8553700E3C47D /* CKJSONView.swift */; };
 		41FCF1F62EA9CFB000E3C47D /* CKMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FCF1F52EA9CFB000E3C47D /* CKMessageView.swift */; };
 		4798E0B1BC024F44BF094D82 /* CarouselStepViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D7BDEBE83A4272AD647901 /* CarouselStepViews.swift */; };
@@ -352,6 +353,7 @@
 		41D892E12F754F3000FA4E01 /* DistributedNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistributedNotifications.swift; sourceTree = "<group>"; };
 		41D892E42F754FBC00FA4E01 /* DistributedNotificationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistributedNotificationsTests.swift; sourceTree = "<group>"; };
 		41D892E62F754FCA00FA4E01 /* PlistEvaluationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlistEvaluationTests.swift; sourceTree = "<group>"; };
+		41D892E82F76085A00FA4E01 /* PseudoNotificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PseudoNotificationView.swift; sourceTree = "<group>"; };
 		41FCF1F22EA8553700E3C47D /* CKJSONView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKJSONView.swift; sourceTree = "<group>"; };
 		41FCF1F52EA9CFB000E3C47D /* CKMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKMessageView.swift; sourceTree = "<group>"; };
 		41FD45FD26C40366006976FC /* TimerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimerView.swift; sourceTree = "<group>"; };
@@ -692,6 +694,7 @@
 				CCB3346F2B2320F20079FB83 /* SolidColourView.swift */,
 				CC7D43CE2B972976004B9E65 /* PresentationView.swift */,
 				CCF430592C07562D004DFB4D /* DebugOverlay.swift */,
+				41D892E82F76085A00FA4E01 /* PseudoNotificationView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1326,6 +1329,7 @@
 				CA2DDA2A96C724AAD6ABFF4E /* BrandingResolver.swift in Sources */,
 				BA2812082EBA183A00384582 /* Preset6.swift in Sources */,
 				CC2190592A7BCDDD00269525 /* View+Additions.swift in Sources */,
+				41D892E92F76085A00FA4E01 /* PseudoNotificationView.swift in Sources */,
 				41D81E6C25F8209F00D1F7E1 /* CLOptions.swift in Sources */,
 				41D81E7125F845D200D1F7E1 /* AppState.swift in Sources */,
 				BA05AF1A2F1C2B9B001367A5 /* PortalWebView.swift in Sources */,

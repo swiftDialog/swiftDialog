@@ -158,6 +158,9 @@ struct CommandLineArguments {
     var showSoundControls         = CommandlineArgument(long: "showsoundcontrols", isbool: true)
     var hideOtherApps            = CommandlineArgument(long: "hideotherapps", isbool: true)
 
+    // Notification style
+    var notificationStyle         = CommandlineArgument(long: "style", defaultValue: "")
+
     // Inspect Mode Arguments
     var inspectMode               = CommandlineArgument(long: "inspect-mode", isbool: true)
     var inspectConfig             = CommandlineArgument(long: "inspect-config")
@@ -353,6 +356,7 @@ extension CommandLineArguments {
                     case "setAppIcon": self.setAppIcon = argument
                     case "removeNotification": self.removeNotification = argument
                     case "notificationIdentifier": self.notificationIdentifier = argument
+                    case "notificationStyle": self.notificationStyle = argument
                     case "inspectMode": self.inspectMode = argument
                     case "inspectConfig": self.inspectConfig = argument
                     case "inspectSchema": self.inspectSchema = argument
@@ -455,6 +459,7 @@ extension CommandLineArguments {
                 case "preferredViewOrder": self.preferredViewOrder = argument
                 case "preferredAppearance": self.preferredAppearance = argument
                 case "playSound": self.playSound = argument
+                case "notificationStyle": self.notificationStyle = argument
                 // Boolean flags
                 case "button1Disabled": self.button1Disabled = argument
                 case "button2Disabled": self.button2Disabled = argument
