@@ -13,6 +13,7 @@ struct MessageContent: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
     @State private var messageHeight: CGFloat
+    @State private var contentOpacity: Double = 0
     
     var messageMinHeight: CGFloat = 50
     var fieldPadding: CGFloat = 15
@@ -219,6 +220,13 @@ struct MessageContent: View {
         .padding(.trailing, appDefaults.sidePadding)
         .padding(.top, appDefaults.topPadding)
         .textSelection(.enabled)
+        .opacity(contentOpacity)
+        .onAppear {
+            contentOpacity = 0
+            withAnimation(.easeInOut(duration: 0.25)) {
+                contentOpacity = 1
+            }
+        }
     }
 }
 

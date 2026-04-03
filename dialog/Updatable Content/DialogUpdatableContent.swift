@@ -95,7 +95,7 @@ class FileReader {
     }
 
     private func processWindow() {
-        placeWindow(observedData.mainWindow ?? NSApp.windows[0], size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
+        placeWindow(observedData.mainWindow ?? NSApp.windows[0], size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight),
             vertical: observedData.appProperties.windowPositionVertical,
             horozontal: observedData.appProperties.windowPositionHorozontal,
             offset: observedData.args.positionOffset.value.floatValue(),
@@ -938,15 +938,16 @@ final class DialogUpdatableContent: ObservableObject {
         appProperties.windowWidth = appvars.windowWidth
         appProperties.windowHeight = appvars.windowHeight
         
-        // Resize window if dimensions changed
+        // Resize window if dimensions changed, crossfading the message area during the transition
         if windowSizeChanged, let window = mainWindow ?? NSApp.windows.first {
             writeLog("Card resizing window to \(appvars.windowWidth) x \(appvars.windowHeight)")
-            placeWindow(window, 
-                       size: CGSize(width: appProperties.windowWidth, height: appProperties.windowHeight + 28),
+            placeWindow(window,
+                       size: CGSize(width: appProperties.windowWidth, height: appProperties.windowHeight),
                        vertical: appProperties.windowPositionVertical,
                        horozontal: appProperties.windowPositionHorozontal,
                        offset: args.positionOffset.value.floatValue(),
-                       useFullScreen: args.blurScreen.present || args.forceOnTop.present)
+                       useFullScreen: args.blurScreen.present || args.forceOnTop.present,
+                       animated: true)
         }
         
         // Check if we have stored input for this card (user navigated back)
@@ -956,6 +957,7 @@ final class DialogUpdatableContent: ObservableObject {
         }
         
         // Update the observed arrays and state from the global state
+        imageArray = appvars.imageArray
         textFieldArray = userInputState.textFields
         dropdownArray = userInputState.dropdownItems
         listItemsArray = userInputState.listItems

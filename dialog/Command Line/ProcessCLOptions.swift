@@ -750,6 +750,9 @@ func processCLOptions(json: JSON = getJSON()) {
 
     if appArguments.mainImage.present {
         writeLog("\(appArguments.mainImage.long) present")
+        // Clear existing images so cards with different images replace rather than accumulate
+        appvars.imageArray.removeAll()
+        appvars.imageCaptionArray.removeAll()
         if json[appArguments.mainImage.long].exists() {
             if json[appArguments.mainImage.long].array == nil {
                 // not an array so pull the single value

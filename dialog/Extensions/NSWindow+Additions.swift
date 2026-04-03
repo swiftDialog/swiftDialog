@@ -111,7 +111,7 @@ func calculateWindowXPos(screenWidth: CGFloat, position: NSWindow.Position.Horiz
 }
 
 
-func placeWindow(_ window: NSWindow, size: CGSize?, vertical: NSWindow.Position.Vertical, horozontal: NSWindow.Position.Horizontal, offset: CGFloat, useFullScreen: Bool = false) {
+func placeWindow(_ window: NSWindow, size: CGSize?, vertical: NSWindow.Position.Vertical, horozontal: NSWindow.Position.Horizontal, offset: CGFloat, useFullScreen: Bool = false, animated: Bool = false) {
     // screen size
     let main = NSScreen.main!
     let mainFrameWidth = main.frame.width
@@ -163,7 +163,15 @@ func placeWindow(_ window: NSWindow, size: CGSize?, vertical: NSWindow.Position.
 
     // Set window frame
     let newFrame = NSRect(x: adjustedWindowX, y: adjustedWindowY, width: windowSize.width, height: windowSize.height)
-    window.setFrame(newFrame, display: true)
+    if animated {
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.25
+            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            window.animator().setFrame(newFrame, display: true)
+        }
+    } else {
+        window.setFrame(newFrame, display: true)
+    }
     writeLog("Final window frame is \(window.frame)", logLevel: .debug)
 }
 
