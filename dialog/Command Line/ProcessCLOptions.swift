@@ -778,6 +778,7 @@ func processCLOptions(json: JSON = getJSON()) {
 
     if json[appArguments.mainImageCaption.long].exists() || appArguments.mainImageCaption.present {
         writeLog("\(appArguments.mainImageCaption.long) present")
+        appvars.imageCaptionArray.removeAll()
         if json[appArguments.mainImageCaption.long].exists() {
             appvars.imageCaptionArray.append(json[appArguments.mainImageCaption.long].stringValue)
         } else {

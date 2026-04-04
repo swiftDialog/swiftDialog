@@ -854,6 +854,7 @@ final class DialogUpdatableContent: ObservableObject {
         userInputState.dropdownItems.removeAll()
         userInputState.checkBoxes.removeAll()
         userInputState.listItems.removeAll()
+        userInputState.iconItems.removeAll()
         
         // Update observed arrays and state
         textFieldArray = []
