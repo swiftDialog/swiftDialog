@@ -877,15 +877,16 @@ final class DialogUpdatableContent: ObservableObject {
         // Clear previous user input state
         clearUserInputState()
         
+        // Reset appvars properties that processCLOptions only sets when the argument is present.
+        // These must be reset BEFORE resetToDefaults() because CommandLineArguments() captures
+        // appvars.iconWidth as the defaultValue for iconSize at initialisation time.
+        appvars.windowWidth = 820   // Default from AppVariables
+        appvars.windowHeight = 380  // Default from AppVariables
+        appvars.iconWidth = 150     // Default from AppVariables
+        
         // Reset appArguments to defaults first
         // This ensures properties not specified in the card revert to defaults
         appArguments.resetToDefaults()
-        
-        // Reset appvars window dimensions to defaults
-        // processCLOptions only updates these if the arguments are present,
-        // so we need to reset them before processing the new card config
-        appvars.windowWidth = 820  // Default from AppVariables
-        appvars.windowHeight = 380 // Default from AppVariables
         
         // Get the merged configuration (global defaults + card overrides)
         let mergedConfig = cardState.getMergedConfiguration(for: card)
@@ -923,21 +924,25 @@ final class DialogUpdatableContent: ObservableObject {
         // This ensures dropdownValues.present, checkbox.present etc. are correctly set
         args = appArguments
         
-        // Update progress bar settings if present in card config
+        // Sync icon display properties from the updated args
+        iconSize = appArguments.iconSize.value.floatValue()
+        iconAlpha = Double(appArguments.iconAlpha.value) ?? 1.0
+        
+        // Reset progress bar state, then re-apply if the current card has one.
+        // This ensures a progress bar from a previous card doesn't leak into a card that has none.
+        progressValue = nil
+        progressTotal = 100
         if args.progressBar.present {
             progressTotal = Double(args.progressBar.value) ?? 100
-            // Start with indeterminate progress (nil) - value is set via command file
-            // The "progress" JSON key sets the total, not the current value
-            progressValue = nil
             writeLog("Card progress bar: total=\(progressTotal), starting indeterminate")
         }
         
-        // Sync window properties from appvars (updated by processCLOptions)
-        // This allows cards to specify different window sizes
-        let windowSizeChanged = appProperties.windowWidth != appvars.windowWidth || 
+        // Re-sync all appProperties from appvars now that processCLOptions has run.
+        // This picks up font, colour, alignment, button size and all other styling
+        // that processCLOptions writes to appvars but that views read from appProperties.
+        let windowSizeChanged = appProperties.windowWidth != appvars.windowWidth ||
                                 appProperties.windowHeight != appvars.windowHeight
-        appProperties.windowWidth = appvars.windowWidth
-        appProperties.windowHeight = appvars.windowHeight
+        appProperties = appvars
         
         // Resize window if dimensions changed, crossfading the message area during the transition
         if windowSizeChanged, let window = mainWindow ?? NSApp.windows.first {
