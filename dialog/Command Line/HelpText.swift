@@ -144,33 +144,84 @@ struct SDHelp {
         ## NOTE: swiftDialog 2.3 and later do not support changes to font name or weight
 """
 
-        argument.notification.helpShort = "Send a system notification"
+        argument.notification.helpShort = "Send a notification"
         argument.notification.helpLong = """
+        Sends a notification instead of showing a dialog window.
+
         Accepts the following arguments:
           --\(appArguments.titleOption.long) <text>
           --\(appArguments.subTitleOption.long) <text>
-          --\(appArguments.messageOption.long) <text> (as plain text. newlines supported as \\n)
-          --\(appArguments.iconOption.long) <image> *
+          --\(appArguments.messageOption.long) <text> (plain text or inline markdown; newlines supported as \\n)
+          --\(appArguments.iconOption.long) <image>
+          --\(appArguments.mainImage.long) <image>
           --\(appArguments.notificationIdentifier.long) <text>
           --\(appArguments.removeNotification.long)
+          --\(appArguments.notificationStyle.long) <style>
+          --\(appArguments.timerBar.long) <seconds>
+          --\(appArguments.button1TextOption.long) <text>
+          --\(appArguments.button1ActionOption.long) <url|command>
+          --\(appArguments.button2TextOption.long) <text>
+          --\(appArguments.button2ActionOption.long) <url|command>
+          --enablenotificationsounds
 
-        * <image> must refer to a local file or app bundle. Remote images sources are not supported.
+        Use --style to select the notification type. See --help style for details.
 """
+
+        argument.notificationStyle.helpShort = "Set the notification style"
+        argument.notificationStyle.helpUsage = "banner | alert | pseudo | pseudo-banner | pseudo-alert"
+        argument.notificationStyle.helpLong = """
+        Selects the notification presentation style when used with --\(appArguments.notification.long).
+
+        System notification styles (routed through helper apps):
+          banner    - Notification appears briefly then auto-dismisses (default)
+          alert     - Notification persists until the user dismisses it
+
+        Pseudo notification styles (custom swiftDialog window):
+          pseudo         - Same as pseudo-banner
+          pseudo-banner  - Slides in from the right, auto-dismisses after 6 seconds (or --\(appArguments.timerBar.long) value)
+          pseudo-alert   - Slides in from the right, stays until user interaction
+
+        Pseudo notifications display a custom icon on the left with title, subtitle, message
+        and optional image on the right. They support --\(appArguments.button1ActionOption.long), --\(appArguments.button2ActionOption.long),
+        --\(appArguments.notificationIdentifier.long), --\(appArguments.removeNotification.long), and --\(appArguments.timerBar.long).
+
+        Each pseudo notification runs as an independent background process, allowing
+        multiple notifications to be displayed simultaneously.
+
+        Examples:
+          dialog --notification --style pseudo-banner --title "Update" --message "Ready to install"
+          dialog --notification --style pseudo-alert --title "Action Required" --message "Please restart" \\
+              --button1text "Restart" --button1action "/sbin/shutdown -r now" \\
+              --button2text "Later" --button2action ""
+          dialog --notification --style pseudo --remove --identifier "my-notification"
+        """
 
         argument.notificationIdentifier.helpShort = "Set the notification identifier"
         argument.notificationIdentifier.helpLong = """
         Identifier is used to uniquely identify the notification.
         If not specified, a random identifier will be generated.
 
-        Use this identifier to remove the notification with the --\(appArguments.removeNotification.long) option
+        Use this identifier to remove the notification with the --\(appArguments.removeNotification.long) option.
 
         If the identifier is not unique, the previous notification will be replaced by the new one.
+        This applies to both system notifications and pseudo notifications.
         """
 
-        argument.removeNotification.helpShort = "Remove a system notification"
+        argument.removeNotification.helpShort = "Remove a notification"
         argument.removeNotification.helpLong = """
         Removes the notification with the specified identifier.
-        If no identifier is specified, all notifications will be removed.
+        If no identifier is specified, all notifications of that style will be removed.
+
+        For system notifications (banner/alert), this removes delivered and pending notifications
+        from the system notification center.
+
+        For pseudo notifications, this sends a signal to dismiss any matching pseudo notification
+        windows currently on screen.
+
+        Examples:
+          dialog --notification --style banner --remove --identifier "update-1"
+          dialog --notification --style pseudo --remove --identifier "my-alert"
+          dialog --notification --style pseudo --remove
         """
 
         argument.dialogStyle.helpShort = "Configure a pre-set window style"
