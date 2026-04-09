@@ -1098,10 +1098,10 @@ struct BentoGridView: View {
                 rowHeight: rowHeight * scaleFactor,
                 gap: gap * scaleFactor
             )
-            let gridSize = CGSize(width: availableWidth, height: gridHeight)
+            // let gridSize = CGSize(width: availableWidth, height: gridHeight)
             // For inline detail, use the full container height (not just the grid)
-            let detailHeight = containerHeight ?? max(gridHeight, 480)
-            let detailSize = CGSize(width: availableWidth, height: detailHeight)
+            // let detailHeight = containerHeight ?? max(gridHeight, 480)
+            // let detailSize = CGSize(width: availableWidth, height: detailHeight)
 
             ZStack(alignment: .topLeading) {
                 // Grid cells

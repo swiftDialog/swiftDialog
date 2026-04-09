@@ -1183,7 +1183,7 @@ struct Preset5View: View {
         }
         commandRouter.startMonitoring(
             triggerFilePath: triggerFilePath,
-            notificationHandler: { [self] command in
+            notificationHandler: { command in
                 writeLog("Preset5: Received notification command: \(command)", logLevel: .info)
             }
         )
@@ -3246,7 +3246,7 @@ struct Preset5View: View {
     @ViewBuilder
     private func showcaseVerticalLayout(step: InspectConfig.IntroStep, stepIndex: Int, canGoBack: Bool, continueText: String, backText: String) -> some View {
         let sp = InspectSizes.SetupSpacing.self
-        return GeometryReader { geometry in
+        GeometryReader { geometry in
             VStack(spacing: 0) {
                 // Content area with vertical centering
                 GeometryReader { contentGeo in
@@ -5489,7 +5489,7 @@ struct Preset5View: View {
         let backText = localized("backButtonText", forStep: step, fallback: nil) ?? step.backButtonText ?? "Back"
 
         let sp = InspectSizes.SetupSpacing.self
-        return GeometryReader { geometry in
+        GeometryReader { geometry in
             let heroHeight = geometry.size.height * (step.assistantImageHeight ?? 0.45)
 
             VStack(spacing: 0) {
@@ -5972,7 +5972,7 @@ struct Preset5View: View {
     @ViewBuilder
     private func guideSidebarContent(step: InspectConfig.IntroStep, accent: Color, alignment: HorizontalAlignment = .leading) -> some View {
         let textAlign: TextAlignment = alignment == .center ? .center : .leading
-        return VStack(alignment: alignment, spacing: 20) {
+        VStack(alignment: alignment, spacing: 20) {
             // Subtitle / description
             if let subtitle = localized("subtitle", forStep: step, fallback: step.subtitle) {
                 Text(subtitle)

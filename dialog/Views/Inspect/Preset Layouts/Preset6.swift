@@ -1652,7 +1652,7 @@ struct Preset6View: View, InspectLayoutProtocol {
         // Use CommandRouter to host monitoring (class-based, survives struct copies)
         commandRouter.startMonitoring(
             triggerFilePath: triggerFilePath,
-            notificationHandler: { [self] command in
+            notificationHandler: { command in
                 writeLog("Preset6: Received notification command: \(command)", logLevel: .info)
             }
         )
@@ -1862,7 +1862,10 @@ struct Preset6View: View, InspectLayoutProtocol {
                 downloadingItems.remove(itemId)
             }
         case "downloading":
-            withAnimation(.spring()) { downloadingItems.insert(itemId) }
+            withAnimation(.spring()) {
+                downloadingItems.insert(itemId)
+                return
+            }
         case "pending":
             withAnimation(.spring()) {
                 completedSteps.remove(itemId)
