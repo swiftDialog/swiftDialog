@@ -3,77 +3,44 @@
 //  dialog
 //
 //  Created by Henry Stamerjohann, Declarative IT GmbH, 10/11/2025
-//  Try a MVVM appoach here as a generic state manager
 //
 //  Centralized state management for Inspect dynamic UI components.
-//  Eliminates nested dictionary @State issues with ObservableObject pattern.
+//  Uses @Observable for per-property tracking — SwiftUI only re-renders
+//  views that read the specific property that changed.
 //
 
 import SwiftUI
-import Combine
+import Observation
 
 /// Observable state manager for Inspect preset dynamic content updates
-/// Replaces problematic @State nested dictionaries with proper @Published properties
 /// Used across multiple presets (Preset5, Preset6, etc.)
 @MainActor
-class InspectDynamicState: ObservableObject {
+@Observable
+class InspectDynamicState {
 
-    // MARK: - Published State (Triggers SwiftUI Updates)
+    // MARK: - Tracked State (Per-Property SwiftUI Updates)
 
-    /// Custom processing messages per step (stepId → message)
-    @Published var dynamicMessages: [String: String] = [:] {
-        willSet {
-            writeLog("MVVM: dynamicMessages willSet (thread: \(Thread.isMainThread ? "MAIN" : "BG"))", logLevel: .debug)
-        }
-    }
+    /// Custom processing messages per step (stepId -> message)
+    var dynamicMessages: [String: String] = [:]
 
-    /// Progress percentages per step (stepId → 0-100)
-    @Published var progressPercentages: [String: Int] = [:] {
-        willSet {
-            writeLog("MVVM: progressPercentages willSet (thread: \(Thread.isMainThread ? "MAIN" : "BG"))", logLevel: .debug)
-        }
-    }
+    /// Progress percentages per step (stepId -> 0-100)
+    var progressPercentages: [String: Int] = [:]
 
-    /// Custom data display per step (stepId → [(key, value, color)])
-    @Published var customDataDisplay: [String: [(String, String, String?)]] = [:] {
-        willSet {
-            writeLog("MVVM: customDataDisplay willSet (thread: \(Thread.isMainThread ? "MAIN" : "BG"))", logLevel: .debug)
-        }
-    }
+    /// Custom data display per step (stepId -> [(key, value, color)])
+    var customDataDisplay: [String: [(String, String, String?)]] = [:]
 
-    /// Dynamic guidance content updates (stepId → blockIndex → content)
-    @Published var dynamicGuidanceContent: [String: [Int: String]] = [:] {
-        willSet {
-            writeLog("MVVM: dynamicGuidanceContent willSet (thread: \(Thread.isMainThread ? "MAIN" : "BG"))", logLevel: .debug)
-        }
-    }
+    /// Dynamic guidance content updates (stepId -> blockIndex -> content)
+    var dynamicGuidanceContent: [String: [Int: String]] = [:]
 
-    /// Dynamic guidance property updates (stepId → blockIndex → [property → value])
+    /// Dynamic guidance property updates (stepId -> blockIndex -> [property -> value])
     /// This is the PRIMARY state for status badges, comparison tables, phase trackers
-    @Published var dynamicGuidanceProperties: [String: [Int: [String: String]]] = [:] {
-        willSet {
-            writeLog("MVVM: dynamicGuidanceProperties willSet (thread: \(Thread.isMainThread ? "MAIN" : "BG"))", logLevel: .debug)
-        }
-        didSet { updateGeneration += 1 }
-    }
+    var dynamicGuidanceProperties: [String: [Int: [String: String]]] = [:]
 
-    /// Monotonic counter incremented on every dynamic property change.
-    /// Used as SwiftUI .id() to force re-render (hashValue is unreliable for dictionaries).
-    @Published var updateGeneration: Int = 0
+    /// Status icons per list item (index -> "iconName-color")
+    var itemStatusIcons: [Int: String] = [:]
 
-    /// Status icons per list item (index → "iconName-color")
-    @Published var itemStatusIcons: [Int: String] = [:] {
-        willSet {
-            writeLog("MVVM: itemStatusIcons willSet (thread: \(Thread.isMainThread ? "MAIN" : "BG"))", logLevel: .debug)
-        }
-    }
-
-    /// Continue button visibility per step (stepId → showButton)
-    @Published var showContinueButton: [String: Bool] = [:] {
-        willSet {
-            writeLog("MVVM: showContinueButton willSet (thread: \(Thread.isMainThread ? "MAIN" : "BG"))", logLevel: .debug)
-        }
-    }
+    /// Continue button visibility per step (stepId -> showButton)
+    var showContinueButton: [String: Bool] = [:]
 
     // MARK: - Update Methods (Called by External Systems)
 
@@ -120,17 +87,14 @@ class InspectDynamicState: ObservableObject {
         var stepDict = dynamicGuidanceProperties[stepId] ?? [:]
         var blockDict = stepDict[blockIndex] ?? [:]
 
-        // Capture old value for debugging
-        let oldValue = blockDict[property] ?? "(none)"
-
         // Update the property
         blockDict[property] = value
         stepDict[blockIndex] = blockDict
 
-        // Reassign to trigger @Published
+        // Reassign to trigger observation
         dynamicGuidanceProperties[stepId] = stepDict
 
-        writeLog("MVVM: updateGuidanceProperty('\(stepId)'[\(blockIndex)].\(property): '\(oldValue)' → '\(value)') (thread: \(Thread.isMainThread ? "MAIN" : "BG"))", logLevel: .info)
+        writeLog("InspectDynamicState: updateGuidanceProperty('\(stepId)'[\(blockIndex)].\(property) = '\(value)')", logLevel: .info)
     }
 
     /// Batch update multiple properties on a guidance component (optimization)
@@ -142,13 +106,13 @@ class InspectDynamicState: ObservableObject {
         blockDict.merge(properties) { _, new in new }
         stepDict[blockIndex] = blockDict
 
-        // Single @Published update
+        // Single observation update
         dynamicGuidanceProperties[stepId] = stepDict
 
         writeLog("InspectDynamicState: Batch updated \(properties.count) properties for '\(stepId)'[\(blockIndex)]", logLevel: .info)
     }
 
-    /// Batch update multiple blocks in a single @Published fire.
+    /// Batch update multiple blocks in a single observation fire.
     /// All values appear in one SwiftUI render frame — no per-property flicker.
     func updateGuidancePropertiesBatch(stepId: String, blocks: [Int: [String: String]]) {
         var stepDict = dynamicGuidanceProperties[stepId] ?? [:]
@@ -159,7 +123,7 @@ class InspectDynamicState: ObservableObject {
             stepDict[blockIndex] = blockDict
         }
 
-        // Single @Published fire for all blocks
+        // Single observation fire for all blocks
         dynamicGuidanceProperties[stepId] = stepDict
 
         let totalProps = blocks.values.reduce(0) { $0 + $1.count }

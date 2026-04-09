@@ -12,6 +12,7 @@ import SwiftUI
 
 // MARK: - Icon Cache Manager
 
+@MainActor
 class PresetIconCache: ObservableObject {
     @Published var mainIcon: String?
     @Published var itemIcons: [String: String] = [:]

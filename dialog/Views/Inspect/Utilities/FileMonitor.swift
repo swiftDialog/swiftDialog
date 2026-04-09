@@ -550,10 +550,10 @@ private class EventDebouncer {
 
         pendingEvents[key]?.cancel()
         
-        let workItem = DispatchWorkItem {
+        let workItem = DispatchWorkItem { [weak self] in
             action()
             DispatchQueue.main.async {
-                self.pendingEvents.removeValue(forKey: key)
+                self?.pendingEvents.removeValue(forKey: key)
             }
         }
         

@@ -39,7 +39,7 @@ struct Preset6View: View, InspectLayoutProtocol {
 
     // MARK: - Module Services
 
-    @StateObject private var dynamicState = InspectDynamicState()
+    @State private var dynamicState = InspectDynamicState()
     @StateObject private var complianceService = ComplianceAggregatorService()
     @StateObject private var introStepMonitor = IntroStepMonitorService()
 
@@ -512,7 +512,7 @@ struct Preset6View: View, InspectLayoutProtocol {
                                             showItemDetailOverlay = true
                                         } : nil,
                                         accentColor: highlightColor,
-                                        refreshToken: dynamicState.updateGeneration
+                                        refreshToken: 0
                                     )
                                 } else {
                                     // Fallback for items without guidanceContent

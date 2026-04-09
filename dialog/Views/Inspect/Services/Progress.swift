@@ -395,7 +395,6 @@ class Progress: ObservableObject {
         itemStatuses.removeAll()
         statusHistory.removeAll()
         presetData.removeAll()
-        
         writeLog("ProgressService: Deinitialized and cleaned up", logLevel: .debug)
     }
 }

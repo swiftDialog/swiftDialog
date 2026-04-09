@@ -412,10 +412,14 @@ class Config {
             }
 
             let decoder = JSONDecoder()
+            InspectConfig.unknownKeyWarnings = []
             let config = try decoder.decode(InspectConfig.self, from: jsonData)
+            let keyWarnings = InspectConfig.unknownKeyWarnings
+            InspectConfig.unknownKeyWarnings = []
 
             let processedConfig = applyConfigurationDefaults(to: config)
-            let warnings = validateConfiguration(processedConfig)
+            var warnings = validateConfiguration(processedConfig)
+            warnings.append(contentsOf: keyWarnings)
 
             writeLog("ConfigurationService: Successfully loaded configuration from URL: \(urlString)", logLevel: .info)
             writeLog("ConfigurationService: Loaded \(config.items.count) items", logLevel: .info)
@@ -476,15 +480,19 @@ class Config {
             }
 
             let decoder = JSONDecoder()
+            InspectConfig.unknownKeyWarnings = []
             let config = try decoder.decode(InspectConfig.self, from: jsonData)
+            let keyWarnings = InspectConfig.unknownKeyWarnings
+            InspectConfig.unknownKeyWarnings = []
 
             // Validate and apply defaults
             let processedConfig = applyConfigurationDefaults(to: config)
-            let warnings = validateConfiguration(processedConfig)
-            
+            var warnings = validateConfiguration(processedConfig)
+            warnings.append(contentsOf: keyWarnings)
+
             writeLog("ConfigurationService: Successfully loaded configuration from \(path)", logLevel: .info)
             writeLog("ConfigurationService: Loaded \(config.items.count) items", logLevel: .info)
-            
+
             return .success(ConfigurationResult(
                 config: processedConfig,
                 source: .file(path: path),

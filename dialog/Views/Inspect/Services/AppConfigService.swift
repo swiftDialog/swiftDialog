@@ -51,6 +51,7 @@ struct MDMBrandingOverrides {
 
 /// Service for reading MDM AppConfig managed preferences
 /// Used to dynamically apply branding based on MDM configuration
+@MainActor
 class AppConfigService: ObservableObject {
 
     // MARK: - Published State

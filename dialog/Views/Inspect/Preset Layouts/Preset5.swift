@@ -51,7 +51,7 @@ struct Preset5View: View {
     @StateObject private var monitoringService = UnifiedMonitoringService()
     @StateObject private var introStepMonitor = IntroStepMonitorService()
     @StateObject private var complianceService = ComplianceAggregatorService()
-    @StateObject private var dynamicState = InspectDynamicState()
+    @State private var dynamicState = InspectDynamicState()
     @State private var preferencesService: PreferencesService?
     @State private var localizationService = LocalizationService()
 
@@ -77,10 +77,7 @@ struct Preset5View: View {
     @State private var skippedSteps: Set<String> = []  // Track skipped processing steps
     @State private var completedProcessingSteps: Set<String> = []  // Track completed processing steps
     @State private var completedNavigatedSteps: Set<String> = []  // Track all steps navigated past (for result file)
-    @State private var dynamicContentUpdateCounter: Int = 0  // Increment to force re-render on dynamic updates
-
     // Dynamic content overrides (controlled via trigger file set: commands)
-    @State private var statusBadgeOverrides: [String: String] = [:]  // label/id -> state
     @State private var phaseTrackerOverride: Int? = nil              // Override currentPhase value
     @State private var iconOverride: String? = nil                   // Override main dialog icon
     @State private var heroImageOverrides: [String: String] = [:]    // stepId -> path/SF symbol
@@ -572,7 +569,9 @@ struct Preset5View: View {
         // Find step in the unified allSteps array
         if let index = allSteps.firstIndex(where: { $0.id == stepId }) {
             writeLog("Preset5: Navigating to step '\(stepId)' at index \(index)", logLevel: .info)
-            currentStepIndex = index
+            withAnimation(InspectConstants.stepTransition) {
+                currentStepIndex = index
+            }
             writeStepEvent("step_started", stepId: stepId)
             return
         }
@@ -581,7 +580,9 @@ struct Preset5View: View {
         if stepId == "portal" {
             if let index = allSteps.firstIndex(where: { $0.stepType == "portal" }) {
                 writeLog("Preset5: Navigating to portal step at index \(index)", logLevel: .info)
-                currentStepIndex = index
+                withAnimation(InspectConstants.stepTransition) {
+                    currentStepIndex = index
+                }
                 writeStepEvent("step_started", stepId: allSteps[index].id)
                 return
             }
@@ -602,7 +603,9 @@ struct Preset5View: View {
 
         if currentStepIndex + 1 < allSteps.count {
             mediaTextVisible = false
-            currentStepIndex += 1
+            withAnimation(InspectConstants.stepTransition) {
+                currentStepIndex += 1
+            }
             writeStepEvent("step_started", stepId: allSteps[currentStepIndex].id)
             writeLog("Preset5: Advanced to step \(currentStepIndex)", logLevel: .info)
         } else {
@@ -616,7 +619,9 @@ struct Preset5View: View {
     private func goToPreviousStep() {
         if currentStepIndex > 0 {
             mediaTextVisible = false
-            currentStepIndex -= 1
+            withAnimation(InspectConstants.stepTransition) {
+                currentStepIndex -= 1
+            }
             writeLog("Preset5: Moved back to step \(currentStepIndex)", logLevel: .info)
         }
     }
@@ -699,10 +704,18 @@ struct Preset5View: View {
         case "status-badge":
             // Format: set:status-badge:labelOrId:state
             let label = value
-            let state = extra ?? "enabled"
-            statusBadgeOverrides[label] = state
-            dynamicContentUpdateCounter += 1  // Force SwiftUI re-render for status badge change
-            writeLog("Preset5: Set status badge '\(label)' to state '\(state)'", logLevel: .info)
+            let newState = extra ?? "enabled"
+            // Find block index by label/id and update via dynamicState
+            if let step = currentStep, let content = step.content {
+                for (blockIndex, block) in content.enumerated() {
+                    let blockKey = block.id ?? block.content ?? block.label ?? ""
+                    if blockKey == label {
+                        dynamicState.updateGuidanceProperty(stepId: step.id, blockIndex: blockIndex, property: "state", value: newState)
+                        break
+                    }
+                }
+            }
+            writeLog("Preset5: Set status badge '\(label)' to state '\(newState)' via dynamicState", logLevel: .info)
 
         case "phase-tracker":
             // Format: set:phase-tracker:phaseIndex
@@ -748,7 +761,7 @@ struct Preset5View: View {
     private func clearOverrides(type: String) {
         switch type {
         case "status-badge", "status-badges":
-            statusBadgeOverrides.removeAll()
+            dynamicState.dynamicGuidanceProperties.removeAll()
             writeLog("Preset5: Cleared all status badge overrides", logLevel: .info)
         case "phase-tracker":
             phaseTrackerOverride = nil
@@ -763,7 +776,7 @@ struct Preset5View: View {
             iconBasePathOverride = nil
             writeLog("Preset5: Cleared icon base path override", logLevel: .info)
         case "all":
-            statusBadgeOverrides.removeAll()
+            dynamicState.dynamicGuidanceProperties.removeAll()
             phaseTrackerOverride = nil
             iconOverride = nil
             heroImageOverrides.removeAll()
@@ -806,82 +819,29 @@ struct Preset5View: View {
         }
 
         let valueOrContent = parts[2]
+        writeLog("Preset5: [DIAG] handleUpdateGuidance step='\(stepId)' block='\(blockIdentifier)' value='\(valueOrContent.prefix(50))'", logLevel: .error)
 
-        // Get or create state for this block index
-        if introStepMonitor.contentStates[blockIndex] == nil {
-            introStepMonitor.contentStates[blockIndex] = DynamicContentState()
-        }
-
-        guard let state = introStepMonitor.contentStates[blockIndex] else {
-            writeLog("Preset5: Failed to get content state for block \(blockIndex)", logLevel: .error)
-            return
+        // Resolve the step ID for dynamicState keying
+        let effectiveStepId: String
+        if stepId == "_" || stepId.isEmpty {
+            // Auto-resolve: find step containing this block by id
+            effectiveStepId = allSteps.first(where: { step in
+                step.content?.contains(where: { $0.id == blockIdentifier }) == true
+            })?.id ?? currentStep?.id ?? ""
+        } else {
+            effectiveStepId = allSteps.first(where: { $0.id == stepId })?.id ?? currentStep?.id ?? ""
         }
 
         // Check if this is a property=value format or plain content
         if let equalsIndex = valueOrContent.firstIndex(of: "=") {
             let property = String(valueOrContent[..<equalsIndex])
             let value = String(valueOrContent[valueOrContent.index(after: equalsIndex)...])
-
-            switch property {
-            case "label":
-                state.label = value
-                writeLog("Preset5: Updated guidance block \(blockIndex) label to '\(value)'", logLevel: .info)
-            case "state":
-                state.state = value
-                // Also update statusBadgeOverrides keyed by block index AND original label for introStatusBadgeView
-                statusBadgeOverrides["block_\(blockIndex)"] = value
-                if let step = currentStep, let content = step.content, blockIndex < content.count {
-                    let block = content[blockIndex]
-                    let badgeKey = block.id ?? block.content ?? block.label ?? ""
-                    if !badgeKey.isEmpty {
-                        statusBadgeOverrides[badgeKey] = value
-                    }
-                }
-                writeLog("Preset5: Updated guidance block \(blockIndex) state to '\(value)'", logLevel: .info)
-            case "actual":
-                state.actual = value
-                writeLog("Preset5: Updated guidance block \(blockIndex) actual to '\(value)'", logLevel: .info)
-            case "progress":
-                if let progressValue = Double(value) {
-                    // Auto-detect scale: values > 1.0 are treated as 0-100, otherwise 0.0-1.0
-                    let normalized = progressValue > 1.0 ? min(1.0, max(0.0, progressValue / 100.0)) : min(1.0, max(0.0, progressValue))
-                    state.progress = normalized
-                    writeLog("Preset5: Updated guidance block \(blockIndex) progress to \(normalized) (raw: \(value))", logLevel: .info)
-                }
-            case "currentPhase":
-                if let phaseValue = Int(value) {
-                    state.currentPhase = phaseValue
-                    writeLog("Preset5: Updated guidance block \(blockIndex) currentPhase to \(phaseValue)", logLevel: .info)
-                }
-            case "content":
-                state.content = value
-                writeLog("Preset5: Updated guidance block \(blockIndex) content to '\(value)'", logLevel: .info)
-            case "visible":
-                state.visible = value.lowercased() == "true" || value == "1"
-                writeLog("Preset5: Updated guidance block \(blockIndex) visible to \(state.visible)", logLevel: .info)
-            case "passed":
-                if let passedValue = Int(value) {
-                    state.passed = passedValue
-                    writeLog("Preset5: Updated guidance block \(blockIndex) passed to \(passedValue)", logLevel: .info)
-                }
-            case "total":
-                if let totalValue = Int(value) {
-                    state.total = totalValue
-                    writeLog("Preset5: Updated guidance block \(blockIndex) total to \(totalValue)", logLevel: .info)
-                }
-            default:
-                writeLog("Preset5: Unknown property in update_guidance: \(property)", logLevel: .debug)
-            }
+            dynamicState.updateGuidanceProperty(stepId: effectiveStepId, blockIndex: blockIndex, property: property, value: value)
+            writeLog("Preset5: Updated guidance block \(blockIndex) \(property) to '\(value)' via dynamicState", logLevel: .info)
         } else {
-            // Plain content update (no equals sign) - treat as label/content update
-            state.content = valueOrContent
-            writeLog("Preset5: Updated guidance block \(blockIndex) content to '\(valueOrContent)'", logLevel: .info)
-        }
-
-        // Trigger UI update
-        DispatchQueue.main.async {
-            self.introStepMonitor.objectWillChange.send()
-            self.dynamicContentUpdateCounter += 1
+            // Plain content update (no equals sign) - treat as content update
+            dynamicState.updateGuidanceProperty(stepId: effectiveStepId, blockIndex: blockIndex, property: "content", value: valueOrContent)
+            writeLog("Preset5: Updated guidance block \(blockIndex) content to '\(valueOrContent)' via dynamicState", logLevel: .info)
         }
     }
 
@@ -920,46 +880,21 @@ struct Preset5View: View {
             return
         }
 
-        // Resolve block keys → numeric indices and apply updates
-        var updatedCount = 0
+        // Resolve block keys → numeric indices
+        var resolvedBlocks: [Int: [String: String]] = [:]
         for (blockKey, properties) in payload.updates {
             if let blockIndex = InspectConfig.GuidanceContent.resolveBlockIndex(blockKey, in: content) {
-                if introStepMonitor.contentStates[blockIndex] == nil {
-                    introStepMonitor.contentStates[blockIndex] = DynamicContentState()
-                }
-                if let state = introStepMonitor.contentStates[blockIndex] {
-                    for (property, value) in properties {
-                        switch property {
-                        case "label": state.label = value
-                        case "state": state.state = value
-                        case "actual": state.actual = value
-                        case "content": state.content = value
-                        case "visible": state.visible = value.lowercased() == "true" || value == "1"
-                        case "progress":
-                            if let v = Double(value) { state.progress = v }
-                        case "currentPhase":
-                            if let v = Int(value) { state.currentPhase = v }
-                        case "passed":
-                            if let v = Int(value) { state.passed = v }
-                        case "total":
-                            if let v = Int(value) { state.total = v }
-                        default: break
-                        }
-                    }
-                    updatedCount += 1
-                }
+                resolvedBlocks[blockIndex] = properties
             } else {
                 writeLog("Preset5: batch_update: cannot resolve block '\(blockKey)' in step '\(step.id)'", logLevel: .error)
             }
         }
 
-        if updatedCount > 0 {
-            DispatchQueue.main.async {
-                self.introStepMonitor.objectWillChange.send()
-                self.dynamicContentUpdateCounter += 1
-            }
-            writeLog("Preset5: batch_update: applied \(updatedCount) blocks to '\(step.id)'", logLevel: .info)
-        }
+        guard !resolvedBlocks.isEmpty else { return }
+
+        // Single atomic update through InspectDynamicState
+        dynamicState.updateGuidancePropertiesBatch(stepId: step.id, blocks: resolvedBlocks)
+        writeLog("Preset5: batch_update: applied \(resolvedBlocks.count) blocks to '\(step.id)' via dynamicState", logLevel: .info)
     }
 
     @ViewBuilder
@@ -971,12 +906,11 @@ struct Preset5View: View {
         } else if let step = currentStep {
             // Linear step model: render based on stepType
             currentStepView(step: step)
-                .id("step-\(currentStepIndex)-\(step.id)")  // Force view recreation on step change
+                .id("step-\(currentStepIndex)-\(step.id)")  // Only changes on navigation
                 .transition(.asymmetric(
                     insertion: .opacity.combined(with: .move(edge: .trailing)),
                     removal: .opacity.combined(with: .move(edge: .leading))
                 ))
-                .animation(InspectConstants.stepTransition, value: currentStepIndex)
         } else if currentStepIndex >= allSteps.count {
             // Past the last step - complete and close
             Color.clear.onAppear { handleCompletion() }
@@ -1144,7 +1078,9 @@ struct Preset5View: View {
         commandRouter.onNavigateByID = { [self] stepId in navigateToStep(stepId: stepId) }
         commandRouter.onNavigateByIndex = { [self] index in
             if index >= 0, index < allSteps.count {
-                currentStepIndex = index
+                withAnimation(InspectConstants.stepTransition) {
+                    currentStepIndex = index
+                }
                 writeStepEvent("step_started", stepId: allSteps[index].id)
             }
         }
@@ -1158,12 +1094,9 @@ struct Preset5View: View {
                 skippedSteps.removeAll()
                 completedNavigatedSteps.removeAll()
                 processingState = .idle
-                dynamicContentUpdateCounter = 0
             }
             // Clear dynamic state (messages, progress, display data)
             dynamicState.clearAllState()
-            // Clear status badge overrides
-            statusBadgeOverrides.removeAll()
             phaseTrackerOverride = nil
             iconOverride = nil
             heroImageOverrides.removeAll()
@@ -2441,7 +2374,7 @@ struct Preset5View: View {
                                 }
                             }
                             // Force re-render when status badges or other dynamic content changes via IPC
-                            .id("processing-content-\(step.id)-\(dynamicContentUpdateCounter)")
+                            .id("processing-content-\(step.id)")
                         }
 
                         if isCompleted {
@@ -2957,7 +2890,7 @@ struct Preset5View: View {
                         }
 
                         // Auto-advance only if explicitly requested
-                        if step.autoAdvance == true {
+                        if step.autoAdvance == true && step.requireManualConfirm != true {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                                 self.goToNextStep()
                             }
@@ -2994,8 +2927,29 @@ struct Preset5View: View {
     private func handleCompletionTrigger(stepId: String, result: CompletionResult) {
         // Find the step to get configuration
         let step = introSteps.first(where: { $0.id == stepId }) ?? outroSteps.first(where: { $0.id == stepId })
-        guard step != nil else {
+        guard let step = step else {
             writeLog("Preset5: Cannot handle completion for unknown step: \(stepId)", logLevel: .error)
+            return
+        }
+
+        // If requireManualConfirm is set, update state but don't auto-advance or close
+        if step.requireManualConfirm == true {
+            writeLog("Preset5: Completion trigger for '\(stepId)' received but requireManualConfirm=true — waiting for user click", logLevel: .info)
+            // Still record the result for state tracking, but skip processing timer stop and auto-advance
+            switch result {
+            case .success(let message):
+                inspectState.userValues["processingResult_\(stepId)"] = "success"
+                writeLog("Preset5: Step '\(stepId)' success recorded (manual confirm required): \(message ?? "")", logLevel: .info)
+            case .warning(let message):
+                inspectState.userValues["processingResult_\(stepId)"] = "warning"
+                writeLog("Preset5: Step '\(stepId)' warning recorded (manual confirm required): \(message ?? "")", logLevel: .info)
+            case .failure(let message):
+                failedSteps[stepId] = message ?? "Step failed"
+                inspectState.userValues["processingResult_\(stepId)"] = "failed"
+                writeLog("Preset5: Step '\(stepId)' failure recorded (manual confirm required): \(message ?? "")", logLevel: .info)
+            case .cancelled:
+                inspectState.userValues["processingResult_\(stepId)"] = "skipped"
+            }
             return
         }
 
@@ -3194,7 +3148,7 @@ struct Preset5View: View {
                         }
                         .padding(.top, sp.topInset)
                         // Force re-render when dynamic state or language changes
-                        .id("content-\(step.id)-\(dynamicContentUpdateCounter)-\(selectedLanguageCode ?? "")")
+                        .id("content-\(step.id)-\(selectedLanguageCode ?? "")")
                     }
 
                     // Media carousel (for instruction videos, GIFs, images)
@@ -3250,6 +3204,11 @@ struct Preset5View: View {
             // Start plist monitoring if this step has monitors configured
             // Pass completion trigger callback for auto-advance support
             introStepMonitor.startMonitoring(step: step) { [self] triggerStepId, result in
+                // Never auto-advance if manual confirmation is required
+                guard step.requireManualConfirm != true else {
+                    writeLog("Preset5: Completion trigger fired for step '\(triggerStepId)' but requireManualConfirm=true", logLevel: .debug)
+                    return
+                }
                 // Only auto-advance if configured and trigger result is success
                 guard step.autoAdvanceOnComplete == true else {
                     writeLog("Preset5: Completion trigger fired for step '\(triggerStepId)' but autoAdvanceOnComplete is not enabled", logLevel: .debug)
@@ -3800,11 +3759,121 @@ struct Preset5View: View {
         return b
     }
 
+    /// Apply IPC-driven dynamic state from InspectDynamicState to a guidance content block.
+    /// Mirrors Preset6's applyDynamicUpdates pattern.
+    private func applyIPCState(to block: InspectConfig.GuidanceContent, blockIndex: Int, stepId: String) -> InspectConfig.GuidanceContent {
+        let props = dynamicState.dynamicGuidanceProperties[stepId]?[blockIndex] ?? [:]
+        guard !props.isEmpty else { return block }
+
+        return InspectConfig.GuidanceContent(
+            type: block.type,
+            content: props["content"] ?? block.content,
+            items: block.items,
+            numbered: block.numbered,
+            color: props["color"] ?? block.color,
+            bold: props["bold"].flatMap { Bool($0) } ?? block.bold,
+            visible: props["visible"].flatMap { Bool($0) } ?? block.visible,
+            imageShape: block.imageShape,
+            imageWidth: block.imageWidth,
+            imageBorder: block.imageBorder,
+            caption: block.caption,
+            autoplay: block.autoplay,
+            videoHeight: block.videoHeight,
+            webHeight: block.webHeight,
+            portalURL: block.portalURL,
+            portalPath: block.portalPath,
+            portalHeight: block.portalHeight,
+            portalShowHeader: block.portalShowHeader,
+            portalShowRefetch: block.portalShowRefetch,
+            portalOfflineMessage: block.portalOfflineMessage,
+            portalUserAgent: block.portalUserAgent,
+            portalBrandingKey: block.portalBrandingKey,
+            portalBrandingHeader: block.portalBrandingHeader,
+            portalCustomHeaders: block.portalCustomHeaders,
+            id: block.id,
+            required: block.required,
+            options: block.options,
+            value: block.value,
+            helpText: block.helpText,
+            min: block.min,
+            max: block.max,
+            step: block.step,
+            unit: block.unit,
+            discreteSteps: block.discreteSteps,
+            placeholder: block.placeholder,
+            secure: block.secure,
+            inherit: block.inherit,
+            regex: block.regex,
+            regexError: block.regexError,
+            maxLength: block.maxLength,
+            action: block.action,
+            url: block.url,
+            shell: block.shell,
+            shellTimeout: block.shellTimeout,
+            requestId: block.requestId,
+            targetBadge: block.targetBadge,
+            buttonStyle: block.buttonStyle,
+            opensOverlay: block.opensOverlay,
+            label: props["label"] ?? block.label,
+            state: props["state"] ?? block.state,
+            icon: props["icon"] ?? block.icon,
+            autoColor: props["autoColor"].flatMap { Bool($0) } ?? block.autoColor,
+            expected: props["expected"] ?? block.expected,
+            actual: props["actual"] ?? block.actual,
+            expectedLabel: props["expectedLabel"] ?? block.expectedLabel,
+            actualLabel: props["actualLabel"] ?? block.actualLabel,
+            expectedIcon: props["expectedIcon"] ?? block.expectedIcon,
+            actualIcon: props["actualIcon"] ?? block.actualIcon,
+            comparisonStyle: props["comparisonStyle"] ?? block.comparisonStyle,
+            highlightCells: props["highlightCells"].flatMap { Bool($0) } ?? block.highlightCells,
+            expectedColor: props["expectedColor"] ?? block.expectedColor,
+            actualColor: props["actualColor"] ?? block.actualColor,
+            category: block.category,
+            currentPhase: props["currentPhase"].flatMap { Int($0) } ?? block.currentPhase,
+            phases: block.phases,
+            style: props["style"] ?? block.style,
+            progress: props["progress"].flatMap { Double($0) } ?? block.progress,
+            images: block.images,
+            captions: block.captions,
+            imageHeight: block.imageHeight,
+            showDots: block.showDots,
+            showArrows: block.showArrows,
+            autoAdvance: block.autoAdvance,
+            autoAdvanceDelay: block.autoAdvanceDelay,
+            transitionStyle: block.transitionStyle,
+            currentIndex: props["currentIndex"].flatMap { Int($0) } ?? block.currentIndex,
+            categoryName: props["categoryName"] ?? block.categoryName,
+            passed: props["passed"].flatMap { Int($0) } ?? block.passed,
+            total: props["total"].flatMap { Int($0) } ?? block.total,
+            cardIcon: props["cardIcon"] ?? block.cardIcon,
+            checkDetails: props["checkDetails"] ?? block.checkDetails,
+            columns: block.columns,
+            rows: block.rows,
+            wallpaperCategories: block.wallpaperCategories,
+            wallpaperColumns: block.wallpaperColumns,
+            wallpaperLayout: block.wallpaperLayout,
+            wallpaperImageFit: block.wallpaperImageFit,
+            wallpaperThumbnailHeight: block.wallpaperThumbnailHeight,
+            wallpaperSelectionKey: block.wallpaperSelectionKey,
+            wallpaperShowPath: block.wallpaperShowPath,
+            wallpaperConfirmButton: block.wallpaperConfirmButton,
+            wallpaperMultiSelect: block.wallpaperMultiSelect,
+            installItems: block.installItems,
+            bentoColumns: block.bentoColumns,
+            bentoRowHeight: block.bentoRowHeight,
+            bentoGap: block.bentoGap,
+            bentoTintColor: block.bentoTintColor,
+            bentoCells: block.bentoCells
+        )
+    }
+
     @ViewBuilder
     private func introContentBlock(_ block: InspectConfig.GuidanceContent, blockIndex: Int = 0) -> some View {
-        // Get dynamic state for this block index (if monitoring is active)
-        let dynamicState = introStepMonitor.stateForBlock(blockIndex)
-        let effectiveBlock = applyDynamicState(to: block, dynamicState: dynamicState)
+        // Layer 1: Plist monitor state (file-based monitoring)
+        let plistState = introStepMonitor.stateForBlock(blockIndex)
+        let plistBlock = applyDynamicState(to: block, dynamicState: plistState)
+        // Layer 2: IPC state from dynamicState (update_guidance, batch_update commands)
+        let effectiveBlock = applyIPCState(to: plistBlock, blockIndex: blockIndex, stepId: currentStep?.id ?? "")
 
         switch effectiveBlock.type {
         // MARK: - Delegated Content Types (rendered by GuidanceContentView with accent color)
@@ -3825,10 +3894,10 @@ struct Preset5View: View {
             }
 
         case "phase-tracker":
-            introPhaseTrackerView(block: block, blockIndex: blockIndex, dynamicState: dynamicState)
+            introPhaseTrackerView(block: effectiveBlock, blockIndex: blockIndex, dynamicState: plistState)
 
         case "status-badge":
-            introStatusBadgeView(block: block, blockIndex: blockIndex, dynamicState: dynamicState)
+            introStatusBadgeView(block: effectiveBlock, blockIndex: blockIndex)
 
         // MARK: Form Elements
 
@@ -3856,14 +3925,14 @@ struct Preset5View: View {
             FeatureTableBlock(block: block, accentColor: branding.primaryColor, maxWidth: 480)
 
         case "comparison-table":
-            ComparisonTableBlock(block: block, accentColor: branding.primaryColor, maxWidth: 480, dynamicState: dynamicState)
-                .id("comparison-\(blockIndex)-\(dynamicState?.actual ?? "")")
+            ComparisonTableBlock(block: block, accentColor: branding.primaryColor, maxWidth: 480, dynamicState: plistState)
+                .id("comparison-\(blockIndex)-\(plistState?.actual ?? "")")
 
         case "compliance-card":
             // Check if block.content specifies a category name for auto-population from plistSources
             if let categoryName = block.content, !categoryName.isEmpty,
                let category = complianceService.category(named: categoryName) {
-                // Auto-populate from aggregated plist data using dynamicState
+                // Auto-populate from aggregated plist data using plistState
                 ComplianceCardBlock(
                     block: block,
                     accentColor: branding.primaryColor,
@@ -3873,8 +3942,8 @@ struct Preset5View: View {
                 .id("compliance-\(blockIndex)-\(category.passed)-\(category.total)")
             } else {
                 // Use block as-is with optional dynamic state from plistMonitors
-                ComplianceCardBlock(block: block, accentColor: branding.primaryColor, maxWidth: 480, dynamicState: dynamicState)
-                    .id("compliance-\(blockIndex)-\(dynamicState?.passed ?? 0)-\(dynamicState?.total ?? 0)")
+                ComplianceCardBlock(block: block, accentColor: branding.primaryColor, maxWidth: 480, dynamicState: plistState)
+                    .id("compliance-\(blockIndex)-\(plistState?.passed ?? 0)-\(plistState?.total ?? 0)")
             }
 
         case "compliance-header":
@@ -3890,13 +3959,13 @@ struct Preset5View: View {
                 .id("compliance-header-\(blockIndex)-\(complianceService.totalPassed)-\(complianceService.totalChecks)")
             } else {
                 // Use block as-is with optional dynamic state from plistMonitors
-                ComplianceDashboardHeaderBlock(block: block, accentColor: branding.primaryColor, maxWidth: 480, dynamicState: dynamicState)
-                    .id("compliance-header-\(blockIndex)-\(dynamicState?.passed ?? 0)-\(dynamicState?.total ?? 0)")
+                ComplianceDashboardHeaderBlock(block: block, accentColor: branding.primaryColor, maxWidth: 480, dynamicState: plistState)
+                    .id("compliance-header-\(blockIndex)-\(plistState?.passed ?? 0)-\(plistState?.total ?? 0)")
             }
 
         case "progress-bar":
-            ProgressBarBlock(block: block, accentColor: branding.primaryColor, maxWidth: 480, dynamicState: dynamicState)
-                .id("progress-\(blockIndex)-\(dynamicState?.progress ?? 0)")
+            ProgressBarBlock(block: block, accentColor: branding.primaryColor, maxWidth: 480, dynamicState: plistState)
+                .id("progress-\(blockIndex)-\(plistState?.progress ?? 0)")
 
         case "image-carousel":
             ImageCarouselBlock(block: block, accentColor: branding.primaryColor, maxWidth: 480)
@@ -3991,13 +4060,11 @@ struct Preset5View: View {
 
     /// Status badge view
     @ViewBuilder
-    private func introStatusBadgeView(block: InspectConfig.GuidanceContent, blockIndex: Int = 0, dynamicState: DynamicContentState? = nil) -> some View {
-        // Priority: dynamicState > statusBadgeOverrides > block config
+    private func introStatusBadgeView(block: InspectConfig.GuidanceContent, blockIndex: Int = 0) -> some View {
         let baseLabel = block.content ?? block.label ?? ""
-        let label = dynamicState?.label ?? baseLabel
-        let blockId = block.id ?? baseLabel  // Use id if available, otherwise label
-        // Check for override by id, by block index, by label, then dynamic state, then config state
-        let effectiveState = dynamicState?.state ?? statusBadgeOverrides[blockId] ?? statusBadgeOverrides["block_\(blockIndex)"] ?? statusBadgeOverrides[baseLabel] ?? block.state ?? "pending"
+        let label = block.label ?? baseLabel
+        let effectiveState = block.state ?? "pending"
+        let effectiveActual = block.actual
         let autoColor = block.autoColor ?? false
 
         let (autoIcon, color) = statusBadgeStyle(for: effectiveState, autoColor: autoColor)
@@ -4032,20 +4099,33 @@ struct Preset5View: View {
 
                 Spacer()
 
-                Text(statusBadgeText(for: effectiveState))
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(color)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(color.opacity(0.1))
-                    .clipShape(Capsule())
+                if let actual = effectiveActual, !actual.isEmpty {
+                    // Show actual value with subtle styling — state controls icon/border only
+                    Text(actual)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(.primary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(color.opacity(0.08))
+                        .clipShape(Capsule())
+                } else {
+                    // No actual value — show state keyword as colored badge
+                    Text(statusBadgeText(for: effectiveState))
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(color)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(color.opacity(0.1))
+                        .clipShape(Capsule())
+                }
             }
             .padding(.vertical, 8)
             .padding(.horizontal, 12)
             .background(Color(NSColor.controlBackgroundColor).opacity(0.4))
             .clipShape(RoundedRectangle(cornerRadius: 8))
         }
-        .id("status-badge-\(blockIndex)-\(effectiveState)-\(label)")
+        .transaction { $0.animation = nil }  // Prevent inherited animations from delaying badge updates
+        .id("status-badge-\(blockIndex)-\(effectiveState)-\(label)-\(effectiveActual ?? "")")
     }
 
     /// Get icon and color for status badge state
@@ -4057,8 +4137,12 @@ struct Preset5View: View {
             return ("xmark.circle.fill", palette.error)
         case "downloading", "processing", "running":
             return ("arrow.down.circle.fill", palette.info)
-        case "warning", "pending":
+        case "warning":
             return ("exclamationmark.triangle.fill", palette.warning)
+        case "pending":
+            return ("clock.fill", palette.warning)
+        case "info":
+            return ("info.circle.fill", .secondary)
         default:
             return ("circle", .secondary)
         }
@@ -5183,7 +5267,7 @@ struct Preset5View: View {
         VStack {
             Spacer(minLength: 0)
             if let path = mediaPath {
-                let url: URL = path.hasPrefix("http") ? URL(string: path)! : URL(fileURLWithPath: path)
+                let url: URL = path.hasPrefix("http") ? (URL(string: path) ?? URL(fileURLWithPath: path)) : URL(fileURLWithPath: path)
                 let mediaType = IntroMediaType.detect(from: url)
 
                 switch mediaType {
@@ -6248,3 +6332,4 @@ struct Preset5View: View {
         }
     }
 #endif
+

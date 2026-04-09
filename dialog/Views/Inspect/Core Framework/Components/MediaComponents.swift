@@ -570,6 +570,7 @@ extension Array {
 
 /// Individual image slide in gallery carousel
 /// Cache for preloading gallery images
+@MainActor
 class GalleryImageCache: ObservableObject {
     @Published var images: [String: NSImage] = [:]
     @Published var loadingComplete: Bool = false

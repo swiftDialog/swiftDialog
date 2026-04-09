@@ -144,6 +144,8 @@
 		BAEFDFE82E83FB310017CFC2 /* InspectState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAEFDFC82E83FB310017CFC2 /* InspectState.swift */; };
 		BAEFDFE92E83FB310017CFC2 /* InspectSizes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAEFDFC72E83FB310017CFC2 /* InspectSizes.swift */; };
 		BAEFDFEA2E83FB310017CFC2 /* InspectConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAEFDFC52E83FB310017CFC2 /* InspectConfig.swift */; };
+		EC37D9506D20F5EAC5BF93F7 /* CommandRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BDE4BF480BF94A4F02C1F64 /* CommandRouter.swift */; };
+		A1B2C3D4E5F60718A9B0C1D2 /* DistributedNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718A9B0C1D3 /* DistributedNotifications.swift */; };
 		BAEFDFEB2E83FB310017CFC2 /* Validation.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAEFDFD92E83FB310017CFC2 /* Validation.swift */; };
 		BAEFDFEE2E83FB310017CFC2 /* InspectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAEFDFC92E83FB310017CFC2 /* InspectView.swift */; };
 		BAEFDFF02E83FB310017CFC2 /* InspectCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAEFDFDE2E83FB310017CFC2 /* InspectCoordinator.swift */; };
@@ -399,6 +401,8 @@
 		BAD826852EE40001000954F3 /* DetailOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailOverlayView.swift; sourceTree = "<group>"; };
 		BAE50F8E8766AAD7B36AC667 /* DeferralMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeferralMenuView.swift; sourceTree = "<group>"; };
 		BAEFDFC52E83FB310017CFC2 /* InspectConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectConfig.swift; sourceTree = "<group>"; };
+		9BDE4BF480BF94A4F02C1F64 /* CommandRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandRouter.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718A9B0C1D3 /* DistributedNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistributedNotifications.swift; sourceTree = "<group>"; };
 		BAEFDFC62E83FB310017CFC2 /* InspectLayoutProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectLayoutProtocol.swift; sourceTree = "<group>"; };
 		BAEFDFC72E83FB310017CFC2 /* InspectSizes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectSizes.swift; sourceTree = "<group>"; };
 		BAEFDFC82E83FB310017CFC2 /* InspectState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectState.swift; sourceTree = "<group>"; };
@@ -777,6 +781,8 @@
 				BA56BA922EC5F41000055C7F /* InspectStateMachines.swift */,
 				BA56BA932EC5F41000055C7F /* PlistAggregator.swift */,
 				BAEFDFC52E83FB310017CFC2 /* InspectConfig.swift */,
+				9BDE4BF480BF94A4F02C1F64 /* CommandRouter.swift */,
+				A1B2C3D4E5F60718A9B0C1D3 /* DistributedNotifications.swift */,
 				BAEFDFC62E83FB310017CFC2 /* InspectLayoutProtocol.swift */,
 				BAEFDFC72E83FB310017CFC2 /* InspectSizes.swift */,
 				BAEFDFC82E83FB310017CFC2 /* InspectState.swift */,
@@ -1234,6 +1240,8 @@
 				CA71F1502F38D87900399EE3 /* OverrideDialogView.swift in Sources */,
 				CA10102F3F10100000002A /* SidebarNavigationModule.swift in Sources */,
 				BAEFDFEA2E83FB310017CFC2 /* InspectConfig.swift in Sources */,
+				EC37D9506D20F5EAC5BF93F7 /* CommandRouter.swift in Sources */,
+				A1B2C3D4E5F60718A9B0C1D2 /* DistributedNotifications.swift in Sources */,
 				BAEFDFEB2E83FB310017CFC2 /* Validation.swift in Sources */,
 				BA4DD5022F242A0000ABCDEF /* DateDisplayService.swift in Sources */,
 				41FCF1F62EA9CFB000E3C47D /* CKMessageView.swift in Sources */,

@@ -72,6 +72,10 @@ enum SimpleItemStatus {
 /// Usage note: Due to the dynamic nature of the config, JSON must be used pre-loaded `export
 /// DIALOG_INSPECT_CONFIG=/path/to/config.json`"$DIALOG_PATH" --inspect-mode
 struct InspectConfig: Codable {
+    /// Unknown key warnings accumulated during the most recent decode pass.
+    /// Cleared before decode, harvested after — see Config.swift loading paths.
+    static var unknownKeyWarnings: [String] = []
+
     let title: String?
     let message: String?
     let infobox: String?
@@ -449,6 +453,7 @@ struct InspectConfig: Codable {
         let successMessage: String?             // Message shown on success (default: "Step Completed")
         let failureMessage: String?             // Message shown on failure (default: "Step Failed")
         let waitForExternalTrigger: Bool?       // If true, NEVER auto-complete - always wait for success:/failure: command (default: false)
+        let requireManualConfirm: Bool?        // If true, success:/failure: commands update state but don't auto-advance — user must click to proceed (default: false)
 
         // Step Overlay (per-step help overlay like preset6's itemOverlay)
         let stepOverlay: DetailOverlayConfig?   // Rich help overlay for this step
@@ -748,6 +753,39 @@ struct InspectConfig: Codable {
 
         init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
+
+            // Detect unknown keys in this item
+            let dynamicContainer = try decoder.container(keyedBy: RawCodingKey.self)
+            let allItemKeys = Set(dynamicContainer.allKeys.map(\.stringValue))
+            let knownItemKeys: Set<String> = [
+                "id", "displayName", "title", // "title" is accepted alias for displayName
+                "subtitle", "guiIndex", "paths", "icon", "status", "banner",
+                "plistKey", "expectedValue", "evaluation", "plistRecheckInterval", "useUserDefaults",
+                "category", "categoryIcon",
+                "guidanceTitle", "guidanceContent", "stepType",
+                "autoAdvanceOnComplete", "actionButtonText", "continueButtonText", "finalButtonText",
+                "processingDuration", "processingMessage",
+                "blocking", "required", "observeOnly",
+                "completedStatus", "downloadingStatus", "pendingStatus",
+                "info", "bentoSize", "cardLayout", "gradientColors", "verticalSpacing",
+                "keyPointsText", "highlightColor",
+                "successMessage", "failureMessage",
+                "waitWarningTime", "waitSmallOverrideTime", "waitLargeOverrideTime",
+                "overrideButtonText", "allowOverride", "allowNavigationDuringProcessing",
+                "processingMode", "autoAdvance", "autoResult", "waitForExternalTrigger",
+                "plistMonitors", "completionMode", "jsonMonitors",
+                "itemOverlay", "validationTargetBadge", "introLayoutConfig",
+                "showBundleInfo",
+                "preset", // accepted via flexible format decoding
+            ]
+            let unknownItemKeys = allItemKeys.subtracting(knownItemKeys)
+            if !unknownItemKeys.isEmpty {
+                // Use id if available for context, fall back to "unknown"
+                let itemId = (try? container.decode(String.self, forKey: .id)) ?? "unknown"
+                for key in unknownItemKeys.sorted() {
+                    InspectConfig.unknownKeyWarnings.append("Unknown key '\(key)' in item '\(itemId)'")
+                }
+            }
 
             // Required fields
             id = try container.decode(String.self, forKey: .id)
@@ -1798,6 +1836,43 @@ struct InspectConfig: Codable {
     /// This enables safe JSON parsing of both legacy and modern config files.
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        // Detect unknown keys by comparing all JSON keys against known CodingKeys
+        let dynamicContainer = try decoder.container(keyedBy: RawCodingKey.self)
+        let allJSONKeys = Set(dynamicContainer.allKeys.map(\.stringValue))
+        let knownRootKeys: Set<String> = [
+            "title", "message", "infobox", "icon", "iconsize",
+            "banner", "bannerHeight", "bannerTitle",
+            "width", "height", "size", "scanInterval", "cachePaths", "cacheExtensions",
+            "sideMessage", "sideInterval", "style", "liststyle", "preset", "popupButton",
+            "highlightColor", "secondaryColor", "backgroundColor", "backgroundImage", "backgroundOpacity",
+            "textOverlayColor", "gradientColors", "gradientPalette", "gradientStyle",
+            "button1text", "button1disabled", "finalButtonText",
+            "button2text", "button2disabled", "button2visible",
+            "buttonStyle", // deprecated but still accepted
+            "autoEnableButton", "autoEnableButtonText", "hideSystemDetails", "observeOnly",
+            "autoAdvanceOnComplete", "autoAdvanceDelay",
+            "colorThresholds", "plistSources", "categoryHelp",
+            "labels", "uiLabels", "complianceLabels", "pickerConfig", "instructionBanner", "pickerLabels",
+            "items", "introSteps",
+            "iconBasePath", "overlayicon", "rotatingImages", "imageRotationInterval",
+            "imageShape", "imageSyncMode", "backButtonStyle", "stepStyle", "listIndicatorStyle",
+            "progressMode", "progressBarConfig", "logoConfig",
+            "detailOverlay", "helpButton", "actionPipe", "triggerFile", "skipPortal", "debugMode", "resumable", "dateStyle",
+            "readinessFile", "resultFile", "eventFile", "deferralConfig",
+            "logMonitor", "logMonitors",
+            "portalConfig", "appConfigSource",
+            "preferencesOutput",
+            "brands", "brandSelectionKey",
+            "localization",
+            "brandPalette",
+            "accentBorderColor", "showAccentBorder", "footerBackgroundColor", "footerTextColor", "footerText", "copyrightText", "supportText",
+            "introScreen", "summaryScreen",
+        ]
+        let unknownRootKeys = allJSONKeys.subtracting(knownRootKeys)
+        for key in unknownRootKeys.sorted() {
+            InspectConfig.unknownKeyWarnings.append("Unknown key '\(key)' in root config")
+        }
 
         title = try container.decodeIfPresent(String.self, forKey: .title)
         message = try container.decodeIfPresent(String.self, forKey: .message)

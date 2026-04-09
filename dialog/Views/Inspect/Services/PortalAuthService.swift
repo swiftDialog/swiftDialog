@@ -200,6 +200,7 @@ protocol AuthProviderProtocol {
 
 /// Main authentication service for self-service portals
 /// Manages authentication flow using pluggable providers
+@MainActor
 class PortalAuthService: ObservableObject {
 
     // MARK: - Published State
@@ -777,8 +778,8 @@ class MTLSAuthProvider: AuthProviderProtocol {
             throw PortalError.keychainReadFailed(service: "Identity", account: commonName)
         }
 
-        // swiftlint:disable:next force_cast
-        return (identity as! SecIdentity)
+        // CFTypeRef from SecItemCopyMatching is always a SecIdentity when kSecReturnRef + kSecClassIdentity
+        return unsafeBitCast(identity, to: SecIdentity.self)
     }
 }
 

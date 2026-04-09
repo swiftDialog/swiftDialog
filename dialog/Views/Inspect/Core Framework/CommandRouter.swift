@@ -76,6 +76,8 @@ final class CommandRouter: ObservableObject {
     func startMonitoring(triggerFilePath: String, notificationHandler: ((String) -> Void)? = nil) {
         monitoredPath = triggerFilePath
 
+        writeLog("\(presetLabel): [DIAG] startMonitoring path='\(triggerFilePath)' exists=\(FileManager.default.fileExists(atPath: triggerFilePath))", logLevel: .error)
+
         // Skip stale content by recording current file size
         if let data = FileManager.default.contents(atPath: triggerFilePath) {
             lastProcessedByteOffset = data.count
@@ -87,7 +89,9 @@ final class CommandRouter: ObservableObject {
             let source = DispatchSource.makeFileSystemObjectSource(
                 fileDescriptor: fileDescriptor, eventMask: [.write, .delete, .rename], queue: .main
             )
-            source.setEventHandler { [weak self] in self?.checkForNewLines() }
+            source.setEventHandler { [weak self] in
+                DispatchQueue.main.async { self?.checkForNewLines() }
+            }
             source.setCancelHandler { [weak self] in
                 guard let fd = self?.fileDescriptor, fd >= 0 else { return }
                 close(fd)
@@ -98,14 +102,16 @@ final class CommandRouter: ObservableObject {
 
         // Timer fallback (200ms) — catches anything DispatchSource misses
         fallbackTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { [weak self] _ in
-            self?.checkForNewLines()
+            DispatchQueue.main.async { self?.checkForNewLines() }
         }
 
         // DistributedNotification → processCommand
-        DialogNotifications.startObserving { [weak self] command in
-            guard let self = self else { return }
-            notificationHandler?(command)
-            self.processCommand(command)
+        DialogNotifications.startObserving { [weak self] (command: String) in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                notificationHandler?(command)
+                self.processCommand(command)
+            }
         }
 
         writeLog("\(presetLabel): File monitoring started at \(triggerFilePath) (DispatchSource + Timer)", logLevel: .info)
@@ -125,10 +131,14 @@ final class CommandRouter: ObservableObject {
     private func checkForNewLines() {
         guard !monitoredPath.isEmpty,
               let data = FileManager.default.contents(atPath: monitoredPath) else { return }
-        guard data.count > lastProcessedByteOffset else { return }
+        guard data.count > lastProcessedByteOffset else {
+            return
+        }
 
         let newData = data.subdata(in: lastProcessedByteOffset..<data.count)
         guard let newContent = String(data: newData, encoding: .utf8) else { return }
+
+        writeLog("\(presetLabel): [DIAG] checkForNewLines \(newData.count) bytes, mainThread=\(Thread.isMainThread)", logLevel: .error)
 
         let lines = newContent.components(separatedBy: .newlines)
         for line in lines {
