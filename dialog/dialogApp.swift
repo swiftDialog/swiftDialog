@@ -45,6 +45,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
     func applicationDidFinishLaunching(_ notification: Notification) {
 
+        // Pseudo notification mode: hide main window, suppress dock icon, keep app alive.
+        if appvars.isPseudoNotificationMode {
+            NSApp.setActivationPolicy(.accessory)
+            if let window = NSApplication.shared.windows.first {
+                window.orderOut(nil)
+            }
+            return
+        }
+
         // Check for calling app pid
         if appArguments.callingPid.present {
             monitor = PIDMonitor(pid: Int32(appArguments.callingPid.value) ?? 0) {
@@ -163,7 +172,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-            return true
+            // Keep alive for pseudo notifications — they use an NSPanel, not a window.
+            return !appvars.isPseudoNotificationMode
         }
 }
 
@@ -210,10 +220,19 @@ struct dialogApp: App {
 
         captureQuitKey(keyValue: appArguments.quitKey.value)
 
-        // Check if we are sending a notification via the legacy path (no --style argument).
+        // Check if we are sending a notification.
+        // Legacy path (no --style or native styles) quits immediately.
+        // Pseudo notification path returns false but sets isPseudoNotificationMode,
+        // keeping the app alive for the custom notification window.
         if checkForDialogNotificationMode(appArguments) {
             writeLog("Notification sent via legacy path (main app bundle)")
             quitDialog(exitCode: 0)
+        }
+
+        // For pseudo notifications, minimize the main window footprint
+        if appvars.isPseudoNotificationMode {
+            appvars.windowWidth = 1
+            appvars.windowHeight = 1
         }
 
         // check for jamfhelper mode
@@ -279,7 +298,19 @@ struct dialogApp: App {
     var body: some Scene {
 
         WindowGroup {
-            if !appArguments.notification.present && !appvars.noargs {
+            if appvars.isPseudoNotificationMode {
+                // Pseudo notification mode — hide the main window entirely.
+                // The notification is rendered in its own NSPanel.
+                Color.clear
+                    .frame(width: 0, height: 0)
+                    .background(WindowAccessor { window in
+                        if let window {
+                            window.setFrame(.zero, display: false)
+                            window.orderOut(nil)
+                            window.alphaValue = 0
+                        }
+                    })
+            } else if !appArguments.notification.present && !appvars.noargs {
                 let _ = appvars.debugMode ? print("DEBUG: Checking modes - mini:\(appArguments.miniMode.present) inspect:\(appArguments.inspectMode.present) presentation:\(appArguments.presentationMode.present)") : ()
                 ZStack {
                     if appArguments.miniMode.present {
