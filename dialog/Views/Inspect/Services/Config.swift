@@ -365,7 +365,7 @@ class Config {
         var downloadedData: Data?
         var downloadError: Error?
 
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+        let task = URLSession.shared.dataTask(with: url) { data, _, error in
             downloadedData = data
             downloadError = error
             semaphore.signal()

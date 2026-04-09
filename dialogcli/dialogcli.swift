@@ -109,7 +109,7 @@ struct DialogLauncher: ParsableCommand {
             }
 
             // Locate the helper relative to our own app bundle
-            var helperBinary: String? = nil
+            var helperBinary: String?
             if let appBundle = findAppBundlePath() {
                 let candidate = "\(appBundle.path)/Contents/Helpers/\(helperName).app/Contents/MacOS/\(helperName)"
                 if FileManager.default.fileExists(atPath: candidate) {

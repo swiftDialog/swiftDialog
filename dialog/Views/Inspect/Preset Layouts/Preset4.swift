@@ -367,7 +367,7 @@ struct Preset4View: View, InspectLayoutProtocol {
 
             // Item icon (small)
             cachedIcon(
-                for: iconCache.getItemIconPath(for: item, state: inspectState) ?? "",
+                for: iconCache.getItemIconPath(for: item, state: inspectState),
                 fallbackSymbol: "app.fill",
                 size: 20
             )

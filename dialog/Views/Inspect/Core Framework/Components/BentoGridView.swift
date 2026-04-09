@@ -163,7 +163,7 @@ struct BentoCell: View {
             ZStack {
                 // Background — procedural gradient or flat color
                 if let bgStyle = config.backgroundStyle,
-                   (bgStyle == "gradient" || bgStyle == "mesh") {
+                   bgStyle == "gradient" || bgStyle == "mesh" {
                     ProceduralGradientView(
                         seed: config.id,
                         palette: gradientPalette,
@@ -1049,7 +1049,7 @@ struct BentoGridView: View {
 
     @State private var selectedCell: InspectConfig.GuidanceContent.BentoCellConfig?
     @State private var showDetail: Bool = false
-    @State private var expandedCellId: String? = nil
+    @State private var expandedCellId: String?
     @State private var visibleCells: Set<String> = []
 
     /// Stagger delay between each cell appearing (seconds)

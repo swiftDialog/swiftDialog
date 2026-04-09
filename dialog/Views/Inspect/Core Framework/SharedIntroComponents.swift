@@ -1078,7 +1078,7 @@ struct IntroRemoteImageView: View {
 
     private func loadImage() {
         isLoading = true
-        URLSession.shared.dataTask(with: url) { data, response, error in
+        URLSession.shared.dataTask(with: url) { data, _, error in
             DispatchQueue.main.async {
                 isLoading = false
                 if let error = error {

@@ -548,7 +548,7 @@ struct Preset6View: View, InspectLayoutProtocol {
                 .transition(.asymmetric(
                     insertion: .move(edge: navigationDirection == .forward ? .trailing : .leading)
                                .combined(with: .opacity),
-                    removal:   .move(edge: navigationDirection == .forward ? .leading : .trailing)
+                    removal: .move(edge: navigationDirection == .forward ? .leading : .trailing)
                                .combined(with: .opacity)
                 ))
             } else {
@@ -1440,7 +1440,6 @@ struct Preset6View: View, InspectLayoutProtocol {
             handleCompletionTrigger(stepId: stepId, result: .cancelled)
         case .cancel:
             writeInteractionLog("override_cancel", step: stepId)
-            break
         }
     }
 

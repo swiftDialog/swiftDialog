@@ -71,17 +71,17 @@ struct Preset5View: View {
     @State private var processingWaitElapsed: Int = 0  // Time elapsed waiting (for override escalation)
     @State private var showOverridePicker: Bool = false  // Show override result picker
     @State private var pendingOverrideStepIndex: Int = 0
-    @State private var lastOverrideResult: String? = nil  // "success", "failed", or "skipped"
-    @State private var lastOverrideStepId: String? = nil  // ID of step that was overridden
+    @State private var lastOverrideResult: String?  // "success", "failed", or "skipped"
+    @State private var lastOverrideStepId: String?  // ID of step that was overridden
     @State private var failedSteps: [String: String] = [:]  // stepId -> failure reason (for result banners)
     @State private var skippedSteps: Set<String> = []  // Track skipped processing steps
     @State private var completedProcessingSteps: Set<String> = []  // Track completed processing steps
     @State private var completedNavigatedSteps: Set<String> = []  // Track all steps navigated past (for result file)
     // Dynamic content overrides (controlled via trigger file set: commands)
-    @State private var phaseTrackerOverride: Int? = nil              // Override currentPhase value
-    @State private var iconOverride: String? = nil                   // Override main dialog icon
+    @State private var phaseTrackerOverride: Int?              // Override currentPhase value
+    @State private var iconOverride: String?                   // Override main dialog icon
     @State private var heroImageOverrides: [String: String] = [:]    // stepId -> path/SF symbol
-    @State private var iconBasePathOverride: String? = nil           // Override iconBasePath
+    @State private var iconBasePathOverride: String?           // Override iconBasePath
 
     // Command routing and file monitoring (hosted on @StateObject for class lifecycle)
     @StateObject private var commandRouter = CommandRouter()
@@ -103,7 +103,7 @@ struct Preset5View: View {
     @State private var guideFullscreenImagePath: String = ""
 
     // Brand picker state (multi-brand onboarding)
-    @State private var selectedBrandId: String? = nil
+    @State private var selectedBrandId: String?
 
     // Overlay state (for help overlays like preset6)
     @State private var showGlobalHelpOverlay: Bool = false
@@ -1343,8 +1343,7 @@ struct Preset5View: View {
                 .buttonStyle(.bordered)
 
                 if let supportURLString = effectivePortalConfig?.supportURL,
-                    let supportURL = URL(string: supportURLString)
-                {
+                    let supportURL = URL(string: supportURLString) {
                     Link(destination: supportURL) {
                         HStack {
                             Image(systemName: "questionmark.circle")
@@ -3013,7 +3012,7 @@ struct Preset5View: View {
 
     /// Starts a timer for waiting state (after countdown completes in progressive mode)
     private func startWaitingTimer(for step: InspectConfig.IntroStep, stepIndex: Int) {
-        processingTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [self] timer in
+        processingTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [self] _ in
             self.processingWaitElapsed += 1
             if case .waiting(let stepId, let waitElapsed) = self.processingState {
                 self.processingState = .waiting(stepId: stepId, waitElapsed: waitElapsed + 1)
@@ -4010,7 +4009,7 @@ struct Preset5View: View {
                     }
 
                     HStack(spacing: 0) {
-                        ForEach(Array(phases.enumerated()), id: \.offset) { index, phase in
+                        ForEach(Array(phases.enumerated()), id: \.offset) { index, _ in
                             let phaseNumber = index + 1
                             let isCompleted = phaseNumber < effectivePhase
                             let isCurrent = phaseNumber == effectivePhase

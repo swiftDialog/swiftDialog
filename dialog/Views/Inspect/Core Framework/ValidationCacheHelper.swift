@@ -15,9 +15,9 @@ import SwiftUI
 
 /// Source of validation data
 enum ValidationSource: String, CustomStringConvertible {
-    case fileSystem = "fileSystem"
-    case plist = "plist"
-    case emptyPaths = "emptyPaths"
+    case fileSystem
+    case plist
+    case emptyPaths
 
     var description: String { rawValue }
 }

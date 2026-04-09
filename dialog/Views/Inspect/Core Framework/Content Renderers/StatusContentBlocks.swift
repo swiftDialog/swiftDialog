@@ -574,7 +574,7 @@ struct ComplianceAllDetailsSheet: View {
             return .green
         } else if overallPercentage >= 0.7 {
             return .orange
-        }else {
+        } else {
             return .red
         }
     }

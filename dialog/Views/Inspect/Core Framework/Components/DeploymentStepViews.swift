@@ -90,7 +90,7 @@ struct DeploymentSidebarView: View {
 struct DeploymentItemRow: View {
     let item: InstallationItemData
     let accentColor: Color
-    var basePath: String? = nil
+    var basePath: String?
 
     var body: some View {
         HStack(spacing: 12) {
@@ -202,7 +202,7 @@ struct DeploymentSideMessageView: View {
 
     private func startRotation() {
         guard messages.count > 1, interval > 0 else { return }
-        Timer.scheduledTimer(withTimeInterval: TimeInterval(interval), repeats: true) { timer in
+        Timer.scheduledTimer(withTimeInterval: TimeInterval(interval), repeats: true) { _ in
             DispatchQueue.main.async {
                 // Invalidate if view is gone (timer won't fire after view disappears since @State resets)
                 currentIndex = (currentIndex + 1) % messages.count

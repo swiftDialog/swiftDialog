@@ -49,7 +49,7 @@ enum DialogNotifications {
         postEvent("button", userInfo: [
             "stepId": stepId,
             "button": label,
-            "action": action,
+            "action": action
         ])
     }
 
@@ -57,7 +57,7 @@ enum DialogNotifications {
     nonisolated static func postStepChange(stepId: String, action: String) {
         postEvent("step", userInfo: [
             "stepId": stepId,
-            "action": action,
+            "action": action
         ])
     }
 
@@ -65,7 +65,7 @@ enum DialogNotifications {
     nonisolated static func postSelection(key: String, values: [String]) {
         postEvent("selection", userInfo: [
             "key": key,
-            "values": values.joined(separator: ","),
+            "values": values.joined(separator: ",")
         ])
     }
 

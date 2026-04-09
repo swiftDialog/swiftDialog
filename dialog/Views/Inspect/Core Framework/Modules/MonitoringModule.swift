@@ -707,7 +707,7 @@ struct ValidationService {
 
         let evaluationType = evaluation ?? "equals"
         var isValid = false
-        var message: String? = nil
+        var message: String?
 
         switch evaluationType {
         case "exists":

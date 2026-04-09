@@ -145,7 +145,7 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
     @Published var plistValidationResults: [String: Bool] = [:] // Track plist validation results
 
     // MARK: - Pre-cache Progress State (for "Loading configuration files..." indicator)
-    @Published var preCacheProgress: (loaded: Int, total: Int)? = nil  // nil = not started, (x, y) = loading
+    @Published var preCacheProgress: (loaded: Int, total: Int)?  // nil = not started, (x, y) = loading
 
     // MARK: - Plist Monitoring - Generalized from Preset6
     private var plistMonitors: [String: PlistMonitorTask] = [:] // Track active monitoring tasks
