@@ -126,7 +126,7 @@ enum DialogNotifications {
         }
     }
 
-    private static func processCommandNotification(
+    nonisolated private static func processCommandNotification(
         _ notification: Notification, handler: CommandHandler
     ) {
         guard let userInfo = notification.userInfo else { return }

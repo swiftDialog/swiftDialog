@@ -1088,7 +1088,7 @@ class Config {
         let lowered = preset.lowercased()
 
         // Direct number
-        if let _ = Int(lowered) { return lowered }
+        if Int(lowered) != nil { return lowered }
 
         // presetN format
         if lowered.hasPrefix("preset"), let num = lowered.dropFirst(6).first {

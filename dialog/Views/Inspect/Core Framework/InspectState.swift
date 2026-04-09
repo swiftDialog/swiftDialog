@@ -1546,13 +1546,18 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         let useUserDefaults = item.useUserDefaults == true
         let readingMethod = useUserDefaults ? "UserDefaults" : "file"
 
+        // Extract values from item before entering async/sendable closures
+        let itemPaths = item.paths
+        let itemPlistKey = item.plistKey
+        let iconBasePath = uiConfiguration.iconBasePath
+
         // Capture initial value from main actor context
         Task { @MainActor in
             // Get initial value using appropriate method
             let initialValue: String
             if useUserDefaults {
                 // Extract domain for UserDefaults reading
-                guard let path = item.paths.first,
+                guard let path = itemPaths.first,
                       let domain = Validation.shared.extractDomainFromPath(path) else {
                     writeLog("InspectState: Cannot extract UserDefaults domain from path for '\(itemId)'", logLevel: .error)
                     return
@@ -1560,7 +1565,19 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                 initialValue = Validation.shared.getUserDefaultsValue(domain: domain, key: plistKey) ?? "(not set)"
                 writeLog("InspectState: Starting plist monitoring (UserDefaults) for '\(itemId)' - initial: \(initialValue), interval: \(recheckInterval)s", logLevel: .info)
             } else {
-                initialValue = self.getPlistValueForDisplay(item: item) ?? "(not set)"
+                // Use extracted Sendable values instead of capturing non-Sendable item
+                if let key = itemPlistKey {
+                    var result: String?
+                    for path in itemPaths {
+                        if let value = Validation.shared.getPlistValue(at: path, key: key, basePath: iconBasePath) {
+                            result = value
+                            break
+                        }
+                    }
+                    initialValue = result ?? "(not set)"
+                } else {
+                    initialValue = "(not set)"
+                }
                 writeLog("InspectState: Starting plist monitoring (file) for '\(itemId)' - initial: \(initialValue), interval: \(recheckInterval)s", logLevel: .info)
             }
 
@@ -1573,13 +1590,25 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                     // Get current value using same method as initial
                     let currentValue: String
                     if useUserDefaults {
-                        guard let path = item.paths.first,
+                        guard let path = itemPaths.first,
                               let domain = Validation.shared.extractDomainFromPath(path) else {
                             return
                         }
                         currentValue = Validation.shared.getUserDefaultsValue(domain: domain, key: plistKey) ?? "(not set)"
                     } else {
-                        currentValue = self.getPlistValueForDisplay(item: item) ?? "(not set)"
+                        // Use extracted Sendable values instead of capturing non-Sendable item
+                        if let key = itemPlistKey {
+                            var result: String?
+                            for path in itemPaths {
+                                if let value = Validation.shared.getPlistValue(at: path, key: key, basePath: iconBasePath) {
+                                    result = value
+                                    break
+                                }
+                            }
+                            currentValue = result ?? "(not set)"
+                        } else {
+                            currentValue = "(not set)"
+                        }
                     }
 
                     // Check if value changed from initial
