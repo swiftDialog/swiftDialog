@@ -43,6 +43,27 @@ func processJSONString(jsonString: String) -> JSON {
 
 func getJSON() -> JSON {
     var json = JSON()
+
+    // Guard: --inspect-mode uses a different config schema than --jsonfile/--jsonstring.
+    // Combining them silently produces a blank window; fail fast before any file is read
+    // (the standalone --jsonfile file-existence check would otherwise mask our error).
+    if CLOptionPresent(optionName: appArguments.inspectMode)
+        && (CLOptionPresent(optionName: appArguments.jsonFile) || CLOptionPresent(optionName: appArguments.jsonString)) {
+        let message = """
+        Error: --inspect-mode cannot be combined with --jsonfile or --jsonstring.
+               (inspect-mode configs use a different schema than standard Dialog configs.)
+
+        Use one of these instead:
+          DIALOG_INSPECT_CONFIG=/abs/path/to/config.json dialog --inspect-mode
+          dialog --inspect-mode --inspect-config /abs/path/to/config.json
+          ignitecli ipc launch /abs/path/to/config.json    # for IPC
+
+        """
+        FileHandle.standardError.write(Data(message.utf8))
+        writeLog("Inspect Mode: rejected conflicting args (--jsonfile or --jsonstring)", logLevel: .error)
+        quitDialog(exitCode: appDefaults.exit1.code)
+    }
+
     if CLOptionPresent(optionName: appArguments.jsonFile) {
         // read json in from file
         json = processJSON(jsonFilePath: CLOptionText(optionName: appArguments.jsonFile))
@@ -132,6 +153,9 @@ func processCLOptions(json: JSON = getJSON()) {
     // Monitor Mode - Use InspectView for all monitor scenarios (with or without config)
     if appvars.debugMode { print("DEBUG: inspectMode.present = \(appArguments.inspectMode.present)") }
     if appArguments.inspectMode.present {
+        // Note: conflict with --jsonfile/--jsonstring is enforced earlier in getJSON()
+        // before any file I/O, so we never reach here with a bad combination.
+
         writeLog("Inspect Mode activated", logLevel: .info)
         writeLog("Inspect Mode: Activated", logLevel: .info)
         writeLog("Inspect Mode: Config can be provided via:", logLevel: .info)
@@ -211,6 +235,13 @@ func processCLOptions(json: JSON = getJSON()) {
             // No config file — will use built-in sample config (Preset 5 bento grid)
             appvars.windowWidth = 800
             appvars.windowHeight = 600
+            let warning = """
+            Warning: --inspect-mode launched without a config source; loading the built-in demo.
+                     Set DIALOG_INSPECT_CONFIG=/abs/path/to/config.json, pass --inspect-config <path>,
+                     or place a config at /var/tmp/dialog-inspect-config.json.
+
+            """
+            FileHandle.standardError.write(Data(warning.utf8))
             writeLog("Inspect Mode: No config file, using built-in sample size (1000×650)", logLevel: .info)
         }
 

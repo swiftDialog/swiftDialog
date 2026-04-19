@@ -295,6 +295,14 @@ struct Preset6View: View, InspectLayoutProtocol {
     // MARK: - Body
 
     var body: some View {
+        innerBody
+            // Share the aggregator with GuidanceContentView so `compliance-summary` and
+            // `findings-list` work here identically to Preset 5.
+            .environment(\.complianceAggregator, complianceService)
+    }
+
+    @ViewBuilder
+    private var innerBody: some View {
         ZStack {
             // Background
             Color(NSColor.windowBackgroundColor)
@@ -1038,6 +1046,14 @@ struct Preset6View: View, InspectLayoutProtocol {
                             let localizedBlocks = content.enumerated().map { index, block in
                                 localizedContentBlock(block, itemId: itemId, blockIndex: index)
                             }
+                            // Wide-layout blocks (bento grids, compliance hero, findings list)
+                            // need more horizontal real estate than the text-friendly
+                            // `contentMaxW`. Let them breathe up to `wideContentMaxW` so the
+                            // cells/cards don't pack into the left portion of the pane.
+                            let hasWideBlock = content.contains { InspectConfig.GuidanceContent.wideLayoutTypes.contains($0.type) }
+                            let effectiveMaxW = hasWideBlock
+                                ? InspectSizes.SetupSpacing.wideContentMaxW
+                                : InspectSizes.SetupSpacing.contentMaxW
                             GuidanceContentView(
                                 contentBlocks: localizedBlocks,
                                 scaleFactor: scaleFactor,
@@ -1047,7 +1063,7 @@ struct Preset6View: View, InspectLayoutProtocol {
                                 accentColor: highlightColor,
                                 contentAlignment: .center
                             )
-                            .frame(maxWidth: InspectSizes.SetupSpacing.contentMaxW)
+                            .frame(maxWidth: effectiveMaxW)
                             .padding(.horizontal, InspectSizes.SetupSpacing.contentPadH)
                         }
 
@@ -1883,7 +1899,15 @@ struct Preset6View: View, InspectLayoutProtocol {
     private func loadPersistedState() {
         // Only restore state if resumable mode is explicitly enabled
         guard inspectState.config?.resumable == true else {
-            writeLog("Preset6: Resumable mode not enabled, starting fresh", logLevel: .debug)
+            // Defensive clear: when resumable is not explicitly enabled, purge any stale persistence file
+            // so a leftover state file from a prior run cannot short-circuit a fresh launch.
+            // Honors DIALOG_KEEP_STALE_STATE=1 for debugging.
+            if ProcessInfo.processInfo.environment["DIALOG_KEEP_STALE_STATE"] != "1" {
+                persistenceService.clearState()
+                writeLog("Preset6: resumable != true, cleared stale persistence file", logLevel: .info)
+            } else {
+                writeLog("Preset6: Resumable mode not enabled, starting fresh (stale state preserved via DIALOG_KEEP_STALE_STATE=1)", logLevel: .debug)
+            }
             return
         }
 

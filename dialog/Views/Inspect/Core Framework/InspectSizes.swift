@@ -96,6 +96,9 @@ public enum InspectSizes {
         static let contentPadH: CGFloat = 40
         /// Max width for text-heavy content columns (480pt)
         static let contentMaxW: CGFloat = 480
+        /// Max width for multi-column layouts that need more horizontal breathing room
+        /// than text (bento grids, compliance summary, findings list).
+        static let wideContentMaxW: CGFloat = 820
         /// Minimum spacer height for breathing room (20pt)
         static let breathingRoom: CGFloat = 20
         /// Gap between title and subtitle — tight semantic pair (8pt)
@@ -106,5 +109,18 @@ public enum InspectSizes {
         static let sectionGap: CGFloat = 20
         /// Top inset from container edge to first element (16pt)
         static let topInset: CGFloat = 16
+    }
+
+    /// Bento-grid layout constants — cell sizing, detail sheet dimensions,
+    /// default icon sizes. Used instead of hardcoding these values at call sites.
+    public enum Bento {
+        /// Width of the compact plist-bound detail sheet (BentoPlistDetailSheet)
+        static let plistDetailWidth: CGFloat = 460
+        /// Frame for the inline BentoInlineDetailView when `inlineExpansion` is on
+        static let inlineDetailSize = CGSize(width: 720, height: 540)
+        /// Default icon size for `contentType: "icon"` bento cells
+        static let defaultIconSize: CGFloat = 48
+        /// Default icon size for `contentType: "mixed"` bento cells (slightly smaller to leave room for title + subtitle)
+        static let mixedIconSize: CGFloat = 40
     }
 }
