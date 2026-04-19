@@ -1449,22 +1449,6 @@ struct SDHelp {
         Example:
             dialog --\(argument.inspectMode.long) --\(argument.inspectConfig.long) /abs/path/to/config.json
 """
-
-        argument.inspectSchema.helpShort = "Write the inspect-mode JSON schema to <file>"
-        argument.inspectSchema.helpUsage = "<file>"
-        argument.inspectSchema.helpLong = """
-        Writes the bundled inspect-config.schema.json to the specified path and exits.
-        Use this to bootstrap editor autocompletion or CI validation of inspect-mode configs.
-"""
-
-        argument.schemaValidate.helpShort = "Validate an inspect-mode config against the schema"
-        argument.schemaValidate.helpUsage = "<file>"
-        argument.schemaValidate.helpLong = """
-        Loads the given inspect-mode config, runs JSON-syntax and schema checks, and
-        prints a report. Exits with 0 on success, 3 on warnings, 201 on failure.
-
-        Intended for CI use alongside --\(argument.inspectMode.long) deployments.
-"""
     }
 
 }
