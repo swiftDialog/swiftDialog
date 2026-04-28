@@ -602,6 +602,17 @@ class FileReader {
                     }
                     activateDialog()
                 }
+                
+            // screen background
+            case "\(observedData.args.screenBackground.long):":
+                if argument == "none" {
+                    observedData.args.screenBackground.present = false
+                    blurredScreen.hide()
+                } else {
+                    observedData.args.screenBackground.present = true
+                    blurredScreen.show(image: getImageFromPath(fileImagePath: argument, returnErrorImage: true))
+                    activateDialog()
+                }
 
             // web content
             case "\(observedData.args.webcontent.long):":

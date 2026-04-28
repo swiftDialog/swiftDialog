@@ -545,6 +545,14 @@ struct SDHelp {
         All other functions are available but the user is prevented from interacting with any other app until swiftDialog is exited.
 """
         
+        argument.screenBackground.helpShort = "Blur screen content behind dialog window"
+        argument.screenBackground.helpUsage = "<file> | <url>"
+        argument.screenBackground.helpLong = """
+        This mode will display the specified image full screen behind the dialog window.
+
+        All other functions are available but the user is prevented from interacting with any other app until swiftDialog is exited.
+"""
+        
         argument.hideOtherApps.helpShort = "Hide all other apps when launching a dialog window"
         argument.hideOtherApps.helpUsage = ""
         argument.hideOtherApps.helpLong = """

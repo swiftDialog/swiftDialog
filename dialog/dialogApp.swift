@@ -78,6 +78,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             if appArguments.showOnAllScreens.present {
                 window.collectionBehavior = [.canJoinAllSpaces]
             }
+            //window.contentView?.wantsLayer = true
+            //window.contentView?.layer?.masksToBounds = true
+            //window.contentView?.layer?.cornerRadius = 80
+            // Toolbar **needs** a delegate
             if appArguments.loginWindow.present {
                 window.canBecomeVisibleWithoutLogin = true
                 writeLog("Window can appear at the loginwindow", logLevel: .debug)
@@ -95,7 +99,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             if appArguments.forceOnTop.present {
                 window.level = .floating  // Start with floating, will be elevated after positioning
                 writeLog("Window initially set to floating level for force on top", logLevel: .debug)
-            } else if appArguments.blurScreen.present {
+            } else if appArguments.blurScreen.present || appArguments.screenBackground.present {
                 window.level = .floating
                 writeLog("Window set to floating level for blur screen", logLevel: .debug)
             } else {
@@ -106,6 +110,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             if appArguments.blurScreen.present && !appArguments.fullScreenWindow.present {
                 writeLog("Blurscreen enabled", logLevel: .debug)
                 blurredScreen.show()
+            } else if appArguments.screenBackground.present {
+                writeLog("Setting backgroun image to \(appArguments.screenBackground.value)", logLevel: .debug)
+                blurredScreen.show(image: getImageFromPath(fileImagePath: appArguments.screenBackground.value))
             } else {
                 background.close()
             }
