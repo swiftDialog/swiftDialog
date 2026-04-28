@@ -1097,7 +1097,8 @@ struct InspectConfig: Codable {
             // Text content (for contentType="text" or "mixed")
             let title: String?              // Main title text
             let subtitle: String?           // Secondary text
-            let textSize: String?           // "large" | "medium" | "small" (default: "medium")
+            /// Text size for title/subtitle: "small" (14pt title), "medium" (20pt, default), "large" (32pt).
+            let textSize: String?
             let textColor: String?          // Hex color for text
 
             // Icon content (for contentType="icon")
@@ -1120,6 +1121,10 @@ struct InspectConfig: Codable {
 
             // Interaction - opens detail overlay when tapped
             let detailOverlay: DetailOverlayConfig?
+
+            // Live plist binding is automatic: if `id` matches a key in the injected
+            // ComplianceAggregatorService, the subtitle + icon color reflect the live
+            // finding and a click shows a detail popover. No new schema field needed.
         }
 
         /// Resolve a block identifier to a numeric index.
@@ -1130,6 +1135,11 @@ struct InspectConfig: Codable {
             }
             return content.firstIndex { $0.id == identifier }
         }
+
+        /// Block types that need more horizontal space than the default text column width.
+        /// Presets check this to widen their content container (see `SetupSpacing.wideContentMaxW`).
+        /// Block authors who add a multi-column renderer should add their type here.
+        static let wideLayoutTypes: Set<String> = ["bento-grid", "compliance-summary", "findings-list"]
     }
 
     struct PlistSourceConfig: Codable {
@@ -1152,6 +1162,14 @@ struct InspectConfig: Codable {
         let evaluation: String?             // Evaluation type: "boolean", "string", etc. (default: "boolean")
         let excludeKeys: [String]?          // Keys to exclude from auto-discovery
         let includePattern: String?         // Regex pattern to include keys (optional)
+
+        // MARK: - Display Labels (optional; fall back to English defaults)
+        /// Label used in subtitles / pills / summary rows when a check passes.
+        /// Default: "Healthy". Override to localize or brand (e.g. "OK", "Compliant").
+        let healthyLabel: String?
+        /// Label used when a check fails.
+        /// Default: "Needs Attention". Override to brand (e.g. "Review", "Failed").
+        let attentionLabel: String?
     }
 
     struct KeyMapping: Codable {
@@ -2007,6 +2025,21 @@ struct InspectConfig: Codable {
         // Preset1/2 multi-screen flow
         introScreen = try container.decodeIfPresent(PresetIntroScreen.self, forKey: .introScreen)
         summaryScreen = try container.decodeIfPresent(PresetSummaryScreen.self, forKey: .summaryScreen)
+
+        // Root-shape conflict guard: preset 5 uses `introSteps[]`, preset 6 uses `items[]`.
+        // Mixing them silently renders a blank panel (pitfalls P9). Fail fast with a clear error.
+        let hasItems = container.contains(.items)
+        let hasIntroSteps = container.contains(.introSteps)
+        if hasItems && hasIntroSteps {
+            throw DecodingError.dataCorruptedError(
+                forKey: .items,
+                in: container,
+                debugDescription: """
+                Conflicting root shape: config has both `items[]` (Preset 6 shape) and `introSteps[]` (Preset 5 shape). \
+                Preset 5 uses `introSteps[]`; Preset 6 uses `items[]`. Remove whichever does not match your target preset.
+                """
+            )
+        }
     }
 
     private enum CodingKeys: String, CodingKey {

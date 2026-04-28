@@ -27,6 +27,7 @@ struct GuidanceContentView: View {
     let contentAlignment: HorizontalAlignment  // Text block alignment (.leading default, .center for Preset5 intro)
     let refreshToken: Int                // Changes on dynamic updates to force SwiftUI re-render
     @Environment(\.palette) private var palette
+    @Environment(\.complianceAggregator) private var complianceAggregator
 
     // Initialize with required parameters for interactive form support
     init(contentBlocks: [InspectConfig.GuidanceContent], scaleFactor: CGFloat, iconBasePath: String? = nil, inspectState: InspectState, itemId: String, onOverlayTap: (() -> Void)? = nil, accentColor: Color? = nil, contentAlignment: HorizontalAlignment = .leading, refreshToken: Int = 0) {
@@ -1220,6 +1221,51 @@ struct GuidanceContentView: View {
                     .italic()
             }
 
+        case "compliance-summary":
+            // Plist-driven hero with overall compliance banner + 3 stat cards.
+            // Requires a ComplianceAggregatorService injected via environment.
+            // Available in both Preset 5 and Preset 6.
+            if let aggregator = complianceAggregator {
+                ComplianceSummaryBlock(
+                    block: block,
+                    totalChecks: aggregator.totalChecks,
+                    totalPassed: aggregator.totalPassed,
+                    healthyLabel: aggregator.healthyLabel,
+                    attentionLabel: aggregator.attentionLabel,
+                    scaleFactor: scaleFactor,
+                    colorThresholds: inspectState.colorThresholds
+                )
+                .frame(maxWidth: 720)
+                .padding(.horizontal, 16 * scaleFactor)
+                .id("compliance-summary-\(itemId)-\(aggregator.totalPassed)-\(aggregator.totalChecks)")
+            } else if appvars.debugMode {
+                Text("compliance-summary requires plistSources to be configured")
+                    .font(.system(size: 11 * scaleFactor))
+                    .foregroundStyle(.red)
+                    .italic()
+            }
+
+        case "findings-list":
+            // Plist-driven category-grouped list with "View all" disclosure.
+            // Default: attention-only (audience-friendly); content="all" to expand by default.
+            if let aggregator = complianceAggregator {
+                FindingsListBlock(
+                    block: block,
+                    categories: aggregator.categories,
+                    healthyLabel: aggregator.healthyLabel,
+                    attentionLabel: aggregator.attentionLabel,
+                    scaleFactor: scaleFactor
+                )
+                .frame(maxWidth: 720)
+                .padding(.horizontal, 16 * scaleFactor)
+                .id("findings-list-\(itemId)-\(aggregator.totalPassed)-\(aggregator.totalChecks)")
+            } else if appvars.debugMode {
+                Text("findings-list requires plistSources to be configured")
+                    .font(.system(size: 11 * scaleFactor))
+                    .foregroundStyle(.red)
+                    .italic()
+            }
+
         case "bento-grid":
             // Bento grid layout with variable cell sizes (1x1, 2x1, 1x2, 2x2)
             if let cells = block.bentoCells, !cells.isEmpty {
@@ -1245,6 +1291,12 @@ struct GuidanceContentView: View {
                     tintColor: block.bentoTintColor.flatMap { Color(hex: $0) },
                     inspectState: inspectState
                 )
+                // Claim the full horizontal space of whatever container this block lives in
+                // (Preset 5 full-width step, or Preset 6's narrower guidance pane). Without
+                // this, GeometryReader inside BentoGridView gets a small intrinsic width and
+                // packs cells into the top-left, leaving the rest of the pane empty.
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 16 * scaleFactor)
             } else if appvars.debugMode {
                 Text("bento-grid requires non-empty 'bentoCells' array")
                     .font(.system(size: 11 * scaleFactor))

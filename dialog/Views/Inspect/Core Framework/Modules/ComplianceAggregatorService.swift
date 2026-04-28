@@ -46,6 +46,21 @@ class ComplianceAggregatorService: ObservableObject {
     /// Error message if loading failed
     @Published private(set) var errorMessage: String?
 
+    // MARK: - Display Labels
+
+    /// User-facing label for a passing check. Takes the first configured source's
+    /// `healthyLabel` if set, otherwise "Healthy". Views (bento, findings-list, summary)
+    /// read this instead of hardcoding the string.
+    var healthyLabel: String {
+        sources.first?.healthyLabel ?? "Healthy"
+    }
+
+    /// User-facing label for a failing check. Takes the first configured source's
+    /// `attentionLabel` if set, otherwise "Needs Attention".
+    var attentionLabel: String {
+        sources.first?.attentionLabel ?? "Needs Attention"
+    }
+
     // MARK: - Private State
 
     private var sources: [InspectConfig.PlistSourceConfig] = []

@@ -43,6 +43,27 @@ func processJSONString(jsonString: String) -> JSON {
 
 func getJSON() -> JSON {
     var json = JSON()
+
+    // Guard: --inspect-mode uses a different config schema than --jsonfile/--jsonstring.
+    // Combining them silently produces a blank window; fail fast before any file is read
+    // (the standalone --jsonfile file-existence check would otherwise mask our error).
+    if CLOptionPresent(optionName: appArguments.inspectMode)
+        && (CLOptionPresent(optionName: appArguments.jsonFile) || CLOptionPresent(optionName: appArguments.jsonString)) {
+        let message = """
+        Error: --inspect-mode cannot be combined with --jsonfile or --jsonstring.
+               (inspect-mode configs use a different schema than standard Dialog configs.)
+
+        Use one of these instead:
+          DIALOG_INSPECT_CONFIG=/abs/path/to/config.json dialog --inspect-mode
+          dialog --inspect-mode --inspect-config /abs/path/to/config.json
+          ignitecli ipc launch /abs/path/to/config.json    # for IPC
+
+        """
+        FileHandle.standardError.write(Data(message.utf8))
+        writeLog("Inspect Mode: rejected conflicting args (--jsonfile or --jsonstring)", logLevel: .error)
+        quitDialog(exitCode: appDefaults.exit1.code)
+    }
+
     if CLOptionPresent(optionName: appArguments.jsonFile) {
         // read json in from file
         json = processJSON(jsonFilePath: CLOptionText(optionName: appArguments.jsonFile))
@@ -132,6 +153,9 @@ func processCLOptions(json: JSON = getJSON()) {
     // Monitor Mode - Use InspectView for all monitor scenarios (with or without config)
     if appvars.debugMode { print("DEBUG: inspectMode.present = \(appArguments.inspectMode.present)") }
     if appArguments.inspectMode.present {
+        // Note: conflict with --jsonfile/--jsonstring is enforced earlier in getJSON()
+        // before any file I/O, so we never reach here with a bad combination.
+
         writeLog("Inspect Mode activated", logLevel: .info)
         writeLog("Inspect Mode: Activated", logLevel: .info)
         writeLog("Inspect Mode: Config can be provided via:", logLevel: .info)
@@ -211,6 +235,13 @@ func processCLOptions(json: JSON = getJSON()) {
             // No config file — will use built-in sample config (Preset 5 bento grid)
             appvars.windowWidth = 800
             appvars.windowHeight = 600
+            let warning = """
+            Warning: --inspect-mode launched without a config source; loading the built-in demo.
+                     Set DIALOG_INSPECT_CONFIG=/abs/path/to/config.json, pass --inspect-config <path>,
+                     or place a config at /var/tmp/dialog-inspect-config.json.
+
+            """
+            FileHandle.standardError.write(Data(warning.utf8))
             writeLog("Inspect Mode: No config file, using built-in sample size (1000×650)", logLevel: .info)
         }
 
@@ -316,86 +347,6 @@ func processCLOptions(json: JSON = getJSON()) {
             sdHelp.printHelpShort()
         }
         quitDialog(exitCode: appDefaults.exitNow.code)
-    }
-    if appArguments.inspectSchema.present {
-        writeLog("\(appArguments.inspectSchema.long) called", logLevel: .info)
-
-        guard let schemaURL = Bundle.main.url(forResource: "inspect-config.schema", withExtension: "json"),
-              let schemaData = try? Data(contentsOf: schemaURL),
-              let schemaString = String(data: schemaData, encoding: .utf8) else {
-            print("Error: Schema file not found in bundle")
-            quitDialog(exitCode: appDefaults.exitNow.code)
-            return
-        }
-
-        if appArguments.inspectSchema.value.isEmpty {
-            // Print to stdout
-            print(schemaString)
-        } else {
-            // Save to file
-            do {
-                try schemaString.write(toFile: appArguments.inspectSchema.value, atomically: true, encoding: .utf8)
-                print("Schema written to: \(appArguments.inspectSchema.value)")
-            } catch {
-                print("Error writing schema: \(error.localizedDescription)")
-            }
-        }
-        quitDialog(exitCode: appDefaults.exitNow.code)
-    }
-    if appArguments.schemaValidate.present {
-        writeLog("\(appArguments.schemaValidate.long) called", logLevel: .info)
-
-        let configPath = appArguments.schemaValidate.value
-        guard !configPath.isEmpty else {
-            print("❌ Error: No config file specified")
-            print("Usage: --schema-validate /path/to/config.json")
-            quitDialog(exitCode: appDefaults.exit201.code)
-            return
-        }
-
-        guard FileManager.default.fileExists(atPath: configPath) else {
-            print("❌ Error: Config file not found: \(configPath)")
-            quitDialog(exitCode: appDefaults.exit201.code)
-            return
-        }
-
-        // Load and validate the config
-        let configService = Config()
-        let result = configService.loadConfiguration(fromFile: configPath)
-
-        switch result {
-        case .success(let configResult):
-            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-            print("  Config Validation: \(configPath)")
-            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-            print("")
-            print("✓ JSON syntax: Valid")
-            print("✓ Preset: \(configResult.config.preset)")
-            print("✓ Items: \(configResult.config.items.count)")
-            print("")
-
-            if configResult.warnings.isEmpty {
-                print("✅ No warnings - config looks good!")
-            } else {
-                print("⚠️  Warnings (\(configResult.warnings.count)):")
-                for warning in configResult.warnings {
-                    print("  • \(warning)")
-                }
-            }
-            print("")
-            quitDialog(exitCode: configResult.warnings.isEmpty ? appDefaults.exit0.code : appDefaults.exit3.code)
-
-        case .failure(let error):
-            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-            print("  Config Validation: \(configPath)")
-            print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-            print("")
-            print("❌ Validation failed:")
-            print("  \(error.localizedDescription)")
-            print("")
-            quitDialog(exitCode: appDefaults.exit201.code)
-        }
-        return
     }
     if appArguments.getVersion.present {
         writeLog("\(appArguments.getVersion.long) called")
