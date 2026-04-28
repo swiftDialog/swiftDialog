@@ -260,8 +260,13 @@ struct dialogApp: App {
         appvars.iconHeight *= appvars.scaleFactor
 
         if appArguments.miniMode.present {
-            appvars.windowWidth = 540
-            appvars.windowHeight = 128
+            if ProcessInfo.processInfo.operatingSystemVersion.majorVersion <= 15 {
+                appvars.windowWidth = 540
+                appvars.windowHeight = 128
+            } else {
+                appvars.windowWidth = 540
+                appvars.windowHeight = 150
+            }
         }
 
         //check debug mode and print info

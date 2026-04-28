@@ -95,7 +95,8 @@ struct MiniView: View {
                                 //Text(observedData.args.messageOption.value)
                                     .lineLimit(4)
                                     .font(.system(size: 15))
-                                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                                    .frame(maxWidth: .infinity, maxHeight: observedData.appProperties.windowHeight - 60, alignment: .topLeading)
+                                    .clipped()
                             } else {
                                 Spacer()
                             }
