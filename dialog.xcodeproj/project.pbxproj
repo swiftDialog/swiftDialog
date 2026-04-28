@@ -129,6 +129,7 @@
 		BA7CA57D2F231310005A922A /* TableContentBlocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7CA57A2F231310005A922A /* TableContentBlocks.swift */; };
 		BA7CA57E2F231310005A922A /* StatusContentBlocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7CA5792F231310005A922A /* StatusContentBlocks.swift */; };
 		BA7CA57F2F231310005A922A /* MediaContentBlocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7CA5782F231310005A922A /* MediaContentBlocks.swift */; };
+		BA7CA5902F231310005A922A /* ComplianceFindingsBlocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7CA58F2F231310005A922A /* ComplianceFindingsBlocks.swift */; };
 		BA7CA5812F231618005A922A /* IntroStepMonitorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7CA5802F231618005A922A /* IntroStepMonitorService.swift */; };
 		BA7TS0012F242B0000ABCDEF /* ThumbnailService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7TS0002F242B0000ABCDEF /* ThumbnailService.swift */; };
 		BAB7C3CB2F39187B0033C0DC /* InspectBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB7C3CA2F39187B0033C0DC /* InspectBannerView.swift */; };
@@ -142,6 +143,7 @@
 		BAEFDFE72E83FB310017CFC2 /* Preset2.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAEFDFCD2E83FB310017CFC2 /* Preset2.swift */; };
 		BAEFDFE82E83FB310017CFC2 /* InspectState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAEFDFC82E83FB310017CFC2 /* InspectState.swift */; };
 		BAEFDFE92E83FB310017CFC2 /* InspectSizes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAEFDFC72E83FB310017CFC2 /* InspectSizes.swift */; };
+		BAEFDFE9A1B2C3D400A0B0C0 /* InspectEnvironmentKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAEFDFC7A1B2C3D400A0B0C0 /* InspectEnvironmentKeys.swift */; };
 		BAEFDFEA2E83FB310017CFC2 /* InspectConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAEFDFC52E83FB310017CFC2 /* InspectConfig.swift */; };
 		BAEFDFEB2E83FB310017CFC2 /* Validation.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAEFDFD92E83FB310017CFC2 /* Validation.swift */; };
 		BAEFDFEE2E83FB310017CFC2 /* InspectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAEFDFC92E83FB310017CFC2 /* InspectView.swift */; };
@@ -394,6 +396,7 @@
 		BA7CA5782F231310005A922A /* MediaContentBlocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaContentBlocks.swift; sourceTree = "<group>"; };
 		BA7CA5792F231310005A922A /* StatusContentBlocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusContentBlocks.swift; sourceTree = "<group>"; };
 		BA7CA57A2F231310005A922A /* TableContentBlocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableContentBlocks.swift; sourceTree = "<group>"; };
+		BA7CA58F2F231310005A922A /* ComplianceFindingsBlocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplianceFindingsBlocks.swift; sourceTree = "<group>"; };
 		BA7CA5802F231618005A922A /* IntroStepMonitorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroStepMonitorService.swift; sourceTree = "<group>"; };
 		BA7TS0002F242B0000ABCDEF /* ThumbnailService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbnailService.swift; sourceTree = "<group>"; };
 		BAB7C3CA2F39187B0033C0DC /* InspectBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectBannerView.swift; sourceTree = "<group>"; };
@@ -404,6 +407,7 @@
 		BAEFDFC52E83FB310017CFC2 /* InspectConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectConfig.swift; sourceTree = "<group>"; };
 		BAEFDFC62E83FB310017CFC2 /* InspectLayoutProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectLayoutProtocol.swift; sourceTree = "<group>"; };
 		BAEFDFC72E83FB310017CFC2 /* InspectSizes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectSizes.swift; sourceTree = "<group>"; };
+		BAEFDFC7A1B2C3D400A0B0C0 /* InspectEnvironmentKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectEnvironmentKeys.swift; sourceTree = "<group>"; };
 		BAEFDFC82E83FB310017CFC2 /* InspectState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectState.swift; sourceTree = "<group>"; };
 		BAEFDFC92E83FB310017CFC2 /* InspectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectView.swift; sourceTree = "<group>"; };
 		BAEFDFCC2E83FB310017CFC2 /* Preset1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preset1.swift; sourceTree = "<group>"; };
@@ -748,6 +752,7 @@
 				BA7CA5782F231310005A922A /* MediaContentBlocks.swift */,
 				BA7CA5792F231310005A922A /* StatusContentBlocks.swift */,
 				BA7CA57A2F231310005A922A /* TableContentBlocks.swift */,
+				BA7CA58F2F231310005A922A /* ComplianceFindingsBlocks.swift */,
 			);
 			path = "Content Renderers";
 			sourceTree = "<group>";
@@ -785,6 +790,7 @@
 				A1B2C3D4E5F60718A9B0C1D3 /* DistributedNotifications.swift */,
 				BAEFDFC62E83FB310017CFC2 /* InspectLayoutProtocol.swift */,
 				BAEFDFC72E83FB310017CFC2 /* InspectSizes.swift */,
+				BAEFDFC7A1B2C3D400A0B0C0 /* InspectEnvironmentKeys.swift */,
 				BAEFDFC82E83FB310017CFC2 /* InspectState.swift */,
 				BAEFDFC92E83FB310017CFC2 /* InspectView.swift */,
 				41D892E02F754F3000FA4E01 /* CommandRouter.swift */,
@@ -1225,6 +1231,7 @@
 				BA7CA5812F231618005A922A /* IntroStepMonitorService.swift in Sources */,
 				BAEFDFE82E83FB310017CFC2 /* InspectState.swift in Sources */,
 				BAEFDFE92E83FB310017CFC2 /* InspectSizes.swift in Sources */,
+				BAEFDFE9A1B2C3D400A0B0C0 /* InspectEnvironmentKeys.swift in Sources */,
 				BA56BA942EC5F41000055C7F /* InspectDynamicState.swift in Sources */,
 				BA56BA952EC5F41000055C7F /* PlistAggregator.swift in Sources */,
 				BA56BA962EC5F41000055C7F /* InspectStateMachines.swift in Sources */,
@@ -1251,6 +1258,7 @@
 				BA7CA57D2F231310005A922A /* TableContentBlocks.swift in Sources */,
 				BA7CA57E2F231310005A922A /* StatusContentBlocks.swift in Sources */,
 				BA7CA57F2F231310005A922A /* MediaContentBlocks.swift in Sources */,
+				BA7CA5902F231310005A922A /* ComplianceFindingsBlocks.swift in Sources */,
 				BAEFDFF12E83FB310017CFC2 /* Config.swift in Sources */,
 				BAEFDFF22E83FB310017CFC2 /* Preset3.swift in Sources */,
 				BAEFDFF32E83FB310017CFC2 /* Preset1.swift in Sources */,

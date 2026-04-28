@@ -105,6 +105,36 @@ struct BentoCell: View {
     let cellIndex: Int
     let onTap: () -> Void
 
+    @Environment(\.complianceAggregator) private var complianceAggregator
+
+    /// The compliance item bound to this cell, if any.
+    /// Zero new schema: a cell auto-binds when its existing `id` matches a plist key
+    /// in the injected `ComplianceAggregatorService`. Users get live subtitle + icon color,
+    /// and the existing `detailOverlay` click-to-sheet flow fires automatically (via a
+    /// synthesized overlay in the parent grid) so they don't have to author one by hand.
+    private var boundItem: PlistAggregator.ComplianceItem? {
+        guard let aggregator = complianceAggregator else { return nil }
+        return aggregator.allItems.first(where: { $0.id == config.id })
+    }
+
+    /// Subtitle override when a plist binding exists; otherwise the config-supplied subtitle.
+    /// Status labels come from the aggregator (configurable via `healthyLabel`/`attentionLabel`
+    /// on `PlistSourceConfig`).
+    private var resolvedSubtitle: String? {
+        if let item = boundItem, let aggregator = complianceAggregator {
+            return item.finding ? aggregator.healthyLabel : aggregator.attentionLabel
+        }
+        return config.subtitle
+    }
+
+    /// Icon color override when a plist binding exists; otherwise falls through to iconColor computed property.
+    private var resolvedIconColor: Color? {
+        if let item = boundItem {
+            return item.finding ? Color.semanticSuccess : Color.semanticWarning
+        }
+        return nil
+    }
+
     private var cornerRadius: CGFloat {
         CGFloat(config.cornerRadius ?? 12) * scaleFactor
     }
@@ -189,9 +219,20 @@ struct BentoCell: View {
         .contentShape(RoundedRectangle(cornerRadius: cornerRadius))
     }
 
+    /// Resolve the effective content type.
+    /// If `contentType` is explicit, use it. Otherwise derive from which fields are set:
+    /// `imagePath` → "mixed", `sfSymbol` → "icon", else → "text".
+    /// This lets users omit `contentType` and still get the expected rendering.
+    private var resolvedContentType: String {
+        if !config.contentType.isEmpty { return config.contentType }
+        if config.imagePath != nil { return "mixed" }
+        if config.sfSymbol != nil { return "icon" }
+        return "text"
+    }
+
     @ViewBuilder
     private var contentView: some View {
-        switch config.contentType {
+        switch resolvedContentType {
         case "image":
             imageContent
         case "text":
@@ -282,8 +323,11 @@ struct BentoCell: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    /// Icon color - uses iconColor from config, falls back to accentColor
+    /// Icon color - live plist binding wins; then iconColor from config; then accentColor.
     private var iconColor: Color {
+        if let bound = resolvedIconColor {
+            return bound
+        }
         if let colorHex = config.iconColor {
             return Color(hex: colorHex)
         }
@@ -316,6 +360,22 @@ struct BentoCell: View {
 
     @ViewBuilder
     private var mixedContent: some View {
+        // Image-backed mixed: retain original image + gradient + bottom-leading text layout.
+        if config.imagePath != nil {
+            imageBackedMixedContent
+        } else if config.sfSymbol != nil {
+            // Icon-backed mixed: SF Symbol hero + label/title/subtitle stack.
+            // This is the common case for compliance bento cards — previously the icon
+            // was silently dropped because mixedContent only checked imagePath.
+            iconBackedMixedContent
+        } else {
+            // No image, no icon — fall back to plain text layout.
+            textContent
+        }
+    }
+
+    @ViewBuilder
+    private var imageBackedMixedContent: some View {
         ZStack(alignment: .bottomLeading) {
             // Background image (skip when procedural gradient is the background)
             if !hasGradientBackground, let imagePath = config.imagePath {
@@ -356,7 +416,7 @@ struct BentoCell: View {
                         .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
                 }
 
-                if let subtitle = config.subtitle {
+                if let subtitle = resolvedSubtitle {
                     Text(subtitle)
                         .font(.system(size: 12 * scaleFactor))
                         .foregroundStyle(.white.opacity(0.9))
@@ -366,6 +426,50 @@ struct BentoCell: View {
             }
             .padding(12 * scaleFactor)
         }
+    }
+
+    @ViewBuilder
+    private var iconBackedMixedContent: some View {
+        VStack(alignment: .leading, spacing: 10 * scaleFactor) {
+            if let sfSymbol = config.sfSymbol {
+                Image(systemName: sfSymbol)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .font(.system(size: CGFloat(config.iconSize ?? 40) * scaleFactor, weight: iconWeight))
+                    .frame(
+                        width: CGFloat(config.iconSize ?? 40) * scaleFactor,
+                        height: CGFloat(config.iconSize ?? 40) * scaleFactor
+                    )
+                    .foregroundStyle(iconColor)
+            }
+
+            VStack(alignment: .leading, spacing: 2 * scaleFactor) {
+                if let label = config.label {
+                    Text(label)
+                        .font(.system(size: 10 * scaleFactor, weight: .semibold))
+                        .textCase(.uppercase)
+                        .tracking(1.2)
+                        .foregroundStyle(textColor.opacity(0.6))
+                }
+
+                if let title = config.title {
+                    Text(title)
+                        .font(.system(size: mixedTitleSize, weight: .semibold))
+                        .foregroundStyle(textColor)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.75)
+                }
+
+                if let subtitle = resolvedSubtitle {
+                    Text(subtitle)
+                        .font(.system(size: 12 * scaleFactor))
+                        .foregroundStyle(textColor.opacity(0.7))
+                        .lineLimit(2)
+                }
+            }
+        }
+        .padding(12 * scaleFactor)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
     // MARK: - Helpers
@@ -487,6 +591,124 @@ private struct AsyncBentoImageView: View {
         }
 
         return nil
+    }
+}
+
+// MARK: - Sheet Context (payload passed through presentation)
+
+/// Bundles the cell + resolved detail payload so SwiftUI's `.sheet(item:)` receives
+/// the data directly in its content closure rather than reading `@State` at presentation time.
+struct BentoSheetContext: Identifiable {
+    enum Payload {
+        case overlay(InspectConfig.DetailOverlayConfig)
+        case plistBinding(PlistAggregator.ComplianceItem)
+    }
+    let id: String
+    let cell: InspectConfig.GuidanceContent.BentoCellConfig
+    let payload: Payload
+}
+
+// MARK: - Bento Plist Detail Sheet
+
+/// Compact sheet shown when a plist-bound bento cell (no explicit `detailOverlay`) is
+/// tapped. Reuses the same sheet presentation as `BentoDetailView`, but is auto-populated
+/// from the live `ComplianceItem`. No extra schema needed — the cell's existing `id` is
+/// the plist key.
+struct BentoPlistDetailSheet: View {
+    let cellConfig: InspectConfig.GuidanceContent.BentoCellConfig
+    let item: PlistAggregator.ComplianceItem
+    /// User-facing label to display when the check passes. Comes from the aggregator so
+    /// `healthyLabel` / `attentionLabel` on `PlistSourceConfig` brand the sheet too.
+    let healthyLabel: String
+    /// User-facing label for a failing check.
+    let attentionLabel: String
+    /// Scale factor for the whole sheet — mirrors the rest of the bento system so
+    /// users with a larger inspect window get a proportionally larger popover.
+    let scaleFactor: CGFloat
+    let onClose: () -> Void
+
+    private var tint: Color { item.finding ? .semanticSuccess : .semanticWarning }
+    private var statusLabel: String { item.finding ? healthyLabel : attentionLabel }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Header ribbon
+            HStack(alignment: .center, spacing: 14 * scaleFactor) {
+                Image(systemName: cellConfig.sfSymbol ?? (item.finding ? "checkmark.seal.fill" : "exclamationmark.triangle.fill"))
+                    .font(.system(size: 28 * scaleFactor, weight: .semibold))
+                    .foregroundStyle(tint)
+                    .frame(width: 44 * scaleFactor)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(item.displayName)
+                        .font(.system(size: 17 * scaleFactor, weight: .semibold))
+                    Text(item.category)
+                        .font(.system(size: 12 * scaleFactor))
+                        .foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 12 * scaleFactor)
+                Text(statusLabel)
+                    .font(.system(size: 12 * scaleFactor, weight: .semibold))
+                    .foregroundStyle(tint)
+                    .padding(.horizontal, 10 * scaleFactor)
+                    .padding(.vertical, 5 * scaleFactor)
+                    .background(Capsule().fill(tint.opacity(0.15)))
+            }
+            .padding(.horizontal, 20 * scaleFactor)
+            .padding(.vertical, 16 * scaleFactor)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(tint.opacity(0.06))
+
+            Divider()
+
+            // Details list
+            VStack(alignment: .leading, spacing: 10 * scaleFactor) {
+                detailRow("Status", statusLabel, tint: tint)
+                detailRow("Category", item.category)
+                if item.isCritical {
+                    detailRow("Criticality", "Critical", tint: .semanticWarning)
+                }
+                detailRow("Plist key", item.id, monospaced: true)
+            }
+            .padding(20 * scaleFactor)
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            // Footer
+            HStack {
+                Spacer(minLength: 0)
+                Button("Close", action: onClose)
+                    .keyboardShortcut(.defaultAction)
+                    .controlSize(.large)
+            }
+            .padding(.horizontal, 20 * scaleFactor)
+            .padding(.bottom, 16 * scaleFactor)
+            .padding(.top, 4 * scaleFactor)
+        }
+        .frame(width: InspectSizes.Bento.plistDetailWidth * scaleFactor)
+        .fixedSize(horizontal: true, vertical: true)
+    }
+
+    @ViewBuilder
+    private func detailRow(_ label: String, _ value: String, tint: Color? = nil, monospaced: Bool = false) -> some View {
+        HStack(alignment: .top, spacing: 12 * scaleFactor) {
+            Text(label)
+                .font(.system(size: 11 * scaleFactor, weight: .medium))
+                .textCase(.uppercase)
+                .tracking(0.6)
+                .foregroundStyle(.secondary)
+                .frame(width: 88 * scaleFactor, alignment: .leading)
+            if monospaced {
+                // Only plist keys (the one thing users actually copy) are selectable.
+                Text(value)
+                    .font(.system(size: 12 * scaleFactor, design: .monospaced))
+                    .foregroundStyle(tint ?? .primary)
+                    .textSelection(.enabled)
+            } else {
+                Text(value)
+                    .font(.system(size: 13 * scaleFactor))
+                    .foregroundStyle(tint ?? .primary)
+            }
+            Spacer()
+        }
     }
 }
 
@@ -1051,9 +1273,19 @@ struct BentoGridView: View {
     @State private var showDetail: Bool = false
     @State private var expandedCellId: String?
     @State private var visibleCells: Set<String> = []
+    @State private var sheetContext: BentoSheetContext?
+
+    @Environment(\.complianceAggregator) private var complianceAggregator
 
     /// Stagger delay between each cell appearing (seconds)
     private let staggerDelay: Double = 0.12
+
+    /// The live compliance item bound to a cell, if any. A cell auto-binds when its
+    /// existing `id` matches a plist key in the injected aggregator — zero new schema.
+    private func boundItem(for cell: InspectConfig.GuidanceContent.BentoCellConfig) -> PlistAggregator.ComplianceItem? {
+        guard let aggregator = complianceAggregator else { return nil }
+        return aggregator.allItems.first(where: { $0.id == cell.id })
+    }
 
     /// Backward-compatible initializer (inlineExpansion defaults to false)
     init(
@@ -1121,15 +1353,21 @@ struct BentoGridView: View {
                             tintColor: tintColor,
                             cellIndex: index,
                             onTap: {
-                                if cellConfig.detailOverlay != nil {
-                                    if inlineExpansion {
-                                        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
-                                            expandedCellId = cellConfig.id
-                                        }
-                                    } else {
-                                        selectedCell = cellConfig
-                                        showDetail = true
+                                // Inline expansion is only meaningful for user-authored overlays
+                                // (BentoInlineDetailView renders `detailOverlay.content`).
+                                if inlineExpansion, cellConfig.detailOverlay != nil {
+                                    withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+                                        expandedCellId = cellConfig.id
                                     }
+                                    return
+                                }
+
+                                // Build the sheet payload at click time so the sheet's
+                                // content closure receives the data directly (see BentoSheetContext).
+                                if let overlay = cellConfig.detailOverlay {
+                                    sheetContext = BentoSheetContext(id: cellConfig.id, cell: cellConfig, payload: .overlay(overlay))
+                                } else if let bound = boundItem(for: cellConfig) {
+                                    sheetContext = BentoSheetContext(id: cellConfig.id, cell: cellConfig, payload: .plistBinding(bound))
                                 }
                             }
                         )
@@ -1173,18 +1411,27 @@ struct BentoGridView: View {
         .onAppear {
             staggerCellAppearance()
         }
-        .sheet(isPresented: $showDetail) {
-            if let cell = selectedCell, let overlay = cell.detailOverlay {
+        // Single sheet driven by an Identifiable payload — SwiftUI passes the value
+        // into the content closure, so we never read `@State` at sheet-content time.
+        .sheet(item: $sheetContext) { context in
+            switch context.payload {
+            case .overlay(let overlay):
                 BentoDetailView(
-                    cellConfig: cell,
+                    cellConfig: context.cell,
                     overlay: overlay,
                     accentColor: accentColor,
                     iconBasePath: iconBasePath,
                     inspectState: inspectState,
-                    onClose: {
-                        showDetail = false
-                        selectedCell = nil
-                    }
+                    onClose: { sheetContext = nil }
+                )
+            case .plistBinding(let item):
+                BentoPlistDetailSheet(
+                    cellConfig: context.cell,
+                    item: item,
+                    healthyLabel: complianceAggregator?.healthyLabel ?? "Healthy",
+                    attentionLabel: complianceAggregator?.attentionLabel ?? "Needs Attention",
+                    scaleFactor: scaleFactor,
+                    onClose: { sheetContext = nil }
                 )
             }
         }

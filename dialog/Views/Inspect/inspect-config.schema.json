@@ -2056,13 +2056,15 @@
             "progress-bar",
             "compliance-card",
             "compliance-header",
+            "compliance-summary",
+            "findings-list",
             "bento-grid",
             "install-list",
             "wallpaper-picker",
             "feature-table",
             "textfield"
           ],
-          "description": "Content block type"
+          "description": "Content block type. 'compliance-summary' and 'findings-list' render live from plistSources via the ComplianceAggregator — available in preset5 and preset6."
         },
         "unit": {
           "type": "string",
@@ -3356,6 +3358,14 @@
         "includePattern": {
           "type": "string",
           "description": "Regex pattern to include keys (optional)"
+        },
+        "healthyLabel": {
+          "type": "string",
+          "description": "User-facing label for a passing check. Default: 'Healthy'. Surfaces in bento subtitles, compliance-summary cards, findings-list rows, and the plist-bound popover."
+        },
+        "attentionLabel": {
+          "type": "string",
+          "description": "User-facing label for a failing check. Default: 'Needs Attention'."
         },
         "keyMappings": {
           "type": "array",

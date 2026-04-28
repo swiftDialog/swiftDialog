@@ -466,6 +466,14 @@ struct Preset5View: View {
     }
 
     var body: some View {
+        innerBody
+            // Expose the aggregator to shared renderers (GuidanceContentView / content blocks)
+            // so `compliance-summary` and `findings-list` work identically here and in Preset 6.
+            .environment(\.complianceAggregator, complianceService)
+    }
+
+    @ViewBuilder
+    private var innerBody: some View {
         ZStack {
             mainContent
 
@@ -992,6 +1000,15 @@ struct Preset5View: View {
     /// Initialize to the correct starting step (linear step model)
     private func initializePhase() {
         writeLog("Preset5.initializePhase: config=\(config != nil), allSteps count=\(allSteps.count)", logLevel: .debug)
+
+        // Defensive clear: when resumable is not explicitly enabled, purge any stale UserDefaults
+        // so a leftover state file from a prior run (or earlier build) cannot short-circuit this launch.
+        // Honors DIALOG_KEEP_STALE_STATE=1 for debugging.
+        if config?.resumable != true
+            && ProcessInfo.processInfo.environment["DIALOG_KEEP_STALE_STATE"] != "1" {
+            resetState()
+            writeLog("Preset5: resumable != true, cleared stale UserDefaults suite '\(stateDomain)'", logLevel: .info)
+        }
 
         // Initialize preferences service if configured
         initializePreferencesService()
@@ -3977,6 +3994,11 @@ struct Preset5View: View {
                 maxWidth: 480,
                 complianceService: complianceService
             )
+
+        // Note: "compliance-summary" and "findings-list" are handled by the shared
+        // GuidanceContentView dispatcher (which picks up `complianceService` via
+        // the \.complianceAggregator environment value), so Preset 5 and Preset 6
+        // render them identically. Fall through to the default branch here.
 
         default:
             // Delegate unhandled types to GuidanceContentView (handles webcontent, etc.)
