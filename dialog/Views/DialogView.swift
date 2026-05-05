@@ -52,7 +52,7 @@ struct DialogView: View {
                                 }
                                 if showInfoBox {
                                     InfoBoxView(observedData: observedData)
-                                        .frame(width: iconDisplayWidth < 150 ? 150 : iconDisplayWidth)
+                                        .frame(width: observedData.args.infoBoxWidth.value.floatValue() < 150 ? 150 : observedData.args.infoBoxWidth.value.floatValue())
                                         .frame(minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
                                         .padding(.top, appDefaults.topPadding)
                                         .clipped()

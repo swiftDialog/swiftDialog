@@ -93,6 +93,7 @@ struct CommandLineArguments {
     var listSelectionEnabled     = CommandlineArgument(long: "enablelistselect", isbool: true)
     var infoText                 = CommandlineArgument(long: "infotext", defaultValue: "swiftDialog \(getVersionString())")
     var infoBox                  = CommandlineArgument(long: "infobox")
+    var infoBoxWidth             = CommandlineArgument(long: "infoboxwidth")
     var quitKey                  = CommandlineArgument(long: "quitkey", defaultValue: appvars.quitKeyCharacter)
     var webcontent               = CommandlineArgument(long: "webcontent")
     var authkey                  = CommandlineArgument(long: "key", short: "k")
@@ -367,6 +368,7 @@ extension CommandLineArguments {
                     case "dockBadge": self.dockBadge = argument
                     case "onAdvance": self.onAdvance = argument
                     case "screenBackground": self.screenBackground = argument
+                    case "infoBoxWidth": self.infoBoxWidth = argument
                     default: break
                     }
                 }
@@ -501,6 +503,7 @@ extension CommandLineArguments {
                 case "dockBadge": self.dockBadge = argument
                 case "onAdvance": self.onAdvance = argument
                 case "screenBackground": self.screenBackground = argument
+                case "infoBoxWidth": self.infoBoxWidth = argument
                 default: break
                 }
             }

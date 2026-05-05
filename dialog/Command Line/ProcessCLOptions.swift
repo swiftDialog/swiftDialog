@@ -393,6 +393,10 @@ func processCLOptions(json: JSON = getJSON()) {
     if appArguments.infoBox.present && appArguments.infoBox.value.lowercased().hasSuffix(".md") {
         appArguments.infoBox.value = processTextString(getMarkdown(mdFilePath: appArguments.infoBox.value), tags: appvars.systemInfo)
     }
+    
+    if !appArguments.infoBoxWidth.present {
+        appArguments.infoBoxWidth.value = appArguments.iconSize.value
+    }
 
     if appArguments.helpMessage.present && appArguments.helpMessage.value.lowercased().hasSuffix(".md") {
         appArguments.helpMessage.value = processTextString(getMarkdown(mdFilePath: appArguments.helpMessage.value), tags: appvars.systemInfo)
