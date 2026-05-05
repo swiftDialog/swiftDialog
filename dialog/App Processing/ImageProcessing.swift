@@ -63,9 +63,13 @@ struct DisplayImage: View {
         case "none":
             nullImage = true
         default:
-            asyncURL = NSURL(fileURLWithPath: path) as URL
-            imgFromURL = true
-            self.shouldClip = true
+            if FileManager.default.fileExists(atPath: path) {
+                asyncURL = NSURL(fileURLWithPath: path) as URL
+                imgFromURL = true
+                self.shouldClip = true
+            } else {
+                writeLog("ERROR: file at path \(path) not found", logLevel: .debug)
+            }
         }
 
         if corners && self.shouldClip {
