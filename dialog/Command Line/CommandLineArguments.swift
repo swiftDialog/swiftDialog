@@ -54,6 +54,8 @@ struct CommandLineArguments {
     var buttonInfoTextOption     = CommandlineArgument(long: "infobuttontext", defaultValue: appDefaults.buttonInfoDefault)
     var buttonInfoActionOption   = CommandlineArgument(long: "infobuttonaction")
     var buttonInfoSymbol         = CommandlineArgument(long: "infobuttonsymbol")
+    var cardsNextButtonText      = CommandlineArgument(long: "nextbuttontext", defaultValue: "Next".localized)
+    var cardsPreviousButtonText  = CommandlineArgument(long: "previousbuttontext", defaultValue: "Previous".localized)
     var buttonStyle              = CommandlineArgument(long: "buttonstyle")
     var buttonSize               = CommandlineArgument(long: "buttonsize", defaultValue: "regular")
     var buttonTextSize           = CommandlineArgument(long: "buttontextsize")
@@ -264,6 +266,8 @@ extension CommandLineArguments {
                     case "buttonInfoTextOption": self.buttonInfoTextOption = argument
                     case "buttonInfoActionOption": self.buttonInfoActionOption = argument
                     case "buttonInfoSymbol": self.buttonInfoSymbol = argument
+                    case "cardsNextButtonText": self.cardsNextButtonText = argument
+                    case "cardsPreviousButtonText": self.cardsPreviousButtonText = argument
                     case "buttonStyle": self.buttonStyle = argument
                     case "buttonSize": self.buttonSize = argument
                     case "buttonTextSize": self.buttonTextSize = argument
@@ -416,6 +420,8 @@ extension CommandLineArguments {
                 case "buttonInfoTextOption": self.buttonInfoTextOption = argument
                 case "buttonInfoActionOption": self.buttonInfoActionOption = argument
                 case "buttonInfoSymbol": self.buttonInfoSymbol = argument
+                case "cardsNextButtonText": self.cardsNextButtonText = argument
+                case "cardsPreviousButtonText": self.cardsPreviousButtonText = argument
                 case "buttonStyle": self.buttonStyle = argument
                 case "buttonSize": self.buttonSize = argument
                 case "buttonTextSize": self.buttonTextSize = argument

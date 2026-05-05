@@ -82,7 +82,7 @@ struct ButtonBarView: View {
             let buttonArray: [AnyView]   = [
                 // Button 2: Cancel in normal mode, Previous in cards mode
                 AnyView(NewButton(label: cardState.isCardsMode
-                          ? (cardState.isFirstCard ? "" : "Previous".localized)
+                          ? (cardState.isFirstCard ? "" : observedData.args.cardsPreviousButtonText.value)
                           : (observedData.args.button2TextOption.value == "nil" ? "" : observedData.args.button2TextOption.value),
                           isVisible: cardState.isCardsMode
                           ? !cardState.isFirstCard
@@ -104,7 +104,7 @@ struct ButtonBarView: View {
                 )),
                 // Button 1: OK in normal mode, Next/Finish in cards mode
                 AnyView(NewButton(label: cardState.isCardsMode
-                          ? (cardState.isLastCard ? (observedData.args.button1TextOption.value == appDefaults.button1Default ? "Finish".localized : observedData.args.button1TextOption.value) : "Next".localized)
+                          ? (cardState.isLastCard ? (observedData.args.button1TextOption.value == appDefaults.button1Default ? "Finish".localized : observedData.args.button1TextOption.value) : observedData.args.cardsNextButtonText.value)
                           : (observedData.args.button1TextOption.value == "nil" ? "" : observedData.args.button1TextOption.value),
                           isVisible: (observedData.args.button1TextOption.value != "none"),
                           isDisabled: observedData.args.button1Disabled.present,
