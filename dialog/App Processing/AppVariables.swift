@@ -34,6 +34,8 @@ struct AppDefaults {
     let buttonSize                      = String("regular")
     //let buttonFontSize: CGFloat?
 
+    // Card block types
+    let cardTypes: [String] = ["workflow", "cards", "stack", "block", "pages", "deck"]
 
     // Content padding
     let sidePadding                     = CGFloat(15)

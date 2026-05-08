@@ -88,18 +88,19 @@ func getJSON() -> JSON {
     }
     
     // Check for cards mode and load cards if present
-    if json["cards"].exists() && json["cards"].type == .array && !json["cards"].arrayValue.isEmpty {
-        writeLog("Cards array detected in JSON configuration")
-        if cardState.loadCards(from: json) {
-            writeLog("Cards mode activated with \(cardState.totalCards) cards")
-            // Return the merged configuration (global defaults + first card) for initial setup
-            // This ensures window properties like height, width, ontop, moveable are applied
-            if let firstCard = cardState.currentCard {
-                return cardState.getMergedConfiguration(for: firstCard)
+    for cardBlock in appDefaults.cardTypes {
+        if json[cardBlock].exists() && json[cardBlock].type == .array && !json[cardBlock].arrayValue.isEmpty {
+            writeLog("\(cardBlock) array detected in JSON configuration")
+            if cardState.loadCards(from: json) {
+                writeLog("Block mode activated with \(cardState.totalCards) cards")
+                // Return the merged configuration (global defaults + first card) for initial setup
+                // This ensures window properties like height, width, ontop, moveable are applied
+                if let firstCard = cardState.currentCard {
+                    return cardState.getMergedConfiguration(for: firstCard)
+                }
             }
         }
     }
-    
     return json
 }
 

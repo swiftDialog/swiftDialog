@@ -77,14 +77,23 @@ class CardState: ObservableObject {
     /// - Returns: True if cards were loaded, false if no cards found (normal mode)
     func loadCards(from json: JSON) -> Bool {
         // Check if "cards" key exists and is an array
-        guard json["cards"].exists(), json["cards"].type == .array else {
+        var blocktype: String = ""
+        
+        for cardBlock in appDefaults.cardTypes {
+            if json[cardBlock].exists() && json[cardBlock].type == .array {
+                blocktype = cardBlock
+                break
+            }
+        }
+        
+        guard json[blocktype].exists(), json[blocktype].type == .array else {
             isCardsMode = false
             cards = []
             globalConfiguration = JSON()
             return false
         }
         
-        let cardsArray = json["cards"].arrayValue
+        let cardsArray = json[blocktype].arrayValue
         
         // If no cards or empty array, operate normally
         guard !cardsArray.isEmpty else {
@@ -97,7 +106,7 @@ class CardState: ObservableObject {
         // Extract global configuration (everything except the "cards" array)
         // These properties serve as defaults for all cards
         var globalJSON = json
-        globalJSON.dictionaryObject?.removeValue(forKey: "cards")
+        globalJSON.dictionaryObject?.removeValue(forKey: blocktype)
         globalConfiguration = globalJSON
         
         if !globalConfiguration.isEmpty {
@@ -121,7 +130,7 @@ class CardState: ObservableObject {
         isCardsMode = true
         accumulatedInput = [:]
         
-        writeLog("Cards mode activated: loaded \(cards.count) cards")
+        writeLog("Block mode activated using keyword '\(blocktype)': loaded \(cards.count) cards")
         return true
     }
     
