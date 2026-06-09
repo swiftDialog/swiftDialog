@@ -32,7 +32,9 @@ struct RadioView: View {
                 userInputState.dropdownItems[index].defaultValue = userInputState.dropdownItems[index].values[0]
                 userInputState.dropdownItems[index].selectedValue = userInputState.dropdownItems[index].values[0]
             }
-            defaultOptions.append(userInputState.dropdownItems[index].defaultValue)
+            // Seed from selectedValue so restored values from prior cards survive view re-creation.
+            // On a fresh page selectedValue == defaultValue, so behaviour is unchanged.
+            defaultOptions.append(userInputState.dropdownItems[index].selectedValue)
             if userInputState.dropdownItems[index].style == "radio" {
                 radioCount+=1
             }

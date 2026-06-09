@@ -951,10 +951,14 @@ final class DialogUpdatableContent: ObservableObject {
         // Re-sync all appProperties from appvars now that processCLOptions has run.
         // This picks up font, colour, alignment, button size and all other styling
         // that processCLOptions writes to appvars but that views read from appProperties.
-        let windowSizeChanged = appProperties.windowWidth != appvars.windowWidth ||
-                                appProperties.windowHeight != appvars.windowHeight
+        // Only request a window resize when the card itself explicitly asked for new
+        // dimensions — otherwise placeWindow snaps the window back to the configured offset
+        // and looks like a "jump" during every card transition.
+        let cardSpecifiesSize = appArguments.windowWidth.present || appArguments.windowHeight.present
+        let windowSizeChanged = cardSpecifiesSize && (appProperties.windowWidth != appvars.windowWidth ||
+                                                     appProperties.windowHeight != appvars.windowHeight)
         appProperties = appvars
-        
+
         // Resize window if dimensions changed, crossfading the message area during the transition
         if windowSizeChanged, let window = mainWindow ?? NSApp.windows.first {
             writeLog("Card resizing window to \(appvars.windowWidth) x \(appvars.windowHeight)")
@@ -1028,37 +1032,35 @@ final class DialogUpdatableContent: ObservableObject {
         }
     }
     
-    /// Advance to the next card
+    /// Advance to the next card, resolving any branch / nextpage logic against the current input.
     /// - Returns: True if advanced, false if on last card (should exit)
     func advanceToNextCard() -> Bool {
-        // Store current input before advancing
-        cardState.storeCurrentCardInput(collectCurrentUserInput())
-        
-        // Try to advance
-        if cardState.nextCard() {
+        let currentInput = collectCurrentUserInput()
+        cardState.storeCurrentCardInput(currentInput)
+
+        if cardState.advance(using: currentInput) {
             if let nextCard = cardState.currentCard {
                 applyCardConfiguration(nextCard)
                 return true
             }
         }
-        
+
         return false
     }
-    
-    /// Go back to the previous card
+
+    /// Go back to the previously visited card by popping the navigation history.
     /// - Returns: True if moved back, false if on first card
     func goToPreviousCard() -> Bool {
         // Store current input before going back
         cardState.storeCurrentCardInput(collectCurrentUserInput())
-        
-        // Try to go back
-        if cardState.previousCard() {
+
+        if cardState.back() {
             if let prevCard = cardState.currentCard {
                 applyCardConfiguration(prevCard)
                 return true
             }
         }
-        
+
         return false
     }
 }
