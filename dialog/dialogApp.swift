@@ -125,7 +125,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                         useFullScreen: appArguments.blurScreen.present || appArguments.forceOnTop.present)
 
             // order to the front
-            window.makeKeyAndOrderFront(self)
+            activateDialog(appArguments.notificationStyle.value.contains("pseudo"))
 
             // show Dock icon
             NSApp.setActivationPolicy((appArguments.showDockIcon.present || appArguments.dockIcon.present) ? .regular : .accessory)
@@ -295,7 +295,7 @@ struct dialogApp: App {
         } else {
             // bring to front on launch
             writeLog("Activating", logLevel: .debug)
-            activateDialog()
+            activateDialog(appArguments.notificationStyle.value.contains("pseudo"))
             writeLog("Activated", logLevel: .debug)
         }
 
