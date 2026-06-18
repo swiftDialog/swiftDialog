@@ -15,6 +15,7 @@ struct Preset1View: View, InspectLayoutProtocol {
     @State private var showingAboutPopover = false
     @State private var showDetailOverlay = false
     @State private var showItemDetailOverlay = false
+    @Environment(\.colorScheme) private var colorScheme
     @State private var selectedItemForDetail: InspectConfig.ItemConfig?
     @StateObject private var iconCache = PresetIconCache()
     @State private var localizationService = LocalizationService()
@@ -81,7 +82,7 @@ struct Preset1View: View, InspectLayoutProtocol {
                 }()
                 if showForPhase {
                     AsyncImageView(
-                        iconPath: logoConfig.imagePath,
+                        iconPath: (colorScheme == .dark ? (logoConfig.imagePathDark ?? logoConfig.imagePath) : logoConfig.imagePath),
                         basePath: inspectState.uiConfiguration.iconBasePath,
                         maxWidth: CGFloat(logoConfig.maxWidth ?? 120) * CGFloat(logoConfig.scale ?? 1.0),
                         maxHeight: CGFloat(logoConfig.maxHeight ?? 40) * CGFloat(logoConfig.scale ?? 1.0),
@@ -372,17 +373,21 @@ struct Preset1View: View, InspectLayoutProtocol {
 
                     // Info button - only show if item has itemOverlay configured
                     if item.itemOverlay != nil {
-                        Button(action: {
+                        ItemInfoButton(item: item, action: {
                             selectedItemForDetail = item
                             showItemDetailOverlay = true
-                        }) {
-                            Image(systemName: "info.circle")
-                                .font(.system(size: 14 * scaleFactor))
-                                .foregroundStyle(.blue)
-                        }
-                        .buttonStyle(.plain)
-                        .help("View details about \(item.displayName)")
+                        }, size: 18 * scaleFactor, tint: primaryColor)
                     }
+                }
+
+                // Per-item description text (issue #663): optional detail under the
+                // name so titles stay short while users can read what each step is for.
+                if let description = localized("\(item.id).subtitle", fallback: item.subtitle),
+                   !description.isEmpty {
+                    Text(description)
+                        .font(.system(size: 13 * scaleFactor))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
 
                 Text(localizedItemStatus(for: item))

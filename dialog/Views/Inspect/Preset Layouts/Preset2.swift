@@ -14,6 +14,7 @@ struct Preset2View: View, InspectLayoutProtocol {
     @State private var showingAboutPopover = false
     @State private var showDetailOverlay = false
     @State private var showItemDetailOverlay = false
+    @Environment(\.colorScheme) private var colorScheme
     @State private var selectedItemForDetail: InspectConfig.ItemConfig?
     @StateObject private var iconCache = PresetIconCache()
     @State private var localizationService = LocalizationService()
@@ -72,7 +73,7 @@ struct Preset2View: View, InspectLayoutProtocol {
                 let showForPhase = logoOpacityForPhase(logoConfig) > 0
                 if showForPhase {
                     AsyncImageView(
-                        iconPath: logoConfig.imagePath,
+                        iconPath: (colorScheme == .dark ? (logoConfig.imagePathDark ?? logoConfig.imagePath) : logoConfig.imagePath),
                         basePath: inspectState.uiConfiguration.iconBasePath,
                         maxWidth: CGFloat(logoConfig.maxWidth ?? 120) * CGFloat(logoConfig.scale ?? 1.0),
                         maxHeight: CGFloat(logoConfig.maxHeight ?? 40) * CGFloat(logoConfig.scale ?? 1.0),
@@ -674,6 +675,15 @@ private struct Preset2ItemCardView: View {
     let localizedDisplayName: String
     let localizedStatusOverride: String?
     let onInfoTapped: (() -> Void)?
+    @State private var isHoveringInfo = false
+
+    /// Show the "i" affordance when there's anything to reveal — a per-item description
+    /// (issue #663) or a configured detail overlay.
+    private var showInfoButton: Bool {
+        (item.subtitle?.isEmpty == false)
+            || inspectState.config?.detailOverlay != nil
+            || item.itemOverlay != nil
+    }
 
     init(item: InspectConfig.ItemConfig, isCompleted: Bool, isDownloading: Bool, isFailed: Bool = false, highlightColor: String, scale: CGFloat, resolvedIconPath: String, inspectState: InspectState, localizedDisplayName: String? = nil, localizedStatusOverride: String? = nil, onInfoTapped: (() -> Void)? = nil) {
         self.item = item
@@ -778,23 +788,33 @@ private struct Preset2ItemCardView: View {
                     .clipShape(.rect(cornerRadius: 22 * scale))
 
                 // Info button overlay (top-left) - only show if detailOverlay or itemOverlay is configured
-                if onInfoTapped != nil && (inspectState.config?.detailOverlay != nil || item.itemOverlay != nil) {
+                if showInfoButton {
                     VStack {
                         HStack {
                             Button(action: {
                                 onInfoTapped?()
                             }) {
                                 ZStack {
+                                    // Whole-circle brand tint with a white glyph — matches the
+                                    // status badge style; falls back to system accent if unset.
                                     Circle()
-                                        .foregroundStyle(.white.opacity(0.8))
+                                        .fill(highlightColor.isEmpty ? Color.accentColor : Color(hex: highlightColor))
+                                        .shadow(color: .black.opacity(0.18), radius: 1, y: 0.5)
                                     Image(systemName: "info")
                                         .font(.system(size: 8 * scale, weight: .semibold))
-                                        .foregroundStyle(.blue)
+                                        .foregroundStyle(.white)
                                 }
                                 .frame(width: 18 * scale, height: 18 * scale)
                             }
                             .buttonStyle(PlainButtonStyle())
                             .help("Show item information")
+                            // Hover the "i" to reveal the description + paths (issue #663);
+                            // click still opens the full detail overlay when one is configured.
+                            .onHover { isHoveringInfo = $0 }
+                            .popover(isPresented: $isHoveringInfo, arrowEdge: .top) {
+                                ItemInfoPopoverView(item: item)
+                                    .frame(width: 300)
+                            }
 
                             Spacer()
                         }
