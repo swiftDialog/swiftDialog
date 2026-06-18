@@ -1251,7 +1251,9 @@ class Validation: ObservableObject {
         )
     }
     
-    private func performSmartEvaluation(value: Any, evaluationType: String, expectedValue: String?, key: String) -> Bool {
+    // Internal (was private) so CadenceMonitorService can reuse the shared evaluation operators
+    // (equals/boolean/exists/contains/range) instead of duplicating them.
+    func performSmartEvaluation(value: Any, evaluationType: String, expectedValue: String?, key: String) -> Bool {
         // Handle NSNull safely
         if value is NSNull {
             writeLog("ValidationService: Key '\(key)', Value is NSNull, Result: false", logLevel: .info)
