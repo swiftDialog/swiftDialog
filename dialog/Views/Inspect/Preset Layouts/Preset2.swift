@@ -258,6 +258,19 @@ struct Preset2View: View, InspectLayoutProtocol {
                 .padding(.top, 24 * scaleFactor)
             }
 
+            // Fixed header subtitle from the top-level `message` field (issue #670) —
+            // distinct from the rotating sideMessages below (config.message → subtitleMessage).
+            if let subtitle = localized("subtitle", fallback: inspectState.uiConfiguration.subtitleMessage),
+               !subtitle.isEmpty {
+                Text(subtitle)
+                    .font(.system(size: 14))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 40 * scaleFactor)
+                    .padding(.top, 2)
+            }
+
             // Rotating side messages - fixed height to prevent layout shifts
             Group {
                 if let currentMessage = localizedSideMessage() {
@@ -613,51 +626,56 @@ struct Preset2View: View, InspectLayoutProtocol {
     // MARK: - Auto-centering for downloading items
 
     private func updateScrollForProgress() {
-        // Switch here to find the currently downloading item
-        guard let downloadingItem = inspectState.downloadingItems.first,
-              let downloadingIndex = inspectState.items.firstIndex(where: { $0.id == downloadingItem }) else {
-            return
+        // Auto-follow installation progress (issue #565). Anchor the visible window on the
+        // currently-downloading item if there is one; otherwise on the "frontier" — the first
+        // item not yet completed — so the cards keep advancing even when items go straight to
+        // 'completed' with no download phase (the case where the dialog looked "frozen").
+        let visibleCount = 4
+        guard inspectState.items.count > visibleCount else { return }
+
+        let anchorIndex: Int
+        if let downloadingItem = inspectState.downloadingItems.first,
+           let idx = inspectState.items.firstIndex(where: { $0.id == downloadingItem }) {
+            anchorIndex = idx
+            lastDownloadingItem = downloadingItem
+        } else if inspectState.completedItems.count < inspectState.items.count {
+            // Frontier = first not-yet-completed item → shows latest completed + what's next.
+            anchorIndex = inspectState.items.firstIndex(where: { !inspectState.completedItems.contains($0.id) }) ?? 0
+        } else {
+            // All complete → rest on the final window.
+            anchorIndex = inspectState.items.count - 1
         }
 
-        let visibleCount = 4
-
-        // Optimized try to keep downloading item in view position (index 1) when possible
-        // Ther ordewr should be: [1 completed] [downloading] [penidng] [pending]...
+        // Keep the anchor at position 1: [completed] [anchor] [pending] [pending].
         let preferredPositionFromLeft = 1
+        var targetOffset = anchorIndex - preferredPositionFromLeft
+        targetOffset = max(0, targetOffset)
+        targetOffset = min(targetOffset, max(0, inspectState.items.count - visibleCount))
 
-        // Calc offset to place downloading item at preferred position
-        var targetOffset = downloadingIndex - preferredPositionFromLeft
-
-        // Set up valid range
-        targetOffset = max(0, targetOffset)  // We try to don't scroll before start
-        targetOffset = min(targetOffset, max(0, inspectState.items.count - visibleCount))  // Don't scroll past end - needs observation if this works better
-
-        // Scroll to target position if different
         if targetOffset != scrollOffset {
             withAnimation(.easeInOut(duration: 0.6)) {
                 scrollOffset = targetOffset
             }
-
-            // Update here for next change
-            lastDownloadingItem = downloadingItem
         }
     }
 
-    /// Get progress bar text with template support
+    /// Get progress bar text with template support. Forgiving token syntax — accepts
+    /// {completed}/{total}, $completed/$total, and %completed%/%total% interchangeably.
     private func getProgressText() -> String {
         let completed = inspectState.completedItems.count
         let total = inspectState.items.count
 
         // Try localized progress format first, then config, then default
-        let template = localized("progressFormat", fallback: inspectState.config?.uiLabels?.progressFormat)
-
-        if let template {
-            return template
-                .replacingOccurrences(of: "{completed}", with: "\(completed)")
-                .replacingOccurrences(of: "{total}", with: "\(total)")
+        guard var text = localized("progressFormat", fallback: inspectState.config?.uiLabels?.progressFormat) else {
+            return "\(completed) of \(total) completed"
         }
-
-        return "\(completed) of \(total) completed"
+        for token in ["{completed}", "$completed", "%completed%"] {
+            text = text.replacingOccurrences(of: token, with: "\(completed)")
+        }
+        for token in ["{total}", "$total", "%total%"] {
+            text = text.replacingOccurrences(of: token, with: "\(total)")
+        }
+        return text
     }
 }
 

@@ -4163,7 +4163,7 @@
         },
         "progressFormat": {
           "type": "string",
-          "description": "Progress text template: '{completed} of {total} completed'"
+          "description": "Progress text template. Tokens (any style works): {completed}/{total}, $completed/$total, or %completed%/%total%. e.g. '{completed} of {total} steps completed'"
         }
       }
     },
@@ -4590,7 +4590,7 @@
         "progressFormat": {
           "type": "string",
           "default": "{completed} of {total} completed",
-          "description": "Progress bar text format"
+          "description": "Progress bar text format. Tokens (any style works): {completed}/{total}, $completed/$total, or %completed%/%total%"
         },
         "sectionHeaderCompleted": {
           "type": "string",

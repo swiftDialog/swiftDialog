@@ -172,10 +172,15 @@ struct PresetCommonViews {
         let completed = state.completedItems.count
         let total = state.items.count
 
-        if let template = state.config?.uiLabels?.progressFormat {
-            return template
-                .replacingOccurrences(of: "{completed}", with: "\(completed)")
-                .replacingOccurrences(of: "{total}", with: "\(total)")
+        if var text = state.config?.uiLabels?.progressFormat {
+            // Forgiving tokens: {completed}/{total}, $completed/$total, %completed%/%total%.
+            for token in ["{completed}", "$completed", "%completed%"] {
+                text = text.replacingOccurrences(of: token, with: "\(completed)")
+            }
+            for token in ["{total}", "$total", "%total%"] {
+                text = text.replacingOccurrences(of: token, with: "\(total)")
+            }
+            return text
         }
 
         return "\(completed) of \(total) completed"
