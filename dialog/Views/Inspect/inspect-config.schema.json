@@ -309,7 +309,9 @@
       "description": "Show secondary button"
     },
     "cacheExtensions": {
-      "type": "array"
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "File extensions (within cachePaths) that mark an item as downloading. Default ['download','pkg','dmg']. Add others for non-curl downloaders — e.g. 'aria2' for aria2c, which writes <name>.aria2 partial files (issue #617). Leading dot optional."
     },
     "cachePaths": {
       "type": "array",
