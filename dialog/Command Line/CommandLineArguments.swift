@@ -54,6 +54,8 @@ struct CommandLineArguments {
     var buttonInfoTextOption     = CommandlineArgument(long: "infobuttontext", defaultValue: appDefaults.buttonInfoDefault)
     var buttonInfoActionOption   = CommandlineArgument(long: "infobuttonaction")
     var buttonInfoSymbol         = CommandlineArgument(long: "infobuttonsymbol")
+    var cardsNextButtonText      = CommandlineArgument(long: "nextbuttontext", defaultValue: "Next".localized)
+    var cardsPreviousButtonText  = CommandlineArgument(long: "previousbuttontext", defaultValue: "Previous".localized)
     var buttonStyle              = CommandlineArgument(long: "buttonstyle")
     var buttonSize               = CommandlineArgument(long: "buttonsize", defaultValue: "regular")
     var buttonTextSize           = CommandlineArgument(long: "buttontextsize")
@@ -93,6 +95,7 @@ struct CommandLineArguments {
     var listSelectionEnabled     = CommandlineArgument(long: "enablelistselect", isbool: true)
     var infoText                 = CommandlineArgument(long: "infotext", defaultValue: "swiftDialog \(getVersionString())")
     var infoBox                  = CommandlineArgument(long: "infobox")
+    var infoBoxWidth             = CommandlineArgument(long: "infoboxwidth")
     var quitKey                  = CommandlineArgument(long: "quitkey", defaultValue: appvars.quitKeyCharacter)
     var webcontent               = CommandlineArgument(long: "webcontent")
     var authkey                  = CommandlineArgument(long: "key", short: "k")
@@ -108,6 +111,7 @@ struct CommandLineArguments {
     var dockIcon                 = CommandlineArgument(long: "dockicon")
     var dockBadge                = CommandlineArgument(long: "dockiconbadge")
     var onAdvance                = CommandlineArgument(long: "onadvance")
+    var screenBackground         = CommandlineArgument(long: "screenbackground")
 
     // command line options that take no additional parameters
     var button1Disabled          = CommandlineArgument(long: "button1disabled", isbool: true)
@@ -157,6 +161,9 @@ struct CommandLineArguments {
     var removeNotification        = CommandlineArgument(long: "remove", isbool: true)
     var showSoundControls         = CommandlineArgument(long: "showsoundcontrols", isbool: true)
     var hideOtherApps            = CommandlineArgument(long: "hideotherapps", isbool: true)
+
+    // Notification style
+    var notificationStyle         = CommandlineArgument(long: "style", defaultValue: "")
 
     // Inspect Mode Arguments
     var inspectMode               = CommandlineArgument(long: "inspect-mode", isbool: true)
@@ -264,6 +271,8 @@ extension CommandLineArguments {
                     case "buttonInfoTextOption": self.buttonInfoTextOption = argument
                     case "buttonInfoActionOption": self.buttonInfoActionOption = argument
                     case "buttonInfoSymbol": self.buttonInfoSymbol = argument
+                    case "cardsNextButtonText": self.cardsNextButtonText = argument
+                    case "cardsPreviousButtonText": self.cardsPreviousButtonText = argument
                     case "buttonStyle": self.buttonStyle = argument
                     case "buttonSize": self.buttonSize = argument
                     case "buttonTextSize": self.buttonTextSize = argument
@@ -356,6 +365,7 @@ extension CommandLineArguments {
                     case "setAppIcon": self.setAppIcon = argument
                     case "removeNotification": self.removeNotification = argument
                     case "notificationIdentifier": self.notificationIdentifier = argument
+                    case "notificationStyle": self.notificationStyle = argument
                     case "inspectMode": self.inspectMode = argument
                     case "inspectConfig": self.inspectConfig = argument
                     case "publishedSessionsDir": self.publishedSessionsDir = argument
@@ -367,6 +377,8 @@ extension CommandLineArguments {
                     case "dockIcon": self.dockIcon = argument
                     case "dockBadge": self.dockBadge = argument
                     case "onAdvance": self.onAdvance = argument
+                    case "screenBackground": self.screenBackground = argument
+                    case "infoBoxWidth": self.infoBoxWidth = argument
                     default: break
                     }
                 }
@@ -414,6 +426,8 @@ extension CommandLineArguments {
                 case "buttonInfoTextOption": self.buttonInfoTextOption = argument
                 case "buttonInfoActionOption": self.buttonInfoActionOption = argument
                 case "buttonInfoSymbol": self.buttonInfoSymbol = argument
+                case "cardsNextButtonText": self.cardsNextButtonText = argument
+                case "cardsPreviousButtonText": self.cardsPreviousButtonText = argument
                 case "buttonStyle": self.buttonStyle = argument
                 case "buttonSize": self.buttonSize = argument
                 case "buttonTextSize": self.buttonTextSize = argument
@@ -457,6 +471,7 @@ extension CommandLineArguments {
                 case "preferredViewOrder": self.preferredViewOrder = argument
                 case "preferredAppearance": self.preferredAppearance = argument
                 case "playSound": self.playSound = argument
+                case "notificationStyle": self.notificationStyle = argument
                 // Boolean flags
                 case "button1Disabled": self.button1Disabled = argument
                 case "button2Disabled": self.button2Disabled = argument
@@ -499,6 +514,8 @@ extension CommandLineArguments {
                 case "dockIcon": self.dockIcon = argument
                 case "dockBadge": self.dockBadge = argument
                 case "onAdvance": self.onAdvance = argument
+                case "screenBackground": self.screenBackground = argument
+                case "infoBoxWidth": self.infoBoxWidth = argument
                 default: break
                 }
             }

@@ -556,7 +556,7 @@ struct Preset6View: View, InspectLayoutProtocol {
                 .transition(.asymmetric(
                     insertion: .move(edge: navigationDirection == .forward ? .trailing : .leading)
                                .combined(with: .opacity),
-                    removal:   .move(edge: navigationDirection == .forward ? .leading : .trailing)
+                    removal: .move(edge: navigationDirection == .forward ? .leading : .trailing)
                                .combined(with: .opacity)
                 ))
             } else {
@@ -1466,7 +1466,6 @@ struct Preset6View: View, InspectLayoutProtocol {
             handleCompletionTrigger(stepId: stepId, result: .cancelled)
         case .cancel:
             writeInteractionLog("override_cancel", step: stepId)
-            break
         }
     }
 
@@ -1679,7 +1678,7 @@ struct Preset6View: View, InspectLayoutProtocol {
         // Use CommandRouter to host monitoring (class-based, survives struct copies)
         commandRouter.startMonitoring(
             triggerFilePath: triggerFilePath,
-            notificationHandler: { [self] command in
+            notificationHandler: { command in
                 writeLog("Preset6: Received notification command: \(command)", logLevel: .info)
             }
         )
@@ -1889,7 +1888,10 @@ struct Preset6View: View, InspectLayoutProtocol {
                 downloadingItems.remove(itemId)
             }
         case "downloading":
-            withAnimation(.spring()) { downloadingItems.insert(itemId) }
+            withAnimation(.spring()) {
+                downloadingItems.insert(itemId)
+                return
+            }
         case "pending":
             withAnimation(.spring()) {
                 completedSteps.remove(itemId)

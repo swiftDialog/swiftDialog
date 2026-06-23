@@ -155,7 +155,7 @@ struct Preset2View: View, InspectLayoutProtocol {
                 // Procedural gradient banner with centered icon
                 let bannerH = CGFloat(inspectState.uiConfiguration.bannerHeight) * scaleFactor
                 let gradientPalette = (inspectState.config?.gradientPalette ?? ["#007AFF", "#5AC8FA"]).compactMap { Color(hex: $0) }
-                let gradientSeed = inspectState.uiConfiguration.windowTitle ?? "preset2"
+                let gradientSeed = inspectState.uiConfiguration.windowTitle
                 let gradientStyleStr = inspectState.config?.gradientStyle ?? "ethereal"
                 let gradientStyle = ProceduralGradientStyle(rawValue: gradientStyleStr) ?? .ethereal
 

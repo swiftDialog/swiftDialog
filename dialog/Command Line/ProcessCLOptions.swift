@@ -88,18 +88,19 @@ func getJSON() -> JSON {
     }
     
     // Check for cards mode and load cards if present
-    if json["cards"].exists() && json["cards"].type == .array && !json["cards"].arrayValue.isEmpty {
-        writeLog("Cards array detected in JSON configuration")
-        if cardState.loadCards(from: json) {
-            writeLog("Cards mode activated with \(cardState.totalCards) cards")
-            // Return the merged configuration (global defaults + first card) for initial setup
-            // This ensures window properties like height, width, ontop, moveable are applied
-            if let firstCard = cardState.currentCard {
-                return cardState.getMergedConfiguration(for: firstCard)
+    for cardBlock in appDefaults.cardTypes {
+        if json[cardBlock].exists() && json[cardBlock].type == .array && !json[cardBlock].arrayValue.isEmpty {
+            writeLog("\(cardBlock) array detected in JSON configuration")
+            if cardState.loadCards(from: json) {
+                writeLog("Block mode activated with \(cardState.totalCards) cards")
+                // Return the merged configuration (global defaults + first card) for initial setup
+                // This ensures window properties like height, width, ontop, moveable are applied
+                if let firstCard = cardState.currentCard {
+                    return cardState.getMergedConfiguration(for: firstCard)
+                }
             }
         }
     }
-    
     return json
 }
 
@@ -392,6 +393,10 @@ func processCLOptions(json: JSON = getJSON()) {
 
     if appArguments.infoBox.present && appArguments.infoBox.value.lowercased().hasSuffix(".md") {
         appArguments.infoBox.value = processTextString(getMarkdown(mdFilePath: appArguments.infoBox.value), tags: appvars.systemInfo)
+    }
+    
+    if !appArguments.infoBoxWidth.present {
+        appArguments.infoBoxWidth.value = appArguments.iconSize.value
     }
 
     if appArguments.helpMessage.present && appArguments.helpMessage.value.lowercased().hasSuffix(".md") {
@@ -701,6 +706,9 @@ func processCLOptions(json: JSON = getJSON()) {
 
     if appArguments.mainImage.present {
         writeLog("\(appArguments.mainImage.long) present")
+        // Clear existing images so cards with different images replace rather than accumulate
+        appvars.imageArray.removeAll()
+        appvars.imageCaptionArray.removeAll()
         if json[appArguments.mainImage.long].exists() {
             if json[appArguments.mainImage.long].array == nil {
                 // not an array so pull the single value
@@ -726,6 +734,7 @@ func processCLOptions(json: JSON = getJSON()) {
 
     if json[appArguments.mainImageCaption.long].exists() || appArguments.mainImageCaption.present {
         writeLog("\(appArguments.mainImageCaption.long) present")
+        appvars.imageCaptionArray.removeAll()
         if json[appArguments.mainImageCaption.long].exists() {
             appvars.imageCaptionArray.append(json[appArguments.mainImageCaption.long].stringValue)
         } else {

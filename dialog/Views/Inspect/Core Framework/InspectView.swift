@@ -176,8 +176,8 @@ private struct CoordinatedConfigErrorView: View {
         }
     }
 
-    /// Parse error message into structured components for better display
     // swiftlint:disable:next large_tuple
+    /// Parse error message into structured components for better display
     private var parsedError: (filePath: String?, errorType: String, details: String?, lineNumber: Int?, jsonSnippet: String?, hint: String?) {
         // Extract file path from message like "Invalid JSON in configuration file /path/file.json: ..."
         var filePath: String?

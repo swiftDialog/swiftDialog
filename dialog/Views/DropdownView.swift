@@ -30,7 +30,9 @@ struct DropdownView: View {
 
         var defaultOptions: [String] = []
         for index in 0..<userInputState.dropdownItems.count {
-            defaultOptions.append(userInputState.dropdownItems[index].defaultValue)
+            // Seed from selectedValue so restored values from prior cards survive view re-creation.
+            // On a fresh page selectedValue == defaultValue, so behaviour is unchanged.
+            defaultOptions.append(userInputState.dropdownItems[index].selectedValue)
             if userInputState.dropdownItems[index].style != "radio" {
                 dropdownCount+=1
             }

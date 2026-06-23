@@ -20,11 +20,7 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
-	<key>CFBundleIconFile</key>
-	<string>AppIcon</string>
 	<key>LSUIElement</key>
 	<true/>
-	<key>NSUserNotificationAlertStyle</key>
-	<string>banner</string>
 </dict>
 </plist>

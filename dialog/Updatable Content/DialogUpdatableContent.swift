@@ -95,7 +95,7 @@ class FileReader {
     }
 
     private func processWindow() {
-        placeWindow(observedData.mainWindow ?? NSApp.windows[0], size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight+28),
+        placeWindow(observedData.mainWindow ?? NSApp.windows[0], size: CGSize(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight),
             vertical: observedData.appProperties.windowPositionVertical,
             horozontal: observedData.appProperties.windowPositionHorozontal,
             offset: observedData.args.positionOffset.value.floatValue(),
@@ -602,6 +602,17 @@ class FileReader {
                     }
                     activateDialog()
                 }
+                
+            // screen background
+            case "\(observedData.args.screenBackground.long):":
+                if argument == "none" {
+                    observedData.args.screenBackground.present = false
+                    blurredScreen.hide()
+                } else {
+                    observedData.args.screenBackground.present = true
+                    blurredScreen.show(image: getImageFromPath(fileImagePath: argument, returnErrorImage: true))
+                    activateDialog()
+                }
 
             // web content
             case "\(observedData.args.webcontent.long):":
@@ -854,6 +865,7 @@ final class DialogUpdatableContent: ObservableObject {
         userInputState.dropdownItems.removeAll()
         userInputState.checkBoxes.removeAll()
         userInputState.listItems.removeAll()
+        userInputState.iconItems.removeAll()
         
         // Update observed arrays and state
         textFieldArray = []
@@ -876,15 +888,16 @@ final class DialogUpdatableContent: ObservableObject {
         // Clear previous user input state
         clearUserInputState()
         
+        // Reset appvars properties that processCLOptions only sets when the argument is present.
+        // These must be reset BEFORE resetToDefaults() because CommandLineArguments() captures
+        // appvars.iconWidth as the defaultValue for iconSize at initialisation time.
+        appvars.windowWidth = 820   // Default from AppVariables
+        appvars.windowHeight = 380  // Default from AppVariables
+        appvars.iconWidth = 150     // Default from AppVariables
+        
         // Reset appArguments to defaults first
         // This ensures properties not specified in the card revert to defaults
         appArguments.resetToDefaults()
-        
-        // Reset appvars window dimensions to defaults
-        // processCLOptions only updates these if the arguments are present,
-        // so we need to reset them before processing the new card config
-        appvars.windowWidth = 820  // Default from AppVariables
-        appvars.windowHeight = 380 // Default from AppVariables
         
         // Get the merged configuration (global defaults + card overrides)
         let mergedConfig = cardState.getMergedConfiguration(for: card)
@@ -922,31 +935,40 @@ final class DialogUpdatableContent: ObservableObject {
         // This ensures dropdownValues.present, checkbox.present etc. are correctly set
         args = appArguments
         
-        // Update progress bar settings if present in card config
+        // Sync icon display properties from the updated args
+        iconSize = appArguments.iconSize.value.floatValue()
+        iconAlpha = Double(appArguments.iconAlpha.value) ?? 1.0
+        
+        // Reset progress bar state, then re-apply if the current card has one.
+        // This ensures a progress bar from a previous card doesn't leak into a card that has none.
+        progressValue = nil
+        progressTotal = 100
         if args.progressBar.present {
             progressTotal = Double(args.progressBar.value) ?? 100
-            // Start with indeterminate progress (nil) - value is set via command file
-            // The "progress" JSON key sets the total, not the current value
-            progressValue = nil
             writeLog("Card progress bar: total=\(progressTotal), starting indeterminate")
         }
         
-        // Sync window properties from appvars (updated by processCLOptions)
-        // This allows cards to specify different window sizes
-        let windowSizeChanged = appProperties.windowWidth != appvars.windowWidth || 
-                                appProperties.windowHeight != appvars.windowHeight
-        appProperties.windowWidth = appvars.windowWidth
-        appProperties.windowHeight = appvars.windowHeight
-        
-        // Resize window if dimensions changed
+        // Re-sync all appProperties from appvars now that processCLOptions has run.
+        // This picks up font, colour, alignment, button size and all other styling
+        // that processCLOptions writes to appvars but that views read from appProperties.
+        // Only request a window resize when the card itself explicitly asked for new
+        // dimensions — otherwise placeWindow snaps the window back to the configured offset
+        // and looks like a "jump" during every card transition.
+        let cardSpecifiesSize = appArguments.windowWidth.present || appArguments.windowHeight.present
+        let windowSizeChanged = cardSpecifiesSize && (appProperties.windowWidth != appvars.windowWidth ||
+                                                     appProperties.windowHeight != appvars.windowHeight)
+        appProperties = appvars
+
+        // Resize window if dimensions changed, crossfading the message area during the transition
         if windowSizeChanged, let window = mainWindow ?? NSApp.windows.first {
             writeLog("Card resizing window to \(appvars.windowWidth) x \(appvars.windowHeight)")
-            placeWindow(window, 
-                       size: CGSize(width: appProperties.windowWidth, height: appProperties.windowHeight + 28),
+            placeWindow(window,
+                       size: CGSize(width: appProperties.windowWidth, height: appProperties.windowHeight),
                        vertical: appProperties.windowPositionVertical,
                        horozontal: appProperties.windowPositionHorozontal,
                        offset: args.positionOffset.value.floatValue(),
-                       useFullScreen: args.blurScreen.present || args.forceOnTop.present)
+                       useFullScreen: args.blurScreen.present || args.forceOnTop.present,
+                       animated: true)
         }
         
         // Check if we have stored input for this card (user navigated back)
@@ -956,6 +978,7 @@ final class DialogUpdatableContent: ObservableObject {
         }
         
         // Update the observed arrays and state from the global state
+        imageArray = appvars.imageArray
         textFieldArray = userInputState.textFields
         dropdownArray = userInputState.dropdownItems
         listItemsArray = userInputState.listItems
@@ -1009,37 +1032,35 @@ final class DialogUpdatableContent: ObservableObject {
         }
     }
     
-    /// Advance to the next card
+    /// Advance to the next card, resolving any branch / nextpage logic against the current input.
     /// - Returns: True if advanced, false if on last card (should exit)
     func advanceToNextCard() -> Bool {
-        // Store current input before advancing
-        cardState.storeCurrentCardInput(collectCurrentUserInput())
-        
-        // Try to advance
-        if cardState.nextCard() {
+        let currentInput = collectCurrentUserInput()
+        cardState.storeCurrentCardInput(currentInput)
+
+        if cardState.advance(using: currentInput) {
             if let nextCard = cardState.currentCard {
                 applyCardConfiguration(nextCard)
                 return true
             }
         }
-        
+
         return false
     }
-    
-    /// Go back to the previous card
+
+    /// Go back to the previously visited card by popping the navigation history.
     /// - Returns: True if moved back, false if on first card
     func goToPreviousCard() -> Bool {
         // Store current input before going back
         cardState.storeCurrentCardInput(collectCurrentUserInput())
-        
-        // Try to go back
-        if cardState.previousCard() {
+
+        if cardState.back() {
             if let prevCard = cardState.currentCard {
                 applyCardConfiguration(prevCard)
                 return true
             }
         }
-        
+
         return false
     }
 }

@@ -111,13 +111,11 @@ struct LogPatternPreset {
             // Detect leading phase keyword (e.g., "Installing foo.pkg" or "Verifying: foo.pkg")
             var phase = "Installing"
             var remainder = trimmed
-            for keyword in ["Installing", "Verifying", "Downloading"] {
-                if trimmed.hasPrefix(keyword) {
-                    phase = keyword
-                    remainder = String(trimmed.dropFirst(keyword.count))
-                        .trimmingCharacters(in: CharacterSet(charactersIn: ": "))
-                    break
-                }
+            for keyword in ["Installing", "Verifying", "Downloading"] where trimmed.hasPrefix(keyword) {
+                phase = keyword
+                remainder = String(trimmed.dropFirst(keyword.count))
+                    .trimmingCharacters(in: CharacterSet(charactersIn: ": "))
+                break
             }
 
             var pkgName = remainder

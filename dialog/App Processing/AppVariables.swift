@@ -34,6 +34,8 @@ struct AppDefaults {
     let buttonSize                      = String("regular")
     //let buttonFontSize: CGFloat?
 
+    // Card block types
+    let cardTypes: [String] = ["workflow", "cards", "stack", "block", "pages", "deck"]
 
     // Content padding
     let sidePadding                     = CGFloat(15)
@@ -165,6 +167,7 @@ struct AppVariables {
     var imageCaptionArray               = [String]()
 
     var isProcessingNotification        = false
+    var isPseudoNotificationMode        = false
     var noargs                          = false
 
     var quitKeyCharacter                = String("q")

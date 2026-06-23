@@ -365,7 +365,7 @@ class Config {
         var downloadedData: Data?
         var downloadError: Error?
 
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+        let task = URLSession.shared.dataTask(with: url) { data, _, error in
             downloadedData = data
             downloadError = error
             semaphore.signal()
@@ -1088,7 +1088,7 @@ class Config {
         let lowered = preset.lowercased()
 
         // Direct number
-        if let _ = Int(lowered) { return lowered }
+        if Int(lowered) != nil { return lowered }
 
         // presetN format
         if lowered.hasPrefix("preset"), let num = lowered.dropFirst(6).first {

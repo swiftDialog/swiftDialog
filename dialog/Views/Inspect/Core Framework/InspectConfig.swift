@@ -791,7 +791,7 @@ struct InspectConfig: Codable {
                 "plistMonitors", "completionMode", "jsonMonitors",
                 "itemOverlay", "validationTargetBadge", "introLayoutConfig",
                 "showBundleInfo",
-                "preset", // accepted via flexible format decoding
+                "preset" // accepted via flexible format decoding
             ]
             let unknownItemKeys = allItemKeys.subtracting(knownItemKeys)
             if !unknownItemKeys.isEmpty {
@@ -1950,7 +1950,7 @@ struct InspectConfig: Codable {
             "localization",
             "brandPalette",
             "accentBorderColor", "showAccentBorder", "footerBackgroundColor", "footerTextColor", "footerText", "copyrightText", "supportText",
-            "introScreen", "summaryScreen",
+            "introScreen", "summaryScreen"
         ]
         let unknownRootKeys = allJSONKeys.subtracting(knownRootKeys)
         for key in unknownRootKeys.sorted() {

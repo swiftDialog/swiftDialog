@@ -13,6 +13,7 @@ struct IconView: View {
     var messageUserImagePath: String
     var messageUserImagePathDark: String = ""
     let darkModeSeperator = ":dark="
+    let defaultCustomImagePath = "/Library/Application Support/Dialog/Dialog.png"
 
     var iconOverlay: String
     var iconOverlayDark: String = ""
@@ -58,7 +59,7 @@ struct IconView: View {
 
     let argRegex = String("(,? ?[a-zA-Z1-9]+=|(,\\s?editor)|(,\\s?fileselect))|(,\\s?passwordfill)|(,\\s?required)|(,\\s?secure)")
 
-    init(image: String = "", overlay: String = "", alpha: Double = 1.0, padding: Double = 0, sfPaddingEnabled: Bool = true, corners: Bool = true, defaultImage: String = "bubble.left.circle.fill", defaultColour: String = "primary") {
+    init(image: String = "", overlay: String = "", alpha: Double = 1.0, padding: Double = 0, sfPaddingEnabled: Bool = true, corners: Bool = true, defaultImage: String = "bubble.circle.fill", defaultColour: String = "primary") {
 
         mainImageAlpha = alpha
         messageUserImagePath = image
@@ -75,7 +76,20 @@ struct IconView: View {
         if !iconOverlay.isEmpty {
             writeLog("With overlay \(overlay)")
         }
+        
+        // Set default icon if needed
+        if messageUserImagePath.isEmpty {
+            // check for custom Dialog.png
+            if FileManager.default.fileExists(atPath: defaultCustomImagePath) {
+                messageUserImagePath = defaultCustomImagePath
+            } else {
+                //use the app bunle path instead
+                messageUserImagePath = Bundle.main.bundlePath
+            }
+        }
 
+        writeLog("builtInIconName = \(builtInIconName)", logLevel: .debug)
+        
         // split if there is a dark mode alternate
         let messageUserImagePathComponents = messageUserImagePath.components(separatedBy: darkModeSeperator)
         let overlayComponents = iconOverlay.components(separatedBy: darkModeSeperator)

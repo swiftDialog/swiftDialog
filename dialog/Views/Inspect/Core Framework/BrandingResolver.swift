@@ -20,8 +20,6 @@ struct BrandingResolver {
     let selectedBrand: InspectConfig.BrandConfig?
     let colorScheme: ColorScheme
 
-    private var service: AppConfigService { AppConfigService.shared }
-
     init(config: InspectConfig?, mdmOverrides: MDMBrandingOverrides?,
          selectedBrand: InspectConfig.BrandConfig? = nil,
          colorScheme: ColorScheme = .light) {

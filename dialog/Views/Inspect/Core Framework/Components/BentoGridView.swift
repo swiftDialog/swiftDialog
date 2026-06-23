@@ -193,7 +193,7 @@ struct BentoCell: View {
             ZStack {
                 // Background — procedural gradient or flat color
                 if let bgStyle = config.backgroundStyle,
-                   (bgStyle == "gradient" || bgStyle == "mesh") {
+                   bgStyle == "gradient" || bgStyle == "mesh" {
                     ProceduralGradientView(
                         seed: config.id,
                         palette: gradientPalette,
@@ -1332,7 +1332,9 @@ struct BentoGridView: View {
     let containerHeight: CGFloat?
     @ObservedObject var inspectState: InspectState
 
-    @State private var expandedCellId: String? = nil
+    @State private var selectedCell: InspectConfig.GuidanceContent.BentoCellConfig?
+    @State private var showDetail: Bool = false
+    @State private var expandedCellId: String?
     @State private var visibleCells: Set<String> = []
     @State private var sheetContext: BentoSheetContext?
 
@@ -1391,10 +1393,10 @@ struct BentoGridView: View {
                 rowHeight: rowHeight * scaleFactor,
                 gap: gap * scaleFactor
             )
-            let gridSize = CGSize(width: availableWidth, height: gridHeight)
+            // let gridSize = CGSize(width: availableWidth, height: gridHeight)
             // For inline detail, use the full container height (not just the grid)
-            let detailHeight = containerHeight ?? max(gridHeight, 480)
-            let detailSize = CGSize(width: availableWidth, height: detailHeight)
+            // let detailHeight = containerHeight ?? max(gridHeight, 480)
+            // let detailSize = CGSize(width: availableWidth, height: detailHeight)
 
             ZStack(alignment: .topLeading) {
                 // Grid cells

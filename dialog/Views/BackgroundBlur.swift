@@ -13,15 +13,19 @@ class BlurWindow: NSWindow {
 
     private var blurredWindows = [BlurWindowController()]
 
-    public func show() {
+    public func show(image: NSImage? = nil) {
         writeLog("initiating blurred window")
+        for controller in blurredWindows {
+            controller.close()
+        }
+        blurredWindows.removeAll()
         let screens = NSScreen.screens
-        for (index, screen) in screens.enumerated() {
-            blurredWindows.append(BlurWindowController())
+        for screen in screens {
+            let controller = BlurWindowController(image: image)
+            blurredWindows.append(controller)
             allScreens = screen
-            blurredWindows[index].close()
-            blurredWindows[index].loadWindow()
-            blurredWindows[index].showWindow(NSApp.windows.first)
+            controller.loadWindow()
+            controller.showWindow(NSApp.windows.first)
         }
         NSApp.windows.first?.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) + 1))
     }
@@ -41,13 +45,16 @@ class BlurWindow: NSWindow {
 
 class BlurWindowController: NSWindowController {
 
-    convenience init() {
+    private var image: NSImage?
+
+    convenience init(image: NSImage? = nil) {
         self.init(windowNibName: "BlurScreen")
+        self.image = image
     }
 
     override func loadWindow() {
         window = BlurWindow(contentRect: CGRect(x: 0, y: 0, width: 100, height: 100), styleMask: [], backing: .buffered, defer: true)
-        self.window?.contentViewController = BlurViewController()
+        self.window?.contentViewController = BlurViewController(image: image)
         self.window?.setFrame((allScreens.frame), display: true)
         self.window?.collectionBehavior = [.canJoinAllSpaces]
         if appArguments.loginWindow.present {
@@ -58,9 +65,12 @@ class BlurWindowController: NSWindowController {
 
 class BlurViewController: NSViewController {
 
-    init() {
-         super.init(nibName: nil, bundle: nil)
-     }
+    private var image: NSImage?
+
+    init(image: NSImage? = nil) {
+        self.image = image
+        super.init(nibName: nil, bundle: nil)
+    }
 
     required init?(coder: NSCoder) {
          fatalError()
@@ -76,11 +86,19 @@ class BlurViewController: NSViewController {
         view.window?.isOpaque = false
         view.window?.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.maximumWindow) - 1 ))
 
-        let blurView = NSVisualEffectView(frame: view.bounds)
-        blurView.blendingMode = .behindWindow
-        blurView.material = .fullScreenUI
-        blurView.state = .active
-        view.window?.contentView?.addSubview(blurView)
+        if let image = image {
+            let imageView = NSImageView(frame: view.bounds)
+            imageView.image = image
+            imageView.imageScaling = .scaleAxesIndependently
+            imageView.autoresizingMask = [.width, .height]
+            view.window?.contentView?.addSubview(imageView)
+        } else {
+            let blurView = NSVisualEffectView(frame: view.bounds)
+            blurView.blendingMode = .behindWindow
+            blurView.material = .fullScreenUI
+            blurView.state = .active
+            view.window?.contentView?.addSubview(blurView)
+        }
     }
 
     override func viewWillDisappear() {

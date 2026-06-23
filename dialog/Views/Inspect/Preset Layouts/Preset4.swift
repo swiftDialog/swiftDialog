@@ -367,7 +367,7 @@ struct Preset4View: View, InspectLayoutProtocol {
 
             // Item icon (small)
             cachedIcon(
-                for: iconCache.getItemIconPath(for: item, state: inspectState) ?? "",
+                for: iconCache.getItemIconPath(for: item, state: inspectState),
                 fallbackSymbol: "app.fill",
                 size: 20
             )
@@ -626,17 +626,17 @@ struct Preset4View: View, InspectLayoutProtocol {
         // SF Symbol icons (e.g. "SF=lock.shield.fill")
         if path.hasPrefix("SF=") {
             let symbolName = String(path.dropFirst(3))
-            return AnyView(
+            AnyView(
                 Image(systemName: symbolName)
                     .font(.system(size: symbolSize))
                     .foregroundStyle(primaryColor)
                     .frame(width: size, height: size)
             )
         }
-
+        
         let resolvedPath = resolvePath(path)
         if let resolvedPath, let nsImage = NSImage(contentsOfFile: resolvedPath) {
-            return AnyView(
+            AnyView(
                 Image(nsImage: nsImage)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
@@ -644,8 +644,8 @@ struct Preset4View: View, InspectLayoutProtocol {
                     .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
             )
         }
-
-        return AnyView(
+        
+        AnyView(
             Image(systemName: fallbackSymbol)
                 .font(.system(size: symbolSize))
                 .foregroundStyle(primaryColor.opacity(0.6))
@@ -843,23 +843,35 @@ struct Preset4View: View, InspectLayoutProtocol {
         // Completion
         commandRouter.onComplete = { [self] stepId in
             if inspectState.items.contains(where: { $0.id == stepId }) {
-                withAnimation(.spring()) { inspectState.completedItems.insert(stepId) }
+                withAnimation(.spring()) {
+                    inspectState.completedItems.insert(stepId)
+                    return
+                }
             }
         }
         commandRouter.onSuccess = { [self] stepId, _ in
             if inspectState.items.contains(where: { $0.id == stepId }) {
-                withAnimation(.spring()) { inspectState.completedItems.insert(stepId) }
+                withAnimation(.spring()) {
+                    inspectState.completedItems.insert(stepId)
+                    return
+                }
             }
         }
         commandRouter.onFailure = { [self] stepId, _ in
             if inspectState.items.contains(where: { $0.id == stepId }) {
-                withAnimation(.spring()) { inspectState.failedItems.insert(stepId) }
+                withAnimation(.spring()) {
+                    inspectState.failedItems.insert(stepId)
+                    return
+                }
             }
         }
         commandRouter.onWarning = { [self] stepId, _ in
             // P4 treats warnings as completions (toast preset has no warning state)
             if inspectState.items.contains(where: { $0.id == stepId }) {
-                withAnimation(.spring()) { inspectState.completedItems.insert(stepId) }
+                withAnimation(.spring()) {
+                    inspectState.completedItems.insert(stepId)
+                    return
+                }
             }
         }
 
@@ -868,11 +880,20 @@ struct Preset4View: View, InspectLayoutProtocol {
             guard inspectState.items.contains(where: { $0.id == itemId }) else { return }
             switch status.lowercased() {
             case "success", "completed":
-                withAnimation(.spring()) { inspectState.completedItems.insert(itemId) }
+                withAnimation(.spring()) {
+                    inspectState.completedItems.insert(itemId)
+                    return
+                }
             case "failed", "error":
-                withAnimation(.spring()) { inspectState.failedItems.insert(itemId) }
+                withAnimation(.spring()) {
+                    inspectState.failedItems.insert(itemId)
+                    return
+                }
             case "downloading":
-                withAnimation(.spring()) { inspectState.downloadingItems.insert(itemId) }
+                withAnimation(.spring()) {
+                    inspectState.downloadingItems.insert(itemId)
+                    return
+                }
             case "pending":
                 withAnimation(.spring()) {
                     inspectState.completedItems.remove(itemId)

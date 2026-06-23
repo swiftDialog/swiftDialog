@@ -587,7 +587,10 @@ var isLaptop: Bool {
     return modelIdentifier.hasPrefix("MacBook")
 }
 
-func activateDialog() {
+func activateDialog(_ dontActivete: Bool = false) {
+    if dontActivete {
+        return
+    }
     DispatchQueue.main.async {
         // Activate the application more aggressively
         NSApplication.shared.activate(ignoringOtherApps: true)
