@@ -129,8 +129,8 @@
 		BA7CA57D2F231310005A922A /* TableContentBlocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7CA57A2F231310005A922A /* TableContentBlocks.swift */; };
 		BA7CA57E2F231310005A922A /* StatusContentBlocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7CA5792F231310005A922A /* StatusContentBlocks.swift */; };
 		BA7CA57F2F231310005A922A /* MediaContentBlocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7CA5782F231310005A922A /* MediaContentBlocks.swift */; };
-		BA7CA5902F231310005A922A /* ComplianceFindingsBlocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7CA58F2F231310005A922A /* ComplianceFindingsBlocks.swift */; };
 		BA7CA5812F231618005A922A /* IntroStepMonitorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7CA5802F231618005A922A /* IntroStepMonitorService.swift */; };
+		BA7CA5902F231310005A922A /* ComplianceFindingsBlocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7CA58F2F231310005A922A /* ComplianceFindingsBlocks.swift */; };
 		BA7TS0012F242B0000ABCDEF /* ThumbnailService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7TS0002F242B0000ABCDEF /* ThumbnailService.swift */; };
 		BAB7C3CB2F39187B0033C0DC /* InspectBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB7C3CA2F39187B0033C0DC /* InspectBannerView.swift */; };
 		BAC04B282E2FB401006B0F89 /* AppInspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAC04B262E2FB401006B0F89 /* AppInspector.swift */; };
@@ -396,8 +396,8 @@
 		BA7CA5782F231310005A922A /* MediaContentBlocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaContentBlocks.swift; sourceTree = "<group>"; };
 		BA7CA5792F231310005A922A /* StatusContentBlocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusContentBlocks.swift; sourceTree = "<group>"; };
 		BA7CA57A2F231310005A922A /* TableContentBlocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableContentBlocks.swift; sourceTree = "<group>"; };
-		BA7CA58F2F231310005A922A /* ComplianceFindingsBlocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplianceFindingsBlocks.swift; sourceTree = "<group>"; };
 		BA7CA5802F231618005A922A /* IntroStepMonitorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroStepMonitorService.swift; sourceTree = "<group>"; };
+		BA7CA58F2F231310005A922A /* ComplianceFindingsBlocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplianceFindingsBlocks.swift; sourceTree = "<group>"; };
 		BA7TS0002F242B0000ABCDEF /* ThumbnailService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThumbnailService.swift; sourceTree = "<group>"; };
 		BAB7C3CA2F39187B0033C0DC /* InspectBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectBannerView.swift; sourceTree = "<group>"; };
 		BAC04B262E2FB401006B0F89 /* AppInspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInspector.swift; sourceTree = "<group>"; };
@@ -968,6 +968,7 @@
 				CCFDE75A2A41B8B700009797 /* swiftlint */,
 				416D81A12E7B6BBF000A53BD /* CopyFiles */,
 				CCC243A42F6ABDD100F659CF /* CopyFiles */,
+				41A34A562FEA29FC003C4FB2 /* Delete Unneeded bundles */,
 			);
 			buildRules = (
 			);
@@ -1182,6 +1183,25 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		41A34A562FEA29FC003C4FB2 /* Delete Unneeded bundles */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Delete Unneeded bundles";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "BUNDLE=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/swiftui-math_SwiftUIMath.bundle\"\n   if [ -d \"$BUNDLE\" ]; then\n       rm -rf \"$BUNDLE\"\n       echo \"Removed SwiftUIMath bundle ($BUNDLE)\"\n   fi\n";
+		};
 		CCFDE75A2A41B8B700009797 /* swiftlint */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -1680,6 +1700,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = au.csiro.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG TEXTUAL_ENABLE_TEXT_SELECTION";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -1712,6 +1733,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = au.csiro.dialog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = TEXTUAL_ENABLE_TEXT_SELECTION;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;

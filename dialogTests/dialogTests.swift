@@ -446,7 +446,7 @@ class dialogTests: XCTestCase {
     }
 
     @MainActor
-    func testCadenceManagedPrefAttribute() {
+    func testCadenceManagedPrefAttribute() throws {
         // A mobileconfig managed preference landing (any MDM: Fleet, Jamf, Intune, …) satisfies a
         // managedpref entry. Point the base at a temp dir standing in for /Library/Managed Preferences.
         let dir = cadenceTempDir()
@@ -470,8 +470,8 @@ class dialogTests: XCTestCase {
 
         // Profile lands with the enforced value.
         let dict: [String: Any] = ["MDMProfileInstalled": "yes"]
-        let data = try! PropertyListSerialization.data(fromPropertyList: dict, format: .xml, options: 0)
-        try! data.write(to: URL(fileURLWithPath: plistPath))
+        let data = try PropertyListSerialization.data(fromPropertyList: dict, format: .xml, options: 0)
+        try data.write(to: URL(fileURLWithPath: plistPath))
 
         XCTAssertTrue(svc.isAttributeSatisfied(attr("exists", nil), entryId: "p"),
                       "key present after profile lands → satisfied")
