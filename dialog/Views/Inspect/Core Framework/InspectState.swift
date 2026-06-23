@@ -591,9 +591,10 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         _ = item.id.lowercased()
         _ = item.displayName.lowercased().replacingOccurrences(of: " ", with: "")
 
-        let isDownloadFile = lowercaseFile.hasSuffix(".download") ||
-                            lowercaseFile.hasSuffix(".pkg") ||
-                            lowercaseFile.hasSuffix(".dmg")
+        // Honour configurable cacheExtensions (issue #617) so non-curl downloaders are
+        // detected — e.g. aria2c writes <name>.aria2 partials. Defaults to .download/.pkg/.dmg.
+        let cacheExts = config?.resolvedCacheExtensions ?? [".download", ".pkg", ".dmg"]
+        let isDownloadFile = cacheExts.contains { lowercaseFile.hasSuffix($0) }
 
         guard isDownloadFile else { return false }
 

@@ -137,6 +137,7 @@ struct InspectConfig: Codable {
     let listIndicatorStyle: String?         // "letters" | "numbers" | "roman" - list indicator format
     let progressMode: String?                // "shared" (single bar, X of Y) | "perItem" (indeterminate per item) — Preset4 toast installer
     let progressBarConfig: ProgressBarConfig? // Optional progress bar visual configuration
+    let appearance: String?                 // Force window appearance: "dark" | "light" (issue #669); nil/"auto" = follow OS
     let logoConfig: LogoConfig?             // Optional logo overlay configuration (legacy presets)
     let detailOverlay: DetailOverlayConfig? // Optional detail flyout overlay configuration
     let helpButton: HelpButtonConfig?       // Optional help button configuration
@@ -462,6 +463,20 @@ struct InspectConfig: Codable {
         let plistMonitors: [PlistMonitor]?      // Array of plist monitors that auto-update content blocks
         let monitorRefreshInterval: Double?     // Global refresh interval in seconds (default: 1.0)
         let completionMode: String?             // "any" (default) | "all" — how multiple completionTriggers combine
+
+        // Gated Cadence — attribute-driven message sequencing (DEPNotify replacement).
+        // When present, the rotating side message advances when each entry's real monitored
+        // attribute is satisfied (gated advance) instead of on a timer. See CadenceMonitorService.
+        let cadence: [CadenceEntry]?            // Ordered gated message sequence
+        let cadenceStyle: String?               // "line" (default, single rotating icon) | "carousel" (horizontal icon-card row, DEPNotify-style)
+        let cadenceInterval: Double?            // Native poll interval in seconds (default: 1.0)
+        let cadenceMinDwell: Double?            // Default minimum seconds each entry shows even if already
+                                                // satisfied — gives a smooth replay when all conditions
+                                                // are already met (default: 0.6). Per-entry minDwell overrides.
+        // Per-value managed-preference sources (read from any MDM profile/domain). Each ref names its
+        // own domain, so brand colour and claims can come from DIFFERENT mobileconfigs/tenants.
+        let cadenceRef: ManagedValueRef?        // Read the claims array (structured CadenceEntry dicts) from a managed pref
+        let brandColorRef: ManagedValueRef?     // Read the cadence brand/tint colour (light + optional dark) from a managed pref
 
         // Portal Step Configuration (for stepType: "portal")
         let portalConfig: PortalConfig?         // Per-step portal config (overrides global portalConfig)
@@ -893,6 +908,49 @@ struct InspectConfig: Codable {
         let completionTrigger: CompletionTrigger? // Optional auto-completion when condition met
     }
 
+    // Cadence (gated-advance DEPNotify replacement). Each entry binds a message to a real
+    // monitored attribute; the sequence advances when that attribute is satisfied.
+    struct CadenceAttribute: Codable {
+        let source: String?             // "native" (default) — swiftDialog evaluates | "ipc" — advanced by cadence: command
+        let type: String?               // native: "app" | "file" | "plist" | "defaults" | "json"
+        let bundleId: String?           // type:"app" by bundle id (NSWorkspace lookup)
+        let path: String?               // file / app-by-path / plist / defaults / json path
+        let key: String?                // plist/defaults/json key (dot notation)
+        let expectedValue: String?      // Expected value (field name matches ItemConfig/PlistMonitor for shared evaluation)
+        let evaluation: String?         // "equals" | "boolean" | "exists" | "contains" | "range"
+        let useUserDefaults: Bool?      // For "defaults" reads
+        // type:"managedpref" — gate on a mobileconfig-deployed managed preference by domain.
+        // MDM-agnostic: reads /Library/Managed Preferences, the standard location any MDM writes to
+        // (Fleet, Jamf, Intune, Mosyle, Kandji, …). Use it to advance the cadence when a profile
+        // pushed by Fleet (or any other MDM/deployment tool) has actually landed on the device.
+        let domain: String?             // Managed-preference payload domain, e.g. "com.company.security"
+        let scope: String?              // "device" (default) | "user" — which Managed Preferences path to read
+    }
+
+    struct CadenceEntry: Codable, Identifiable {
+        let id: String                  // Stable id (used for `cadence:satisfy:<id>` and SwiftUI identity)
+        let message: String             // The claim shown while this entry is active
+        let attribute: CadenceAttribute // Condition that gates advancement
+        let minDwell: Double?           // Minimum seconds to show even if already satisfied (anti-flash)
+        let timeout: Double?            // Force-advance after N seconds if never satisfied
+        // Per-entry visuals — override the step's hero while this entry is active so the
+        // icon/image changes as the cadence advances (fall back to the step hero when nil).
+        let sfSymbol: String?           // SF Symbol name (e.g. "lock.fill")
+        let imagePath: String?          // Image file path (overrides sfSymbol)
+        let iconColor: String?          // Hex color for the SF Symbol
+    }
+
+    /// A reference to a value in a managed preference, by its own domain + key. Lets different
+    /// values be sourced from different MDM profiles/tenants (e.g. brand colour from
+    /// `nl.root3.support`, claims from another domain). `darkKey` is the optional dark-mode variant
+    /// for colours (e.g. `CustomColor` + `CustomColorDarkMode`). MDM-agnostic — reads
+    /// `/Library/Managed Preferences/<domain>.plist`, written by any MDM.
+    struct ManagedValueRef: Codable {
+        let domain: String              // Managed-preference domain, e.g. "nl.root3.support"
+        let key: String                 // Key within that domain (light value for colours)
+        let darkKey: String?            // Optional dark-mode variant key (colours only)
+    }
+
     // MARK: - Log Monitor Configuration
     /// Configuration for monitoring log files and extracting status text via regex patterns
     /// Works across Presets 1-3 and 6+ for real-time status updates from Installomator, Jamf, Munki, etc.
@@ -1177,6 +1235,12 @@ struct InspectConfig: Codable {
         let displayName: String?            // Human-readable name (optional)
         let category: String?               // Override category (optional)
         let isCritical: Bool?              // Override critical status (optional)
+        // FR #667: rich remediation content. Plist sibling values override these defaults.
+        let severity: String?               // "healthy" | "warning" | "failure" (config-only)
+        let explanation: String?            // User-facing reason for the check
+        let remediation: String?            // Steps the user can take to resolve a failure
+        let actionButtonText: String?       // Label for the optional remediation button
+        let actionURL: String?              // URL the action button opens (e.g. x-apple.systempreferences:...)
     }
 
     struct CategoryHelp: Codable {
@@ -1783,6 +1847,7 @@ struct InspectConfig: Codable {
         try container.encodeIfPresent(highlightColor, forKey: .highlightColor)
         try container.encodeIfPresent(secondaryColor, forKey: .secondaryColor)
         try container.encodeIfPresent(backgroundColor, forKey: .backgroundColor)
+        try container.encodeIfPresent(appearance, forKey: .appearance)
         try container.encodeIfPresent(backgroundImage, forKey: .backgroundImage)
         try container.encodeIfPresent(backgroundOpacity, forKey: .backgroundOpacity)
         try container.encodeIfPresent(textOverlayColor, forKey: .textOverlayColor)
@@ -1917,6 +1982,7 @@ struct InspectConfig: Codable {
         highlightColor = try container.decodeIfPresent(String.self, forKey: .highlightColor)
         secondaryColor = try container.decodeIfPresent(String.self, forKey: .secondaryColor)
         backgroundColor = try container.decodeIfPresent(String.self, forKey: .backgroundColor)
+        appearance = try container.decodeIfPresent(String.self, forKey: .appearance)
         backgroundImage = try container.decodeIfPresent(String.self, forKey: .backgroundImage)
         backgroundOpacity = try container.decodeIfPresent(Double.self, forKey: .backgroundOpacity)
         textOverlayColor = try container.decodeIfPresent(String.self, forKey: .textOverlayColor)
@@ -2046,7 +2112,7 @@ struct InspectConfig: Codable {
         case title, message, infobox, icon, iconsize, banner, bannerHeight, bannerTitle
         case width, height, size, scanInterval, cachePaths, cacheExtensions
         case sideMessage, sideInterval, style, liststyle, preset, popupButton
-        case highlightColor, secondaryColor, backgroundColor, backgroundImage, backgroundOpacity
+        case highlightColor, secondaryColor, backgroundColor, backgroundImage, backgroundOpacity, appearance
         case textOverlayColor, gradientColors, gradientPalette, gradientStyle
         case button1Text = "button1text"
         case button1Disabled = "button1disabled"

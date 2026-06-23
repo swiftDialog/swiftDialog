@@ -633,6 +633,16 @@ struct Preset6View: View, InspectLayoutProtocol {
                 Spacer()
             }
 
+            // Per-item description text (issue #663): detail under the step title so
+            // titles stay short while users can read what each step is for.
+            if let description = localized("subtitle", forItem: item, fallback: item.subtitle),
+               !description.isEmpty {
+                Text(description)
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
             // Status badge
             if completedSteps.contains(item.id) || inspectState.completedItems.contains(item.id) {
                 let completedText = localized("completedStatus", forItem: item, fallback: item.completedStatus) ?? "Completed"

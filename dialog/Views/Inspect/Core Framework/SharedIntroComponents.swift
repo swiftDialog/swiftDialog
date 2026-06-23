@@ -216,6 +216,7 @@ struct IntroProgressDots: View {
 /// Logo is rendered as a persistent overlay at Preset5 root level — not in the footer.
 struct IntroFooterView<PopoverContent: View>: View {
     let footerText: String?
+    var footerLogoPath: String? = nil   // optional brand logo, laid out in the footer row (aligns with buttons)
     let backButtonText: String
     let continueButtonText: String
     let accentColor: Color
@@ -234,6 +235,18 @@ struct IntroFooterView<PopoverContent: View>: View {
     let showDeferral: Bool
 
     @State private var showPopover: Bool = false
+    @Environment(\.colorScheme) private var colorScheme
+
+    /// Footer logo: only when an explicit `footerLogoPath` is passed. Bottom-positioned
+    /// brand logos are rendered as a *persistent* overlay at the preset root (so they stay
+    /// fixed across step transitions), not in this per-step footer.
+    private var resolvedFooterLogoPath: String? { footerLogoPath }
+
+    /// Footer logo height — honours logoConfig.maxHeight (default 24), capped so it can't
+    /// overgrow the footer row.
+    private var footerLogoHeight: CGFloat {
+        min(CGFloat(inspectConfig?.logoConfig?.maxHeight ?? 24), 48)
+    }
 
     init(
         footerText: String? = nil,
@@ -286,6 +299,15 @@ struct IntroFooterView<PopoverContent: View>: View {
             }
 
             HStack(spacing: 12) {
+                // Footer brand logo — laid out in the same row as the buttons, so it
+                // vertically aligns with Continue. Loaded synchronously (no AsyncImage spinner).
+                if let logoPath = resolvedFooterLogoPath,
+                   let nsLogo = NSImage(contentsOfFile: (logoPath as NSString).expandingTildeInPath) {
+                    Image(nsImage: nsLogo)
+                        .resizable().scaledToFit()
+                        .frame(maxHeight: footerLogoHeight)
+                        .accessibilityHidden(true)
+                }
                 // Footer text (e.g., branding text)
                 if let footerText = footerText {
                     Text(footerText)
@@ -371,9 +393,11 @@ extension IntroFooterView where PopoverContent == EmptyView {
         inspectConfig: InspectConfig? = nil,
         buttonControlSize: ControlSize = .large,
         footerVerticalPadding: CGFloat = 16,
-        showDeferral: Bool = true
+        showDeferral: Bool = true,
+        footerLogoPath: String? = nil
     ) {
         self.footerText = footerText
+        self.footerLogoPath = footerLogoPath
         self.backButtonText = backButtonText
         self.continueButtonText = continueButtonText
         self.accentColor = accentColor
@@ -551,6 +575,7 @@ struct IntroStepContainer<Content: View>: View {
 
     struct IntroFooterConfig {
         let footerText: String?
+        var footerLogoPath: String? = nil
         let backButtonText: String
         let continueButtonText: String
         let showBackButton: Bool
@@ -567,6 +592,7 @@ struct IntroStepContainer<Content: View>: View {
 
         init(
             footerText: String? = nil,
+            footerLogoPath: String? = nil,
             backButtonText: String = "Back",
             continueButtonText: String = "Continue",
             showBackButton: Bool = true,
@@ -582,6 +608,7 @@ struct IntroStepContainer<Content: View>: View {
             showDeferral: Bool = true
         ) {
             self.footerText = footerText
+            self.footerLogoPath = footerLogoPath
             self.backButtonText = backButtonText
             self.continueButtonText = continueButtonText
             self.showBackButton = showBackButton
@@ -653,7 +680,8 @@ struct IntroStepContainer<Content: View>: View {
                 inspectConfig: footerConfig.inspectConfig,
                 buttonControlSize: footerConfig.buttonControlSize,
                 footerVerticalPadding: footerConfig.footerVerticalPadding,
-                showDeferral: footerConfig.showDeferral
+                showDeferral: footerConfig.showDeferral,
+                footerLogoPath: footerConfig.footerLogoPath
             )
         }
     }

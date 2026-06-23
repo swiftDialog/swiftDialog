@@ -151,10 +151,6 @@
             argument = "--builder"
             isEnabled = "NO">
          </CommandLineArgument>
-         <CommandLineArgument
-            argument = "--jsonfile /Users/rea094/Developer/testing/cards3.json"
-            isEnabled = "YES">
-         </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>
    <ProfileAction

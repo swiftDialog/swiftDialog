@@ -444,12 +444,12 @@ final class DistributedNotificationsTests: XCTestCase {
             expectation.fulfill()
         }
 
-        DialogNotifications.postEvent("test_event", userInfo: ["foo": "bar"])
+        DialogNotifications.postEvent(.ready, userInfo: ["foo": "bar"])
 
         waitForExpectations(timeout: 2.0)
         center.removeObserver(observer)
 
-        XCTAssertEqual(receivedInfo?["event"] as? String, "test_event")
+        XCTAssertEqual(receivedInfo?["event"] as? String, "ready")
         XCTAssertEqual(receivedInfo?["foo"] as? String, "bar")
         XCTAssertEqual(receivedInfo?["pid"] as? String,
                        String(ProcessInfo.processInfo.processIdentifier))

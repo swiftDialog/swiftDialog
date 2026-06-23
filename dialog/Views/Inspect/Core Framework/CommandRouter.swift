@@ -51,6 +51,7 @@ final class CommandRouter: ObservableObject {
     var onSetCommand: ((String, String, String?) -> Void)?
     var onItemStatus: ((String, String, String?) -> Void)?
     var onListItem: ((String) -> Void)?            // raw remainder after "listitem:"
+    var onCadence: ((String) -> Void)?             // raw remainder after "cadence:" (drives CadenceMonitorService)
 
     // MARK: - Configuration
 
@@ -226,6 +227,14 @@ final class CommandRouter: ObservableObject {
             writeLog("\(presetLabel): reset", logLevel: .info)
             onReset?()
             writeAck("reset", stepId: "_")
+
+        } else if trimmed.hasPrefix("cadence:") {
+            // cadence:satisfy:<id> | cadence:advance | cadence:goto:<index> | cadence:message:<index>:<text>
+            // Parsed by the host preset's onCadence closure, which holds the CadenceMonitorService.
+            let remainder = String(trimmed.dropFirst(8))
+            writeLog("\(presetLabel): cadence:\(remainder)", logLevel: .info)
+            onCadence?(remainder)
+            writeAck("cadence", stepId: remainder)
 
         } else if trimmed.hasPrefix("progress:") {
             // progress:stepId:value — auto-detect 0-1 or 0-100

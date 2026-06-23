@@ -15,6 +15,18 @@ class PlistAggregator {
 
     // MARK: - Data Models
 
+    /// User-visible severity for a compliance check.
+    /// Derived from `finding` when no explicit severity is configured:
+    ///   `finding=true`  → `.healthy`
+    ///   `finding=false` → `.failure`
+    /// An explicit `severity: "warning"` in the keyMapping config opts a failing check
+    /// into a softer state used by the detail sheet (FR #667).
+    enum CellSeverity: String {
+        case healthy
+        case warning
+        case failure
+    }
+
     /// Represents a single compliance check item from a plist
     struct ComplianceItem {
         let id: String              // Original plist key
@@ -22,6 +34,23 @@ class PlistAggregator {
         let finding: Bool           // true = passed, false = failed
         let isCritical: Bool       // Whether this is a critical check
         let displayName: String    // Human-readable name for UI display
+        // FR #667: rich remediation content. Plist values override keyMapping defaults.
+        let severity: CellSeverity
+        let explanation: String?
+        let remediation: String?
+        let actionButtonText: String?
+        let actionURL: String?
+    }
+
+    /// Result of parsing a single plist value. `finding` carries the pass/fail bit
+    /// the existing UI relies on; the optional sibling-key strings are only populated
+    /// when the plist value is a nested dict (e.g. `{ finding: false, explanation: ... }`).
+    struct EvaluatedValue {
+        let finding: Bool
+        let explanation: String?
+        let remediation: String?
+        let actionButtonText: String?
+        let actionURL: String?
     }
 
     /// Represents an aggregated category with compliance statistics
@@ -100,13 +129,26 @@ class PlistAggregator {
                     }
 
                     if shouldProcessKey(key, source: source) {
-                        if let finding = evaluateValue(value, source: source) {
+                        if let evaluated = evaluateValue(value, source: source) {
+                            // Plist sibling values override keyMapping config defaults (FR #667).
+                            let mapping = source.keyMappings?.first(where: { $0.key == key })
+                            let severity: CellSeverity = {
+                                if let raw = mapping?.severity, let parsed = CellSeverity(rawValue: raw) {
+                                    return parsed
+                                }
+                                return evaluated.finding ? .healthy : .failure
+                            }()
                             let item = ComplianceItem(
                                 id: String(key), // Ensure string copy, not reference
                                 category: getCategoryForKey(key, source: source),
-                                finding: finding,
+                                finding: evaluated.finding,
                                 isCritical: isCriticalKey(key, source: source),
-                                displayName: getDisplayName(key, source: source)
+                                displayName: getDisplayName(key, source: source),
+                                severity: severity,
+                                explanation: evaluated.explanation ?? mapping?.explanation,
+                                remediation: evaluated.remediation ?? mapping?.remediation,
+                                actionButtonText: evaluated.actionButtonText ?? mapping?.actionButtonText,
+                                actionURL: evaluated.actionURL ?? mapping?.actionURL
                             )
                             items.append(item)
                             processedCount += 1
@@ -207,33 +249,51 @@ class PlistAggregator {
         return true
     }
 
-    /// Evaluate a plist value to determine pass/fail status
-    private static func evaluateValue(_ value: Any, source: InspectConfig.PlistSourceConfig) -> Bool? {
+    /// Evaluate a plist value to determine pass/fail status, plus any sibling-key
+    /// remediation strings if the value is a nested dict (FR #667).
+    private static func evaluateValue(_ value: Any, source: InspectConfig.PlistSourceConfig) -> EvaluatedValue? {
         let successValues = source.successValues ?? ["true", "1", "YES"]
 
         // Handle boolean values
         if let boolValue = value as? Bool {
-            return successValues.contains(String(boolValue))
+            return EvaluatedValue(finding: successValues.contains(String(boolValue)),
+                                  explanation: nil, remediation: nil,
+                                  actionButtonText: nil, actionURL: nil)
         }
 
         // Handle string values
         if let stringValue = value as? String {
-            return successValues.contains(stringValue)
+            return EvaluatedValue(finding: successValues.contains(stringValue),
+                                  explanation: nil, remediation: nil,
+                                  actionButtonText: nil, actionURL: nil)
         }
 
         // Handle number values
         if let numberValue = value as? NSNumber {
-            return successValues.contains(numberValue.stringValue)
+            return EvaluatedValue(finding: successValues.contains(numberValue.stringValue),
+                                  explanation: nil, remediation: nil,
+                                  actionButtonText: nil, actionURL: nil)
         }
 
-        // Handle nested dictionary (e.g., CIS audit format: { "finding": false })
+        // Handle nested dictionary (e.g., CIS audit format: { "finding": false, "explanation": "...", ... })
         if let dictValue = value as? [String: Any] {
-            if let finding = dictValue["finding"] as? Bool {
-                return successValues.contains(String(finding))
-            }
-            if let status = dictValue["status"] as? String {
-                return successValues.contains(status)
-            }
+            let finding: Bool? = {
+                if let finding = dictValue["finding"] as? Bool {
+                    return successValues.contains(String(finding))
+                }
+                if let status = dictValue["status"] as? String {
+                    return successValues.contains(status)
+                }
+                return nil
+            }()
+            guard let finding else { return nil }
+            return EvaluatedValue(
+                finding: finding,
+                explanation: dictValue["explanation"] as? String,
+                remediation: dictValue["remediation"] as? String,
+                actionButtonText: dictValue["actionButtonText"] as? String,
+                actionURL: dictValue["actionURL"] as? String
+            )
         }
 
         return nil

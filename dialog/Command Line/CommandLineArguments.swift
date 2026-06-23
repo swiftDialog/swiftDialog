@@ -168,6 +168,11 @@ struct CommandLineArguments {
     // Inspect Mode Arguments
     var inspectMode               = CommandlineArgument(long: "inspect-mode", isbool: true)
     var inspectConfig             = CommandlineArgument(long: "inspect-config")
+
+    // IPC: directory where each running Dialog publishes a <pid>.json
+    // session-discovery file. Pass an empty value or "none" to disable.
+    var publishedSessionsDir      = CommandlineArgument(long: "published-sessions-dir",
+                                                        defaultValue: "/private/tmp/swiftdialog/sessions")
 }
 
 extension CommandlineArgument {
@@ -363,6 +368,7 @@ extension CommandLineArguments {
                     case "notificationStyle": self.notificationStyle = argument
                     case "inspectMode": self.inspectMode = argument
                     case "inspectConfig": self.inspectConfig = argument
+                    case "publishedSessionsDir": self.publishedSessionsDir = argument
                     case "callingPid": self.callingPid = argument
                     case "playSound": self.playSound = argument
                     case "showSoundControls": self.showSoundControls = argument

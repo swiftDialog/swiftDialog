@@ -1508,6 +1508,24 @@ struct SDHelp {
         Example:
             dialog --\(argument.inspectMode.long) --\(argument.inspectConfig.long) /abs/path/to/config.json
 """
+
+        argument.publishedSessionsDir.helpShort = "Directory to publish per-PID session discovery JSON"
+        argument.publishedSessionsDir.helpUsage = "<dir>"
+        argument.publishedSessionsDir.helpLong = """
+        While Dialog is running it writes <dir>/<pid>.json containing the trigger-file
+        path, ack channel name, preset, and ready timestamp. This lets external tools
+        (install scripts, ignitecli, MDM helpers) discover an active Dialog without
+        knowing its PID up front.
+
+        Default: /private/tmp/swiftdialog/sessions
+        Pass an empty value or "none" to disable publishing.
+
+        Discovery example:
+            ls -t /private/tmp/swiftdialog/sessions | head -1   # newest <pid>.json
+            cat /private/tmp/swiftdialog/sessions/$(ls -t ... | head -1)
+
+        The file is removed automatically on Dialog exit.
+"""
     }
 
 }

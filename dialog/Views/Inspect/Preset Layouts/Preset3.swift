@@ -16,6 +16,7 @@ struct Preset3View: View, InspectLayoutProtocol {
     @State private var selectedItemForDetail: InspectConfig.ItemConfig?
     @StateObject private var iconCache = PresetIconCache()
     @State private var localizationService = LocalizationService()
+    @Environment(\.colorScheme) private var colorScheme
 
     init(inspectState: InspectState) {
         self.inspectState = inspectState
@@ -29,44 +30,8 @@ struct Preset3View: View, InspectLayoutProtocol {
             customBackground()
             
             VStack(spacing: 0) {
-                // Fixed header with title and button - always visible
-                HStack {
-                    Text(localized("title", fallback: inspectState.uiConfiguration.windowTitle) ?? "")
-                        .font(.title)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(textColor)
-                    Spacer()
-                    
-                    HStack(spacing: 12) {
-                        // Button 2 (Secondary/Cancel) - Exit code 2
-                        // Only show when all items are completed (like preset3)
-                        if inspectState.completedItems.count == inspectState.items.count && 
-                           inspectState.buttonConfiguration.button2Visible && !inspectState.buttonConfiguration.button2Text.isEmpty {
-                            Button(inspectState.buttonConfiguration.button2Text) {
-                                writeLog("Preset3LayoutServiceBased: User clicked button2 (\(inspectState.buttonConfiguration.button2Text)) - exiting with code 2", logLevel: .info)
-                                exit(2)
-                            }
-                            .buttonStyle(.bordered)
-                            // Note: button2 is always enabled when visible
-                        }
-                        
-                        // Button 1 (Primary) - Exit code 0 - uses finalButtonText with fallback chain
-                        let finalButtonText = inspectState.config?.finalButtonText ??
-                                             inspectState.config?.button1Text ??
-                                             (inspectState.buttonConfiguration.button1Text.isEmpty ? "Continue" : inspectState.buttonConfiguration.button1Text)
-
-                        Button(finalButtonText) {
-                            writeLog("Preset3LayoutServiceBased: User clicked button1 (\(finalButtonText)) - exiting with code 0", logLevel: .info)
-                            exit(0)
-                        }
-                        .keyboardShortcut(.defaultAction)
-                        .buttonStyle(.borderedProminent)
-                        .disabled(inspectState.buttonConfiguration.button1Disabled)
-                    }
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 10)
-                .background(Color.primary.opacity(0.05))
+                // Clean layout: no top header bar. The title lives in the hero block
+                // below; the action buttons live in the bottom footer.
                 
                 // Banner image at top if available
                 if inspectState.uiConfiguration.bannerImage != nil {
@@ -93,7 +58,7 @@ struct Preset3View: View, InspectLayoutProtocol {
                 }
 
                 // Company icon section - more compact
-                HStack(spacing: 16) {
+                HStack(spacing: 20) {
                     IconView(
                         image: iconCache.getMainIconPath(for: inspectState),
                         overlay: iconCache.getOverlayIconPath(for: inspectState),
@@ -102,20 +67,23 @@ struct Preset3View: View, InspectLayoutProtocol {
                         defaultImage: "building.2.fill",
                         defaultColour: "accent"
                     )
-                    .frame(width: 100 * scaleFactor, height: 100 * scaleFactor)
-                        // Border removed
+                    .frame(width: 96 * scaleFactor, height: 96 * scaleFactor)
                         .onAppear {
                             iconCache.cacheMainIcon(for: inspectState)
                             iconCache.cacheBannerImage(for: inspectState)
                         }
 
-                    VStack(alignment: .leading, spacing: 4) {
-                        // Add subtitle message if available
+                    VStack(alignment: .leading, spacing: 6) {
+                        // Big hero title (moved here from the old top header)
+                        Text(localized("title", fallback: inspectState.uiConfiguration.windowTitle) ?? "")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundStyle(textColor)
+
                         if let subtitle = localized("subtitle", fallback: inspectState.uiConfiguration.subtitleMessage) {
                             Text(subtitle)
-                                .font(.headline)
-                                .fontWeight(.medium)
-                                .foregroundStyle(textColor)
+                                .font(.title3)
+                                .foregroundStyle(textColor.opacity(0.75))
                         }
 
                         if let currentMessage = localizedSideMessage() {
@@ -127,8 +95,9 @@ struct Preset3View: View, InspectLayoutProtocol {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .padding(.horizontal, 24)
-                .padding(.vertical, 16)
+                .padding(.horizontal, 32)
+                .padding(.top, 40)
+                .padding(.bottom, 22)
                 
                 // Removed - message is now inline with logo
                 
@@ -140,27 +109,41 @@ struct Preset3View: View, InspectLayoutProtocol {
                             [GridItem(.flexible()), GridItem(.flexible())] :
                             [GridItem(.flexible())]
 
-                        LazyVGrid(columns: columns, spacing: 6) {
+                        LazyVGrid(columns: columns, spacing: 10) {
                             let sortedItems = getSortedItemsByStatus() // Use simple order: Latest Completed → Installing → Waiting
                             ForEach(sortedItems, id: \.id) { item in
-                                HStack {
-                                    // Small item icon - use resolved path from cache
+                                HStack(spacing: 14) {
+                                    // Item icon - use resolved path from cache
                                     IconView(image: iconCache.getItemIconPath(for: item, state: inspectState), sfPaddingEnabled: false, corners: false, defaultImage: "app.badge.fill", defaultColour: "accent")
-                                        .frame(width: 24 * scaleFactor, height: 24 * scaleFactor)
+                                        .frame(width: 36 * scaleFactor, height: 36 * scaleFactor)
                                         .id("icon-\(item.id)") // Stable ID to prevent recreation
 
-                                    // Item name with info button
-                                    HStack(spacing: 4) {
-                                        Text(localized("\(item.id).displayName", fallback: item.displayName) ?? item.displayName)
-                                            .font(.body)
-                                            .foregroundStyle(textColor)
+                                    // Item name + optional description (issue #663)
+                                    VStack(alignment: .leading, spacing: 1) {
+                                        HStack(spacing: 4) {
+                                            Text(localized("\(item.id).displayName", fallback: item.displayName) ?? item.displayName)
+                                                .font(.body)
+                                                .foregroundStyle(textColor)
 
-                                        // Info button (only show if detailOverlay is configured)
-                                        if inspectState.config?.detailOverlay != nil || item.itemOverlay != nil {
-                                            ItemInfoButton(item: item, action: {
-                                                selectedItemForDetail = item
-                                                showItemDetailOverlay = true
-                                            }, size: 12 * scaleFactor)
+                                            // Info button (only show if detailOverlay is configured)
+                                            if inspectState.config?.detailOverlay != nil || item.itemOverlay != nil {
+                                                ItemInfoButton(item: item, action: {
+                                                    selectedItemForDetail = item
+                                                    showItemDetailOverlay = true
+                                                }, size: 16 * scaleFactor,
+                                                   tint: Color(hex: inspectState.uiConfiguration.highlightColor))
+                                            }
+                                        }
+
+                                        // Per-item description — capped to one line so a long
+                                        // string can never deform a compact grid cell.
+                                        if let description = localized("\(item.id).subtitle", fallback: item.subtitle),
+                                           !description.isEmpty {
+                                            Text(description)
+                                                .font(.caption)
+                                                .foregroundStyle(textColor.opacity(0.7))
+                                                .lineLimit(1)
+                                                .truncationMode(.tail)
                                         }
                                     }
                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -168,14 +151,14 @@ struct Preset3View: View, InspectLayoutProtocol {
                                     // Status indicator with validation support
                                     statusIndicatorWithValidation(for: item, textColor: textColor)
                                 }
-                                .padding(.vertical, 3)
-                                .padding(.horizontal, 8)
-                                .background(Color.primary.opacity(0.05))
-                                .clipShape(.rect(cornerRadius: 6))
+                                .padding(.vertical, 10)
+                                .padding(.horizontal, 14)
+                                .background(Color.primary.opacity(0.04))
+                                .clipShape(.rect(cornerRadius: 12))
                             }
                         }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 4)
+                        .padding(.horizontal, 32)
+                        .padding(.vertical, 6)
                         .onChange(of: inspectState.completedItems.count) { _, _ in
                             // Auto-scroll to top when new item completes
                             let sortedItems = getSortedItemsByStatus()
@@ -231,35 +214,93 @@ struct Preset3View: View, InspectLayoutProtocol {
                     let progress = Double(inspectState.completedItems.count) / Double(inspectState.items.count)
                     let isComplete = inspectState.completedItems.count == inspectState.items.count
                     
+                    let brand = Color(hex: inspectState.uiConfiguration.highlightColor)
+
                     VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Text(isComplete ? (localized("completionMessage", fallback: inspectState.config?.uiLabels?.completionMessage) ?? "Installation Complete!") : (localized("installationProgress", fallback: nil) ?? "Installation Progress"))
-                                .font(.headline)
-                                .foregroundStyle(textColor)
-                            Spacer()
+                        HStack(spacing: 6) {
                             if isComplete {
-                                Text(localized("completionSubtitle", fallback: inspectState.config?.uiLabels?.completionSubtitle) ?? "All installations completed successfully")
+                                Image(systemName: "checkmark.circle.fill")
                                     .font(.subheadline)
-                                    .fontWeight(.semibold)
-                                    .foregroundStyle(textColor)
-                            } else {
-                                Text(PresetCommonViews.getProgressText(state: inspectState))
-                                    .font(.subheadline)
-                                    .foregroundStyle(textColor.opacity(0.8))
+                                    .foregroundStyle(.green)
+                            }
+                            Text(isComplete
+                                 ? (localized("completionMessage", fallback: inspectState.config?.uiLabels?.completionMessage) ?? "Installation complete")
+                                 : (localized("installationProgress", fallback: nil) ?? "Installing…"))
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundStyle(textColor.opacity(0.85))
+                            Spacer()
+                            Text("\(inspectState.completedItems.count) of \(inspectState.items.count)")
+                                .font(.subheadline)
+                                .monospacedDigit()
+                                .foregroundStyle(textColor.opacity(0.5))
+                        }
+
+                        // Slim, rounded, brand-tinted progress line — no heavy box.
+                        GeometryReader { geo in
+                            ZStack(alignment: .leading) {
+                                Capsule().fill(Color.primary.opacity(0.08))
+                                Capsule()
+                                    .fill(isComplete ? Color.green : brand)
+                                    .frame(width: max(0, geo.size.width * progress))
+                                    .animation(.easeInOut(duration: 0.35), value: progress)
                             }
                         }
-                        
-                        ProgressView(value: progress)
-                            .progressViewStyle(LinearProgressViewStyle())
-                            .scaleEffect(y: 2.0)
+                        .frame(height: 6)
                     }
-                    .padding()
-                    .background(Color.primary.opacity(0.05))
-                    .clipShape(.rect(cornerRadius: 8))
-                    .padding(.horizontal)
+                    .padding(.horizontal, 32)
                     .padding(.top, 8)
-                    .padding(.bottom, 12) // Bottom spacing
+                    .padding(.bottom, 10)
                 }
+
+                Divider()
+                    .padding(.horizontal, 32)
+
+                // Footer: brand wordmark (logoConfig) on the left, action buttons on the right.
+                HStack(spacing: 12) {
+                    if let lc = inspectState.config?.logoConfig {
+                        // Dark-aware (imagePathDark) + honours logoConfig.maxHeight (capped),
+                        // matching the footer-logo handling in Preset 5/6.
+                        let logoPath = (colorScheme == .dark ? (lc.imagePathDark ?? lc.imagePath) : lc.imagePath)
+                        if let nsLogo = NSImage(contentsOfFile: (logoPath as NSString).expandingTildeInPath) {
+                            Image(nsImage: nsLogo)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxHeight: min(CGFloat(lc.maxHeight ?? 26), 48) * scaleFactor)
+                                .opacity(lc.opacity ?? 1.0)
+                                .accessibilityHidden(true)
+                        }
+                    }
+
+                    Spacer()
+
+                    // Button 2 (Secondary/Cancel) — only when all items complete
+                    if inspectState.completedItems.count == inspectState.items.count &&
+                       inspectState.buttonConfiguration.button2Visible && !inspectState.buttonConfiguration.button2Text.isEmpty {
+                        Button(inspectState.buttonConfiguration.button2Text) {
+                            writeLog("Preset3: button2 (\(inspectState.buttonConfiguration.button2Text)) → exit 2", logLevel: .info)
+                            exit(2)
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.large)
+                    }
+
+                    // Button 1 (Primary) — finalButtonText fallback chain
+                    let finalButtonText = inspectState.config?.finalButtonText ??
+                                         inspectState.config?.button1Text ??
+                                         (inspectState.buttonConfiguration.button1Text.isEmpty ? "Continue" : inspectState.buttonConfiguration.button1Text)
+                    Button(finalButtonText) {
+                        writeLog("Preset3: button1 (\(finalButtonText)) → exit 0", logLevel: .info)
+                        exit(0)
+                    }
+                    .keyboardShortcut(.defaultAction)
+                    .buttonStyle(.borderedProminent)
+                    .tint(inspectState.uiConfiguration.highlightColor.isEmpty ? Color.accentColor : Color(hex: inspectState.uiConfiguration.highlightColor))
+                    .controlSize(.large)
+                    .disabled(inspectState.buttonConfiguration.button1Disabled)
+                }
+                .padding(.horizontal, 32)
+                .padding(.vertical, 18)
             }
         }
         .frame(width: windowSize.width, height: windowSize.height)

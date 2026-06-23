@@ -625,10 +625,23 @@ struct BentoPlistDetailSheet: View {
     /// Scale factor for the whole sheet — mirrors the rest of the bento system so
     /// users with a larger inspect window get a proportionally larger popover.
     let scaleFactor: CGFloat
+    /// Inspect state, used to log remediation-button interactions through the same
+    /// channel as other button actions (FR #667).
+    let inspectState: InspectState
     let onClose: () -> Void
 
-    private var tint: Color { item.finding ? .semanticSuccess : .semanticWarning }
+    private var tint: Color {
+        switch item.severity {
+        case .healthy: return .semanticSuccess
+        case .warning: return .semanticWarning
+        case .failure: return item.finding ? .semanticSuccess : .semanticWarning
+        }
+    }
     private var statusLabel: String { item.finding ? healthyLabel : attentionLabel }
+    private var actionURL: URL? {
+        guard let raw = item.actionURL, !raw.isEmpty else { return nil }
+        return URL(string: raw)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -672,6 +685,33 @@ struct BentoPlistDetailSheet: View {
             .padding(20 * scaleFactor)
             .frame(maxWidth: .infinity, alignment: .leading)
 
+            // FR #667: Rich remediation content
+            if item.explanation != nil || (item.severity != .healthy && (item.remediation != nil || actionURL != nil)) {
+                Divider()
+                VStack(alignment: .leading, spacing: 14 * scaleFactor) {
+                    if let explanation = item.explanation {
+                        markdownBlock(label: "Explanation", text: explanation)
+                    }
+                    if item.severity != .healthy, let remediation = item.remediation {
+                        markdownBlock(label: "Remediation", text: remediation)
+                    }
+                    if item.severity != .healthy, let url = actionURL {
+                        Button(item.actionButtonText ?? "Open") {
+                            NSWorkspace.shared.open(url)
+                            inspectState.writeToInteractionLog(
+                                "button:\(item.id):remediation:url:\(url.absoluteString)"
+                            )
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.regular)
+                        .tint(tint)
+                    }
+                }
+                .padding(.horizontal, 20 * scaleFactor)
+                .padding(.vertical, 16 * scaleFactor)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
             // Footer
             HStack {
                 Spacer(minLength: 0)
@@ -685,6 +725,29 @@ struct BentoPlistDetailSheet: View {
         }
         .frame(width: InspectSizes.Bento.plistDetailWidth * scaleFactor)
         .fixedSize(horizontal: true, vertical: true)
+    }
+
+    @ViewBuilder
+    private func markdownBlock(label: String, text: String) -> some View {
+        VStack(alignment: .leading, spacing: 6 * scaleFactor) {
+            Text(label)
+                .font(.system(size: 11 * scaleFactor, weight: .medium))
+                .textCase(.uppercase)
+                .tracking(0.6)
+                .foregroundStyle(.secondary)
+            Text(parseMarkdown(text))
+                .font(.system(size: 13 * scaleFactor))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func parseMarkdown(_ markdown: String) -> AttributedString {
+        (try? AttributedString(
+            markdown: markdown,
+            options: AttributedString.MarkdownParsingOptions(
+                interpretedSyntax: .inlineOnlyPreservingWhitespace
+            )
+        )) ?? AttributedString(markdown)
     }
 
     @ViewBuilder
@@ -1431,6 +1494,7 @@ struct BentoGridView: View {
                     healthyLabel: complianceAggregator?.healthyLabel ?? "Healthy",
                     attentionLabel: complianceAggregator?.attentionLabel ?? "Needs Attention",
                     scaleFactor: scaleFactor,
+                    inspectState: inspectState,
                     onClose: { sheetContext = nil }
                 )
             }

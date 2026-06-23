@@ -249,6 +249,11 @@
       "type": "string",
       "description": "Background color (hex format)"
     },
+    "appearance": {
+      "type": "string",
+      "enum": ["dark", "light", "auto"],
+      "description": "Force the inspect window appearance (issue #669): 'dark' or 'light' override the OS in both directions; omit or 'auto' to follow the system setting."
+    },
     "backgroundImage": {
       "type": "string",
       "description": "Background image path"
@@ -287,12 +292,6 @@
         "$ref": "#/definitions/BrandConfig"
       }
     },
-    "button1Disabled": {
-      "type": "boolean"
-    },
-    "button1Text": {
-      "type": "string"
-    },
     "button1disabled": {
       "type": "boolean",
       "description": "Disable primary button initially"
@@ -300,12 +299,6 @@
     "button1text": {
       "type": "string",
       "description": "Primary button text"
-    },
-    "button2Text": {
-      "type": "string"
-    },
-    "button2Visible": {
-      "type": "boolean"
     },
     "button2text": {
       "type": "string",
@@ -316,7 +309,9 @@
       "description": "Show secondary button"
     },
     "cacheExtensions": {
-      "type": "array"
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "File extensions (within cachePaths) that mark an item as downloading. Default ['download','pkg','dmg']. Add others for non-curl downloaders — e.g. 'aria2' for aria2c, which writes <name>.aria2 partial files (issue #617). Leading dot optional."
     },
     "cachePaths": {
       "type": "array",
@@ -690,6 +685,65 @@
     }
   },
   "definitions": {
+    "CadenceAttribute": {
+      "type": "object",
+      "description": "Condition that gates cadence advancement. 'native' sources are evaluated by swiftDialog; 'ipc' advances via the cadence: command (e.g. ignitecli ipc send cadence:satisfy:<id>).",
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": ["native", "ipc"],
+          "default": "native",
+          "description": "'native' = swiftDialog evaluates the attribute | 'ipc' = advanced externally by the cadence: command"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["app", "file", "plist", "defaults", "json", "managedpref"],
+          "description": "Native attribute type. 'managedpref' reads /Library/Managed Preferences/<domain>.plist (MDM-agnostic)."
+        },
+        "bundleId": { "type": "string", "description": "type:'app' — bundle identifier (NSWorkspace lookup)" },
+        "path": { "type": "string", "description": "file existence / app-by-path / plist / defaults / json file path" },
+        "key": { "type": "string", "description": "plist/defaults/json/managedpref key (dot notation supported)" },
+        "expectedValue": { "type": "string", "description": "Expected value for the evaluation" },
+        "evaluation": {
+          "type": "string",
+          "enum": ["equals", "boolean", "exists", "contains", "range"],
+          "description": "How to compare the read value against expectedValue (default 'exists')"
+        },
+        "useUserDefaults": { "type": "boolean", "description": "For 'defaults' reads, use UserDefaults instead of file polling" },
+        "domain": { "type": "string", "description": "type:'managedpref' — managed-preference payload domain, e.g. 'com.company.security'" },
+        "scope": {
+          "type": "string",
+          "enum": ["device", "user"],
+          "default": "device",
+          "description": "type:'managedpref' — device scope (/Library/Managed Preferences/<domain>.plist) or user scope"
+        }
+      }
+    },
+    "CadenceEntry": {
+      "type": "object",
+      "required": ["id", "message", "attribute"],
+      "description": "One gated message in a cadence sequence. The sequence advances to the next entry when this entry's attribute is satisfied.",
+      "properties": {
+        "id": { "type": "string", "description": "Stable id — used for cadence:satisfy:<id> and SwiftUI identity" },
+        "message": { "type": "string", "description": "Claim shown while this entry is active" },
+        "attribute": { "$ref": "#/definitions/CadenceAttribute" },
+        "minDwell": { "type": "number", "description": "Minimum seconds to show even if already satisfied (anti-flash)" },
+        "timeout": { "type": "number", "description": "Force-advance after N seconds if the attribute is never satisfied" },
+        "sfSymbol": { "type": "string", "description": "Per-entry SF Symbol (overrides the step hero while active)" },
+        "imagePath": { "type": "string", "description": "Per-entry image path (overrides sfSymbol)" },
+        "iconColor": { "type": "string", "description": "Hex colour for the SF Symbol" }
+      }
+    },
+    "ManagedValueRef": {
+      "type": "object",
+      "required": ["domain", "key"],
+      "description": "Reference to a value in a managed preference by its own domain + key. Reads /Library/Managed Preferences/<domain>.plist (works with any MDM). Lets brand colour and claims come from DIFFERENT tenant profiles.",
+      "properties": {
+        "domain": { "type": "string", "description": "Managed-preference domain, e.g. 'nl.root3.support'" },
+        "key": { "type": "string", "description": "Key within that domain (light value for colours)" },
+        "darkKey": { "type": "string", "description": "Optional dark-mode variant key (colours only)" }
+      }
+    },
     "AppConfigSource": {
       "type": "object",
       "description": "MDM AppConfig source for dynamic branding overrides. Maps MDM managed preference keys to existing InspectConfig branding fields.",
@@ -1483,30 +1537,6 @@
         }
       }
     },
-    "FeatureItem": {
-      "type": "object",
-      "required": [
-        "name"
-      ],
-      "description": "A feature row in feature-table (legacy format)",
-      "properties": {
-        "description": {
-          "type": "string"
-        },
-        "enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Whether feature is enabled"
-        },
-        "icon": {
-          "type": "string",
-          "description": "SF Symbol or icon path"
-        },
-        "name": {
-          "type": "string"
-        }
-      }
-    },
     "FeatureTableColumn": {
       "type": "object",
       "required": [
@@ -1766,13 +1796,6 @@
           "default": "Expected",
           "description": "Label for expected column"
         },
-        "features": {
-          "type": "array",
-          "description": "Features for feature-table type (legacy)",
-          "items": {
-            "$ref": "#/definitions/FeatureItem"
-          }
-        },
         "helpText": {
           "type": "string",
           "description": "Help text displayed in info popover"
@@ -1856,11 +1879,6 @@
           "type": "number",
           "default": 0,
           "description": "Minimum value for slider"
-        },
-        "multiline": {
-          "type": "boolean",
-          "default": false,
-          "description": "Enable multiline input for textfield"
         },
         "numbered": {
           "type": "boolean",
@@ -2348,6 +2366,21 @@
               "$ref": "#/definitions/StepBase"
             },
             {
+              "$ref": "#/definitions/StepType_Extra"
+            }
+          ],
+          "properties": {
+            "stepType": {
+              "const": "cadence"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StepBase"
+            },
+            {
               "$ref": "#/definitions/StepType_Processing"
             },
             {
@@ -2805,7 +2838,7 @@
         },
         "subtitle": {
           "type": "string",
-          "description": "Subtitle text (used in preset6 checklist)"
+          "description": "Per-item description text shown under the item name (issue #663). Rendered inline in presets 1, 3 and 5; under the step heading in preset 6; in preset 2 it appears via the hover/click info popover on the card's 'i' badge."
         },
         "successMessage": {
           "type": "string",
@@ -2932,6 +2965,27 @@
         "key": {
           "type": "string",
           "description": "Original plist key"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["healthy", "warning", "failure"],
+          "description": "Visual severity level shown in the bento detail sheet. When omitted, severity is derived from the check result (passing → healthy, failing → failure). Use 'warning' to mark a failing check as advisory rather than blocking. Config-only — not read from the plist."
+        },
+        "explanation": {
+          "type": "string",
+          "description": "User-facing explanation of why this check matters. Markdown is supported. Always rendered in the detail sheet when set. A matching key in the compliance plist (sibling to the value) overrides this default."
+        },
+        "remediation": {
+          "type": "string",
+          "description": "User-facing remediation steps. Markdown is supported. Rendered in the detail sheet only when severity is not 'healthy'. A matching key in the compliance plist overrides this default."
+        },
+        "actionButtonText": {
+          "type": "string",
+          "description": "Label for the optional remediation action button (e.g. 'Open Software Update'). Rendered only when severity is not 'healthy' and actionURL is set. A matching key in the compliance plist overrides this default."
+        },
+        "actionURL": {
+          "type": "string",
+          "description": "URL the action button opens via NSWorkspace (e.g. 'x-apple.systempreferences:com.apple.Software-Update-Settings.extension'). A matching key in the compliance plist overrides this default."
         }
       }
     },
@@ -3782,6 +3836,35 @@
           "type": "string",
           "description": "Back button text (default: 'Back')"
         },
+        "cadence": {
+          "type": "array",
+          "description": "Gated message sequence (DEPNotify POLICY_ARRAY replacement). Advances per-entry as each monitored attribute is satisfied. Augments a step's rotating side message.",
+          "items": { "$ref": "#/definitions/CadenceEntry" }
+        },
+        "cadenceStyle": {
+          "type": "string",
+          "enum": ["line", "carousel"],
+          "default": "line",
+          "description": "'line' (single rotating icon) | 'carousel' (horizontal icon-card row, DEPNotify-style)"
+        },
+        "cadenceInterval": {
+          "type": "number",
+          "default": 1.0,
+          "description": "Native poll interval in seconds"
+        },
+        "cadenceMinDwell": {
+          "type": "number",
+          "default": 0.6,
+          "description": "Default minimum seconds each cadence entry shows even when already satisfied (per-entry minDwell overrides)"
+        },
+        "cadenceRef": {
+          "$ref": "#/definitions/ManagedValueRef",
+          "description": "Read the cadence claims array (CadenceEntry dicts) from a managed preference instead of inline 'cadence'"
+        },
+        "brandColorRef": {
+          "$ref": "#/definitions/ManagedValueRef",
+          "description": "Read the cadence brand/tint colour (light + optional dark) from a managed preference"
+        },
         "completionMode": {
           "type": "string",
           "enum": [
@@ -3952,9 +4035,11 @@
             "carousel",
             "showcase",
             "bento",
-            "media"
+            "media",
+            "cadence",
+            "brandPicker"
           ],
-          "description": "Step type (default: 'intro'). 'portal' = embedded webview, 'assistant' = Apple Setup Assistant style, 'guide' = monitored step, 'deployment'/'carousel'/'showcase'/'bento'/'media' = specialized layouts"
+          "description": "Step type (default: 'intro'). 'portal' = embedded webview, 'assistant' = Apple Setup Assistant style, 'guide' = monitored step, 'cadence' = gated message sequence (line or carousel), 'deployment'/'carousel'/'showcase'/'bento'/'media' = specialized layouts"
         },
         "subtitle": {
           "type": "string",
@@ -4080,7 +4165,7 @@
         },
         "progressFormat": {
           "type": "string",
-          "description": "Progress text template: '{completed} of {total} completed'"
+          "description": "Progress text template. Tokens (any style works): {completed}/{total}, $completed/$total, or %completed%/%total%. e.g. '{completed} of {total} steps completed'"
         }
       }
     },
@@ -4507,7 +4592,7 @@
         "progressFormat": {
           "type": "string",
           "default": "{completed} of {total} completed",
-          "description": "Progress bar text format"
+          "description": "Progress bar text format. Tokens (any style works): {completed}/{total}, $completed/$total, or %completed%/%total%"
         },
         "sectionHeaderCompleted": {
           "type": "string",
