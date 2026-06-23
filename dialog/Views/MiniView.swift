@@ -57,7 +57,7 @@ struct MiniView: View {
                         if observedData.appProperties.titleFontAlignment.lowercased() == "right" {
                             Spacer()
                         }
-                        InlineText(observedData.args.titleOption.value, parser: ColoredMarkdownParser())
+                        StructuredText(observedData.args.titleOption.value, parser: ColoredMarkdownParser())
                         //Text(observedData.args.titleOption.value)
                             .font(.system(size: 18, weight: .semibold))
                             .border(observedData.appProperties.debugBorderColour, width: 2)
