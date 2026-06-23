@@ -172,10 +172,15 @@ struct PresetCommonViews {
         let completed = state.completedItems.count
         let total = state.items.count
 
-        if let template = state.config?.uiLabels?.progressFormat {
-            return template
-                .replacingOccurrences(of: "{completed}", with: "\(completed)")
-                .replacingOccurrences(of: "{total}", with: "\(total)")
+        if var text = state.config?.uiLabels?.progressFormat {
+            // Forgiving tokens: {completed}/{total}, $completed/$total, %completed%/%total%.
+            for token in ["{completed}", "$completed", "%completed%"] {
+                text = text.replacingOccurrences(of: token, with: "\(completed)")
+            }
+            for token in ["{total}", "$total", "%total%"] {
+                text = text.replacingOccurrences(of: token, with: "\(total)")
+            }
+            return text
         }
 
         return "\(completed) of \(total) completed"
@@ -995,18 +1000,28 @@ struct ItemInfoButton: View {
     let item: InspectConfig.ItemConfig
     let action: () -> Void
     let size: CGFloat
+    let tint: Color
 
-    init(item: InspectConfig.ItemConfig, action: @escaping () -> Void, size: CGFloat = 16) {
+    init(item: InspectConfig.ItemConfig, action: @escaping () -> Void, size: CGFloat = 18, tint: Color = .accentColor) {
         self.item = item
         self.action = action
         self.size = size
+        self.tint = tint
     }
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: "info.circle")
-                .font(.system(size: size))
-                .foregroundStyle(.secondary)
+            // Brand-tinted circle with a white glyph — shared badge used across
+            // presets for visual consistency with Preset 2's info affordance.
+            ZStack {
+                Circle()
+                    .fill(tint)
+                    .shadow(color: .black.opacity(0.18), radius: 1, y: 0.5)
+                Image(systemName: "info")
+                    .font(.system(size: size * 0.45, weight: .semibold))
+                    .foregroundStyle(.white)
+            }
+            .frame(width: size, height: size)
         }
         .buttonStyle(.plain)
         .help("More info about \(item.displayName)")
@@ -1129,6 +1144,22 @@ func resolveReadinessFilePath(config: InspectConfig?, triggerFilePath: String) -
     config?.readinessFile ?? "\(triggerFilePath).ready"
 }
 
+/// Resolve the directory where Dialog publishes per-PID session discovery JSON,
+/// or nil when publishing is disabled (empty value or "none").
+func resolvePublishedSessionsDir() -> String? {
+    let raw = appArguments.publishedSessionsDir.value.trimmingCharacters(in: .whitespaces)
+    guard !raw.isEmpty, raw.lowercased() != "none" else { return nil }
+    return (raw as NSString).expandingTildeInPath
+}
+
+/// Resolve the absolute path to this process's published session file (<dir>/<pid>.json),
+/// or nil when publishing is disabled.
+func resolvePublishedSessionPath() -> String? {
+    guard let dir = resolvePublishedSessionsDir() else { return nil }
+    let pid = ProcessInfo.processInfo.processIdentifier
+    return (dir as NSString).appendingPathComponent("\(pid).json")
+}
+
 /// Write a readiness signal JSON file so external launchers can detect Dialog is ready.
 /// Call after monitoring/command file setup is complete.
 func writeReadinessFile(config: InspectConfig?, triggerFilePath: String,
@@ -1150,13 +1181,30 @@ func writeReadinessFile(config: InspectConfig?, triggerFilePath: String,
         print("[SWIFTDIALOG] readiness_file: \(path)")
         writeLog("IPC: Readiness file written to \(path)", logLevel: .info)
 
+        // Mirror an ENRICHED record to <dir>/<pid>.json so external tools can
+        // discover AND drive an active Dialog by directory listing (IPC contract Gap 1).
+        if let publishedPath = resolvePublishedSessionPath() {
+            var published = json   // pid, triggerFile, timestamp, ackChannel, preset?, itemCount?, items?
+            published["readinessFile"] = path
+            if let resultFile = config?.resultFile { published["resultFile"] = resultFile }
+            if let eventFile = config?.eventFile { published["eventFile"] = eventFile }
+            published["schemaVersion"] = 2
+            let dir = (publishedPath as NSString).deletingLastPathComponent
+            try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+            if let pubData = try? JSONSerialization.data(withJSONObject: published, options: .prettyPrinted) {
+                FileManager.default.createFile(atPath: publishedPath, contents: pubData)
+                print("[SWIFTDIALOG] published_session: \(publishedPath)")
+                writeLog("IPC: Published session file at \(publishedPath)", logLevel: .info)
+            }
+        }
+
         // Post DistributedNotification so ignitecli wait-ready returns instantly
         var eventInfo: [String: String] = ["triggerFile": triggerFilePath]
         if let preset { eventInfo["preset"] = preset }
         if let itemCount { eventInfo["itemCount"] = String(itemCount) }
         if let itemIDs { eventInfo["items"] = itemIDs.prefix(50).joined(separator: ",") }
         eventInfo["ackChannel"] = "com.swiftdialog.ack"
-        DialogNotifications.postEvent("ready", userInfo: eventInfo)
+        DialogNotifications.postEvent(.ready, userInfo: eventInfo)
     }
 }
 
@@ -1173,10 +1221,15 @@ func cleanupReadinessFile(config: InspectConfig?, triggerFilePath: String,
     if let failedCount { eventInfo["failedCount"] = String(failedCount) }
     if let totalSteps { eventInfo["totalSteps"] = String(totalSteps) }
     if let resultFile = config?.resultFile { eventInfo["resultFile"] = resultFile }
-    DialogNotifications.postEvent("exit", userInfo: eventInfo)
+    DialogNotifications.postEvent(.exit, userInfo: eventInfo)
 
     try? FileManager.default.removeItem(atPath: (path as NSString).expandingTildeInPath)
     writeLog("IPC: Readiness file cleaned up at \(path)", logLevel: .debug)
+
+    if let publishedPath = resolvePublishedSessionPath() {
+        try? FileManager.default.removeItem(atPath: publishedPath)
+        writeLog("IPC: Published session file cleaned up at \(publishedPath)", logLevel: .debug)
+    }
 }
 
 /// Lightweight step identity for result file output (avoids coupling to full IntroStep/ItemConfig)
@@ -1368,7 +1421,7 @@ func performDeferral(duration: String, config: InspectConfig?) {
     print("defer:\(seconds)")
 
     // Post DistributedNotification so ignitecli gets instant deferral feedback
-    DialogNotifications.postEvent("defer", userInfo: [
+    DialogNotifications.postEvent(.deferred, userInfo: [
         "duration": duration,
         "seconds": String(seconds),
         "exitCode": String(exitCode),

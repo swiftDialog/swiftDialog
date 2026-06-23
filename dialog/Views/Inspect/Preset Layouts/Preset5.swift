@@ -50,6 +50,7 @@ struct Preset5View: View {
     // MARK: - Module Services (Modular Architecture)
     @StateObject private var monitoringService = UnifiedMonitoringService()
     @StateObject private var introStepMonitor = IntroStepMonitorService()
+    @StateObject private var cadenceMonitor = CadenceMonitorService()
     @StateObject private var complianceService = ComplianceAggregatorService()
     @State private var dynamicState = InspectDynamicState()
     @State private var preferencesService: PreferencesService?
@@ -226,6 +227,20 @@ struct Preset5View: View {
     private var currentStep: InspectConfig.IntroStep? {
         guard currentStepIndex >= 0 && currentStepIndex < allSteps.count else { return nil }
         return allSteps[currentStepIndex]
+    }
+
+    /// True when logoConfig requests a bottom position. Bottom logos render in the footer
+    /// row (so they align with the footer button across intro/outro/cadence screens); top
+    /// positions keep the persistent corner overlay.
+    private var logoIsBottomPositioned: Bool {
+        (config?.logoConfig?.position ?? "").lowercased().contains("bottom")
+    }
+
+    /// Persistent footer logo path (dark-aware) for bottom-positioned logoConfig.
+    private var persistentFooterLogoPath: String? {
+        guard let lc = config?.logoConfig, logoIsBottomPositioned else { return nil }
+        if colorScheme == .dark, let dark = lc.imagePathDark { return dark }
+        return lc.imagePath
     }
 
     /// Whether the current step is a portal step
@@ -493,11 +508,32 @@ struct Preset5View: View {
             }
 
             // Persistent branded logo — renders once, stays across step transitions
-            if let logoConfig = config?.logoConfig {
+            if let logoConfig = config?.logoConfig, !logoIsBottomPositioned {
                 BrandedLogoView(
                     logoConfig: logoConfig,
                     basePath: effectiveIconBasePath
                 )
+            }
+
+            // Persistent footer brand logo (bottom-positioned logoConfig). Rendered at the
+            // preset root so it stays fixed while step content transitions, and sits on the
+            // footer baseline — bottom-leading, aligned with the action buttons. Dark-aware.
+            if logoIsBottomPositioned,
+               let logoPath = persistentFooterLogoPath,
+               let nsLogo = NSImage(contentsOfFile: (logoPath as NSString).expandingTildeInPath) {
+                VStack {
+                    Spacer()
+                    HStack {
+                        Image(nsImage: nsLogo)
+                            .resizable().scaledToFit()
+                            .frame(maxHeight: min(CGFloat(config?.logoConfig?.maxHeight ?? 28), 48))
+                            .opacity(config?.logoConfig?.opacity ?? 0.95)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, setupFooterPadding + 4)
+                }
+                .allowsHitTesting(false)
             }
 
             // Instruction banner overlay (top of window)
@@ -944,6 +980,9 @@ struct Preset5View: View {
             } else {
                 standardIntroStepView(step: step, stepIndex: currentStepIndex)
             }
+        case "cadence":
+            // Cadence step - DEPNotify-style gated rotating message (attribute-driven sequencing)
+            cadenceStepView(step: step, stepIndex: currentStepIndex)
         case "showcase":
             // Showcase step - immersive full-bleed image layout (showcase-style)
             showcaseStepView(step: step, stepIndex: currentStepIndex)
@@ -1121,6 +1160,22 @@ struct Preset5View: View {
             // Reset state persistence
             resetState()
             writeLog("Preset5: Full reset — all progress and overrides cleared", logLevel: .info)
+        }
+
+        // Cadence — drive the gated message sequence via `cadence:` IPC commands
+        // (cadence:satisfy:<id> | cadence:advance | cadence:goto:<index>).
+        commandRouter.onCadence = { [self] remainder in
+            let parts = remainder.split(separator: ":", maxSplits: 1).map(String.init)
+            switch parts.first {
+            case "satisfy":
+                if parts.count > 1 { cadenceMonitor.satisfyExternally(id: parts[1]) }
+            case "advance":
+                cadenceMonitor.advance()
+            case "goto":
+                if parts.count > 1, let index = Int(parts[1]) { cadenceMonitor.goto(index: index) }
+            default:
+                writeLog("Preset5: unknown cadence subcommand '\(remainder)'", logLevel: .info)
+            }
         }
 
         // Completion
@@ -2332,6 +2387,281 @@ struct Preset5View: View {
     }
 
     // MARK: - Processing Step View (Countdown Timer)
+
+    /// Cadence step — a DEPNotify-style screen showing a single rotating message that the
+    /// `CadenceMonitorService` advances as each entry's real monitored attribute is satisfied.
+    /// The rotating message is sourced from the monitor (the "sequence the message" logic);
+    /// completion routes through the shared `handleCompletionTrigger`.
+    private func cadenceStepView(step: InspectConfig.IntroStep, stepIndex: Int) -> some View {
+        let canGoBackFromStep = canGoBack(fromStepIndex: stepIndex)
+        let continueText = localized("continueButtonText", forStep: step, fallback: nil) ?? step.continueButtonText ?? "Continue"
+        let backText = branding.button2Text ?? localized("backButtonText", forStep: step, fallback: nil) ?? step.backButtonText ?? "Back"
+        // Brand colour read from a managed preference (per-tenant profile, e.g. nl.root3.support
+        // CustomColor / CustomColorDarkMode). Tints the cadence icons + accent when present.
+        let brandColor: Color? = step.brandColorRef.flatMap {
+            CadenceMonitorService.resolveColor(from: $0, dark: colorScheme == .dark)
+        }.map { Color(hex: $0) }
+
+        return IntroStepContainer(
+            accentColor: brandColor ?? branding.primaryColor,
+            accentBorderHeight: 0,
+            showProgressDots: step.showProgressDots ?? false,
+            currentStep: stepIndex,
+            totalSteps: totalSteps,
+            footerConfig: IntroStepContainer.IntroFooterConfig(
+                footerText: branding.footerText,
+                backButtonText: backText,
+                continueButtonText: continueText,
+                showBackButton: (step.showBackButton ?? true) && canGoBackFromStep,
+                onBack: canGoBackFromStep ? { goToPreviousStep() } : nil,
+                onContinue: { goToNextStep() },
+                continueDisabled: !cadenceMonitor.isComplete,   // Continue only once the cadence finishes
+                inspectConfig: config,
+                buttonControlSize: setupButtonControlSize,
+                footerVerticalPadding: setupFooterPadding
+            )
+        ) {
+        VStack(spacing: 24) {
+            Spacer()
+            if (step.cadenceStyle ?? "line").lowercased() == "carousel" {
+                // DEPNotify-style: a static top hero icon, then title/subtitle, then a
+                // horizontal icon-card carousel (done → ✓, active → enlarged + spinner,
+                // pending → dimmed/dots), a slim progress line, and the step message.
+                // Fall back to the config brand colour (highlightColor) when no
+                // brandColorRef managed-pref is set — so the progress bar / cards / spinner
+                // use the brand colour rather than the system accent.
+                let effectiveBrand: Color? = brandColor ?? branding.primaryColor
+                cadenceHero(step: step, brandColor: effectiveBrand)
+                if let title = step.title {
+                    Text(title)
+                        .font(.system(size: 28, weight: .bold))
+                        .multilineTextAlignment(.center)
+                }
+                if let subtitle = step.subtitle {
+                    Text(subtitle)
+                        .font(.system(size: 15))
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                cadenceCarousel(brandColor: effectiveBrand)
+                cadenceProgressLine(brandColor: effectiveBrand)
+            } else {
+                // Per-entry visual: imagePath → sfSymbol → step hero fallback. Changes as the cadence advances.
+                Group {
+                    if let imagePath = cadenceMonitor.currentEntry?.imagePath,
+                       let nsImage = NSImage(contentsOfFile: (imagePath as NSString).expandingTildeInPath) {
+                        Image(nsImage: nsImage)
+                            .resizable().scaledToFit()
+                            .frame(width: 84, height: 84)
+                    } else if let sf = cadenceMonitor.currentEntry?.sfSymbol {
+                        Image(systemName: sf)
+                            .font(.system(size: 56, weight: .semibold))
+                            .foregroundStyle(cadenceMonitor.currentEntry?.iconColor.map { Color(hex: $0) } ?? brandColor ?? Color.accentColor)
+                    } else if let hero = step.heroImage, hero.hasPrefix("SF=") {
+                        Image(systemName: String(hero.dropFirst(3)))
+                            .font(.system(size: 56, weight: .semibold))
+                            .foregroundStyle(brandColor ?? Color.accentColor)
+                    }
+                }
+                // Fixed-size container so the message below doesn't jump as icons of different
+                // intrinsic heights swap in per phase. SF symbols are scaled to fit this box.
+                .frame(width: 96, height: 96)
+                .id("cadence-icon-\(cadenceMonitor.currentIndex)")
+                .transition(.opacity)
+                .animation(.easeInOut(duration: 0.35), value: cadenceMonitor.currentIndex)
+                if let title = step.title {
+                    Text(title)
+                        .font(.system(size: 28, weight: .bold))
+                        .multilineTextAlignment(.center)
+                }
+                if let subtitle = step.subtitle {
+                    Text(subtitle)
+                        .font(.system(size: 15))
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                HStack(spacing: 12) {
+                    ProgressView().controlSize(.small)
+                    Text(cadenceMonitor.currentMessage ?? "")
+                        .font(.system(size: 16))
+                        .foregroundStyle(.secondary)
+                        .id(cadenceMonitor.currentIndex)   // key on index, not message (duplicate messages allowed)
+                        .transition(.opacity)
+                        .animation(.easeInOut(duration: 0.35), value: cadenceMonitor.currentIndex)
+                }
+                .padding(.top, 8)
+            }
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(40)
+        .onAppear {
+            // If we're returning to an already-completed cadence (e.g. via Back), fast-replay it
+            // (all conditions known-met) and STOP here — do not auto-advance forward again.
+            // The monitor is a @StateObject that persists across navigation. If it already
+            // completed this cadence on a prior appearance (e.g. before going forward), this
+            // is a Back/replay → fast-replay and stop. Read isComplete BEFORE start() resets it.
+            let isReplay = cadenceMonitor.isComplete
+            cadenceMonitor.start(step: step, replay: isReplay) { [self] triggerStepId, triggerResult in
+                // Convert CompletionTriggerResult → CompletionResult (parity with introStepMonitor).
+                let completionResult: CompletionResult
+                switch triggerResult {
+                case .success(let message):
+                    completionResult = .success(message: message)
+                case .failure(let message):
+                    completionResult = .failure(message: message)
+                }
+                handleCompletionTrigger(stepId: triggerStepId, result: completionResult)
+                // First forward completion auto-advances (hands-off); a replay stops on this screen.
+                if !isReplay && step.autoAdvance != false && step.requireManualConfirm != true {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                        goToNextStep()
+                    }
+                }
+            }
+        }
+        .onDisappear {
+            cadenceMonitor.stop()
+        }
+        }   // IntroStepContainer content
+    }
+
+    // MARK: - Cadence carousel (DEPNotify-style horizontal icon cards)
+
+    private enum CadenceCardState { case done, active, pending }
+
+    /// Static top hero icon for the carousel style — image path or SF symbol from the step's heroImage.
+    @ViewBuilder
+    private func cadenceHero(step: InspectConfig.IntroStep, brandColor: Color?) -> some View {
+        if let hero = step.heroImage {
+            if hero.lowercased().hasPrefix("sf=") {
+                Image(systemName: String(hero.dropFirst(3)))
+                    .font(.system(size: 60, weight: .semibold))
+                    .foregroundStyle(brandColor ?? Color.accentColor)
+                    .frame(height: 88)
+            } else if let nsImage = NSImage(contentsOfFile: (hero as NSString).expandingTildeInPath) {
+                Image(nsImage: nsImage)
+                    .resizable().scaledToFit()
+                    .frame(maxHeight: 100)
+            }
+        }
+    }
+
+    /// Horizontal row of icon cards. The active card is enlarged and auto-centred;
+    /// completed cards show a green check, pending cards dim with a dots badge.
+    @ViewBuilder
+    private func cadenceCarousel(brandColor: Color?) -> some View {
+        let entries = cadenceMonitor.entries
+        let current = cadenceMonitor.currentIndex
+        let complete = cadenceMonitor.isComplete
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 16) {
+                    ForEach(Array(entries.enumerated()), id: \.element.id) { idx, entry in
+                        let state: CadenceCardState = (complete || idx < current) ? .done
+                            : (idx == current ? .active : .pending)
+                        cadenceCard(entry: entry, state: state, brandColor: brandColor)
+                            .id(idx)
+                    }
+                }
+                .padding(.horizontal, 80)   // headroom so the active card can centre
+                .padding(.vertical, 10)
+            }
+            .frame(height: 148)
+            .onChange(of: cadenceMonitor.currentIndex) { _, idx in
+                withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(idx, anchor: .center) }
+            }
+            .onAppear { proxy.scrollTo(cadenceMonitor.currentIndex, anchor: .center) }
+        }
+    }
+
+    @ViewBuilder
+    private func cadenceCard(entry: InspectConfig.CadenceEntry, state: CadenceCardState, brandColor: Color?) -> some View {
+        let size: CGFloat = state == .active ? 112 : 92
+        RoundedRectangle(cornerRadius: 18, style: .continuous)
+            .fill(Color(NSColor.controlBackgroundColor))
+            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(.primary.opacity(0.06), lineWidth: 1))
+            .frame(width: size, height: size)
+            .overlay { cadenceEntryIcon(entry: entry, brandColor: brandColor, active: state == .active) }
+            .overlay(alignment: .bottomTrailing) { cadenceCardBadge(state: state).padding(7) }
+            .opacity(state == .pending ? 0.45 : 1)
+            .shadow(color: .black.opacity(state == .active ? 0.14 : 0.05),
+                    radius: state == .active ? 10 : 3, y: 2)
+            .animation(.easeInOut(duration: 0.35), value: state)
+    }
+
+    @ViewBuilder
+    private func cadenceCardBadge(state: CadenceCardState) -> some View {
+        ZStack {
+            Circle().fill(Color(NSColor.windowBackgroundColor)).frame(width: 22, height: 22)
+            switch state {
+            case .done:
+                Image(systemName: "checkmark.circle.fill").font(.system(size: 18)).foregroundStyle(.green)
+            case .active:
+                ProgressView().controlSize(.small)
+            case .pending:
+                Image(systemName: "ellipsis").font(.system(size: 12, weight: .bold)).foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func cadenceEntryIcon(entry: InspectConfig.CadenceEntry, brandColor: Color?, active: Bool) -> some View {
+        let dim: CGFloat = active ? 52 : 42
+        if let imagePath = entry.imagePath,
+           let nsImage = NSImage(contentsOfFile: (imagePath as NSString).expandingTildeInPath) {
+            Image(nsImage: nsImage).resizable().scaledToFit().frame(width: dim, height: dim)
+        } else if let sf = entry.sfSymbol {
+            Image(systemName: sf)
+                .font(.system(size: dim * 0.62, weight: .semibold))
+                .foregroundStyle(entry.iconColor.map { Color(hex: $0) } ?? brandColor ?? Color.accentColor)
+        } else {
+            Image(systemName: "shippingbox.fill")
+                .font(.system(size: dim * 0.62, weight: .semibold))
+                .foregroundStyle(brandColor ?? Color.accentColor)
+        }
+    }
+
+    /// Slim brand progress line + "Step N of M" / completion message for the carousel style.
+    @ViewBuilder
+    private func cadenceProgressLine(brandColor: Color?) -> some View {
+        let total = cadenceMonitor.entries.count
+        let progress = total > 0
+            ? (cadenceMonitor.isComplete ? 1.0 : Double(cadenceMonitor.currentIndex) / Double(total))
+            : 0
+        let stepNum = cadenceMonitor.isComplete ? total : min(cadenceMonitor.currentIndex + 1, total)
+        VStack(spacing: 8) {
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.primary.opacity(0.08))
+                    Capsule().fill(cadenceMonitor.isComplete ? Color.green : (brandColor ?? Color.accentColor))
+                        .frame(width: max(0, geo.size.width * progress))
+                        .animation(.easeInOut(duration: 0.35), value: progress)
+                }
+            }
+            .frame(height: 5)
+            .frame(maxWidth: 440)
+            HStack(spacing: 8) {
+                if cadenceMonitor.isComplete {
+                    Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+                } else {
+                    ProgressView().controlSize(.small)
+                }
+                Text(cadenceMonitor.currentMessage ?? (cadenceMonitor.isComplete ? "Finished" : ""))
+                    .font(.system(size: 15))
+                    .foregroundStyle(.secondary)
+                Text("·  \(stepNum) of \(total)")
+                    .font(.system(size: 13))
+                    .monospacedDigit()
+                    .foregroundStyle(.tertiary)
+            }
+            .id(cadenceMonitor.currentIndex)
+            .transition(.opacity)
+            .animation(.easeInOut(duration: 0.35), value: cadenceMonitor.currentIndex)
+        }
+        .padding(.horizontal, 40)
+        .padding(.top, 4)
+    }
 
     /// Processing step with countdown timer and visual feedback
     /// Shows countdown during processing, then result banner with continue button after completion

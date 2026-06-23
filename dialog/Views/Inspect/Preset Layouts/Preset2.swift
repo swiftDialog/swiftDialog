@@ -14,6 +14,7 @@ struct Preset2View: View, InspectLayoutProtocol {
     @State private var showingAboutPopover = false
     @State private var showDetailOverlay = false
     @State private var showItemDetailOverlay = false
+    @Environment(\.colorScheme) private var colorScheme
     @State private var selectedItemForDetail: InspectConfig.ItemConfig?
     @StateObject private var iconCache = PresetIconCache()
     @State private var localizationService = LocalizationService()
@@ -72,7 +73,7 @@ struct Preset2View: View, InspectLayoutProtocol {
                 let showForPhase = logoOpacityForPhase(logoConfig) > 0
                 if showForPhase {
                     AsyncImageView(
-                        iconPath: logoConfig.imagePath,
+                        iconPath: (colorScheme == .dark ? (logoConfig.imagePathDark ?? logoConfig.imagePath) : logoConfig.imagePath),
                         basePath: inspectState.uiConfiguration.iconBasePath,
                         maxWidth: CGFloat(logoConfig.maxWidth ?? 120) * CGFloat(logoConfig.scale ?? 1.0),
                         maxHeight: CGFloat(logoConfig.maxHeight ?? 40) * CGFloat(logoConfig.scale ?? 1.0),
@@ -255,6 +256,19 @@ struct Preset2View: View, InspectLayoutProtocol {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.top, 24 * scaleFactor)
+            }
+
+            // Fixed header subtitle from the top-level `message` field (issue #670) —
+            // distinct from the rotating sideMessages below (config.message → subtitleMessage).
+            if let subtitle = localized("subtitle", fallback: inspectState.uiConfiguration.subtitleMessage),
+               !subtitle.isEmpty {
+                Text(subtitle)
+                    .font(.system(size: 14))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 40 * scaleFactor)
+                    .padding(.top, 2)
             }
 
             // Rotating side messages - fixed height to prevent layout shifts
@@ -612,51 +626,56 @@ struct Preset2View: View, InspectLayoutProtocol {
     // MARK: - Auto-centering for downloading items
 
     private func updateScrollForProgress() {
-        // Switch here to find the currently downloading item
-        guard let downloadingItem = inspectState.downloadingItems.first,
-              let downloadingIndex = inspectState.items.firstIndex(where: { $0.id == downloadingItem }) else {
-            return
+        // Auto-follow installation progress (issue #565). Anchor the visible window on the
+        // currently-downloading item if there is one; otherwise on the "frontier" — the first
+        // item not yet completed — so the cards keep advancing even when items go straight to
+        // 'completed' with no download phase (the case where the dialog looked "frozen").
+        let visibleCount = 4
+        guard inspectState.items.count > visibleCount else { return }
+
+        let anchorIndex: Int
+        if let downloadingItem = inspectState.downloadingItems.first,
+           let idx = inspectState.items.firstIndex(where: { $0.id == downloadingItem }) {
+            anchorIndex = idx
+            lastDownloadingItem = downloadingItem
+        } else if inspectState.completedItems.count < inspectState.items.count {
+            // Frontier = first not-yet-completed item → shows latest completed + what's next.
+            anchorIndex = inspectState.items.firstIndex(where: { !inspectState.completedItems.contains($0.id) }) ?? 0
+        } else {
+            // All complete → rest on the final window.
+            anchorIndex = inspectState.items.count - 1
         }
 
-        let visibleCount = 4
-
-        // Optimized try to keep downloading item in view position (index 1) when possible
-        // Ther ordewr should be: [1 completed] [downloading] [penidng] [pending]...
+        // Keep the anchor at position 1: [completed] [anchor] [pending] [pending].
         let preferredPositionFromLeft = 1
+        var targetOffset = anchorIndex - preferredPositionFromLeft
+        targetOffset = max(0, targetOffset)
+        targetOffset = min(targetOffset, max(0, inspectState.items.count - visibleCount))
 
-        // Calc offset to place downloading item at preferred position
-        var targetOffset = downloadingIndex - preferredPositionFromLeft
-
-        // Set up valid range
-        targetOffset = max(0, targetOffset)  // We try to don't scroll before start
-        targetOffset = min(targetOffset, max(0, inspectState.items.count - visibleCount))  // Don't scroll past end - needs observation if this works better
-
-        // Scroll to target position if different
         if targetOffset != scrollOffset {
             withAnimation(.easeInOut(duration: 0.6)) {
                 scrollOffset = targetOffset
             }
-
-            // Update here for next change
-            lastDownloadingItem = downloadingItem
         }
     }
 
-    /// Get progress bar text with template support
+    /// Get progress bar text with template support. Forgiving token syntax — accepts
+    /// {completed}/{total}, $completed/$total, and %completed%/%total% interchangeably.
     private func getProgressText() -> String {
         let completed = inspectState.completedItems.count
         let total = inspectState.items.count
 
         // Try localized progress format first, then config, then default
-        let template = localized("progressFormat", fallback: inspectState.config?.uiLabels?.progressFormat)
-
-        if let template {
-            return template
-                .replacingOccurrences(of: "{completed}", with: "\(completed)")
-                .replacingOccurrences(of: "{total}", with: "\(total)")
+        guard var text = localized("progressFormat", fallback: inspectState.config?.uiLabels?.progressFormat) else {
+            return "\(completed) of \(total) completed"
         }
-
-        return "\(completed) of \(total) completed"
+        for token in ["{completed}", "$completed", "%completed%"] {
+            text = text.replacingOccurrences(of: token, with: "\(completed)")
+        }
+        for token in ["{total}", "$total", "%total%"] {
+            text = text.replacingOccurrences(of: token, with: "\(total)")
+        }
+        return text
     }
 }
 
@@ -674,6 +693,15 @@ private struct Preset2ItemCardView: View {
     let localizedDisplayName: String
     let localizedStatusOverride: String?
     let onInfoTapped: (() -> Void)?
+    @State private var isHoveringInfo = false
+
+    /// Show the "i" affordance when there's anything to reveal — a per-item description
+    /// (issue #663) or a configured detail overlay.
+    private var showInfoButton: Bool {
+        (item.subtitle?.isEmpty == false)
+            || inspectState.config?.detailOverlay != nil
+            || item.itemOverlay != nil
+    }
 
     init(item: InspectConfig.ItemConfig, isCompleted: Bool, isDownloading: Bool, isFailed: Bool = false, highlightColor: String, scale: CGFloat, resolvedIconPath: String, inspectState: InspectState, localizedDisplayName: String? = nil, localizedStatusOverride: String? = nil, onInfoTapped: (() -> Void)? = nil) {
         self.item = item
@@ -778,23 +806,33 @@ private struct Preset2ItemCardView: View {
                     .clipShape(.rect(cornerRadius: 22 * scale))
 
                 // Info button overlay (top-left) - only show if detailOverlay or itemOverlay is configured
-                if onInfoTapped != nil && (inspectState.config?.detailOverlay != nil || item.itemOverlay != nil) {
+                if showInfoButton {
                     VStack {
                         HStack {
                             Button(action: {
                                 onInfoTapped?()
                             }) {
                                 ZStack {
+                                    // Whole-circle brand tint with a white glyph — matches the
+                                    // status badge style; falls back to system accent if unset.
                                     Circle()
-                                        .foregroundStyle(.white.opacity(0.8))
+                                        .fill(highlightColor.isEmpty ? Color.accentColor : Color(hex: highlightColor))
+                                        .shadow(color: .black.opacity(0.18), radius: 1, y: 0.5)
                                     Image(systemName: "info")
                                         .font(.system(size: 8 * scale, weight: .semibold))
-                                        .foregroundStyle(.blue)
+                                        .foregroundStyle(.white)
                                 }
                                 .frame(width: 18 * scale, height: 18 * scale)
                             }
                             .buttonStyle(PlainButtonStyle())
                             .help("Show item information")
+                            // Hover the "i" to reveal the description + paths (issue #663);
+                            // click still opens the full detail overlay when one is configured.
+                            .onHover { isHoveringInfo = $0 }
+                            .popover(isPresented: $isHoveringInfo, arrowEdge: .top) {
+                                ItemInfoPopoverView(item: item)
+                                    .frame(width: 300)
+                            }
 
                             Spacer()
                         }
