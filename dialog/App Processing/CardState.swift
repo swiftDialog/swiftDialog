@@ -227,8 +227,8 @@ class CardState: ObservableObject {
             let rawValue = input[fieldName]
 
             // Normalise the input to comparable forms.
-            var resolvedKey: String? = nil
-            var resolvedBool: Bool? = nil
+            var resolvedKey: String?
+            var resolvedBool: Bool?
             if let boolValue = rawValue as? Bool {
                 resolvedBool = boolValue
                 resolvedKey = boolValue ? "true" : "false"

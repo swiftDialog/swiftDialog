@@ -216,7 +216,7 @@ struct IntroProgressDots: View {
 /// Logo is rendered as a persistent overlay at Preset5 root level — not in the footer.
 struct IntroFooterView<PopoverContent: View>: View {
     let footerText: String?
-    var footerLogoPath: String? = nil   // optional brand logo, laid out in the footer row (aligns with buttons)
+    var footerLogoPath: String?   // optional brand logo, laid out in the footer row (aligns with buttons)
     let backButtonText: String
     let continueButtonText: String
     let accentColor: Color
@@ -575,7 +575,7 @@ struct IntroStepContainer<Content: View>: View {
 
     struct IntroFooterConfig {
         let footerText: String?
-        var footerLogoPath: String? = nil
+        var footerLogoPath: String?
         let backButtonText: String
         let continueButtonText: String
         let showBackButton: Bool

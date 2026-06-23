@@ -88,7 +88,7 @@ class dialogTests: XCTestCase {
     // MARK: - FR #667: Rich Remediation Content (KeyMapping + PlistAggregator)
 
     func testKeyMappingDecodesNewFields() throws {
-        let json = """
+        let json = Data("""
         {
           "key": "macos_version",
           "displayName": "macOS Version",
@@ -100,7 +100,7 @@ class dialogTests: XCTestCase {
           "actionButtonText": "Open Software Update",
           "actionURL": "x-apple.systempreferences:com.apple.Software-Update-Settings.extension"
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let mapping = try JSONDecoder().decode(InspectConfig.KeyMapping.self, from: json)
         XCTAssertEqual(mapping.key, "macos_version")
@@ -115,7 +115,7 @@ class dialogTests: XCTestCase {
     func testKeyMappingDecodesBackwardsCompat() throws {
         // A pre-FR-#667 config with only `key` must still decode and yield nil for
         // every new field.
-        let json = #"{ "key": "battery_health" }"#.data(using: .utf8)!
+        let json = Data(#"{ "key": "battery_health" }"#.utf8)
         let mapping = try JSONDecoder().decode(InspectConfig.KeyMapping.self, from: json)
         XCTAssertEqual(mapping.key, "battery_health")
         XCTAssertNil(mapping.severity)
@@ -148,7 +148,7 @@ class dialogTests: XCTestCase {
         )
         try plistData.write(to: URL(fileURLWithPath: plistPath))
 
-        let configJSON = """
+        let configJSON = Data("""
         {
           "path": "\(plistPath)",
           "type": "compliance",
@@ -174,7 +174,7 @@ class dialogTests: XCTestCase {
             }
           ]
         }
-        """.data(using: .utf8)!
+        """.utf8)
         let source = try JSONDecoder().decode(InspectConfig.PlistSourceConfig.self, from: configJSON)
 
         let result = PlistAggregator.loadPlistSource(source: source)
@@ -209,9 +209,9 @@ class dialogTests: XCTestCase {
             fromPropertyList: ["passing": true, "failing": false], format: .xml, options: 0
         ).write(to: URL(fileURLWithPath: plistPath))
 
-        let configJSON = """
+        let configJSON = Data("""
         { "path": "\(plistPath)", "type": "compliance", "displayName": "Test" }
-        """.data(using: .utf8)!
+        """.utf8)
         let source = try JSONDecoder().decode(InspectConfig.PlistSourceConfig.self, from: configJSON)
 
         let items = try XCTUnwrap(PlistAggregator.loadPlistSource(source: source)?.items)
@@ -253,7 +253,7 @@ class dialogTests: XCTestCase {
 
         // Append new content AFTER monitoring has started
         if let fileHandle = try? FileHandle(forWritingTo: URL(fileURLWithPath: tmpFile)) {
-            try? fileHandle.seekToEnd()
+            _ = try? fileHandle.seekToEnd()
             try? fileHandle.write(contentsOf: Data("success:appended\n".utf8))
             try? fileHandle.close()
         }
