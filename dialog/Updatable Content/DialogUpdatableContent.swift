@@ -719,6 +719,12 @@ final class DialogUpdatableContent: ObservableObject {
     /// Current card index for cards mode - used to force view recreation
     @Published var currentCardIndex: Int = 0
 
+    /// Forced window appearance published by inspect mode's loaded config (`appearance`
+    /// key, issue #669). Hoisted here so dialogApp's WindowGroup-level
+    /// `.preferredColorScheme(...)` can honour it; an InspectView-level modifier is
+    /// overridden by the outer one and never reaches the NSWindow.
+    @Published var inspectForcedAppearance: String?
+
     var status: StatusState
 
     let commandFilePermissions: [FileAttributeKey: Any] = [FileAttributeKey.posixPermissions: 0o666]

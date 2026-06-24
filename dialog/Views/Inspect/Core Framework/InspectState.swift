@@ -247,6 +247,9 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                 // Set core configuration
                 self.config = loadedConfig
 
+                // Publish forced appearance to the WindowGroup-level modifier (issue #669).
+                DialogUpdatableContent.shared.inspectForcedAppearance = loadedConfig.appearance
+
                 // Configure date display service with style from config
                 DateDisplayService.shared.configure(style: loadedConfig.dateStyle)
 

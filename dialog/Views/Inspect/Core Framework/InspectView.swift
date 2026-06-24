@@ -14,16 +14,6 @@ struct InspectView: View {
     @StateObject private var inspectState = InspectState()
     @State private var showingAboutPopover = false
 
-    /// Force the inspect window appearance from config `appearance` (issue #669):
-    /// "dark"/"light" override the OS in both directions; nil/"auto" follows the system.
-    private var forcedColorScheme: ColorScheme? {
-        switch inspectState.config?.appearance?.lowercased() {
-        case "dark":  return .dark
-        case "light": return .light
-        default:      return nil
-        }
-    }
-
     var body: some View {
         Group {
             switch inspectState.loadingState {
@@ -65,7 +55,6 @@ struct InspectView: View {
             writeLog("InspectViewServiceBased: Initializing with InspectState", logLevel: .info)
             inspectState.initialize()
         }
-        .preferredColorScheme(forcedColorScheme)
     }
 
     // MARK: - Helper Methods

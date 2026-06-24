@@ -191,6 +191,29 @@ struct dialogApp: App {
 
     @ObservedObject var observedData: DialogUpdatableContent
 
+    /// Resolves the window's forced colour scheme. The CLI `--appearance` arg wins;
+    /// otherwise inspect mode's `appearance` config key takes effect (issue #669).
+    /// Returning nil follows the OS appearance. An equivalent modifier inside
+    /// `InspectView` is overridden by this outer one, so the inspect path must be
+    /// honoured here.
+    private var resolvedColorScheme: ColorScheme? {
+        if observedData.args.preferredAppearance.present {
+            switch observedData.args.preferredAppearance.value.lowercased() {
+            case "dark":  return .dark
+            case "light": return .light
+            default:      break
+            }
+        }
+        if appArguments.inspectMode.present {
+            switch observedData.inspectForcedAppearance?.lowercased() {
+            case "dark":  return .dark
+            case "light": return .light
+            default:      return nil
+            }
+        }
+        return nil
+    }
+
     init () {
 
         appvars.debugMode = CLOptionPresent(optionName: appArguments.debug)
@@ -382,11 +405,7 @@ struct dialogApp: App {
                 .onDisappear {
                     quitDialog(exitCode: appDefaults.exit15.code)
                 }
-                .preferredColorScheme(observedData.args.preferredAppearance.present &&
-                                      observedData.args.preferredAppearance.value.lowercased() == "dark" ? .dark
-                                      : observedData.args.preferredAppearance.present &&
-                                      observedData.args.preferredAppearance.value.lowercased() == "light" ? .light
-                                      : nil)
+                .preferredColorScheme(resolvedColorScheme)
             }
         }
         // Hide Title Bar
