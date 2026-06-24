@@ -51,10 +51,10 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
         imageData = try NSData(contentsOf: urlPath as URL)
     } catch {
         if returnErrorImage! {
-            writeLog("An error occured - returning error image")
+            writeLog("An error occurred - returning error image")
             return errorImage
         } else {
-            writeLog("An error occured - exiting")
+            writeLog("An error occurred - exiting")
             quitDialog(exitCode: appDefaults.exit201.code, exitMessage: "\(appDefaults.exit201.message) \(fileImagePath)", observedObject: DialogUpdatableContent())
         }
     }
