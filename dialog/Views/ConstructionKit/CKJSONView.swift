@@ -1,5 +1,5 @@
 //
-//  JSONView.swift
+//  CKJSONView.swift
 //  dialog
 //
 //  Created by Reardon, Bart (IM&T, Black Mountain) on 22/10/2025.
@@ -8,154 +8,282 @@
 import SwiftUI
 import SwiftyJSON
 
-struct JSONView: View {
-    @ObservedObject var observedDialogContent: DialogUpdatableContent
+// Pure export helpers. Kept free of view state so output is reproducible and testable.
+enum CKExport {
 
-    @State private var jsonText: String = ""
-    @State private var showAlert = false
-    @State private var alertMessage = ""
-
-    private func exportJSON(debug: Bool = false) -> String {
-        var json = JSON()
-        var jsonDEBUG = JSON()
-
-        // copy modifyable objects into args
-        observedDialogContent.args.iconSize.value = "\(observedDialogContent.iconSize)"
-        observedDialogContent.args.windowWidth.value = "\(observedDialogContent.appProperties.windowWidth)"
-        observedDialogContent.args.windowHeight.value = "\(observedDialogContent.appProperties.windowHeight)"
-
-        let mirroredAppArguments = Mirror(reflecting: observedDialogContent.args)
-        for (_, attr) in mirroredAppArguments.children.enumerated() {
-            if let propertyValue = attr.value as? CommandlineArgument {
-                if ["builder", "debug", "pid"].contains(propertyValue.long) { continue } 
-                if propertyValue.present { //}&& propertyValue.value != "" {
-                    if propertyValue.value != "" {
-                        json[propertyValue.long].string = propertyValue.value
-                    } else if propertyValue.isbool {
-                        json[propertyValue.long].string = "\(propertyValue.present)"
-                    }
-                }
-                jsonDEBUG[propertyValue.long].string = propertyValue.value
-                jsonDEBUG["\(propertyValue.long)-present"].bool = propertyValue.present
-            }
-        }
-
-        if observedDialogContent.listItemsArray.count > 0 {
-            json[appArguments.listItem.long].arrayObject = Array(repeating: 0, count: observedDialogContent.listItemsArray.count)
-            for index in 0..<observedDialogContent.listItemsArray.count {
-                if observedDialogContent.listItemsArray[index].title.isEmpty {
-                    observedDialogContent.listItemsArray[index].title = "Item \(index)"
-                }
-                // print(observedDialogContent.listItemsArray[i].dictionary)
-                json[appArguments.listItem.long][index].dictionaryObject = observedDialogContent.listItemsArray[index].dictionary
-            }
-        }
-        
-        if observedDialogContent.textFieldArray.count > 0 {
-            json[appArguments.textField.long].arrayObject = Array(repeating: 0, count: observedDialogContent.textFieldArray.count)
-            for index in 0..<observedDialogContent.textFieldArray.count {
-                json[appArguments.textField.long][index].dictionaryObject = observedDialogContent.textFieldArray[index].dictionary
-            }
-        }
-
-        if observedDialogContent.imageArray.count > 0 {
-            json[appArguments.mainImage.long].arrayObject = Array(repeating: 0, count: observedDialogContent.imageArray.count)
-            for index in 0..<observedDialogContent.imageArray.count {
-                json[appArguments.mainImage.long][index].dictionaryObject = observedDialogContent.imageArray[index].dictionary
-            }
-        }
-        
-        if observedDialogContent.observedUserInputState.checkBoxes.count > 0 {
-            json[appArguments.checkbox.long].arrayObject = Array(repeating: 0, count: observedDialogContent.observedUserInputState.checkBoxes.count)
-            for index in 0..<observedDialogContent.observedUserInputState.checkBoxes.count {
-                json[appArguments.checkbox.long][index].dictionaryObject = observedDialogContent.observedUserInputState.checkBoxes[index].dictionary
-            }
-            json[appArguments.checkboxStyle.long].stringValue = observedDialogContent.appProperties.checkboxControlStyle
-        }
-        
-
-        // message font stuff
-        if observedDialogContent.appProperties.messageFontColour != .primary {
-            json[appArguments.messageFont.long].dictionaryObject = ["colour": observedDialogContent.appProperties.messageFontColour.hexValue]
-        }
-
-        if observedDialogContent.appProperties.titleFontColour != .primary {
-            json[appArguments.titleFont.long].dictionaryObject = ["colour": observedDialogContent.appProperties.titleFontColour.hexValue]
-        }
-
-        if observedDialogContent.appProperties.buttonSize != .regular {
-            json[appArguments.buttonSize.long].string = observedDialogContent.args.buttonSize.value
-        }
-
-        // convert the JSON to a raw String
-        jsonFormattedOutout = json.rawString() ?? "json is nil"
-
-        if debug {
-            jsonFormattedOutout = jsonDEBUG.rawString() ?? ""
-        }
-        return jsonFormattedOutout
+    // Size-related values are stored on appProperties rather than the argument's
+    // `.value`, so surface them as overrides keyed by the argument name.
+    private static func sizeOverrides(_ content: DialogUpdatableContent) -> [String: String] {
+        return [
+            appArguments.iconSize.long: "\(Int(content.iconSize))",
+            appArguments.windowWidth.long: "\(Int(content.appProperties.windowWidth))",
+            appArguments.windowHeight.long: "\(Int(content.appProperties.windowHeight))"
+        ]
     }
 
-    init (observedDialogContent: DialogUpdatableContent) {
+    private static let skippedArguments = ["builder", "debug", "pid"]
+
+    /// JSON config representation of the current builder state. This is the lossless export.
+    static func json(from content: DialogUpdatableContent, debug: Bool = false) -> String {
+        var json = JSON()
+        var jsonDEBUG = JSON()
+        let overrides = sizeOverrides(content)
+
+        for child in Mirror(reflecting: content.args).children {
+            guard let arg = child.value as? CommandlineArgument else { continue }
+            if skippedArguments.contains(arg.long) { continue }
+            let value = overrides[arg.long] ?? arg.value
+            if arg.present {
+                if !value.isEmpty {
+                    json[arg.long].string = value
+                } else if arg.isbool {
+                    json[arg.long].string = "\(arg.present)"
+                }
+            }
+            jsonDEBUG[arg.long].string = value
+            jsonDEBUG["\(arg.long)-present"].bool = arg.present
+        }
+
+        if !content.listItemsArray.isEmpty {
+            json[appArguments.listItem.long].arrayObject = Array(repeating: 0, count: content.listItemsArray.count)
+            for index in content.listItemsArray.indices {
+                var item = content.listItemsArray[index]
+                if item.title.isEmpty { item.title = "Item \(index)" }
+                json[appArguments.listItem.long][index].dictionaryObject = item.dictionary
+            }
+        }
+
+        if !content.textFieldArray.isEmpty {
+            json[appArguments.textField.long].arrayObject = Array(repeating: 0, count: content.textFieldArray.count)
+            for index in content.textFieldArray.indices {
+                json[appArguments.textField.long][index].dictionaryObject = content.textFieldArray[index].dictionary
+            }
+        }
+
+        if !content.imageArray.isEmpty {
+            json[appArguments.mainImage.long].arrayObject = Array(repeating: 0, count: content.imageArray.count)
+            for index in content.imageArray.indices {
+                json[appArguments.mainImage.long][index].dictionaryObject = content.imageArray[index].dictionary
+            }
+        }
+
+        if !content.observedUserInputState.checkBoxes.isEmpty {
+            json[appArguments.checkbox.long].arrayObject = Array(repeating: 0, count: content.observedUserInputState.checkBoxes.count)
+            for index in content.observedUserInputState.checkBoxes.indices {
+                json[appArguments.checkbox.long][index].dictionaryObject = content.observedUserInputState.checkBoxes[index].dictionary
+            }
+            json[appArguments.checkboxStyle.long].stringValue = content.appProperties.checkboxControlStyle
+        }
+
+        if content.appProperties.messageFontColour != .primary {
+            json[appArguments.messageFont.long].dictionaryObject = ["colour": content.appProperties.messageFontColour.hexValue]
+        }
+        if content.appProperties.titleFontColour != .primary {
+            json[appArguments.titleFont.long].dictionaryObject = ["colour": content.appProperties.titleFontColour.hexValue]
+        }
+        if content.appProperties.buttonSize != .regular {
+            json[appArguments.buttonSize.long].string = content.args.buttonSize.value
+        }
+
+        if debug {
+            return jsonDEBUG.rawString() ?? ""
+        }
+        return json.rawString() ?? "json is nil"
+    }
+
+    /// A copy/paste-able `dialog` command. Scalar/bool options become flags; collections use
+    /// swiftDialog's comma syntax. The JSON export remains the lossless path for values that
+    /// contain commas.
+    static func command(from content: DialogUpdatableContent) -> String {
+        var flags: [String] = []
+        let overrides = sizeOverrides(content)
+        let collectionMarkers = [
+            appArguments.textField.long,
+            appArguments.checkbox.long,
+            appArguments.listItem.long,
+            appArguments.mainImage.long,
+            appArguments.dropdownTitle.long
+        ]
+
+        for child in Mirror(reflecting: content.args).children {
+            guard let arg = child.value as? CommandlineArgument, arg.present else { continue }
+            if skippedArguments.contains(arg.long) || collectionMarkers.contains(arg.long) { continue }
+            let value = overrides[arg.long] ?? arg.value
+            if !value.isEmpty {
+                flags.append("--\(arg.long) \(quote(value))")
+            } else if arg.isbool {
+                flags.append("--\(arg.long)")
+            }
+        }
+
+        for field in content.textFieldArray {
+            flags.append("--\(appArguments.textField.long) \(quote(encode(field)))")
+        }
+        for box in content.observedUserInputState.checkBoxes {
+            flags.append("--\(appArguments.checkbox.long) \(quote(encode(box)))")
+        }
+        for (index, item) in content.listItemsArray.enumerated() {
+            flags.append("--\(appArguments.listItem.long) \(quote(encode(item, index: index)))")
+        }
+        for image in content.imageArray {
+            flags.append("--\(appArguments.mainImage.long) \(quote(image.path))")
+        }
+
+        if content.appProperties.titleFontColour != .primary {
+            flags.append("--\(appArguments.titleFont.long) \(quote("colour=\(content.appProperties.titleFontColour.hexValue)"))")
+        }
+        if content.appProperties.messageFontColour != .primary {
+            flags.append("--\(appArguments.messageFont.long) \(quote("colour=\(content.appProperties.messageFontColour.hexValue)"))")
+        }
+
+        return (["dialog"] + flags).joined(separator: " \\\n  ")
+    }
+
+    // MARK: - Collection encoders (mirror the parsers in ProcessCLOptions)
+
+    private static func encode(_ field: TextFieldState) -> String {
+        var tokens = [field.title]
+        if field.required { tokens.append("required") }
+        if field.secure { tokens.append("secure") }
+        if field.confirm { tokens.append("confirm") }
+        if field.fileSelect { tokens.append("fileselect") }
+        if !field.fileType.isEmpty { tokens.append("filetype=\(field.fileType)") }
+        if !field.prompt.isEmpty { tokens.append("prompt=\(field.prompt)") }
+        if !field.regex.isEmpty { tokens.append("regex=\(field.regex)") }
+        if !field.regexError.isEmpty { tokens.append("regexerror=\(field.regexError)") }
+        if !field.value.isEmpty { tokens.append("value=\(field.value)") }
+        if !field.name.isEmpty { tokens.append("name=\(field.name)") }
+        if !field.initialPath.isEmpty { tokens.append("path=\(field.initialPath)") }
+        return tokens.joined(separator: ",")
+    }
+
+    private static func encode(_ box: CheckBoxes) -> String {
+        var tokens = [box.label]
+        if !box.name.isEmpty { tokens.append("name=\(box.name)") }
+        if !box.icon.isEmpty { tokens.append("icon=\(box.icon)") }
+        if box.checked { tokens.append("checked") }
+        if box.disabled { tokens.append("disabled") }
+        if box.enablesButton1 { tokens.append("enableButton1") }
+        return tokens.joined(separator: ",")
+    }
+
+    private static func encode(_ item: ListItems, index: Int) -> String {
+        var tokens = [item.title.isEmpty ? "Item \(index)" : item.title]
+        if !item.subTitle.isEmpty { tokens.append("subtitle=\(item.subTitle)") }
+        if !item.icon.isEmpty { tokens.append("icon=\(item.icon)") }
+        if !item.statusText.isEmpty { tokens.append("statustext=\(item.statusText)") }
+        if !item.statusIcon.isEmpty { tokens.append("status=\(item.statusIcon)") }
+        return tokens.joined(separator: ",")
+    }
+
+    private static func quote(_ value: String) -> String {
+        let escaped = value
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "\"", with: "\\\"")
+        return "\"\(escaped)\""
+    }
+}
+
+enum CKOutputFormat: String, CaseIterable, Identifiable {
+    case json = "JSON"
+    case command = "Command Line"
+    var id: String { rawValue }
+}
+
+struct CKOutputView: View {
+    @ObservedObject var observedDialogContent: DialogUpdatableContent
+
+    @State private var format: CKOutputFormat = .json
+    @State private var showAlert = false
+    @State private var alertTitle = ""
+    @State private var alertMessage = ""
+
+    init(observedDialogContent: DialogUpdatableContent) {
         self.observedDialogContent = observedDialogContent
     }
 
-    func saveToFile(_ content: String) {
-            let savePanel = NSSavePanel()
-        savePanel.allowedContentTypes = [.json]
-            savePanel.canCreateDirectories = true
-            savePanel.nameFieldStringValue = "file.json"
-            savePanel.message = "Choose a location to save the file"
-            
-            savePanel.begin { response in
-                if response == .OK, let url = savePanel.url {
-                    do {
-                        try content.write(to: url, atomically: true, encoding: .utf8)
-                        alertMessage = "File saved successfully!"
-                        showAlert = true
-                    } catch {
-                        alertMessage = "Failed to save file: \(error.localizedDescription)"
-                        showAlert = true
-                    }
+    // Recomputed whenever observed state changes, so the preview stays live.
+    private var outputText: String {
+        switch format {
+        case .json: return CKExport.json(from: observedDialogContent)
+        case .command: return CKExport.command(from: observedDialogContent)
+        }
+    }
+
+    private func copyToClipboard() {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(outputText, forType: .string)
+        alertTitle = "Copied to clipboard".localized
+        alertMessage = format == .json
+            ? "The JSON output was copied to the clipboard.".localized
+            : "The dialog command was copied to the clipboard.".localized
+        showAlert = true
+    }
+
+    private func saveToFile() {
+        let savePanel = NSSavePanel()
+        switch format {
+        case .json:
+            savePanel.allowedContentTypes = [.json]
+            savePanel.nameFieldStringValue = "dialog.json"
+        case .command:
+            savePanel.allowedContentTypes = [.plainText]
+            savePanel.nameFieldStringValue = "dialog-command.txt"
+        }
+        savePanel.canCreateDirectories = true
+        savePanel.message = "Choose a location to save the file".localized
+
+        let content = outputText
+        savePanel.begin { response in
+            if response == .OK, let url = savePanel.url {
+                do {
+                    try content.write(to: url, atomically: true, encoding: .utf8)
+                    alertTitle = "Saved".localized
+                    alertMessage = "File saved successfully.".localized
+                    showAlert = true
+                } catch {
+                    alertTitle = "Save failed".localized
+                    alertMessage = error.localizedDescription
+                    showAlert = true
                 }
             }
         }
-    
+    }
+
     var body: some View {
-        ScrollView {
+        VStack(spacing: 0) {
+            Picker("", selection: $format) {
+                ForEach(CKOutputFormat.allCases) { fmt in
+                    Text(fmt.rawValue.localized).tag(fmt)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .padding(10)
             HStack {
-                Button("Regenerate") {
-                    jsonText = exportJSON()
+                Button("Copy to clipboard".localized) {
+                    copyToClipboard()
                 }
-                Button("Copy to clipboard") {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.writeObjects([NSString(string: exportJSON())])
-                }
-                Button("Save File") {
-                    saveToFile(exportJSON())
+                Button("Save File".localized) {
+                    saveToFile()
                 }
                 Spacer()
             }
-            .padding(.top, 10)
-            .padding(.leading, 10)
+            .padding(.horizontal, 10)
+            .padding(.bottom, 10)
             Divider()
-            HStack {
-                Text(jsonText)
-                Spacer()
+            ScrollView([.vertical, .horizontal]) {
+                Text(outputText)
+                    .font(.system(.body, design: .monospaced))
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(10)
             }
-            .padding(.top, 10)
-            .padding(.leading, 10)
-            .alert("Save Status", isPresented: $showAlert) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text(alertMessage)
-            }
-            
-            Spacer()
-            
         }
-        .onAppear {
-            jsonText = exportJSON()
+        .alert(alertTitle, isPresented: $showAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(alertMessage)
         }
     }
 }

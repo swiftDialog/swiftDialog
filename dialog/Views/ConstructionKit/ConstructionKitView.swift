@@ -8,9 +8,7 @@
 import SwiftUI
 import SwiftyJSON
 
-var jsonFormattedOutout: String = ""
-
-struct LabelView: View {
+struct CKLabelView: View {
     var label: String
     var body: some View {
         VStack {
@@ -24,18 +22,15 @@ struct LabelView: View {
     }
 }
 
-struct WelcomeView: View {
+struct CKWelcomeView: View {
     var body: some View {
         VStack {
             ZStack {
                 IconView(image: "default")
-                //Image(systemName: "bubble.left.circle.fill")
-                //    .resizable()
-
                 IconView(image: "sf=wrench.and.screwdriver.fill", alpha: 0.5, defaultColour: "white")
             }
             .frame(width: 150, height: 150)
-            
+
             Text("Welcome to the swiftDialog builder".localized)
                 .font(.largeTitle)
             Divider()
@@ -45,9 +40,63 @@ struct WelcomeView: View {
     }
 }
 
+// Reusable icon picker used by the list and checkbox builders.
+// Handles drag-and-drop of an image file plus an SF Symbol + colour popover.
+struct CKIconPicker: View {
+    @Binding var icon: String
+    @Binding var sfPicker: Bool
+    @Binding var sfSymbol: String
+    @Binding var sfColour: String
+    var opacity: Double = 1
+    var onIconChange: ((String) -> Void)?
+
+    @State private var tmpColour: Color = .clear
+
+    var body: some View {
+        IconView(image: icon, defaultImage: "sf=questionmark.square.dashed")
+            .frame(width: 32, height: 32)
+            .opacity(opacity)
+            .onDrop(of: [.fileURL], isTargeted: nil) { providers in
+                guard let provider = providers.first else { return false }
+                _ = provider.loadObject(ofClass: URL.self) { url, _ in
+                    if let url {
+                        DispatchQueue.main.async { icon = url.path }
+                    }
+                }
+                return true
+            }
+            .overlay(
+                RoundedRectangle(cornerRadius: 2)
+                    .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [5]))
+                    .foregroundColor(.gray.opacity(0.5))
+            )
+            .contentShape(Rectangle())
+            .onTapGesture { sfPicker.toggle() }
+            .onChange(of: icon) { _, newValue in onIconChange?(newValue) }
+            .popover(isPresented: $sfPicker) {
+                VStack {
+                    HStack {
+                        Text("sf=")
+                        TextField("SF Symbol Name", text: $sfSymbol)
+                            .onChange(of: sfSymbol) { _, sfName in
+                                icon = "sf=\(sfName)"
+                            }
+                    }
+                    ColorPicker("Colour".localized, selection: $tmpColour)
+                        .onChange(of: tmpColour) { _, colour in
+                            sfColour = colour.hexValue
+                            icon = "sf=\(sfSymbol),color=\(colour.hexValue)"
+                        }
+                }
+                .padding(20)
+            }
+    }
+}
+
 struct ConstructionKitView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
+    @State private var showExportConfirmation = false
 
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
@@ -55,7 +104,6 @@ struct ConstructionKitView: View {
         // mark all standard fields visible
         observedDialogContent.args.titleOption.present = true
         observedDialogContent.args.titleFont.present = true
-        observedDialogContent.args.messageOption.present = true
         observedDialogContent.args.messageOption.present = true
         observedDialogContent.args.iconOption.present = true
         observedDialogContent.args.iconSize.present = true
@@ -129,31 +177,34 @@ struct ConstructionKitView: View {
                     }
                 }
                 Spacer()
-                Section(header: Text("Output".localized)) {
-                    NavigationLink(destination: JSONView(observedDialogContent: observedData) ) {
-                        Text("JSON Output".localized)
+                Section(header: Text("Export".localized)) {
+                    NavigationLink(destination: CKOutputView(observedDialogContent: observedData) ) {
+                        Text("Output".localized)
                     }
                 }
             }
             .padding(10)
 
-            WelcomeView()
+            CKWelcomeView()
         }
         .listStyle(SidebarListStyle())
-        //.frame(minWidth: 800, height: 800)
         Divider()
-        ZStack {
+        HStack {
+            Button("Quit".localized) {
+                quitDialog(exitCode: appDefaults.exit0.code)
+            }
             Spacer()
-            HStack {
-                Button("ck-quit".localized) {
-                    quitDialog(exitCode: appDefaults.exit0.code)
-                }
-                Spacer()
-                .disabled(false)
-                Button("Export Command".localized) {}
-                    .disabled(true)
+            Button("Export Command".localized) {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(CKExport.command(from: observedData), forType: .string)
+                showExportConfirmation = true
             }
         }
         .padding(20)
+        .alert("Copied to clipboard".localized, isPresented: $showExportConfirmation) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("The dialog command was copied to the clipboard.".localized)
+        }
     }
 }

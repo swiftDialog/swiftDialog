@@ -12,8 +12,6 @@ struct CKTitleView: View {
     @ObservedObject var observedData: DialogUpdatableContent
     @State var bannerColour: Color = .white
     @State var bannerHeight: CGFloat = 150
-    
-    let alignmentArray = ["left", "centre", "right"]
 
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
@@ -22,7 +20,7 @@ struct CKTitleView: View {
     var body: some View {
 
         ScrollView {
-            LabelView(label: "Title".localized)
+            CKLabelView(label: "Title".localized)
             HStack {
                 TextField("", text: $observedData.args.titleOption.value)
                 ColorPicker("Colour".localized,selection: $observedData.appProperties.titleFontColour)
@@ -38,7 +36,7 @@ struct CKTitleView: View {
             }
             
             Group {
-                LabelView(label: "Banner Image".localized)
+                CKLabelView(label: "Banner Image".localized)
                 IconView(image: observedData.args.bannerImage.value)
                     .frame(width: 200, height: 48)
                     .opacity(observedData.args.bannerImage.present ? 1 : 0.5)

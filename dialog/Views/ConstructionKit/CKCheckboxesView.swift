@@ -10,18 +10,15 @@ import SwiftUI
 struct CKCheckBoxesView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
-    //@State var textfieldContent: [TextFieldState]
     @State private var showHelp: Bool = false
-    @State private var tmpColour: Color = .clear
 
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
-        //textfieldContent = userInputState.textFields
     }
 
     var body: some View {
         VStack {
-        LabelView(label: "Checkboxes".localized)
+        CKLabelView(label: "Checkboxes".localized)
         HStack {
             Toggle("Format output as JSON", isOn: $observedData.args.jsonOutPut.present)
             .toggleStyle(.switch)
@@ -54,12 +51,7 @@ struct CKCheckBoxesView: View {
                 }
             Toggle("Show".localized, isOn: $observedData.args.checkbox.present)
                 .toggleStyle(.switch)
-            
-            //Button("Clear All") {
-            //    observedData.listItemPresent = false
-            //    observedData.listItemsArray = [ListItems]()
-            //}
-            
+
             Spacer()
         }
         .padding(.bottom, 20)
@@ -70,52 +62,14 @@ struct CKCheckBoxesView: View {
                 ForEach(0..<userInputState.checkBoxes.count, id: \.self) { item in
                     HStack {
                         
-                        IconView(image: observedData.observedUserInputState.checkBoxes[item].icon, defaultImage: "sf=questionmark.square.dashed")
-                            .frame(width: 32, height: 32)
-                            .opacity(observedData.observedUserInputState.checkBoxes[item].icon.isEmpty || observedData.appProperties.checkboxControlStyle == "switch" ? 1 : 0.5)
-                            .onDrop(of: [.fileURL], isTargeted: nil) { providers in
-                                guard let provider = providers.first else { return false }
-                                _ = provider.loadObject(ofClass: URL.self) { url, _ in
-                                    if let url = url {
-                                        DispatchQueue.main.async {
-                                            observedData.observedUserInputState.checkBoxes[item].icon = url.path
-                                        }
-                                    }
-                                }
-                                return true
-                            }
-                        
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 2)
-                                    .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [5]))
-                                    .foregroundColor(.gray.opacity(0.5))
-                            )
-                            .onChange(of: observedData.observedUserInputState.checkBoxes[item].icon) { _, textRequired in
-                                observedData.observedUserInputState.checkBoxes[item].icon = textRequired
-                            }
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                observedData.observedUserInputState.checkBoxes[item].sfPicker.toggle()
-                            }
-                        
-                            .popover(isPresented: $observedData.observedUserInputState.checkBoxes[item].sfPicker) {
-                                VStack {
-                                    HStack {
-                                        Text("sf=")
-                                        TextField("SF Symbol Name", text: $observedData.observedUserInputState.checkBoxes[item].sfSymbol)
-                                            .onChange(of: observedData.observedUserInputState.checkBoxes[item].sfSymbol) { _, sfName in
-                                                observedData.observedUserInputState.checkBoxes[item].icon = "sf=\(sfName)"
-                                            }
-                                    }
-                                    ColorPicker("Colour".localized,selection: $tmpColour)
-                                        .onChange(of: tmpColour) { _, colour in
-                                            observedData.observedUserInputState.checkBoxes[item].sfColour = colour.hexValue
-                                            observedData.observedUserInputState.checkBoxes[item].icon = "sf=\(observedData.observedUserInputState.checkBoxes[item].sfSymbol),color=\(colour.hexValue)"
-                                        }
-                                }
-                                .padding(20)
-                            }
-                        
+                        CKIconPicker(
+                            icon: $observedData.observedUserInputState.checkBoxes[item].icon,
+                            sfPicker: $observedData.observedUserInputState.checkBoxes[item].sfPicker,
+                            sfSymbol: $observedData.observedUserInputState.checkBoxes[item].sfSymbol,
+                            sfColour: $observedData.observedUserInputState.checkBoxes[item].sfColour,
+                            opacity: observedData.observedUserInputState.checkBoxes[item].icon.isEmpty || observedData.appProperties.checkboxControlStyle == "switch" ? 1 : 0.5
+                        )
+
                         TextField("Label".localized, text: $observedData.observedUserInputState.checkBoxes[item].label)
                             .onChange(of: observedData.observedUserInputState.checkBoxes[item].label) { _, label in
                                 userInputState.checkBoxes[item].label = label

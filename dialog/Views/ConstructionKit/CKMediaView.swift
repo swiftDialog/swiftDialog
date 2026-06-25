@@ -19,7 +19,7 @@ struct CKMediaView: View {
     var body: some View {
         ScrollView { //buttons
             VStack {
-                LabelView(label: "Video")
+                CKLabelView(label: "Video")
                 HStack {
                     Toggle("Enable".localized, isOn: $observedData.args.video.present)
                         .toggleStyle(.switch)
@@ -41,7 +41,7 @@ struct CKMediaView: View {
 
             }
             VStack {
-                LabelView(label: "Web".localized)
+                CKLabelView(label: "Web".localized)
                 HStack {
                     Toggle("Disabled".localized, isOn: $observedData.args.webcontent.present)
                         .toggleStyle(.switch)

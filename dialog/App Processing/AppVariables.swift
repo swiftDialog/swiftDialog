@@ -37,6 +37,12 @@ struct AppDefaults {
     // Card block types
     let cardTypes: [String] = ["workflow", "cards", "stack", "block", "pages", "deck"]
 
+    // Construction Kit option value lists (single source of truth for the builder pickers)
+    let ckAlignmentOptions: [String]        = ["left", "centre", "right"]
+    let ckListStatusOptions: [String]       = ["wait", "success", "fail", "error", "pending", "progress"]
+    let ckWatermarkPositionOptions: [String] = ["topleft", "left", "bottomleft", "top", "center", "bottom", "topright", "right", "bottomright"]
+    let ckWatermarkFillOptions: [String]    = ["fill", "fit"]
+
     // Content padding
     let sidePadding                     = CGFloat(15)
     let topPadding                      = CGFloat(10)

@@ -18,7 +18,7 @@ struct CKIconView: View {
     var body: some View {
         ScrollView { // icon and icon overlay
             VStack {
-                LabelView(label: "Icon".localized)
+                CKLabelView(label: "Icon".localized)
                 HStack {
                     IconView(image: observedData.args.iconOption.value, defaultImage: "sf=questionmark.square.dashed")
                         .frame(width: 48, height: 48)
@@ -58,20 +58,20 @@ struct CKIconView: View {
                 }
                 HStack {
                     Button(action: {
-                        observedData.args.iconOption.value = "SF=\(observedData.args.iconOption.value)"
+                        observedData.args.iconOption.value = "sf=\(observedData.args.iconOption.value)"
                     }, label: {
                         Text("SF Symbol")
                     })
                     Spacer()
                 }
-                LabelView(label: "Icon Size".localized)
+                CKLabelView(label: "Icon Size".localized)
                 HStack {
                     Slider(value: $observedData.iconSize, in: 0...400)
                     //Text("Current value: \(observedDialogContent.iconSize, specifier: "%.0f")")
                     TextField("Size value:", value: $observedData.iconSize, formatter: displayAsInt)
                         .frame(width: 50)
                 }
-                LabelView(label: "Icon Alpha")
+                CKLabelView(label: "Icon Alpha")
                 HStack {
                     Slider(value: $observedData.iconAlpha, in: 0.0...1.0)
                     TextField("Alpha value:", value: $observedData.iconAlpha,
@@ -80,7 +80,7 @@ struct CKIconView: View {
                 }
             }
             VStack {
-                LabelView(label: "Overlay".localized)
+                CKLabelView(label: "Overlay".localized)
                 HStack {
                     Toggle("Visible".localized, isOn: $observedData.args.overlayIconOption.present)
                         .toggleStyle(.switch)

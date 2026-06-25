@@ -18,7 +18,7 @@ struct CKSidebarView: View {
     var body: some View {
         ScrollView { // infoBox
             VStack {
-                LabelView(label: "Infobox".localized)
+                CKLabelView(label: "Infobox".localized)
                 Text("Use markdown formatting to style the text")
                     .frame(width: .infinity, alignment: .leading)
                 HStack {
@@ -31,7 +31,7 @@ struct CKSidebarView: View {
                 }
             }
             VStack {
-                LabelView(label: "Infotext".localized)
+                CKLabelView(label: "Infotext".localized)
                 HStack {
                     Toggle("Visible".localized, isOn: $observedData.args.infoText.present)
                         .toggleStyle(.switch)

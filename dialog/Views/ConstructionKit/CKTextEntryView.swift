@@ -21,7 +21,7 @@ struct CKTextEntryView: View {
     var body: some View {
         
         VStack {
-            LabelView(label: "Textfields".localized)
+            CKLabelView(label: "Textfields".localized)
             HStack {
                 Toggle("Format output as JSON", isOn: $observedData.args.jsonOutPut.present)
                     .toggleStyle(.switch)
@@ -85,15 +85,15 @@ struct CKTextEntryView: View {
                             .toggleStyle(.switch)
                         //filetype
                         TextField("File type".localized, text: $observedData.textFieldArray[item].fileType)
-                            .onChange(of: observedData.textFieldArray[item].title) { _, textTitle in
-                                userInputState.textFields[item].title = textTitle
+                            .onChange(of: observedData.textFieldArray[item].fileType) { _, fileType in
+                                userInputState.textFields[item].fileType = fileType
                             }
                             .disabled(!observedData.textFieldArray[item].fileSelect)
                         
                         //filepath
                         TextField("Initial path".localized, text: $observedData.textFieldArray[item].initialPath)
-                            .onChange(of: observedData.textFieldArray[item].title) { _, textTitle in
-                                userInputState.textFields[item].title = textTitle
+                            .onChange(of: observedData.textFieldArray[item].initialPath) { _, initialPath in
+                                userInputState.textFields[item].initialPath = initialPath
                             }
                             .disabled(!observedData.textFieldArray[item].fileSelect)
                         

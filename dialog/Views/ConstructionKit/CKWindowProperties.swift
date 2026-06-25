@@ -15,9 +15,6 @@ struct CKWindowProperties: View {
     @State var bannerColour: Color = .white
     @State var bannerHeight: CGFloat
 
-    let positionArray = ["topleft", "left", "bottomleft", "top", "center", "bottom", "topright", "right", "bottomright"]
-    let fillScaleArray = ["fill", "fit"]
-
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
         bannerHeight = observedDialogContent.args.bannerHeight.value.floatValue()
@@ -26,7 +23,7 @@ struct CKWindowProperties: View {
     var body: some View {
 
         ScrollView {
-            LabelView(label: "Window Height".localized)
+            CKLabelView(label: "Window Height".localized)
             HStack {
                 TextField("Height value:".localized, value: $observedData.appProperties.windowHeight, formatter: displayAsInt )
                     .frame(width: 50)
@@ -37,7 +34,7 @@ struct CKWindowProperties: View {
                     }
                 Spacer()
             }
-            LabelView(label: "Window Width".localized)
+            CKLabelView(label: "Window Width".localized)
             HStack {
                 TextField("Width value:".localized, value: $observedData.appProperties.windowWidth, formatter: displayAsInt)
                     .frame(width: 50)
@@ -49,14 +46,7 @@ struct CKWindowProperties: View {
                 Spacer()
             }
             Group {
-                LabelView(label: "Window Properties".localized)
-                //HStack {
-                //    Text("Mini view")
-                //        .frame(width: 100, alignment: .leading)
-                //    Toggle("", isOn: $observedData.args.miniMode.present)
-                //        .toggleStyle(.switch)
-                //    Spacer()
-                //}
+                CKLabelView(label: "Window Properties".localized)
                 HStack {
                     Text("Preset Sizes".localized)
                         .frame(width: 100, alignment: .leading)
@@ -79,7 +69,7 @@ struct CKWindowProperties: View {
                         }
                     Spacer()
                 }
-                LabelView(label: "Configurations")
+                CKLabelView(label: "Configurations")
                 HStack {
                     Text("Will not apply to live view").italic()
                     Spacer()
@@ -112,7 +102,7 @@ struct CKWindowProperties: View {
                         .toggleStyle(.switch)
                     Spacer()
                 }
-                LabelView(label: "Progress Bar")
+                CKLabelView(label: "Progress Bar")
                 HStack {
                     Text("Progress Bar".localized)
                         .frame(width: 100, alignment: .leading)
@@ -129,13 +119,7 @@ struct CKWindowProperties: View {
                 }
             }
             
-            /*
-            VStack {
-                Toggle("banner title", isOn: $observedData.args.bannerTitle.present)
-                    .toggleStyle(.switch)
-            }
-             */
-            LabelView(label: "Background Image".localized)
+            CKLabelView(label: "Background Image".localized)
             IconView(image: observedData.args.watermarkImage.value)
                 .frame(width: 48, height: 48)
                 .opacity(observedData.args.watermarkImage.present ? 1 : 0.5)
@@ -177,7 +161,7 @@ struct CKWindowProperties: View {
             VStack {
                 Picker("Fill".localized, selection: $observedData.args.watermarkFill.value) {
                     Text("").tag("")
-                    ForEach(fillScaleArray, id: \.self) {
+                    ForEach(appDefaults.ckWatermarkFillOptions, id: \.self) {
                         Text($0)
                     }
                 }
@@ -190,13 +174,13 @@ struct CKWindowProperties: View {
                 }
                 Picker("Scale".localized, selection: $observedData.args.watermarkScale.value) {
                     Text("").tag("")
-                    ForEach(fillScaleArray, id: \.self) {
+                    ForEach(appDefaults.ckWatermarkFillOptions, id: \.self) {
                         Text($0)
                     }
                 }
                 Picker("Position".localized, selection: $observedData.args.watermarkPosition.value) {
                     Text("").tag("")
-                    ForEach(positionArray, id: \.self) {
+                    ForEach(appDefaults.ckWatermarkPositionOptions, id: \.self) {
                         Text($0)
                     }
                 }

@@ -19,7 +19,7 @@ struct CKButtonView: View {
     var body: some View {
         ScrollView { //buttons
             VStack {
-                 LabelView(label: "Button Size".localized)
+                 CKLabelView(label: "Button Size".localized)
                  HStack {
                      Button("mini") {
                          observedData.args.buttonSize.value = "mini"
@@ -41,7 +41,7 @@ struct CKButtonView: View {
                                 observedData.appProperties.buttonSize = appDefaults.buttonSizeStates[newValue] ?? .regular
                             }
                  }
-                LabelView(label: "Button Text Size".localized)
+                CKLabelView(label: "Button Text Size".localized)
                 HStack {
                     Text("Button Font Size")
                     Slider(value: $buttonFontSize, in: 8...32, step: 1)
@@ -52,7 +52,7 @@ struct CKButtonView: View {
                 }
                  }
             VStack {
-                LabelView(label: "Button1".localized)
+                CKLabelView(label: "Button1".localized)
                 HStack {
                     Toggle("Disabled".localized, isOn: $observedData.args.button1Disabled.present)
                         .toggleStyle(.switch)
@@ -63,7 +63,7 @@ struct CKButtonView: View {
                 }
             }
             VStack {
-                LabelView(label: "Button2".localized)
+                CKLabelView(label: "Button2".localized)
                 HStack {
                     Toggle("Visible".localized, isOn: $observedData.args.button2Option.present)
                         .onChange(of: observedData.args.button2Option.present) {
@@ -77,7 +77,7 @@ struct CKButtonView: View {
                 }
             }
             VStack {
-                LabelView(label: "Info Button".localized)
+                CKLabelView(label: "Info Button".localized)
                 HStack {
                     Toggle("Visible".localized, isOn: $observedData.args.infoButtonOption.present)
                         .onChange(of: observedData.args.infoButtonOption.present) {

@@ -19,7 +19,7 @@ struct CKSelectListsView: View {
 
     var body: some View {
         
-        LabelView(label: "Select Lists".localized)
+        CKLabelView(label: "Select Lists".localized)
         HStack {
             Button(action: {
                 showHelp.toggle()

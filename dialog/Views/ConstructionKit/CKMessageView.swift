@@ -17,7 +17,7 @@ struct CKMessageView: View {
     }
     
     var body: some View {
-        LabelView(label: "ck-message".localized)
+        CKLabelView(label: "Message".localized)
         VStack {
             HStack {
                 Picker("Text Alignment".localized, selection: $observedData.args.messageAlignment.value) {

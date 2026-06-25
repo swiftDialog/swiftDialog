@@ -10,8 +10,6 @@ import SwiftUI
 struct CKListView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
-    //@State private var showSFPicker: Bool = false
-    @State private var tmpColour: Color = .clear
 
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
@@ -20,8 +18,6 @@ struct CKListView: View {
     func removeItems(at offsets: IndexSet) {
         observedData.listItemsArray.remove(atOffsets: offsets)
     }
-
-    let statusTypeArray = ["wait","success","fail","error","pending","progress"]
 
     var body: some View {
         ScrollView {
@@ -36,72 +32,20 @@ struct CKListView: View {
                 Toggle("Show".localized, isOn: $observedData.args.listItem.present)
                     .toggleStyle(.switch)
 
-                //Button("Clear All") {
-                //    observedData.listItemPresent = false
-                //    observedData.listItemsArray = [ListItems]()
-                //}
-
                 Spacer()
             }
-
-            //ForEach(observedData.listItemsArray, id: \.self)
 
             ForEach(0..<observedData.listItemsArray.count, id: \.self) { item in
                 VStack {
                     HStack {
-                        IconView(image: observedData.listItemsArray[item].icon, defaultImage: "sf=questionmark.square.dashed")
-                            .frame(width: 32, height: 32)
-                            .opacity(observedData.listItemsArray[item].icon.isEmpty ? 0.5 : 1)
-                            .onDrop(of: [.fileURL], isTargeted: nil) { providers in
-                                guard let provider = providers.first else { return false }
-                                _ = provider.loadObject(ofClass: URL.self) { url, _ in
-                                    if let url = url {
-                                        DispatchQueue.main.async {
-                                            observedData.listItemsArray[item].icon = url.path
-                                        }
-                                    }
-                                }
-                                return true
-                            }
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 2)
-                                    .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [5]))
-                                    .foregroundColor(.gray.opacity(0.5))
-                            )
-                            .onChange(of: observedData.listItemsArray[item].icon) { _, textRequired in
-                                userInputState.listItems[item].icon = textRequired
-                            }
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                observedData.listItemsArray[item].sfPicker.toggle()
-                            }
-                            .popover(isPresented: $observedData.listItemsArray[item].sfPicker) {
-                                VStack {
-                                    HStack {
-                                        Text("sf=")
-                                        TextField("SF Symbol Name", text: $observedData.listItemsArray[item].sfSymbol)
-                                            .onChange(of: observedData.listItemsArray[item].sfSymbol) { _, sfName in
-                                                observedData.listItemsArray[item].icon = "sf=\(sfName)"
-                                            }
-                                    }
-                                    ColorPicker("Colour".localized,selection: $tmpColour)
-                                        .onChange(of: tmpColour) { _, colour in
-                                            observedData.listItemsArray[item].sfColour = colour.hexValue
-                                            observedData.listItemsArray[item].icon = "sf=\(observedData.listItemsArray[item].sfSymbol),color=\(colour.hexValue)"
-                                            
-                                        }
-                                    /*
-                                    HStack {
-                                        Text("Opacity")
-                                        Slider(value: $observedData.listItemsArray[item].iconAlpha, in: 0...1)
-                                            .onChange(of: observedData.listItemsArray[item].iconAlpha) { _, alpha in
-                                                observedData.listItemsArray[item].iconAlpha = alpha
-                                            }
-                                    }
-                                     */
-                                }
-                                .padding(20)
-                            }
+                        CKIconPicker(
+                            icon: $observedData.listItemsArray[item].icon,
+                            sfPicker: $observedData.listItemsArray[item].sfPicker,
+                            sfSymbol: $observedData.listItemsArray[item].sfSymbol,
+                            sfColour: $observedData.listItemsArray[item].sfColour,
+                            opacity: observedData.listItemsArray[item].icon.isEmpty ? 0.5 : 1,
+                            onIconChange: { userInputState.listItems[item].icon = $0 }
+                        )
                         TextField("Title".localized, text: $observedData.listItemsArray[item].title)
                             .onChange(of: observedData.listItemsArray[item].title) { _, textRequired in
                                 userInputState.listItems[item].title = textRequired
@@ -118,7 +62,7 @@ struct CKListView: View {
                             }
                         Picker("Status".localized, selection: $observedData.listItemsArray[item].statusIcon) {
                             Text("").tag("")
-                            ForEach(statusTypeArray, id: \.self) {
+                            ForEach(appDefaults.ckListStatusOptions, id: \.self) {
                                 Text($0)
                             }
                             .onChange(of: observedData.listItemsArray[item].statusIcon) { _, textRequired in
