@@ -93,6 +93,156 @@ struct CKIconPicker: View {
     }
 }
 
+// Structured editor for a button symbol argument (button1symbol / button2symbol /
+// infobuttonsymbol). Presents the SF Symbol properties as individual controls and
+// recomposes the `name[,position,rendering,size,color|palette]` comma string that the
+// CLI and ButtonBarView already understand.
+struct CKSymbolEditor: View {
+    @Binding var symbol: String
+    @Binding var present: Bool
+
+    @State private var name: String
+    @State private var position: String
+    @State private var renderingMode: String
+    @State private var useColour: Bool
+    @State private var colour: Color
+    @State private var paletteColour1: Color
+    @State private var paletteColour2: Color
+    @State private var paletteColour3: Color
+    @State private var paletteCount: Int
+    @State private var useSize: Bool
+    @State private var size: Double
+
+    private let positions = ["leading", "trailing", "top", "bottom"]
+    private let renderingModes = ["hierarchical", "monochrome", "multicolour", "palette"]
+
+    init(symbol: Binding<String>, present: Binding<Bool>) {
+        self._symbol = symbol
+        self._present = present
+
+        // Seed the controls from any existing spec so values aren't lost.
+        let parts = symbol.wrappedValue.split(separator: ",").map { String($0) }
+        var name = "", position = "", mode = ""
+        var useColour = false, colour = Color.primary
+        var palette: [Color] = [.red, .green, .blue], paletteCount = 2
+        var useSize = false, size = 16.0
+        if let first = parts.first { name = first }
+        for part in parts.dropFirst() {
+            let lower = part.lowercased()
+            if ["leading", "trailing", "top", "bottom"].contains(lower) {
+                position = lower
+            } else if ["hierarchical", "monochrome", "multicolour", "palette"].contains(lower) {
+                mode = lower
+            } else if lower.hasPrefix("size="), let value = Double(part.dropFirst(5)) {
+                useSize = true; size = value
+            } else if lower.hasPrefix("color=") || lower.hasPrefix("colour=") {
+                useColour = true
+                colour = Color(argument: String(part.split(separator: "=").last ?? "primary"))
+            } else if lower.hasPrefix("palette=") {
+                mode = "palette"
+                let colours = part.split(separator: "=").last?.split(separator: "-").map { Color(argument: String($0)) } ?? []
+                for (index, value) in colours.prefix(3).enumerated() { palette[index] = value }
+                paletteCount = min(max(colours.count, 2), 3)
+            }
+        }
+        _name = State(initialValue: name)
+        _position = State(initialValue: position)
+        _renderingMode = State(initialValue: mode)
+        _useColour = State(initialValue: useColour)
+        _colour = State(initialValue: colour)
+        _paletteColour1 = State(initialValue: palette[0])
+        _paletteColour2 = State(initialValue: palette[1])
+        _paletteColour3 = State(initialValue: palette[2])
+        _paletteCount = State(initialValue: paletteCount)
+        _useSize = State(initialValue: useSize)
+        _size = State(initialValue: size)
+    }
+
+    private func compose() {
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else {
+            symbol = ""
+            present = false
+            return
+        }
+        var tokens = [trimmed]
+        if !position.isEmpty { tokens.append(position) }
+        if renderingMode == "palette" {
+            let colours = [paletteColour1, paletteColour2, paletteColour3].prefix(paletteCount).map { $0.hexValue }
+            tokens.append("palette=\(colours.joined(separator: "-"))")
+        } else {
+            if !renderingMode.isEmpty { tokens.append(renderingMode) }
+            if useColour && renderingMode != "multicolour" { tokens.append("color=\(colour.hexValue)") }
+        }
+        if useSize { tokens.append("size=\(Int(size))") }
+        symbol = tokens.joined(separator: ",")
+        present = true
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Image(systemName: name.isEmpty ? "questionmark.square.dashed" : name)
+                    .frame(width: 22, height: 22)
+                TextField("SF Symbol name".localized, text: $name)
+                    .onChange(of: name) { _, _ in compose() }
+            }
+            HStack {
+                Picker("Position".localized, selection: $position) {
+                    Text("Default".localized).tag("")
+                    ForEach(positions, id: \.self) { Text($0).tag($0) }
+                }
+                .onChange(of: position) { _, _ in compose() }
+                Picker("Render".localized, selection: $renderingMode) {
+                    Text("Default".localized).tag("")
+                    ForEach(renderingModes, id: \.self) { Text($0).tag($0) }
+                }
+                .onChange(of: renderingMode) { _, _ in compose() }
+            }
+            if renderingMode == "palette" {
+                HStack {
+                    Stepper("Palette colours: \(paletteCount)".localized, value: $paletteCount, in: 2...3)
+                        .onChange(of: paletteCount) { _, _ in compose() }
+                    ColorPicker("", selection: $paletteColour1).labelsHidden()
+                        .onChange(of: paletteColour1) { _, _ in compose() }
+                    ColorPicker("", selection: $paletteColour2).labelsHidden()
+                        .onChange(of: paletteColour2) { _, _ in compose() }
+                    if paletteCount == 3 {
+                        ColorPicker("", selection: $paletteColour3).labelsHidden()
+                            .onChange(of: paletteColour3) { _, _ in compose() }
+                    }
+                    Spacer()
+                }
+            } else {
+                HStack {
+                    Toggle("Colour".localized, isOn: $useColour)
+                        .onChange(of: useColour) { _, _ in compose() }
+                    ColorPicker("", selection: $colour).labelsHidden()
+                        .disabled(!useColour || renderingMode == "multicolour")
+                        .onChange(of: colour) { _, _ in compose() }
+                    Spacer()
+                }
+            }
+            HStack {
+                Toggle("Custom size".localized, isOn: $useSize)
+                    .onChange(of: useSize) { _, _ in compose() }
+                if useSize {
+                    Slider(value: $size, in: 8...48, step: 1)
+                        .onChange(of: size) { _, _ in compose() }
+                    Text("\(Int(size))")
+                }
+                Spacer()
+            }
+            if !symbol.isEmpty {
+                Text(symbol)
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundColor(.secondary)
+                    .textSelection(.enabled)
+            }
+        }
+    }
+}
+
 struct ConstructionKitView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent

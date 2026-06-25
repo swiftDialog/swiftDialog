@@ -58,9 +58,8 @@ struct CKButtonView: View {
                         .toggleStyle(.switch)
                     TextField("", text: $observedData.args.button1TextOption.value)
                 }
-                HStack {
-                    TextField("Symbol", text: $observedData.args.button1Symbol.value)
-                }
+                CKSymbolEditor(symbol: $observedData.args.button1Symbol.value,
+                               present: $observedData.args.button1Symbol.present)
             }
             VStack {
                 CKLabelView(label: "Button2".localized)
@@ -72,9 +71,8 @@ struct CKButtonView: View {
                         .toggleStyle(.switch)
                     TextField("", text: $observedData.args.button2TextOption.value)
                 }
-                HStack {
-                    TextField("Symbol", text: $observedData.args.button2Symbol.value)
-                }
+                CKSymbolEditor(symbol: $observedData.args.button2Symbol.value,
+                               present: $observedData.args.button2Symbol.present)
             }
             VStack {
                 CKLabelView(label: "Info Button".localized)
@@ -93,9 +91,8 @@ struct CKButtonView: View {
                     Text("Label: ".localized)
                     TextField("", text: $observedData.args.buttonInfoTextOption.value)
                 }
-                HStack {
-                    TextField("Symbol", text: $observedData.args.buttonInfoSymbol.value)
-                }
+                CKSymbolEditor(symbol: $observedData.args.buttonInfoSymbol.value,
+                               present: $observedData.args.buttonInfoSymbol.present)
                 HStack {
                     Text("Info Button Action: ".localized)
                     TextField("", text: $observedData.args.buttonInfoActionOption.value)
