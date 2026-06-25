@@ -54,7 +54,8 @@ struct UserInputState {
     var iconItems = [Icons]()
 }
 
-struct TextFieldState {
+struct TextFieldState: Identifiable, Equatable {
+    var id = UUID()
     var editor: Bool       = false
     var fileSelect: Bool   = false
     var fileType: String   = ""
@@ -106,7 +107,8 @@ struct DropDownItems: Equatable, Identifiable {
     var requiredfieldHighlight: Color = .clear
 }
 
-struct CheckBoxes {
+struct CheckBoxes: Identifiable, Equatable {
+    var id = UUID()
     var label: String
     var name: String = ""
     var icon: String = ""
@@ -127,7 +129,8 @@ struct CheckBoxes {
         }
 }
 
-struct ListItems: Codable {
+struct ListItems: Codable, Identifiable, Equatable {
+    var id = UUID()
     var title: String
     var subTitle: String = ""
     var icon: String = ""
@@ -140,6 +143,13 @@ struct ListItems: Codable {
     var progress: CGFloat = 0
     var action: String = ""
     var selected: Bool = false
+
+    // `id` is intentionally excluded so the encoded shape is unchanged
+    private enum CodingKeys: String, CodingKey {
+        case title, subTitle, icon, sfSymbol, sfColour, sfPicker
+        case iconAlpha, statusText, statusIcon, progress, action, selected
+    }
+
     var dictionary: [String: Any] {
             return ["title": title,
                     "subtitle": subTitle,

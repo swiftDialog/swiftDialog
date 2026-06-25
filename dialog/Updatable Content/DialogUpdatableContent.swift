@@ -708,12 +708,9 @@ final class DialogUpdatableContent: ObservableObject {
     @Published var listItemsArray: [ListItems]
     @Published var listItemUpdateRow: Int
 
-    @Published var requiredFieldsPresent: Bool
-
     @Published var showSheet: Bool
     @Published var sheetErrorMessage: String
 
-    @Published var updateView: Bool = true
     @Published var constructionKitShown: Bool = false
     
     /// Current card index for cards mode - used to force view recreation
@@ -755,8 +752,6 @@ final class DialogUpdatableContent: ObservableObject {
         listItemsArray = userInputState.listItems
         
         observedUserInputState = userInputState
-
-        requiredFieldsPresent = false
 
         showSheet = false
         sheetErrorMessage = ""

@@ -72,7 +72,9 @@ enum CKExport {
             for index in content.observedUserInputState.checkBoxes.indices {
                 json[appArguments.checkbox.long][index].dictionaryObject = content.observedUserInputState.checkBoxes[index].dictionary
             }
-            json[appArguments.checkboxStyle.long].stringValue = content.appProperties.checkboxControlStyle
+            if !content.appProperties.checkboxControlStyle.isEmpty {
+                json[appArguments.checkboxStyle.long].stringValue = content.appProperties.checkboxControlStyle
+            }
         }
 
         if content.appProperties.messageFontColour != .primary {
@@ -127,6 +129,10 @@ enum CKExport {
         }
         for image in content.imageArray {
             flags.append("--\(appArguments.mainImage.long) \(quote(image.path))")
+        }
+
+        if !content.observedUserInputState.checkBoxes.isEmpty && !content.appProperties.checkboxControlStyle.isEmpty {
+            flags.append("--\(appArguments.checkboxStyle.long) \(quote(content.appProperties.checkboxControlStyle))")
         }
 
         if content.appProperties.titleFontColour != .primary {

@@ -10,20 +10,18 @@ import SwiftUI
 struct CKTextEntryView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
-    //@State var textfieldContent: [TextFieldState]
     @State private var showHelp: Bool = false
 
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
-        //textfieldContent = userInputState.textFields
     }
 
     var body: some View {
-        
+
         VStack {
             CKLabelView(label: "Textfields".localized)
             HStack {
-                Toggle("Format output as JSON", isOn: $observedData.args.jsonOutPut.present)
+                Toggle("Format output as JSON".localized, isOn: $observedData.args.jsonOutPut.present)
                     .toggleStyle(.switch)
                 Spacer()
             }
@@ -37,10 +35,8 @@ struct CKTextEntryView: View {
                     let sdHelp = SDHelp(arguments: observedData.args)
                     CKHelpView(text: sdHelp.argument.textField.helpLong)
                 }
-                
-                
+
                 Button(action: {
-                    userInputState.textFields.append(TextFieldState(title: "New Text"))
                     observedData.textFieldArray.append(TextFieldState(title: "New Text"))
                     observedData.args.textField.present = true
                     appArguments.textField.present = true
@@ -49,97 +45,43 @@ struct CKTextEntryView: View {
                 })
                 Toggle("Show".localized, isOn: $observedData.args.textField.present)
                     .toggleStyle(.switch)
-                
-                //Button("Clear All") {
-                //    observedData.listItemPresent = false
-                //    observedData.listItemsArray = [ListItems]()
-                //}
-                
+
                 Spacer()
             }
             .padding(.bottom, 20)
             ScrollView {
-                //List {
-                ForEach(0..<userInputState.textFields.count, id: \.self) { item in
+                ForEach($observedData.textFieldArray) { $field in
                     HStack {
-                        //Image(systemName: "line.3.horizontal")
-                        //    .foregroundColor(.secondary)
-                        
-                        
-                        Toggle("Required".localized, isOn: $observedData.textFieldArray[item].required)
-                            .onChange(of: observedData.textFieldArray[item].required) { _, textRequired in
-                                observedData.requiredFieldsPresent.toggle()
-                                userInputState.textFields[item].required = textRequired
-                            }
+                        Toggle("Required".localized, isOn: $field.required)
                             .toggleStyle(.switch)
-                        
-                        Toggle("Confirm".localized, isOn: $observedData.textFieldArray[item].confirm)
-                            .onChange(of: observedData.textFieldArray[item].confirm) { _, textSecure in
-                                userInputState.textFields[item].confirm = textSecure
-                            }
+                        Toggle("Confirm".localized, isOn: $field.confirm)
                             .toggleStyle(.switch)
-                        Toggle("File Select".localized, isOn: $observedData.textFieldArray[item].fileSelect)
-                            .onChange(of: observedData.textFieldArray[item].fileSelect) { _, textSecure in
-                                userInputState.textFields[item].fileSelect = textSecure
-                            }
+                        Toggle("File Select".localized, isOn: $field.fileSelect)
                             .toggleStyle(.switch)
-                        //filetype
-                        TextField("File type".localized, text: $observedData.textFieldArray[item].fileType)
-                            .onChange(of: observedData.textFieldArray[item].fileType) { _, fileType in
-                                userInputState.textFields[item].fileType = fileType
-                            }
-                            .disabled(!observedData.textFieldArray[item].fileSelect)
-                        
-                        //filepath
-                        TextField("Initial path".localized, text: $observedData.textFieldArray[item].initialPath)
-                            .onChange(of: observedData.textFieldArray[item].initialPath) { _, initialPath in
-                                userInputState.textFields[item].initialPath = initialPath
-                            }
-                            .disabled(!observedData.textFieldArray[item].fileSelect)
-                        
-                        
+                        TextField("File type".localized, text: $field.fileType)
+                            .disabled(!field.fileSelect)
+                        TextField("Initial path".localized, text: $field.initialPath)
+                            .disabled(!field.fileSelect)
+
                         Spacer()
-                        
+
                         Button(action: {
-                            guard item >= 0 && item < observedData.textFieldArray.count else {
-                                writeLog("Could not delete textfield at position \(item)", logLevel: .info)
-                                return
-                            }
-                            writeLog("Delete textfield at position \(item)", logLevel: .info)
-                            userInputState.textFields.remove(at: item)
-                            observedData.textFieldArray.remove(at: item)
+                            writeLog("Delete textfield \(field.title)", logLevel: .info)
+                            observedData.textFieldArray.removeAll { $0.id == field.id }
                         }, label: {
                             Image(systemName: "trash")
                         })
                     }
                     HStack {
-                        TextField("Label".localized, text: $observedData.textFieldArray[item].title)
-                            .onChange(of: observedData.textFieldArray[item].title) { _, textTitle in
-                                userInputState.textFields[item].title = textTitle
-                            }
-                        TextField("Name".localized+": \(observedData.textFieldArray[item].title)", text: $observedData.textFieldArray[item].name)
-                            .onChange(of: observedData.textFieldArray[item].name) { _, textTitle in
-                                userInputState.textFields[item].name = textTitle
-                            }
-                        TextField("Default Value".localized, text: $observedData.textFieldArray[item].value)
-                            .onChange(of: observedData.textFieldArray[item].value) { _, textValue in
-                                userInputState.textFields[item].value = textValue
-                            }
-                        TextField("Prompt".localized, text: $observedData.textFieldArray[item].prompt)
-                            .onChange(of: observedData.textFieldArray[item].prompt) { _, textPrompt in
-                                userInputState.textFields[item].prompt = textPrompt
-                            }
+                        TextField("Label".localized, text: $field.title)
+                        TextField("Name".localized+": \(field.title)", text: $field.name)
+                        TextField("Default Value".localized, text: $field.value)
+                        TextField("Prompt".localized, text: $field.prompt)
                     }
                     .padding(.leading, 20)
                     HStack {
-                        TextField("Regex".localized, text: $observedData.textFieldArray[item].regex)
-                            .onChange(of: observedData.textFieldArray[item].regex) { _, textRegex in
-                                userInputState.textFields[item].regex = textRegex
-                            }
-                        TextField("Regex Error".localized, text: $observedData.textFieldArray[item].regexError)
-                            .onChange(of: observedData.textFieldArray[item].regexError) { _, textRegexError in
-                                userInputState.textFields[item].regexError = textRegexError
-                            }
+                        TextField("Regex".localized, text: $field.regex)
+                        TextField("Regex Error".localized, text: $field.regexError)
                     }
                     .padding(.leading, 20)
                     Divider()
@@ -149,11 +91,15 @@ struct CKTextEntryView: View {
                     withAnimation(.smooth) {
                         observedData.textFieldArray.move(fromOffsets: from, toOffset: to)
                     }
-                }                
+                }
                 Spacer()
+            }
+            // Single sync point: mirror the edited structure to the canonical
+            // userInputState the dialog runtime reads from.
+            .onChange(of: observedData.textFieldArray) { _, newValue in
+                userInputState.textFields = newValue
             }
         }
         .padding(20)
     }
 }
-

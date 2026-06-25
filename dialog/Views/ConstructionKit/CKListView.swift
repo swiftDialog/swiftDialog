@@ -15,16 +15,11 @@ struct CKListView: View {
         self.observedData = observedDialogContent
     }
 
-    func removeItems(at offsets: IndexSet) {
-        observedData.listItemsArray.remove(atOffsets: offsets)
-    }
-
     var body: some View {
         ScrollView {
             HStack {
                 Button(action: {
-                    observedData.listItemsArray.append(ListItems(title: "New Item", icon: "", statusText: "", statusIcon: "", progress: 0))
-                    userInputState.listItems.append(ListItems(title: "New Item", icon: "", statusText: "", statusIcon: "", progress: 0))
+                    observedData.listItemsArray.append(ListItems(title: "New Item"))
                     observedData.args.listItem.present = true
                 }, label: {
                     Image(systemName: "plus")
@@ -35,49 +30,32 @@ struct CKListView: View {
                 Spacer()
             }
 
-            ForEach(0..<observedData.listItemsArray.count, id: \.self) { item in
+            ForEach($observedData.listItemsArray) { $item in
                 VStack {
                     HStack {
                         CKIconPicker(
-                            icon: $observedData.listItemsArray[item].icon,
-                            sfPicker: $observedData.listItemsArray[item].sfPicker,
-                            sfSymbol: $observedData.listItemsArray[item].sfSymbol,
-                            sfColour: $observedData.listItemsArray[item].sfColour,
-                            opacity: observedData.listItemsArray[item].icon.isEmpty ? 0.5 : 1,
-                            onIconChange: { userInputState.listItems[item].icon = $0 }
+                            icon: $item.icon,
+                            sfPicker: $item.sfPicker,
+                            sfSymbol: $item.sfSymbol,
+                            sfColour: $item.sfColour,
+                            opacity: item.icon.isEmpty ? 0.5 : 1
                         )
-                        TextField("Title".localized, text: $observedData.listItemsArray[item].title)
-                            .onChange(of: observedData.listItemsArray[item].title) { _, textRequired in
-                                userInputState.listItems[item].title = textRequired
-                            }
-                        TextField("Sub Title".localized, text: $observedData.listItemsArray[item].subTitle)
-                            .onChange(of: observedData.listItemsArray[item].subTitle) { _, textRequired in
-                                userInputState.listItems[item].subTitle = textRequired
-                            }
+                        TextField("Title".localized, text: $item.title)
+                        TextField("Sub Title".localized, text: $item.subTitle)
                     }
                     HStack {
-                        TextField("Status Text".localized, text: $observedData.listItemsArray[item].statusText)
-                            .onChange(of: observedData.listItemsArray[item].statusText) { _, textRequired in
-                                userInputState.listItems[item].statusText = textRequired
-                            }
-                        Picker("Status".localized, selection: $observedData.listItemsArray[item].statusIcon) {
+                        TextField("Status Text".localized, text: $item.statusText)
+                        Picker("Status".localized, selection: $item.statusIcon) {
                             Text("").tag("")
                             ForEach(appDefaults.ckListStatusOptions, id: \.self) {
                                 Text($0)
                             }
-                            .onChange(of: observedData.listItemsArray[item].statusIcon) { _, textRequired in
-                                userInputState.listItems[item].statusIcon = textRequired
-                            }
                         }
-                        Slider(value: $observedData.listItemsArray[item].progress, in: 0...100)
-                            .onChange(of: observedData.listItemsArray[item].progress) { _, textRequired in
-                                userInputState.listItems[item].progress = textRequired
-                            }
-                        TextField("", value: $observedData.listItemsArray[item].progress, formatter: displayAsInt)
+                        Slider(value: $item.progress, in: 0...100)
+                        TextField("", value: $item.progress, formatter: displayAsInt)
                             .frame(width: 30)
                         Button(action: {
-                            observedData.listItemsArray.remove(at: item)
-                            userInputState.listItems.remove(at: item)
+                            observedData.listItemsArray.removeAll { $0.id == item.id }
                         }, label: {
                             Image(systemName: "trash")
                         })
@@ -89,6 +67,9 @@ struct CKListView: View {
             Spacer()
         }
         .padding(20)
+        // Single sync point to the canonical userInputState the list view renders from.
+        .onChange(of: observedData.listItemsArray) { _, newValue in
+            userInputState.listItems = newValue
+        }
     }
 }
-

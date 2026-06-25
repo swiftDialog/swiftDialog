@@ -11,18 +11,13 @@ import UniformTypeIdentifiers
 struct TextEntryView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
-    //@State var textfieldContent: [TextFieldState]
-    @State var datepickerID: [Int]
 
     var fieldwidth: CGFloat = 0
     var textFieldValidationOpacity: CGFloat = 0
 
     let dateFormatter = DateFormatter()
 
-    init(observedDialogContent: DialogUpdatableContent, textfieldContent: [TextFieldState]) {
-        // we take in textfieldContent but that just populates the State variable
-        // When the state variable is updated, the global textFields variable initiated in AppState.swift is updated
-
+    init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
         if !observedDialogContent.args.hideIcon.present { //} appArguments.hideIcon.present {
             fieldwidth = observedDialogContent.args.windowWidth.value.floatValue()
@@ -33,8 +28,6 @@ struct TextEntryView: View {
             writeLog("Displaying text entry")
             writeLog("\(userInputState.textFields.count) textfields detected")
         }
-        //self.textfieldContent = textfieldContent
-        datepickerID = Array(0...textfieldContent.count)
 
         if observedDialogContent.args.textFieldLiveValidation.present {
             textFieldValidationOpacity = 0.1
@@ -83,7 +76,7 @@ struct TextEntryView: View {
     var body: some View {
         // Guard against array size mismatch during card transitions
         let textFieldCount = observedData.textFieldArray.count
-        if observedData.args.textField.present && textFieldCount == userInputState.textFields.count && textFieldCount == datepickerID.count - 1 {
+        if observedData.args.textField.present && textFieldCount == userInputState.textFields.count {
             VStack {
                 ForEach(0..<textFieldCount, id: \.self) {index in
                     if observedData.textFieldArray[index].editor {
@@ -252,10 +245,10 @@ struct TextEntryView: View {
                                                 dateFormatter.timeStyle = .none
                                                 dateFormatter.dateStyle = .short
                                                 observedData.textFieldArray[index].value = dateFormatter.string(from: dateContent)
-                                                datepickerID[index] += 1 // stupid hack to make the picker disappear when a date is selected
                                             }
                                             .labelsHidden()
-                                            .id(datepickerID[index])
+                                            // Re-create the picker when the date changes so its calendar popover dismisses
+                                            .id("\(observedData.textFieldArray[index].id)\(observedData.textFieldArray[index].date)")
                                     }
                                 }
                             }
