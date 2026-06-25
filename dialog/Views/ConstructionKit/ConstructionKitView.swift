@@ -93,6 +93,75 @@ struct CKIconPicker: View {
     }
 }
 
+// Markdown editor for the message / infobox. Supports inline markdown, or loading a
+// .md file / URL: in sourced mode the bound value holds the loaded content for the live
+// preview while `source` keeps the reference that CKExport emits instead of the content.
+struct CKMarkdownEditor: View {
+    @Binding var text: String
+    @Binding var source: String
+    @Binding var present: Bool
+    var minHeight: CGFloat = 60
+
+    @State private var urlField: String = ""
+
+    private func load(_ reference: String) {
+        let trimmed = reference.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+        text = processTextString(getMarkdown(mdFilePath: trimmed), tags: appvars.systemInfo)
+        source = trimmed
+        present = true
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            if source.isEmpty {
+                HStack {
+                    Text("Use markdown formatting to style the text".localized)
+                    Spacer()
+                    Button("From file…".localized) {
+                        let panel = NSOpenPanel()
+                        panel.allowsMultipleSelection = false
+                        panel.canChooseDirectories = false
+                        if panel.runModal() == .OK, let path = panel.url?.path {
+                            load(path)
+                        }
+                    }
+                    TextField("…or URL".localized, text: $urlField)
+                        .frame(maxWidth: 180)
+                    Button("Load".localized) { load(urlField) }
+                        .disabled(urlField.isEmpty)
+                }
+                TextEditor(text: $text)
+                    .frame(minHeight: minHeight)
+                    .background(Color("editorBackgroundColour"))
+                    .border(.primary, width: 0.5)
+            } else {
+                HStack {
+                    Image(systemName: "doc.text")
+                    Text("Loaded from:".localized)
+                    Text(source)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Button("Reload".localized) { load(source) }
+                    Button("Edit inline".localized) { source = "" }
+                }
+                .font(.caption)
+                TextEditor(text: .constant(text))
+                    .frame(minHeight: minHeight)
+                    .background(Color("editorBackgroundColour"))
+                    .border(.primary, width: 0.5)
+                    .disabled(true)
+                    .opacity(0.85)
+                Text("Export references the source; the text above is a preview.".localized)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+}
+
 // Structured editor for a button symbol argument (button1symbol / button2symbol /
 // infobuttonsymbol). Presents the SF Symbol properties as individual controls and
 // recomposes the `name[,position,rendering,size,color|palette]` comma string that the

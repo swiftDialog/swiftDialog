@@ -54,9 +54,11 @@ struct CKCheckBoxesView: View {
             }
             .padding(.bottom, 20)
 
-            ScrollView {
+            List {
                 ForEach($observedData.observedUserInputState.checkBoxes) { $box in
                     HStack {
+                        Image(systemName: "line.3.horizontal")
+                            .foregroundColor(.secondary)
                         CKIconPicker(
                             icon: $box.icon,
                             sfPicker: $box.sfPicker,
@@ -78,7 +80,11 @@ struct CKCheckBoxesView: View {
                             Image(systemName: "trash")
                         })
                     }
-                    Divider()
+                }
+                .onMove { from, to in
+                    withAnimation(.smooth) {
+                        observedData.observedUserInputState.checkBoxes.move(fromOffsets: from, toOffset: to)
+                    }
                 }
             }
         }

@@ -89,6 +89,24 @@ struct CKWindowProperties: View {
                     Spacer()
                 }
                 HStack {
+                    Text("Screen Background Image".localized)
+                        .frame(width: 100, alignment: .leading)
+                    Toggle("", isOn: $observedData.args.screenBackground.present)
+                        .toggleStyle(.switch)
+                        .disabled(observedData.args.screenBackground.value.isEmpty)
+                    Button("Select".localized) {
+                        let panel = NSOpenPanel()
+                        panel.allowsMultipleSelection = false
+                        panel.canChooseDirectories = false
+                        panel.allowedContentTypes = [.image]
+                        if panel.runModal() == .OK {
+                            observedData.args.screenBackground.value = panel.url?.path ?? ""
+                            observedData.args.screenBackground.present = true
+                        }
+                    }
+                    TextField("", text: $observedData.args.screenBackground.value)
+                }
+                HStack {
                     Text("Movable".localized)
                         .frame(width: 100, alignment: .leading)
                     Toggle("", isOn: $observedData.args.movableWindow.present)

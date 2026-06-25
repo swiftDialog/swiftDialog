@@ -16,7 +16,7 @@ struct CKListView: View {
     }
 
     var body: some View {
-        ScrollView {
+        VStack {
             HStack {
                 Button(action: {
                     observedData.listItemsArray.append(ListItems(title: "New Item"))
@@ -30,41 +30,48 @@ struct CKListView: View {
                 Spacer()
             }
 
-            ForEach($observedData.listItemsArray) { $item in
-                VStack {
-                    HStack {
-                        CKIconPicker(
-                            icon: $item.icon,
-                            sfPicker: $item.sfPicker,
-                            sfSymbol: $item.sfSymbol,
-                            sfColour: $item.sfColour,
-                            opacity: item.icon.isEmpty ? 0.5 : 1
-                        )
-                        TextField("Title".localized, text: $item.title)
-                        TextField("Sub Title".localized, text: $item.subTitle)
-                    }
-                    HStack {
-                        TextField("Status Text".localized, text: $item.statusText)
-                        Picker("Status".localized, selection: $item.statusIcon) {
-                            Text("").tag("")
-                            ForEach(appDefaults.ckListStatusOptions, id: \.self) {
-                                Text($0)
-                            }
+            // List enables drag-to-reorder via .onMove
+            List {
+                ForEach($observedData.listItemsArray) { $item in
+                    VStack {
+                        HStack {
+                            Image(systemName: "line.3.horizontal")
+                                .foregroundColor(.secondary)
+                            CKIconPicker(
+                                icon: $item.icon,
+                                sfPicker: $item.sfPicker,
+                                sfSymbol: $item.sfSymbol,
+                                sfColour: $item.sfColour,
+                                opacity: item.icon.isEmpty ? 0.5 : 1
+                            )
+                            TextField("Title".localized, text: $item.title)
+                            TextField("Sub Title".localized, text: $item.subTitle)
                         }
-                        Slider(value: $item.progress, in: 0...100)
-                        TextField("", value: $item.progress, formatter: displayAsInt)
-                            .frame(width: 30)
-                        Button(action: {
-                            observedData.listItemsArray.removeAll { $0.id == item.id }
-                        }, label: {
-                            Image(systemName: "trash")
-                        })
+                        HStack {
+                            TextField("Status Text".localized, text: $item.statusText)
+                            Picker("Status".localized, selection: $item.statusIcon) {
+                                Text("").tag("")
+                                ForEach(appDefaults.ckListStatusOptions, id: \.self) {
+                                    Text($0)
+                                }
+                            }
+                            Slider(value: $item.progress, in: 0...100)
+                            TextField("", value: $item.progress, formatter: displayAsInt)
+                                .frame(width: 30)
+                            Button(action: {
+                                observedData.listItemsArray.removeAll { $0.id == item.id }
+                            }, label: {
+                                Image(systemName: "trash")
+                            })
+                        }
                     }
-                    Divider()
-                        .padding(20)
+                }
+                .onMove { from, to in
+                    withAnimation(.smooth) {
+                        observedData.listItemsArray.move(fromOffsets: from, toOffset: to)
+                    }
                 }
             }
-            Spacer()
         }
         .padding(20)
         // Single sync point to the canonical userInputState the list view renders from.

@@ -19,16 +19,15 @@ struct CKSidebarView: View {
         ScrollView { // infoBox
             VStack {
                 CKLabelView(label: "Infobox".localized)
-                Text("Use markdown formatting to style the text")
-                    .frame(width: .infinity, alignment: .leading)
                 HStack {
                     Toggle("Visible".localized, isOn: $observedData.args.infoBox.present)
                         .toggleStyle(.switch)
-                    TextEditor(text: $observedData.args.infoBox.value)
-                        .frame(height: 100)
-                        .background(Color("editorBackgroundColour"))
-                        .border(.primary, width: 0.5)
+                    Spacer()
                 }
+                CKMarkdownEditor(text: $observedData.args.infoBox.value,
+                                 source: $observedData.infoBoxSource,
+                                 present: $observedData.args.infoBox.present,
+                                 minHeight: 100)
             }
             VStack {
                 CKLabelView(label: "Infotext".localized)
@@ -44,4 +43,3 @@ struct CKSidebarView: View {
         Spacer()
     }
 }
-

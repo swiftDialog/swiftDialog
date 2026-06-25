@@ -15,7 +15,7 @@ struct CKMessageView: View {
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
     }
-    
+
     var body: some View {
         CKLabelView(label: "Message".localized)
         VStack {
@@ -32,19 +32,17 @@ struct CKMessageView: View {
                 }
                 Toggle("Vertical Position".localized, isOn: $observedData.args.messageVerticalAlignment.present)
                     .toggleStyle(.switch)
-                ColorPicker("Colour".localized,selection: $observedData.appProperties.messageFontColour)
+                ColorPicker("Colour".localized, selection: $observedData.appProperties.messageFontColour)
                 Button("Reset".localized) {
                     observedData.appProperties.messageFontColour = .primary
                 }
             }
-            Text("Use markdown formatting to style the text")
-                .frame(width: .infinity, alignment: .leading)
-            TextEditor(text: $observedData.args.messageOption.value)
-                .frame(minHeight: 50)
-                .background(Color("editorBackgroundColour"))
-                .border(.primary, width: 0.5)
+            CKMarkdownEditor(text: $observedData.args.messageOption.value,
+                             source: $observedData.messageSource,
+                             present: $observedData.args.messageOption.present,
+                             minHeight: 50)
         }
         .padding(20)
     }
-    
+
 }

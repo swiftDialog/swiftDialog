@@ -49,50 +49,52 @@ struct CKTextEntryView: View {
                 Spacer()
             }
             .padding(.bottom, 20)
-            ScrollView {
+            // List enables drag-to-reorder via .onMove
+            List {
                 ForEach($observedData.textFieldArray) { $field in
-                    HStack {
-                        Toggle("Required".localized, isOn: $field.required)
-                            .toggleStyle(.switch)
-                        Toggle("Confirm".localized, isOn: $field.confirm)
-                            .toggleStyle(.switch)
-                        Toggle("File Select".localized, isOn: $field.fileSelect)
-                            .toggleStyle(.switch)
-                        TextField("File type".localized, text: $field.fileType)
-                            .disabled(!field.fileSelect)
-                        TextField("Initial path".localized, text: $field.initialPath)
-                            .disabled(!field.fileSelect)
+                    VStack {
+                        HStack {
+                            Image(systemName: "line.3.horizontal")
+                                .foregroundColor(.secondary)
+                            Toggle("Required".localized, isOn: $field.required)
+                                .toggleStyle(.switch)
+                            Toggle("Confirm".localized, isOn: $field.confirm)
+                                .toggleStyle(.switch)
+                            Toggle("File Select".localized, isOn: $field.fileSelect)
+                                .toggleStyle(.switch)
+                            TextField("File type".localized, text: $field.fileType)
+                                .disabled(!field.fileSelect)
+                            TextField("Initial path".localized, text: $field.initialPath)
+                                .disabled(!field.fileSelect)
 
-                        Spacer()
+                            Spacer()
 
-                        Button(action: {
-                            writeLog("Delete textfield \(field.title)", logLevel: .info)
-                            observedData.textFieldArray.removeAll { $0.id == field.id }
-                        }, label: {
-                            Image(systemName: "trash")
-                        })
+                            Button(action: {
+                                writeLog("Delete textfield \(field.title)", logLevel: .info)
+                                observedData.textFieldArray.removeAll { $0.id == field.id }
+                            }, label: {
+                                Image(systemName: "trash")
+                            })
+                        }
+                        HStack {
+                            TextField("Label".localized, text: $field.title)
+                            TextField("Name".localized+": \(field.title)", text: $field.name)
+                            TextField("Default Value".localized, text: $field.value)
+                            TextField("Prompt".localized, text: $field.prompt)
+                        }
+                        .padding(.leading, 20)
+                        HStack {
+                            TextField("Regex".localized, text: $field.regex)
+                            TextField("Regex Error".localized, text: $field.regexError)
+                        }
+                        .padding(.leading, 20)
                     }
-                    HStack {
-                        TextField("Label".localized, text: $field.title)
-                        TextField("Name".localized+": \(field.title)", text: $field.name)
-                        TextField("Default Value".localized, text: $field.value)
-                        TextField("Prompt".localized, text: $field.prompt)
-                    }
-                    .padding(.leading, 20)
-                    HStack {
-                        TextField("Regex".localized, text: $field.regex)
-                        TextField("Regex Error".localized, text: $field.regexError)
-                    }
-                    .padding(.leading, 20)
-                    Divider()
-                        .padding(.bottom, 10)
                 }
                 .onMove { from, to in
                     withAnimation(.smooth) {
                         observedData.textFieldArray.move(fromOffsets: from, toOffset: to)
                     }
                 }
-                Spacer()
             }
             // Single sync point: mirror the edited structure to the canonical
             // userInputState the dialog runtime reads from.

@@ -13,12 +13,21 @@ enum CKExport {
 
     // Size-related values are stored on appProperties rather than the argument's
     // `.value`, so surface them as overrides keyed by the argument name.
-    private static func sizeOverrides(_ content: DialogUpdatableContent) -> [String: String] {
-        return [
+    private static func argumentOverrides(_ content: DialogUpdatableContent) -> [String: String] {
+        var overrides = [
             appArguments.iconSize.long: "\(Int(content.iconSize))",
             appArguments.windowWidth.long: "\(Int(content.appProperties.windowWidth))",
             appArguments.windowHeight.long: "\(Int(content.appProperties.windowHeight))"
         ]
+        // When the message / infobox is sourced from a markdown file or URL, export the
+        // reference rather than the loaded preview content.
+        if !content.messageSource.isEmpty {
+            overrides[appArguments.messageOption.long] = content.messageSource
+        }
+        if !content.infoBoxSource.isEmpty {
+            overrides[appArguments.infoBox.long] = content.infoBoxSource
+        }
+        return overrides
     }
 
     private static let skippedArguments = ["builder", "debug", "pid"]
@@ -27,7 +36,7 @@ enum CKExport {
     static func json(from content: DialogUpdatableContent, debug: Bool = false) -> String {
         var json = JSON()
         var jsonDEBUG = JSON()
-        let overrides = sizeOverrides(content)
+        let overrides = argumentOverrides(content)
 
         for child in Mirror(reflecting: content.args).children {
             guard let arg = child.value as? CommandlineArgument else { continue }
@@ -77,6 +86,12 @@ enum CKExport {
             }
         }
 
+        // bannerTitle is used as a flag (overlay the title on the banner); the mirror walk
+        // skips it because it has no value, so emit it explicitly when present.
+        if content.args.bannerTitle.present && content.args.bannerTitle.value.isEmpty {
+            json[appArguments.bannerTitle.long].string = "true"
+        }
+
         if content.appProperties.messageFontColour != .primary {
             json[appArguments.messageFont.long].dictionaryObject = ["colour": content.appProperties.messageFontColour.hexValue]
         }
@@ -98,7 +113,7 @@ enum CKExport {
     /// contain commas.
     static func command(from content: DialogUpdatableContent) -> String {
         var flags: [String] = []
-        let overrides = sizeOverrides(content)
+        let overrides = argumentOverrides(content)
         let collectionMarkers = [
             appArguments.textField.long,
             appArguments.checkbox.long,
@@ -133,6 +148,10 @@ enum CKExport {
 
         if !content.observedUserInputState.checkBoxes.isEmpty && !content.appProperties.checkboxControlStyle.isEmpty {
             flags.append("--\(appArguments.checkboxStyle.long) \(quote(content.appProperties.checkboxControlStyle))")
+        }
+
+        if content.args.bannerTitle.present && content.args.bannerTitle.value.isEmpty {
+            flags.append("--\(appArguments.bannerTitle.long)")
         }
 
         if content.appProperties.titleFontColour != .primary {
