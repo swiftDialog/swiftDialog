@@ -11,6 +11,15 @@ struct CKIconView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
 
+    // Local state for the shared icon picker's SF Symbol popover (the icon args
+    // only store the composed icon string).
+    @State private var iconSfPicker = false
+    @State private var iconSfSymbol = ""
+    @State private var iconSfColour = ""
+    @State private var overlaySfPicker = false
+    @State private var overlaySfSymbol = ""
+    @State private var overlaySfColour = ""
+
     init(observedDialogContent: DialogUpdatableContent) {
         self.observedData = observedDialogContent
     }
@@ -18,60 +27,36 @@ struct CKIconView: View {
     var body: some View {
         ScrollView { // icon and icon overlay
             VStack {
-                LabelView(label: "Icon".localized)
+                CKLabelView(label: "Icon".localized)
                 HStack {
-                    IconView(image: observedData.args.iconOption.value, defaultImage: "sf=questionmark.square.dashed")
-                        .frame(width: 48, height: 48)
-                        .opacity(observedData.args.iconOption.present ? 1 : 0.5)
-                        .onDrop(of: [.fileURL], isTargeted: nil) { providers in
-                            guard let provider = providers.first else { return false }
-                            
-                            _ = provider.loadObject(ofClass: URL.self) { url, _ in
-                                if let url = url {
-                                    DispatchQueue.main.async {
-                                        observedData.args.iconOption.value = url.path
-                                    }
-                                }
-                            }
-                            return true
-                        }
-                        .overlay(
-                                RoundedRectangle(cornerRadius: 2)
-                                    .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [5]))
-                                    .foregroundColor(.gray.opacity(0.5))
-                            )
-                    
+                    CKIconPicker(icon: $observedData.args.iconOption.value,
+                                 sfPicker: $iconSfPicker,
+                                 sfSymbol: $iconSfSymbol,
+                                 sfColour: $iconSfColour,
+                                 opacity: observedData.args.iconOption.present ? 1 : 0.5)
+
                     Toggle("Visible".localized, isOn: $observedData.args.iconOption.present)
                         .toggleStyle(.switch)
                     Toggle("Centred".localized, isOn: $observedData.args.centreIcon.present)
                         .toggleStyle(.switch)
                     Button("Select".localized) {
-                            let panel = NSOpenPanel()
-                            panel.allowsMultipleSelection = false
-                            panel.canChooseDirectories = false
-                            panel.allowedContentTypes = [.image, .application, .systemPreferencesPane]
-                            if panel.runModal() == .OK {
-                                observedData.args.iconOption.value = panel.url?.path ?? "<none>"
-                            }
-                          }
+                        let panel = NSOpenPanel()
+                        panel.allowsMultipleSelection = false
+                        panel.canChooseDirectories = false
+                        panel.allowedContentTypes = [.image, .application, .systemPreferencesPane]
+                        if panel.runModal() == .OK {
+                            observedData.args.iconOption.value = panel.url?.path ?? "<none>"
+                        }
+                    }
                     TextField("", text: $observedData.args.iconOption.value)
                 }
-                HStack {
-                    Button(action: {
-                        observedData.args.iconOption.value = "SF=\(observedData.args.iconOption.value)"
-                    }, label: {
-                        Text("SF Symbol")
-                    })
-                    Spacer()
-                }
-                LabelView(label: "Icon Size".localized)
+                CKLabelView(label: "Icon Size".localized)
                 HStack {
                     Slider(value: $observedData.iconSize, in: 0...400)
-                    //Text("Current value: \(observedDialogContent.iconSize, specifier: "%.0f")")
                     TextField("Size value:", value: $observedData.iconSize, formatter: displayAsInt)
                         .frame(width: 50)
                 }
-                LabelView(label: "Icon Alpha")
+                CKLabelView(label: "Icon Alpha")
                 HStack {
                     Slider(value: $observedData.iconAlpha, in: 0.0...1.0)
                     TextField("Alpha value:", value: $observedData.iconAlpha,
@@ -80,19 +65,25 @@ struct CKIconView: View {
                 }
             }
             VStack {
-                LabelView(label: "Overlay".localized)
+                CKLabelView(label: "Overlay".localized)
                 HStack {
+                    CKIconPicker(icon: $observedData.args.overlayIconOption.value,
+                                 sfPicker: $overlaySfPicker,
+                                 sfSymbol: $overlaySfSymbol,
+                                 sfColour: $overlaySfColour,
+                                 opacity: observedData.args.overlayIconOption.present ? 1 : 0.5)
+
                     Toggle("Visible".localized, isOn: $observedData.args.overlayIconOption.present)
                         .toggleStyle(.switch)
                     Button("Select".localized) {
-                            let panel = NSOpenPanel()
-                            panel.allowsMultipleSelection = false
-                            panel.canChooseDirectories = false
-                            panel.allowedContentTypes = [.image]
-                            if panel.runModal() == .OK {
-                                observedData.args.overlayIconOption.value = panel.url?.path ?? "<none>"
-                            }
-                          }
+                        let panel = NSOpenPanel()
+                        panel.allowsMultipleSelection = false
+                        panel.canChooseDirectories = false
+                        panel.allowedContentTypes = [.image]
+                        if panel.runModal() == .OK {
+                            observedData.args.overlayIconOption.value = panel.url?.path ?? "<none>"
+                        }
+                    }
                     TextField("", text: $observedData.args.overlayIconOption.value)
                 }
             }
@@ -101,4 +92,3 @@ struct CKIconView: View {
         Spacer()
     }
 }
-

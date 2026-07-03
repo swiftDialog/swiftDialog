@@ -180,7 +180,7 @@ struct MessageContent: View {
                             .border(observedData.appProperties.debugBorderColour, width: 2)
                             .frame(maxWidth: dataEntryMaxWidth)
                     case observedData.appProperties.viewOrder.firstIndex(of: ViewType.textfield.rawValue):
-                        TextEntryView(observedDialogContent: observedData, textfieldContent: userInputState.textFields)
+                        TextEntryView(observedDialogContent: observedData)
                             .id(observedData.currentCardIndex)
                             .padding(.bottom, appDefaults.contentPadding)
                             .border(observedData.appProperties.debugBorderColour, width: 2)

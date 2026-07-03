@@ -708,13 +708,16 @@ final class DialogUpdatableContent: ObservableObject {
     @Published var listItemsArray: [ListItems]
     @Published var listItemUpdateRow: Int
 
-    @Published var requiredFieldsPresent: Bool
-
     @Published var showSheet: Bool
     @Published var sheetErrorMessage: String
 
-    @Published var updateView: Bool = true
     @Published var constructionKitShown: Bool = false
+
+    // Builder: markdown source references (file path / URL). When set, the message /
+    // infobox value holds the loaded content for the live preview, but exports emit the
+    // reference instead of the rendered markdown.
+    @Published var messageSource: String = ""
+    @Published var infoBoxSource: String = ""
     
     /// Current card index for cards mode - used to force view recreation
     @Published var currentCardIndex: Int = 0
@@ -761,8 +764,6 @@ final class DialogUpdatableContent: ObservableObject {
         listItemsArray = userInputState.listItems
         
         observedUserInputState = userInputState
-
-        requiredFieldsPresent = false
 
         showSheet = false
         sheetErrorMessage = ""

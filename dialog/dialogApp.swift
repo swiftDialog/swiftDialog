@@ -128,7 +128,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             activateDialog(appArguments.notificationStyle.value.contains("pseudo"))
 
             // show Dock icon
-            NSApp.setActivationPolicy((appArguments.showDockIcon.present || appArguments.dockIcon.present) ? .regular : .accessory)
+            NSApp.setActivationPolicy((appArguments.showDockIcon.present || appArguments.dockIcon.present || appArguments.constructionKit.present) ? .regular : .accessory)
 
             // Set Dock Icon
             if appArguments.dockIcon.present {

@@ -63,6 +63,8 @@ struct ButtonBarView: View {
                                     exitCode: 3,
                                     observedData: observedData
                         )
+                        // re-parse the symbol spec when it changes (e.g. live builder edits)
+                        .id(observedData.args.buttonInfoSymbol.value)
                     }
                     if observedData.args.timerBar.present {
                         TimerView(progressSteps: progressSteps, visible: !observedData.args.hideTimerBar.present, observedDialogContent: observedData)
@@ -101,7 +103,7 @@ struct ButtonBarView: View {
                           shouldQuit: cardState.isCardsMode ? false : true,
                           exitCode: 2,
                           observedData: observedData
-                )),
+                ).id(cardState.isCardsMode ? "" : observedData.args.button2Symbol.value)),
                 // Button 1: OK in normal mode, Next/Finish in cards mode
                 AnyView(NewButton(label: cardState.isCardsMode
                           ? (cardState.isLastCard ? (observedData.args.button1TextOption.value == appDefaults.button1Default ? "Finish".localized : observedData.args.button1TextOption.value) : observedData.args.cardsNextButtonText.value)
@@ -120,7 +122,7 @@ struct ButtonBarView: View {
                           shouldQuit: cardState.isCardsMode ? cardState.isLastCard : true,
                           exitCode: 0,
                           observedData: observedData
-                ))
+                ).id(observedData.args.button1Symbol.value))
             ]
 
             // if displaying stack style, reverse the order so the default button is at the bottom
