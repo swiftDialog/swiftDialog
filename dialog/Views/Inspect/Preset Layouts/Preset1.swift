@@ -167,6 +167,18 @@ struct Preset1View: View, InspectLayoutProtocol {
                         tintColor: primaryColor
                     )
                     .padding(.top, 20 * scaleFactor)
+
+                    // Single motion source for the whole list — one spinner here in the
+                    // sidebar, not one per active row. Rows report state with static dots.
+                    if !inspectState.downloadingItems.isEmpty {
+                        HStack(spacing: 8) {
+                            ProgressView().controlSize(.small)
+                            Text("Installing…")
+                                .font(.system(size: 12))
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.top, 10 * scaleFactor)
+                    }
                 }
 
                 Spacer()
@@ -410,6 +422,12 @@ struct Preset1View: View, InspectLayoutProtocol {
         .padding(.leading)
         .padding(.trailing, 24)
         .padding(.vertical, 8)
+        .background(
+            // Subtle tint marks the actively-installing row without any motion.
+            PresetCommonViews.resolveInstallStatus(for: item, state: inspectState) == .active
+                ? primaryColor.opacity(0.06)
+                : Color.clear
+        )
     }
 
     // MARK: - Sorting & Status
@@ -490,21 +508,8 @@ struct Preset1View: View, InspectLayoutProtocol {
     // MARK: - Validation Support
 
     private func hasValidationWarning(for item: InspectConfig.ItemConfig) -> Bool {
-        // Only check validation for completed items  
-        guard inspectState.completedItems.contains(item.id) else { return false }
-        
-        // Check if item has any plist validation configuration
-        let hasPlistValidation = item.plistKey != nil || 
-                               inspectState.plistSources?.contains(where: { source in
-                                   item.paths.contains(source.path)
-                               }) == true
-        
-        // If item has plist validation, check the results
-        if hasPlistValidation {
-            return !(inspectState.plistValidationResults[item.id] ?? true)
-        }
-        
-        return false
+        // Delegates to the shared single source of truth (PresetCommonViews).
+        PresetCommonViews.hasValidationWarning(for: item, state: inspectState)
     }
 
     private func getItemStatusWithValidation(for item: InspectConfig.ItemConfig) -> String {
@@ -535,8 +540,8 @@ struct Preset1View: View, InspectLayoutProtocol {
     private func statusIndicatorWithValidation(for item: InspectConfig.ItemConfig) -> some View {
         let size: CGFloat = 20 * scaleFactor
 
-        if inspectState.failedItems.contains(item.id) {
-            // Failed - show red X
+        switch PresetCommonViews.resolveInstallStatus(for: item, state: inspectState) {
+        case .failed:
             Circle()
                 .fill(Color.red)
                 .frame(width: size, height: size)
@@ -546,27 +551,39 @@ struct Preset1View: View, InspectLayoutProtocol {
                         .foregroundStyle(.white)
                 )
                 .help("Installation failed")
-        } else if inspectState.completedItems.contains(item.id) {
-            // Completed - check for validation warnings
+        case .completed:
             Circle()
-                .fill(hasValidationWarning(for: item) ? Color.orange : Color.green)
+                .fill(Color.green)
                 .frame(width: size, height: size)
                 .overlay(
-                    Image(systemName: hasValidationWarning(for: item) ? "exclamationmark" : "checkmark")
+                    Image(systemName: "checkmark")
                         .font(.system(size: size * 0.6, weight: .bold))
                         .foregroundStyle(.white)
                 )
-                .help(hasValidationWarning(for: item) ?
-                      "Configuration validation failed - check plist settings" :
-                      "Installed and validated")
-        } else if inspectState.downloadingItems.contains(item.id) {
-            // Downloading — tint with brand color
-            ProgressView()
-                .scaleEffect(0.7)
-                .tint(primaryColor)
+                .help("Installed and validated")
+        case .completedWithWarning:
+            Circle()
+                .fill(Color.orange)
                 .frame(width: size, height: size)
-        } else {
-            // Pending
+                .overlay(
+                    Image(systemName: "exclamationmark")
+                        .font(.system(size: size * 0.6, weight: .bold))
+                        .foregroundStyle(.white)
+                )
+                .help("Configuration validation failed - check plist settings")
+        case .active:
+            // Static filled accent dot with a soft halo — the header spinner owns the
+            // motion, so N concurrent installs no longer spawn N spinning rows.
+            Circle()
+                .fill(primaryColor.opacity(0.18))
+                .frame(width: size, height: size)
+                .overlay(
+                    Circle()
+                        .fill(primaryColor)
+                        .frame(width: size * 0.5, height: size * 0.5)
+                )
+                .help("Installing…")
+        case .pending:
             Circle()
                 .stroke(Color.gray.opacity(0.3), lineWidth: 2)
                 .frame(width: size, height: size)

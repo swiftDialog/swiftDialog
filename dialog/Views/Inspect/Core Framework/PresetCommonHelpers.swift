@@ -66,6 +66,40 @@ struct PresetCommonViews {
         }
     }
 
+    // MARK: Install Row Status (shared decision for preset item indicators)
+
+    /// Resolved status for a single install/monitor row, derived once from InspectState's
+    /// membership sets + validation results. Shared by Preset1/2/3 so the state *decision*
+    /// lives in one place while each preset renders it in its own visual language.
+    enum InstallRowStatus: Equatable {
+        case pending
+        case active                 // in downloadingItems (downloading / installing)
+        case completed
+        case completedWithWarning   // completed but plist validation failed
+        case failed
+    }
+
+    static func resolveInstallStatus(for item: InspectConfig.ItemConfig, state: InspectState) -> InstallRowStatus {
+        if state.failedItems.contains(item.id) { return .failed }
+        if state.completedItems.contains(item.id) {
+            return hasValidationWarning(for: item, state: state) ? .completedWithWarning : .completed
+        }
+        if state.downloadingItems.contains(item.id) { return .active }
+        return .pending
+    }
+
+    /// Single source of truth for the completed-but-validation-failed (orange) state.
+    /// Previously copy-pasted verbatim across Preset1/2/3.
+    static func hasValidationWarning(for item: InspectConfig.ItemConfig, state: InspectState) -> Bool {
+        guard state.completedItems.contains(item.id) else { return false }
+        let hasPlistValidation = item.plistKey != nil ||
+            state.plistSources?.contains(where: { item.paths.contains($0.path) }) == true
+        if hasPlistValidation {
+            return !(state.plistValidationResults[item.id] ?? true)
+        }
+        return false
+    }
+
     // MARK: Button Area
     @ViewBuilder
     static func buttonArea(

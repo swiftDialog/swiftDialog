@@ -368,10 +368,16 @@ struct Preset2View: View, InspectLayoutProtocol {
                     .frame(maxWidth: 700 * scaleFactor)
                     .tint(Color(hex: inspectState.uiConfiguration.highlightColor))
 
-                // Progress text (customizable via uiLabels.progressFormat)
-                Text(getProgressText())
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                // Progress text (customizable via uiLabels.progressFormat), with the
+                // list's single spinner beside it — one motion source for all cards.
+                HStack(spacing: 8) {
+                    if !inspectState.downloadingItems.isEmpty {
+                        ProgressView().controlSize(.small)
+                    }
+                    Text(getProgressText())
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
             .padding(.horizontal, 48 * scaleFactor)
             .padding(.top, 12 * scaleFactor)
@@ -718,21 +724,8 @@ private struct Preset2ItemCardView: View {
     }
 
     private var hasValidationWarning: Bool {
-        // Only check validation for completed items
-        guard isCompleted else { return false }
-        
-        // Check if item has any plist validation configuration
-        let hasPlistValidation = item.plistKey != nil || 
-                               inspectState.plistSources?.contains(where: { source in
-                                   item.paths.contains(source.path)
-                               }) == true
-        
-        // If item has plist validation, check the results
-        if hasPlistValidation {
-            return !(inspectState.plistValidationResults[item.id] ?? true)
-        }
-        
-        return false
+        // Delegates to the shared single source of truth (PresetCommonViews).
+        PresetCommonViews.hasValidationWarning(for: item, state: inspectState)
     }
 
     private func getStatusText() -> String {
@@ -869,10 +862,17 @@ private struct Preset2ItemCardView: View {
                                       "Configuration validation failed - check plist settings" :
                                       "\(getStatusText()) and validated")
                         } else if isDownloading {
-                            ProgressView()
-                                .scaleEffect(0.7)
-                                .tint(Color(hex: highlightColor))
+                            // Static active badge — the single header spinner owns the
+                            // motion, so a carousel of active cards doesn't spin N times.
+                            Circle()
+                                .fill(Color(hex: highlightColor))
                                 .frame(width: 26 * scale, height: 26 * scale)
+                                .overlay(
+                                    Circle()
+                                        .fill(.white)
+                                        .frame(width: 9 * scale, height: 9 * scale)
+                                )
+                                .help("Installing…")
                         }
                     }
                     Spacer()

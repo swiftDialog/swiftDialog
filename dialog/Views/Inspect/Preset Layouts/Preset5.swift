@@ -2641,10 +2641,11 @@ struct Preset5View: View {
             .frame(height: 5)
             .frame(maxWidth: 440)
             HStack(spacing: 8) {
+                // Completion is marked with a checkmark; in-progress motion is already
+                // conveyed by the active carousel tile's spinner and the animated bar
+                // above — a second spinner here is redundant.
                 if cadenceMonitor.isComplete {
                     Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
-                } else {
-                    ProgressView().controlSize(.small)
                 }
                 Text(cadenceMonitor.currentMessage ?? (cadenceMonitor.isComplete ? "Finished" : ""))
                     .font(.system(size: 15))

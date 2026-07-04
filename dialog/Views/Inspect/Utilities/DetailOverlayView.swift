@@ -273,15 +273,27 @@ struct DetailOverlayView: View {
             // Currently installing items
             if !inspectState.downloadingItems.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Currently Installing")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.blue)
+                    // Header owns the single spinner — motion lives in exactly one
+                    // place, so N concurrent installs don't spawn N competing gears.
+                    HStack(spacing: 8) {
+                        Text("Currently Installing")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundStyle(.blue)
+                        ProgressView()
+                            .controlSize(.small)
+                        Spacer()
+                    }
 
                     ForEach(inspectState.items.filter { inspectState.downloadingItems.contains($0.id) }, id: \.id) { item in
                         HStack(spacing: 8) {
-                            ProgressView()
-                                .scaleEffect(0.6)
+                            // Static "active" dot — each row reports its own state
+                            // without spinning; the header spinner carries the motion.
+                            Circle()
+                                .fill(Color.blue)
+                                .frame(width: 8, height: 8)
+                                .padding(3)
+                                .background(Circle().fill(Color.blue.opacity(0.18)))
                             Text(item.displayName)
                                 .font(.caption)
                                 .fontWeight(.medium)
