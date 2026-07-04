@@ -406,6 +406,13 @@ class Config {
                     print("🎨 CONFIG: No brandPalette found in config")
                 }
 
+                // Coerce quoted numbers/bools (e.g. "wallpaperMultiSelect": "2") to their
+                // schema-declared scalar types before strict Codable decoding — tolerant of
+                // configs from MDM/templating tools that emit everything as strings.
+                if let coerced = InspectConfigCoercion.coerceScalars(in: jsonObject) as? [String: Any] {
+                    jsonObject = coerced
+                }
+
                 if let modifiedData = try? JSONSerialization.data(withJSONObject: jsonObject, options: []) {
                     jsonData = modifiedData
                 }
@@ -1495,5 +1502,124 @@ class Config {
         }
         
         return buttonConfig
+    }
+}
+
+/// Tolerant scalar coercion for inspect config JSON, applied *before* `Codable` decoding.
+///
+/// Config authors and templating / orchestration tools (MDM payloads, ignitecli, Jamf,
+/// etc.) routinely emit numbers and booleans as quoted strings — e.g.
+/// `"wallpaperMultiSelect": "2"` or `"enabled": "true"`. swiftDialog's synthesised
+/// `Codable` conformances decode strictly, so those configs fail with a `typeMismatch`
+/// ("expected Int"). This pass coerces loosely-typed scalar values for the fields the
+/// schema declares as integer / number / boolean, so `"2"` and `2` both decode.
+///
+/// The field-name sets are DERIVED FROM `dialog/Views/Inspect/inspect-config.schema.json`:
+/// only names carrying a *single unambiguous* scalar type across the entire schema are
+/// listed. Names that appear with mixed types (e.g. `value`, `warning`, `passed`,
+/// `blocking` — sometimes string) are intentionally excluded so a legitimate string is
+/// never corrupted. Coercion is idempotent — correctly-typed values pass through unchanged.
+/// Regenerate after editing the schema by collecting `properties` whose `type` is exactly
+/// one of integer/number/boolean and dropping any name seen with another type.
+enum InspectConfigCoercion {
+
+    /// Schema fields declared only as `integer`.
+    static let integerFields: Set<String> = [
+        "bannerHeight", "bentoColumns", "blockIndex", "cacheDuration", "captureGroup",
+        "column", "columnSpan", "currentIndex", "currentPhase", "errorDetectionThreshold",
+        "exitCode", "gridColumns", "guiIndex", "guidanceBlockIndex", "height", "iconsize",
+        "maxCheckDetails", "maxLength", "plistRecheckInterval", "processingDuration",
+        "recheckInterval", "retryCount", "row", "rowSpan", "scanInterval", "scriptTimeout",
+        "shellTimeout", "sideInterval", "sideMessageInterval", "tokenRefreshInterval",
+        "total", "waitLargeOverrideTime", "waitSmallOverrideTime", "waitWarningTime",
+        "wallpaperColumns", "wallpaperMultiSelect", "width",
+    ]
+
+    /// Schema fields declared only as `number` (floating point).
+    static let numberFields: Set<String> = [
+        "assistantImageHeight", "autoAdvanceDelay", "backgroundOpacity", "bentoGap",
+        "bentoRowHeight", "bentoSidebarRatio", "cadenceInterval", "cadenceMinDwell",
+        "cornerRadius", "delay", "dismissDelay", "excellent", "good", "guideImageRatio",
+        "heroImagePadding", "heroImageSize", "iconSize", "imageHeight",
+        "imageRotationInterval", "imageWidth", "installationScale", "introScale",
+        "introVerticalOffset", "logoMaxWidth", "max", "maxHeight", "maxWidth",
+        "mediaHeight", "mediaRatio", "min", "minDwell", "monitorRefreshInterval",
+        "opacity", "outroScale", "outroVerticalOffset", "padding", "portalHeight",
+        "progress", "retryDelay", "scale", "showcaseImageHeight", "step", "thumbnailSize",
+        "timeout", "verticalOffset", "videoHeight", "wallpaperThumbnailHeight", "webHeight",
+    ]
+
+    /// Schema fields declared only as `boolean`.
+    static let booleanFields: Set<String> = [
+        "allowContinueWithoutSelection", "allowImageZoom", "allowNavigationDuringProcessing",
+        "allowOverride", "autoAdvance", "autoAdvanceOnComplete", "autoColor", "autoDiscover",
+        "autoDismiss", "autoEnableButton", "autoMatch", "autoTransition", "autoplay", "bold",
+        "button1disabled", "button2visible", "cacheContentForOffline", "debugMode",
+        "enableStatusColors", "enabled", "ephemeralSession", "hideSystemDetails",
+        "highlightCells", "imageBorder", "isCritical", "languagePicker", "mediaAutoplay",
+        "mediaShowArrows", "mediaShowDots", "mergeWithExisting", "numbered", "observeOnly",
+        "openExternalLinksInBrowser", "opensOverlay", "portalShowHeader", "portalShowRefetch",
+        "requireManualConfirm", "required", "resumable", "returnSelections", "secure",
+        "selectable", "selfServiceOnly", "showAccentBorder", "showArrows", "showBackButton",
+        "showBlockingState", "showCompletionState", "showDividers", "showDots",
+        "showNavigationArrows", "showOnIntro", "showOnMain", "showOnSummary", "showOnce",
+        "showProgressDots", "showProgressInfo", "showStepCounter", "showSystemInfo",
+        "showThumbnails", "skipIfComplete", "skipPortal", "startFromEnd", "useUserDefaults",
+        "visible", "waitForExternalTrigger", "wallpaperShowPath", "wide",
+        "writeOnDialogExit", "writeOnStepComplete",
+    ]
+
+    /// Recursively coerce scalar values in a parsed-JSON object graph
+    /// (`[String: Any]` / `[Any]` as produced by `JSONSerialization`).
+    static func coerceScalars(in value: Any) -> Any {
+        if let dict = value as? [String: Any] {
+            var out = [String: Any](minimumCapacity: dict.count)
+            for (key, val) in dict {
+                if val is [String: Any] || val is [Any] {
+                    out[key] = coerceScalars(in: val)   // nested container — recurse
+                } else if integerFields.contains(key), let i = asInt(val) {
+                    out[key] = i
+                } else if numberFields.contains(key), let d = asDouble(val) {
+                    out[key] = d
+                } else if booleanFields.contains(key), let b = asBool(val) {
+                    out[key] = b
+                } else {
+                    out[key] = val
+                }
+            }
+            return out
+        }
+        if let arr = value as? [Any] {
+            return arr.map { coerceScalars(in: $0) }
+        }
+        return value
+    }
+
+    // MARK: Scalar parsers (idempotent: already-correct values pass through)
+
+    private static func asInt(_ v: Any) -> Int? {
+        if let i = v as? Int { return i }
+        if let s = v as? String, let i = Int(s.trimmingCharacters(in: .whitespaces)) { return i }
+        if let d = v as? Double, d == d.rounded() { return Int(d) }
+        return nil
+    }
+
+    private static func asDouble(_ v: Any) -> Double? {
+        if let d = v as? Double { return d }
+        if let i = v as? Int { return Double(i) }
+        if let s = v as? String, let d = Double(s.trimmingCharacters(in: .whitespaces)) { return d }
+        return nil
+    }
+
+    private static func asBool(_ v: Any) -> Bool? {
+        if let b = v as? Bool { return b }
+        if let s = v as? String {
+            switch s.trimmingCharacters(in: .whitespaces).lowercased() {
+            case "true", "yes", "1": return true
+            case "false", "no", "0": return false
+            default: return nil
+            }
+        }
+        return nil
     }
 }
