@@ -341,7 +341,7 @@ struct WallpaperTileView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 8 * scaleFactor))
                     .overlay(
                         RoundedRectangle(cornerRadius: 8 * scaleFactor)
-                            .stroke(isSelected ? accentColor : Color.clear, lineWidth: 3)
+                            .stroke(isSelected ? accentColor : Color.clear, lineWidth: 2.5)
                     )
                     .overlay(
                         // Show monitor badge(s) or checkmark
@@ -373,8 +373,9 @@ struct WallpaperTileView: View {
                         },
                         alignment: .topTrailing
                     )
-                    .shadow(color: isSelected ? accentColor.opacity(0.3) : .black.opacity(0.1),
-                            radius: isSelected ? 8 : 4,
+                    // Neutral drop shadow (no colored halo) — selection reads via the crisp ring.
+                    .shadow(color: .black.opacity(isSelected ? 0.16 : 0.1),
+                            radius: isSelected ? 5 : 4,
                             y: 2)
 
                 // Optional title - fixed width to match tile

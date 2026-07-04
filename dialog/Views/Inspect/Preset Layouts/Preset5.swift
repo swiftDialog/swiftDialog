@@ -4615,42 +4615,43 @@ struct Preset5View: View {
     private func introDropdownView(block: InspectConfig.GuidanceContent) -> some View {
         let selection = formBinding(for: block.id, type: "dropdown")
         let options = block.options ?? []
-        let isRequired = block.required ?? false
+        let brandColor = branding.primaryColor
 
         formFieldContainer {
-            HStack(spacing: 8) {
-                if let label = block.label ?? block.content {
-                    Text(label)
-                        .font(.system(size: 14))
+            // Centered vertical option list (Apple Setup Assistant style) — replaces the
+            // label-left / native-menu form row. Each option is a tappable row; the selected
+            // one gets a checkmark + subtle brand tint. No inline label (the step title names it).
+            VStack(alignment: .leading, spacing: 4) {
+                ForEach(options, id: \.self) { option in
+                    HStack(spacing: 10) {
+                        Text(option)
+                            .font(.system(size: 14))
+                            .foregroundStyle(.primary)
 
-                    if isRequired {
-                        Text("*")
-                            .foregroundStyle(.orange)
-                            .font(.system(size: 12, weight: .medium))
+                        Spacer()
+
+                        if selection.wrappedValue == option {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(brandColor)
+                        }
                     }
-
-                    if let helpText = block.helpText {
-                        formHelpButton(helpText: helpText)
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 14)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(selection.wrappedValue == option
+                                  ? brandColor.opacity(0.10)
+                                  : Color(NSColor.controlBackgroundColor).opacity(0.4))
+                    )
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.12)) {
+                            selection.wrappedValue = option
+                        }
                     }
                 }
-
-                Spacer()
-
-                Picker("", selection: selection) {
-                    if selection.wrappedValue.isEmpty {
-                        Text("Select...").tag("")
-                    }
-                    ForEach(options, id: \.self) { option in
-                        Text(option).tag(option)
-                    }
-                }
-                .pickerStyle(.menu)
-                .frame(minWidth: 140)
             }
-            .padding(.vertical, 6)
-            .padding(.horizontal, 12)
-            .background(Color(NSColor.controlBackgroundColor).opacity(0.4))
-            .clipShape(RoundedRectangle(cornerRadius: 6))
         }
         .onAppear {
             if let defaultValue = block.value, formValues[block.id ?? ""] == nil {
