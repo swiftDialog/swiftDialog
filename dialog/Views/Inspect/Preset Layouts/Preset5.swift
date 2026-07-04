@@ -4549,7 +4549,7 @@ struct Preset5View: View {
     /// Checkbox form element view - clean native style
     @ViewBuilder
     private func introCheckboxView(block: InspectConfig.GuidanceContent) -> some View {
-        let isChecked = formBoolBinding(for: block.id)
+        let isChecked = formBoolBinding(for: block.id, type: "checkbox")
         let isRequired = block.required ?? false
 
         formFieldContainer {
@@ -4579,7 +4579,7 @@ struct Preset5View: View {
     /// Toggle form element view - clean row style
     @ViewBuilder
     private func introToggleView(block: InspectConfig.GuidanceContent) -> some View {
-        let isOn = formBoolBinding(for: block.id)
+        let isOn = formBoolBinding(for: block.id, type: "toggle")
         let isRequired = block.required ?? false
 
         formFieldContainer {
@@ -4613,7 +4613,7 @@ struct Preset5View: View {
     /// Dropdown form element view - clean inline style
     @ViewBuilder
     private func introDropdownView(block: InspectConfig.GuidanceContent) -> some View {
-        let selection = formBinding(for: block.id)
+        let selection = formBinding(for: block.id, type: "dropdown")
         let options = block.options ?? []
         let isRequired = block.required ?? false
 
@@ -4662,7 +4662,7 @@ struct Preset5View: View {
     /// Radio button form element view - vertical list with selection highlight
     @ViewBuilder
     private func introRadioView(block: InspectConfig.GuidanceContent) -> some View {
-        let selection = formBinding(for: block.id)
+        let selection = formBinding(for: block.id, type: "radio")
         let options = block.options ?? []
         let isRequired = block.required ?? false
         let brandColor = branding.primaryColor
@@ -4725,7 +4725,7 @@ struct Preset5View: View {
     /// Textfield form element view - clean labeled input
     @ViewBuilder
     private func introTextfieldView(block: InspectConfig.GuidanceContent) -> some View {
-        let text = formBinding(for: block.id)
+        let text = formBinding(for: block.id, type: "textfield")
         let isRequired = block.required ?? false
         let isSecure = block.secure ?? false
 
@@ -4780,6 +4780,7 @@ struct Preset5View: View {
                 formValues[block.id ?? ""] = "\(Int(newValue))"
                 if let fieldId = block.id {
                     preferencesService?.setValue(Int(newValue), forKey: fieldId)
+                    inspectState.writeToInteractionLog("slider:\(fieldId):\(Int(newValue))")
                 }
             }
         )
@@ -5014,8 +5015,9 @@ struct Preset5View: View {
 
     // MARK: - Form State Management
 
-    /// Create a binding for a form field value
-    private func formBinding(for id: String?) -> Binding<String> {
+    /// Create a binding for a form field value. `type` tags the live interaction-log line
+    /// (dropdown/radio/textfield) so external monitors can react mid-session.
+    private func formBinding(for id: String?, type: String) -> Binding<String> {
         let key = id ?? ""
         return Binding(
             get: { formValues[key] ?? "" },
@@ -5024,13 +5026,15 @@ struct Preset5View: View {
                 // Write to preferences immediately
                 if let fieldId = id {
                     preferencesService?.setValue(newValue, forKey: fieldId)
+                    inspectState.writeToInteractionLog("\(type):\(fieldId):\(newValue)")
                 }
             }
         )
     }
 
-    /// Create a binding for a boolean form field (checkbox/toggle)
-    private func formBoolBinding(for id: String?) -> Binding<Bool> {
+    /// Create a binding for a boolean form field (checkbox/toggle). `type` tags the live
+    /// interaction-log line so external monitors can react mid-session.
+    private func formBoolBinding(for id: String?, type: String) -> Binding<Bool> {
         let key = id ?? ""
         return Binding(
             get: { formValues[key] == "true" },
@@ -5039,6 +5043,7 @@ struct Preset5View: View {
                 // Write to preferences immediately
                 if let fieldId = id {
                     preferencesService?.setValue(newValue, forKey: fieldId)
+                    inspectState.writeToInteractionLog("\(type):\(fieldId):\(newValue)")
                 }
             }
         )

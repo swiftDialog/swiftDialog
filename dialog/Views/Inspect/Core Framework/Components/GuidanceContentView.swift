@@ -588,6 +588,8 @@ struct GuidanceContentView: View {
                                 }
                                 inspectState.guidanceFormInputs[itemId]?.checkboxes[fieldId] = newValue
                                 writeLog("GuidanceContentView: Checkbox '\(fieldId)' set to \(newValue)", logLevel: .info)
+                                // Live event so external monitors can react mid-session (symmetric with toggle/slider/textfield).
+                                inspectState.writeToInteractionLog("checkbox:\(itemId):\(fieldId):\(newValue)")
                             }
                         )) {
                             Text(block.content ?? "")
@@ -637,6 +639,8 @@ struct GuidanceContentView: View {
                                 }
                                 inspectState.guidanceFormInputs[itemId]?.dropdowns[fieldId] = newValue
                                 writeLog("GuidanceContentView: Dropdown '\(fieldId)' set to '\(newValue)'", logLevel: .info)
+                                // Live event so external monitors can react mid-session (symmetric with toggle/slider/textfield).
+                                inspectState.writeToInteractionLog("dropdown:\(itemId):\(fieldId):\(newValue)")
                             }
                         )) {
                             ForEach(options, id: \.self) { option in
@@ -699,6 +703,8 @@ struct GuidanceContentView: View {
                             }
                             inspectState.guidanceFormInputs[itemId]?.radios[fieldId] = newValue
                             writeLog("GuidanceContentView: Radio '\(fieldId)' set to '\(newValue)'", logLevel: .info)
+                            // Live event so external monitors can react mid-session (symmetric with toggle/slider/textfield).
+                            inspectState.writeToInteractionLog("radio:\(itemId):\(fieldId):\(newValue)")
                         }
                     )
 
