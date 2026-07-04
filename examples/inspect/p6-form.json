@@ -1,0 +1,23 @@
+{
+  "preset": "6",
+  "title": "Preferences",
+  "highlightColor": "#0A66C2",
+  "triggerFile": "/tmp/ignitecli-p6.trigger",
+  "readinessFile": "/tmp/ignitecli-p6.ready",
+  "resultFile": "/tmp/ignitecli-p6-result.json",
+  "items": [
+    {
+      "id": "prefs",
+      "displayName": "Preferences",
+      "guiIndex": 0,
+      "paths": [],
+      "guidanceTitle": "Choose your defaults",
+      "guidanceContent": [
+        { "type": "text", "content": "Pick your preferences below — each change should append a live line to the interaction log." },
+        { "type": "dropdown", "id": "browser", "content": "Default browser", "options": ["Safari", "Chrome", "Firefox", "Edge"], "value": "Safari" },
+        { "type": "radio", "id": "theme", "content": "Appearance", "options": ["Light", "Dark", "Auto"], "value": "Auto" },
+        { "type": "checkbox", "id": "analytics", "content": "Share anonymous analytics" }
+      ]
+    }
+  ]
+}
