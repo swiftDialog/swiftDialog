@@ -27,6 +27,14 @@ struct Preset2View: View, InspectLayoutProtocol {
         Color(hex: inspectState.uiConfiguration.highlightColor)
     }
 
+    /// Trigger file path for readiness signalling (mirrors Preset4/6). Additive only —
+    /// the FSEvents command path is unchanged; this just lets `wait-ready` succeed.
+    private var triggerFilePath: String {
+        if let customPath = inspectState.config?.triggerFile { return customPath }
+        if appArguments.inspectMode.present { return "/tmp/swiftdialog_dev_preset2.trigger" }
+        return "/tmp/swiftdialog_\(ProcessInfo.processInfo.processIdentifier)_preset2.trigger"
+    }
+
     init(inspectState: InspectState) {
         self.inspectState = inspectState
     }
@@ -411,6 +419,7 @@ struct Preset2View: View, InspectLayoutProtocol {
                             } else {
                                 // Normal button2 action - typically quits with code 2
                                 writeLog("Preset2LayoutServiceBased: User clicked button2", logLevel: .info)
+                                cleanupReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath, exitCode: 2)
                                 exit(2)
                             }
                         }) {
@@ -441,6 +450,7 @@ struct Preset2View: View, InspectLayoutProtocol {
                             action()
                         } else {
                             writeLog("Preset2View: User clicked button1 (\(finalButtonText)) - exiting with code 0", logLevel: .info)
+                            cleanupReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath, exitCode: 0)
                             exit(0)
                         }
                     }) {
@@ -491,6 +501,10 @@ struct Preset2View: View, InspectLayoutProtocol {
                 localizationService.loadLanguages(from: locConfig, basePath: basePath)
             }
             writeLog("Preset2LayoutServiceBased: Using InspectState", logLevel: .info)
+            // Announce readiness so `ignitecli ipc wait-ready` returns (FSEvents path unchanged).
+            writeReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath,
+                               preset: "2", itemCount: inspectState.items.count,
+                               itemIDs: inspectState.items.map { $0.id })
         }
     }
 

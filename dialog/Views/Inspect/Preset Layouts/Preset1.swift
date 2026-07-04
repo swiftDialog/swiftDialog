@@ -28,6 +28,14 @@ struct Preset1View: View, InspectLayoutProtocol {
         Color(hex: inspectState.uiConfiguration.highlightColor)
     }
 
+    /// Trigger file path for readiness signalling (mirrors Preset4/6). Additive only —
+    /// presets 1/2/3 keep their FSEvents command path; this just lets `wait-ready` succeed.
+    private var triggerFilePath: String {
+        if let customPath = inspectState.config?.triggerFile { return customPath }
+        if appArguments.inspectMode.present { return "/tmp/swiftdialog_dev_preset1.trigger" }
+        return "/tmp/swiftdialog_\(ProcessInfo.processInfo.processIdentifier)_preset1.trigger"
+    }
+
     init(inspectState: InspectState) {
         self.inspectState = inspectState
     }
@@ -62,6 +70,7 @@ struct Preset1View: View, InspectLayoutProtocol {
                         inspectState: inspectState,
                         onClose: {
                             writeLog("Preset1View: Summary screen closed", logLevel: .info)
+                            cleanupReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath, exitCode: 0)
                             exit(0)
                         }
                     )
@@ -279,6 +288,10 @@ struct Preset1View: View, InspectLayoutProtocol {
                 localizationService.loadLanguages(from: locConfig, basePath: basePath)
             }
             writeLog("Preset1View: Using refactored InspectState", logLevel: .info)
+            // Announce readiness so `ignitecli ipc wait-ready` returns (FSEvents path unchanged).
+            writeReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath,
+                               preset: "1", itemCount: inspectState.items.count,
+                               itemIDs: inspectState.items.map { $0.id })
         }
     }
 

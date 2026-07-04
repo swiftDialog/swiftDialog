@@ -21,7 +21,15 @@ struct Preset3View: View, InspectLayoutProtocol {
     init(inspectState: InspectState) {
         self.inspectState = inspectState
     }
-    
+
+    /// Trigger file path for readiness signalling (mirrors Preset4/6). Additive only —
+    /// Preset3 remains headless for commands (FSEvents); this just lets `wait-ready` succeed.
+    private var triggerFilePath: String {
+        if let customPath = inspectState.config?.triggerFile { return customPath }
+        if appArguments.inspectMode.present { return "/tmp/swiftdialog_dev_preset3.trigger" }
+        return "/tmp/swiftdialog_\(ProcessInfo.processInfo.processIdentifier)_preset3.trigger"
+    }
+
     var body: some View {
         let textColor = getTextColor()
         
@@ -288,6 +296,7 @@ struct Preset3View: View, InspectLayoutProtocol {
                        inspectState.buttonConfiguration.button2Visible && !inspectState.buttonConfiguration.button2Text.isEmpty {
                         Button(inspectState.buttonConfiguration.button2Text) {
                             writeLog("Preset3: button2 (\(inspectState.buttonConfiguration.button2Text)) → exit 2", logLevel: .info)
+                            cleanupReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath, exitCode: 2)
                             exit(2)
                         }
                         .buttonStyle(.bordered)
@@ -300,6 +309,7 @@ struct Preset3View: View, InspectLayoutProtocol {
                                          (inspectState.buttonConfiguration.button1Text.isEmpty ? "Continue" : inspectState.buttonConfiguration.button1Text)
                     Button(finalButtonText) {
                         writeLog("Preset3: button1 (\(finalButtonText)) → exit 0", logLevel: .info)
+                        cleanupReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath, exitCode: 0)
                         exit(0)
                     }
                     .keyboardShortcut(.defaultAction)
@@ -345,6 +355,10 @@ struct Preset3View: View, InspectLayoutProtocol {
                 let basePath = inspectState.uiConfiguration.iconBasePath ?? ""
                 localizationService.loadLanguages(from: locConfig, basePath: basePath)
             }
+            // Announce readiness so `ignitecli ipc wait-ready` returns (FSEvents path unchanged).
+            writeReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath,
+                               preset: "3", itemCount: inspectState.items.count,
+                               itemIDs: inspectState.items.map { $0.id })
         }
     }
 
