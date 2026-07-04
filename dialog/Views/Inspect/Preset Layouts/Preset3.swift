@@ -73,7 +73,7 @@ struct Preset3View: View, InspectLayoutProtocol {
                             iconCache.cacheBannerImage(for: inspectState)
                         }
 
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: InspectConstants.spacingIntra) {
                         // Big hero title (moved here from the old top header)
                         Text(localized("title", fallback: inspectState.uiConfiguration.windowTitle) ?? "")
                             .font(.largeTitle)
@@ -96,8 +96,8 @@ struct Preset3View: View, InspectLayoutProtocol {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .padding(.horizontal, 32)
-                .padding(.top, 40)
-                .padding(.bottom, 22)
+                .padding(.top, InspectConstants.spacingOuter)
+                .padding(.bottom, InspectConstants.spacingSection)
                 
                 // Removed - message is now inline with logo
                 
@@ -109,7 +109,7 @@ struct Preset3View: View, InspectLayoutProtocol {
                             [GridItem(.flexible()), GridItem(.flexible())] :
                             [GridItem(.flexible())]
 
-                        LazyVGrid(columns: columns, spacing: 10) {
+                        LazyVGrid(columns: columns, spacing: InspectConstants.spacingInner) {
                             let sortedItems = getSortedItemsByStatus() // Use simple order: Latest Completed → Installing → Waiting
                             ForEach(sortedItems, id: \.id) { item in
                                 HStack(spacing: 14) {

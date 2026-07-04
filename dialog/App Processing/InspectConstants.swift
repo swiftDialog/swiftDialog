@@ -39,6 +39,18 @@ struct InspectConstants {
     // MARK: - UI Layout
     static let sideMessageInterval: TimeInterval = 10.0
     static let progressCompletionDelay: TimeInterval = 2.0
+
+    // MARK: - Spacing Scale (12pt base grid)
+    // A group-tiered rhythm derived from the reference wallpaper layout: content
+    // *within* a group sits `spacingInner` apart, sibling groups sit `spacingOuter`
+    // apart. The 3:1 ratio makes the grouping read at a glance (Gestalt proximity),
+    // instead of one uniform gap that reads as a flat, undifferentiated list.
+    // Multiply by scaleFactor at the call site where a view already scales.
+    static let spacingGridUnit: CGFloat = 12         // base unit
+    static let spacingIntra: CGFloat = 6             // 0.5u — inside one element (icon → caption)
+    static let spacingInner: CGFloat = 12            // 1u   — within a group (label → its content)
+    static let spacingSection: CGFloat = 24          // 2u   — header → first section
+    static let spacingOuter: CGFloat = 36            // 3u   — between sibling groups
     
     // MARK: - UI Scale Factors
     static let miniScaleFactor: CGFloat = 0.75

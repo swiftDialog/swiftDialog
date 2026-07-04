@@ -291,7 +291,7 @@ struct Preset2View: View, InspectLayoutProtocol {
                 let visibleCount = 4
                 let allItemsFit = inspectState.items.count <= visibleCount
 
-                HStack(spacing: 16 * scaleFactor) {
+                HStack(spacing: InspectConstants.spacingInner * scaleFactor) {
                     // Left arrow (hidden when all items fit)
                     if !allItemsFit {
                         Button(action: {
@@ -306,7 +306,7 @@ struct Preset2View: View, InspectLayoutProtocol {
                     }
 
                     // App cards - show 5 at a time
-                    HStack(spacing: 16 * scaleFactor) {
+                    HStack(spacing: InspectConstants.spacingInner * scaleFactor) {
                         ForEach(getVisibleItemsWithOffset(), id: \.id) { item in
                             Preset2ItemCardView(
                                 item: item,
@@ -358,7 +358,7 @@ struct Preset2View: View, InspectLayoutProtocol {
                 }
                 .padding(.horizontal, 48 * scaleFactor)
             }
-            .padding(.top, 16)
+            .padding(.top, InspectConstants.spacingInner)
 
             // Progress section — sits below cards, above spacer
             VStack(spacing: 4) {
@@ -380,9 +380,9 @@ struct Preset2View: View, InspectLayoutProtocol {
                 }
             }
             .padding(.horizontal, 48 * scaleFactor)
-            .padding(.top, 12 * scaleFactor)
+            .padding(.top, InspectConstants.spacingInner * scaleFactor)
 
-            Spacer(minLength: 16 * scaleFactor)
+            Spacer(minLength: InspectConstants.spacingInner * scaleFactor)
 
             // Bottom section — info link left, buttons right
             HStack {
@@ -455,7 +455,7 @@ struct Preset2View: View, InspectLayoutProtocol {
                 }
             }
             .padding(.horizontal, 40 * scaleFactor)
-            .padding(.bottom, 24 * scaleFactor)
+            .padding(.bottom, InspectConstants.spacingSection * scaleFactor)
         }
         } // ZStack
         .overlay {

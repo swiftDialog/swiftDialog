@@ -209,7 +209,7 @@ struct Preset1View: View, InspectLayoutProtocol {
                 }
                 .frame(height: 60, alignment: .topLeading)
                 .padding(.horizontal)
-                .padding(.top, 12)
+                .padding(.top, InspectConstants.spacingInner)
                 .padding(.bottom, 4)
 
                 // Item list
@@ -227,14 +227,17 @@ struct Preset1View: View, InspectLayoutProtocol {
                                     Spacer()
                                 }
                                 .padding(.horizontal)
-                                .padding(.top, 10 * scaleFactor)
-                                .padding(.bottom, 5 * scaleFactor)
+                                // Tiered group break: large gap above the status header
+                                // separates it from the previous group, small gap below
+                                // hugs it to the rows it labels (2u : 0.5u).
+                                .padding(.top, InspectConstants.spacingSection * scaleFactor)
+                                .padding(.bottom, InspectConstants.spacingIntra * scaleFactor)
                             }
 
                             itemRow(for: item)
                         }
                     }
-                    .padding(.vertical, 10 * scaleFactor)
+                    .padding(.vertical, InspectConstants.spacingInner * scaleFactor)
                 }
 
             }
@@ -309,7 +312,7 @@ struct Preset1View: View, InspectLayoutProtocol {
         }
         .padding(.horizontal, 40 * scaleFactor)
         .padding(.top, 8)
-        .padding(.bottom, 24 * scaleFactor)
+        .padding(.bottom, InspectConstants.spacingSection * scaleFactor)
     }
 
     // MARK: - Localization
