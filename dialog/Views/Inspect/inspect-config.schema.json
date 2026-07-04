@@ -2080,7 +2080,10 @@
             "install-list",
             "wallpaper-picker",
             "feature-table",
-            "textfield"
+            "textfield",
+            "explainer",
+            "label-value",
+            "compliance-details-button"
           ],
           "description": "Content block type. 'compliance-summary' and 'findings-list' render live from plistSources via the ComplianceAggregator — available in preset5 and preset6."
         },
