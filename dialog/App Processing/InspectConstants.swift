@@ -29,6 +29,9 @@ struct InspectConstants {
     static let longAnimationDuration: TimeInterval = 0.5
     static let scaleAnimationDuration: TimeInterval = 0.2
     static let stepTransition: Animation = .interpolatingSpring(mass: 2, stiffness: 300, damping: 50)
+    /// Preset5 step cross-fade — short ease so the opacity transition doesn't linger
+    /// (the heavy `stepTransition` spring left both steps double-exposed too long).
+    static let stepCrossfade: Animation = .easeInOut(duration: 0.3)
     static let snappyExit: Animation = .interpolatingSpring(mass: 0.75, stiffness: 350, damping: 20)
     
     // MARK: - Performance Limits

@@ -613,7 +613,7 @@ struct Preset5View: View {
         // Find step in the unified allSteps array
         if let index = allSteps.firstIndex(where: { $0.id == stepId }) {
             writeLog("Preset5: Navigating to step '\(stepId)' at index \(index)", logLevel: .info)
-            withAnimation(InspectConstants.stepTransition) {
+            withAnimation(InspectConstants.stepCrossfade) {
                 currentStepIndex = index
             }
             writeStepEvent("step_started", stepId: stepId)
@@ -624,7 +624,7 @@ struct Preset5View: View {
         if stepId == "portal" {
             if let index = allSteps.firstIndex(where: { $0.stepType == "portal" }) {
                 writeLog("Preset5: Navigating to portal step at index \(index)", logLevel: .info)
-                withAnimation(InspectConstants.stepTransition) {
+                withAnimation(InspectConstants.stepCrossfade) {
                     currentStepIndex = index
                 }
                 writeStepEvent("step_started", stepId: allSteps[index].id)
@@ -647,7 +647,7 @@ struct Preset5View: View {
 
         if currentStepIndex + 1 < allSteps.count {
             mediaTextVisible = false
-            withAnimation(InspectConstants.stepTransition) {
+            withAnimation(InspectConstants.stepCrossfade) {
                 currentStepIndex += 1
             }
             writeStepEvent("step_started", stepId: allSteps[currentStepIndex].id)
@@ -663,7 +663,7 @@ struct Preset5View: View {
     private func goToPreviousStep() {
         if currentStepIndex > 0 {
             mediaTextVisible = false
-            withAnimation(InspectConstants.stepTransition) {
+            withAnimation(InspectConstants.stepCrossfade) {
                 currentStepIndex -= 1
             }
             writeLog("Preset5: Moved back to step \(currentStepIndex)", logLevel: .info)
@@ -951,10 +951,9 @@ struct Preset5View: View {
             // Linear step model: render based on stepType
             currentStepView(step: step)
                 .id("step-\(currentStepIndex)-\(step.id)")  // Only changes on navigation
-                .transition(.asymmetric(
-                    insertion: .opacity.combined(with: .move(edge: .trailing)),
-                    removal: .opacity.combined(with: .move(edge: .leading))
-                ))
+                // Pure opacity cross-fade — no .move transform, so text isn't rasterized at a
+                // fractional offset (which produced blurry glyphs during the slide).
+                .transition(.opacity)
         } else if currentStepIndex >= allSteps.count {
             // Past the last step - complete and close
             Color.clear.onAppear { handleCompletion() }
@@ -1134,7 +1133,7 @@ struct Preset5View: View {
         commandRouter.onNavigateByID = { [self] stepId in navigateToStep(stepId: stepId) }
         commandRouter.onNavigateByIndex = { [self] index in
             if index >= 0, index < allSteps.count {
-                withAnimation(InspectConstants.stepTransition) {
+                withAnimation(InspectConstants.stepCrossfade) {
                     currentStepIndex = index
                 }
                 writeStepEvent("step_started", stepId: allSteps[index].id)
