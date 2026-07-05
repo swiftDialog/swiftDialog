@@ -229,7 +229,12 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         // Use configuration service to load config
         // TODO: this works when calling the global appvars but really should be passed in as a config item.
         // Pass the inspect config path from appvars if available
-        let result = configurationService.loadConfiguration(fromFile: appvars.inspectConfigPath)
+        let result: Result<ConfigurationResult, ConfigurationError>
+        if let data = appvars.inspectConfigData {
+            result = configurationService.loadConfiguration(fromData: data)
+        } else {
+            result = configurationService.loadConfiguration(fromFile: appvars.inspectConfigPath)
+        }
         
         switch result {
         case .success(let configResult):
