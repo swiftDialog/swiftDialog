@@ -14,9 +14,11 @@
 //    - Plist-based status monitoring (items with plistKey get polled)
 //    - Auto-advance on item completion, auto-transition to summary
 //
-//  Progress modes:
+//  Progress modes (config `progressMode`):
 //    "shared"  — Single progress bar showing "X of Y completed" (default)
 //    "perItem" — Indeterminate progress per item, auto-advances on completion
+//    "report"  — All items at once as a scrollable check-report list; persists
+//                until the user taps Done (ideal for plist/compliance checks)
 //
 
 import SwiftUI
@@ -88,7 +90,13 @@ struct Preset4View: View, InspectLayoutProtocol {
             case .intro:
                 compactIntroView
             case .main:
-                mainPhaseView
+                // "report" shows all items at once as a scrollable check-report
+                // (persists until Done); default is the one-item-at-a-time installer.
+                if progressMode == "report" {
+                    compactReportView
+                } else {
+                    mainPhaseView
+                }
             case .summary:
                 compactSummaryView
             }
@@ -783,6 +791,8 @@ struct Preset4View: View, InspectLayoutProtocol {
 
     private func checkAutoTransitionToSummary() {
         guard currentPhase == .main, !inspectState.items.isEmpty else { return }
+        // Report mode stays put so the user can review all checks — its own Done button exits.
+        guard progressMode != "report" else { return }
         // Transition when all items are terminal (completed + failed)
         guard allItemsTerminal else { return }
 

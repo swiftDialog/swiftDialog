@@ -584,9 +584,10 @@
       "type": "string",
       "enum": [
         "shared",
-        "perItem"
+        "perItem",
+        "report"
       ],
-      "description": "Preset4: 'shared' (single bar, X of Y) | 'perItem' (indeterminate per item)"
+      "description": "Preset4: 'shared' (single bar, X of Y) | 'perItem' (indeterminate per item) | 'report' (all items as a scrollable check-report list; persists until Done)"
     },
     "readinessFile": {
       "type": "string",

@@ -135,7 +135,7 @@ struct InspectConfig: Codable {
     let backButtonStyle: String?             // "inline" (inside scroll, default) | "footer" (in footer bar)
     let stepStyle: String?                  // "plain" | "colored" | "cards"
     let listIndicatorStyle: String?         // "letters" | "numbers" | "roman" - list indicator format
-    let progressMode: String?                // "shared" (single bar, X of Y) | "perItem" (indeterminate per item) — Preset4 toast installer
+    let progressMode: String?                // "shared" (single bar, X of Y) | "perItem" (indeterminate per item) | "report" (all items as a check-report list) — Preset4 toast installer
     let progressBarConfig: ProgressBarConfig? // Optional progress bar visual configuration
     let appearance: String?                 // Force window appearance: "dark" | "light" (issue #669); nil/"auto" = follow OS
     let logoConfig: LogoConfig?             // Optional logo overlay configuration (legacy presets)
