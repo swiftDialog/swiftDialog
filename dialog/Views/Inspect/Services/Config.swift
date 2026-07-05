@@ -1683,6 +1683,7 @@ func validateInspectSchema(_ data: Data) -> InspectSchemaValidation {
         let config = try JSONDecoder().decode(InspectConfig.self, from: coercedData)
         return .valid(config)
     } catch {
-        return .malformed(reason: String(describing: error))
+        let jsonString = String(data: data, encoding: .utf8)
+        return .malformed(reason: ConfigurationError.formatJSONError(error, jsonString: jsonString))
     }
 }
