@@ -20,6 +20,9 @@ struct Preset1View: View, InspectLayoutProtocol {
     @StateObject private var iconCache = PresetIconCache()
     @State private var localizationService = LocalizationService()
     @State private var currentPhase: PresetPhase = .main
+    // When the .main list first appeared — used to keep an already-complete list on screen
+    // briefly before auto-advancing, so it isn't flashed past in under a second.
+    @State private var mainAppearedAt: Date?
 
     let systemImage: String = isLaptop ? "laptopcomputer.and.arrow.down" : "desktopcomputer.and.arrow.down"
 
@@ -60,6 +63,7 @@ struct Preset1View: View, InspectLayoutProtocol {
                 }
             case .main:
                 mainPhaseView
+                    .onAppear { if mainAppearedAt == nil { mainAppearedAt = Date() } }
             case .summary:
                 if let summaryConfig = inspectState.config?.summaryScreen {
                     PresetSummaryScreenView(
@@ -134,7 +138,21 @@ struct Preset1View: View, InspectLayoutProtocol {
               summaryConfig.autoTransition != false,
               !inspectState.items.isEmpty,
               inspectState.completedItems.count == inspectState.items.count else { return }
-        currentPhase = .summary
+        // Keep an already-complete list on screen for a minimum time before advancing, so it
+        // isn't flashed past in under a second when everything was already installed. This only
+        // delays the transition — it can never strand an item, so live installs are unaffected.
+        let minimumDisplay: TimeInterval = 2.5
+        let elapsed = mainAppearedAt.map { Date().timeIntervalSince($0) } ?? minimumDisplay
+        if elapsed < minimumDisplay {
+            DispatchQueue.main.asyncAfter(deadline: .now() + (minimumDisplay - elapsed)) {
+                if currentPhase == .main,
+                   inspectState.completedItems.count == inspectState.items.count {
+                    currentPhase = .summary
+                }
+            }
+        } else {
+            currentPhase = .summary
+        }
     }
 
     /// When summaryScreen is configured, button1 transitions to summary instead of exit(0).

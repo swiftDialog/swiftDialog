@@ -21,6 +21,9 @@ struct Preset2View: View, InspectLayoutProtocol {
     @State private var scrollOffset: Int = 0
     @State private var lastDownloadingItem: String?
     @State private var currentPhase: PresetPhase = .main
+    // When the .main view first appeared — keeps an already-complete list on screen briefly
+    // before auto-advancing, so it isn't flashed past in under a second.
+    @State private var mainAppearedAt: Date?
 
     /// Highlight color derived from config
     private var primaryColor: Color {
@@ -58,6 +61,7 @@ struct Preset2View: View, InspectLayoutProtocol {
                 }
             case .main:
                 mainPhaseView
+                    .onAppear { if mainAppearedAt == nil { mainAppearedAt = Date() } }
             case .summary:
                 if let summaryConfig = inspectState.config?.summaryScreen {
                     PresetSummaryScreenView(
@@ -123,7 +127,20 @@ struct Preset2View: View, InspectLayoutProtocol {
               summaryConfig.autoTransition != false,
               !inspectState.items.isEmpty,
               inspectState.completedItems.count == inspectState.items.count else { return }
-        currentPhase = .summary
+        // Minimum on-screen time before advancing, so an already-complete list isn't flashed
+        // past in under a second. Only delays the transition — never strands an item.
+        let minimumDisplay: TimeInterval = 2.5
+        let elapsed = mainAppearedAt.map { Date().timeIntervalSince($0) } ?? minimumDisplay
+        if elapsed < minimumDisplay {
+            DispatchQueue.main.asyncAfter(deadline: .now() + (minimumDisplay - elapsed)) {
+                if currentPhase == .main,
+                   inspectState.completedItems.count == inspectState.items.count {
+                    currentPhase = .summary
+                }
+            }
+        } else {
+            currentPhase = .summary
+        }
     }
 
     // MARK: - Shared Logo Helpers
