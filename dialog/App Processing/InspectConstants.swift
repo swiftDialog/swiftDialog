@@ -23,7 +23,13 @@ struct InspectConstants {
     static let updateTimerInterval: TimeInterval = 5.0
     static let fileSystemCheckInterval: TimeInterval = 3.0
     static let robustUpdateInterval: TimeInterval = 2.0
-    
+    /// Per-item delay for a preset's phased "already-installed" reveal cascade, so a
+    /// pre-completed list checks off one-by-one instead of all at once.
+    static let initialRevealStagger: TimeInterval = 0.12
+    /// Cap on how many items the reveal cascade ramps over, so very long lists don't take
+    /// seconds to finish revealing.
+    static let initialRevealStaggerCap: Int = 12
+
     // MARK: - UI Animation
     static let standardAnimationDuration: TimeInterval = 0.3
     static let longAnimationDuration: TimeInterval = 0.5

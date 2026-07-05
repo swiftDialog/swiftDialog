@@ -326,6 +326,12 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                 // Once config is loaded, start FSEvents monitoring for UI updates
                 self.setupOptimizedFileMonitoring()
 
+                // Immediate silent detection: items already present on disk become completed
+                // now (not after the first 2s timer tick). This populates completedItems as the
+                // source of truth; the VISIBLE phased reveal is owned by each preset's view
+                // (e.g. Preset1's cascade on the .main phase), not by this sweep.
+                self.checkDirectInstallationStatus()
+
                 // Initialize progress tracker
                 self.initializeProgressTracker()
 
