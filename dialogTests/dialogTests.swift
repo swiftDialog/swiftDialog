@@ -570,3 +570,21 @@ final class InspectSchemaValidationTests: XCTestCase {
         if case .valid = r {} else { XCTFail("expected .valid, got \(r)") }
     }
 }
+
+final class ConfigLoadFromDataTests: XCTestCase {
+    func testValidInspectDataLoads() {
+        let data = Data(#"{"preset":"1","items":[{"id":"a","displayName":"A","guiIndex":0}]}"#.utf8)
+        let result = Config().loadConfiguration(fromData: data)
+        switch result {
+        case .success(let r): XCTAssertEqual(r.config.items.count, 1)
+        case .failure(let e): XCTFail("expected success, got \(e)")
+        }
+    }
+
+    func testStandardDataFails() {
+        let data = Data(#"{"title":"Hi"}"#.utf8)
+        if case .failure = Config().loadConfiguration(fromData: data) {} else {
+            XCTFail("expected failure for non-inspect JSON")
+        }
+    }
+}

@@ -32,6 +32,7 @@ enum ConfigurationError: Error, LocalizedError {
     case invalidJSON(path: String, error: Error)
     case missingEnvironmentVariable(name: String)
     case testDataCreationFailed(error: Error)
+    case invalidFormat(reason: String)
 
     var errorDescription: String? {
         switch self {
@@ -45,6 +46,8 @@ enum ConfigurationError: Error, LocalizedError {
             return "Environment variable '\(name)' not set and no fallback available"
         case .testDataCreationFailed(let error):
             return "Failed to create test configuration: \(error.localizedDescription)"
+        case .invalidFormat(let reason):
+            return reason
         }
     }
 
@@ -445,6 +448,34 @@ class Config {
         }
     }
     
+    /// Decode + validate inspect config from in-memory JSON. Single decode surface
+    /// shared by the file loader and inline `--jsonstring`. `source` lets callers
+    /// (e.g. the file loader) attribute the resulting `ConfigurationResult` to
+    /// where the bytes actually came from.
+    func loadConfiguration(fromData data: Data, source: ConfigurationSource = .file(path: "<data>")) -> Result<ConfigurationResult, ConfigurationError> {
+        InspectConfig.unknownKeyWarnings = []
+        let validation = validateInspectSchema(data)
+        let keyWarnings = InspectConfig.unknownKeyWarnings
+        InspectConfig.unknownKeyWarnings = []
+
+        switch validation {
+        case .valid(let config):
+            let processedConfig = applyConfigurationDefaults(to: config)
+            var warnings = validateConfiguration(processedConfig)
+            warnings.append(contentsOf: keyWarnings)
+
+            return .success(ConfigurationResult(
+                config: processedConfig,
+                source: source,
+                warnings: warnings
+            ))
+        case .notInspect:
+            return .failure(.invalidFormat(reason: "No inspect content found (expected preset, introSteps, or items). If you meant a standard dialog, drop --inspect-mode."))
+        case .malformed(let reason):
+            return .failure(.invalidFormat(reason: "Inspect config is malformed: \(reason)"))
+        }
+    }
+
     /// Fallback: Load configuration from specific file path
     /// TODO: Reevaluate as this has been brittle - loading from file system to late to initialize UI accordingly
     func loadConfigurationFromFile(at path: String) -> Result<ConfigurationResult, ConfigurationError> {
@@ -459,7 +490,8 @@ class Config {
             // Load and parse JSON
             let data = try Data(contentsOf: URL(fileURLWithPath: path))
 
-            // Parse JSON to dictionary for pre-processing
+            // Parse JSON to dictionary for pre-processing (path-specific; must
+            // happen before the shared decode surface, which only sees bytes)
             var jsonData = data
             if var jsonObject = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
 
@@ -486,28 +518,22 @@ class Config {
                 }
             }
 
-            let decoder = JSONDecoder()
-            InspectConfig.unknownKeyWarnings = []
-            let config = try decoder.decode(InspectConfig.self, from: jsonData)
-            let keyWarnings = InspectConfig.unknownKeyWarnings
-            InspectConfig.unknownKeyWarnings = []
+            // Delegate schema validation + decode + defaults/warnings to the
+            // single shared decode surface.
+            let result = loadConfiguration(fromData: jsonData, source: .file(path: path))
 
-            // Validate and apply defaults
-            let processedConfig = applyConfigurationDefaults(to: config)
-            var warnings = validateConfiguration(processedConfig)
-            warnings.append(contentsOf: keyWarnings)
+            switch result {
+            case .success(let configResult):
+                writeLog("ConfigurationService: Successfully loaded configuration from \(path)", logLevel: .info)
+                writeLog("ConfigurationService: Loaded \(configResult.config.items.count) items", logLevel: .info)
+            case .failure(let error):
+                writeLog("ConfigurationService: Configuration loading failed for \(path):\n\(error.localizedDescription)", logLevel: .error)
+            }
+            return result
 
-            writeLog("ConfigurationService: Successfully loaded configuration from \(path)", logLevel: .info)
-            writeLog("ConfigurationService: Loaded \(config.items.count) items", logLevel: .info)
-
-            return .success(ConfigurationResult(
-                config: processedConfig,
-                source: .file(path: path),
-                warnings: warnings
-            ))
-            
         } catch let error {
-            // Get original JSON string for enhanced error reporting
+            // File-read failure (not a decode/schema failure) — keep the
+            // richer JSON-error formatting for this class of error.
             let jsonString = try? String(contentsOfFile: path, encoding: .utf8)
             let detailedError = ConfigurationError.formatJSONError(error, jsonString: jsonString)
             writeLog("ConfigurationService: Configuration loading failed for \(path):\n\(detailedError)", logLevel: .error)
