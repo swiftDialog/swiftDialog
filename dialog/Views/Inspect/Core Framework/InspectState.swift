@@ -326,14 +326,6 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                 // Once config is loaded, start FSEvents monitoring for UI updates
                 self.setupOptimizedFileMonitoring()
 
-                // Immediate initial sweep: items whose target paths already exist on disk
-                // should render as completed at launch, not flash "Waiting" until the first
-                // 2s timer tick. Runs on main (this block is dispatched to main); mutates the
-                // @Published completedItems set directly. Items with empty paths are skipped
-                // by design (they are driven by external commands / preset logic).
-                // initialStagger reveals them one-at-a-time (cascade) like Preset5.
-                self.checkDirectInstallationStatus(initialStagger: true)
-
                 // Initialize progress tracker
                 self.initializeProgressTracker()
 
@@ -663,17 +655,12 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         }
     }
     
-    /// - Parameter initialStagger: when true (launch-only), items already installed on disk
-    ///   are revealed as completed one-at-a-time with a small delay so they cascade
-    ///   top-to-bottom (matching Preset5's item-to-item feel) instead of all snapping to ✓
-    ///   at once. Ongoing timer/command detection passes false for immediate updates.
-    private func checkDirectInstallationStatus(initialStagger: Bool = false) {
+    private func checkDirectInstallationStatus() {
         // Direct filesystem check - this is our backup detection method
         guard !items.isEmpty else { return }
-
+        
         var changesDetected = false
-        var revealIndex = 0   // position in the staggered initial reveal (installed items only)
-
+        
         for item in items {
             // Skip filesystem monitoring for items with empty paths - they should be managed by presets
             guard !item.paths.isEmpty else {
@@ -764,11 +751,11 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
 
             // Apply changes only if status actually changed
             if isInstalled && !wasCompleted {
-                let markCompleted: () -> Void = { [weak self] in
+                self.debouncedUpdater.debounce(key: "item-install-\(item.id)") { [weak self] in
                     guard let self = self else { return }
                     self.completedItems.insert(item.id)
                     self.downloadingItems.remove(item.id)
-
+                    
                     // Check if this was the last item to complete
                     if self.completedItems.count == self.items.count {
                         writeLog("InspectState: All items completed - triggering button state update", logLevel: .info)
@@ -777,18 +764,6 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                             self?.checkAndUpdateButtonState()
                         }
                     }
-                }
-                if initialStagger {
-                    // Launch reveal: cascade already-installed items top-to-bottom rather than
-                    // debouncing them into a single simultaneous flip.
-                    let steps = min(revealIndex, InspectConstants.initialRevealStaggerCap)
-                    let delay = Double(steps) * InspectConstants.initialRevealStagger
-                    revealIndex += 1
-                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                        withAnimation(.easeOut(duration: 0.25)) { markCompleted() }
-                    }
-                } else {
-                    self.debouncedUpdater.debounce(key: "item-install-\(item.id)") { markCompleted() }
                 }
                 writeLog("InspectState: FILESYSTEM - \(item.displayName) detection completed", logLevel: .info)
                 changesDetected = true
