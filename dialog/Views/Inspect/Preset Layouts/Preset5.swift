@@ -523,15 +523,18 @@ struct Preset5View: View {
                let nsLogo = NSImage(contentsOfFile: (logoPath as NSString).expandingTildeInPath) {
                 VStack {
                     Spacer()
-                    HStack {
+                    HStack(alignment: .bottom) {
                         Image(nsImage: nsLogo)
                             .resizable().scaledToFit()
                             .frame(maxHeight: min(CGFloat(config?.logoConfig?.maxHeight ?? 28), 48))
                             .opacity(config?.logoConfig?.opacity ?? 0.95)
                         Spacer()
                     }
-                    .padding(.horizontal, 32)
-                    .padding(.bottom, setupFooterPadding + 4)
+                    // Share the button baseline: same horizontal inset and bottom padding as the
+                    // footer's action row, and bottom-aligned — so the logo's height changes how
+                    // tall it is, never where its base sits relative to Continue.
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, setupFooterPadding)
                 }
                 .allowsHitTesting(false)
             }
@@ -2552,6 +2555,7 @@ struct Preset5View: View {
         let entries = cadenceMonitor.entries
         let current = cadenceMonitor.currentIndex
         let complete = cadenceMonitor.isComplete
+        GeometryReader { geo in
         ScrollViewReader { proxy in
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
@@ -2562,29 +2566,43 @@ struct Preset5View: View {
                             .id(idx)
                     }
                 }
-                .padding(.horizontal, 80)   // headroom so the active card can centre
+                .padding(.horizontal, 40)   // headroom for the active card's scale + glow
                 .padding(.vertical, 10)
+                // Make the scroll content at least as wide as the viewport and centre it, so a
+                // handful of cards sit centred rather than left-shifted. When the row is wider
+                // than the viewport this min-width is exceeded and it scrolls normally.
+                .frame(minWidth: geo.size.width, alignment: .center)
             }
-            .frame(height: 148)
             .onChange(of: cadenceMonitor.currentIndex) { _, idx in
                 withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(idx, anchor: .center) }
             }
             .onAppear { proxy.scrollTo(cadenceMonitor.currentIndex, anchor: .center) }
         }
+        }
+        .frame(height: 148)
     }
 
     @ViewBuilder
     private func cadenceCard(entry: InspectConfig.CadenceEntry, state: CadenceCardState, brandColor: Color?) -> some View {
-        let size: CGFloat = state == .active ? 112 : 92
+        // Every tile keeps the SAME footprint so the row stays balanced as the cadence
+        // advances — the active tile is lifted with a scale + accent ring + shadow rather than
+        // a larger frame (which would shove its neighbours and unbalance the row).
+        let accent = brandColor ?? Color.accentColor
+        let size: CGFloat = 96
         RoundedRectangle(cornerRadius: 18, style: .continuous)
             .fill(Color(NSColor.controlBackgroundColor))
-            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(.primary.opacity(0.06), lineWidth: 1))
+            .overlay {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(state == .active ? accent.opacity(0.9) : .primary.opacity(0.06),
+                                  lineWidth: state == .active ? 2 : 1)
+            }
             .frame(width: size, height: size)
             .overlay { cadenceEntryIcon(entry: entry, brandColor: brandColor, active: state == .active) }
             .overlay(alignment: .bottomTrailing) { cadenceCardBadge(state: state).padding(7) }
             .opacity(state == .pending ? 0.45 : 1)
-            .shadow(color: .black.opacity(state == .active ? 0.14 : 0.05),
-                    radius: state == .active ? 10 : 3, y: 2)
+            .scaleEffect(state == .active ? 1.08 : 1)
+            .shadow(color: state == .active ? accent.opacity(0.22) : .black.opacity(0.05),
+                    radius: state == .active ? 12 : 3, y: 2)
             .animation(.easeInOut(duration: 0.35), value: state)
     }
 
@@ -2605,7 +2623,9 @@ struct Preset5View: View {
 
     @ViewBuilder
     private func cadenceEntryIcon(entry: InspectConfig.CadenceEntry, brandColor: Color?, active: Bool) -> some View {
-        let dim: CGFloat = active ? 52 : 42
+        // Constant icon footprint across states — the tile's scaleEffect supplies the active
+        // lift, so a per-state size bump here would compound and read as unbalanced.
+        let dim: CGFloat = 46
         if let imagePath = entry.imagePath,
            let nsImage = NSImage(contentsOfFile: (imagePath as NSString).expandingTildeInPath) {
             Image(nsImage: nsImage).resizable().scaledToFit().frame(width: dim, height: dim)

@@ -317,22 +317,9 @@ struct IntroFooterView<PopoverContent: View>: View {
             }
 
             HStack(spacing: 12) {
-                // Footer brand logo — laid out in the same row as the buttons, so it
-                // vertically aligns with Continue. Loaded synchronously (no AsyncImage spinner).
-                if let logoPath = resolvedFooterLogoPath,
-                   let nsLogo = NSImage(contentsOfFile: (logoPath as NSString).expandingTildeInPath) {
-                    Image(nsImage: nsLogo)
-                        .resizable().scaledToFit()
-                        .frame(maxHeight: footerLogoHeight)
-                        .accessibilityHidden(true)
-                }
-                // Footer text (e.g., branding text)
-                if let footerText = footerText {
-                    Text(footerText)
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(.primary)
-                }
-
+                // Leading space is reserved for the brand logo/text, but they are drawn as a
+                // leading .overlay (below) — NOT laid out in this row — so their intrinsic
+                // height can never grow the row and shift the buttons' baseline when they load.
                 Spacer()
 
                 // Popup button centered between logo and nav buttons
@@ -386,6 +373,26 @@ struct IntroFooterView<PopoverContent: View>: View {
                     .tint(accentColor)
                     .controlSize(buttonControlSize)
                     .disabled(continueDisabled)
+            }
+            // Brand logo + text float over the leading edge, vertically centred on the button
+            // row. Kept out of the HStack's height so loading them never nudges the buttons.
+            .overlay(alignment: .leading) {
+                HStack(spacing: 12) {
+                    if let logoPath = resolvedFooterLogoPath,
+                       let nsLogo = NSImage(contentsOfFile: (logoPath as NSString).expandingTildeInPath) {
+                        Image(nsImage: nsLogo)
+                            .resizable().scaledToFit()
+                            .frame(maxHeight: footerLogoHeight)
+                            .accessibilityHidden(true)
+                    }
+                    if let footerText = footerText {
+                        Text(footerText)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                    }
+                }
+                .allowsHitTesting(false)
             }
         }
         .padding(.horizontal, 20)
