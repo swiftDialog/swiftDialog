@@ -76,26 +76,6 @@ func resolveInspectConfigSource(
 func getJSON() -> JSON {
     var json = JSON()
 
-    // Guard: --inspect-mode uses a different config schema than --jsonfile/--jsonstring.
-    // Combining them silently produces a blank window; fail fast before any file is read
-    // (the standalone --jsonfile file-existence check would otherwise mask our error).
-    if CLOptionPresent(optionName: appArguments.inspectMode)
-        && (CLOptionPresent(optionName: appArguments.jsonFile) || CLOptionPresent(optionName: appArguments.jsonString)) {
-        let message = """
-        Error: --inspect-mode cannot be combined with --jsonfile or --jsonstring.
-               (inspect-mode configs use a different schema than standard Dialog configs.)
-
-        Use one of these instead:
-          DIALOG_INSPECT_CONFIG=/abs/path/to/config.json dialog --inspect-mode
-          dialog --inspect-mode --inspect-config /abs/path/to/config.json
-          ignitecli ipc launch /abs/path/to/config.json    # for IPC
-
-        """
-        FileHandle.standardError.write(Data(message.utf8))
-        writeLog("Inspect Mode: rejected conflicting args (--jsonfile or --jsonstring)", logLevel: .error)
-        quitDialog(exitCode: appDefaults.exit1.code)
-    }
-
     if CLOptionPresent(optionName: appArguments.jsonFile) {
         // read json in from file
         json = processJSON(jsonFilePath: CLOptionText(optionName: appArguments.jsonFile))
@@ -186,96 +166,80 @@ func processCLOptions(json: JSON = getJSON()) {
     // Monitor Mode - Use InspectView for all monitor scenarios (with or without config)
     if appvars.debugMode { print("DEBUG: inspectMode.present = \(appArguments.inspectMode.present)") }
     if appArguments.inspectMode.present {
-        // Note: conflict with --jsonfile/--jsonstring is enforced earlier in getJSON()
-        // before any file I/O, so we never reach here with a bad combination.
-
         writeLog("Inspect Mode activated", logLevel: .info)
         writeLog("Inspect Mode: Activated", logLevel: .info)
         writeLog("Inspect Mode: Config can be provided via:", logLevel: .info)
-        writeLog("  1. Environment variable: DIALOG_INSPECT_CONFIG=/path/to/config.json", logLevel: .info)
-        writeLog("  2. Standard location: /var/tmp/dialog-inspect-config.json", logLevel: .info)
-        writeLog("  3. Command line: --inspect-config (may cause hang with certain SwiftUI versions)", logLevel: .info)
+        writeLog("  1. --jsonfile /abs/path/to/config.json", logLevel: .info)
+        writeLog("  2. --jsonstring '{...}'", logLevel: .info)
+        writeLog("  3. Environment variable: DIALOG_INSPECT_CONFIG=/path/to/config.json", logLevel: .info)
+        writeLog("  4. Standard location: /var/tmp/dialog-inspect-config.json", logLevel: .info)
 
-        // Determine config path using same priority as InspectView
-        var configPath: String?
-
-        // Priority 1: Check environment variable DIALOG_INSPECT_CONFIG
-        if let envConfigPath = ProcessInfo.processInfo.environment["DIALOG_INSPECT_CONFIG"],
-           !envConfigPath.isEmpty {
-            configPath = envConfigPath
-            writeLog("Inspect Mode: Config path found in environment variable: \(configPath!)", logLevel: .info)
-        }
-        // Priority 2: Check standard config location
-        else if FileManager.default.fileExists(atPath: "/var/tmp/dialog-inspect-config.json") {
-            configPath = "/var/tmp/dialog-inspect-config.json"
-            writeLog("Inspect Mode: Using standard config location: \(configPath!)", logLevel: .info)
-        }
-        // Priority 3: Check command line argument
-        else if appArguments.inspectConfig.present {
-            configPath = appArguments.inspectConfig.value
-            writeLog("Inspect Mode: Config path from command line: \(configPath!)", logLevel: .info)
+        if appArguments.inspectConfig.present {
+            writeLog("Inspect Mode: --inspect-config is deprecated; use --jsonfile.", logLevel: .info)
         }
 
-        // Store the config path for InspectView to access
-        if let configPath = configPath {
-            appvars.inspectConfigPath = configPath
+        let stdLocation = "/var/tmp/dialog-inspect-config.json"
+        let resolved = resolveInspectConfigSource(
+            jsonString: appArguments.jsonString.present ? CLOptionText(optionName: appArguments.jsonString) : nil,
+            jsonFilePath: appArguments.jsonFile.present ? CLOptionText(optionName: appArguments.jsonFile) : nil,
+            inspectConfigPath: appArguments.inspectConfig.present ? CLOptionText(optionName: appArguments.inspectConfig) : nil,
+            envPath: ProcessInfo.processInfo.environment["DIALOG_INSPECT_CONFIG"],
+            standardLocationPath: FileManager.default.fileExists(atPath: stdLocation) ? stdLocation : nil,
+            readFile: { FileManager.default.contents(atPath: $0) }
+        )
 
-            // Load the config to determine preset and apply appropriate window dimensions
-            if FileManager.default.fileExists(atPath: configPath) {
-                do {
-                    let data = try Data(contentsOf: URL(fileURLWithPath: configPath))
-                    let decoder = JSONDecoder()
-
-                    // Read config for sizing
-                    struct MinimalInspectConfig: Codable {
-                        let preset: String?
-                        let size: String?
-                        let width: Int?
-                        let height: Int?
-                    }
-
-                    let config = try decoder.decode(MinimalInspectConfig.self, from: data)
-
-                    // Priority 1: Explicit width/height
-                    if let w = config.width, let h = config.height {
-                        appvars.windowWidth = CGFloat(w)
-                        appvars.windowHeight = CGFloat(h)
-                        writeLog("Inspect Mode: Custom size \(w)×\(h)", logLevel: .info)
-                    }
-                    // Priority 2: Use shared sizing definitions
-                    else if let preset = config.preset {
-                        let sizeMode = config.size ?? "standard"
-                        let (width, height) = InspectSizes.getSize(preset: preset, mode: sizeMode)
-                        appvars.windowWidth = width
-                        appvars.windowHeight = height
-                        writeLog("Inspect Mode: \(preset) \(sizeMode) (\(Int(width))×\(Int(height)))", logLevel: .info)
-                    }
-                    // Priority 3: Default
-                    else {
-                        let (width, height) = InspectSizes.defaultSize
-                        appvars.windowWidth = width
-                        appvars.windowHeight = height
-                        writeLog("Inspect Mode: Using default size (\(Int(width))×\(Int(height)))", logLevel: .info)
-                    }
-                } catch {
-                    writeLog("Inspect Mode: Error loading config for dimensions: \(error)", logLevel: .error)
-                    // Default to standard size on error
-                    appvars.windowWidth = 1000
-                    appvars.windowHeight = 600
-                }
-            }
-        } else {
-            // No config file — will use built-in sample config (Preset 5 bento grid)
-            appvars.windowWidth = 800
-            appvars.windowHeight = 600
-            let warning = """
-            Warning: --inspect-mode launched without a config source; loading the built-in demo.
-                     Set DIALOG_INSPECT_CONFIG=/abs/path/to/config.json, pass --inspect-config <path>,
-                     or place a config at /var/tmp/dialog-inspect-config.json.
+        guard let source = resolved else {
+            let msg = """
+            Error: --inspect-mode requires a config. Provide one via:
+              dialog --inspect-mode --jsonfile /abs/path/config.json
+              dialog --inspect-mode --jsonstring '{...}'
+              DIALOG_INSPECT_CONFIG=/abs/path/config.json dialog --inspect-mode
 
             """
-            FileHandle.standardError.write(Data(warning.utf8))
-            writeLog("Inspect Mode: No config file, using built-in sample size (1000×650)", logLevel: .info)
+            FileHandle.standardError.write(Data(msg.utf8))
+            writeLog("Inspect Mode: no config source resolved", logLevel: .error)
+            quitDialog(exitCode: appDefaults.exit1.code)
+            return
+        }
+
+        switch validateInspectSchema(source.data) {
+        case .notInspect:
+            let msg = "Error: \(source.origin) is not an inspect config (expected preset, introSteps, or items). If you meant a standard dialog, drop --inspect-mode.\n"
+            FileHandle.standardError.write(Data(msg.utf8))
+            writeLog("Inspect Mode: source \(source.origin) failed Gate A (notInspect)", logLevel: .error)
+            quitDialog(exitCode: appDefaults.exit1.code)
+        case .malformed(let reason):
+            let msg = "Error: inspect config from \(source.origin) is malformed: \(reason)\n"
+            FileHandle.standardError.write(Data(msg.utf8))
+            writeLog("Inspect Mode: source \(source.origin) malformed: \(reason)", logLevel: .error)
+            quitDialog(exitCode: appDefaults.exit1.code)
+        case .valid(let config):
+            appvars.inspectConfigData = source.data
+            if let p = source.path { appvars.inspectConfigPath = p }
+            writeLog("Inspect Mode: config accepted from \(source.origin)", logLevel: .info)
+
+            // Window sizing from the already-resolved config (no extra file read).
+            // Priority 1: Explicit width/height
+            if let w = config.width, let h = config.height {
+                appvars.windowWidth = CGFloat(w)
+                appvars.windowHeight = CGFloat(h)
+                writeLog("Inspect Mode: Custom size \(w)×\(h)", logLevel: .info)
+            }
+            // Priority 2: Use shared sizing definitions
+            else if !config.preset.isEmpty {
+                let sizeMode = config.size ?? "standard"
+                let (width, height) = InspectSizes.getSize(preset: config.preset, mode: sizeMode)
+                appvars.windowWidth = width
+                appvars.windowHeight = height
+                writeLog("Inspect Mode: \(config.preset) \(sizeMode) (\(Int(width))×\(Int(height)))", logLevel: .info)
+            }
+            // Priority 3: Default
+            else {
+                let (width, height) = InspectSizes.defaultSize
+                appvars.windowWidth = width
+                appvars.windowHeight = height
+                writeLog("Inspect Mode: Using default size (\(Int(width))×\(Int(height)))", logLevel: .info)
+            }
         }
 
         // InspectView handles all its own state and configuration - no presentation mode needed
