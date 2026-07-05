@@ -13,7 +13,7 @@
 - Swift 6; macOS; target minimum unchanged.
 - **Xcode target membership:** do NOT create new `.swift` files unless you also add them to the correct Xcode target — a new file not in compile sources fails the build. This plan adds production code inside existing compiled files (`Config.swift`, `AppVariables.swift`, `ProcessCLOptions.swift`, `InspectState.swift`, `HelpText.swift`) and tests inside the existing `dialogTests/dialogTests.swift`.
 - Build command: `xcodebuild -project dialog.xcodeproj -scheme "Dialog App Bundle" -configuration Debug build CODE_SIGNING_ALLOWED=NO`
-- Test command: `xcodebuild test -project dialog.xcodeproj -scheme "Dialog App Bundle" -destination 'platform=macOS' -only-testing:dialogTests/<Class>/<method>` (tests use `@testable import Dialog`, matching `dialogTests/PlistEvaluationTests.swift`).
+- Test command (signing MUST be disabled or `xcodebuild test` fails with a Developer ID error): `xcodebuild test -project dialog.xcodeproj -scheme "Dialog App Bundle" -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" -only-testing:dialogTests/<Class>` (tests use `@testable import Dialog`, matching `dialogTests/PlistEvaluationTests.swift`). Note: `LogMonitorServiceTests` has 6 pre-existing unrelated failures — ignore them; only assert on the classes this plan adds.
 - Git: commit after each task. No `--push`. No Claude co-author line.
 - Do NOT change the standard (non-inspect) `--jsonfile`/`--jsonstring` behavior. Do NOT auto-detect inspect vs standard without `--inspect-mode` (explicitly out of scope).
 - Inspect marker keys (canonical set, used verbatim): `inspectMode`, `preset`, `introSteps`, `items`.
@@ -291,7 +291,7 @@ final class InspectSourceResolverTests: XCTestCase {
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `xcodebuild test -project dialog.xcodeproj -scheme "Dialog App Bundle" -destination 'platform=macOS' -only-testing:dialogTests/InspectSourceResolverTests 2>&1 | tail -20`
+Run: `xcodebuild test -project dialog.xcodeproj -scheme "Dialog App Bundle" -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" -only-testing:dialogTests/InspectSourceResolverTests -only-testing:dialogTests/InspectIntakePipelineTests 2>&1 | tail -20`
 Expected: FAIL — `cannot find 'resolveInspectConfigSource' in scope`.
 
 - [ ] **Step 3: Implement the resolver and the appvars field**
@@ -340,14 +340,60 @@ func resolveInspectConfigSource(
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `xcodebuild test -project dialog.xcodeproj -scheme "Dialog App Bundle" -destination 'platform=macOS' -only-testing:dialogTests/InspectSourceResolverTests 2>&1 | tail -20`
+Run: `xcodebuild test -project dialog.xcodeproj -scheme "Dialog App Bundle" -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" -only-testing:dialogTests/InspectSourceResolverTests 2>&1 | tail -20`
 Expected: PASS (5 tests).
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Full-pipeline integration test (source → validate → load)**
+
+This is the end-to-end proof that inspect config from a file source AND an inline string both resolve, validate, and load into a usable `InspectConfig` — the closest we get to "launch works" without a GUI. Append to `dialogTests/dialogTests.swift`:
+
+```swift
+final class InspectIntakePipelineTests: XCTestCase {
+    private let inspectJSON = #"{"preset":"1","items":[{"id":"a","displayName":"A","guiIndex":0},{"id":"b","displayName":"B","guiIndex":1}]}"#
+
+    func testJsonStringPipelineProducesValidConfig() {
+        let src = resolveInspectConfigSource(jsonString: inspectJSON, jsonFilePath: nil,
+            inspectConfigPath: nil, envPath: nil, standardLocationPath: nil, readFile: { _ in nil })
+        XCTAssertNotNil(src)
+        guard case .valid = validateInspectSchema(src!.data) else { return XCTFail("string source failed validation") }
+        switch Config().loadConfiguration(fromData: src!.data) {
+        case .success(let r): XCTAssertEqual(r.config.items.count, 2)
+        case .failure(let e): XCTFail("string pipeline load failed: \(e)")
+        }
+    }
+
+    func testJsonFilePipelineMatchesString() throws {
+        let tmp = FileManager.default.temporaryDirectory.appendingPathComponent("intake-\(UUID().uuidString).json")
+        try Data(inspectJSON.utf8).write(to: tmp)
+        defer { try? FileManager.default.removeItem(at: tmp) }
+        let src = resolveInspectConfigSource(jsonString: nil, jsonFilePath: tmp.path,
+            inspectConfigPath: nil, envPath: nil, standardLocationPath: nil,
+            readFile: { FileManager.default.contents(atPath: $0) })
+        XCTAssertEqual(src?.path, tmp.path)
+        switch Config().loadConfiguration(fromData: src!.data) {
+        case .success(let r): XCTAssertEqual(r.config.items.count, 2)
+        case .failure(let e): XCTFail("file pipeline load failed: \(e)")
+        }
+    }
+
+    func testStandardJSONViaPipelineIsRejected() {
+        let src = resolveInspectConfigSource(jsonString: #"{"title":"Hi"}"#, jsonFilePath: nil,
+            inspectConfigPath: nil, envPath: nil, standardLocationPath: nil, readFile: { _ in nil })
+        if case .failure = Config().loadConfiguration(fromData: src!.data) {} else {
+            XCTFail("standard JSON should be rejected by the pipeline")
+        }
+    }
+}
+```
+
+Run: `xcodebuild test -project dialog.xcodeproj -scheme "Dialog App Bundle" -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" -only-testing:dialogTests/InspectIntakePipelineTests 2>&1 | tail -20`
+Expected: PASS (3 tests).
+
+- [ ] **Step 6: Commit**
 
 ```bash
 git add "dialog/App Processing/AppVariables.swift" "dialog/Command Line/ProcessCLOptions.swift" dialogTests/dialogTests.swift
-git commit -m "feat(inspect): pure config-source resolver + inspectConfigData"
+git commit -m "feat(inspect): config-source resolver + inspectConfigData + intake pipeline tests"
 ```
 
 ---
