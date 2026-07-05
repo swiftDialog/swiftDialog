@@ -33,6 +33,7 @@ struct Preset4View: View, InspectLayoutProtocol {
     @State private var currentItemIndex: Int = 0
     @State private var isUserNavigating: Bool = false
     @State private var progressCount: Int = 0  // High-water-mark: only goes up
+    @State private var externalProgressPct: Int? = nil  // Live `progress:` override (0-100); nil = derive from item count
 
     // MARK: - Derived properties
 
@@ -234,12 +235,15 @@ struct Preset4View: View, InspectLayoutProtocol {
             }
             .padding(.horizontal, 16)
 
-            // Progress bar — driven by high-water-mark counter that never decreases
+            // Progress bar — live `progress:` override (0-100) when driven, else the
+            // high-water-mark item counter. Both never decrease.
             if progressMode == "shared" {
-                ProgressView(value: Double(progressCount), total: Double(max(inspectState.items.count, 1)))
+                let fraction = externalProgressPct.map { Double($0) / 100.0 }
+                    ?? Double(progressCount) / Double(max(inspectState.items.count, 1))
+                ProgressView(value: min(1.0, max(0, fraction)), total: 1.0)
                     .tint(primaryColor)
                     .padding(.horizontal, 20)
-                    .animation(.easeInOut(duration: 0.4), value: progressCount)
+                    .animation(.easeInOut(duration: 0.4), value: fraction)
             }
         }
     }
@@ -824,6 +828,13 @@ struct Preset4View: View, InspectLayoutProtocol {
         commandRouter.acknowledgmentLogPath = "/var/tmp/dialog-ack.log"
         commandRouter.itemCount = inspectState.items.count
 
+        // Live progress — `progress:<id>:<0-100|0-1>` drives the shared bar directly
+        // (high-water-mark, never decreases). Until one arrives the bar derives from the
+        // item count as before. stepId is ignored: the toast shows a single overall bar.
+        commandRouter.onProgress = { [self] _, pct in
+            externalProgressPct = max(externalProgressPct ?? 0, pct)
+        }
+
         // Navigation
         commandRouter.onNavigateByID = { [self] stepId in
             if let index = inspectState.items.firstIndex(where: { $0.id == stepId }) {
@@ -846,6 +857,7 @@ struct Preset4View: View, InspectLayoutProtocol {
                 inspectState.failedItems.removeAll()
                 inspectState.downloadingItems.removeAll()
                 progressCount = 0
+                externalProgressPct = nil
                 currentItemIndex = 0
             }
         }
