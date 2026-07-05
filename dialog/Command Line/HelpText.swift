@@ -1480,8 +1480,10 @@ struct SDHelp {
         by a JSON config file. It is a different schema from the standard --\(argument.jsonFile.long) format.
 
         Config source (first match wins):
-            DIALOG_INSPECT_CONFIG=/abs/path/to/config.json   (env var, preferred)
-            --\(argument.inspectConfig.long) /abs/path/to/config.json             (flag form)
+            --\(argument.jsonString.long) '{...}'                          (inline JSON string)
+            --\(argument.jsonFile.long) /abs/path/to/config.json              (flag form)
+            --\(argument.inspectConfig.long) /abs/path/to/config.json             (deprecated alias for --\(argument.jsonFile.long))
+            DIALOG_INSPECT_CONFIG=/abs/path/to/config.json   (env var)
             /var/tmp/dialog-inspect-config.json              (standard location)
 
         Canonical launch:
@@ -1491,8 +1493,8 @@ struct SDHelp {
             dialog --\(argument.inspectMode.long) --\(argument.jsonString.long) '{...}'
             ignitecli ipc launch /abs/path/config.json       (for IPC workflows)
 
-        Without any config source, a built-in demo is loaded and a warning is logged
-        to stderr.
+        Without any config source, inspect mode exits with an error listing the
+        accepted sources.
 """
 
         argument.inspectConfig.helpShort = "Path to an inspect-mode config (preset 5/6)"

@@ -454,7 +454,23 @@ class Config {
     /// where the bytes actually came from.
     func loadConfiguration(fromData data: Data, source: ConfigurationSource = .file(path: "<data>")) -> Result<ConfigurationResult, ConfigurationError> {
         InspectConfig.unknownKeyWarnings = []
-        let validation = validateInspectSchema(data)
+
+        // Resolve brandPalette $token references before schema validation/decode,
+        // same as the file/URL loaders. Safe to re-run when the caller already
+        // resolved tokens (e.g. loadConfigurationFromFile): resolution only
+        // rewrites strings still containing "$", so a second pass is a no-op.
+        var resolvedData = data
+        if var jsonObject = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            if let brandPalette = jsonObject["brandPalette"] as? [String: Any] {
+                jsonObject = resolveBrandTokens(in: jsonObject, palette: brandPalette)
+                writeLog("ConfigurationService: Resolved brand palette tokens (fromData)", logLevel: .info)
+            }
+            if let modifiedData = try? JSONSerialization.data(withJSONObject: jsonObject, options: []) {
+                resolvedData = modifiedData
+            }
+        }
+
+        let validation = validateInspectSchema(resolvedData)
         let keyWarnings = InspectConfig.unknownKeyWarnings
         InspectConfig.unknownKeyWarnings = []
 

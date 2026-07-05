@@ -230,7 +230,12 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         // TODO: this works when calling the global appvars but really should be passed in as a config item.
         // Pass the inspect config path from appvars if available
         let result: Result<ConfigurationResult, ConfigurationError>
-        if let data = appvars.inspectConfigData {
+        if !appvars.inspectConfigPath.isEmpty {
+            // File-based sources (--jsonfile / --inspect-config / env / standard location):
+            // use the file loader so iconBasePath auto-set + brandPalette token resolution run.
+            result = configurationService.loadConfiguration(fromFile: appvars.inspectConfigPath)
+        } else if let data = appvars.inspectConfigData {
+            // Path-less inline --jsonstring: load from the in-memory bytes.
             result = configurationService.loadConfiguration(fromData: data)
         } else {
             result = configurationService.loadConfiguration(fromFile: appvars.inspectConfigPath)
