@@ -76,6 +76,16 @@ func resolveInspectConfigSource(
 func getJSON() -> JSON {
     var json = JSON()
 
+    // Inspect mode resolves AND validates its own config downstream via
+    // resolveInspectConfigSource()/validateInspectSchema(). Skip the standard JSON
+    // readers here so a missing file or malformed JSON surfaces through the resolver's
+    // precise errors (exit 1) instead of the generic exit-202 path — and so "all inspect
+    // sources route through the validator" actually holds. getJSON()'s result is unused
+    // in the inspect-mode branch of processCLOptions().
+    if CLOptionPresent(optionName: appArguments.inspectMode) {
+        return json
+    }
+
     if CLOptionPresent(optionName: appArguments.jsonFile) {
         // read json in from file
         json = processJSON(jsonFilePath: CLOptionText(optionName: appArguments.jsonFile))
@@ -208,11 +218,13 @@ func processCLOptions(json: JSON = getJSON()) {
             FileHandle.standardError.write(Data(msg.utf8))
             writeLog("Inspect Mode: source \(source.origin) failed Gate A (notInspect)", logLevel: .error)
             quitDialog(exitCode: appDefaults.exit1.code)
+            return
         case .malformed(let reason):
             let msg = "Error: inspect config from \(source.origin) is malformed: \(reason)\n"
             FileHandle.standardError.write(Data(msg.utf8))
             writeLog("Inspect Mode: source \(source.origin) malformed: \(reason)", logLevel: .error)
             quitDialog(exitCode: appDefaults.exit1.code)
+            return
         case .valid(let config):
             appvars.inspectConfigData = source.data
             if let p = source.path { appvars.inspectConfigPath = p }
