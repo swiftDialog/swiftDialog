@@ -21,59 +21,7 @@ struct Preset1View: View, InspectLayoutProtocol {
     @State private var localizationService = LocalizationService()
     @State private var currentPhase: PresetPhase = .main
 
-    // Phased reveal ("cascade") of items already installed when the .main list first appears,
-    // so a pre-completed list checks off one-by-one (like Preset5) instead of showing all-done
-    // at once. `completedItems` is the source of truth; these gate what the rows DISPLAY.
-    @State private var cascadeRevealed: Set<String> = []
-    @State private var cascadeStarted: Bool = false
-    @State private var cascadeDone: Bool = false
-
     let systemImage: String = isLaptop ? "laptopcomputer.and.arrow.down" : "desktopcomputer.and.arrow.down"
-
-    /// True once the cascade has revealed this item (or the cascade is finished / never ran).
-    private func isRevealed(_ item: InspectConfig.ItemConfig) -> Bool {
-        cascadeDone || cascadeRevealed.contains(item.id)
-    }
-
-    /// Completed state gated by the reveal cascade — an already-installed item shows as
-    /// completed only once the cascade has reached it.
-    private func displayCompleted(_ item: InspectConfig.ItemConfig) -> Bool {
-        inspectState.completedItems.contains(item.id) && isRevealed(item)
-    }
-
-    /// Row status with the reveal gate applied: a completed-but-not-yet-revealed item renders
-    /// as pending so it can cascade in. Live (post-cascade) installs are unaffected.
-    private func effectiveInstallStatus(for item: InspectConfig.ItemConfig) -> PresetCommonViews.InstallRowStatus {
-        let base = PresetCommonViews.resolveInstallStatus(for: item, state: inspectState)
-        if (base == .completed || base == .completedWithWarning) && !isRevealed(item) {
-            return .pending
-        }
-        return base
-    }
-
-    /// Kick off the one-time cascade shortly after the .main list appears, so already-present
-    /// items are in `completedItems` (populated at load) and reveal one-by-one. Idempotent.
-    private func startCascadeIfNeeded() {
-        guard !cascadeStarted else { return }
-        cascadeStarted = true
-        // Snapshot the items already completed at this moment, in display (list) order.
-        let present = PresetCommonViews.getSortedItemsByStatus(inspectState)
-            .filter { inspectState.completedItems.contains($0.id) }
-        guard !present.isEmpty else { cascadeDone = true; return }
-        for (i, item) in present.enumerated() {
-            let steps = min(i, InspectConstants.initialRevealStaggerCap)
-            let delay = Double(steps) * InspectConstants.initialRevealStagger
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                withAnimation(.easeOut(duration: 0.25)) { _ = cascadeRevealed.insert(item.id) }
-            }
-        }
-        let lastStep = min(present.count - 1, InspectConstants.initialRevealStaggerCap)
-        let finishDelay = Double(lastStep) * InspectConstants.initialRevealStagger + 0.3
-        DispatchQueue.main.asyncAfter(deadline: .now() + finishDelay) {
-            cascadeDone = true
-            checkAutoTransitionToSummary()   // any held auto-transition may now proceed
-        }
-    }
 
     /// Highlight color derived from config (matches Preset2 pattern)
     private var primaryColor: Color {
@@ -112,11 +60,6 @@ struct Preset1View: View, InspectLayoutProtocol {
                 }
             case .main:
                 mainPhaseView
-                    .onAppear {
-                        // Start the reveal cascade once the list is on screen. Small delay so the
-                        // load-time silent detection has populated completedItems (esp. no-intro).
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { startCascadeIfNeeded() }
-                    }
             case .summary:
                 if let summaryConfig = inspectState.config?.summaryScreen {
                     PresetSummaryScreenView(
@@ -186,9 +129,6 @@ struct Preset1View: View, InspectLayoutProtocol {
 
     /// Check if all items are complete and auto-transition to summary
     private func checkAutoTransitionToSummary() {
-        // Hold the auto-transition while the reveal cascade is still playing, so an
-        // already-completed list is actually shown rather than flashing past to the summary.
-        guard !(cascadeStarted && !cascadeDone) else { return }
         guard currentPhase == .main,
               let summaryConfig = inspectState.config?.summaryScreen,
               summaryConfig.autoTransition != false,
@@ -414,7 +354,7 @@ struct Preset1View: View, InspectLayoutProtocol {
         guard effectiveLanguage != nil else { return baseStatus }
 
         // Try item-specific status key first, then global status keys
-        if displayCompleted(item) {
+        if inspectState.completedItems.contains(item.id) {
             return localized("\(item.id).completedStatus", fallback: nil)
                 ?? localized("completedStatus", fallback: nil)
                 ?? baseStatus
@@ -589,7 +529,7 @@ struct Preset1View: View, InspectLayoutProtocol {
     }
 
     private func getItemStatusWithValidation(for item: InspectConfig.ItemConfig) -> String {
-        if displayCompleted(item) {
+        if inspectState.completedItems.contains(item.id) {
             if hasValidationWarning(for: item) {
                 return inspectState.config?.uiLabels?.failedStatus ?? "Failed"
             } else {
@@ -603,7 +543,7 @@ struct Preset1View: View, InspectLayoutProtocol {
     private func getItemStatusColor(for item: InspectConfig.ItemConfig) -> Color {
         if inspectState.failedItems.contains(item.id) {
             return .red
-        } else if displayCompleted(item) {
+        } else if inspectState.completedItems.contains(item.id) {
             return hasValidationWarning(for: item) ? .orange : .green
         } else if inspectState.downloadingItems.contains(item.id) {
             return .blue
@@ -616,7 +556,7 @@ struct Preset1View: View, InspectLayoutProtocol {
     private func statusIndicatorWithValidation(for item: InspectConfig.ItemConfig) -> some View {
         let size: CGFloat = 20 * scaleFactor
 
-        switch effectiveInstallStatus(for: item) {
+        switch PresetCommonViews.resolveInstallStatus(for: item, state: inspectState) {
         case .failed:
             Circle()
                 .fill(Color.red)
