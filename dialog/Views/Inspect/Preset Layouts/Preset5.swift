@@ -2550,34 +2550,45 @@ struct Preset5View: View {
 
     /// Horizontal row of icon cards. The active card is enlarged and auto-centred;
     /// completed cards show a green check, pending cards dim with a dots badge.
+    /// Below this count the whole row fits comfortably, so it is centred as one balanced
+    /// group; at or above it the row scrolls and keeps the active card centred.
+    private static let cadenceCarouselCenterThreshold = 7
+
     @ViewBuilder
     private func cadenceCarousel(brandColor: Color?) -> some View {
         let entries = cadenceMonitor.entries
         let current = cadenceMonitor.currentIndex
         let complete = cadenceMonitor.isComplete
-        GeometryReader { geo in
-        ScrollViewReader { proxy in
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 16) {
-                    ForEach(Array(entries.enumerated()), id: \.element.id) { idx, entry in
-                        let state: CadenceCardState = (complete || idx < current) ? .done
-                            : (idx == current ? .active : .pending)
-                        cadenceCard(entry: entry, state: state, brandColor: brandColor)
-                            .id(idx)
-                    }
-                }
-                .padding(.horizontal, 40)   // headroom for the active card's scale + glow
-                .padding(.vertical, 10)
-                // Make the scroll content at least as wide as the viewport and centre it, so a
-                // handful of cards sit centred rather than left-shifted. When the row is wider
-                // than the viewport this min-width is exceeded and it scrolls normally.
-                .frame(minWidth: geo.size.width, alignment: .center)
+        // Shared card row, used by both the centred and the scrolling layout.
+        let cardRow = HStack(spacing: 16) {
+            ForEach(Array(entries.enumerated()), id: \.element.id) { idx, entry in
+                let state: CadenceCardState = (complete || idx < current) ? .done
+                    : (idx == current ? .active : .pending)
+                cadenceCard(entry: entry, state: state, brandColor: brandColor)
+                    .id(idx)
             }
-            .onChange(of: cadenceMonitor.currentIndex) { _, idx in
-                withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(idx, anchor: .center) }
-            }
-            .onAppear { proxy.scrollTo(cadenceMonitor.currentIndex, anchor: .center) }
         }
+        .padding(.horizontal, 40)   // headroom for the active card's scale + glow
+        .padding(.vertical, 10)
+
+        Group {
+            if entries.count < Self.cadenceCarouselCenterThreshold {
+                // Few enough to show at once: centre the whole balanced group and keep it
+                // static. The active card is conveyed by its ring/scale, not by scrolling —
+                // so the row never shifts as the cadence advances.
+                cardRow.frame(maxWidth: .infinity, alignment: .center)
+            } else {
+                // Too many to fit: horizontal scroll that keeps the active card centred.
+                ScrollViewReader { proxy in
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        cardRow
+                    }
+                    .onChange(of: cadenceMonitor.currentIndex) { _, idx in
+                        withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(idx, anchor: .center) }
+                    }
+                    .onAppear { proxy.scrollTo(cadenceMonitor.currentIndex, anchor: .center) }
+                }
+            }
         }
         .frame(height: 148)
     }
