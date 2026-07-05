@@ -41,6 +41,38 @@ func processJSONString(jsonString: String) -> JSON {
     return json
 }
 
+struct ResolvedInspectSource {
+    let data: Data
+    let origin: String
+    let path: String?
+}
+
+/// Pure resolver: pick the highest-priority inspect config source and return its bytes.
+/// Explicit flags beat ambient env/standard-location. Unreadable path sources fall through.
+func resolveInspectConfigSource(
+    jsonString: String?,
+    jsonFilePath: String?,
+    inspectConfigPath: String?,
+    envPath: String?,
+    standardLocationPath: String?,
+    readFile: (String) -> Data?
+) -> ResolvedInspectSource? {
+    if let s = jsonString, !s.isEmpty {
+        return ResolvedInspectSource(data: Data(s.utf8), origin: "--jsonstring", path: nil)
+    }
+    let fileSources: [(label: String, path: String?)] = [
+        ("--jsonfile", jsonFilePath),
+        ("--inspect-config", inspectConfigPath),
+        ("DIALOG_INSPECT_CONFIG", envPath),
+        ("standard location", standardLocationPath),
+    ]
+    for src in fileSources {
+        guard let p = src.path, !p.isEmpty, let data = readFile(p) else { continue }
+        return ResolvedInspectSource(data: data, origin: "\(src.label) \(p)", path: p)
+    }
+    return nil
+}
+
 func getJSON() -> JSON {
     var json = JSON()
 

@@ -588,3 +588,78 @@ final class ConfigLoadFromDataTests: XCTestCase {
         }
     }
 }
+
+final class InspectSourceResolverTests: XCTestCase {
+    private let fakeRead: (String) -> Data? = { p in Data("FILE:\(p)".utf8) }
+
+    func testJsonStringWins() {
+        let r = resolveInspectConfigSource(jsonString: "{}", jsonFilePath: "/a.json",
+            inspectConfigPath: nil, envPath: nil, standardLocationPath: nil, readFile: fakeRead)
+        XCTAssertEqual(r?.origin, "--jsonstring")
+        XCTAssertEqual(r?.data, Data("{}".utf8))
+        XCTAssertNil(r?.path)
+    }
+
+    func testJsonFileBeatsEnvAndStandard() {
+        let r = resolveInspectConfigSource(jsonString: nil, jsonFilePath: "/a.json",
+            inspectConfigPath: nil, envPath: "/env.json", standardLocationPath: "/std.json", readFile: fakeRead)
+        XCTAssertEqual(r?.path, "/a.json")
+        XCTAssertEqual(r?.data, Data("FILE:/a.json".utf8))
+    }
+
+    func testEnvBeatsStandard() {
+        let r = resolveInspectConfigSource(jsonString: nil, jsonFilePath: nil,
+            inspectConfigPath: nil, envPath: "/env.json", standardLocationPath: "/std.json", readFile: fakeRead)
+        XCTAssertEqual(r?.path, "/env.json")
+    }
+
+    func testNoSourceReturnsNil() {
+        let r = resolveInspectConfigSource(jsonString: nil, jsonFilePath: nil,
+            inspectConfigPath: nil, envPath: nil, standardLocationPath: nil, readFile: fakeRead)
+        XCTAssertNil(r)
+    }
+
+    func testUnreadableFileFallsThrough() {
+        let r = resolveInspectConfigSource(jsonString: nil, jsonFilePath: "/missing.json",
+            inspectConfigPath: nil, envPath: "/env.json", standardLocationPath: nil,
+            readFile: { $0 == "/env.json" ? Data("ok".utf8) : nil })
+        XCTAssertEqual(r?.path, "/env.json")
+    }
+}
+
+final class InspectIntakePipelineTests: XCTestCase {
+    private let inspectJSON = #"{"preset":"1","items":[{"id":"a","displayName":"A","guiIndex":0},{"id":"b","displayName":"B","guiIndex":1}]}"#
+
+    func testJsonStringPipelineProducesValidConfig() {
+        let src = resolveInspectConfigSource(jsonString: inspectJSON, jsonFilePath: nil,
+            inspectConfigPath: nil, envPath: nil, standardLocationPath: nil, readFile: { _ in nil })
+        XCTAssertNotNil(src)
+        guard case .valid = validateInspectSchema(src!.data) else { return XCTFail("string source failed validation") }
+        switch Config().loadConfiguration(fromData: src!.data) {
+        case .success(let r): XCTAssertEqual(r.config.items.count, 2)
+        case .failure(let e): XCTFail("string pipeline load failed: \(e)")
+        }
+    }
+
+    func testJsonFilePipelineMatchesString() throws {
+        let tmp = FileManager.default.temporaryDirectory.appendingPathComponent("intake-\(UUID().uuidString).json")
+        try Data(inspectJSON.utf8).write(to: tmp)
+        defer { try? FileManager.default.removeItem(at: tmp) }
+        let src = resolveInspectConfigSource(jsonString: nil, jsonFilePath: tmp.path,
+            inspectConfigPath: nil, envPath: nil, standardLocationPath: nil,
+            readFile: { FileManager.default.contents(atPath: $0) })
+        XCTAssertEqual(src?.path, tmp.path)
+        switch Config().loadConfiguration(fromData: src!.data) {
+        case .success(let r): XCTAssertEqual(r.config.items.count, 2)
+        case .failure(let e): XCTFail("file pipeline load failed: \(e)")
+        }
+    }
+
+    func testStandardJSONViaPipelineIsRejected() {
+        let src = resolveInspectConfigSource(jsonString: #"{"title":"Hi"}"#, jsonFilePath: nil,
+            inspectConfigPath: nil, envPath: nil, standardLocationPath: nil, readFile: { _ in nil })
+        if case .failure = Config().loadConfiguration(fromData: src!.data) {} else {
+            XCTFail("standard JSON should be rejected by the pipeline")
+        }
+    }
+}
