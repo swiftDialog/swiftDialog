@@ -533,3 +533,40 @@ class dialogTests: XCTestCase {
     }
 
 }
+
+final class InspectSchemaValidationTests: XCTestCase {
+    private func data(_ s: String) -> Data { Data(s.utf8) }
+
+    func testStandardDialogJSONIsNotInspect() {
+        let r = validateInspectSchema(data(#"{"title":"Hi","message":"yo"}"#))
+        if case .notInspect = r {} else { XCTFail("expected .notInspect, got \(r)") }
+    }
+
+    func testItemsOnlyConfigIsValid() {
+        let r = validateInspectSchema(data(#"{"preset":"1","items":[{"id":"a","displayName":"A","guiIndex":0}]}"#))
+        if case .valid = r {} else { XCTFail("expected .valid, got \(r)") }
+    }
+
+    func testEmptyObjectIsNotInspect() {
+        let r = validateInspectSchema(data("{}"))
+        if case .notInspect = r {} else { XCTFail("expected .notInspect, got \(r)") }
+    }
+
+    func testEmptyItemsArrayIsNotInspect() {
+        // markers must be NON-empty to count as intent
+        let r = validateInspectSchema(data(#"{"items":[]}"#))
+        if case .notInspect = r {} else { XCTFail("expected .notInspect, got \(r)") }
+    }
+
+    func testMarkerPresentButMalformedDecode() {
+        // preset present (marker) but items has wrong type -> malformed, not notInspect
+        let r = validateInspectSchema(data(#"{"preset":"1","items":"not-an-array"}"#))
+        if case .malformed = r {} else { XCTFail("expected .malformed, got \(r)") }
+    }
+
+    func testQuotedScalarsCoerceAndValidate() {
+        // guiIndex given as quoted string must coerce and still validate
+        let r = validateInspectSchema(data(#"{"preset":"1","items":[{"id":"a","displayName":"A","guiIndex":"2"}]}"#))
+        if case .valid = r {} else { XCTFail("expected .valid, got \(r)") }
+    }
+}

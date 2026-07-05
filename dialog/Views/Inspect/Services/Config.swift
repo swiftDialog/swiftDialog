@@ -1623,3 +1623,40 @@ enum InspectConfigCoercion {
         return nil
     }
 }
+
+/// Result of validating raw JSON against the inspect-mode schema.
+enum InspectSchemaValidation {
+    case valid(InspectConfig)
+    case notInspect
+    case malformed(reason: String)
+}
+
+/// Strict two-gate check that `data` is an intended, well-formed inspect config.
+/// Gate A: the raw object must carry an inspect *intent* marker (non-empty
+/// `inspectMode`/`preset`/`introSteps`/`items`) — decoding alone is too lenient.
+/// Gate B: it must decode into `InspectConfig` (after scalar coercion).
+func validateInspectSchema(_ data: Data) -> InspectSchemaValidation {
+    guard let obj = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
+        return .malformed(reason: "top-level JSON is not an object")
+    }
+
+    // Gate A — intent marker
+    var hasMarker = false
+    if let b = obj["inspectMode"] as? Bool, b { hasMarker = true }
+    if let s = obj["preset"] as? String, !s.isEmpty { hasMarker = true }
+    if let a = obj["introSteps"] as? [Any], !a.isEmpty { hasMarker = true }
+    if let a = obj["items"] as? [Any], !a.isEmpty { hasMarker = true }
+    guard hasMarker else { return .notInspect }
+
+    // Gate B — decode (reuse the same scalar coercion the loaders apply)
+    let coerced = (InspectConfigCoercion.coerceScalars(in: obj) as? [String: Any]) ?? obj
+    guard let coercedData = try? JSONSerialization.data(withJSONObject: coerced) else {
+        return .malformed(reason: "could not re-serialize coerced JSON")
+    }
+    do {
+        let config = try JSONDecoder().decode(InspectConfig.self, from: coercedData)
+        return .valid(config)
+    } catch {
+        return .malformed(reason: String(describing: error))
+    }
+}
