@@ -184,10 +184,6 @@ func processCLOptions(json: JSON = getJSON()) {
         writeLog("  3. Environment variable: DIALOG_INSPECT_CONFIG=/path/to/config.json", logLevel: .info)
         writeLog("  4. Standard location: /var/tmp/dialog-inspect-config.json", logLevel: .info)
 
-        if appArguments.inspectConfig.present {
-            writeLog("Inspect Mode: --inspect-config is deprecated; use --jsonfile.", logLevel: .info)
-        }
-
         let stdLocation = "/var/tmp/dialog-inspect-config.json"
         let resolved = resolveInspectConfigSource(
             jsonString: appArguments.jsonString.present ? CLOptionText(optionName: appArguments.jsonString) : nil,
@@ -199,16 +195,13 @@ func processCLOptions(json: JSON = getJSON()) {
         )
 
         guard let source = resolved else {
-            let msg = """
-            Error: --inspect-mode requires a config. Provide one via:
-              dialog --inspect-mode --jsonfile /abs/path/config.json
-              dialog --inspect-mode --jsonstring '{...}'
-              DIALOG_INSPECT_CONFIG=/abs/path/config.json dialog --inspect-mode
-
-            """
-            FileHandle.standardError.write(Data(msg.utf8))
-            writeLog("Inspect Mode: no config source resolved", logLevel: .error)
-            quitDialog(exitCode: appDefaults.exit1.code)
+            // No config source provided: fall back to the built-in demo. InspectState loads
+            // the bundled test-data workflow when inspectConfigPath/Data are empty, so we
+            // simply leave them unset and use the default window size.
+            writeLog("Inspect Mode: no config source — loading built-in demo", logLevel: .info)
+            let (width, height) = InspectSizes.defaultSize
+            appvars.windowWidth = width
+            appvars.windowHeight = height
             return
         }
 
