@@ -689,7 +689,7 @@ class Config {
                                 "icon": "bell.badge",
                                 "content": [
                                     { "type": "text", "content": "A small, unobtrusive toast notification that tracks installations in the corner of the screen. Stays out of the user's way." },
-                                    { "type": "bullets", "items": ["Notification-sized window", "Corner-anchored positioning", "Progress tracking with minimal UI", "Non-intrusive for background installs"] },
+                                    { "type": "bullets", "items": ["Notification-sized window", "Corner-anchored positioning", "Three progress modes: shared bar, per-item, or report list", "Non-intrusive for background installs"] },
                                     { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "4", "buttonStyle": "borderedProminent" }
                                 ]
                             }
@@ -713,8 +713,8 @@ class Config {
                                 "subtitle": "The most flexible preset (this sample)",
                                 "icon": "macwindow.on.rectangle",
                                 "content": [
-                                    { "type": "text", "content": "A multi-step wizard with 9 step types. Combine intro screens, bento grids, deployment tracking, carousels, guides, and more in a single workflow." },
-                                    { "type": "bullets", "items": ["9 step types: intro, bento, deployment, carousel, guide, showcase, portal, processing, outro", "Linear navigation with back/continue", "55+ content block types", "Branding, forms, compliance checks"] },
+                                    { "type": "text", "content": "A multi-step wizard with 12 step types. Combine intro screens, bento grids, deployment tracking, cadence carousels, guides, brand pickers, and more in a single workflow." },
+                                    { "type": "bullets", "items": ["12 step types: intro, bento, deployment, cadence, carousel, guide, showcase, portal, processing, brandPicker, assistant, outro", "Linear navigation with back/continue", "55+ content block types", "Branding, forms, compliance checks"] },
                                     { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "5", "buttonStyle": "borderedProminent" }
                                 ]
                             }
