@@ -158,6 +158,20 @@ final class LogMonitorServiceTests: XCTestCase {
         XCTAssertNotNil(match)
     }
 
+    func testInstallomatorPresetMatchesUnzipping() {
+        // Installomator logs "Unzipping <archive>" for zip payloads — must match.
+        let preset = LogPatternPreset.presets["installomator"]!
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
+
+        let testLine = "2026-02-22 15:34:05 : INFO  : googlechrome : Unzipping googlechrome.zip"
+        let range = NSRange(testLine.startIndex..., in: testLine)
+        let match = regex.firstMatch(in: testLine, range: range)
+
+        XCTAssertNotNil(match, "Should match 'Unzipping .zip' line")
+    }
+
     func testInstallomatorPresetMatchesInstallingPKG() {
         let preset = LogPatternPreset.presets["installomator"]!
         guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
