@@ -25,7 +25,7 @@ struct LogPatternPreset {
         // Captures: Downloading/Mounting/Copying/Installing/Verifying/Removing/Running + path, version info
         // Auto-match works because paths contain app names (e.g., "googlechrome.dmg", "Google Chrome.app")
         "installomator": LogPatternPreset(
-            pattern: #": (?:INFO|DEBUG|REQ|WARN)\s+: \w+ : ((?:Downloading|Mounted|Mounting|Verifying|Copy|Copying|Installing|Unpacking|Removing|Running|Extracting)\s+.+?(?:\.dmg|\.pkg|\.zip|\.app|$)|(?:Installed|Downloaded) version: [\d.]+|\d+%)"#,
+            pattern: #": (?:INFO|DEBUG|REQ|WARN)\s+: \w+ : ((?:Downloading|Mounted|Mounting|Verifying|Copy|Copying|Installing|Unpacking|Removing|Running|Extracting):?\s+.+?(?:\.dmg|\.pkg|\.zip|\.app|$)|(?:Installed|Downloaded) version: [\d.]+|\d+%)"#,
             captureGroup: 1
         ),
         // Jamf Pro: [timestamp] LEVEL - message
@@ -40,7 +40,7 @@ struct LogPatternPreset {
         ),
         // Generic shell scripts: [STATUS] message
         "shell": LogPatternPreset(
-            pattern: #"^\[STATUS\]\s*(.+)$"#,
+            pattern: #"^\[STATUS\]\s+(.+)$"#,
             captureGroup: 1
         ),
         // Generic MDM installer pattern: process.name: message
