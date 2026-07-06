@@ -33,9 +33,12 @@ struct LogPatternPreset {
             pattern: #"\[.*?\]\s*(?:INFO|DEBUG)\s*-\s*(.+)"#,
             captureGroup: 1
         ),
-        // Munki: INFO: message
+        // Munki (ManagedSoftwareUpdate.log): real format is "TIMESTAMP message" (e.g.
+        // "2026-07-06 09:53:12.758+02:00 Installing Firefox") — there is no "INFO:" prefix.
+        // Capture only install-phase lines so the huge volume of manifest/catalog/checking
+        // noise doesn't surface as status.
         "munki": LogPatternPreset(
-            pattern: #"INFO:\s*(.+)"#,
+            pattern: #"^\d{4}-\d{2}-\d{2} [\d:.]+[+-]\d{2}:\d{2}\s+((?:Installing|Downloading|Removing|Staging)\b.*)$"#,
             captureGroup: 1
         ),
         // Generic shell scripts: [STATUS] message
