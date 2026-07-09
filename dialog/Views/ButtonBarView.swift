@@ -106,6 +106,10 @@ struct ButtonBarView: View {
                           keyboardShortcut: .defaultAction,
                           buttonFontSize: observedData.appProperties.buttonTextSize,
                           buttonStyle: observedData.appProperties.buttonSize,
+                          action: observedData.args.button1ShellActionOption.present
+                              ? observedData.args.button1ShellActionOption.value
+                              : observedData.args.button1ActionOption.value,
+                          isShellCommand: observedData.args.button1ShellActionOption.present,
                           shouldQuit: true,
                           exitCode: 0,
                           observedData: observedData
