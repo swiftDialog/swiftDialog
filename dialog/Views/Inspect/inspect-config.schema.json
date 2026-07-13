@@ -584,9 +584,10 @@
       "type": "string",
       "enum": [
         "shared",
-        "perItem"
+        "perItem",
+        "report"
       ],
-      "description": "Preset4: 'shared' (single bar, X of Y) | 'perItem' (indeterminate per item)"
+      "description": "Preset4: 'shared' (single bar, X of Y) | 'perItem' (indeterminate per item) | 'report' (all items as a scrollable check-report list; persists until Done)"
     },
     "readinessFile": {
       "type": "string",
@@ -2080,7 +2081,10 @@
             "install-list",
             "wallpaper-picker",
             "feature-table",
-            "textfield"
+            "textfield",
+            "explainer",
+            "label-value",
+            "compliance-details-button"
           ],
           "description": "Content block type. 'compliance-summary' and 'findings-list' render live from plistSources via the ComplianceAggregator — available in preset5 and preset6."
         },

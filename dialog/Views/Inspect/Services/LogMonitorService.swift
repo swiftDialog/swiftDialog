@@ -25,7 +25,7 @@ struct LogPatternPreset {
         // Captures: Downloading/Mounting/Copying/Installing/Verifying/Removing/Running + path, version info
         // Auto-match works because paths contain app names (e.g., "googlechrome.dmg", "Google Chrome.app")
         "installomator": LogPatternPreset(
-            pattern: #": (?:INFO|DEBUG|REQ|WARN)\s+: \w+ : ((?:Downloading|Mounted|Mounting|Verifying|Copy|Copying|Installing|Unpacking|Removing|Running|Extracting)\s+.+?(?:\.dmg|\.pkg|\.zip|\.app|$)|(?:Installed|Downloaded) version: [\d.]+|\d+%)"#,
+            pattern: #": (?:INFO|DEBUG|REQ|WARN)\s+: \w+ : ((?:Downloading|Mounted|Mounting|Verifying|Copy|Copying|Installing|Unpacking|Unzipping|Removing|Running|Extracting):?\s+.+?(?:\.dmg|\.pkg|\.zip|\.app|$)|(?:Installed|Downloaded) version: [\d.]+|\d+%)"#,
             captureGroup: 1
         ),
         // Jamf Pro: [timestamp] LEVEL - message
@@ -33,14 +33,17 @@ struct LogPatternPreset {
             pattern: #"\[.*?\]\s*(?:INFO|DEBUG)\s*-\s*(.+)"#,
             captureGroup: 1
         ),
-        // Munki: INFO: message
+        // Munki (ManagedSoftwareUpdate.log): real format is "TIMESTAMP message" (e.g.
+        // "2026-07-06 09:53:12.758+02:00 Installing Firefox") — there is no "INFO:" prefix.
+        // Capture only install-phase lines so the huge volume of manifest/catalog/checking
+        // noise doesn't surface as status.
         "munki": LogPatternPreset(
-            pattern: #"INFO:\s*(.+)"#,
+            pattern: #"^\d{4}-\d{2}-\d{2} [\d:.]+[+-]\d{2}:\d{2}\s+((?:Installing|Downloading|Removing|Staging)\b.*)$"#,
             captureGroup: 1
         ),
         // Generic shell scripts: [STATUS] message
         "shell": LogPatternPreset(
-            pattern: #"^\[STATUS\]\s*(.+)$"#,
+            pattern: #"^\[STATUS\]\s+(.+)$"#,
             captureGroup: 1
         ),
         // Generic MDM installer pattern: process.name: message
@@ -86,6 +89,7 @@ struct LogPatternPreset {
         if trimmed.hasPrefix("Downloading ") { return "Downloading..." }
         if trimmed.hasPrefix("Mounting ") || trimmed.hasPrefix("Mounted ") { return "Mounting..." }
         if trimmed.hasPrefix("Unpacking ") { return "Unpacking..." }
+        if trimmed.hasPrefix("Unzipping ") { return "Unpacking..." }   // Installomator uses "Unzipping <archive>"
         if trimmed.hasPrefix("Extracting ") { return "Extracting..." }
         if trimmed.hasPrefix("Removing ") { return "Cleaning up..." }
         if trimmed.hasPrefix("Running ") { return "Running script..." }

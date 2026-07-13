@@ -21,7 +21,15 @@ struct Preset3View: View, InspectLayoutProtocol {
     init(inspectState: InspectState) {
         self.inspectState = inspectState
     }
-    
+
+    /// Trigger file path for readiness signalling (mirrors Preset4/6). Additive only —
+    /// Preset3 remains headless for commands (FSEvents); this just lets `wait-ready` succeed.
+    private var triggerFilePath: String {
+        if let customPath = inspectState.config?.triggerFile { return customPath }
+        if appArguments.inspectMode.present { return "/tmp/swiftdialog_dev_preset3.trigger" }
+        return "/tmp/swiftdialog_\(ProcessInfo.processInfo.processIdentifier)_preset3.trigger"
+    }
+
     var body: some View {
         let textColor = getTextColor()
         
@@ -73,7 +81,7 @@ struct Preset3View: View, InspectLayoutProtocol {
                             iconCache.cacheBannerImage(for: inspectState)
                         }
 
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: InspectConstants.spacingIntra) {
                         // Big hero title (moved here from the old top header)
                         Text(localized("title", fallback: inspectState.uiConfiguration.windowTitle) ?? "")
                             .font(.largeTitle)
@@ -96,8 +104,8 @@ struct Preset3View: View, InspectLayoutProtocol {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .padding(.horizontal, 32)
-                .padding(.top, 40)
-                .padding(.bottom, 22)
+                .padding(.top, InspectConstants.spacingOuter)
+                .padding(.bottom, InspectConstants.spacingSection)
                 
                 // Removed - message is now inline with logo
                 
@@ -109,7 +117,7 @@ struct Preset3View: View, InspectLayoutProtocol {
                             [GridItem(.flexible()), GridItem(.flexible())] :
                             [GridItem(.flexible())]
 
-                        LazyVGrid(columns: columns, spacing: 10) {
+                        LazyVGrid(columns: columns, spacing: InspectConstants.spacingInner) {
                             let sortedItems = getSortedItemsByStatus() // Use simple order: Latest Completed → Installing → Waiting
                             ForEach(sortedItems, id: \.id) { item in
                                 HStack(spacing: 14) {
@@ -153,7 +161,12 @@ struct Preset3View: View, InspectLayoutProtocol {
                                 }
                                 .padding(.vertical, 10)
                                 .padding(.horizontal, 14)
-                                .background(Color.primary.opacity(0.04))
+                                .background(
+                                    // Subtle brand tint marks the actively-installing cell.
+                                    inspectState.downloadingItems.contains(item.id)
+                                        ? Color(hex: inspectState.uiConfiguration.highlightColor).opacity(0.10)
+                                        : Color.primary.opacity(0.04)
+                                )
                                 .clipShape(.rect(cornerRadius: 12))
                             }
                         }
@@ -222,6 +235,10 @@ struct Preset3View: View, InspectLayoutProtocol {
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.subheadline)
                                     .foregroundStyle(.green)
+                            } else if !inspectState.downloadingItems.isEmpty {
+                                // The list's single spinner — one motion source, not one
+                                // per grid cell.
+                                ProgressView().controlSize(.small)
                             }
                             Text(isComplete
                                  ? (localized("completionMessage", fallback: inspectState.config?.uiLabels?.completionMessage) ?? "Installation complete")
@@ -279,6 +296,7 @@ struct Preset3View: View, InspectLayoutProtocol {
                        inspectState.buttonConfiguration.button2Visible && !inspectState.buttonConfiguration.button2Text.isEmpty {
                         Button(inspectState.buttonConfiguration.button2Text) {
                             writeLog("Preset3: button2 (\(inspectState.buttonConfiguration.button2Text)) → exit 2", logLevel: .info)
+                            cleanupReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath, exitCode: 2)
                             exit(2)
                         }
                         .buttonStyle(.bordered)
@@ -291,6 +309,7 @@ struct Preset3View: View, InspectLayoutProtocol {
                                          (inspectState.buttonConfiguration.button1Text.isEmpty ? "Continue" : inspectState.buttonConfiguration.button1Text)
                     Button(finalButtonText) {
                         writeLog("Preset3: button1 (\(finalButtonText)) → exit 0", logLevel: .info)
+                        cleanupReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath, exitCode: 0)
                         exit(0)
                     }
                     .keyboardShortcut(.defaultAction)
@@ -336,6 +355,10 @@ struct Preset3View: View, InspectLayoutProtocol {
                 let basePath = inspectState.uiConfiguration.iconBasePath ?? ""
                 localizationService.loadLanguages(from: locConfig, basePath: basePath)
             }
+            // Announce readiness so `ignitecli ipc wait-ready` returns (FSEvents path unchanged).
+            writeReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath,
+                               preset: "3", itemCount: inspectState.items.count,
+                               itemIDs: inspectState.items.map { $0.id })
         }
     }
 
@@ -467,50 +490,32 @@ struct Preset3View: View, InspectLayoutProtocol {
     // MARK: - Validation Support
 
     private func hasValidationWarning(for item: InspectConfig.ItemConfig) -> Bool {
-        print("DEBUG Preset3: hasValidationWarning called for item '\(item.id)'")
-        
-        // Only check validation for completed items  
-        guard inspectState.completedItems.contains(item.id) else { 
-            print("DEBUG Preset3: Item '\(item.id)' not completed - completedItems: \(inspectState.completedItems)")
-            return false 
-        }
-        
-        print("DEBUG Preset3: Item '\(item.id)' IS completed")
-        
+        // Only check validation for completed items
+        guard inspectState.completedItems.contains(item.id) else { return false }
+
         // Check if item has any plist validation configuration
-        let hasPlistValidation = item.plistKey != nil || 
+        let hasPlistValidation = item.plistKey != nil ||
                                inspectState.plistSources?.contains(where: { source in
                                    item.paths.contains(source.path)
                                }) == true
-        
-        print("DEBUG Preset3: Item '\(item.id)' - plistKey: '\(item.plistKey ?? "nil")', paths: \(item.paths), hasPlistValidation: \(hasPlistValidation)")
-        
+
         // If item has plist validation, check the results
         if hasPlistValidation {
-            // If validation result is missing, assume validation passed (true)
-            // If validation result is false, that means validation failed, so we have a warning
+            // Missing result → assume validation passed (no warning); false → warning.
             let validationResultFromDict = inspectState.plistValidationResults[item.id]
-            let validationResult = validationResultFromDict ?? true
-            let hasWarning = !validationResult  // Warning when validation result is false
-            print("DEBUG Preset3: Item '\(item.id)' - raw value from dict: \(validationResultFromDict as Any), computed validationResult: \(validationResult), hasWarning: \(hasWarning)")
-            print("DEBUG Preset3: Full validation results dict: \(inspectState.plistValidationResults)")
-            print("DEBUG Preset3: Dictionary keys: \(Array(inspectState.plistValidationResults.keys))")
-            
-            // If validation result is missing but item has plist validation config, trigger validation manually
+
+            // If the result is missing but the item has plist validation config, trigger
+            // validation manually; assume no warning until it completes.
             if validationResultFromDict == nil {
-                print("DEBUG Preset3: Item '\(item.id)' missing validation result - triggering manual validation")
                 Task { @MainActor in
                     _ = inspectState.validatePlistItem(item)
-                    print("DEBUG Preset3: Manual validation triggered for '\(item.id)'")
                 }
-                // For now, assume no warning until validation completes
                 return false
             }
-            
-            return hasWarning
+
+            return !(validationResultFromDict ?? true)
         }
-        
-        print("DEBUG Preset3: Item '\(item.id)' - no plist validation configured")
+
         return false
     }
 
@@ -575,9 +580,7 @@ struct Preset3View: View, InspectLayoutProtocol {
         let isFailed = inspectState.failedItems.contains(item.id)
         let isCompleted = inspectState.completedItems.contains(item.id)
         let hasWarning = hasValidationWarning(for: item)
-
-        // Move print statements outside of ViewBuilder context
-        let _ = print("DEBUG Preset3 UI: Item '\(item.id)' - isFailed: \(isFailed), isCompleted: \(isCompleted), hasWarning: \(hasWarning)")
+        let brand = Color(hex: inspectState.uiConfiguration.highlightColor)
 
         if isFailed {
             // Failed - show red X and error message
@@ -595,7 +598,6 @@ struct Preset3View: View, InspectLayoutProtocol {
         } else if isCompleted {
             // Completed - check for validation warnings (using same logic as Preset2)
             if hasWarning {
-                let _ = print("DEBUG Preset3 UI: Showing 'Check Config' for '\(item.id)'")
                 HStack(spacing: 4) {
                     Image(systemName: "exclamationmark.circle.fill")
                         .foregroundStyle(.orange)
@@ -607,7 +609,6 @@ struct Preset3View: View, InspectLayoutProtocol {
                 }
                 .help("Configuration validation failed - check plist settings")
             } else {
-                let _ = print("DEBUG Preset3 UI: Showing '\(localizedItemStatus(for: item))' for '\(item.id)'")
                 HStack(spacing: 4) {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(.green)
@@ -620,18 +621,19 @@ struct Preset3View: View, InspectLayoutProtocol {
                 .help("\(localizedItemStatus(for: item)) and validated")
             }
         } else if inspectState.downloadingItems.contains(item.id) {
-            let _ = print("DEBUG Preset3 UI: Showing '\(localizedItemStatus(for: item))' for '\(item.id)'")
+            // Static accent dot beside the status text — the single header spinner owns
+            // the motion, so concurrent installs don't fill the grid with spinners.
             HStack(spacing: 4) {
-                ProgressView()
-                    .scaleEffect(0.6)
+                Circle()
+                    .fill(brand.opacity(0.2))
                     .frame(width: 12, height: 12)
+                    .overlay(Circle().fill(brand).frame(width: 6, height: 6))
                 Text(localizedItemStatus(for: item))
                     .font(.caption)
                     .foregroundStyle(textColor.opacity(0.7))
                     .fontWeight(.medium)
             }
         } else {
-            let _ = print("DEBUG Preset3 UI: Showing '\(localizedItemStatus(for: item))' for '\(item.id)'")
             HStack(spacing: 4) {
                 Image(systemName: "clock.fill")
                     .foregroundStyle(textColor.opacity(0.5))

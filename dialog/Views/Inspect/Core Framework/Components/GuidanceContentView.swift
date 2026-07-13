@@ -162,19 +162,14 @@ struct GuidanceContentView: View {
                 .frame(maxWidth: .infinity, alignment: Alignment(horizontal: contentAlignment, vertical: .center))
 
         case "highlight":
-            let resolvedAccent: Color = accentColor ?? {
-                if let customColor = inspectState.config?.secondaryColor {
-                    return Color(hex: customColor)
-                }
-                // Use system accent color if default gray is still set
-                let defaultColor = inspectState.uiConfiguration.secondaryColor
-                return defaultColor == "#A0A0A0" ? Color.accentColor : Color(hex: defaultColor)
-            }()
-
+            // Emphasized instruction line — plain centered prose (no chip box) so it reads as
+            // onboarding copy, not a button/tag. Semibold keeps the emphasis vs body text.
             Text(block.content ?? "")
-                .font(.system(size: 14 * scaleFactor, weight: .semibold, design: .monospaced))
+                .font(.system(size: 14 * scaleFactor, weight: .semibold))
                 .foregroundStyle(.primary)
-                .modifier(HighlightChipStyle(accentColor: resolvedAccent, scaleFactor: scaleFactor))
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .center)
 
         case "arrow":
             HStack(spacing: 6 * scaleFactor) {
@@ -588,6 +583,8 @@ struct GuidanceContentView: View {
                                 }
                                 inspectState.guidanceFormInputs[itemId]?.checkboxes[fieldId] = newValue
                                 writeLog("GuidanceContentView: Checkbox '\(fieldId)' set to \(newValue)", logLevel: .info)
+                                // Live event so external monitors can react mid-session (symmetric with toggle/slider/textfield).
+                                inspectState.writeToInteractionLog("checkbox:\(itemId):\(fieldId):\(newValue)")
                             }
                         )) {
                             Text(block.content ?? "")
@@ -637,6 +634,8 @@ struct GuidanceContentView: View {
                                 }
                                 inspectState.guidanceFormInputs[itemId]?.dropdowns[fieldId] = newValue
                                 writeLog("GuidanceContentView: Dropdown '\(fieldId)' set to '\(newValue)'", logLevel: .info)
+                                // Live event so external monitors can react mid-session (symmetric with toggle/slider/textfield).
+                                inspectState.writeToInteractionLog("dropdown:\(itemId):\(fieldId):\(newValue)")
                             }
                         )) {
                             ForEach(options, id: \.self) { option in
@@ -699,6 +698,8 @@ struct GuidanceContentView: View {
                             }
                             inspectState.guidanceFormInputs[itemId]?.radios[fieldId] = newValue
                             writeLog("GuidanceContentView: Radio '\(fieldId)' set to '\(newValue)'", logLevel: .info)
+                            // Live event so external monitors can react mid-session (symmetric with toggle/slider/textfield).
+                            inspectState.writeToInteractionLog("radio:\(itemId):\(fieldId):\(newValue)")
                         }
                     )
 

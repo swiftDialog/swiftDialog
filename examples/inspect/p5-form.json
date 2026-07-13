@@ -1,0 +1,27 @@
+{
+  "preset": "5",
+  "title": "Preset5 Form",
+  "highlightColor": "#0A66C2",
+  "triggerFile": "/tmp/ignitecli-p5f.trigger",
+  "readinessFile": "/tmp/ignitecli-p5f.ready",
+  "resultFile": "/tmp/ignitecli-p5f-result.json",
+  "introSteps": [
+    {
+      "id": "prefs",
+      "stepType": "intro",
+      "heroImage": "SF=slider.horizontal.3",
+      "heroImageShape": "roundedSquare",
+      "heroImageSize": 64,
+      "title": "Choose your defaults",
+      "subtitle": "Each change should append a live line to the interaction log.",
+      "content": [
+        { "type": "dropdown", "id": "browser", "content": "Default browser", "options": ["Safari", "Chrome", "Firefox", "Edge"], "value": "Safari" },
+        { "type": "radio", "id": "theme", "content": "Appearance", "options": ["Light", "Dark", "Auto"], "value": "Auto" },
+        { "type": "checkbox", "id": "analytics", "content": "Share anonymous analytics" },
+        { "type": "toggle", "id": "notifications", "content": "Enable notifications" },
+        { "type": "slider", "id": "volume", "content": "Volume", "min": 0, "max": 100, "step": 10, "value": "50", "unit": "%" },
+        { "type": "textfield", "id": "nickname", "content": "Nickname", "placeholder": "Enter a name" }
+      ]
+    }
+  ]
+}

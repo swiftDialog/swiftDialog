@@ -83,7 +83,10 @@ struct WallpaperPickerView: View {
     }
 
     var body: some View {
-        VStack(alignment: centered ? .center : .leading, spacing: 20 * scaleFactor) {
+        // Outer stack spacing == the gap *between* category groups (3u). Paired with the
+        // per-category inner spacing (1u) below, this is the 3:1 proximity tier: each
+        // [title + row] reads as one unit rather than four loose strips.
+        VStack(alignment: centered ? .center : .leading, spacing: InspectConstants.spacingOuter * scaleFactor) {
             // Multi-select monitor picker
             if isMultiSelect {
                 HStack(spacing: 8 * scaleFactor) {
@@ -120,8 +123,8 @@ struct WallpaperPickerView: View {
             switch layout {
             case .grid:
                 // Flat grid - all images in specified number of columns
-                let gridColumns = Array(repeating: GridItem(.flexible(), spacing: 12 * scaleFactor), count: columns)
-                LazyVGrid(columns: gridColumns, spacing: 12 * scaleFactor) {
+                let gridColumns = Array(repeating: GridItem(.flexible(), spacing: InspectConstants.spacingInner * scaleFactor), count: columns)
+                LazyVGrid(columns: gridColumns, spacing: InspectConstants.spacingInner * scaleFactor) {
                     ForEach(allImages, id: \.path) { image in
                         WallpaperTileView(
                             image: image,
@@ -142,7 +145,7 @@ struct WallpaperPickerView: View {
             case .row:
                 // Single horizontal row
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12 * scaleFactor) {
+                    HStack(spacing: InspectConstants.spacingInner * scaleFactor) {
                         ForEach(allImages, id: \.path) { image in
                             WallpaperTileView(
                                 image: image,
@@ -165,7 +168,9 @@ struct WallpaperPickerView: View {
             case .categories:
                 // Existing category-based layout
                 ForEach(categories, id: \.title) { category in
-                    VStack(alignment: .leading, spacing: 8 * scaleFactor) {
+                    // Inner spacing == title → its row (1u). Hugs the row it labels so the
+                    // pair groups against the larger 3u gap to the next category.
+                    VStack(alignment: .leading, spacing: InspectConstants.spacingInner * scaleFactor) {
                         // Category title
                         Text(category.title)
                             .font(.system(size: 13 * scaleFactor, weight: .semibold))
@@ -173,7 +178,7 @@ struct WallpaperPickerView: View {
 
                         // Horizontal scrolling row for this category
                         ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 12 * scaleFactor) {
+                            HStack(spacing: InspectConstants.spacingInner * scaleFactor) {
                                 ForEach(category.images, id: \.path) { image in
                                     WallpaperTileView(
                                         image: image,
@@ -336,7 +341,7 @@ struct WallpaperTileView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 8 * scaleFactor))
                     .overlay(
                         RoundedRectangle(cornerRadius: 8 * scaleFactor)
-                            .stroke(isSelected ? accentColor : Color.clear, lineWidth: 3)
+                            .stroke(isSelected ? accentColor : Color.clear, lineWidth: 2.5)
                     )
                     .overlay(
                         // Show monitor badge(s) or checkmark
@@ -368,8 +373,9 @@ struct WallpaperTileView: View {
                         },
                         alignment: .topTrailing
                     )
-                    .shadow(color: isSelected ? accentColor.opacity(0.3) : .black.opacity(0.1),
-                            radius: isSelected ? 8 : 4,
+                    // Neutral drop shadow (no colored halo) — selection reads via the crisp ring.
+                    .shadow(color: .black.opacity(isSelected ? 0.16 : 0.1),
+                            radius: isSelected ? 5 : 4,
                             y: 2)
 
                 // Optional title - fixed width to match tile

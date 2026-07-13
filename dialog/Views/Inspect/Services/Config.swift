@@ -32,6 +32,7 @@ enum ConfigurationError: Error, LocalizedError {
     case invalidJSON(path: String, error: Error)
     case missingEnvironmentVariable(name: String)
     case testDataCreationFailed(error: Error)
+    case invalidFormat(reason: String)
 
     var errorDescription: String? {
         switch self {
@@ -45,6 +46,8 @@ enum ConfigurationError: Error, LocalizedError {
             return "Environment variable '\(name)' not set and no fallback available"
         case .testDataCreationFailed(let error):
             return "Failed to create test configuration: \(error.localizedDescription)"
+        case .invalidFormat(let reason):
+            return reason
         }
     }
 
@@ -406,6 +409,13 @@ class Config {
                     print("🎨 CONFIG: No brandPalette found in config")
                 }
 
+                // Coerce quoted numbers/bools (e.g. "wallpaperMultiSelect": "2") to their
+                // schema-declared scalar types before strict Codable decoding — tolerant of
+                // configs from MDM/templating tools that emit everything as strings.
+                if let coerced = InspectConfigCoercion.coerceScalars(in: jsonObject) as? [String: Any] {
+                    jsonObject = coerced
+                }
+
                 if let modifiedData = try? JSONSerialization.data(withJSONObject: jsonObject, options: []) {
                     jsonData = modifiedData
                 }
@@ -438,6 +448,50 @@ class Config {
         }
     }
     
+    /// Decode + validate inspect config from in-memory JSON. Single decode surface
+    /// shared by the file loader and inline `--jsonstring`. `source` lets callers
+    /// (e.g. the file loader) attribute the resulting `ConfigurationResult` to
+    /// where the bytes actually came from.
+    func loadConfiguration(fromData data: Data, source: ConfigurationSource = .file(path: "<data>")) -> Result<ConfigurationResult, ConfigurationError> {
+        InspectConfig.unknownKeyWarnings = []
+
+        // Resolve brandPalette $token references before schema validation/decode,
+        // same as the file/URL loaders. Safe to re-run when the caller already
+        // resolved tokens (e.g. loadConfigurationFromFile): resolution only
+        // rewrites strings still containing "$", so a second pass is a no-op.
+        var resolvedData = data
+        if var jsonObject = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            if let brandPalette = jsonObject["brandPalette"] as? [String: Any] {
+                jsonObject = resolveBrandTokens(in: jsonObject, palette: brandPalette)
+                writeLog("ConfigurationService: Resolved brand palette tokens (fromData)", logLevel: .info)
+            }
+            if let modifiedData = try? JSONSerialization.data(withJSONObject: jsonObject, options: []) {
+                resolvedData = modifiedData
+            }
+        }
+
+        let validation = validateInspectSchema(resolvedData)
+        let keyWarnings = InspectConfig.unknownKeyWarnings
+        InspectConfig.unknownKeyWarnings = []
+
+        switch validation {
+        case .valid(let config):
+            let processedConfig = applyConfigurationDefaults(to: config)
+            var warnings = validateConfiguration(processedConfig)
+            warnings.append(contentsOf: keyWarnings)
+
+            return .success(ConfigurationResult(
+                config: processedConfig,
+                source: source,
+                warnings: warnings
+            ))
+        case .notInspect:
+            return .failure(.invalidFormat(reason: "No inspect content found (expected preset, introSteps, or items). If you meant a standard dialog, drop --inspect-mode."))
+        case .malformed(let reason):
+            return .failure(.invalidFormat(reason: "Inspect config is malformed: \(reason)"))
+        }
+    }
+
     /// Fallback: Load configuration from specific file path
     /// TODO: Reevaluate as this has been brittle - loading from file system to late to initialize UI accordingly
     func loadConfigurationFromFile(at path: String) -> Result<ConfigurationResult, ConfigurationError> {
@@ -452,7 +506,8 @@ class Config {
             // Load and parse JSON
             let data = try Data(contentsOf: URL(fileURLWithPath: path))
 
-            // Parse JSON to dictionary for pre-processing
+            // Parse JSON to dictionary for pre-processing (path-specific; must
+            // happen before the shared decode surface, which only sees bytes)
             var jsonData = data
             if var jsonObject = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
 
@@ -479,28 +534,22 @@ class Config {
                 }
             }
 
-            let decoder = JSONDecoder()
-            InspectConfig.unknownKeyWarnings = []
-            let config = try decoder.decode(InspectConfig.self, from: jsonData)
-            let keyWarnings = InspectConfig.unknownKeyWarnings
-            InspectConfig.unknownKeyWarnings = []
+            // Delegate schema validation + decode + defaults/warnings to the
+            // single shared decode surface.
+            let result = loadConfiguration(fromData: jsonData, source: .file(path: path))
 
-            // Validate and apply defaults
-            let processedConfig = applyConfigurationDefaults(to: config)
-            var warnings = validateConfiguration(processedConfig)
-            warnings.append(contentsOf: keyWarnings)
+            switch result {
+            case .success(let configResult):
+                writeLog("ConfigurationService: Successfully loaded configuration from \(path)", logLevel: .info)
+                writeLog("ConfigurationService: Loaded \(configResult.config.items.count) items", logLevel: .info)
+            case .failure(let error):
+                writeLog("ConfigurationService: Configuration loading failed for \(path):\n\(error.localizedDescription)", logLevel: .error)
+            }
+            return result
 
-            writeLog("ConfigurationService: Successfully loaded configuration from \(path)", logLevel: .info)
-            writeLog("ConfigurationService: Loaded \(config.items.count) items", logLevel: .info)
-
-            return .success(ConfigurationResult(
-                config: processedConfig,
-                source: .file(path: path),
-                warnings: warnings
-            ))
-            
         } catch let error {
-            // Get original JSON string for enhanced error reporting
+            // File-read failure (not a decode/schema failure) — keep the
+            // richer JSON-error formatting for this class of error.
             let jsonString = try? String(contentsOfFile: path, encoding: .utf8)
             let detailedError = ConfigurationError.formatJSONError(error, jsonString: jsonString)
             writeLog("ConfigurationService: Configuration loading failed for \(path):\n\(detailedError)", logLevel: .error)
@@ -640,7 +689,7 @@ class Config {
                                 "icon": "bell.badge",
                                 "content": [
                                     { "type": "text", "content": "A small, unobtrusive toast notification that tracks installations in the corner of the screen. Stays out of the user's way." },
-                                    { "type": "bullets", "items": ["Notification-sized window", "Corner-anchored positioning", "Progress tracking with minimal UI", "Non-intrusive for background installs"] },
+                                    { "type": "bullets", "items": ["Notification-sized window", "Corner-anchored positioning", "Three progress modes: shared bar, per-item, or report list", "Non-intrusive for background installs"] },
                                     { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "4", "buttonStyle": "borderedProminent" }
                                 ]
                             }
@@ -664,8 +713,8 @@ class Config {
                                 "subtitle": "The most flexible preset (this sample)",
                                 "icon": "macwindow.on.rectangle",
                                 "content": [
-                                    { "type": "text", "content": "A multi-step wizard with 9 step types. Combine intro screens, bento grids, deployment tracking, carousels, guides, and more in a single workflow." },
-                                    { "type": "bullets", "items": ["9 step types: intro, bento, deployment, carousel, guide, showcase, portal, processing, outro", "Linear navigation with back/continue", "55+ content block types", "Branding, forms, compliance checks"] },
+                                    { "type": "text", "content": "A multi-step wizard with 12 step types. Combine intro screens, bento grids, deployment tracking, cadence carousels, guides, brand pickers, and more in a single workflow." },
+                                    { "type": "bullets", "items": ["12 step types: intro, bento, deployment, cadence, carousel, guide, showcase, portal, processing, brandPicker, assistant, outro", "Linear navigation with back/continue", "55+ content block types", "Branding, forms, compliance checks"] },
                                     { "type": "button", "content": "Generate Starter", "icon": "arrow.down.doc.fill", "action": "generate", "requestId": "5", "buttonStyle": "borderedProminent" }
                                 ]
                             }
@@ -1495,5 +1544,162 @@ class Config {
         }
         
         return buttonConfig
+    }
+}
+
+/// Tolerant scalar coercion for inspect config JSON, applied *before* `Codable` decoding.
+///
+/// Config authors and templating / orchestration tools (MDM payloads, ignitecli, Jamf,
+/// etc.) routinely emit numbers and booleans as quoted strings — e.g.
+/// `"wallpaperMultiSelect": "2"` or `"enabled": "true"`. swiftDialog's synthesised
+/// `Codable` conformances decode strictly, so those configs fail with a `typeMismatch`
+/// ("expected Int"). This pass coerces loosely-typed scalar values for the fields the
+/// schema declares as integer / number / boolean, so `"2"` and `2` both decode.
+///
+/// The field-name sets are DERIVED FROM `dialog/Views/Inspect/inspect-config.schema.json`:
+/// only names carrying a *single unambiguous* scalar type across the entire schema are
+/// listed. Names that appear with mixed types (e.g. `value`, `warning`, `passed`,
+/// `blocking` — sometimes string) are intentionally excluded so a legitimate string is
+/// never corrupted. Coercion is idempotent — correctly-typed values pass through unchanged.
+/// Regenerate after editing the schema by collecting `properties` whose `type` is exactly
+/// one of integer/number/boolean and dropping any name seen with another type.
+enum InspectConfigCoercion {
+
+    /// Schema fields declared only as `integer`.
+    static let integerFields: Set<String> = [
+        "bannerHeight", "bentoColumns", "blockIndex", "cacheDuration", "captureGroup",
+        "column", "columnSpan", "currentIndex", "currentPhase", "errorDetectionThreshold",
+        "exitCode", "gridColumns", "guiIndex", "guidanceBlockIndex", "height", "iconsize",
+        "maxCheckDetails", "maxLength", "plistRecheckInterval", "processingDuration",
+        "recheckInterval", "retryCount", "row", "rowSpan", "scanInterval", "scriptTimeout",
+        "shellTimeout", "sideInterval", "sideMessageInterval", "tokenRefreshInterval",
+        "total", "waitLargeOverrideTime", "waitSmallOverrideTime", "waitWarningTime",
+        "wallpaperColumns", "wallpaperMultiSelect", "width",
+    ]
+
+    /// Schema fields declared only as `number` (floating point).
+    static let numberFields: Set<String> = [
+        "assistantImageHeight", "autoAdvanceDelay", "backgroundOpacity", "bentoGap",
+        "bentoRowHeight", "bentoSidebarRatio", "cadenceInterval", "cadenceMinDwell",
+        "cornerRadius", "delay", "dismissDelay", "excellent", "good", "guideImageRatio",
+        "heroImagePadding", "heroImageSize", "iconSize", "imageHeight",
+        "imageRotationInterval", "imageWidth", "installationScale", "introScale",
+        "introVerticalOffset", "logoMaxWidth", "max", "maxHeight", "maxWidth",
+        "mediaHeight", "mediaRatio", "min", "minDwell", "monitorRefreshInterval",
+        "opacity", "outroScale", "outroVerticalOffset", "padding", "portalHeight",
+        "progress", "retryDelay", "scale", "showcaseImageHeight", "step", "thumbnailSize",
+        "timeout", "verticalOffset", "videoHeight", "wallpaperThumbnailHeight", "webHeight",
+    ]
+
+    /// Schema fields declared only as `boolean`.
+    static let booleanFields: Set<String> = [
+        "allowContinueWithoutSelection", "allowImageZoom", "allowNavigationDuringProcessing",
+        "allowOverride", "autoAdvance", "autoAdvanceOnComplete", "autoColor", "autoDiscover",
+        "autoDismiss", "autoEnableButton", "autoMatch", "autoTransition", "autoplay", "bold",
+        "button1disabled", "button2visible", "cacheContentForOffline", "debugMode",
+        "enableStatusColors", "enabled", "ephemeralSession", "hideSystemDetails",
+        "highlightCells", "imageBorder", "isCritical", "languagePicker", "mediaAutoplay",
+        "mediaShowArrows", "mediaShowDots", "mergeWithExisting", "numbered", "observeOnly",
+        "openExternalLinksInBrowser", "opensOverlay", "portalShowHeader", "portalShowRefetch",
+        "requireManualConfirm", "required", "resumable", "returnSelections", "secure",
+        "selectable", "selfServiceOnly", "showAccentBorder", "showArrows", "showBackButton",
+        "showBlockingState", "showCompletionState", "showDividers", "showDots",
+        "showNavigationArrows", "showOnIntro", "showOnMain", "showOnSummary", "showOnce",
+        "showProgressDots", "showProgressInfo", "showStepCounter", "showSystemInfo",
+        "showThumbnails", "skipIfComplete", "skipPortal", "startFromEnd", "useUserDefaults",
+        "visible", "waitForExternalTrigger", "wallpaperShowPath", "wide",
+        "writeOnDialogExit", "writeOnStepComplete",
+    ]
+
+    /// Recursively coerce scalar values in a parsed-JSON object graph
+    /// (`[String: Any]` / `[Any]` as produced by `JSONSerialization`).
+    static func coerceScalars(in value: Any) -> Any {
+        if let dict = value as? [String: Any] {
+            var out = [String: Any](minimumCapacity: dict.count)
+            for (key, val) in dict {
+                if val is [String: Any] || val is [Any] {
+                    out[key] = coerceScalars(in: val)   // nested container — recurse
+                } else if integerFields.contains(key), let i = asInt(val) {
+                    out[key] = i
+                } else if numberFields.contains(key), let d = asDouble(val) {
+                    out[key] = d
+                } else if booleanFields.contains(key), let b = asBool(val) {
+                    out[key] = b
+                } else {
+                    out[key] = val
+                }
+            }
+            return out
+        }
+        if let arr = value as? [Any] {
+            return arr.map { coerceScalars(in: $0) }
+        }
+        return value
+    }
+
+    // MARK: Scalar parsers (idempotent: already-correct values pass through)
+
+    private static func asInt(_ v: Any) -> Int? {
+        if let i = v as? Int { return i }
+        if let s = v as? String, let i = Int(s.trimmingCharacters(in: .whitespaces)) { return i }
+        if let d = v as? Double, d == d.rounded() { return Int(d) }
+        return nil
+    }
+
+    private static func asDouble(_ v: Any) -> Double? {
+        if let d = v as? Double { return d }
+        if let i = v as? Int { return Double(i) }
+        if let s = v as? String, let d = Double(s.trimmingCharacters(in: .whitespaces)) { return d }
+        return nil
+    }
+
+    private static func asBool(_ v: Any) -> Bool? {
+        if let b = v as? Bool { return b }
+        if let s = v as? String {
+            switch s.trimmingCharacters(in: .whitespaces).lowercased() {
+            case "true", "yes", "1": return true
+            case "false", "no", "0": return false
+            default: return nil
+            }
+        }
+        return nil
+    }
+}
+
+/// Result of validating raw JSON against the inspect-mode schema.
+enum InspectSchemaValidation {
+    case valid(InspectConfig)
+    case notInspect
+    case malformed(reason: String)
+}
+
+/// Strict two-gate check that `data` is an intended, well-formed inspect config.
+/// Gate A: the raw object must carry an inspect *intent* marker (non-empty
+/// `inspectMode`/`preset`/`introSteps`/`items`) — decoding alone is too lenient.
+/// Gate B: it must decode into `InspectConfig` (after scalar coercion).
+func validateInspectSchema(_ data: Data) -> InspectSchemaValidation {
+    guard let obj = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
+        return .malformed(reason: "top-level JSON is not an object")
+    }
+
+    // Gate A — intent marker
+    var hasMarker = false
+    if let b = obj["inspectMode"] as? Bool, b { hasMarker = true }
+    if let s = obj["preset"] as? String, !s.isEmpty { hasMarker = true }
+    if let a = obj["introSteps"] as? [Any], !a.isEmpty { hasMarker = true }
+    if let a = obj["items"] as? [Any], !a.isEmpty { hasMarker = true }
+    guard hasMarker else { return .notInspect }
+
+    // Gate B — decode (reuse the same scalar coercion the loaders apply)
+    let coerced = (InspectConfigCoercion.coerceScalars(in: obj) as? [String: Any]) ?? obj
+    guard let coercedData = try? JSONSerialization.data(withJSONObject: coerced) else {
+        return .malformed(reason: "could not re-serialize coerced JSON")
+    }
+    do {
+        let config = try JSONDecoder().decode(InspectConfig.self, from: coercedData)
+        return .valid(config)
+    } catch {
+        let jsonString = String(data: data, encoding: .utf8)
+        return .malformed(reason: ConfigurationError.formatJSONError(error, jsonString: jsonString))
     }
 }

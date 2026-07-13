@@ -188,4 +188,5 @@ struct AppVariables {
     
     // inspect mode config path
     var inspectConfigPath               = String("")
+    var inspectConfigData: Data?        // resolved inspect config bytes (any source)
 }

@@ -51,6 +51,22 @@ struct IntroHeroImage: View {
         return size * 0.04
     }
 
+    /// Glyph heroes (device icon / SF Symbol) are centered marks that look right in a
+    /// circular medallion; real image files do not.
+    private var isGlyphHero: Bool {
+        path.lowercased() == "computer" || path.hasPrefix("SF=")
+    }
+
+    /// A file-based hero must never be force-cropped into a circle — a photo/logo filled
+    /// into a circle (and its loading placeholder) reads as "round and cut out". When such
+    /// an image is left at the default `"circle"`, render it as a rounded rectangle instead
+    /// so the whole image shows. Explicit square/roundedSquare/none, and all glyph heroes,
+    /// are honoured unchanged.
+    private var effectiveShape: String {
+        if !isGlyphHero && shape.lowercased() == "circle" { return "roundedSquare" }
+        return shape
+    }
+
     var body: some View {
         Group {
             if path.lowercased() == "computer" {
@@ -66,7 +82,7 @@ struct IntroHeroImage: View {
             }
         }
         .frame(width: size, height: size)
-        .modifier(ConditionalClipShape(shape: shape, size: size))
+        .modifier(ConditionalClipShape(shape: effectiveShape, size: size))
         .shadow(color: .black.opacity(0.1), radius: 10, y: 5)
     }
 
@@ -100,7 +116,9 @@ struct IntroHeroImage: View {
     @ViewBuilder
     private func imageFileView(path: String) -> some View {
         let contentSize = size - 2 * effectivePadding
-        let usesFit = shape.lowercased() == "none"
+        // Aspect-fit (show the whole image, no cropping) for "none" and for the remapped
+        // default — i.e. whenever we're not honouring an explicit fill shape.
+        let usesFit = effectiveShape.lowercased() == "none" || shape.lowercased() == "circle"
         if let nsImage = loadImage(path: path) {
             Image(nsImage: nsImage)
                 .resizable()
@@ -299,22 +317,9 @@ struct IntroFooterView<PopoverContent: View>: View {
             }
 
             HStack(spacing: 12) {
-                // Footer brand logo — laid out in the same row as the buttons, so it
-                // vertically aligns with Continue. Loaded synchronously (no AsyncImage spinner).
-                if let logoPath = resolvedFooterLogoPath,
-                   let nsLogo = NSImage(contentsOfFile: (logoPath as NSString).expandingTildeInPath) {
-                    Image(nsImage: nsLogo)
-                        .resizable().scaledToFit()
-                        .frame(maxHeight: footerLogoHeight)
-                        .accessibilityHidden(true)
-                }
-                // Footer text (e.g., branding text)
-                if let footerText = footerText {
-                    Text(footerText)
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(.primary)
-                }
-
+                // Leading space is reserved for the brand logo/text, but they are drawn as a
+                // leading .overlay (below) — NOT laid out in this row — so their intrinsic
+                // height can never grow the row and shift the buttons' baseline when they load.
                 Spacer()
 
                 // Popup button centered between logo and nav buttons
@@ -368,6 +373,26 @@ struct IntroFooterView<PopoverContent: View>: View {
                     .tint(accentColor)
                     .controlSize(buttonControlSize)
                     .disabled(continueDisabled)
+            }
+            // Brand logo + text float over the leading edge, vertically centred on the button
+            // row. Kept out of the HStack's height so loading them never nudges the buttons.
+            .overlay(alignment: .leading) {
+                HStack(spacing: 12) {
+                    if let logoPath = resolvedFooterLogoPath,
+                       let nsLogo = NSImage(contentsOfFile: (logoPath as NSString).expandingTildeInPath) {
+                        Image(nsImage: nsLogo)
+                            .resizable().scaledToFit()
+                            .frame(maxHeight: footerLogoHeight)
+                            .accessibilityHidden(true)
+                    }
+                    if let footerText = footerText {
+                        Text(footerText)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                    }
+                }
+                .allowsHitTesting(false)
             }
         }
         .padding(.horizontal, 20)

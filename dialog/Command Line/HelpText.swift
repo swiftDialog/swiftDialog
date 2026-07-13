@@ -1479,34 +1479,36 @@ struct SDHelp {
         Inspect mode renders a preset 5 wizard or preset 6 sidebar dashboard described
         by a JSON config file. It is a different schema from the standard --\(argument.jsonFile.long) format.
 
-        Config source (first match wins):
-            DIALOG_INSPECT_CONFIG=/abs/path/to/config.json   (env var, preferred)
-            --\(argument.inspectConfig.long) /abs/path/to/config.json             (flag form)
-            /var/tmp/dialog-inspect-config.json              (standard location)
+        Main tip — point it at a config file:
+            dialog --\(argument.inspectMode.long) --\(argument.inspectConfig.long) /path/to/config.json
 
-        Canonical launch:
-            DIALOG_INSPECT_CONFIG=/abs/path/config.json dialog --\(argument.inspectMode.long)
-            dialog --\(argument.inspectMode.long) --\(argument.inspectConfig.long) /abs/path/config.json
+        Other config sources (first match wins):
+            --\(argument.jsonString.long) '{...}'                          (inline JSON string)
+            --\(argument.jsonFile.long) /abs/path/to/config.json              (flag form)
+            --\(argument.inspectConfig.long) /abs/path/to/config.json             (inspect config file)
+            DIALOG_INSPECT_CONFIG=/abs/path/to/config.json   (env var)
+            /var/tmp/dialog-inspect-config.json              (standard location)
             ignitecli ipc launch /abs/path/config.json       (for IPC workflows)
 
-        Antipattern (rejected, exits with code 1):
-            dialog --\(argument.inspectMode.long) --\(argument.jsonFile.long) config.json
-            dialog --\(argument.inspectMode.long) --\(argument.jsonString.long) '{...}'
-
-        Without any config source, a built-in demo is loaded and a warning is logged
-        to stderr.
+        Whatever the source, the JSON is validated on launch and rejected with a clear
+        error if it isn't an inspect config. Without any config source, a built-in demo
+        workflow is loaded.
 """
 
         argument.inspectConfig.helpShort = "Path to an inspect-mode config (preset 5/6)"
         argument.inspectConfig.helpUsage = "<file>"
         argument.inspectConfig.helpLong = """
-        Load the given inspect-mode config file. Used with --\(argument.inspectMode.long).
+        Load the given inspect-mode config file. Used with --\(argument.inspectMode.long). This is the
+        primary way to launch inspect mode:
 
-        Inspect-mode configs use a different schema than --\(argument.jsonFile.long). Do not mix them.
+            dialog --\(argument.inspectMode.long) --\(argument.inspectConfig.long) /path/to/config.json
+
+        Equivalent alternatives: --\(argument.jsonFile.long) <file> (same file form) or --\(argument.jsonString.long) '{...}' (inline).
+
+        Inspect-mode configs use a different schema than standard Dialog configs; the JSON is validated
+        on launch and rejected with an error if it isn't an inspect config.
+
         The env var DIALOG_INSPECT_CONFIG takes precedence over this flag when both are set.
-
-        Example:
-            dialog --\(argument.inspectMode.long) --\(argument.inspectConfig.long) /abs/path/to/config.json
 """
 
         argument.publishedSessionsDir.helpShort = "Directory to publish per-PID session discovery JSON"

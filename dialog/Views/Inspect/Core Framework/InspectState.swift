@@ -229,7 +229,17 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         // Use configuration service to load config
         // TODO: this works when calling the global appvars but really should be passed in as a config item.
         // Pass the inspect config path from appvars if available
-        let result = configurationService.loadConfiguration(fromFile: appvars.inspectConfigPath)
+        let result: Result<ConfigurationResult, ConfigurationError>
+        if !appvars.inspectConfigPath.isEmpty {
+            // File-based sources (--jsonfile / --inspect-config / env / standard location):
+            // use the file loader so iconBasePath auto-set + brandPalette token resolution run.
+            result = configurationService.loadConfiguration(fromFile: appvars.inspectConfigPath)
+        } else if let data = appvars.inspectConfigData {
+            // Path-less inline --jsonstring: load from the in-memory bytes.
+            result = configurationService.loadConfiguration(fromData: data)
+        } else {
+            result = configurationService.loadConfiguration(fromFile: appvars.inspectConfigPath)
+        }
         
         switch result {
         case .success(let configResult):
@@ -2386,77 +2396,6 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
 
         writeLog("InspectState: All required fields validated for '\(item.id)'", logLevel: .debug)
         return true
-    }
-
-    /// Export guidance selections for external script consumption
-    func exportGuidanceSelections(for itemId: String) -> [String: Any] {
-        guard let formState = guidanceFormInputs[itemId] else {
-            return [:]
-        }
-
-        var result: [String: Any] = [:]
-        result["itemId"] = itemId
-        result["timestamp"] = ISO8601DateFormatter().string(from: Date())
-        result["checkboxes"] = formState.checkboxes
-        result["dropdowns"] = formState.dropdowns
-        result["radios"] = formState.radios
-        result["toggles"] = formState.toggles
-        result["sliders"] = formState.sliders
-        result["textfields"] = formState.textfields
-
-        return result
-    }
-
-    /// Write all guidance selections to log file for calling scripts
-    func writeGuidanceSelectionsToLog() {
-        let logPath = "/tmp/preset6_form_inputs.json"
-
-        var allSelections: [[String: Any]] = []
-        for (itemId, _) in guidanceFormInputs {
-            let selections = exportGuidanceSelections(for: itemId)
-            if !selections.isEmpty {
-                allSelections.append(selections)
-            }
-        }
-
-        do {
-            let jsonData = try JSONSerialization.data(withJSONObject: allSelections, options: .prettyPrinted)
-            try jsonData.write(to: URL(fileURLWithPath: logPath), options: .atomic)
-            writeLog("InspectState: Form selections written to \(logPath)", logLevel: .info)
-
-            // Also log to console in parseable format
-            for selection in allSelections {
-                if let itemId = selection["itemId"] as? String {
-                    let checkboxes = selection["checkboxes"] as? [String: Bool] ?? [:]
-                    let dropdowns = selection["dropdowns"] as? [String: String] ?? [:]
-                    let radios = selection["radios"] as? [String: String] ?? [:]
-                    let toggles = selection["toggles"] as? [String: Bool] ?? [:]
-                    let sliders = selection["sliders"] as? [String: Double] ?? [:]
-                    let textfields = selection["textfields"] as? [String: String] ?? [:]
-
-                    for (fieldId, checked) in checkboxes {
-                        print("[PRESET9_FORM] stepId=\(itemId) field=\(fieldId) type=checkbox value=\(checked)")
-                    }
-                    for (fieldId, value) in dropdowns {
-                        print("[PRESET9_FORM] stepId=\(itemId) field=\(fieldId) type=dropdown value=\(value)")
-                    }
-                    for (fieldId, value) in radios {
-                        print("[PRESET9_FORM] stepId=\(itemId) field=\(fieldId) type=radio value=\(value)")
-                    }
-                    for (fieldId, enabled) in toggles {
-                        print("[PRESET9_FORM] stepId=\(itemId) field=\(fieldId) type=toggle value=\(enabled)")
-                    }
-                    for (fieldId, value) in sliders {
-                        print("[PRESET9_FORM] stepId=\(itemId) field=\(fieldId) type=slider value=\(value)")
-                    }
-                    for (fieldId, value) in textfields {
-                        print("[PRESET9_FORM] stepId=\(itemId) field=\(fieldId) type=textfield value=\(value)")
-                    }
-                }
-            }
-        } catch {
-            writeLog("InspectState: Failed to write form selections: \(error)", logLevel: .error)
-        }
     }
 
     /// Write a simple interaction log entry to /tmp/preset6_interaction.log

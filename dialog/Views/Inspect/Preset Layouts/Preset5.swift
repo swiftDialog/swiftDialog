@@ -523,15 +523,18 @@ struct Preset5View: View {
                let nsLogo = NSImage(contentsOfFile: (logoPath as NSString).expandingTildeInPath) {
                 VStack {
                     Spacer()
-                    HStack {
+                    HStack(alignment: .bottom) {
                         Image(nsImage: nsLogo)
                             .resizable().scaledToFit()
                             .frame(maxHeight: min(CGFloat(config?.logoConfig?.maxHeight ?? 28), 48))
                             .opacity(config?.logoConfig?.opacity ?? 0.95)
                         Spacer()
                     }
-                    .padding(.horizontal, 32)
-                    .padding(.bottom, setupFooterPadding + 4)
+                    // Share the button baseline: same horizontal inset and bottom padding as the
+                    // footer's action row, and bottom-aligned — so the logo's height changes how
+                    // tall it is, never where its base sits relative to Continue.
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, setupFooterPadding)
                 }
                 .allowsHitTesting(false)
             }
@@ -613,7 +616,7 @@ struct Preset5View: View {
         // Find step in the unified allSteps array
         if let index = allSteps.firstIndex(where: { $0.id == stepId }) {
             writeLog("Preset5: Navigating to step '\(stepId)' at index \(index)", logLevel: .info)
-            withAnimation(InspectConstants.stepTransition) {
+            withAnimation(InspectConstants.stepCrossfade) {
                 currentStepIndex = index
             }
             writeStepEvent("step_started", stepId: stepId)
@@ -624,7 +627,7 @@ struct Preset5View: View {
         if stepId == "portal" {
             if let index = allSteps.firstIndex(where: { $0.stepType == "portal" }) {
                 writeLog("Preset5: Navigating to portal step at index \(index)", logLevel: .info)
-                withAnimation(InspectConstants.stepTransition) {
+                withAnimation(InspectConstants.stepCrossfade) {
                     currentStepIndex = index
                 }
                 writeStepEvent("step_started", stepId: allSteps[index].id)
@@ -647,7 +650,7 @@ struct Preset5View: View {
 
         if currentStepIndex + 1 < allSteps.count {
             mediaTextVisible = false
-            withAnimation(InspectConstants.stepTransition) {
+            withAnimation(InspectConstants.stepCrossfade) {
                 currentStepIndex += 1
             }
             writeStepEvent("step_started", stepId: allSteps[currentStepIndex].id)
@@ -663,7 +666,7 @@ struct Preset5View: View {
     private func goToPreviousStep() {
         if currentStepIndex > 0 {
             mediaTextVisible = false
-            withAnimation(InspectConstants.stepTransition) {
+            withAnimation(InspectConstants.stepCrossfade) {
                 currentStepIndex -= 1
             }
             writeLog("Preset5: Moved back to step \(currentStepIndex)", logLevel: .info)
@@ -951,10 +954,9 @@ struct Preset5View: View {
             // Linear step model: render based on stepType
             currentStepView(step: step)
                 .id("step-\(currentStepIndex)-\(step.id)")  // Only changes on navigation
-                .transition(.asymmetric(
-                    insertion: .opacity.combined(with: .move(edge: .trailing)),
-                    removal: .opacity.combined(with: .move(edge: .leading))
-                ))
+                // Pure opacity cross-fade — no .move transform, so text isn't rasterized at a
+                // fractional offset (which produced blurry glyphs during the slide).
+                .transition(.opacity)
         } else if currentStepIndex >= allSteps.count {
             // Past the last step - complete and close
             Color.clear.onAppear { handleCompletion() }
@@ -1134,7 +1136,7 @@ struct Preset5View: View {
         commandRouter.onNavigateByID = { [self] stepId in navigateToStep(stepId: stepId) }
         commandRouter.onNavigateByIndex = { [self] index in
             if index >= 0, index < allSteps.count {
-                withAnimation(InspectConstants.stepTransition) {
+                withAnimation(InspectConstants.stepCrossfade) {
                     currentStepIndex = index
                 }
                 writeStepEvent("step_started", stepId: allSteps[index].id)
@@ -2548,44 +2550,70 @@ struct Preset5View: View {
 
     /// Horizontal row of icon cards. The active card is enlarged and auto-centred;
     /// completed cards show a green check, pending cards dim with a dots badge.
+    /// Below this count the whole row fits comfortably, so it is centred as one balanced
+    /// group; at or above it the row scrolls and keeps the active card centred.
+    private static let cadenceCarouselCenterThreshold = 7
+
     @ViewBuilder
     private func cadenceCarousel(brandColor: Color?) -> some View {
         let entries = cadenceMonitor.entries
         let current = cadenceMonitor.currentIndex
         let complete = cadenceMonitor.isComplete
-        ScrollViewReader { proxy in
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 16) {
-                    ForEach(Array(entries.enumerated()), id: \.element.id) { idx, entry in
-                        let state: CadenceCardState = (complete || idx < current) ? .done
-                            : (idx == current ? .active : .pending)
-                        cadenceCard(entry: entry, state: state, brandColor: brandColor)
-                            .id(idx)
-                    }
-                }
-                .padding(.horizontal, 80)   // headroom so the active card can centre
-                .padding(.vertical, 10)
+        // Shared card row, used by both the centred and the scrolling layout.
+        let cardRow = HStack(spacing: 16) {
+            ForEach(Array(entries.enumerated()), id: \.element.id) { idx, entry in
+                let state: CadenceCardState = (complete || idx < current) ? .done
+                    : (idx == current ? .active : .pending)
+                cadenceCard(entry: entry, state: state, brandColor: brandColor)
+                    .id(idx)
             }
-            .frame(height: 148)
-            .onChange(of: cadenceMonitor.currentIndex) { _, idx in
-                withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(idx, anchor: .center) }
-            }
-            .onAppear { proxy.scrollTo(cadenceMonitor.currentIndex, anchor: .center) }
         }
+        .padding(.horizontal, 40)   // headroom for the active card's scale + glow
+        .padding(.vertical, 10)
+
+        Group {
+            if entries.count < Self.cadenceCarouselCenterThreshold {
+                // Few enough to show at once: centre the whole balanced group and keep it
+                // static. The active card is conveyed by its ring/scale, not by scrolling —
+                // so the row never shifts as the cadence advances.
+                cardRow.frame(maxWidth: .infinity, alignment: .center)
+            } else {
+                // Too many to fit: horizontal scroll that keeps the active card centred.
+                ScrollViewReader { proxy in
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        cardRow
+                    }
+                    .onChange(of: cadenceMonitor.currentIndex) { _, idx in
+                        withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(idx, anchor: .center) }
+                    }
+                    .onAppear { proxy.scrollTo(cadenceMonitor.currentIndex, anchor: .center) }
+                }
+            }
+        }
+        .frame(height: 148)
     }
 
     @ViewBuilder
     private func cadenceCard(entry: InspectConfig.CadenceEntry, state: CadenceCardState, brandColor: Color?) -> some View {
-        let size: CGFloat = state == .active ? 112 : 92
+        // Every tile keeps the SAME footprint so the row stays balanced as the cadence
+        // advances — the active tile is lifted with a scale + accent ring + shadow rather than
+        // a larger frame (which would shove its neighbours and unbalance the row).
+        let accent = brandColor ?? Color.accentColor
+        let size: CGFloat = 96
         RoundedRectangle(cornerRadius: 18, style: .continuous)
             .fill(Color(NSColor.controlBackgroundColor))
-            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(.primary.opacity(0.06), lineWidth: 1))
+            .overlay {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(state == .active ? accent.opacity(0.9) : .primary.opacity(0.06),
+                                  lineWidth: state == .active ? 2 : 1)
+            }
             .frame(width: size, height: size)
             .overlay { cadenceEntryIcon(entry: entry, brandColor: brandColor, active: state == .active) }
             .overlay(alignment: .bottomTrailing) { cadenceCardBadge(state: state).padding(7) }
             .opacity(state == .pending ? 0.45 : 1)
-            .shadow(color: .black.opacity(state == .active ? 0.14 : 0.05),
-                    radius: state == .active ? 10 : 3, y: 2)
+            .scaleEffect(state == .active ? 1.08 : 1)
+            .shadow(color: state == .active ? accent.opacity(0.22) : .black.opacity(0.05),
+                    radius: state == .active ? 12 : 3, y: 2)
             .animation(.easeInOut(duration: 0.35), value: state)
     }
 
@@ -2606,7 +2634,9 @@ struct Preset5View: View {
 
     @ViewBuilder
     private func cadenceEntryIcon(entry: InspectConfig.CadenceEntry, brandColor: Color?, active: Bool) -> some View {
-        let dim: CGFloat = active ? 52 : 42
+        // Constant icon footprint across states — the tile's scaleEffect supplies the active
+        // lift, so a per-state size bump here would compound and read as unbalanced.
+        let dim: CGFloat = 46
         if let imagePath = entry.imagePath,
            let nsImage = NSImage(contentsOfFile: (imagePath as NSString).expandingTildeInPath) {
             Image(nsImage: nsImage).resizable().scaledToFit().frame(width: dim, height: dim)
@@ -2641,10 +2671,11 @@ struct Preset5View: View {
             .frame(height: 5)
             .frame(maxWidth: 440)
             HStack(spacing: 8) {
+                // Completion is marked with a checkmark; in-progress motion is already
+                // conveyed by the active carousel tile's spinner and the animated bar
+                // above — a second spinner here is redundant.
                 if cadenceMonitor.isComplete {
                     Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
-                } else {
-                    ProgressView().controlSize(.small)
                 }
                 Text(cadenceMonitor.currentMessage ?? (cadenceMonitor.isComplete ? "Finished" : ""))
                     .font(.system(size: 15))
@@ -4548,7 +4579,7 @@ struct Preset5View: View {
     /// Checkbox form element view - clean native style
     @ViewBuilder
     private func introCheckboxView(block: InspectConfig.GuidanceContent) -> some View {
-        let isChecked = formBoolBinding(for: block.id)
+        let isChecked = formBoolBinding(for: block.id, type: "checkbox")
         let isRequired = block.required ?? false
 
         formFieldContainer {
@@ -4578,7 +4609,7 @@ struct Preset5View: View {
     /// Toggle form element view - clean row style
     @ViewBuilder
     private func introToggleView(block: InspectConfig.GuidanceContent) -> some View {
-        let isOn = formBoolBinding(for: block.id)
+        let isOn = formBoolBinding(for: block.id, type: "toggle")
         let isRequired = block.required ?? false
 
         formFieldContainer {
@@ -4612,44 +4643,45 @@ struct Preset5View: View {
     /// Dropdown form element view - clean inline style
     @ViewBuilder
     private func introDropdownView(block: InspectConfig.GuidanceContent) -> some View {
-        let selection = formBinding(for: block.id)
+        let selection = formBinding(for: block.id, type: "dropdown")
         let options = block.options ?? []
-        let isRequired = block.required ?? false
+        let brandColor = branding.primaryColor
 
         formFieldContainer {
-            HStack(spacing: 8) {
-                if let label = block.label ?? block.content {
-                    Text(label)
-                        .font(.system(size: 14))
+            // Centered vertical option list (Apple Setup Assistant style) — replaces the
+            // label-left / native-menu form row. Each option is a tappable row; the selected
+            // one gets a checkmark + subtle brand tint. No inline label (the step title names it).
+            VStack(alignment: .leading, spacing: 4) {
+                ForEach(options, id: \.self) { option in
+                    HStack(spacing: 10) {
+                        Text(option)
+                            .font(.system(size: 14))
+                            .foregroundStyle(.primary)
 
-                    if isRequired {
-                        Text("*")
-                            .foregroundStyle(.orange)
-                            .font(.system(size: 12, weight: .medium))
+                        Spacer()
+
+                        if selection.wrappedValue == option {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(brandColor)
+                        }
                     }
-
-                    if let helpText = block.helpText {
-                        formHelpButton(helpText: helpText)
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 14)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(selection.wrappedValue == option
+                                  ? brandColor.opacity(0.10)
+                                  : Color(NSColor.controlBackgroundColor).opacity(0.4))
+                    )
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.12)) {
+                            selection.wrappedValue = option
+                        }
                     }
                 }
-
-                Spacer()
-
-                Picker("", selection: selection) {
-                    if selection.wrappedValue.isEmpty {
-                        Text("Select...").tag("")
-                    }
-                    ForEach(options, id: \.self) { option in
-                        Text(option).tag(option)
-                    }
-                }
-                .pickerStyle(.menu)
-                .frame(minWidth: 140)
             }
-            .padding(.vertical, 6)
-            .padding(.horizontal, 12)
-            .background(Color(NSColor.controlBackgroundColor).opacity(0.4))
-            .clipShape(RoundedRectangle(cornerRadius: 6))
         }
         .onAppear {
             if let defaultValue = block.value, formValues[block.id ?? ""] == nil {
@@ -4661,7 +4693,7 @@ struct Preset5View: View {
     /// Radio button form element view - vertical list with selection highlight
     @ViewBuilder
     private func introRadioView(block: InspectConfig.GuidanceContent) -> some View {
-        let selection = formBinding(for: block.id)
+        let selection = formBinding(for: block.id, type: "radio")
         let options = block.options ?? []
         let isRequired = block.required ?? false
         let brandColor = branding.primaryColor
@@ -4724,7 +4756,7 @@ struct Preset5View: View {
     /// Textfield form element view - clean labeled input
     @ViewBuilder
     private func introTextfieldView(block: InspectConfig.GuidanceContent) -> some View {
-        let text = formBinding(for: block.id)
+        let text = formBinding(for: block.id, type: "textfield")
         let isRequired = block.required ?? false
         let isSecure = block.secure ?? false
 
@@ -4779,6 +4811,7 @@ struct Preset5View: View {
                 formValues[block.id ?? ""] = "\(Int(newValue))"
                 if let fieldId = block.id {
                     preferencesService?.setValue(Int(newValue), forKey: fieldId)
+                    inspectState.writeToInteractionLog("slider:\(fieldId):\(Int(newValue))")
                 }
             }
         )
@@ -5013,8 +5046,9 @@ struct Preset5View: View {
 
     // MARK: - Form State Management
 
-    /// Create a binding for a form field value
-    private func formBinding(for id: String?) -> Binding<String> {
+    /// Create a binding for a form field value. `type` tags the live interaction-log line
+    /// (dropdown/radio/textfield) so external monitors can react mid-session.
+    private func formBinding(for id: String?, type: String) -> Binding<String> {
         let key = id ?? ""
         return Binding(
             get: { formValues[key] ?? "" },
@@ -5023,13 +5057,15 @@ struct Preset5View: View {
                 // Write to preferences immediately
                 if let fieldId = id {
                     preferencesService?.setValue(newValue, forKey: fieldId)
+                    inspectState.writeToInteractionLog("\(type):\(fieldId):\(newValue)")
                 }
             }
         )
     }
 
-    /// Create a binding for a boolean form field (checkbox/toggle)
-    private func formBoolBinding(for id: String?) -> Binding<Bool> {
+    /// Create a binding for a boolean form field (checkbox/toggle). `type` tags the live
+    /// interaction-log line so external monitors can react mid-session.
+    private func formBoolBinding(for id: String?, type: String) -> Binding<Bool> {
         let key = id ?? ""
         return Binding(
             get: { formValues[key] == "true" },
@@ -5038,6 +5074,7 @@ struct Preset5View: View {
                 // Write to preferences immediately
                 if let fieldId = id {
                     preferencesService?.setValue(newValue, forKey: fieldId)
+                    inspectState.writeToInteractionLog("\(type):\(fieldId):\(newValue)")
                 }
             }
         )

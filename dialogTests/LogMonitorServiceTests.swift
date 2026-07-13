@@ -158,6 +158,20 @@ final class LogMonitorServiceTests: XCTestCase {
         XCTAssertNotNil(match)
     }
 
+    func testInstallomatorPresetMatchesUnzipping() {
+        // Installomator logs "Unzipping <archive>" for zip payloads — must match.
+        let preset = LogPatternPreset.presets["installomator"]!
+        guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
+            return
+        }
+
+        let testLine = "2026-02-22 15:34:05 : INFO  : googlechrome : Unzipping googlechrome.zip"
+        let range = NSRange(testLine.startIndex..., in: testLine)
+        let match = regex.firstMatch(in: testLine, range: range)
+
+        XCTAssertNotNil(match, "Should match 'Unzipping .zip' line")
+    }
+
     func testInstallomatorPresetMatchesInstallingPKG() {
         let preset = LogPatternPreset.presets["installomator"]!
         guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
@@ -287,21 +301,27 @@ final class LogMonitorServiceTests: XCTestCase {
         XCTAssertNotNil(match)
     }
 
-    func testMunkiPresetMatchesInfoLines() {
+    func testMunkiPresetMatchesRealLogFormat() {
+        // Real ManagedSoftwareUpdate.log format is "TIMESTAMP message" (no "INFO:" prefix).
         let preset = LogPatternPreset.presets["munki"]!
         guard let regex = regexForPreset(forPreset: preset, options: .anchorsMatchLines) else {
             return
         }
 
-        let testLine = "INFO: Installing Firefox-123.0.pkg"
-        let range = NSRange(testLine.startIndex..., in: testLine)
-        let match = regex.firstMatch(in: testLine, range: range)
-
-        XCTAssertNotNil(match)
-        if let match = match {
-            let captureRange = Range(match.range(at: preset.captureGroup), in: testLine)!
-            XCTAssertEqual(String(testLine[captureRange]), "Installing Firefox-123.0.pkg")
+        // Install-phase line should match, capturing the message after the timestamp.
+        let installLine = "2026-07-06 09:53:12.758+02:00 Installing Firefox"
+        let installRange = NSRange(installLine.startIndex..., in: installLine)
+        let installMatch = regex.firstMatch(in: installLine, range: installRange)
+        XCTAssertNotNil(installMatch, "Should match a Munki install line")
+        if let installMatch = installMatch {
+            let captureRange = Range(installMatch.range(at: preset.captureGroup), in: installLine)!
+            XCTAssertEqual(String(installLine[captureRange]), "Installing Firefox")
         }
+
+        // Noise lines (manifest/catalog/checking) must NOT match.
+        let noise = "2026-07-06 09:53:10.115+02:00 Requesting manifest Mac.localdomain..."
+        XCTAssertNil(regex.firstMatch(in: noise, range: NSRange(noise.startIndex..., in: noise)),
+                     "Manifest/noise lines should not surface as status")
     }
 
     // MARK: - Custom Pattern Tests
@@ -732,7 +752,7 @@ final class LogMonitorServiceTests: XCTestCase {
         let actionLines: [(line: String, expectedCleanup: String)] = [
             ("2026-02-22 15:36:22 : REQ   : microsoftoutlook : Downloading https://go.microsoft.com/fwlink/?linkid=525137 to Microsoft Outlook.pkg", "Downloading..."),
             ("2026-02-22 15:38:41 : REQ   : microsoftoutlook : Installing Microsoft Outlook", "Installing Microsoft Outlook..."),
-            ("2026-02-22 15:38:41 : INFO  : microsoftoutlook : Verifying: Microsoft Outlook.pkg", "Installing Microsoft Outlook..."),
+            ("2026-02-22 15:38:41 : INFO  : microsoftoutlook : Verifying: Microsoft Outlook.pkg", "Verifying Microsoft Outlook..."),
             ("2026-02-22 15:38:41 : INFO  : microsoftoutlook : Installing Microsoft Outlook.pkg to /", "Installing Microsoft Outlook...")
         ]
 

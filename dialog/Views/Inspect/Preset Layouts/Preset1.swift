@@ -20,12 +20,23 @@ struct Preset1View: View, InspectLayoutProtocol {
     @StateObject private var iconCache = PresetIconCache()
     @State private var localizationService = LocalizationService()
     @State private var currentPhase: PresetPhase = .main
+    // When the .main list first appeared — used to keep an already-complete list on screen
+    // briefly before auto-advancing, so it isn't flashed past in under a second.
+    @State private var mainAppearedAt: Date?
 
     let systemImage: String = isLaptop ? "laptopcomputer.and.arrow.down" : "desktopcomputer.and.arrow.down"
 
     /// Highlight color derived from config (matches Preset2 pattern)
     private var primaryColor: Color {
         Color(hex: inspectState.uiConfiguration.highlightColor)
+    }
+
+    /// Trigger file path for readiness signalling (mirrors Preset4/6). Additive only —
+    /// presets 1/2/3 keep their FSEvents command path; this just lets `wait-ready` succeed.
+    private var triggerFilePath: String {
+        if let customPath = inspectState.config?.triggerFile { return customPath }
+        if appArguments.inspectMode.present { return "/tmp/swiftdialog_dev_preset1.trigger" }
+        return "/tmp/swiftdialog_\(ProcessInfo.processInfo.processIdentifier)_preset1.trigger"
     }
 
     init(inspectState: InspectState) {
@@ -52,6 +63,7 @@ struct Preset1View: View, InspectLayoutProtocol {
                 }
             case .main:
                 mainPhaseView
+                    .onAppear { if mainAppearedAt == nil { mainAppearedAt = Date() } }
             case .summary:
                 if let summaryConfig = inspectState.config?.summaryScreen {
                     PresetSummaryScreenView(
@@ -62,6 +74,7 @@ struct Preset1View: View, InspectLayoutProtocol {
                         inspectState: inspectState,
                         onClose: {
                             writeLog("Preset1View: Summary screen closed", logLevel: .info)
+                            cleanupReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath, exitCode: 0)
                             exit(0)
                         }
                     )
@@ -125,7 +138,21 @@ struct Preset1View: View, InspectLayoutProtocol {
               summaryConfig.autoTransition != false,
               !inspectState.items.isEmpty,
               inspectState.completedItems.count == inspectState.items.count else { return }
-        currentPhase = .summary
+        // Keep an already-complete list on screen for a minimum time before advancing, so it
+        // isn't flashed past in under a second when everything was already installed. This only
+        // delays the transition — it can never strand an item, so live installs are unaffected.
+        let minimumDisplay: TimeInterval = 2.5
+        let elapsed = mainAppearedAt.map { Date().timeIntervalSince($0) } ?? minimumDisplay
+        if elapsed < minimumDisplay {
+            DispatchQueue.main.asyncAfter(deadline: .now() + (minimumDisplay - elapsed)) {
+                if currentPhase == .main,
+                   inspectState.completedItems.count == inspectState.items.count {
+                    currentPhase = .summary
+                }
+            }
+        } else {
+            currentPhase = .summary
+        }
     }
 
     /// When summaryScreen is configured, button1 transitions to summary instead of exit(0).
@@ -167,6 +194,18 @@ struct Preset1View: View, InspectLayoutProtocol {
                         tintColor: primaryColor
                     )
                     .padding(.top, 20 * scaleFactor)
+
+                    // Single motion source for the whole list — one spinner here in the
+                    // sidebar, not one per active row. Rows report state with static dots.
+                    if !inspectState.downloadingItems.isEmpty {
+                        HStack(spacing: 8) {
+                            ProgressView().controlSize(.small)
+                            Text("Installing…")
+                                .font(.system(size: 12))
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.top, 10 * scaleFactor)
+                    }
                 }
 
                 Spacer()
@@ -197,7 +236,7 @@ struct Preset1View: View, InspectLayoutProtocol {
                 }
                 .frame(height: 60, alignment: .topLeading)
                 .padding(.horizontal)
-                .padding(.top, 12)
+                .padding(.top, InspectConstants.spacingInner)
                 .padding(.bottom, 4)
 
                 // Item list
@@ -215,14 +254,17 @@ struct Preset1View: View, InspectLayoutProtocol {
                                     Spacer()
                                 }
                                 .padding(.horizontal)
-                                .padding(.top, 10 * scaleFactor)
-                                .padding(.bottom, 5 * scaleFactor)
+                                // Tiered group break: large gap above the status header
+                                // separates it from the previous group, small gap below
+                                // hugs it to the rows it labels (2u : 0.5u).
+                                .padding(.top, InspectConstants.spacingSection * scaleFactor)
+                                .padding(.bottom, InspectConstants.spacingIntra * scaleFactor)
                             }
 
                             itemRow(for: item)
                         }
                     }
-                    .padding(.vertical, 10 * scaleFactor)
+                    .padding(.vertical, InspectConstants.spacingInner * scaleFactor)
                 }
 
             }
@@ -264,6 +306,10 @@ struct Preset1View: View, InspectLayoutProtocol {
                 localizationService.loadLanguages(from: locConfig, basePath: basePath)
             }
             writeLog("Preset1View: Using refactored InspectState", logLevel: .info)
+            // Announce readiness so `ignitecli ipc wait-ready` returns (FSEvents path unchanged).
+            writeReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath,
+                               preset: "1", itemCount: inspectState.items.count,
+                               itemIDs: inspectState.items.map { $0.id })
         }
     }
 
@@ -297,7 +343,7 @@ struct Preset1View: View, InspectLayoutProtocol {
         }
         .padding(.horizontal, 40 * scaleFactor)
         .padding(.top, 8)
-        .padding(.bottom, 24 * scaleFactor)
+        .padding(.bottom, InspectConstants.spacingSection * scaleFactor)
     }
 
     // MARK: - Localization
@@ -410,6 +456,12 @@ struct Preset1View: View, InspectLayoutProtocol {
         .padding(.leading)
         .padding(.trailing, 24)
         .padding(.vertical, 8)
+        .background(
+            // Subtle tint marks the actively-installing row without any motion.
+            PresetCommonViews.resolveInstallStatus(for: item, state: inspectState) == .active
+                ? primaryColor.opacity(0.06)
+                : Color.clear
+        )
     }
 
     // MARK: - Sorting & Status
@@ -490,21 +542,8 @@ struct Preset1View: View, InspectLayoutProtocol {
     // MARK: - Validation Support
 
     private func hasValidationWarning(for item: InspectConfig.ItemConfig) -> Bool {
-        // Only check validation for completed items  
-        guard inspectState.completedItems.contains(item.id) else { return false }
-        
-        // Check if item has any plist validation configuration
-        let hasPlistValidation = item.plistKey != nil || 
-                               inspectState.plistSources?.contains(where: { source in
-                                   item.paths.contains(source.path)
-                               }) == true
-        
-        // If item has plist validation, check the results
-        if hasPlistValidation {
-            return !(inspectState.plistValidationResults[item.id] ?? true)
-        }
-        
-        return false
+        // Delegates to the shared single source of truth (PresetCommonViews).
+        PresetCommonViews.hasValidationWarning(for: item, state: inspectState)
     }
 
     private func getItemStatusWithValidation(for item: InspectConfig.ItemConfig) -> String {
@@ -535,8 +574,8 @@ struct Preset1View: View, InspectLayoutProtocol {
     private func statusIndicatorWithValidation(for item: InspectConfig.ItemConfig) -> some View {
         let size: CGFloat = 20 * scaleFactor
 
-        if inspectState.failedItems.contains(item.id) {
-            // Failed - show red X
+        switch PresetCommonViews.resolveInstallStatus(for: item, state: inspectState) {
+        case .failed:
             Circle()
                 .fill(Color.red)
                 .frame(width: size, height: size)
@@ -546,27 +585,39 @@ struct Preset1View: View, InspectLayoutProtocol {
                         .foregroundStyle(.white)
                 )
                 .help("Installation failed")
-        } else if inspectState.completedItems.contains(item.id) {
-            // Completed - check for validation warnings
+        case .completed:
             Circle()
-                .fill(hasValidationWarning(for: item) ? Color.orange : Color.green)
+                .fill(Color.green)
                 .frame(width: size, height: size)
                 .overlay(
-                    Image(systemName: hasValidationWarning(for: item) ? "exclamationmark" : "checkmark")
+                    Image(systemName: "checkmark")
                         .font(.system(size: size * 0.6, weight: .bold))
                         .foregroundStyle(.white)
                 )
-                .help(hasValidationWarning(for: item) ?
-                      "Configuration validation failed - check plist settings" :
-                      "Installed and validated")
-        } else if inspectState.downloadingItems.contains(item.id) {
-            // Downloading — tint with brand color
-            ProgressView()
-                .scaleEffect(0.7)
-                .tint(primaryColor)
+                .help("Installed and validated")
+        case .completedWithWarning:
+            Circle()
+                .fill(Color.orange)
                 .frame(width: size, height: size)
-        } else {
-            // Pending
+                .overlay(
+                    Image(systemName: "exclamationmark")
+                        .font(.system(size: size * 0.6, weight: .bold))
+                        .foregroundStyle(.white)
+                )
+                .help("Configuration validation failed - check plist settings")
+        case .active:
+            // Static filled accent dot with a soft halo — the header spinner owns the
+            // motion, so N concurrent installs no longer spawn N spinning rows.
+            Circle()
+                .fill(primaryColor.opacity(0.18))
+                .frame(width: size, height: size)
+                .overlay(
+                    Circle()
+                        .fill(primaryColor)
+                        .frame(width: size * 0.5, height: size * 0.5)
+                )
+                .help("Installing…")
+        case .pending:
             Circle()
                 .stroke(Color.gray.opacity(0.3), lineWidth: 2)
                 .frame(width: size, height: size)

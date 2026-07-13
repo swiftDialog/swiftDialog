@@ -21,10 +21,21 @@ struct Preset2View: View, InspectLayoutProtocol {
     @State private var scrollOffset: Int = 0
     @State private var lastDownloadingItem: String?
     @State private var currentPhase: PresetPhase = .main
+    // When the .main view first appeared — keeps an already-complete list on screen briefly
+    // before auto-advancing, so it isn't flashed past in under a second.
+    @State private var mainAppearedAt: Date?
 
     /// Highlight color derived from config
     private var primaryColor: Color {
         Color(hex: inspectState.uiConfiguration.highlightColor)
+    }
+
+    /// Trigger file path for readiness signalling (mirrors Preset4/6). Additive only —
+    /// the FSEvents command path is unchanged; this just lets `wait-ready` succeed.
+    private var triggerFilePath: String {
+        if let customPath = inspectState.config?.triggerFile { return customPath }
+        if appArguments.inspectMode.present { return "/tmp/swiftdialog_dev_preset2.trigger" }
+        return "/tmp/swiftdialog_\(ProcessInfo.processInfo.processIdentifier)_preset2.trigger"
     }
 
     init(inspectState: InspectState) {
@@ -50,6 +61,7 @@ struct Preset2View: View, InspectLayoutProtocol {
                 }
             case .main:
                 mainPhaseView
+                    .onAppear { if mainAppearedAt == nil { mainAppearedAt = Date() } }
             case .summary:
                 if let summaryConfig = inspectState.config?.summaryScreen {
                     PresetSummaryScreenView(
@@ -115,7 +127,20 @@ struct Preset2View: View, InspectLayoutProtocol {
               summaryConfig.autoTransition != false,
               !inspectState.items.isEmpty,
               inspectState.completedItems.count == inspectState.items.count else { return }
-        currentPhase = .summary
+        // Minimum on-screen time before advancing, so an already-complete list isn't flashed
+        // past in under a second. Only delays the transition — never strands an item.
+        let minimumDisplay: TimeInterval = 2.5
+        let elapsed = mainAppearedAt.map { Date().timeIntervalSince($0) } ?? minimumDisplay
+        if elapsed < minimumDisplay {
+            DispatchQueue.main.asyncAfter(deadline: .now() + (minimumDisplay - elapsed)) {
+                if currentPhase == .main,
+                   inspectState.completedItems.count == inspectState.items.count {
+                    currentPhase = .summary
+                }
+            }
+        } else {
+            currentPhase = .summary
+        }
     }
 
     // MARK: - Shared Logo Helpers
@@ -291,7 +316,7 @@ struct Preset2View: View, InspectLayoutProtocol {
                 let visibleCount = 4
                 let allItemsFit = inspectState.items.count <= visibleCount
 
-                HStack(spacing: 16 * scaleFactor) {
+                HStack(spacing: InspectConstants.spacingInner * scaleFactor) {
                     // Left arrow (hidden when all items fit)
                     if !allItemsFit {
                         Button(action: {
@@ -306,7 +331,7 @@ struct Preset2View: View, InspectLayoutProtocol {
                     }
 
                     // App cards - show 5 at a time
-                    HStack(spacing: 16 * scaleFactor) {
+                    HStack(spacing: InspectConstants.spacingInner * scaleFactor) {
                         ForEach(getVisibleItemsWithOffset(), id: \.id) { item in
                             Preset2ItemCardView(
                                 item: item,
@@ -358,7 +383,7 @@ struct Preset2View: View, InspectLayoutProtocol {
                 }
                 .padding(.horizontal, 48 * scaleFactor)
             }
-            .padding(.top, 16)
+            .padding(.top, InspectConstants.spacingInner)
 
             // Progress section — sits below cards, above spacer
             VStack(spacing: 4) {
@@ -368,15 +393,21 @@ struct Preset2View: View, InspectLayoutProtocol {
                     .frame(maxWidth: 700 * scaleFactor)
                     .tint(Color(hex: inspectState.uiConfiguration.highlightColor))
 
-                // Progress text (customizable via uiLabels.progressFormat)
-                Text(getProgressText())
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                // Progress text (customizable via uiLabels.progressFormat), with the
+                // list's single spinner beside it — one motion source for all cards.
+                HStack(spacing: 8) {
+                    if !inspectState.downloadingItems.isEmpty {
+                        ProgressView().controlSize(.small)
+                    }
+                    Text(getProgressText())
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
             .padding(.horizontal, 48 * scaleFactor)
-            .padding(.top, 12 * scaleFactor)
+            .padding(.top, InspectConstants.spacingInner * scaleFactor)
 
-            Spacer(minLength: 16 * scaleFactor)
+            Spacer(minLength: InspectConstants.spacingInner * scaleFactor)
 
             // Bottom section — info link left, buttons right
             HStack {
@@ -405,6 +436,7 @@ struct Preset2View: View, InspectLayoutProtocol {
                             } else {
                                 // Normal button2 action - typically quits with code 2
                                 writeLog("Preset2LayoutServiceBased: User clicked button2", logLevel: .info)
+                                cleanupReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath, exitCode: 2)
                                 exit(2)
                             }
                         }) {
@@ -435,6 +467,7 @@ struct Preset2View: View, InspectLayoutProtocol {
                             action()
                         } else {
                             writeLog("Preset2View: User clicked button1 (\(finalButtonText)) - exiting with code 0", logLevel: .info)
+                            cleanupReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath, exitCode: 0)
                             exit(0)
                         }
                     }) {
@@ -449,7 +482,7 @@ struct Preset2View: View, InspectLayoutProtocol {
                 }
             }
             .padding(.horizontal, 40 * scaleFactor)
-            .padding(.bottom, 24 * scaleFactor)
+            .padding(.bottom, InspectConstants.spacingSection * scaleFactor)
         }
         } // ZStack
         .overlay {
@@ -485,6 +518,10 @@ struct Preset2View: View, InspectLayoutProtocol {
                 localizationService.loadLanguages(from: locConfig, basePath: basePath)
             }
             writeLog("Preset2LayoutServiceBased: Using InspectState", logLevel: .info)
+            // Announce readiness so `ignitecli ipc wait-ready` returns (FSEvents path unchanged).
+            writeReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath,
+                               preset: "2", itemCount: inspectState.items.count,
+                               itemIDs: inspectState.items.map { $0.id })
         }
     }
 
@@ -718,21 +755,8 @@ private struct Preset2ItemCardView: View {
     }
 
     private var hasValidationWarning: Bool {
-        // Only check validation for completed items
-        guard isCompleted else { return false }
-        
-        // Check if item has any plist validation configuration
-        let hasPlistValidation = item.plistKey != nil || 
-                               inspectState.plistSources?.contains(where: { source in
-                                   item.paths.contains(source.path)
-                               }) == true
-        
-        // If item has plist validation, check the results
-        if hasPlistValidation {
-            return !(inspectState.plistValidationResults[item.id] ?? true)
-        }
-        
-        return false
+        // Delegates to the shared single source of truth (PresetCommonViews).
+        PresetCommonViews.hasValidationWarning(for: item, state: inspectState)
     }
 
     private func getStatusText() -> String {
@@ -869,10 +893,17 @@ private struct Preset2ItemCardView: View {
                                       "Configuration validation failed - check plist settings" :
                                       "\(getStatusText()) and validated")
                         } else if isDownloading {
-                            ProgressView()
-                                .scaleEffect(0.7)
-                                .tint(Color(hex: highlightColor))
+                            // Static active badge — the single header spinner owns the
+                            // motion, so a carousel of active cards doesn't spin N times.
+                            Circle()
+                                .fill(Color(hex: highlightColor))
                                 .frame(width: 26 * scale, height: 26 * scale)
+                                .overlay(
+                                    Circle()
+                                        .fill(.white)
+                                        .frame(width: 9 * scale, height: 9 * scale)
+                                )
+                                .help("Installing…")
                         }
                     }
                     Spacer()
