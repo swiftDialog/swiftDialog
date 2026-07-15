@@ -97,6 +97,9 @@
 		A1B2C3D4E5F6A7B8C9D0E1F2 /* BentoStepViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E1D0C9B8A7F6E5D4C3B2A1 /* BentoStepViews.swift */; };
 		A383B2EE203B064A4679B3F0 /* PresetPhaseViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2810AAF9ED2F802F95999029 /* PresetPhaseViews.swift */; };
 		AA00000000000001AABBCC01 /* LogMonitorServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000001AABBCC00 /* LogMonitorServiceTests.swift */; };
+		AA00000000000002AABBCC01 /* ColourAdditionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000002AABBCC00 /* ColourAdditionsTests.swift */; };
+		AA00000000000003AABBCC01 /* StringProcessingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000003AABBCC00 /* StringProcessingTests.swift */; };
+		AA00000000000004AABBCC01 /* VideoURLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000004AABBCC00 /* VideoURLTests.swift */; };
 		B3D4E5F6A7B8C9D0E1F2A3B4 /* BrandedLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E1F2A3B4C5D6E7F8A9B0C1 /* BrandedLogoView.swift */; };
 		B4608E5B819446BC9AADDC8F /* FileSystemCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9F647DDE9CB42EBA9D931B9 /* FileSystemCache.swift */; };
 		BA05AF1A2F1C2B9B001367A5 /* PortalWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA05AF182F1C2B9B001367A5 /* PortalWebView.swift */; };
@@ -363,6 +366,9 @@
 		A1B2C3D4E5F60718A9B0C1D3 /* DistributedNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistributedNotifications.swift; sourceTree = "<group>"; };
 		A4F660819C6A4FBC8F1D8BAB /* DebouncedUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebouncedUpdater.swift; sourceTree = "<group>"; };
 		AA00000000000001AABBCC00 /* LogMonitorServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogMonitorServiceTests.swift; sourceTree = "<group>"; };
+		AA00000000000002AABBCC00 /* ColourAdditionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColourAdditionsTests.swift; sourceTree = "<group>"; };
+		AA00000000000003AABBCC00 /* StringProcessingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringProcessingTests.swift; sourceTree = "<group>"; };
+		AA00000000000004AABBCC00 /* VideoURLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoURLTests.swift; sourceTree = "<group>"; };
 		BA05AF162F1C2B9B001367A5 /* AppConfigService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfigService.swift; sourceTree = "<group>"; };
 		BA05AF172F1C2B9B001367A5 /* PortalAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortalAuthService.swift; sourceTree = "<group>"; };
 		BA05AF182F1C2B9B001367A5 /* PortalWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortalWebView.swift; sourceTree = "<group>"; };
@@ -618,6 +624,9 @@
 				4154C2F225F76BDC00A3D373 /* Info.plist */,
 				41D892E42F754FBC00FA4E01 /* DistributedNotificationsTests.swift */,
 				41D892E62F754FCA00FA4E01 /* PlistEvaluationTests.swift */,
+				AA00000000000002AABBCC00 /* ColourAdditionsTests.swift */,
+				AA00000000000003AABBCC00 /* StringProcessingTests.swift */,
+				AA00000000000004AABBCC00 /* VideoURLTests.swift */,
 			);
 			path = dialogTests;
 			sourceTree = "<group>";
@@ -1383,6 +1392,9 @@
 				41D892E52F754FBC00FA4E01 /* DistributedNotificationsTests.swift in Sources */,
 				4154C2F125F76BDC00A3D373 /* dialogTests.swift in Sources */,
 				AA00000000000001AABBCC01 /* LogMonitorServiceTests.swift in Sources */,
+				AA00000000000002AABBCC01 /* ColourAdditionsTests.swift in Sources */,
+				AA00000000000003AABBCC01 /* StringProcessingTests.swift in Sources */,
+				AA00000000000004AABBCC01 /* VideoURLTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
