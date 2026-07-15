@@ -298,7 +298,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
             }
         }
 
-        if observedObject?.args.dropdownValues.present ?? false {
+        if appArguments.dropdownValues.present {
             writeLog("Select items present - checking requirements are met")
             if userInputState.dropdownItems.count == 1 {
                 let selectedValue = userInputState.dropdownItems[0].selectedValue
@@ -338,7 +338,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
             }
         }
         
-        if observedObject?.args.listSelectionEnabled.present ?? false {
+        if appArguments.listSelectionEnabled.present {
             for item in userInputState.listItems {
                 outputArray.append("\"\(item.title)\" : \"\(item.selected)\"")
                 json[item.title].bool = item.selected
@@ -369,7 +369,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
             // Cards mode: output all accumulated input from all cards
             writeLog("Cards mode: outputting accumulated input from \(cardState.totalCards) cards")
             
-            if observedObject?.args.jsonOutPut.present ?? false {
+            if appArguments.jsonOutPut.present {
                 // JSON output for cards mode - include current card's input plus accumulated
                 var cardsJson = JSON()
                 let allInput = cardState.getAllAccumulatedInput()
@@ -415,7 +415,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
             }
         } else {
             // Normal mode: original output behavior
-            if observedObject?.args.jsonOutPut.present ?? false {
+            if appArguments.jsonOutPut.present {
                 print(json)
             } else {
                 for index in 0..<outputArray.count {
