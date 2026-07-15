@@ -487,12 +487,18 @@ func getVideoStreamingURLFromID(videoid: String, autoplay: Bool = false) -> Stri
 }
 
 func getModificationDateOf(_ fileURL: URL) -> Date {
+    // Fall back to "now" when the attributes can't be read, so callers that use
+    // this for a launch-time comparison default to processing rather than skipping.
     var theDate: Date = Date.now
     do {
-        let attr = try FileManager.default.attributesOfItem(atPath: fileURL.absoluteString)
-        theDate = attr[FileAttributeKey.modificationDate] as! Date
+        let attr = try FileManager.default.attributesOfItem(atPath: fileURL.path)
+        if let modificationDate = attr[FileAttributeKey.modificationDate] as? Date {
+            theDate = modificationDate
+        } else {
+            writeLog("No modification date available for \(fileURL.path); using current time", logLevel: .debug)
+        }
     } catch {
-        writeLog("Failed to get file creation date: \(error.localizedDescription)", logLevel: .error)
+        writeLog("Failed to read modification date of \(fileURL.path): \(error.localizedDescription)", logLevel: .error)
     }
     return theDate
 }

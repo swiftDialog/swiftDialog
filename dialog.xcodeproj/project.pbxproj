@@ -100,6 +100,7 @@
 		AA00000000000002AABBCC01 /* ColourAdditionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000002AABBCC00 /* ColourAdditionsTests.swift */; };
 		AA00000000000003AABBCC01 /* StringProcessingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000003AABBCC00 /* StringProcessingTests.swift */; };
 		AA00000000000004AABBCC01 /* VideoURLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000004AABBCC00 /* VideoURLTests.swift */; };
+		AA00000000000005AABBCC01 /* FileModificationDateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000005AABBCC00 /* FileModificationDateTests.swift */; };
 		B3D4E5F6A7B8C9D0E1F2A3B4 /* BrandedLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E1F2A3B4C5D6E7F8A9B0C1 /* BrandedLogoView.swift */; };
 		B4608E5B819446BC9AADDC8F /* FileSystemCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9F647DDE9CB42EBA9D931B9 /* FileSystemCache.swift */; };
 		BA05AF1A2F1C2B9B001367A5 /* PortalWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA05AF182F1C2B9B001367A5 /* PortalWebView.swift */; };
@@ -369,6 +370,7 @@
 		AA00000000000002AABBCC00 /* ColourAdditionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColourAdditionsTests.swift; sourceTree = "<group>"; };
 		AA00000000000003AABBCC00 /* StringProcessingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringProcessingTests.swift; sourceTree = "<group>"; };
 		AA00000000000004AABBCC00 /* VideoURLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoURLTests.swift; sourceTree = "<group>"; };
+		AA00000000000005AABBCC00 /* FileModificationDateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileModificationDateTests.swift; sourceTree = "<group>"; };
 		BA05AF162F1C2B9B001367A5 /* AppConfigService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfigService.swift; sourceTree = "<group>"; };
 		BA05AF172F1C2B9B001367A5 /* PortalAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortalAuthService.swift; sourceTree = "<group>"; };
 		BA05AF182F1C2B9B001367A5 /* PortalWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortalWebView.swift; sourceTree = "<group>"; };
@@ -627,6 +629,7 @@
 				AA00000000000002AABBCC00 /* ColourAdditionsTests.swift */,
 				AA00000000000003AABBCC00 /* StringProcessingTests.swift */,
 				AA00000000000004AABBCC00 /* VideoURLTests.swift */,
+				AA00000000000005AABBCC00 /* FileModificationDateTests.swift */,
 			);
 			path = dialogTests;
 			sourceTree = "<group>";
@@ -1395,6 +1398,7 @@
 				AA00000000000002AABBCC01 /* ColourAdditionsTests.swift in Sources */,
 				AA00000000000003AABBCC01 /* StringProcessingTests.swift in Sources */,
 				AA00000000000004AABBCC01 /* VideoURLTests.swift in Sources */,
+				AA00000000000005AABBCC01 /* FileModificationDateTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
