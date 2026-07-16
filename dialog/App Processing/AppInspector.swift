@@ -38,6 +38,7 @@ class AppInspector {
     private let checkInterval: TimeInterval = 2.0
     private let commandFile: String
     private var fsEventStream: FSEventStreamRef?
+    private var checkTimer: Timer?
     private let fileSystemCache = FileSystemCache()
     
     // MARK: - Initialization
@@ -249,7 +250,8 @@ class AppInspector {
         checkAndReport()
         
         // Setup periodic checks
-        Timer.scheduledTimer(withTimeInterval: checkInterval, repeats: true) { [weak self] _ in
+        checkTimer?.invalidate()
+        checkTimer = Timer.scheduledTimer(withTimeInterval: checkInterval, repeats: true) { [weak self] _ in
             self?.checkAndReport()
         }
         
@@ -259,6 +261,7 @@ class AppInspector {
     
     // MARK: - Cleanup
     deinit {
+        checkTimer?.invalidate()
         if let stream = fsEventStream {
             FSEventStreamStop(stream)
             FSEventStreamInvalidate(stream)
