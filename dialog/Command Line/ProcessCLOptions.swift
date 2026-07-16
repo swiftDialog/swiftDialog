@@ -147,6 +147,25 @@ func getMarkdown(mdFilePath: String) -> String {
 
 }
 
+/// Reads a CGFloat from a SwiftyJSON value. Accepts native JSON numbers and, for
+/// backward compatibility, quoted numeric strings (e.g. "20"). The quoted form is
+/// deprecated and logs a warning. Returns `defaultValue` when the value is absent
+/// or not numeric — the previous code force-cast `.number` and crashed on a
+/// non-number (e.g. a quoted font size).
+func jsonCGFloat(_ value: JSON, default defaultValue: CGFloat, context: String) -> CGFloat {
+    if let number = value.number {
+        return CGFloat(number.doubleValue)
+    }
+    if let string = value.string, !string.isEmpty {
+        if let parsed = Double(string) {
+            writeLog("\(context): numeric value provided as a quoted string (\"\(string)\"). Quoted numeric values are deprecated and may be removed in a future release; provide the value unquoted.", logLevel: .info)
+            return CGFloat(parsed)
+        }
+        writeLog("\(context): expected a number but got non-numeric value \"\(string)\"; keeping \(defaultValue)", logLevel: .error)
+    }
+    return defaultValue
+}
+
 func processCLOptionValues() {
 
     // this method reads in arguments from either json file or from the command line and loads them into the appArguments object
@@ -889,7 +908,7 @@ func processCLOptions(json: JSON = getJSON()) {
                                     writeLog("titleFont.object : \(json[appArguments.titleFont.long].object)")
 
             if json[appArguments.titleFont.long]["size"].exists() {
-                appvars.titleFontSize = json[appArguments.titleFont.long]["size"].number as! CGFloat
+                appvars.titleFontSize = jsonCGFloat(json[appArguments.titleFont.long]["size"], default: appvars.titleFontSize, context: "titlefont size")
             }
             if json[appArguments.titleFont.long]["weight"].exists() {
                 appvars.titleFontWeight = Font.Weight(argument: json[appArguments.titleFont.long]["weight"].stringValue)
@@ -907,7 +926,7 @@ func processCLOptions(json: JSON = getJSON()) {
                 appvars.titleFontAlignment = json[appArguments.titleFont.long]["alignment"].stringValue
             }
             if json[appArguments.titleFont.long]["offset"].exists() {
-                appvars.titleFontOffset = json[appArguments.titleFont.long]["offset"].number as! CGFloat
+                appvars.titleFontOffset = jsonCGFloat(json[appArguments.titleFont.long]["offset"], default: appvars.titleFontOffset, context: "titlefont offset")
             }
         } else {
             writeLog("titleFont.value : \(appArguments.titleFont.value)")
@@ -956,7 +975,7 @@ func processCLOptions(json: JSON = getJSON()) {
         if appArguments.messageFont.value == "" {
                                     writeLog("messageFont.object : \(json[appArguments.messageFont.long].object)")
             if json[appArguments.messageFont.long]["size"].exists() {
-                appvars.messageFontSize = json[appArguments.messageFont.long]["size"].number as! CGFloat
+                appvars.messageFontSize = jsonCGFloat(json[appArguments.messageFont.long]["size"], default: appvars.messageFontSize, context: "messagefont size")
             }
             if json[appArguments.messageFont.long]["weight"].exists() {
                 appvars.messageFontWeight = Font.Weight(argument: json[appArguments.messageFont.long]["weight"].stringValue)

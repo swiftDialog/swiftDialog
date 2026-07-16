@@ -267,11 +267,11 @@ func processNotification(response: UNNotificationResponse) {
     // Get action items from the notification
 
     let userInfo = response.notification.request.content.userInfo
-    let acceptAction = userInfo["ACCEPT_ACTION"] as! String
-    let declineAction = userInfo["DECLINE_ACTION"] as! String
+    let acceptAction = userInfo["ACCEPT_ACTION"] as? String ?? ""
+    let declineAction = userInfo["DECLINE_ACTION"] as? String ?? ""
 
     writeLog("acceptAction: \(acceptAction)")
-    writeLog("declineAction: \(acceptAction)")
+    writeLog("declineAction: \(declineAction)")
 
     switch response.actionIdentifier {
     case "ACCEPT_ACTION_LABEL", UNNotificationDefaultActionIdentifier:
