@@ -41,7 +41,15 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
     // checking for anything starting with http - crude but it works (for now)
     if fileImagePath.hasPrefix("http") {
         writeLog("Getting image from http")
-        urlPath = NSURL(string: fileImagePath)!
+        guard let httpURL = NSURL(string: fileImagePath) else {
+            writeLog("Invalid image URL: \(fileImagePath)", logLevel: .error)
+            if returnErrorImage! {
+                return errorImage
+            }
+            quitDialog(exitCode: appDefaults.exit201.code, exitMessage: "\(appDefaults.exit201.message) \(fileImagePath)", observedObject: DialogUpdatableContent())
+            return errorImage
+        }
+        urlPath = httpURL
     } else {
         urlPath = NSURL(fileURLWithPath: fileImagePath)
     }
@@ -71,9 +79,11 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
 }
 
 func getImageFromBase64(base64String: String) -> NSImage {
-    var image = NSImage(systemSymbolName: "applelogo", accessibilityDescription: nil)!
-    if let imageData = Data(base64Encoded: base64String, options: .ignoreUnknownCharacters) {
-        image = NSImage(data: imageData)!
+    let fallback = NSImage(systemSymbolName: "applelogo", accessibilityDescription: nil) ?? NSImage()
+    guard let imageData = Data(base64Encoded: base64String, options: .ignoreUnknownCharacters),
+          let image = NSImage(data: imageData) else {
+        writeLog("Could not decode base64 image data; using fallback image", logLevel: .error)
+        return fallback
     }
     return image
 }
@@ -124,12 +134,15 @@ func getAppIcon(appPath: String, withSize: CGFloat? = 300) -> NSImage {
 
 func savePNG(image: NSImage, path: String) {
     // from https://gist.github.com/WilliamD47/e0a2a02b5e32018139a47f5e53ff3bb4
-    let imageRep = NSBitmapImageRep(data: image.tiffRepresentation!)
-    let pngData = imageRep?.representation(using: .png, properties: [:])
+    guard let tiff = image.tiffRepresentation,
+          let pngData = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) else {
+        writeLog("Could not convert image to PNG for \(path)", logLevel: .error)
+        return
+    }
     do {
-        try pngData!.write(to: URL(fileURLWithPath: path))
+        try pngData.write(to: URL(fileURLWithPath: path))
     } catch {
-        print(error)
+        writeLog("Failed to write PNG to \(path): \(error.localizedDescription)", logLevel: .error)
     }
 }
 

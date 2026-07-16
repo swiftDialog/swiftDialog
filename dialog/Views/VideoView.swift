@@ -26,7 +26,12 @@ struct VideoView: View {
             embeddedContent = true
         }
         if videourl.hasPrefix("http") {
-            playerURL = URL(string: videourl)!
+            if let url = URL(string: videourl) {
+                playerURL = url
+            } else {
+                writeLog("Invalid video URL: \(videourl)", logLevel: .error)
+                playerURL = URL(fileURLWithPath: videourl)
+            }
         } else {
             playerURL = URL(fileURLWithPath: videourl)
         }
