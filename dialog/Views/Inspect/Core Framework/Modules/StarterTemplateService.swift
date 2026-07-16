@@ -328,7 +328,7 @@ struct StarterTemplateService {
 
         } catch {
             writeLog("StarterTemplate: Failed to generate — \(error.localizedDescription)", logLevel: .error)
-            print("  ✗ Failed to generate starter: \(error.localizedDescription)")
+            writeLog("  ✗ Failed to generate starter: \(error.localizedDescription)", logLevel: .debug)
         }
     }
 }

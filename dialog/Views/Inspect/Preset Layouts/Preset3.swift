@@ -215,7 +215,7 @@ struct Preset3View: View, InspectLayoutProtocol {
                             inspectState.checkAndUpdateButtonState()
                         }
                         .onChange(of: inspectState.plistValidationResults) { _, _ in
-                            print("DEBUG Preset3: plistValidationResults changed: \(inspectState.plistValidationResults)")
+                            writeLog("DEBUG Preset3: plistValidationResults changed: \(inspectState.plistValidationResults)", logLevel: .debug)
                             // Force UI update when validation results change
                         }
                     }
