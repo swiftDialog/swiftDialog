@@ -166,7 +166,8 @@ func jsonCGFloat(_ value: JSON, default defaultValue: CGFloat, context: String) 
     return defaultValue
 }
 
-func processCLOptionValues() {
+@discardableResult
+func processCLOptionValues() -> JSON {
 
     // this method reads in arguments from either json file or from the command line and loads them into the appArguments object
     // also records whether an argument is present or not
@@ -182,9 +183,13 @@ func processCLOptionValues() {
     for argument in CommandLine.arguments {
         writeLog("Using argument: \(argument)", logLevel: .debug)
     }
+    // Parse the JSON once here and hand it back to the caller so processCLOptions
+    // can reuse it rather than re-parsing (and re-running cardState.loadCards) via
+    // its default argument. loadCards is idempotent, so this is behaviour-preserving.
     let json: JSON = getJSON()
 
     appArguments.updateAllItems(with: json)
+    return json
 }
 
 func processCLOptions(json: JSON = getJSON()) {

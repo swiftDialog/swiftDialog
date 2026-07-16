@@ -234,8 +234,8 @@ struct dialogApp: App {
             appvars.screenWidth = rect.size.width
         }
 
-        // get all the command line option values
-        processCLOptionValues()
+        // get all the command line option values (parse the JSON once and reuse it below)
+        let json = processCLOptionValues()
 
         // Legacy notification path: --notification without --style routes through the main app bundle.
         // This preserves compatibility with existing MDM notification-settings profiles.
@@ -271,8 +271,8 @@ struct dialogApp: App {
             convertFromJamfHelperSyntax()
         }
 
-        // process remaining command line options
-        processCLOptions()
+        // process remaining command line options (reuse the JSON parsed above)
+        processCLOptions(json: json)
 
         appvars.overlayShadow = 1
 
