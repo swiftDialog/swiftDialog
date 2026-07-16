@@ -346,15 +346,15 @@ struct dialogApp: App {
                         }
                     })
             } else if !appArguments.notification.present && !appvars.noargs {
-                let _ = appvars.debugMode ? print("DEBUG: Checking modes - mini:\(appArguments.miniMode.present) inspect:\(appArguments.inspectMode.present) presentation:\(appArguments.presentationMode.present)") : ()
+                let _ = appvars.debugMode ? writeLog("Checking modes - mini:\(appArguments.miniMode.present) inspect:\(appArguments.inspectMode.present) presentation:\(appArguments.presentationMode.present)", logLevel: .debug) : ()
                 ZStack {
                     if appArguments.miniMode.present {
-                        let _ = appvars.debugMode ? print("DEBUG: Loading MiniView") : ()
+                        let _ = appvars.debugMode ? writeLog("Loading MiniView", logLevel: .debug) : ()
                         MiniView(observedDialogContent: observedData)
                             .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
                     } else if appArguments.inspectMode.present {
                         // Wrap InspectView to delay its initialization
-                        let _ = appvars.debugMode ? print("DEBUG: Loading InspectView") : ()
+                        let _ = appvars.debugMode ? writeLog("Loading InspectView", logLevel: .debug) : ()
                         if appArguments.windowResizable.present {
                             InspectView()
                         } else {
@@ -363,11 +363,11 @@ struct dialogApp: App {
                                        height: observedData.appProperties.windowHeight)
                         }
                     } else if appArguments.presentationMode.present {
-                        let _ = appvars.debugMode ? print("DEBUG: Loading PresentationView") : ()
+                        let _ = appvars.debugMode ? writeLog("Loading PresentationView", logLevel: .debug) : ()
                         PresentationView(observedData: observedData)
                             .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
                     } else {
-                        let _ = appvars.debugMode ? print("DEBUG: Loading default ContentView") : ()
+                        let _ = appvars.debugMode ? writeLog("Loading default ContentView", logLevel: .debug) : ()
                         if appArguments.windowResizable.present {
                             ContentView(observedDialogContent: observedData)
                         } else {

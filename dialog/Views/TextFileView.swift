@@ -67,7 +67,7 @@ struct TextFileView: View {
             }
             
         } catch {
-            print("Error loading existing log content: \(error.localizedDescription)")
+            writeLog("Error loading existing log content: \(error.localizedDescription)", logLevel: .error)
         }
     }
 
@@ -103,7 +103,7 @@ struct TextFileView: View {
                 }
             }
         } catch {
-            print("Error opening or reading log file: \(error.localizedDescription)")
+            writeLog("Error opening or reading log file: \(error.localizedDescription)", logLevel: .error)
         }
     }
 }

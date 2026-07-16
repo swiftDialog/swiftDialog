@@ -193,7 +193,7 @@ func processCLOptions(json: JSON = getJSON()) {
     writeLog("Processing Options")
 
     // Monitor Mode - Use InspectView for all monitor scenarios (with or without config)
-    if appvars.debugMode { print("DEBUG: inspectMode.present = \(appArguments.inspectMode.present)") }
+    writeLog("inspectMode.present = \(appArguments.inspectMode.present)", logLevel: .debug)
     if appArguments.inspectMode.present {
         writeLog("Inspect Mode activated", logLevel: .info)
         writeLog("Inspect Mode: Activated", logLevel: .info)

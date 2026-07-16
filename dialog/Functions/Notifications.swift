@@ -248,17 +248,17 @@ func sendNotification(title: String = "",
                 // Schedule the request with the system.
                 notification.add(request) { (error) in
                    if error != nil {
-                       print(error?.localizedDescription ?? "Notification error")
+                       writeLog(error?.localizedDescription ?? "Notification error", logLevel: .error)
                    }
                 }
             case .provisional:
-                print("Notification authorisation is provisional")
+                writeLog("Notification authorisation is provisional", logLevel: .info)
             case .denied:
-                print("Notification authorisation is denied")
+                writeLog("Notification authorisation is denied", logLevel: .info)
             case .notDetermined:
-                print("Notification authorisation cannot be determined")
+                writeLog("Notification authorisation cannot be determined", logLevel: .info)
             default:
-            print("Notifications aren't authorised")
+                writeLog("Notifications aren't authorised", logLevel: .info)
         }
     }
 }
