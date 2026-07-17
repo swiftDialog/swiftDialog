@@ -29,10 +29,6 @@ struct JHOptions {
     static let lockHUD            = CommandlineArgument(long: "lockHUD",          short: "lockHUD")          // -lockHUD
     static let fullScreenIcon     = CommandlineArgument(long: "fullScreenIcon",   short: "fullScreenIcon")   // -fullScreenIcon
 
-    public func return_jh_value() {
-
-    }
-
 }
 
 public func convertFromJamfHelperSyntax() {

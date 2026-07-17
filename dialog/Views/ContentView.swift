@@ -23,10 +23,6 @@ struct ContentView: View {
             titlePadding = 0
         }
     }
-//
-//    // set up timer to read data from temp file
-//    let updateTimer = Timer.publish(every: 5, on: .main, in: .common).autoconnect() // tick every 1 second
-//
     var body: some View {
 
         ZStack {

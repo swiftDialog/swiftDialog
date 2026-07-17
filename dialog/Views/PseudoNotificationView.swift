@@ -97,7 +97,6 @@ struct PseudoNotificationView: View {
             HStack(alignment: .center, spacing: 12) {
                 // Icon — sole left-side element, centered vertically
                 IconView(image: config.icon, corners: false)
-                //notificationIcon
                     .frame(width: 40, height: 40)
                     //.clipShape(RoundedRectangle(cornerRadius: 8))
 
@@ -225,39 +224,6 @@ struct PseudoNotificationView: View {
         }
         .onReceive(timestampTimer) { _ in
             elapsedMinutes = max(1, Int(Date().timeIntervalSince(appearDate) / 60))
-        }
-    }
-
-    // MARK: - Icon
-
-    @ViewBuilder
-    private var notificationIcon: some View {
-        let iconValue = config.icon
-        if iconValue.isEmpty || iconValue == "default" {
-            Image(nsImage: NSImage(named: "AppIcon") ?? NSImage())
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-        } else if iconValue.hasSuffix(".app") || iconValue.hasSuffix("prefPane") {
-            Image(nsImage: getAppIcon(appPath: iconValue))
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-        } else if iconValue.lowercased().hasPrefix("sf=") {
-            let symbolName = String(iconValue.dropFirst(3))
-                .components(separatedBy: ",").first ?? ""
-            Image(systemName: symbolName)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .symbolRenderingMode(.hierarchical)
-                .foregroundColor(.accentColor)
-                .padding(4)
-        } else if iconValue.hasPrefix("http") || FileManager.default.fileExists(atPath: iconValue) {
-            Image(nsImage: getImageFromPath(fileImagePath: iconValue, returnErrorImage: true))
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-        } else {
-            Image(nsImage: NSImage(named: "AppIcon") ?? NSImage())
-                .resizable()
-                .aspectRatio(contentMode: .fit)
         }
     }
 
