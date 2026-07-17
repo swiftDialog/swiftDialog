@@ -149,6 +149,29 @@ struct DialogLauncher: ParsableCommand {
             fputs("Could not locate app bundle.\n", stderr)
         }
 
+        // --- Info-and-exit fast paths ---
+        // Handle --version/--licence/--coffee here (all exit 0), producing byte-identical
+        // output to the app, instead of launching it. --help takes precedence in the app,
+        // so if it is present we fall through and let the app render help. --version also
+        // falls through if the app's Info.plist can't be read, so we never print a drifting
+        // fallback version.
+        if !argPresent("--help", in: passthroughArgs) {
+            if argPresent("--version", in: passthroughArgs),
+               let version = dialogAppVersion(dialogBinary: dialogBinary) {
+                print(version)
+                throw ExitCode(0)
+            }
+            if argPresent("--licence", in: passthroughArgs) {
+                print(licenseText)
+                throw ExitCode(0)
+            }
+            if argPresent("--coffee", in: passthroughArgs) {
+                print("If you like this app and want to buy me a coffee https://www.buymeacoffee.com/bartreardon")
+                throw ExitCode(0)
+            }
+        }
+        // --- End fast paths ---
+
         // Check if the dialog binary exists
         guard FileManager.default.fileExists(atPath: dialogBinary) else {
             fputs("ERROR: Cannot find swiftDialog binary at \(dialogBinary)\n", stderr)
@@ -403,6 +426,26 @@ struct DialogLauncher: ParsableCommand {
         _ = _NSGetExecutablePath(&buffer, &size)
         let rawPath = String(cString: buffer)
         return URL(fileURLWithPath: rawPath).resolvingSymlinksInPath().path
+    }
+
+    /// Reads the version string from the located Dialog.app's Info.plist, matching the
+    /// app's getVersionString(): "CFBundleShortVersionString.CFBundleVersion" (or just the
+    /// short version if the build key is absent). Returns nil if the plist or the
+    /// short-version key can't be read, so the caller falls through to the app rather than
+    /// printing a fallback that could drift from the real build.
+    func dialogAppVersion(dialogBinary: String) -> String? {
+        let infoPlist = URL(fileURLWithPath: dialogBinary)
+            .deletingLastPathComponent()   // Contents/MacOS
+            .deletingLastPathComponent()   // Contents
+            .appendingPathComponent("Info.plist")
+        guard let plist = NSDictionary(contentsOf: infoPlist),
+              let shortVersion = plist["CFBundleShortVersionString"] as? String else {
+            return nil
+        }
+        if let build = plist["CFBundleVersion"] as? String {
+            return "\(shortVersion).\(build)"
+        }
+        return shortVersion
     }
     
     func findAppBundlePath() -> URL? {

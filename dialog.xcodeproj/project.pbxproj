@@ -15,6 +15,7 @@
 		41005AA927CEF81A0065F323 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 41005AA827CEF81A0065F323 /* SwiftyJSON */; };
 		41005AAA27CEF8250065F323 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4114E1E827153FEE00388274 /* AVKit.framework */; };
 		41110A2825F9E79E008171D2 /* License.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41110A2725F9E79E008171D2 /* License.swift */; };
+		41110A2925F9E79E008171D2 /* License.swift in Sources (dialogcli) */ = {isa = PBXBuildFile; fileRef = 41110A2725F9E79E008171D2 /* License.swift */; };
 		41132F822F3C7847006BECA2 /* Textual in Frameworks */ = {isa = PBXBuildFile; productRef = 41132F812F3C7847006BECA2 /* Textual */; };
 		41132F842F3CA032006BECA2 /* Markdown+Addittions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41132F832F3CA018006BECA2 /* Markdown+Addittions.swift */; };
 		4116922C28939B4500A88700 /* CKTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4116922B28939B4500A88700 /* CKTitleView.swift */; };
@@ -1419,6 +1420,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				417DEF1F2E7ACCB600CAB132 /* dialogcli.swift in Sources */,
+				41110A2925F9E79E008171D2 /* License.swift in Sources (dialogcli) */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
