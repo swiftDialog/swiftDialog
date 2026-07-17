@@ -127,24 +127,47 @@ func getJSON() -> JSON {
 }
 
 func getMarkdown(mdFilePath: String) -> String {
-    //let fileURL = URL(fileURLWithPath: mdFilePath)
-    var urlPath = NSURL(string: "")!
-
-    // checking for anything starting with http - crude but it works (for now)
-    if mdFilePath.hasPrefix("http") {
-        writeLog("Getting image from http")
-        urlPath = NSURL(string: mdFilePath)!
-    } else {
-        urlPath = NSURL(fileURLWithPath: mdFilePath)
+    // Local file: read directly.
+    if !mdFilePath.hasPrefix("http") {
+        do {
+            return try String(contentsOf: URL(fileURLWithPath: mdFilePath), encoding: .utf8)
+        } catch {
+            return error.localizedDescription
+        }
     }
 
-    do {
-        let fileContents = try String(contentsOf: urlPath as URL, encoding: .utf8)
-        return fileContents
-    } catch {
-        return error.localizedDescription
+    // Remote (http/https): fetch with an explicit timeout so a slow or unreachable
+    // URL can't stall the run loop indefinitely (this runs on the live command-file
+    // update path). Kept synchronous to preserve the String return contract.
+    writeLog("Getting markdown from \(mdFilePath)")
+    guard let url = URL(string: mdFilePath) else {
+        writeLog("Invalid markdown URL: \(mdFilePath)", logLevel: .error)
+        return "Invalid URL: \(mdFilePath)"
     }
 
+    var request = URLRequest(url: url)
+    request.timeoutInterval = 10
+
+    var result = ""
+    let semaphore = DispatchSemaphore(value: 0)
+    URLSession.shared.dataTask(with: request) { data, _, error in
+        defer { semaphore.signal() }
+        if let error = error {
+            result = error.localizedDescription
+        } else if let data = data, let string = String(data: data, encoding: .utf8) {
+            result = string
+        } else {
+            result = "Could not read markdown from \(mdFilePath)"
+        }
+    }.resume()
+
+    // Backstop the wait a little beyond the request timeout so a hung connection
+    // can't block the run loop forever even if the session timeout doesn't fire.
+    if semaphore.wait(timeout: .now() + 11) == .timedOut {
+        writeLog("Timed out fetching markdown from \(mdFilePath)", logLevel: .error)
+        return "Timed out fetching \(mdFilePath)"
+    }
+    return result
 }
 
 /// Reads a CGFloat from a SwiftyJSON value. Accepts native JSON numbers and, for
