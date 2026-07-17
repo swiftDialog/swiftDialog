@@ -37,6 +37,9 @@ struct DisplayImage: View {
     var contentMode: ContentMode = .fit
     var showBackground: Bool = false
 
+    // Cached svg/pdf image, loaded once via .task rather than re-decoded every render.
+    @State private var svgPdfImage: NSImage?
+
     init(_ path: String,
          corners: Bool = true,
          rezize: Bool = true,
@@ -87,11 +90,22 @@ struct DisplayImage: View {
         ZStack {
             if imgFromURL {
                 if ["svg", "pdf"].contains(imgPath.split(separator: ".").last) {
-                    let legacyImage = getImageFromPath(fileImagePath: imgPath, returnErrorImage: true)
-                    Image(nsImage: legacyImage)
-                        .resizable()
-                        .interpolation(.high)
-                // Reserved for future use
+                    // Load the svg/pdf once (into @State) instead of re-fetching and
+                    // re-decoding it on every body evaluation. Show a placeholder until
+                    // it's ready, consistent with the AsyncImage path below.
+                    Group {
+                        if let svgPdfImage {
+                            Image(nsImage: svgPdfImage)
+                                .resizable()
+                                .interpolation(.high)
+                        } else {
+                            RoundedRectangle(cornerRadius: clipShapeRadius, style: .continuous)
+                                .fill(.regularMaterial)
+                        }
+                    }
+                    .task(id: imgPath) {
+                        svgPdfImage = getImageFromPath(fileImagePath: imgPath, returnErrorImage: true)
+                    }
                 } else if ["gif"].contains(imgPath.split(separator: ".").last) {
                     AnimatedImage(url: asyncURL)
                         .resizable()
