@@ -26,15 +26,13 @@ struct DebugOverlay: View {
                 .padding(.trailing, 5)
                 Spacer()
             }
-            .background(GeometryReader {child -> Color in
+            .onGeometryChange(for: CGSize.self) { proxy in
+                proxy.size
+            } action: { newValue in
                 if observedData.args.debug.present {
-                    DispatchQueue.main.async {
-                        // update on next cycle with calculated height
-                        self.windowFrame = child.size
-                    }
+                    windowFrame = newValue
                 }
-                return Color.clear
-            })
+            }
             .ignoresSafeArea()
             .frame(maxWidth: observedData.appProperties.windowWidth, maxHeight: observedData.appProperties.windowHeight)
         }

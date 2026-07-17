@@ -108,12 +108,11 @@ struct MessageContent: View {
                                     .multilineTextAlignment(observedData.appProperties.messageAlignment)
                                     .lineSpacing(2)
                                     .fixedSize()
-                                    .background(GeometryReader { child -> Color in
-                                        DispatchQueue.main.async {
-                                            self.messageHeight = child.size.height > defaultMessageHeight ? child.size.height : defaultMessageHeight
-                                        }
-                                        return Color.clear
-                                    })
+                                    .onGeometryChange(for: CGFloat.self) { proxy in
+                                        max(proxy.size.height, defaultMessageHeight)
+                                    } action: { newValue in
+                                        messageHeight = newValue
+                                    }
                                     // Instead of .textual.structuredTextStyle(.gitHub), set each piece individually:
                                     .textual.inlineStyle(
                                         InlineStyle()

@@ -109,13 +109,11 @@ struct CheckboxView: View {
                 VStack {
                     //Spacer()
                     RenderToggles(observedDialogContent: observedData)
-                        .background(GeometryReader {child -> Color in
-                            DispatchQueue.main.async {
-                                // update on next cycle with calculated height
-                                self.switchHeight = child.size.height
-                            }
-                            return Color.clear
-                        })
+                        .onGeometryChange(for: CGFloat.self) { proxy in
+                            proxy.size.height
+                        } action: { newValue in
+                            switchHeight = newValue
+                        }
                         .scrollOnOverflow()
                 }
                 .frame(minHeight: 10, maxHeight: switchHeight)
