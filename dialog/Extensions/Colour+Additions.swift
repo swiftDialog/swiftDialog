@@ -36,18 +36,9 @@ extension Color {
         let hexPred = NSPredicate(format: "SELF MATCHES %@", hexRegEx)
 
         if hexPred.evaluate(with: argument) {
-
-            let colourRedValue = "\(argument[1])\(argument[2])"
-            let colourRed = Double(Int(colourRedValue, radix: 16)!)/255
-
-            let colourGreenValue = "\(argument[3])\(argument[4])"
-            let colourGreen = Double(Int(colourGreenValue, radix: 16)!)/255
-
-            let colourBlueValue = "\(argument[5])\(argument[6])"
-            let colourBlue = Double(Int(colourBlueValue, radix: 16)!)/255
-
-            self.init(red: colourRed, green: colourGreen, blue: colourBlue)
-
+            // Delegate to the Scanner-based hex initialiser rather than hand-parsing
+            // with force-unwrapped Int(_, radix:) conversions.
+            self.init(hex: argument)
             return
         }
 

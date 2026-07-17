@@ -149,8 +149,9 @@ struct InstallationInfoPopoverView: View {
 
     /// Get macOS build number
     private func getBuildNumber() -> String {
-        // Still use sw_vers for build number as ProcessInfo doesn't provide it
-        return shell("sw_vers -buildVersion").trimmingCharacters(in: .whitespacesAndNewlines)
+        // Native sysctl (kern.osversion) — same value as `sw_vers -buildVersion`,
+        // without spawning a process.
+        return osBuildVersion
     }
 
     /// Get current user's UID using native Foundation API

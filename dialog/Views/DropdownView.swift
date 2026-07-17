@@ -78,14 +78,8 @@ struct DropdownView: View {
                                         userInputState.dropdownItems[index].selectedValue = selectedOption
                                     }
                                     .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
-                                    .overlay(RoundedRectangle(cornerRadius: 5)
-                                        .stroke(userInputState.dropdownItems[index].requiredfieldHighlight, lineWidth: 2)
-                                        .animation(
-                                            .easeIn(duration: 0.2).repeatCount(3, autoreverses: true),
-                                            value: observedData.showSheet
-                                        )
-                                    )
-                                    
+                                    .requiredFieldHighlight(userInputState.dropdownItems[index].requiredfieldHighlight, trigger: observedData.showSheet)
+
                             } else {
                                 Picker("", selection: $selectedOption[index]) {
                                     if userInputState.dropdownItems[index].defaultValue.isEmpty {
@@ -109,13 +103,7 @@ struct DropdownView: View {
                                 }
                                 .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
                                 .buttonSizeFit()
-                                .overlay(RoundedRectangle(cornerRadius: 5)
-                                    .stroke(userInputState.dropdownItems[index].requiredfieldHighlight, lineWidth: 2)
-                                    .animation(
-                                        .easeIn(duration: 0.2).repeatCount(3, autoreverses: true),
-                                        value: observedData.showSheet
-                                    )
-                                )
+                                .requiredFieldHighlight(userInputState.dropdownItems[index].requiredfieldHighlight, trigger: observedData.showSheet)
                             }
                         }
                     }

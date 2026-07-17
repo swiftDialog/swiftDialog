@@ -94,14 +94,7 @@ struct TextEntryView: View {
                                 .font(.custom("HelveticaNeue", size: 14))
                                 .cornerRadius(3.0)
                                 .frame(minHeight: 80, maxHeight: observedData.appProperties.windowHeight/2)
-                                .overlay(RoundedRectangle(cornerRadius: 5)
-                                    .stroke(userInputState.textFields[index].requiredTextfieldHighlight, lineWidth: 2)
-                                            .animation(
-                                                .easeIn(duration: 0.2)
-                                                .repeatCount(3, autoreverses: true),
-                                                value: observedData.showSheet
-                                            )
-                                         )
+                                .requiredFieldHighlight(userInputState.textFields[index].requiredTextfieldHighlight, trigger: observedData.showSheet)
                         }
                         .padding(.bottom, appDefaults.contentPadding)
                     } else {
