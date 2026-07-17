@@ -368,7 +368,11 @@ class Config {
         var downloadedData: Data?
         var downloadError: Error?
 
-        let task = URLSession.shared.dataTask(with: url) { data, _, error in
+        // Bound the underlying request to the same 10s as the wait below, so the
+        // task doesn't linger in the background to URLSession's 60s default.
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 10
+        let task = URLSession.shared.dataTask(with: request) { data, _, error in
             downloadedData = data
             downloadError = error
             semaphore.signal()
