@@ -27,13 +27,16 @@ func shell(_ command: String) -> String {
     task.standardOutput = pipe
     task.standardError = pipe
     task.arguments = ["-c", command]
-    task.launchPath = "/bin/zsh"
-    task.launch()
+    task.executableURL = URL(fileURLWithPath: "/bin/zsh")
+    do {
+        try task.run()
+    } catch {
+        writeLog("Failed to run shell command: \(error.localizedDescription)", logLevel: .error)
+        return ""
+    }
 
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
-    let output = String(data: data, encoding: .utf8)!
-
-    return output
+    return String(data: data, encoding: .utf8) ?? ""
 }
 
 // taken wholesale from DEPNotify because Joel and team and jsut awesome so why re-invent the wheel?
@@ -161,11 +164,11 @@ func executeOnAdvanceCallback(command: String, cardIndex: Int, cardId: String?, 
     task.standardOutput = outputPipe
     task.standardError = errorPipe
     task.arguments = ["-c", command]
-    task.launchPath = "/bin/zsh"
-    
+    task.executableURL = URL(fileURLWithPath: "/bin/zsh")
+
     do {
         try task.run()
-        
+
         // Write JSON to stdin
         inputPipe.fileHandleForWriting.write(jsonString.data(using: .utf8)!)
         inputPipe.fileHandleForWriting.closeFile()

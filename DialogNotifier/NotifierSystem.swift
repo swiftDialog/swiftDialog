@@ -22,8 +22,13 @@ func shell(_ command: String) -> String {
     task.standardOutput = pipe
     task.standardError = pipe
     task.arguments = ["-c", command]
-    task.launchPath = "/bin/zsh"
-    task.launch()
+    task.executableURL = URL(fileURLWithPath: "/bin/zsh")
+    do {
+        try task.run()
+    } catch {
+        writeLog("Failed to run shell command: \(error.localizedDescription)", logLevel: .error)
+        return ""
+    }
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
     return String(data: data, encoding: .utf8) ?? ""
 }

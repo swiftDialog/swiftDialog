@@ -299,7 +299,7 @@ struct DialogLauncher: ParsableCommand {
     // Function to execute the provided command with the specified arguments
     func runCommand(binary: String, args: [String]) -> CommandResult {
         let process = DialogLauncher.process
-        process.launchPath = binary
+        process.executableURL = URL(fileURLWithPath: binary)
         process.arguments = args
 
         // Set up pipes for stdout and stderr
@@ -386,9 +386,13 @@ struct DialogLauncher: ParsableCommand {
     // Function to check if a user can read a specific file
     func canUserReadFile(user: String, file: String) -> Bool {
         let task = Process()
-        task.launchPath = "/usr/bin/sudo"
+        task.executableURL = URL(fileURLWithPath: "/usr/bin/sudo")
         task.arguments = ["-u", user, "test", "-r", file]
-        task.launch()
+        do {
+            try task.run()
+        } catch {
+            return false
+        }
         task.waitUntilExit()
         return task.terminationStatus == 0
     }
