@@ -521,11 +521,13 @@ func processCLOptions(json: JSON = getJSON()) {
             var dropdownLabels = CLOptionMultiOptions(optionName: appArguments.dropdownTitle.long)
             var dropdownDefaults = CLOptionMultiOptions(optionName: appArguments.dropdownDefault.long)
 
-            // need to make sure the title and default value arrays are the same size
-            for _ in dropdownLabels.count..<dropdownValues.count {
+            // need to make sure the title and default value arrays are at least as
+            // large as the values array (while-loops are safe when more titles/defaults
+            // than values were supplied — a range like 3..<2 would crash)
+            while dropdownLabels.count < dropdownValues.count {
                 dropdownLabels.append("")
             }
-            for _ in dropdownDefaults.count..<dropdownValues.count {
+            while dropdownDefaults.count < dropdownValues.count {
                 dropdownDefaults.append("")
             }
 
@@ -614,6 +616,9 @@ func processCLOptions(json: JSON = getJSON()) {
                     if items.count > 1 {
                         fieldRegexError = "\"\(fieldTitle)\" "+"doesn't match the required format".localized
                         for index in 1...items.count-1 {
+                            // the value for a key=value sub-option is the next token, or
+                            // empty if this key is the last item (avoids reading past the end)
+                            let nextValue = index + 1 < items.count ? items[index+1] : ""
                             switch items[index].lowercased()
                                 .replacingOccurrences(of: ",", with: "")
                                 .replacingOccurrences(of: "=", with: "")
@@ -623,29 +628,29 @@ func processCLOptions(json: JSON = getJSON()) {
                             case "fileselect":
                                 fieldFileSelect = true
                             case "filetype":
-                                fieldSelectType = items[index+1]
+                                fieldSelectType = nextValue
                             case "passwordfill":
                                 fieldPasswordFill = true
                             case "prompt":
-                                fieldPrompt = items[index+1]
+                                fieldPrompt = nextValue
                             case "regex":
-                                fieldRegex = items[index+1]
+                                fieldRegex = nextValue
                             case "regexerror":
-                                fieldRegexError = items[index+1]
+                                fieldRegexError = nextValue
                             case "required":
                                 fieldRequire = true
                             case "secure":
                                 fieldSecure = true
                             case "value":
-                                fieldValue = items[index+1]
+                                fieldValue = nextValue
                             case "name":
-                                fieldName = items[index+1]
+                                fieldName = nextValue
                             case "isdate":
                                 fieldIsDate = true
                             case "confirm":
                                 fieldConfirm = true
                             case "path":
-                                fieldInitialPath = items[index+1]
+                                fieldInitialPath = nextValue
                             default: ()
                             }
                         }

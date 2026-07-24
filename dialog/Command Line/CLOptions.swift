@@ -9,23 +9,28 @@ import Foundation
 
 // returns array of multiple option values
 func CLOptionMultiOptions(optionName: String) -> Array<String> {
-    // return an array that contains of all the --textfield options that are passed in
+    // return an array that contains all the values passed in for a repeatable option
     var optionsArray: Array = [String]()
-    var argIndex = 0
     let CLArguments = CommandLine.arguments
-    for argument in CLArguments {
-
+    for (argIndex, argument) in CLArguments.enumerated() {
         if argument == "--\(optionName)" {
+            // The value is the next token. Treat it as empty if the option is the
+            // last argument or the next token is itself an option (starts with "-"),
+            // matching CLOptionText — otherwise we'd read past the end of the array
+            // or swallow the following flag.
+            var value = ""
+            let valueIndex = argIndex + 1
+            if valueIndex < CLArguments.count && !CLArguments[valueIndex].starts(with: "-") {
+                value = CLArguments[valueIndex]
+            }
             switch optionName {
             case "image":
-                // Accept as comma seperate values
-                let argArray = CLArguments[argIndex+1].components(separatedBy: ",")
-                optionsArray += argArray
+                // Accept as comma separated values
+                optionsArray += value.components(separatedBy: ",")
             default:
-                optionsArray.append(CLArguments[argIndex+1])
+                optionsArray.append(value)
             }
         }
-        argIndex+=1
     }
     return optionsArray
 }
