@@ -73,6 +73,16 @@ struct TextEntryView: View {
         }
     }
 
+    /// Format a date field's current date. Uses a strftime-style `format=` string when
+    /// supplied (e.g. "+%s" for epoch), otherwise the default ISO format for its components.
+    func formattedDate(_ field: TextFieldState) -> String {
+        if !field.dateOutputFormat.isEmpty {
+            return strftimeString(from: field.date, format: field.dateOutputFormat)
+        }
+        dateFormatter.dateFormat = field.dateFormat
+        return dateFormatter.string(from: field.date)
+    }
+
     var body: some View {
         // Guard against array size mismatch during card transitions
         let textFieldCount = observedData.textFieldArray.count
@@ -150,6 +160,23 @@ struct TextEntryView: View {
                                             .padding(.top, 5)
                                         }
                                     }
+                                } else if observedData.textFieldArray[index].isDatePicker {
+                                    // Date/time field: the picker replaces the text field.
+                                    DatePicker("", selection: $observedData.textFieldArray[index].date,
+                                               displayedComponents: observedData.textFieldArray[index].dateComponents)
+                                        .labelsHidden()
+                                        .datePickerStyle(.field)
+                                        .onAppear {
+                                            // return the initial (default) date even if the user never changes it
+                                            let formatted = formattedDate(observedData.textFieldArray[index])
+                                            observedData.textFieldArray[index].value = formatted
+                                            userInputState.textFields[index].value = formatted
+                                        }
+                                        .onChange(of: observedData.textFieldArray[index].date) { _, _ in
+                                            let formatted = formattedDate(observedData.textFieldArray[index])
+                                            observedData.textFieldArray[index].value = formatted
+                                            userInputState.textFields[index].value = formatted
+                                        }
                                 } else {
                                     VStack {
                                         TextField(observedData.textFieldArray[index].prompt,
@@ -229,19 +256,6 @@ struct TextEntryView: View {
                                                 userInputState.textFields[index].validationValue = confirmed
                                             }
                                         }
-                                    }
-
-
-                                    if observedData.textFieldArray[index].isDate {
-                                        DatePicker("", selection: $observedData.textFieldArray[index].date, displayedComponents: [.date])
-                                            .onChange(of: observedData.textFieldArray[index].date) { _, dateContent in
-                                                dateFormatter.timeStyle = .none
-                                                dateFormatter.dateStyle = .short
-                                                observedData.textFieldArray[index].value = dateFormatter.string(from: dateContent)
-                                            }
-                                            .labelsHidden()
-                                            // Re-create the picker when the date changes so its calendar popover dismisses
-                                            .id("\(observedData.textFieldArray[index].id)\(observedData.textFieldArray[index].date)")
                                     }
                                 }
                             }

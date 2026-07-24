@@ -189,6 +189,60 @@ func jsonCGFloat(_ value: JSON, default defaultValue: CGFloat, context: String) 
     return defaultValue
 }
 
+/// Best-effort parse of a user-supplied string into a Date, for the `value=` starting
+/// value of a date/time textfield. Tries, in order: explicit locale-independent formats
+/// (including the ones swiftDialog emits — yyyy-MM-dd, yyyy-MM-dd HH:mm, HH:mm, hh:mm a),
+/// a Unix epoch in seconds, the user's locale short/medium/long styles, and finally
+/// NSDataDetector's natural-language detection ("July 15 2026", "3pm", "next friday").
+/// Falls back to the current date/time if nothing parses.
+func parseDateOrNow(_ string: String) -> Date {
+    let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
+    if trimmed.isEmpty { return Date.now }
+
+    let posix = DateFormatter()
+    posix.locale = Locale(identifier: "en_US_POSIX")
+    for format in ["yyyy-MM-dd HH:mm", "yyyy-MM-dd'T'HH:mm", "yyyy-MM-dd", "HH:mm", "hh:mm a"] {
+        posix.dateFormat = format
+        if let date = posix.date(from: trimmed) { return date }
+    }
+
+    // Unix epoch seconds — 9–11 digits, so a bare year like "2026" isn't misread as one.
+    if (9...11).contains(trimmed.count), trimmed.allSatisfy(\.isNumber), let epoch = Double(trimmed) {
+        return Date(timeIntervalSince1970: epoch)
+    }
+
+    let localeFormatter = DateFormatter()
+    for dateStyle in [DateFormatter.Style.short, .medium, .long] {
+        for timeStyle in [DateFormatter.Style.none, .short] {
+            localeFormatter.dateStyle = dateStyle
+            localeFormatter.timeStyle = timeStyle
+            if let date = localeFormatter.date(from: trimmed) { return date }
+        }
+    }
+
+    if let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.date.rawValue),
+       let match = detector.firstMatch(in: trimmed, range: NSRange(trimmed.startIndex..., in: trimmed)),
+       let date = match.date {
+        return date
+    }
+
+    return Date.now
+}
+
+/// Format a Date using strftime(3) — the same specifiers the shell `date` command uses
+/// (e.g. "+%Y-%m-%d", "+%s" for epoch). A leading "+" is accepted and stripped, matching
+/// the `date` convention. Returns "" if the format produces no output.
+func strftimeString(from date: Date, format: String) -> String {
+    let pattern = format.hasPrefix("+") ? String(format.dropFirst()) : format
+    if pattern.isEmpty { return "" }
+    var seconds = time_t(date.timeIntervalSince1970)
+    var brokenDown = tm()
+    localtime_r(&seconds, &brokenDown)
+    var buffer = [CChar](repeating: 0, count: 256)
+    let written = strftime(&buffer, buffer.count, pattern, &brokenDown)
+    return written > 0 ? String(cString: buffer) : ""
+}
+
 @discardableResult
 func processCLOptionValues() -> JSON {
 
@@ -587,7 +641,10 @@ func processCLOptions(json: JSON = getJSON()) {
                         title: String(json[appArguments.textField.long][index]["title"].stringValue),
                         name: String(json[appArguments.textField.long][index]["name"].stringValue),
                         value: String(json[appArguments.textField.long][index]["value"].stringValue),
-                        isDate: Bool(json[appArguments.textField.long][index]["isdate"].boolValue),
+                        date: (json[appArguments.textField.long][index]["date"].boolValue || json[appArguments.textField.long][index]["time"].boolValue) ? parseDateOrNow(String(json[appArguments.textField.long][index]["value"].stringValue)) : Date.now,
+                        showDate: Bool(json[appArguments.textField.long][index]["date"].boolValue),
+                        showTime: Bool(json[appArguments.textField.long][index]["time"].boolValue),
+                        dateOutputFormat: String(json[appArguments.textField.long][index]["format"].stringValue),
                         confirm: Bool(json[appArguments.textField.long][index]["confirm"].boolValue),
                         initialPath: String(json[appArguments.textField.long][index]["path"].stringValue))
                     )
@@ -608,7 +665,9 @@ func processCLOptions(json: JSON = getJSON()) {
                 var fieldTitle: String = ""
                 var fieldName: String = ""
                 var fieldValue: String = ""
-                var fieldIsDate: Bool = false
+                var fieldShowDate: Bool = false
+                var fieldShowTime: Bool = false
+                var fieldDateFormat: String = ""
                 var fieldConfirm: Bool = false
                 var fieldInitialPath: String = ""
                 if items.count > 0 {
@@ -645,8 +704,12 @@ func processCLOptions(json: JSON = getJSON()) {
                                 fieldValue = nextValue
                             case "name":
                                 fieldName = nextValue
-                            case "isdate":
-                                fieldIsDate = true
+                            case "date":
+                                fieldShowDate = true
+                            case "time":
+                                fieldShowTime = true
+                            case "format":
+                                fieldDateFormat = nextValue
                             case "confirm":
                                 fieldConfirm = true
                             case "path":
@@ -656,6 +719,8 @@ func processCLOptions(json: JSON = getJSON()) {
                         }
                     }
                 }
+                // Seed the picker from value= when this is a date/time field.
+                let fieldDate = (fieldShowDate || fieldShowTime) ? parseDateOrNow(fieldValue) : Date.now
                 userInputState.textFields.append(TextFieldState(
                             editor: fieldEditor,
                             fileSelect: fieldFileSelect,
@@ -669,7 +734,10 @@ func processCLOptions(json: JSON = getJSON()) {
                             title: fieldTitle,
                             name: fieldName,
                             value: fieldValue,
-                            isDate: fieldIsDate,
+                            date: fieldDate,
+                            showDate: fieldShowDate,
+                            showTime: fieldShowTime,
+                            dateOutputFormat: fieldDateFormat,
                             confirm: fieldConfirm,
                             initialPath: fieldInitialPath))
             }

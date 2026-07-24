@@ -55,7 +55,7 @@ struct AppDefaults {
 
     let defaultStatusLogFile            = String("/var/tmp/dialog.log")
 
-    let argRegex                        = String("(,? ?[a-zA-Z1-9]+=|(,\\s?editor)|(,\\s?fileselect))|(,\\s?passwordfill)|(,\\s?required)|(,\\s?secure)|(,\\s?confirm)")
+    let argRegex                        = String("(,? ?[a-zA-Z1-9]+=|(,\\s?editor)|(,\\s?fileselect))|(,\\s?passwordfill)|(,\\s?required)|(,\\s?secure)|(,\\s?confirm)|(,\\s?date)|(,\\s?time)")
 
     // exit codes and error messages
     let exit0                           = (code: Int32(0),   message: String("")) // normal exit
