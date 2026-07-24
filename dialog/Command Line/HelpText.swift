@@ -139,6 +139,8 @@ struct SDHelp {
 
             size=<float>              - accepts any float value.
 
+            name=<fontname>           - Name of a font family to use. Show available fonts with --\(argument.listFonts.long)
+
         example: \"colour=#00A4C7,size=60\"
 
         ## NOTE: swiftDialog 2.3 and later do not support changes to font name or weight
