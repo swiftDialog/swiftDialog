@@ -99,7 +99,8 @@ class FileReader {
             vertical: observedData.appProperties.windowPositionVertical,
             horozontal: observedData.appProperties.windowPositionHorozontal,
             offset: observedData.args.positionOffset.value.floatValue(),
-            useFullScreen: observedData.args.blurScreen.present || observedData.args.forceOnTop.present)
+            useFullScreen: observedData.args.blurScreen.present,
+            respectDock: observedData.args.forceOnTop.present)
     }
 
     private func writeToLog(_ message: String, logLevel: OSLogType = .info) {
@@ -985,7 +986,8 @@ final class DialogUpdatableContent: ObservableObject {
                        vertical: appProperties.windowPositionVertical,
                        horozontal: appProperties.windowPositionHorozontal,
                        offset: args.positionOffset.value.floatValue(),
-                       useFullScreen: args.blurScreen.present || args.forceOnTop.present,
+                       useFullScreen: args.blurScreen.present,
+                       respectDock: args.forceOnTop.present,
                        animated: true)
         }
         

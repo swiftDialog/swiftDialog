@@ -122,7 +122,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                         vertical: appvars.windowPositionVertical,
                         horozontal: appvars.windowPositionHorozontal,
                         offset: appvars.windowPositionOffset,
-                        useFullScreen: appArguments.blurScreen.present || appArguments.forceOnTop.present)
+                        useFullScreen: appArguments.blurScreen.present,
+                        respectDock: appArguments.forceOnTop.present)
 
             // order to the front
             activateDialog(appArguments.notificationStyle.value.contains("pseudo"))

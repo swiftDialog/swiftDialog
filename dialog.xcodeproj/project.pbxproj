@@ -104,6 +104,7 @@
 		AA00000000000005AABBCC01 /* FileModificationDateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000005AABBCC00 /* FileModificationDateTests.swift */; };
 		AA00000000000006AABBCC01 /* CommandLineArgumentsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000006AABBCC00 /* CommandLineArgumentsTests.swift */; };
 		AA00000000000008AABBCC01 /* DebouncedUpdaterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000008AABBCC00 /* DebouncedUpdaterTests.swift */; };
+		AA00000000000009AABBCC01 /* WindowPlacementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000009AABBCC00 /* WindowPlacementTests.swift */; };
 		AA00000000000007AABBCC01 /* FileSystemCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA00000000000007AABBCC00 /* FileSystemCacheTests.swift */; };
 		B3D4E5F6A7B8C9D0E1F2A3B4 /* BrandedLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E1F2A3B4C5D6E7F8A9B0C1 /* BrandedLogoView.swift */; };
 		B4608E5B819446BC9AADDC8F /* FileSystemCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9F647DDE9CB42EBA9D931B9 /* FileSystemCache.swift */; };
@@ -377,6 +378,7 @@
 		AA00000000000005AABBCC00 /* FileModificationDateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileModificationDateTests.swift; sourceTree = "<group>"; };
 		AA00000000000006AABBCC00 /* CommandLineArgumentsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandLineArgumentsTests.swift; sourceTree = "<group>"; };
 		AA00000000000008AABBCC00 /* DebouncedUpdaterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebouncedUpdaterTests.swift; sourceTree = "<group>"; };
+		AA00000000000009AABBCC00 /* WindowPlacementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowPlacementTests.swift; sourceTree = "<group>"; };
 		AA00000000000007AABBCC00 /* FileSystemCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystemCacheTests.swift; sourceTree = "<group>"; };
 		BA05AF162F1C2B9B001367A5 /* AppConfigService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfigService.swift; sourceTree = "<group>"; };
 		BA05AF172F1C2B9B001367A5 /* PortalAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortalAuthService.swift; sourceTree = "<group>"; };
@@ -639,6 +641,7 @@
 				AA00000000000005AABBCC00 /* FileModificationDateTests.swift */,
 				AA00000000000006AABBCC00 /* CommandLineArgumentsTests.swift */,
 				AA00000000000008AABBCC00 /* DebouncedUpdaterTests.swift */,
+				AA00000000000009AABBCC00 /* WindowPlacementTests.swift */,
 				AA00000000000007AABBCC00 /* FileSystemCacheTests.swift */,
 			);
 			path = dialogTests;
@@ -1411,6 +1414,7 @@
 				AA00000000000005AABBCC01 /* FileModificationDateTests.swift in Sources */,
 				AA00000000000006AABBCC01 /* CommandLineArgumentsTests.swift in Sources */,
 				AA00000000000008AABBCC01 /* DebouncedUpdaterTests.swift in Sources */,
+				AA00000000000009AABBCC01 /* WindowPlacementTests.swift in Sources */,
 				AA00000000000007AABBCC01 /* FileSystemCacheTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
