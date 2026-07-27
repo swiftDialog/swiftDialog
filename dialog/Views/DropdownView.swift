@@ -78,14 +78,8 @@ struct DropdownView: View {
                                         userInputState.dropdownItems[index].selectedValue = selectedOption
                                     }
                                     .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
-                                    .overlay(RoundedRectangle(cornerRadius: 5)
-                                        .stroke(userInputState.dropdownItems[index].requiredfieldHighlight, lineWidth: 2)
-                                        .animation(
-                                            .easeIn(duration: 0.2).repeatCount(3, autoreverses: true),
-                                            value: observedData.showSheet
-                                        )
-                                    )
-                                    
+                                    .requiredFieldHighlight(userInputState.dropdownItems[index].requiredfieldHighlight, trigger: observedData.showSheet)
+
                             } else {
                                 Picker("", selection: $selectedOption[index]) {
                                     if userInputState.dropdownItems[index].defaultValue.isEmpty {
@@ -109,13 +103,7 @@ struct DropdownView: View {
                                 }
                                 .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
                                 .buttonSizeFit()
-                                .overlay(RoundedRectangle(cornerRadius: 5)
-                                    .stroke(userInputState.dropdownItems[index].requiredfieldHighlight, lineWidth: 2)
-                                    .animation(
-                                        .easeIn(duration: 0.2).repeatCount(3, autoreverses: true),
-                                        value: observedData.showSheet
-                                    )
-                                )
+                                .requiredFieldHighlight(userInputState.dropdownItems[index].requiredfieldHighlight, trigger: observedData.showSheet)
                             }
                         }
                     }
@@ -693,62 +681,3 @@ struct FlowLayout: Layout {
         return (CGSize(width: totalWidth, height: max(totalHeight, 20)), positions)
     }
 }
-
-// MARK: - Key Handler View
-
-/*
-struct KeyHandlerView: NSViewRepresentable {
-    var onKeyDown: (NSEvent) -> Void
-    static var currentHandler: ((NSEvent) -> Void)?
-
-    func makeNSView(context: Context) -> NSView {
-        let view = NSView()
-        // Install a single global monitor only once
-        if context.coordinator.monitor == nil {
-            context.coordinator.monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-                //KeyHandlerView.currentHandler?(event)
-                // Only swallow keys if the handler actually used them
-                if let handler = KeyHandlerView.currentHandler {
-                    handler(event)
-                    // Ask handler if it "handled" Return (⏎)
-                    if SearchablePicker.lastHandledKeyCodes.contains(Int(event.keyCode)) {
-                        return nil
-                    }
-                }
-                return event
-            }
-        }
-        return view
-    }
-
-    func updateNSView(_ nsView: NSView, context: Context) {
-        // When this picker has focus, set it as the active handler
-        KeyHandlerView.currentHandler = onKeyDown
-    }
-
-    func makeCoordinator() -> Coordinator { Coordinator() }
-
-    class Coordinator {
-        var monitor: Any?
-        deinit {
-            if let monitor {
-                NSEvent.removeMonitor(monitor)
-            }
-        }
-    }
-}
-
-*/
-
-
-/*
- HStack {
-     Spacer()
-     Image(systemName: "chevron.up.chevron.down.square.fill")
-         .foregroundColor(.accentColor).opacity(0.5)
-         .onTapGesture {
-             searchText = ""
-             showPopup = false
-         }
- }
- */

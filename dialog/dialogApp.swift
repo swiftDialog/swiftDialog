@@ -122,7 +122,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                         vertical: appvars.windowPositionVertical,
                         horozontal: appvars.windowPositionHorozontal,
                         offset: appvars.windowPositionOffset,
-                        useFullScreen: appArguments.blurScreen.present || appArguments.forceOnTop.present)
+                        useFullScreen: appArguments.blurScreen.present,
+                        respectDock: appArguments.forceOnTop.present)
 
             // order to the front
             activateDialog(appArguments.notificationStyle.value.contains("pseudo"))
@@ -234,8 +235,8 @@ struct dialogApp: App {
             appvars.screenWidth = rect.size.width
         }
 
-        // get all the command line option values
-        processCLOptionValues()
+        // get all the command line option values (parse the JSON once and reuse it below)
+        let json = processCLOptionValues()
 
         // Legacy notification path: --notification without --style routes through the main app bundle.
         // This preserves compatibility with existing MDM notification-settings profiles.
@@ -271,8 +272,8 @@ struct dialogApp: App {
             convertFromJamfHelperSyntax()
         }
 
-        // process remaining command line options
-        processCLOptions()
+        // process remaining command line options (reuse the JSON parsed above)
+        processCLOptions(json: json)
 
         appvars.overlayShadow = 1
 
@@ -346,15 +347,15 @@ struct dialogApp: App {
                         }
                     })
             } else if !appArguments.notification.present && !appvars.noargs {
-                let _ = appvars.debugMode ? print("DEBUG: Checking modes - mini:\(appArguments.miniMode.present) inspect:\(appArguments.inspectMode.present) presentation:\(appArguments.presentationMode.present)") : ()
+                let _ = appvars.debugMode ? writeLog("Checking modes - mini:\(appArguments.miniMode.present) inspect:\(appArguments.inspectMode.present) presentation:\(appArguments.presentationMode.present)", logLevel: .debug) : ()
                 ZStack {
                     if appArguments.miniMode.present {
-                        let _ = appvars.debugMode ? print("DEBUG: Loading MiniView") : ()
+                        let _ = appvars.debugMode ? writeLog("Loading MiniView", logLevel: .debug) : ()
                         MiniView(observedDialogContent: observedData)
                             .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
                     } else if appArguments.inspectMode.present {
                         // Wrap InspectView to delay its initialization
-                        let _ = appvars.debugMode ? print("DEBUG: Loading InspectView") : ()
+                        let _ = appvars.debugMode ? writeLog("Loading InspectView", logLevel: .debug) : ()
                         if appArguments.windowResizable.present {
                             InspectView()
                         } else {
@@ -363,11 +364,11 @@ struct dialogApp: App {
                                        height: observedData.appProperties.windowHeight)
                         }
                     } else if appArguments.presentationMode.present {
-                        let _ = appvars.debugMode ? print("DEBUG: Loading PresentationView") : ()
+                        let _ = appvars.debugMode ? writeLog("Loading PresentationView", logLevel: .debug) : ()
                         PresentationView(observedData: observedData)
                             .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
                     } else {
-                        let _ = appvars.debugMode ? print("DEBUG: Loading default ContentView") : ()
+                        let _ = appvars.debugMode ? writeLog("Loading default ContentView", logLevel: .debug) : ()
                         if appArguments.windowResizable.present {
                             ContentView(observedDialogContent: observedData)
                         } else {

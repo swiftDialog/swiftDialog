@@ -13,7 +13,7 @@ struct FullscreenView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
 
-    let displayDetails: CGRect = NSScreen.main!.frame
+    let displayDetails: CGRect = NSScreen.main?.frame ?? NSScreen.screens.first?.frame ?? CGRect(x: 0, y: 0, width: 1920, height: 1080)
     var windowHeight: CGFloat = 0
     var windowWidth: CGFloat = 0
 
@@ -77,8 +77,7 @@ struct FullscreenView: View {
 
     public func showFullScreen() {
 
-        var window: NSWindow!
-        window = NSWindow(
+        let window = NSWindow(
                contentRect: NSRect(x: 0, y: 0, width: 480, height: 300),
                styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
                backing: .buffered, defer: false)
@@ -88,7 +87,10 @@ struct FullscreenView: View {
         window.contentView = NSHostingView(rootView: FullscreenView(observedData: observedData))
 
         // open fullScreen mode
-        let mainScreen: NSScreen = NSScreen.main!
+        guard let mainScreen = NSScreen.main ?? NSScreen.screens.first else {
+            writeLog("No screen available to enter fullscreen mode", logLevel: .error)
+            return
+        }
         window.contentView?.enterFullScreenMode(mainScreen)
     }
 

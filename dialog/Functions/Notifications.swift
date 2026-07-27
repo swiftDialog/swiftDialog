@@ -248,17 +248,17 @@ func sendNotification(title: String = "",
                 // Schedule the request with the system.
                 notification.add(request) { (error) in
                    if error != nil {
-                       print(error?.localizedDescription ?? "Notification error")
+                       writeLog(error?.localizedDescription ?? "Notification error", logLevel: .error)
                    }
                 }
             case .provisional:
-                print("Notification authorisation is provisional")
+                writeLog("Notification authorisation is provisional", logLevel: .info)
             case .denied:
-                print("Notification authorisation is denied")
+                writeLog("Notification authorisation is denied", logLevel: .info)
             case .notDetermined:
-                print("Notification authorisation cannot be determined")
+                writeLog("Notification authorisation cannot be determined", logLevel: .info)
             default:
-            print("Notifications aren't authorised")
+                writeLog("Notifications aren't authorised", logLevel: .info)
         }
     }
 }
@@ -267,11 +267,11 @@ func processNotification(response: UNNotificationResponse) {
     // Get action items from the notification
 
     let userInfo = response.notification.request.content.userInfo
-    let acceptAction = userInfo["ACCEPT_ACTION"] as! String
-    let declineAction = userInfo["DECLINE_ACTION"] as! String
+    let acceptAction = userInfo["ACCEPT_ACTION"] as? String ?? ""
+    let declineAction = userInfo["DECLINE_ACTION"] as? String ?? ""
 
     writeLog("acceptAction: \(acceptAction)")
-    writeLog("declineAction: \(acceptAction)")
+    writeLog("declineAction: \(declineAction)")
 
     switch response.actionIdentifier {
     case "ACCEPT_ACTION_LABEL", UNNotificationDefaultActionIdentifier:

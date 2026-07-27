@@ -131,6 +131,28 @@ struct OverflowContentViewModifier: ViewModifier {
     }
 }
 
+/// The shake-highlight border drawn around a required input field when the user
+/// tries to submit without completing it. `trigger` is the value whose change drives
+/// the shake animation (the dialog's `showSheet` flag at the call sites).
+struct RequiredFieldHighlight: ViewModifier {
+    let highlight: Color
+    let trigger: Bool
+
+    func body(content: Content) -> some View {
+        content.overlay(
+            RoundedRectangle(cornerRadius: 5)
+                .stroke(highlight, lineWidth: 2)
+                .animation(.easeIn(duration: 0.2).repeatCount(3, autoreverses: true), value: trigger)
+        )
+    }
+}
+
+extension View {
+    func requiredFieldHighlight(_ highlight: Color, trigger: Bool) -> some View {
+        modifier(RequiredFieldHighlight(highlight: highlight, trigger: trigger))
+    }
+}
+
 enum glassType {
     case clear
     case regular

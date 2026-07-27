@@ -265,15 +265,15 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
 
                 // PRIORITY: Set UI configuration FIRST before items
                 // This ensures button text, title, etc. are ready before view transitions from loading
-                print("InspectState: About to extract configurations")
-                print("InspectState: loadedConfig.banner = \(loadedConfig.banner ?? "nil")")
-                print("InspectState: loadedConfig.listIndicatorStyle = \(loadedConfig.listIndicatorStyle ?? "nil")")
-                print("InspectState: loadedConfig.stepStyle = \(loadedConfig.stepStyle ?? "nil")")
+                writeLog("InspectState: About to extract configurations", logLevel: .debug)
+                writeLog("InspectState: loadedConfig.banner = \(loadedConfig.banner ?? "nil")", logLevel: .debug)
+                writeLog("InspectState: loadedConfig.listIndicatorStyle = \(loadedConfig.listIndicatorStyle ?? "nil")", logLevel: .debug)
+                writeLog("InspectState: loadedConfig.stepStyle = \(loadedConfig.stepStyle ?? "nil")", logLevel: .debug)
                 self.uiConfiguration = self.configurationService.extractUIConfiguration(from: loadedConfig)
-                print("InspectState: After extraction - uiConfiguration.bannerImage = \(self.uiConfiguration.bannerImage ?? "nil")")
-                print("InspectState: After extraction - uiConfiguration.iconBasePath = \(self.uiConfiguration.iconBasePath ?? "nil")")
-                print("InspectState: After extraction - uiConfiguration.listIndicatorStyle = \(self.uiConfiguration.listIndicatorStyle)")
-                print("InspectState: After extraction - uiConfiguration.stepStyle = \(self.uiConfiguration.stepStyle)")
+                writeLog("InspectState: After extraction - uiConfiguration.bannerImage = \(self.uiConfiguration.bannerImage ?? "nil")", logLevel: .debug)
+                writeLog("InspectState: After extraction - uiConfiguration.iconBasePath = \(self.uiConfiguration.iconBasePath ?? "nil")", logLevel: .debug)
+                writeLog("InspectState: After extraction - uiConfiguration.listIndicatorStyle = \(self.uiConfiguration.listIndicatorStyle)", logLevel: .debug)
+                writeLog("InspectState: After extraction - uiConfiguration.stepStyle = \(self.uiConfiguration.stepStyle)", logLevel: .debug)
                 self.backgroundConfiguration = self.configurationService.extractBackgroundConfiguration(from: loadedConfig)
                 self.buttonConfiguration = self.configurationService.extractButtonConfiguration(from: loadedConfig)
 
@@ -298,8 +298,8 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                 }
                 
                 // Debug logging for preset detection
-                if appvars.debugMode { print("DEBUG: loadedConfig.preset = \(loadedConfig.preset)") }
-                if appvars.debugMode { print("DEBUG: Setting preset to: \(self.uiConfiguration.preset)") }
+                writeLog("loadedConfig.preset = \(loadedConfig.preset)", logLevel: .debug)
+                writeLog("Setting preset to: \(self.uiConfiguration.preset)", logLevel: .debug)
                 
                 writeLog("InspectState: Loaded \(loadedConfig.items.count) items from config", logLevel: .info)
                 writeLog("InspectState: Title: \(self.uiConfiguration.windowTitle)", logLevel: .debug)

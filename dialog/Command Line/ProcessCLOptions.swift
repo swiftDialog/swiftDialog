@@ -127,27 +127,124 @@ func getJSON() -> JSON {
 }
 
 func getMarkdown(mdFilePath: String) -> String {
-    //let fileURL = URL(fileURLWithPath: mdFilePath)
-    var urlPath = NSURL(string: "")!
-
-    // checking for anything starting with http - crude but it works (for now)
-    if mdFilePath.hasPrefix("http") {
-        writeLog("Getting image from http")
-        urlPath = NSURL(string: mdFilePath)!
-    } else {
-        urlPath = NSURL(fileURLWithPath: mdFilePath)
+    // Local file: read directly.
+    if !mdFilePath.hasPrefix("http") {
+        do {
+            return try String(contentsOf: URL(fileURLWithPath: mdFilePath), encoding: .utf8)
+        } catch {
+            return error.localizedDescription
+        }
     }
 
-    do {
-        let fileContents = try String(contentsOf: urlPath as URL, encoding: .utf8)
-        return fileContents
-    } catch {
-        return error.localizedDescription
+    // Remote (http/https): fetch with an explicit timeout so a slow or unreachable
+    // URL can't stall the run loop indefinitely (this runs on the live command-file
+    // update path). Kept synchronous to preserve the String return contract.
+    writeLog("Getting markdown from \(mdFilePath)")
+    guard let url = URL(string: mdFilePath) else {
+        writeLog("Invalid markdown URL: \(mdFilePath)", logLevel: .error)
+        return "Invalid URL: \(mdFilePath)"
     }
 
+    var request = URLRequest(url: url)
+    request.timeoutInterval = 10
+
+    var result = ""
+    let semaphore = DispatchSemaphore(value: 0)
+    URLSession.shared.dataTask(with: request) { data, _, error in
+        defer { semaphore.signal() }
+        if let error = error {
+            result = error.localizedDescription
+        } else if let data = data, let string = String(data: data, encoding: .utf8) {
+            result = string
+        } else {
+            result = "Could not read markdown from \(mdFilePath)"
+        }
+    }.resume()
+
+    // Backstop the wait a little beyond the request timeout so a hung connection
+    // can't block the run loop forever even if the session timeout doesn't fire.
+    if semaphore.wait(timeout: .now() + 11) == .timedOut {
+        writeLog("Timed out fetching markdown from \(mdFilePath)", logLevel: .error)
+        return "Timed out fetching \(mdFilePath)"
+    }
+    return result
 }
 
-func processCLOptionValues() {
+/// Reads a CGFloat from a SwiftyJSON value. Accepts native JSON numbers and, for
+/// backward compatibility, quoted numeric strings (e.g. "20"). The quoted form is
+/// deprecated and logs a warning. Returns `defaultValue` when the value is absent
+/// or not numeric — the previous code force-cast `.number` and crashed on a
+/// non-number (e.g. a quoted font size).
+func jsonCGFloat(_ value: JSON, default defaultValue: CGFloat, context: String) -> CGFloat {
+    if let number = value.number {
+        return CGFloat(number.doubleValue)
+    }
+    if let string = value.string, !string.isEmpty {
+        if let parsed = Double(string) {
+            writeLog("\(context): numeric value provided as a quoted string (\"\(string)\"). Quoted numeric values are deprecated and may be removed in a future release; provide the value unquoted.", logLevel: .info)
+            return CGFloat(parsed)
+        }
+        writeLog("\(context): expected a number but got non-numeric value \"\(string)\"; keeping \(defaultValue)", logLevel: .error)
+    }
+    return defaultValue
+}
+
+/// Best-effort parse of a user-supplied string into a Date, for the `value=` starting
+/// value of a date/time textfield. Tries, in order: explicit locale-independent formats
+/// (including the ones swiftDialog emits — yyyy-MM-dd, yyyy-MM-dd HH:mm, HH:mm, hh:mm a),
+/// a Unix epoch in seconds, the user's locale short/medium/long styles, and finally
+/// NSDataDetector's natural-language detection ("July 15 2026", "3pm", "next friday").
+/// Falls back to the current date/time if nothing parses.
+func parseDateOrNow(_ string: String) -> Date {
+    let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
+    if trimmed.isEmpty { return Date.now }
+
+    let posix = DateFormatter()
+    posix.locale = Locale(identifier: "en_US_POSIX")
+    for format in ["yyyy-MM-dd HH:mm", "yyyy-MM-dd'T'HH:mm", "yyyy-MM-dd", "HH:mm", "hh:mm a"] {
+        posix.dateFormat = format
+        if let date = posix.date(from: trimmed) { return date }
+    }
+
+    // Unix epoch seconds — 9–11 digits, so a bare year like "2026" isn't misread as one.
+    if (9...11).contains(trimmed.count), trimmed.allSatisfy(\.isNumber), let epoch = Double(trimmed) {
+        return Date(timeIntervalSince1970: epoch)
+    }
+
+    let localeFormatter = DateFormatter()
+    for dateStyle in [DateFormatter.Style.short, .medium, .long] {
+        for timeStyle in [DateFormatter.Style.none, .short] {
+            localeFormatter.dateStyle = dateStyle
+            localeFormatter.timeStyle = timeStyle
+            if let date = localeFormatter.date(from: trimmed) { return date }
+        }
+    }
+
+    if let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.date.rawValue),
+       let match = detector.firstMatch(in: trimmed, range: NSRange(trimmed.startIndex..., in: trimmed)),
+       let date = match.date {
+        return date
+    }
+
+    return Date.now
+}
+
+/// Format a Date using strftime(3) — the same specifiers the shell `date` command uses
+/// (e.g. "+%Y-%m-%d", "+%s" for epoch). A leading "+" is accepted and stripped, matching
+/// the `date` convention. Returns "" if the format produces no output.
+func strftimeString(from date: Date, format: String) -> String {
+    let pattern = format.hasPrefix("+") ? String(format.dropFirst()) : format
+    if pattern.isEmpty { return "" }
+    var seconds = time_t(date.timeIntervalSince1970)
+    var brokenDown = tm()
+    localtime_r(&seconds, &brokenDown)
+    var buffer = [CChar](repeating: 0, count: 256)
+    let written = strftime(&buffer, buffer.count, pattern, &brokenDown)
+    return written > 0 ? String(cString: buffer) : ""
+}
+
+@discardableResult
+func processCLOptionValues() -> JSON {
 
     // this method reads in arguments from either json file or from the command line and loads them into the appArguments object
     // also records whether an argument is present or not
@@ -163,9 +260,13 @@ func processCLOptionValues() {
     for argument in CommandLine.arguments {
         writeLog("Using argument: \(argument)", logLevel: .debug)
     }
+    // Parse the JSON once here and hand it back to the caller so processCLOptions
+    // can reuse it rather than re-parsing (and re-running cardState.loadCards) via
+    // its default argument. loadCards is idempotent, so this is behaviour-preserving.
     let json: JSON = getJSON()
 
     appArguments.updateAllItems(with: json)
+    return json
 }
 
 func processCLOptions(json: JSON = getJSON()) {
@@ -174,7 +275,7 @@ func processCLOptions(json: JSON = getJSON()) {
     writeLog("Processing Options")
 
     // Monitor Mode - Use InspectView for all monitor scenarios (with or without config)
-    if appvars.debugMode { print("DEBUG: inspectMode.present = \(appArguments.inspectMode.present)") }
+    writeLog("inspectMode.present = \(appArguments.inspectMode.present)", logLevel: .debug)
     if appArguments.inspectMode.present {
         writeLog("Inspect Mode activated", logLevel: .info)
         writeLog("Inspect Mode: Activated", logLevel: .info)
@@ -474,11 +575,13 @@ func processCLOptions(json: JSON = getJSON()) {
             var dropdownLabels = CLOptionMultiOptions(optionName: appArguments.dropdownTitle.long)
             var dropdownDefaults = CLOptionMultiOptions(optionName: appArguments.dropdownDefault.long)
 
-            // need to make sure the title and default value arrays are the same size
-            for _ in dropdownLabels.count..<dropdownValues.count {
+            // need to make sure the title and default value arrays are at least as
+            // large as the values array (while-loops are safe when more titles/defaults
+            // than values were supplied — a range like 3..<2 would crash)
+            while dropdownLabels.count < dropdownValues.count {
                 dropdownLabels.append("")
             }
-            for _ in dropdownDefaults.count..<dropdownValues.count {
+            while dropdownDefaults.count < dropdownValues.count {
                 dropdownDefaults.append("")
             }
 
@@ -538,7 +641,10 @@ func processCLOptions(json: JSON = getJSON()) {
                         title: String(json[appArguments.textField.long][index]["title"].stringValue),
                         name: String(json[appArguments.textField.long][index]["name"].stringValue),
                         value: String(json[appArguments.textField.long][index]["value"].stringValue),
-                        isDate: Bool(json[appArguments.textField.long][index]["isdate"].boolValue),
+                        date: (json[appArguments.textField.long][index]["date"].boolValue || json[appArguments.textField.long][index]["time"].boolValue) ? parseDateOrNow(String(json[appArguments.textField.long][index]["value"].stringValue)) : Date.now,
+                        showDate: Bool(json[appArguments.textField.long][index]["date"].boolValue),
+                        showTime: Bool(json[appArguments.textField.long][index]["time"].boolValue),
+                        dateOutputFormat: String(json[appArguments.textField.long][index]["format"].stringValue),
                         confirm: Bool(json[appArguments.textField.long][index]["confirm"].boolValue),
                         initialPath: String(json[appArguments.textField.long][index]["path"].stringValue))
                     )
@@ -559,7 +665,9 @@ func processCLOptions(json: JSON = getJSON()) {
                 var fieldTitle: String = ""
                 var fieldName: String = ""
                 var fieldValue: String = ""
-                var fieldIsDate: Bool = false
+                var fieldShowDate: Bool = false
+                var fieldShowTime: Bool = false
+                var fieldDateFormat: String = ""
                 var fieldConfirm: Bool = false
                 var fieldInitialPath: String = ""
                 if items.count > 0 {
@@ -567,6 +675,9 @@ func processCLOptions(json: JSON = getJSON()) {
                     if items.count > 1 {
                         fieldRegexError = "\"\(fieldTitle)\" "+"doesn't match the required format".localized
                         for index in 1...items.count-1 {
+                            // the value for a key=value sub-option is the next token, or
+                            // empty if this key is the last item (avoids reading past the end)
+                            let nextValue = index + 1 < items.count ? items[index+1] : ""
                             switch items[index].lowercased()
                                 .replacingOccurrences(of: ",", with: "")
                                 .replacingOccurrences(of: "=", with: "")
@@ -576,34 +687,40 @@ func processCLOptions(json: JSON = getJSON()) {
                             case "fileselect":
                                 fieldFileSelect = true
                             case "filetype":
-                                fieldSelectType = items[index+1]
+                                fieldSelectType = nextValue
                             case "passwordfill":
                                 fieldPasswordFill = true
                             case "prompt":
-                                fieldPrompt = items[index+1]
+                                fieldPrompt = nextValue
                             case "regex":
-                                fieldRegex = items[index+1]
+                                fieldRegex = nextValue
                             case "regexerror":
-                                fieldRegexError = items[index+1]
+                                fieldRegexError = nextValue
                             case "required":
                                 fieldRequire = true
                             case "secure":
                                 fieldSecure = true
                             case "value":
-                                fieldValue = items[index+1]
+                                fieldValue = nextValue
                             case "name":
-                                fieldName = items[index+1]
-                            case "isdate":
-                                fieldIsDate = true
+                                fieldName = nextValue
+                            case "date":
+                                fieldShowDate = true
+                            case "time":
+                                fieldShowTime = true
+                            case "format":
+                                fieldDateFormat = nextValue
                             case "confirm":
                                 fieldConfirm = true
                             case "path":
-                                fieldInitialPath = items[index+1]
+                                fieldInitialPath = nextValue
                             default: ()
                             }
                         }
                     }
                 }
+                // Seed the picker from value= when this is a date/time field.
+                let fieldDate = (fieldShowDate || fieldShowTime) ? parseDateOrNow(fieldValue) : Date.now
                 userInputState.textFields.append(TextFieldState(
                             editor: fieldEditor,
                             fileSelect: fieldFileSelect,
@@ -617,7 +734,10 @@ func processCLOptions(json: JSON = getJSON()) {
                             title: fieldTitle,
                             name: fieldName,
                             value: fieldValue,
-                            isDate: fieldIsDate,
+                            date: fieldDate,
+                            showDate: fieldShowDate,
+                            showTime: fieldShowTime,
+                            dateOutputFormat: fieldDateFormat,
                             confirm: fieldConfirm,
                             initialPath: fieldInitialPath))
             }
@@ -889,7 +1009,7 @@ func processCLOptions(json: JSON = getJSON()) {
                                     writeLog("titleFont.object : \(json[appArguments.titleFont.long].object)")
 
             if json[appArguments.titleFont.long]["size"].exists() {
-                appvars.titleFontSize = json[appArguments.titleFont.long]["size"].number as! CGFloat
+                appvars.titleFontSize = jsonCGFloat(json[appArguments.titleFont.long]["size"], default: appvars.titleFontSize, context: "titlefont size")
             }
             if json[appArguments.titleFont.long]["weight"].exists() {
                 appvars.titleFontWeight = Font.Weight(argument: json[appArguments.titleFont.long]["weight"].stringValue)
@@ -907,7 +1027,7 @@ func processCLOptions(json: JSON = getJSON()) {
                 appvars.titleFontAlignment = json[appArguments.titleFont.long]["alignment"].stringValue
             }
             if json[appArguments.titleFont.long]["offset"].exists() {
-                appvars.titleFontOffset = json[appArguments.titleFont.long]["offset"].number as! CGFloat
+                appvars.titleFontOffset = jsonCGFloat(json[appArguments.titleFont.long]["offset"], default: appvars.titleFontOffset, context: "titlefont offset")
             }
         } else {
             writeLog("titleFont.value : \(appArguments.titleFont.value)")
@@ -956,7 +1076,7 @@ func processCLOptions(json: JSON = getJSON()) {
         if appArguments.messageFont.value == "" {
                                     writeLog("messageFont.object : \(json[appArguments.messageFont.long].object)")
             if json[appArguments.messageFont.long]["size"].exists() {
-                appvars.messageFontSize = json[appArguments.messageFont.long]["size"].number as! CGFloat
+                appvars.messageFontSize = jsonCGFloat(json[appArguments.messageFont.long]["size"], default: appvars.messageFontSize, context: "messagefont size")
             }
             if json[appArguments.messageFont.long]["weight"].exists() {
                 appvars.messageFontWeight = Font.Weight(argument: json[appArguments.messageFont.long]["weight"].stringValue)

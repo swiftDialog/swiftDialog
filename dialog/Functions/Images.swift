@@ -11,6 +11,24 @@ import CoreImage.CIFilterBuiltins
 import SwiftUI
 import UniformTypeIdentifiers
 
+/// Synchronous data fetch bounded by a timeout so a slow or unreachable host can't
+/// stall the calling thread indefinitely. Returns nil on error or timeout.
+func fetchDataWithTimeout(from url: URL, timeout: TimeInterval) -> Data? {
+    var request = URLRequest(url: url)
+    request.timeoutInterval = timeout
+    var result: Data?
+    let semaphore = DispatchSemaphore(value: 0)
+    URLSession.shared.dataTask(with: request) { data, _, _ in
+        result = data
+        semaphore.signal()
+    }.resume()
+    if semaphore.wait(timeout: .now() + timeout + 1) == .timedOut {
+        writeLog("Timed out fetching \(url.absoluteString)", logLevel: .error)
+        return nil
+    }
+    return result
+}
+
 func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, imgHeight: CGFloat? = .infinity, returnErrorImage: Bool? = false, errorImageName: String? = "questionmark.square.dashed") -> NSImage {
     // accept image as local file path or as URL and return NSImage
     // can pass in width and height as optional values otherwsie return the image as is.
@@ -20,8 +38,6 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
 
     writeLog("Getting image from path \(fileImagePath)")
 
-    // need to declare literal empty string first otherwsie the runtime whinges about an NSURL instance with an empty URL string. I know!
-    var urlPath = NSURL(string: "")!
     var imageData = NSData()
 
     let errorImageConfig = NSImage.SymbolConfiguration(pointSize: 200, weight: .thin)
@@ -38,31 +54,41 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
         return getImageFromBase64(base64String: fileImagePath.replacingOccurrences(of: "base64=", with: ""))
     }
 
-    // checking for anything starting with http - crude but it works (for now)
+    // Fetch the image data. Remote URLs use a bounded fetch so a slow or unreachable
+    // host can't stall the run loop; local files are read directly. On failure, return
+    // the error image or exit, exactly as before.
     if fileImagePath.hasPrefix("http") {
         writeLog("Getting image from http")
-        urlPath = NSURL(string: fileImagePath)!
-    } else {
-        urlPath = NSURL(fileURLWithPath: fileImagePath)
-    }
-
-    // wrap everything in a try block.IF the URL or filepath is unreadable then return a default wtf image
-    do {
-        imageData = try NSData(contentsOf: urlPath as URL)
-    } catch {
-        if returnErrorImage! {
-            writeLog("An error occurred - returning error image")
+        guard let httpURL = URL(string: fileImagePath),
+              let data = fetchDataWithTimeout(from: httpURL, timeout: 10) else {
+            writeLog("Could not load image from \(fileImagePath)", logLevel: .error)
+            if returnErrorImage! {
+                return errorImage
+            }
+            quitDialog(exitCode: appDefaults.exit201.code, exitMessage: "\(appDefaults.exit201.message) \(fileImagePath)", observedObject: DialogUpdatableContent())
             return errorImage
-        } else {
+        }
+        imageData = data as NSData
+    } else {
+        do {
+            imageData = try NSData(contentsOf: URL(fileURLWithPath: fileImagePath))
+        } catch {
+            if returnErrorImage! {
+                writeLog("An error occurred - returning error image")
+                return errorImage
+            }
             writeLog("An error occurred - exiting")
             quitDialog(exitCode: appDefaults.exit201.code, exitMessage: "\(appDefaults.exit201.message) \(fileImagePath)", observedObject: DialogUpdatableContent())
+            return errorImage
         }
     }
 
-    let image: NSImage = NSImage(data: imageData as Data) ?? errorImage
+    // Decode the image data once (the original decoded it twice).
+    guard let image = NSImage(data: imageData as Data) else {
+        return errorImage
+    }
 
-    if let rep = NSImage(data: imageData as Data)?
-        .bestRepresentation(for: NSRect(x: 0, y: 0, width: imgWidth!, height: imgHeight!), context: nil, hints: nil) {
+    if let rep = image.bestRepresentation(for: NSRect(x: 0, y: 0, width: imgWidth!, height: imgHeight!), context: nil, hints: nil) {
         image.size = rep.size
         image.addRepresentation(rep)
     }
@@ -71,9 +97,11 @@ func getImageFromPath(fileImagePath: String, imgWidth: CGFloat? = .infinity, img
 }
 
 func getImageFromBase64(base64String: String) -> NSImage {
-    var image = NSImage(systemSymbolName: "applelogo", accessibilityDescription: nil)!
-    if let imageData = Data(base64Encoded: base64String, options: .ignoreUnknownCharacters) {
-        image = NSImage(data: imageData)!
+    let fallback = NSImage(systemSymbolName: "applelogo", accessibilityDescription: nil) ?? NSImage()
+    guard let imageData = Data(base64Encoded: base64String, options: .ignoreUnknownCharacters),
+          let image = NSImage(data: imageData) else {
+        writeLog("Could not decode base64 image data; using fallback image", logLevel: .error)
+        return fallback
     }
     return image
 }
@@ -124,12 +152,15 @@ func getAppIcon(appPath: String, withSize: CGFloat? = 300) -> NSImage {
 
 func savePNG(image: NSImage, path: String) {
     // from https://gist.github.com/WilliamD47/e0a2a02b5e32018139a47f5e53ff3bb4
-    let imageRep = NSBitmapImageRep(data: image.tiffRepresentation!)
-    let pngData = imageRep?.representation(using: .png, properties: [:])
+    guard let tiff = image.tiffRepresentation,
+          let pngData = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) else {
+        writeLog("Could not convert image to PNG for \(path)", logLevel: .error)
+        return
+    }
     do {
-        try pngData!.write(to: URL(fileURLWithPath: path))
+        try pngData.write(to: URL(fileURLWithPath: path))
     } catch {
-        print(error)
+        writeLog("Failed to write PNG to \(path): \(error.localizedDescription)", logLevel: .error)
     }
 }
 

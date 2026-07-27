@@ -27,13 +27,16 @@ func shell(_ command: String) -> String {
     task.standardOutput = pipe
     task.standardError = pipe
     task.arguments = ["-c", command]
-    task.launchPath = "/bin/zsh"
-    task.launch()
+    task.executableURL = URL(fileURLWithPath: "/bin/zsh")
+    do {
+        try task.run()
+    } catch {
+        writeLog("Failed to run shell command: \(error.localizedDescription)", logLevel: .error)
+        return ""
+    }
 
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
-    let output = String(data: data, encoding: .utf8)!
-
-    return output
+    return String(data: data, encoding: .utf8) ?? ""
 }
 
 // taken wholesale from DEPNotify because Joel and team and jsut awesome so why re-invent the wheel?
@@ -161,11 +164,11 @@ func executeOnAdvanceCallback(command: String, cardIndex: Int, cardId: String?, 
     task.standardOutput = outputPipe
     task.standardError = errorPipe
     task.arguments = ["-c", command]
-    task.launchPath = "/bin/zsh"
-    
+    task.executableURL = URL(fileURLWithPath: "/bin/zsh")
+
     do {
         try task.run()
-        
+
         // Write JSON to stdin
         inputPipe.fileHandleForWriting.write(jsonString.data(using: .utf8)!)
         inputPipe.fileHandleForWriting.closeFile()
@@ -298,7 +301,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
             }
         }
 
-        if observedObject?.args.dropdownValues.present ?? false {
+        if appArguments.dropdownValues.present {
             writeLog("Select items present - checking requirements are met")
             if userInputState.dropdownItems.count == 1 {
                 let selectedValue = userInputState.dropdownItems[0].selectedValue
@@ -338,7 +341,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
             }
         }
         
-        if observedObject?.args.listSelectionEnabled.present ?? false {
+        if appArguments.listSelectionEnabled.present {
             for item in userInputState.listItems {
                 outputArray.append("\"\(item.title)\" : \"\(item.selected)\"")
                 json[item.title].bool = item.selected
@@ -369,7 +372,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
             // Cards mode: output all accumulated input from all cards
             writeLog("Cards mode: outputting accumulated input from \(cardState.totalCards) cards")
             
-            if observedObject?.args.jsonOutPut.present ?? false {
+            if appArguments.jsonOutPut.present {
                 // JSON output for cards mode - include current card's input plus accumulated
                 var cardsJson = JSON()
                 let allInput = cardState.getAllAccumulatedInput()
@@ -415,7 +418,7 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
             }
         } else {
             // Normal mode: original output behavior
-            if observedObject?.args.jsonOutPut.present ?? false {
+            if appArguments.jsonOutPut.present {
                 print(json)
             } else {
                 for index in 0..<outputArray.count {
@@ -487,12 +490,18 @@ func getVideoStreamingURLFromID(videoid: String, autoplay: Bool = false) -> Stri
 }
 
 func getModificationDateOf(_ fileURL: URL) -> Date {
+    // Fall back to "now" when the attributes can't be read, so callers that use
+    // this for a launch-time comparison default to processing rather than skipping.
     var theDate: Date = Date.now
     do {
-        let attr = try FileManager.default.attributesOfItem(atPath: fileURL.absoluteString)
-        theDate = attr[FileAttributeKey.modificationDate] as! Date
+        let attr = try FileManager.default.attributesOfItem(atPath: fileURL.path)
+        if let modificationDate = attr[FileAttributeKey.modificationDate] as? Date {
+            theDate = modificationDate
+        } else {
+            writeLog("No modification date available for \(fileURL.path); using current time", logLevel: .debug)
+        }
     } catch {
-        writeLog("Failed to get file creation date: \(error.localizedDescription)", logLevel: .error)
+        writeLog("Failed to read modification date of \(fileURL.path): \(error.localizedDescription)", logLevel: .error)
     }
     return theDate
 }

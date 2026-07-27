@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import Combine
 
 struct ButtonBarView: View {
 
@@ -242,7 +243,10 @@ struct NewButton: View {
     @State private var symbolColour2: Color = .clear
     @State private var symbolColour3: Color = .clear
 
-    let timer = Timer.publish(every: 3.0, on: .main, in: .common).autoconnect()
+    // Connectable timer: it stays dormant (no run-loop wakeups) until connect() is
+    // called, which we only do when this button actually uses the timer behaviour.
+    let timer = Timer.publish(every: 3.0, on: .main, in: .common)
+    @State private var timerCancellable: Cancellable?
 
     @FocusState private var isFocused: Bool
     @State private var needsFocusRefresh = false
@@ -376,6 +380,10 @@ struct NewButton: View {
             }
             .onAppear {
                 symbolProcessing()
+                // Only start the 3s timer for buttons that actually use it.
+                if enableOnTimer {
+                    timerCancellable = timer.connect()
+                }
             }
             .onChange(of: needsFocusRefresh) { _, refresh in
                 if refresh {

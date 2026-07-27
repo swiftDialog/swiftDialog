@@ -37,14 +37,14 @@ struct RenderToggles: View {
                 ForEach(0..<checkboxCount, id: \.self) {index in
                     HStack {
                         if observedData.appProperties.checkboxControlStyle == "switch" {
-                        let _ = writeLog("Displaying switches instead of checkboxes")
+                        let _ = writeLog("Displaying switches instead of checkboxes", logLevel: .debug)
                         if iconPresent {
                             if observedData.observedUserInputState.checkBoxes[index].icon != "" {
-                                let _ = writeLog("Switch index \(index): Displaying icon \(observedData.observedUserInputState.checkBoxes[index].icon)")
+                                let _ = writeLog("Switch index \(index): Displaying icon \(observedData.observedUserInputState.checkBoxes[index].icon)", logLevel: .debug)
                                 IconView(image: observedData.observedUserInputState.checkBoxes[index].icon, overlay: "")
                                     .frame(height: rowHeight)
                             } else {
-                                let _ = writeLog("Switch index \(index) has no icon")
+                                let _ = writeLog("Switch index \(index) has no icon", logLevel: .debug)
                                 IconView(image: "none", overlay: "")
                                     .frame(height: rowHeight)
                             }
@@ -109,13 +109,11 @@ struct CheckboxView: View {
                 VStack {
                     //Spacer()
                     RenderToggles(observedDialogContent: observedData)
-                        .background(GeometryReader {child -> Color in
-                            DispatchQueue.main.async {
-                                // update on next cycle with calculated height
-                                self.switchHeight = child.size.height
-                            }
-                            return Color.clear
-                        })
+                        .onGeometryChange(for: CGFloat.self) { proxy in
+                            proxy.size.height
+                        } action: { newValue in
+                            switchHeight = newValue
+                        }
                         .scrollOnOverflow()
                 }
                 .frame(minHeight: 10, maxHeight: switchHeight)

@@ -139,6 +139,8 @@ struct SDHelp {
 
             size=<float>              - accepts any float value.
 
+            name=<fontname>           - Name of a font family to use. Show available fonts with --\(argument.listFonts.long)
+
         example: \"colour=#00A4C7,size=60\"
 
         ## NOTE: swiftDialog 2.3 and later do not support changes to font name or weight
@@ -744,6 +746,12 @@ struct SDHelp {
             fileselect - Adds a "Select" button and presents a file picker
             path       - Used with fileselect. Sets initial path for file select dialog
             filetype   - Limits fileselect to the named file extensions. Presented in space separated values
+            date       - Presents a date picker instead of a text field. Returns "yyyy-MM-dd"
+            time       - Presents a time picker instead of a text field. Returns "HH:mm"
+                         (combine date and time to pick both; returns "yyyy-MM-dd HH:mm")
+                         value= sets the starting date/time (accepts ISO, locale, 12/24h, or epoch)
+            format     - With date/time, sets the returned format using `date` (strftime) syntax,
+                         e.g. format="+%s" returns epoch, format="+%Y/%m/%d" returns 2026/07/24
 
         modifiers can be combined e.g. --\(appArguments.textField.long) <text>,secure,required
                                        --\(appArguments.textField.long) <text>,required,prompt="<text>"

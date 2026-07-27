@@ -21,7 +21,7 @@ struct InspectView: View {
                 CoordinatedLoadingView()
                     .onAppear {
                         if appvars.debugMode {
-                            print("DEBUG: InspectViewServiceBased: Loading state - using new coordinator")
+                            writeLog("InspectViewServiceBased: Loading state - using new coordinator", logLevel: .debug)
                         }
                     }
 
@@ -36,21 +36,21 @@ struct InspectView: View {
                     }
                 )
                 .onAppear {
-                    print("ERROR: InspectViewServiceBased: Failed state - \(errorMessage)")
+                    writeLog("InspectViewServiceBased: Failed state - \(errorMessage)", logLevel: .error)
                 }
 
             case .loaded:
                 presetView(for: inspectState.uiConfiguration.preset)
                     .onAppear {
                         if appvars.debugMode {
-                            print("DEBUG: InspectViewServiceBased: Loading preset '\(inspectState.uiConfiguration.preset)' with new coordinator")
+                            writeLog("InspectViewServiceBased: Loading preset '\(inspectState.uiConfiguration.preset)' with new coordinator", logLevel: .debug)
                         }
                     }
             }
         }
         .onAppear {
             if appvars.debugMode {
-                print("DEBUG: InspectViewServiceBased: Starting with service-based architecture")
+                writeLog("InspectViewServiceBased: Starting with service-based architecture", logLevel: .debug)
             }
             writeLog("InspectViewServiceBased: Initializing with InspectState", logLevel: .info)
             inspectState.initialize()
@@ -82,7 +82,7 @@ struct InspectView: View {
         default:
             Preset1View(inspectState: inspectState)
                 .onAppear {
-                    print("WARNING: InspectViewServiceBased: Unknown preset '\(presetName)', using default")
+                    writeLog("InspectViewServiceBased: Unknown preset '\(presetName)', using default", logLevel: .info)
                 }
         }
     }

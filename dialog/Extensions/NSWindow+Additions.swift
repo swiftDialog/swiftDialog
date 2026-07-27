@@ -111,14 +111,47 @@ func calculateWindowXPos(screenWidth: CGFloat, position: NSWindow.Position.Horiz
 }
 
 
-func placeWindow(_ window: NSWindow, size: CGSize?, vertical: NSWindow.Position.Vertical, horozontal: NSWindow.Position.Horizontal, offset: CGFloat, useFullScreen: Bool = false, animated: Bool = false) {
+/// The area of `screen` a window should be positioned within.
+///
+/// - `useFullScreen` (`--blurscreen`) draws a full screen overlay *above* the dock, so the
+///   entire frame is genuinely available and nothing needs to be reserved.
+/// - `respectDock` (`--ontop`) has no such overlay. The dock is still on screen, and because
+///   the dialog is raised above the dock's window level it would otherwise be positioned on
+///   top of it (GitHub #630). Inset whichever edge the dock occupies.
+///
+/// The dock inset is derived by differencing `frame` and `visibleFrame` rather than reading
+/// `com.apple.dock`: the preferences report neither the reserved size (`tilesize` is the icon
+/// size, not the space taken) nor a position when the dock is at its default. Differencing is
+/// also per screen and already expressed in global coordinates, so it stays correct for
+/// displays offset within the virtual desktop.
+///
+/// The top (menu bar) inset is deliberately *not* applied — AppKit already clamps a window so
+/// it cannot overlap the menu bar, even above `.normal` window level.
+/// Takes the two rects rather than the `NSScreen` so the geometry can be unit tested,
+/// including displays offset within the virtual desktop.
+func windowPlacementFrame(fullFrame full: NSRect, visibleFrame visible: NSRect, useFullScreen: Bool, respectDock: Bool) -> NSRect {
+    if useFullScreen { return full }
+    guard respectDock else { return visible }
+
+    let leftInset = visible.minX - full.minX
+    let rightInset = full.maxX - visible.maxX
+    let bottomInset = visible.minY - full.minY
+
+    return NSRect(x: full.minX + leftInset,
+                  y: full.minY + bottomInset,
+                  width: full.width - leftInset - rightInset,
+                  height: full.height - bottomInset)
+}
+
+func placeWindow(_ window: NSWindow, size: CGSize?, vertical: NSWindow.Position.Vertical, horozontal: NSWindow.Position.Horizontal, offset: CGFloat, useFullScreen: Bool = false, respectDock: Bool = false, animated: Bool = false) {
     // screen size
     let main = NSScreen.main!
     let mainFrameWidth = main.frame.width
     let mainFrameHeight = main.frame.height
 
-    // visible screen (minus dock and menubar
-    let visibleFrame = useFullScreen ? main.frame : main.visibleFrame
+    // the area to place the window within (see windowPlacementFrame)
+    let visibleFrame = windowPlacementFrame(fullFrame: main.frame, visibleFrame: main.visibleFrame,
+                                            useFullScreen: useFullScreen, respectDock: respectDock)
     let visibleFrameOriginX = visibleFrame.origin.x
     let visibleFrameOriginY = visibleFrame.origin.y
     let visibleFrameWidth = visibleFrame.width

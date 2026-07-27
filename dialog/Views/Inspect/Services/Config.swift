@@ -368,7 +368,11 @@ class Config {
         var downloadedData: Data?
         var downloadError: Error?
 
-        let task = URLSession.shared.dataTask(with: url) { data, _, error in
+        // Bound the underlying request to the same 10s as the wait below, so the
+        // task doesn't linger in the background to URLSession's 60s default.
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 10
+        let task = URLSession.shared.dataTask(with: request) { data, _, error in
             downloadedData = data
             downloadError = error
             semaphore.signal()
@@ -401,12 +405,12 @@ class Config {
 
                 // Resolve brand palette tokens BEFORE decoding
                 if let brandPalette = jsonObject["brandPalette"] as? [String: Any] {
-                    print("🎨 CONFIG: Found brandPalette with \(brandPalette.count) keys: \(Array(brandPalette.keys))")
+                    writeLog("🎨 CONFIG: Found brandPalette with \(brandPalette.count) keys: \(Array(brandPalette.keys))", logLevel: .debug)
                     jsonObject = resolveBrandTokens(in: jsonObject, palette: brandPalette)
-                    print("🎨 CONFIG: Token resolution completed")
+                    writeLog("🎨 CONFIG: Token resolution completed", logLevel: .debug)
                     writeLog("ConfigurationService: Resolved brand palette tokens", logLevel: .info)
                 } else {
-                    print("🎨 CONFIG: No brandPalette found in config")
+                    writeLog("🎨 CONFIG: No brandPalette found in config", logLevel: .debug)
                 }
 
                 // Coerce quoted numbers/bools (e.g. "wallpaperMultiSelect": "2") to their
@@ -495,7 +499,7 @@ class Config {
     /// Fallback: Load configuration from specific file path
     /// TODO: Reevaluate as this has been brittle - loading from file system to late to initialize UI accordingly
     func loadConfigurationFromFile(at path: String) -> Result<ConfigurationResult, ConfigurationError> {
-        print("🔧 CONFIG: loadConfigurationFromFile called with path: \(path)")
+        writeLog("🔧 CONFIG: loadConfigurationFromFile called with path: \(path)", logLevel: .debug)
 
         // Check if file exists
         guard FileManager.default.fileExists(atPath: path) else {
@@ -520,12 +524,12 @@ class Config {
 
                 // Resolve brand palette tokens BEFORE decoding
                 if let brandPalette = jsonObject["brandPalette"] as? [String: Any] {
-                    print("🎨 CONFIG: Found brandPalette with \(brandPalette.count) keys: \(Array(brandPalette.keys))")
+                    writeLog("🎨 CONFIG: Found brandPalette with \(brandPalette.count) keys: \(Array(brandPalette.keys))", logLevel: .debug)
                     jsonObject = resolveBrandTokens(in: jsonObject, palette: brandPalette)
-                    print("🎨 CONFIG: Token resolution completed")
+                    writeLog("🎨 CONFIG: Token resolution completed", logLevel: .debug)
                     writeLog("ConfigurationService: Resolved brand palette tokens", logLevel: .info)
                 } else {
-                    print("🎨 CONFIG: No brandPalette found in config")
+                    writeLog("🎨 CONFIG: No brandPalette found in config", logLevel: .debug)
                 }
 
                 // Re-serialize modified JSON
@@ -1367,10 +1371,10 @@ class Config {
     func extractUIConfiguration(from config: InspectConfig) -> UIConfiguration {
         var uiConfig = UIConfiguration()
 
-        print("Config.swift: extractUIConfiguration called")
-        print("Config.swift: config.banner = \(config.banner ?? "nil")")
-        print("Config.swift: config.bannerHeight = \(config.bannerHeight ?? 0)")
-        print("Config.swift: config.bannerTitle = \(config.bannerTitle ?? "nil")")
+        writeLog("Config.swift: extractUIConfiguration called", logLevel: .debug)
+        writeLog("Config.swift: config.banner = \(config.banner ?? "nil")", logLevel: .debug)
+        writeLog("Config.swift: config.bannerHeight = \(config.bannerHeight ?? 0)", logLevel: .debug)
+        writeLog("Config.swift: config.bannerTitle = \(config.bannerTitle ?? "nil")", logLevel: .debug)
 
         if let title = config.title {
             uiConfig.windowTitle = title
@@ -1405,21 +1409,21 @@ class Config {
 
         // Banner configuration
         if let banner = config.banner {
-            print("Config.swift: Setting uiConfig.bannerImage = \(banner)")
+            writeLog("Config.swift: Setting uiConfig.bannerImage = \(banner)", logLevel: .debug)
             uiConfig.bannerImage = banner
         }
 
         if let bannerHeight = config.bannerHeight {
-            print("Config.swift: Setting uiConfig.bannerHeight = \(bannerHeight)")
+            writeLog("Config.swift: Setting uiConfig.bannerHeight = \(bannerHeight)", logLevel: .debug)
             uiConfig.bannerHeight = bannerHeight
         }
 
         if let bannerTitle = config.bannerTitle {
-            print("Config.swift: Setting uiConfig.bannerTitle = \(bannerTitle)")
+            writeLog("Config.swift: Setting uiConfig.bannerTitle = \(bannerTitle)", logLevel: .debug)
             uiConfig.bannerTitle = bannerTitle
         }
 
-        print("Config.swift: After extraction - uiConfig.bannerImage = \(uiConfig.bannerImage ?? "nil")")
+        writeLog("Config.swift: After extraction - uiConfig.bannerImage = \(uiConfig.bannerImage ?? "nil")", logLevel: .debug)
 
         if let iconsize = config.iconsize {
             uiConfig.iconSize = iconsize
@@ -1470,9 +1474,9 @@ class Config {
 
         if let listIndicatorStyle = config.listIndicatorStyle {
             uiConfig.listIndicatorStyle = listIndicatorStyle
-            print("Config: Setting listIndicatorStyle to '\(listIndicatorStyle)' from JSON")
+            writeLog("Config: Setting listIndicatorStyle to '\(listIndicatorStyle)' from JSON", logLevel: .debug)
         } else {
-            print("Config: No listIndicatorStyle in JSON, using default: '\(uiConfig.listIndicatorStyle)'")
+            writeLog("Config: No listIndicatorStyle in JSON, using default: '\(uiConfig.listIndicatorStyle)'", logLevel: .debug)
         }
 
         return uiConfig

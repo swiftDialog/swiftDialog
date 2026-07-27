@@ -70,11 +70,34 @@ struct TextFieldState: Identifiable, Equatable {
     var name: String       = ""
     var value: String      = ""
     var date: Date         = Date.now
-    var isDate: Bool       = false
+    var showDate: Bool     = false
+    var showTime: Bool     = false
+    var dateOutputFormat: String = ""   // strftime-style (e.g. "+%s"); empty = default ISO
     var confirm: Bool     = false
     var validationValue: String = ""
     var requiredTextfieldHighlight: Color = .clear
     var initialPath: String = ""
+
+    /// True when this field should render a date/time picker instead of a text field.
+    var isDatePicker: Bool { showDate || showTime }
+
+    /// The SwiftUI DatePicker components implied by the date/time modifiers.
+    var dateComponents: DatePickerComponents {
+        var components: DatePickerComponents = []
+        if showDate { components.insert(.date) }
+        if showTime { components.insert(.hourAndMinute) }
+        return components.isEmpty ? [.date] : components
+    }
+
+    /// A locale-stable format string for the returned value based on the components.
+    var dateFormat: String {
+        switch (showDate, showTime) {
+        case (true, true):  return "yyyy-MM-dd HH:mm"
+        case (false, true): return "HH:mm"
+        default:            return "yyyy-MM-dd"
+        }
+    }
+
     var dictionary: [String: Any] {
             return ["title": title,
                     "name": name,

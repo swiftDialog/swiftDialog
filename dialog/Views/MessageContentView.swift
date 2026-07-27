@@ -108,12 +108,11 @@ struct MessageContent: View {
                                     .multilineTextAlignment(observedData.appProperties.messageAlignment)
                                     .lineSpacing(2)
                                     .fixedSize()
-                                    .background(GeometryReader { child -> Color in
-                                        DispatchQueue.main.async {
-                                            self.messageHeight = child.size.height > defaultMessageHeight ? child.size.height : defaultMessageHeight
-                                        }
-                                        return Color.clear
-                                    })
+                                    .onGeometryChange(for: CGFloat.self) { proxy in
+                                        max(proxy.size.height, defaultMessageHeight)
+                                    } action: { newValue in
+                                        messageHeight = newValue
+                                    }
                                     // Instead of .textual.structuredTextStyle(.gitHub), set each piece individually:
                                     .textual.inlineStyle(
                                         InlineStyle()
@@ -229,86 +228,3 @@ struct MessageContent: View {
         }
     }
 }
-
-struct PriorityView<Content: View>: View {
-    private var content: () -> Content
-    private var priority: Int
-
-    init(priority: Int, @ViewBuilder content: @escaping () -> Content) {
-        self.content = content
-        self.priority = priority
-    }
-
-    var body: some View {
-        EmptyView()
-            .overlay(content())
-            .zIndex(Double(priority))
-    }
-}
-
-struct MarkdownSection: Identifiable {
-    let id = UUID()
-    let isCollapsible: Bool
-    let title: String?
-    let content: String
-}
-
-struct CollapsibleBlock: View {
-    let title: String
-    let content: String
-    @State private var isExpanded: Bool = false
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Button(action: { isExpanded.toggle() }) {
-                HStack {
-                    Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
-                    Text(title)
-                        .font(.headline)
-                    Spacer()
-                }
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(PlainButtonStyle())
-
-            if isExpanded {
-                StructuredText(markdown: content)
-                    .padding(.leading, 16)
-            }
-        }
-        .padding(.vertical, 4)
-    }
-}
-
-func parseMarkdownSections(from text: String) -> [MarkdownSection] {
-        var sections: [MarkdownSection] = []
-        let lines = text.split(separator: "\n", omittingEmptySubsequences: false)
-        var index = 0
-
-        while index < lines.count {
-                let line = lines[index].trimmingCharacters(in: .whitespaces)
-            if line.starts(with: "::~") {
-                let title = line.replacingOccurrences(of: "::~", with: "").trimmingCharacters(in: .whitespaces)
-                var content = ""
-                index += 1
-                while index < lines.count && !lines[index].trimmingCharacters(in: .whitespaces).starts(with: ":::") {
-                    content += lines[index] + "\n"
-                    index += 1
-                }
-                // Skip the ::: end line
-                index += 1
-                sections.append(.init(isCollapsible: true, title: title, content: content))
-            } else {
-                var content = ""
-                while index < lines.count && !lines[index].trimmingCharacters(in: .whitespaces).starts(with: "::~") {
-                    content += lines[index] + "\n"
-                    index += 1
-                }
-                if !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    sections.append(.init(isCollapsible: false, title: nil, content: content))
-                }
-            }
-        }
-
-        return sections
-    }

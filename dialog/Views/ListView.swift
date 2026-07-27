@@ -85,7 +85,7 @@ struct ListView: View {
         // Guard against array access during card transitions
         let listCount = userInputState.listItems.count
         if observedData.args.listItem.present && listCount > 0 {
-            let _ = writeLog("Displaying listitems")
+            let _ = writeLog("Displaying listitems", logLevel: .debug)
             ScrollViewReader { proxy in
                 VStack {
                     List(0..<listCount, id: \.self, selection: $selection) {index in
@@ -108,7 +108,7 @@ struct ListView: View {
                             VStack {
                                 HStack {
                                     if !userInputState.listItems[index].icon.isEmpty {
-                                        let _ = writeLog("Switch index \(index): Displaying icon \(userInputState.listItems[index].icon)")
+                                        let _ = writeLog("Switch index \(index): Displaying icon \(userInputState.listItems[index].icon)", logLevel: .debug)
                                         IconView(image: userInputState.listItems[index].icon, overlay: "", alpha: userInputState.listItems[index].iconAlpha, sfPaddingEnabled: false, corners: false)
                                             .frame(maxHeight: rowHeight)
                                             .frame(width: rowHeight)

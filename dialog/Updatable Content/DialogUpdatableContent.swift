@@ -99,7 +99,8 @@ class FileReader {
             vertical: observedData.appProperties.windowPositionVertical,
             horozontal: observedData.appProperties.windowPositionHorozontal,
             offset: observedData.args.positionOffset.value.floatValue(),
-            useFullScreen: observedData.args.blurScreen.present || observedData.args.forceOnTop.present)
+            useFullScreen: observedData.args.blurScreen.present,
+            respectDock: observedData.args.forceOnTop.present)
     }
 
     private func writeToLog(_ message: String, logLevel: OSLogType = .info) {
@@ -230,9 +231,12 @@ class FileReader {
     }
 
     private func processCommands(commands: String) {
-        //print(getModificationDateOf(self.fileURL))
-        //print(Date.now)
+        // Ignore content that predates our launch — e.g. stale content in a
+        // pre-existing command file that couldn't be truncated at startup (see
+        // createCommandFile). Without this, a root-owned /var/tmp/dialog.log left
+        // over from a previous run would be replayed on this launch.
         if getModificationDateOf(self.fileURL) < appDefaults.launchTime {
+            writeToLog("Ignoring command file content older than launch time: \(commands)", logLevel: .debug)
             return
         }
         let allCommands = commands.components(separatedBy: "\n")
@@ -794,20 +798,26 @@ final class DialogUpdatableContent: ObservableObject {
 
         // check to make sure the file exists
         if manager.fileExists(atPath: commandFilePath) {
-            writeLog("Existing file at \(commandFilePath). Cleaning")
+            writeLog("Existing command file at \(commandFilePath); truncating")
             let text = ""
             do {
-                try text.write(toFile: path, atomically: false, encoding: String.Encoding.utf8)
+                try text.write(toFile: commandFilePath, atomically: false, encoding: String.Encoding.utf8)
             } catch {
-                if !manager.isReadableFile(atPath: commandFilePath) {
-                    writeLog(" Existing file at \(commandFilePath) is not readable\n\tCommands set to \(commandFilePath) will not be processed\n"
-                             , logLevel: .error)
-                    writeLog("\(error)\n", logLevel: .error)
+                // Truncation failed — typically a root-owned command file while
+                // running in a user context. We can't clear it, so any pre-existing
+                // content remains and the launch-time guard in processCommands will
+                // ignore it. Log clearly so this is diagnosable in the field.
+                if manager.isReadableFile(atPath: commandFilePath) {
+                    writeLog("Could not truncate existing command file at \(commandFilePath): \(error.localizedDescription). Pre-existing content will be ignored (older than launch time); new commands will still be processed.", logLevel: .info)
+                } else {
+                    writeLog("Existing command file at \(commandFilePath) is neither readable nor writable: \(error.localizedDescription). Commands sent to \(commandFilePath) will not be processed.", logLevel: .error)
                 }
             }
         } else {
-            writeLog("Creating file at \(commandFilePath)")
-            manager.createFile(atPath: path, contents: nil, attributes: commandFilePermissions)
+            writeLog("Creating command file at \(commandFilePath)")
+            if !manager.createFile(atPath: commandFilePath, contents: nil, attributes: commandFilePermissions) {
+                writeLog("Failed to create command file at \(commandFilePath)", logLevel: .error)
+            }
         }
     }
 
@@ -820,11 +830,13 @@ final class DialogUpdatableContent: ObservableObject {
         if manager.isDeletableFile(atPath: path) {
             do {
                 try manager.removeItem(atPath: path)
-                //NSLog("Deleted Dialog command file")
+                writeLog("Deleted existing command file at \(path)", logLevel: .debug)
             } catch {
-                writeLog("Unable to delete file at path \(path)", logLevel: .debug)
-                writeLog("\(error)", logLevel: .debug)
+                writeLog("Unable to delete command file at \(path): \(error.localizedDescription)", logLevel: .debug)
             }
+        } else if manager.fileExists(atPath: path) {
+            // e.g. a root-owned file in the sticky /var/tmp; it will be truncated instead.
+            writeLog("Existing command file at \(path) is not deletable in this context; will attempt truncation", logLevel: .debug)
         }
     }
     
@@ -974,7 +986,8 @@ final class DialogUpdatableContent: ObservableObject {
                        vertical: appProperties.windowPositionVertical,
                        horozontal: appProperties.windowPositionHorozontal,
                        offset: args.positionOffset.value.floatValue(),
-                       useFullScreen: args.blurScreen.present || args.forceOnTop.present,
+                       useFullScreen: args.blurScreen.present,
+                       respectDock: args.forceOnTop.present,
                        animated: true)
         }
         
