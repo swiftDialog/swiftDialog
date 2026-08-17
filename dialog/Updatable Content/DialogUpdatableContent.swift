@@ -493,6 +493,7 @@ class FileReader {
             // image Caption
             case "\(observedData.args.mainImageCaption.long):":
                 appvars.imageCaptionArray = [argument]
+                
                 observedData.args.mainImageCaption.present = true
 
             // list items
