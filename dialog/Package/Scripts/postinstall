@@ -20,7 +20,7 @@ write_to_log "Installed version: $("${dialogbinary}" --version)"
 # Check what the latest available version is and records it in the install log
 # fetches json from swiftdialog.app
 # json format is {"version":"x.y.z","released":"yyyy-mm-ddThh:mm:ssZ"}
-sd_json_data=$(/usr/bin/curl -sL https://beta.swiftdialog.app/version.json)
+sd_json_data=$(/usr/bin/curl -sL https://swiftdialog.app/version.json)
 sd_latest_version=$(echo $sd_json_data | /usr/bin/jq -r '.version' 2>/dev/null)
 sd_release_date=$(echo $sd_json_data | /usr/bin/jq -r '.released' 2>/dev/null)
 if [[ -n $sd_latest_version ]]; then
