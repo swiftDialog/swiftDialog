@@ -1813,22 +1813,33 @@ struct Preset5View: View {
                         .padding(.top, sp.blockGap)
                     }
 
-                    // Zone 4: Grouped item list with subtle card background
+                    // Zone 4: Grouped item list with subtle card background.
+                    // Precompute the status-group order up front and render each group as a pure
+                    // function of the data. The previous code mutated a running `lastStatusGroup`
+                    // from inside the ForEach builder; a LazyVStack builds rows on demand and can
+                    // re-evaluate them out of order, so the header attached to whichever row built
+                    // first — landing mid-list or drawing twice. (#691)
+                    // sortedItems is already sorted by group, so groups are contiguous and this
+                    // yields the distinct groups in display order.
+                    let orderedGroups: [Int] = sortedItems.reduce(into: []) { acc, item in
+                        let group = deploymentStatusGroupIndex(item.status)
+                        if acc.last != group { acc.append(group) }
+                    }
                     LazyVStack(alignment: .leading, spacing: 0) {
-                        var lastStatusGroup: Int = -1
-                        ForEach(sortedItems) { item in
-                            let currentGroup = deploymentStatusGroupIndex(item.status)
-                            if currentGroup != lastStatusGroup {
-                                let _ = { lastStatusGroup = currentGroup }()
+                        ForEach(orderedGroups, id: \.self) { group in
+                            let itemsInGroup = sortedItems.filter { deploymentStatusGroupIndex($0.status) == group }
+                            if let first = itemsInGroup.first {
                                 DeploymentItemGroupHeader(
-                                    title: deploymentGroupHeader(for: item.status)
+                                    title: deploymentGroupHeader(for: first.status)
                                 )
+                                ForEach(itemsInGroup) { item in
+                                    DeploymentItemRow(
+                                        item: item,
+                                        accentColor: branding.primaryColor,
+                                        basePath: effectiveIconBasePath
+                                    )
+                                }
                             }
-                            DeploymentItemRow(
-                                item: item,
-                                accentColor: branding.primaryColor,
-                                basePath: effectiveIconBasePath
-                            )
                         }
                     }
                     .background(
