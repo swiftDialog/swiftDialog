@@ -73,6 +73,50 @@ func resolveInspectConfigSource(
     return nil
 }
 
+/// Applies a vetted set of general dialog options from the inspect JSON `options` map
+/// onto the same `appArguments` the command line populates, so all downstream window
+/// handling (dialogApp + later ProcessCLOptions passes) is reused (#693).
+///
+/// Command-line flags win: a JSON option is only applied when the matching argument was
+/// not already passed on the CLI. Options outside the allowlist are ignored with a log line.
+func applyInspectGeneralOptions(_ options: [String: OptionValue]) {
+    for (rawKey, value) in options {
+        switch rawKey.lowercased() {
+        case "moveable", "movable":
+            guard !appArguments.movableWindow.present else { continue }
+            if value.boolValue == true {
+                appArguments.movableWindow.present = true
+                writeLog("Inspect Mode: options.\(rawKey) → moveable window enabled", logLevel: .info)
+            }
+        case "ontop":
+            guard !appArguments.forceOnTop.present else { continue }
+            if value.boolValue == true {
+                appArguments.forceOnTop.present = true
+                writeLog("Inspect Mode: options.ontop → force on top enabled", logLevel: .info)
+            }
+        case "resizable":
+            guard !appArguments.windowResizable.present else { continue }
+            if value.boolValue == true {
+                appArguments.windowResizable.present = true
+                writeLog("Inspect Mode: options.resizable → resizable window enabled", logLevel: .info)
+            }
+        case "windowbuttons":
+            guard !appArguments.windowButtonsEnabled.present else { continue }
+            if case .string(let selection) = value, !selection.isEmpty {
+                // e.g. "min,max,close" — value parsed into individual buttons later in processCLOptions
+                appArguments.windowButtonsEnabled.present = true
+                appArguments.windowButtonsEnabled.value = selection
+                writeLog("Inspect Mode: options.windowbuttons → \(selection)", logLevel: .info)
+            } else if value.boolValue == true {
+                appArguments.windowButtonsEnabled.present = true
+                writeLog("Inspect Mode: options.windowbuttons → all buttons enabled", logLevel: .info)
+            }
+        default:
+            writeLog("Inspect Mode: ignoring unsupported option '\(rawKey)' (allowed: moveable, ontop, resizable, windowbuttons)", logLevel: .info)
+        }
+    }
+}
+
 func getJSON() -> JSON {
     var json = JSON()
 
@@ -345,6 +389,11 @@ func processCLOptions(json: JSON = getJSON()) {
                 appvars.windowWidth = width
                 appvars.windowHeight = height
                 writeLog("Inspect Mode: Using default size (\(Int(width))×\(Int(height)))", logLevel: .info)
+            }
+
+            // Apply allowlisted general dialog options (moveable, ontop, …) from the JSON config (#693)
+            if let options = config.options {
+                applyInspectGeneralOptions(options)
             }
         }
 
