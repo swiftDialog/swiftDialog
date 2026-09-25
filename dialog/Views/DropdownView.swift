@@ -75,7 +75,7 @@ struct DropdownView: View {
                                     idealWidth: fieldwidth*0.50
                                 )
                                     .onChange(of: selectedOption[index]) { _, selectedOption in
-                                        userInputState.dropdownItems[index].selectedValue = selectedOption
+                                        setIfInBounds(&userInputState.dropdownItems, index, \.selectedValue, selectedOption)
                                     }
                                     .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
                                     .requiredFieldHighlight(userInputState.dropdownItems[index].requiredfieldHighlight, trigger: observedData.showSheet)
@@ -99,7 +99,7 @@ struct DropdownView: View {
                                 }
                                 .pickerStyle(MenuPickerStyle())
                                 .onChange(of: selectedOption[index]) { _, selectedOption in
-                                    userInputState.dropdownItems[index].selectedValue = selectedOption
+                                    setIfInBounds(&userInputState.dropdownItems, index, \.selectedValue, selectedOption)
                                 }
                                 .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
                                 .buttonSizeFit()

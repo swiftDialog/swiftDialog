@@ -167,3 +167,44 @@ extension View {
         }
     }
 }
+
+/// A binding to one field of `array[index]` that survives the array shrinking underneath it.
+///
+/// SwiftUI keeps a value action — the closure behind `.onChange(of:)` — alive independently of the
+/// body that created it, and flushes it from `Update.dispatchActions()` during a later layout pass.
+/// A binding written as `$array[index].field` captures `index` and reads the array at that point, so
+/// in workflow mode a card change that empties the array between the action being queued and it
+/// being dispatched traps on `Array.subscript`. Reading a fallback and dropping the write is correct
+/// here: the value belongs to a card that is no longer on screen, and its input has already been
+/// stored by `storeCurrentCardInput`.
+func boundedBinding<Element, Field>(
+    _ array: Binding<[Element]>,
+    _ index: Int,
+    _ field: WritableKeyPath<Element, Field>,
+    default fallback: Field
+) -> Binding<Field> {
+    Binding<Field>(
+        get: {
+            guard array.wrappedValue.indices.contains(index) else { return fallback }
+            return array.wrappedValue[index][keyPath: field]
+        },
+        set: { newValue in
+            guard array.wrappedValue.indices.contains(index) else { return }
+            array.wrappedValue[index][keyPath: field] = newValue
+        }
+    )
+}
+
+/// Assign into `array[index]` only while that index still exists.
+///
+/// The counterpart to `boundedBinding` for the plain writes inside those same action closures, which
+/// reach past the observed copy straight into `userInputState`.
+func setIfInBounds<Element, Field>(
+    _ array: inout [Element],
+    _ index: Int,
+    _ field: WritableKeyPath<Element, Field>,
+    _ newValue: Field
+) {
+    guard array.indices.contains(index) else { return }
+    array[index][keyPath: field] = newValue
+}

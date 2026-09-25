@@ -96,9 +96,9 @@ struct TextEntryView: View {
                                     .frame(alignment: .leading)
                                 Spacer()
                             }
-                            TextEditor(text: $observedData.textFieldArray[index].value)
+                            TextEditor(text: boundedBinding($observedData.textFieldArray, index, \.value, default: ""))
                                 .onChange(of: observedData.textFieldArray[index].value) { _, textContent in
-                                    userInputState.textFields[index].value = textContent
+                                    setIfInBounds(&userInputState.textFields, index, \.value, textContent)
                                 }
                                 .background(Color("editorBackgroundColour"))
                                 .font(.custom("HelveticaNeue", size: 14))
@@ -129,7 +129,7 @@ struct TextEntryView: View {
                             if observedData.textFieldArray[index].fileSelect {
                                 Button("Select".localized) {
                                     openFilePanel(fileType: observedData.textFieldArray[index].fileType, initialPath: observedData.textFieldArray[index].initialPath) { selectedPath in
-                                         observedData.textFieldArray[index].value = selectedPath
+                                         setIfInBounds(&observedData.textFieldArray, index, \.value, selectedPath)
                                     }
                                 }
                             }
@@ -137,11 +137,11 @@ struct TextEntryView: View {
                                 if observedData.textFieldArray[index].secure {
                                     VStack {
                                         ZStack {
-                                            SecureField(observedData.textFieldArray[index].prompt, text: $observedData.textFieldArray[index].value)
+                                            SecureField(observedData.textFieldArray[index].prompt, text: boundedBinding($observedData.textFieldArray, index, \.value, default: ""))
                                                 .disableAutocorrection(true)
                                                 .textContentType(observedData.textFieldArray[index].passwordFill ? .password: .none)
                                                 .onChange(of: observedData.textFieldArray[index].value,) { _, textContent in
-                                                    userInputState.textFields[index].value = textContent
+                                                    setIfInBounds(&userInputState.textFields, index, \.value, textContent)
                                                 }
                                             Image(systemName: "lock.fill")
                                                 .foregroundColor(Color(argument: "#008815")).opacity(0.5)
@@ -149,9 +149,9 @@ struct TextEntryView: View {
                                         }
                                         if observedData.textFieldArray[index].confirm {
                                             ZStack {
-                                                SecureField(observedData.textFieldArray[index].prompt, text: $observedData.textFieldArray[index].validationValue)
+                                                SecureField(observedData.textFieldArray[index].prompt, text: boundedBinding($observedData.textFieldArray, index, \.validationValue, default: ""))
                                                     .onChange(of: observedData.textFieldArray[index].validationValue) { _, textContent in
-                                                        userInputState.textFields[index].validationValue = textContent
+                                                        setIfInBounds(&userInputState.textFields, index, \.validationValue, textContent)
                                                     }
                                                 Image(systemName: "lock.fill")
                                                     .foregroundColor(Color(argument: "#008815")).opacity(0.5)
@@ -162,42 +162,46 @@ struct TextEntryView: View {
                                     }
                                 } else if observedData.textFieldArray[index].isDatePicker {
                                     // Date/time field: the picker replaces the text field.
-                                    DatePicker("", selection: $observedData.textFieldArray[index].date,
+                                    DatePicker("", selection: boundedBinding($observedData.textFieldArray, index, \.date, default: Date()),
                                                displayedComponents: observedData.textFieldArray[index].dateComponents)
                                         .labelsHidden()
                                         .datePickerStyle(.field)
                                         .onAppear {
                                             // return the initial (default) date even if the user never changes it
+                                            guard observedData.textFieldArray.indices.contains(index) else { return }
                                             let formatted = formattedDate(observedData.textFieldArray[index])
-                                            observedData.textFieldArray[index].value = formatted
-                                            userInputState.textFields[index].value = formatted
+                                            setIfInBounds(&observedData.textFieldArray, index, \.value, formatted)
+                                            setIfInBounds(&userInputState.textFields, index, \.value, formatted)
                                         }
                                         .onChange(of: observedData.textFieldArray[index].date) { _, _ in
+                                            guard observedData.textFieldArray.indices.contains(index) else { return }
                                             let formatted = formattedDate(observedData.textFieldArray[index])
-                                            observedData.textFieldArray[index].value = formatted
-                                            userInputState.textFields[index].value = formatted
+                                            setIfInBounds(&observedData.textFieldArray, index, \.value, formatted)
+                                            setIfInBounds(&userInputState.textFields, index, \.value, formatted)
                                         }
                                 } else {
                                     VStack {
                                         TextField(observedData.textFieldArray[index].prompt,
-                                                  text: $observedData.textFieldArray[index].value)
+                                                  text: boundedBinding($observedData.textFieldArray, index, \.value, default: ""))
                                         .onChange(of: observedData.textFieldArray[index].value) { _, textContent in
-                                            userInputState.textFields[index].value = textContent
-                                            
+                                            guard observedData.textFieldArray.indices.contains(index) else { return }
+                                            setIfInBounds(&userInputState.textFields, index, \.value, textContent)
+
                                             // live regex checking
                                             if observedData.textFieldArray[index].regex != "" && observedData.args.textFieldLiveValidation.present {
                                                 if checkRegexPattern(regexPattern: observedData.textFieldArray[index].regex, textToValidate: observedData.textFieldArray[index].value) {
-                                                    observedData.textFieldArray[index].backgroundColour = Color.green
+                                                    setIfInBounds(&observedData.textFieldArray, index, \.backgroundColour, Color.green)
                                                 } else {
-                                                    observedData.textFieldArray[index].backgroundColour = Color.red
+                                                    setIfInBounds(&observedData.textFieldArray, index, \.backgroundColour, Color.red)
                                                 }
                                                 if observedData.textFieldArray[index].value == "" {
-                                                    observedData.textFieldArray[index].backgroundColour = Color.clear
+                                                    setIfInBounds(&observedData.textFieldArray, index, \.backgroundColour, Color.clear)
                                                 }
                                             }
                                         }
                                         .onSubmit {
-                                            userInputState.textFields[index].value = observedData.textFieldArray[index].value
+                                            guard observedData.textFieldArray.indices.contains(index) else { return }
+                                            setIfInBounds(&userInputState.textFields, index, \.value, observedData.textFieldArray[index].value)
                                             
                                             // Handle cards mode - advance to next card instead of exiting
                                             if cardState.isCardsMode {
@@ -251,9 +255,9 @@ struct TextEntryView: View {
                                     
                                         if observedData.textFieldArray[index].confirm {
                                             TextField(observedData.textFieldArray[index].prompt,
-                                                      text: $observedData.textFieldArray[index].validationValue)
+                                                      text: boundedBinding($observedData.textFieldArray, index, \.validationValue, default: ""))
                                             .onChange(of: observedData.textFieldArray[index].validationValue) { _, confirmed in
-                                                userInputState.textFields[index].validationValue = confirmed
+                                                setIfInBounds(&userInputState.textFields, index, \.validationValue, confirmed)
                                             }
                                         }
                                     }

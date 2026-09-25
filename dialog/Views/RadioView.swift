@@ -69,7 +69,7 @@ struct RadioView: View {
                                     }
                                 }
                                 .onChange(of: selectedOption[index]) { _, selectedOption in
-                                    userInputState.dropdownItems[index].selectedValue = selectedOption
+                                    setIfInBounds(&userInputState.dropdownItems, index, \.selectedValue, selectedOption)
                                 }
                                 .pickerStyle(RadioGroupPickerStyle())
                                 Spacer()
