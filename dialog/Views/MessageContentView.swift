@@ -74,6 +74,7 @@ struct MessageContent: View {
 
             if observedData.args.mainImage.present {
                 ImageView(imageArray: observedData.imageArray, captionArray: observedData.appProperties.imageCaptionArray, autoPlaySeconds: observedData.args.autoPlay.value.floatValue(), showControls: true, hideTimer: observedData.args.hideTimer.present)
+                    .id(observedData.currentCardIndex)
             }
 
             if !["", "none"].contains(observedData.args.messageOption.value) {

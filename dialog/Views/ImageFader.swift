@@ -21,18 +21,24 @@ struct ImageFader: View {
 
     var autoPlayTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
+    // The visible frame, clamped to the list currently being displayed. In workflow mode a card
+    // change swaps imageList out from under this view, so an index left behind by a longer
+    // slideshow can point past the end of a shorter one. Every frame then compares unequal to it
+    // and the card draws no image at all
+    private var safeVisibleIndex: Int {
+        guard !imageList.isEmpty else { return 0 }
+        return min(max(visibleIndex, 0), imageList.count - 1)
+    }
+
     func incrementIndex() {
-        visibleIndex+=1
-        if visibleIndex == imageList.count {
-            visibleIndex = 0
-        }
+        guard !imageList.isEmpty else { return }
+        visibleIndex = (safeVisibleIndex + 1) % imageList.count
     }
 
     func decrementIndex() {
-        visibleIndex-=1
-        if visibleIndex < 0 {
-            visibleIndex = imageList.count
-        }
+        guard !imageList.isEmpty else { return }
+        // Wrap to the last frame, not to imageList.count, which is one past it
+        visibleIndex = (safeVisibleIndex + imageList.count - 1) % imageList.count
     }
 
     func incrementTimer() {
@@ -47,10 +53,13 @@ struct ImageFader: View {
         HStack {
             Spacer()
             ZStack {
-                ForEach(0..<imageList.count, id: \.self) { index in
+                // Iterate the collection's indices rather than 0..<count. ForEach over a Range is
+                // the constant-data initialiser: it pins to the count it first saw and goes on
+                // evaluating those indices after the array has changed size, which traps
+                ForEach(Array(imageList.indices), id: \.self) { index in
                     VStack {
                         DisplayImage(imageList[index], corners: showCorners, content: contentMode)
-                        if captionsList.count > 0 {
+                        if index < captionsList.count {
                             if appArguments.fullScreenWindow.present {
                                 Text(captionsList[index])
                                     .font(.system(size: 60))
@@ -62,7 +71,7 @@ struct ImageFader: View {
                             }
                         }
                     }
-                    .opacity(index==visibleIndex ? 1 : 0)
+                    .opacity(index==safeVisibleIndex ? 1 : 0)
                     //.frame(maxHeight: .infinity)
                 }
                 if imageList.count > 1 && showControls && autoPlaySeconds < 1 {
@@ -79,7 +88,12 @@ struct ImageFader: View {
                     }
                 }
             }
-            .animation(.easeInOut(duration: 0.4), value: visibleIndex)
+            .animation(.easeInOut(duration: 0.4), value: safeVisibleIndex)
+            .onChange(of: imageList.count) { _, _ in
+                // A new set of images is a new slideshow: start it at the first frame
+                visibleIndex = 0
+                timerTicks = 0
+            }
             .onReceive(autoPlayTimer) { _ in
                 if autoPlaySeconds > 0 {
                     incrementTimer()
