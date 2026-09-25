@@ -493,7 +493,13 @@ class FileReader {
             // image Caption
             case "\(observedData.args.mainImageCaption.long):":
                 appvars.imageCaptionArray = [argument]
-                
+                // ImageView renders each caption from MainImage.caption on observedData.imageArray;
+                // appvars.imageCaptionArray is only consumed at launch and never re-read on command
+                // updates, so writing it alone left the caption invisible (#690). Apply the update to
+                // the most recent image — matching the usual "show an image, then caption it" sequence.
+                if let lastImage = observedData.imageArray.indices.last {
+                    observedData.imageArray[lastImage].caption = argument
+                }
                 observedData.args.mainImageCaption.present = true
 
             // list items
