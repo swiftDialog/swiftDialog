@@ -52,7 +52,10 @@ struct RadioView: View {
         // When cards change, userInputState may have different count than @State selectedOption
         if observedData.args.dropdownValues.present && radioCount > 0 && selectedOption.count == userInputState.dropdownItems.count {
             VStack {
-                ForEach(0..<userInputState.dropdownItems.count, id: \.self) {index in
+                // Iterate the collection's indices, not 0..<count: a Range-based ForEach pins to the
+                // count it first saw and keeps evaluating stale indices after the array shrinks on a
+                // card change, which traps on subscript. Array(indices) always tracks the current list.
+                ForEach(Array(userInputState.dropdownItems.indices), id: \.self) {index in
                     if userInputState.dropdownItems[index].style == "radio" {
                         VStack {
                             HStack {
