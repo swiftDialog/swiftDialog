@@ -51,21 +51,22 @@ struct RenderToggles: View {
                         }
                         Text(observedData.observedUserInputState.checkBoxes[index].label)
                         Spacer()
-                        Toggle("", isOn: $observedData.observedUserInputState.checkBoxes[index].checked)
+                        Toggle("", isOn: boundedBinding($observedData.observedUserInputState.checkBoxes, index, \.checked, default: false))
                             .toggleStyle(.switch)
                             .disabled(observedData.observedUserInputState.checkBoxes[index].disabled)
                             .controlSize(observedData.appProperties.checkboxControlSize)
                             .onChange(of: observedData.observedUserInputState.checkBoxes[index].checked) { _, checked in
-                                userInputState.checkBoxes[index].checked = checked
+                                setIfInBounds(&userInputState.checkBoxes, index, \.checked, checked)
                             }
                     } else {
-                        Toggle(isOn: $observedData.observedUserInputState.checkBoxes[index].checked) {
+                        Toggle(isOn: boundedBinding($observedData.observedUserInputState.checkBoxes, index, \.checked, default: false)) {
                             Text(observedData.observedUserInputState.checkBoxes[index].label)
                                 .padding(.leading, 5)
                         }
                             .toggleStyle(.checkbox)
                             .onChange(of: observedData.observedUserInputState.checkBoxes[index].checked) { _, checked in
-                                userInputState.checkBoxes[index].checked = checked
+                                setIfInBounds(&userInputState.checkBoxes, index, \.checked, checked)
+                                guard observedData.observedUserInputState.checkBoxes.indices.contains(index) else { return }
                                 if observedData.observedUserInputState.checkBoxes[index].enablesButton1 {
                                     observedData.args.button1Disabled.present = !checked
                                 }
