@@ -66,6 +66,68 @@ enum SimpleItemStatus {
     case failed
 }
 
+// MARK: - Generic option values
+
+/// A single heterogeneous JSON scalar used by the `options` passthrough map (#693).
+/// Inspect JSON can set a vetted set of general dialog options whose values are
+/// booleans (e.g. `moveable`) or strings (e.g. `windowbuttons: "min,max"`).
+enum OptionValue: Codable, Equatable {
+    case bool(Bool)
+    case int(Int)
+    case string(String)
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        // Order matters: JSONDecoder won't coerce true/false to Int or vice versa,
+        // so probing Bool before Int before String keeps each value on its native type.
+        if let value = try? container.decode(Bool.self) {
+            self = .bool(value)
+        } else if let value = try? container.decode(Int.self) {
+            self = .int(value)
+        } else if let value = try? container.decode(String.self) {
+            self = .string(value)
+        } else {
+            throw DecodingError.dataCorruptedError(in: container,
+                debugDescription: "Option value must be a boolean, integer, or string")
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .bool(let value): try container.encode(value)
+        case .int(let value): try container.encode(value)
+        case .string(let value): try container.encode(value)
+        }
+    }
+
+    /// Interprets the value as a boolean, accepting common string/int spellings.
+    /// Returns nil when the value can't be read as a boolean.
+    var boolValue: Bool? {
+        switch self {
+        case .bool(let value):
+            return value
+        case .int(let value):
+            return value != 0
+        case .string(let value):
+            switch value.lowercased() {
+            case "true", "yes", "1": return true
+            case "false", "no", "0": return false
+            default: return nil
+            }
+        }
+    }
+
+    /// The value expressed as a string (for options that take a string argument).
+    var stringValue: String {
+        switch self {
+        case .bool(let value): return value ? "true" : "false"
+        case .int(let value): return String(value)
+        case .string(let value): return value
+        }
+    }
+}
+
 // MARK: - Configuration
 
 /// Configuration structure, this is matching the JSON format
@@ -87,6 +149,7 @@ struct InspectConfig: Codable {
     let width: Int?
     let height: Int?
     let size: String?  // Refactored into preset-specific sizing- we use "compact", "standard", or "large" -> see InspectSizes.swift
+    let options: [String: OptionValue]?  // Vetted general dialog options (moveable, ontop, windowbuttons, resizable) — see applyInspectGeneralOptions (#693)
     let scanInterval: Int?
     let cachePaths: [String]?
     let cacheExtensions: [String]?
@@ -1926,7 +1989,7 @@ struct InspectConfig: Codable {
         let knownRootKeys: Set<String> = [
             "title", "message", "infobox", "icon", "iconsize",
             "banner", "bannerHeight", "bannerTitle",
-            "width", "height", "size", "scanInterval", "cachePaths", "cacheExtensions",
+            "width", "height", "size", "options", "scanInterval", "cachePaths", "cacheExtensions",
             "sideMessage", "sideInterval", "style", "liststyle", "preset", "popupButton",
             "highlightColor", "secondaryColor", "backgroundColor", "backgroundImage", "backgroundOpacity",
             "textOverlayColor", "gradientColors", "gradientPalette", "gradientStyle",
@@ -1965,6 +2028,7 @@ struct InspectConfig: Codable {
         width = try container.decodeIfPresent(Int.self, forKey: .width)
         height = try container.decodeIfPresent(Int.self, forKey: .height)
         size = try container.decodeIfPresent(String.self, forKey: .size)
+        options = try container.decodeIfPresent([String: OptionValue].self, forKey: .options)
         scanInterval = try container.decodeIfPresent(Int.self, forKey: .scanInterval)
         cachePaths = try container.decodeIfPresent([String].self, forKey: .cachePaths)
         cacheExtensions = try container.decodeIfPresent([String].self, forKey: .cacheExtensions)
@@ -2110,7 +2174,7 @@ struct InspectConfig: Codable {
 
     private enum CodingKeys: String, CodingKey {
         case title, message, infobox, icon, iconsize, banner, bannerHeight, bannerTitle
-        case width, height, size, scanInterval, cachePaths, cacheExtensions
+        case width, height, size, options, scanInterval, cachePaths, cacheExtensions
         case sideMessage, sideInterval, style, liststyle, preset, popupButton
         case highlightColor, secondaryColor, backgroundColor, backgroundImage, backgroundOpacity, appearance
         case textOverlayColor, gradientColors, gradientPalette, gradientStyle
