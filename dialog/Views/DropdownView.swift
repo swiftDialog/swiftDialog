@@ -56,7 +56,10 @@ struct DropdownView: View {
         // When cards change, userInputState may have different count than @State selectedOption
         if observedData.args.dropdownValues.present && dropdownCount > 0 && selectedOption.count == userInputState.dropdownItems.count {
             VStack {
-                ForEach(0..<userInputState.dropdownItems.count, id: \.self) {index in
+                // Iterate the collection's indices, not 0..<count: a Range-based ForEach pins to the
+                // count it first saw and keeps evaluating stale indices after the array shrinks on a
+                // card change, which traps on subscript. Array(indices) always tracks the current list.
+                ForEach(Array(userInputState.dropdownItems.indices), id: \.self) {index in
                     if userInputState.dropdownItems[index].style != "radio" {
                         HStack {
                             // we could print the title as part of the picker control but then we don't get easy access to swiftui text formatting

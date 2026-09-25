@@ -56,7 +56,10 @@ struct MessageContent: View {
                             .accessibilityHint(observedData.args.iconAccessabilityLabel.value)
                             .frame(width: iconDisplayWidth, alignment: .top)
                         } else {
-                            ForEach(0..<userInputState.iconItems.count, id: \.self) {index in
+                            // Iterate the collection's indices, not 0..<count: a Range-based ForEach
+                            // pins to the count it first saw and keeps evaluating stale indices after
+                            // the array shrinks on a card change, which traps on subscript.
+                            ForEach(Array(userInputState.iconItems.indices), id: \.self) {index in
                                 IconView(image: userInputState.iconItems[index].value,
                                          alpha: observedData.iconAlpha)
                                 .frame(height: iconDisplayWidth, alignment: .top)
