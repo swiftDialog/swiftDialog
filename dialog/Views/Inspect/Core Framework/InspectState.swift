@@ -1011,6 +1011,35 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         // Enhanced parsing to handle multiple command formats from AppInspector
         writeLog("InspectState: Parsing command line: \(line)", logLevel: .debug)
 
+        // Window management commands. Inspect mode runs its own command pipeline
+        // (checkCommandFileForUpdates → parseCommandLine) and never reaches the
+        // normal-mode handler in DialogUpdatableContent.processCommands, so these
+        // are handled here explicitly to behave identically to a standard dialog. #689
+        switch line.trimmingCharacters(in: .whitespaces).lowercased() {
+        case "minimize:", "minimise:":
+            writeLog("InspectState: minimizing window", logLevel: .info)
+            if appArguments.blurScreen.present {
+                blurredScreen.hide()
+            }
+            activateDialog()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                NSApp.keyWindow?.setIsMiniaturized(true)
+            }
+            return
+        case "maximize:", "maximise:":
+            writeLog("InspectState: maximizing window", logLevel: .info)
+            if appArguments.blurScreen.present {
+                blurredScreen.show()
+            }
+            // Find all minimized windows, ordered by recentness (0 is frontmost)
+            let minimizedWindows = NSApp.windows.filter { $0.isMiniaturized }
+            // Deminimize the first one found (most recent)
+            minimizedWindows.first?.deminiaturize(nil)
+            return
+        default:
+            break
+        }
+
         // Format 2: "item:itemId:status" or "item:itemId:status:message"
         // This is the modern format that works with both Preset 1 and Preset 5
         if line.hasPrefix("item:") {
