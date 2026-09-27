@@ -273,6 +273,30 @@ func parseDateOrNow(_ string: String) -> Date {
     return Date.now
 }
 
+/// Parses a date-picker boundary (mindate/maxdate) locked to `YYYYMMDD`.
+///
+/// Every non-numeric character is stripped first, so `2026-09-28`, `20260928` (and, if someone
+/// insists, `2026/09/28`) all resolve to the same day. The result must be exactly 8 digits and a
+/// valid calendar date; anything else returns nil and the boundary is simply not applied.
+func parseBoundaryDate(_ string: String) -> Date? {
+    let digits = String(string.filter(\.isNumber))
+    guard digits.count == 8 else { return nil }
+    let formatter = DateFormatter()
+    formatter.locale = Locale(identifier: "en_US_POSIX")
+    formatter.dateFormat = "yyyyMMdd"
+    formatter.isLenient = false
+    return formatter.date(from: digits)
+}
+
+/// Clamps `date` into the optional [min, max] bounds. An inverted range (min > max) is treated as
+/// min-only, matching how the date picker falls back when given a nonsensical range.
+func clampDate(_ date: Date, min: Date?, max: Date?) -> Date {
+    var result = date
+    if let min, result < min { result = min }
+    if let max, (min == nil || min! <= max), result > max { result = max }
+    return result
+}
+
 /// Format a Date using strftime(3) — the same specifiers the shell `date` command uses
 /// (e.g. "+%Y-%m-%d", "+%s" for epoch). A leading "+" is accepted and stripped, matching
 /// the `date` convention. Returns "" if the format produces no output.
@@ -677,25 +701,33 @@ func processCLOptions(json: JSON = getJSON()) {
                 if json[appArguments.textField.long][index]["title"].stringValue == "" {
                     userInputState.textFields.append(TextFieldState(title: String(json[appArguments.textField.long][index].stringValue)))
                 } else {
+                    let field = json[appArguments.textField.long][index]
+                    let jsonMinDate = parseBoundaryDate(String(field["mindate"].stringValue))
+                    let jsonMaxDate = parseBoundaryDate(String(field["maxdate"].stringValue))
+                    let jsonSeedDate = (field["date"].boolValue || field["time"].boolValue)
+                        ? clampDate(parseDateOrNow(String(field["value"].stringValue)), min: jsonMinDate, max: jsonMaxDate)
+                        : Date.now
                     userInputState.textFields.append(TextFieldState(
-                        editor: Bool(json[appArguments.textField.long][index]["editor"].boolValue),
-                        fileSelect: Bool(json[appArguments.textField.long][index]["fileselect"].boolValue),
-                        fileType: String(json[appArguments.textField.long][index]["filetype"].stringValue),
-                        passwordFill: Bool(json[appArguments.textField.long][index]["passwordfill"].boolValue),
-                        prompt: String(json[appArguments.textField.long][index]["prompt"].stringValue),
-                        regex: String(json[appArguments.textField.long][index]["regex"].stringValue),
-                        regexError: String(json[appArguments.textField.long][index]["regexerror"].stringValue),
-                        required: Bool(json[appArguments.textField.long][index]["required"].boolValue),
-                        secure: Bool(json[appArguments.textField.long][index]["secure"].boolValue),
-                        title: String(json[appArguments.textField.long][index]["title"].stringValue),
-                        name: String(json[appArguments.textField.long][index]["name"].stringValue),
-                        value: String(json[appArguments.textField.long][index]["value"].stringValue),
-                        date: (json[appArguments.textField.long][index]["date"].boolValue || json[appArguments.textField.long][index]["time"].boolValue) ? parseDateOrNow(String(json[appArguments.textField.long][index]["value"].stringValue)) : Date.now,
-                        showDate: Bool(json[appArguments.textField.long][index]["date"].boolValue),
-                        showTime: Bool(json[appArguments.textField.long][index]["time"].boolValue),
-                        dateOutputFormat: String(json[appArguments.textField.long][index]["format"].stringValue),
-                        confirm: Bool(json[appArguments.textField.long][index]["confirm"].boolValue),
-                        initialPath: String(json[appArguments.textField.long][index]["path"].stringValue))
+                        editor: Bool(field["editor"].boolValue),
+                        fileSelect: Bool(field["fileselect"].boolValue),
+                        fileType: String(field["filetype"].stringValue),
+                        passwordFill: Bool(field["passwordfill"].boolValue),
+                        prompt: String(field["prompt"].stringValue),
+                        regex: String(field["regex"].stringValue),
+                        regexError: String(field["regexerror"].stringValue),
+                        required: Bool(field["required"].boolValue),
+                        secure: Bool(field["secure"].boolValue),
+                        title: String(field["title"].stringValue),
+                        name: String(field["name"].stringValue),
+                        value: String(field["value"].stringValue),
+                        date: jsonSeedDate,
+                        showDate: Bool(field["date"].boolValue),
+                        showTime: Bool(field["time"].boolValue),
+                        minDate: jsonMinDate,
+                        maxDate: jsonMaxDate,
+                        dateOutputFormat: String(field["format"].stringValue),
+                        confirm: Bool(field["confirm"].boolValue),
+                        initialPath: String(field["path"].stringValue))
                     )
                 }
             }
@@ -716,6 +748,8 @@ func processCLOptions(json: JSON = getJSON()) {
                 var fieldValue: String = ""
                 var fieldShowDate: Bool = false
                 var fieldShowTime: Bool = false
+                var fieldMinDate: Date?
+                var fieldMaxDate: Date?
                 var fieldDateFormat: String = ""
                 var fieldConfirm: Bool = false
                 var fieldInitialPath: String = ""
@@ -757,6 +791,10 @@ func processCLOptions(json: JSON = getJSON()) {
                                 fieldShowDate = true
                             case "time":
                                 fieldShowTime = true
+                            case "mindate":
+                                fieldMinDate = parseBoundaryDate(nextValue)
+                            case "maxdate":
+                                fieldMaxDate = parseBoundaryDate(nextValue)
                             case "format":
                                 fieldDateFormat = nextValue
                             case "confirm":
@@ -768,8 +806,10 @@ func processCLOptions(json: JSON = getJSON()) {
                         }
                     }
                 }
-                // Seed the picker from value= when this is a date/time field.
-                let fieldDate = (fieldShowDate || fieldShowTime) ? parseDateOrNow(fieldValue) : Date.now
+                // Seed the picker from value= when this is a date/time field, clamped into any
+                // mindate/maxdate bounds so the returned initial value matches what the picker allows.
+                let fieldDate = clampDate((fieldShowDate || fieldShowTime) ? parseDateOrNow(fieldValue) : Date.now,
+                                          min: fieldMinDate, max: fieldMaxDate)
                 userInputState.textFields.append(TextFieldState(
                             editor: fieldEditor,
                             fileSelect: fieldFileSelect,
@@ -786,6 +826,8 @@ func processCLOptions(json: JSON = getJSON()) {
                             date: fieldDate,
                             showDate: fieldShowDate,
                             showTime: fieldShowTime,
+                            minDate: fieldMinDate,
+                            maxDate: fieldMaxDate,
                             dateOutputFormat: fieldDateFormat,
                             confirm: fieldConfirm,
                             initialPath: fieldInitialPath))

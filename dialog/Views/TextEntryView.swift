@@ -83,6 +83,27 @@ struct TextEntryView: View {
         return dateFormatter.string(from: field.date)
     }
 
+    /// The date/time picker for a field, using whichever bounded initialiser matches the
+    /// mindate/maxdate the field carries. SwiftUI needs a distinct call per range shape, and
+    /// `min...max` would trap if min > max, so an inverted range falls back to min-only.
+    @ViewBuilder
+    func datePicker(index: Int) -> some View {
+        let selection = boundedBinding($observedData.textFieldArray, index, \.date, default: Date())
+        let components = observedData.textFieldArray[index].dateComponents
+        let minDate = observedData.textFieldArray[index].minDate
+        let maxDate = observedData.textFieldArray[index].maxDate
+        switch (minDate, maxDate) {
+        case let (minDate?, maxDate?) where minDate <= maxDate:
+            DatePicker("", selection: selection, in: minDate...maxDate, displayedComponents: components)
+        case let (minDate?, _):
+            DatePicker("", selection: selection, in: minDate..., displayedComponents: components)
+        case let (nil, maxDate?):
+            DatePicker("", selection: selection, in: ...maxDate, displayedComponents: components)
+        case (nil, nil):
+            DatePicker("", selection: selection, displayedComponents: components)
+        }
+    }
+
     var body: some View {
         // Guard against array size mismatch during card transitions
         let textFieldCount = observedData.textFieldArray.count
@@ -162,8 +183,7 @@ struct TextEntryView: View {
                                     }
                                 } else if observedData.textFieldArray[index].isDatePicker {
                                     // Date/time field: the picker replaces the text field.
-                                    DatePicker("", selection: boundedBinding($observedData.textFieldArray, index, \.date, default: Date()),
-                                               displayedComponents: observedData.textFieldArray[index].dateComponents)
+                                    datePicker(index: index)
                                         .labelsHidden()
                                         .datePickerStyle(.field)
                                         .onAppear {
