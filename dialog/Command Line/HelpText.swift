@@ -364,6 +364,15 @@ struct SDHelp {
         animation=<keyword>  *(macOS 14)* - Uses animated SF symbols. Accepts one of the following keywords:
                                            variable, variable.reversing, variable.iterative, variable.iterative.reversing
                                            variable.cumulative, pulse, pulse.bylayer
+
+        The icon (and overlay icon) may instead be supplied as a JSON object using the same
+        properties as the comma-separated form, e.g.
+            --icon '{"sf":"gear","colour":"blue","weight":"bold"}'
+            --icon '{"sf":"gear","palette":["red","green","blue"]}'
+            --icon '{"path":"/Applications/Chess.app"}'
+            --icon '{"light":{"sf":"sun.max"},"dark":{"sf":"moon","colour":"white"}}'
+        Keys: sf|name|symbol, weight, colour|color, colour2, colour3, palette (array),
+              animation, bgcolour, auto (true|false), icon|path|value (non-symbol), light, dark.
         """
 
         argument.iconOption.helpShort = "Set the dialog icon"

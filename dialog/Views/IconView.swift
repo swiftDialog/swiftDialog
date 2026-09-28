@@ -76,7 +76,14 @@ struct IconView: View {
         if !iconOverlay.isEmpty {
             writeLog("With overlay \(overlay)")
         }
-        
+
+        // Accept a JSON object as the icon/overlay value and normalise it to the legacy
+        // "SF=…,colour=…" string form the parser below understands. Non-JSON values (paths,
+        // "SF=…" strings, qr=/text=/none/etc.) are returned unchanged, so existing usage is
+        // unaffected. Runs before the dark-mode split so {"light":…,"dark":…} works too.
+        messageUserImagePath = normalizedIconValue(messageUserImagePath)
+        iconOverlay = normalizedIconValue(iconOverlay)
+
         // Set default icon if needed
         if messageUserImagePath.isEmpty {
             // check for custom Dialog.png

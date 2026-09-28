@@ -417,6 +417,13 @@ func applyMessageFont(from field: JSON) {
     }
 }
 
+/// Returns an icon value as a string. When the JSON node is an object (the JSON icon schema),
+/// it is serialised back to a JSON string so IconView's normaliser converts it to the legacy
+/// icon string; a plain string node is returned as-is. Keeps IconView the single icon parser.
+func iconNodeToString(_ node: JSON) -> String {
+    node.type == .dictionary ? (node.rawString(options: []) ?? "") : node.stringValue
+}
+
 /// Format a Date using strftime(3) — the same specifiers the shell `date` command uses
 /// (e.g. "+%Y-%m-%d", "+%s" for epoch). A leading "+" is accepted and stripped, matching
 /// the `date` convention. Returns "" if the format produces no output.
@@ -1309,12 +1316,12 @@ func processCLOptions(json: JSON = getJSON()) {
         if json["icons"].exists() {
             writeLog("processing multiple icons from json")
             for index in 0..<json["icons"].count {
-                userInputState.iconItems.append(Icons(value: json["icons"][index]["icon"].stringValue))
+                userInputState.iconItems.append(Icons(value: iconNodeToString(json["icons"][index]["icon"])))
             }
             // use index 0 for the default icon value
             appArguments.iconOption.value = userInputState.iconItems[0].value
         } else if json["icon"].exists() {
-            userInputState.iconItems.append(Icons(value: json["icon"].stringValue))
+            userInputState.iconItems.append(Icons(value: iconNodeToString(json["icon"])))
         } else {
             for iconOption in CLOptionMultiOptions(optionName: appArguments.iconOption.long) {
                 userInputState.iconItems.append(Icons(value: iconOption))
