@@ -704,6 +704,23 @@ struct SDHelp {
             searchable - Marks the List as searchable. Typing in the provided textfield will filter the list of results. Useful
                          for long lists or lists with similar items.
             multiselect- Allows mulltiple options to be selected
+
+        A complete select list may instead be supplied as a single JSON object (using the same keys
+        as "selectitems") via --\(argument.selectItem.long), or by passing the object to --\(argument.dropdownTitle.long):
+            --\(argument.selectItem.long) '{"title":"Region","values":["AU","US","UK"],"default":"AU","required":true}'
+        When using the JSON form, put the whole item in the object rather than pairing it with --\(argument.dropdownValues.long).
+"""
+
+        argument.selectItem.helpShort = "Define a select list item as a JSON object"
+        argument.selectItem.helpUsage = "'{\"title\":\"<text>\",\"values\":[...],\"default\":\"<text>\"}'"
+        argument.selectItem.helpLong = """
+        Defines a single select list item from a JSON object, using the same keys as "selectitems"
+        (title, values, default, required, style, name). Repeatable for multiple lists.
+
+        --\(argument.selectItem.long) '{"title":"Region","values":["AU","US","UK"],"default":"AU","required":true}'
+
+        This is synonymous with passing the same JSON object to --\(argument.dropdownTitle.long). The item is
+        self-contained, so it does not need an accompanying --\(argument.dropdownValues.long).
 """
 
         argument.dropdownValues.helpShort = "Select list values"

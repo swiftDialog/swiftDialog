@@ -355,6 +355,21 @@ func makeListItem(from field: JSON) -> ListItems {
         action: field["action"].stringValue)
 }
 
+/// Builds a `DropDownItems` from a JSON object. Shared by the whole-config `selectitems` path and
+/// the per-argument JSON form (`--selectitem '{...}'`, or a JSON object passed to `--selecttitle`)
+/// so all three accept the same keys.
+func makeDropDownItem(from field: JSON) -> DropDownItems {
+    let values = field["values"].arrayValue.map { $0.stringValue.trimmingCharacters(in: .whitespaces) }
+    return DropDownItems(
+        title: field["title"].stringValue,
+        name: field["name"].stringValue,
+        values: values,
+        defaultValue: field["default"].stringValue,
+        selectedValue: field["default"].stringValue,
+        required: field["required"].boolValue,
+        style: field["style"].stringValue)
+}
+
 /// Format a Date using strftime(3) — the same specifiers the shell `date` command uses
 /// (e.g. "+%Y-%m-%d", "+%s" for epoch). A leading "+" is accepted and stripped, matching
 /// the `date` convention. Returns "" if the format produces no output.
@@ -675,8 +690,26 @@ func processCLOptions(json: JSON = getJSON()) {
         appvars.buttonTextSize = appArguments.buttonTextSize.value.floatValue()
     }
 
-    if appArguments.dropdownValues.present {
-        writeLog("\(appArguments.dropdownValues.long) present")
+    // Self-contained JSON select items from --selectitem, or a JSON object passed to --selecttitle.
+    // Each carries its own title/values/default/required/style and is independent of the positional
+    // --selectvalues/--selecttitle/--selectdefault zip.
+    let jsonSelectItems = (CLOptionMultiOptions(optionName: appArguments.selectItem.long)
+                           + CLOptionMultiOptions(optionName: appArguments.dropdownTitle.long))
+        .map { JSON(parseJSON: $0) }
+        .filter { $0.type == .dictionary }
+
+    if appArguments.dropdownValues.present || appArguments.selectItem.present || !jsonSelectItems.isEmpty {
+        writeLog("select list present")
+
+        for item in jsonSelectItems {
+            userInputState.dropdownItems.append(makeDropDownItem(from: item))
+        }
+        if !jsonSelectItems.isEmpty {
+            // Downstream views gate on dropdownValues being present, so ensure the select
+            // renders even when items came only from --selectitem / a JSON --selecttitle.
+            appArguments.dropdownValues.present = true
+        }
+
         // checking for the pre 1.10 way of defining a select list
         if json[appArguments.dropdownValues.long].exists() && !json["selectitems"].exists() {
             writeLog("processing select list from json")
@@ -689,21 +722,16 @@ func processCLOptions(json: JSON = getJSON()) {
         if json["selectitems"].exists() {
             writeLog("processing select items from json")
             for index in 0..<json["selectitems"].count {
-                userInputState.dropdownItems.append(DropDownItems(
-                        title: json["selectitems"][index]["title"].stringValue,
-                        name: json["selectitems"][index]["name"].stringValue,
-                        values: (json["selectitems"][index]["values"].arrayValue.map {$0.stringValue}).map { $0.trimmingCharacters(in: .whitespaces) },
-                        defaultValue: json["selectitems"][index]["default"].stringValue,
-                        selectedValue: json["selectitems"][index]["default"].stringValue,
-                        required: json["selectitems"][index]["required"].boolValue,
-                        style: json["selectitems"][index]["style"].stringValue
-                ))
+                userInputState.dropdownItems.append(makeDropDownItem(from: json["selectitems"][index]))
             }
 
         } else {
             writeLog("processing select list from command line arguments")
             let dropdownValues = CLOptionMultiOptions(optionName: appArguments.dropdownValues.long)
+            // JSON --selecttitle values were handled above as standalone items; keep them out of
+            // the positional label list so they aren't misread as plain labels.
             var dropdownLabels = CLOptionMultiOptions(optionName: appArguments.dropdownTitle.long)
+                .filter { JSON(parseJSON: $0).type != .dictionary }
             var dropdownDefaults = CLOptionMultiOptions(optionName: appArguments.dropdownDefault.long)
 
             // need to make sure the title and default value arrays are at least as
