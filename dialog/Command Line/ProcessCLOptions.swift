@@ -297,6 +297,38 @@ func clampDate(_ date: Date, min: Date?, max: Date?) -> Date {
     return result
 }
 
+/// Builds a `TextFieldState` from a JSON object. Shared by the whole-config JSON path
+/// (`--jsonstring` / `--jsonfile`) and the per-argument JSON form (`--textfield '{...}'`) so both
+/// accept exactly the same keys and can't drift apart.
+func makeTextFieldState(from field: JSON) -> TextFieldState {
+    let minDate = parseBoundaryDate(field["mindate"].stringValue)
+    let maxDate = parseBoundaryDate(field["maxdate"].stringValue)
+    let seedDate = (field["date"].boolValue || field["time"].boolValue)
+        ? clampDate(parseDateOrNow(field["value"].stringValue), min: minDate, max: maxDate)
+        : Date.now
+    return TextFieldState(
+        editor: field["editor"].boolValue,
+        fileSelect: field["fileselect"].boolValue,
+        fileType: field["filetype"].stringValue,
+        passwordFill: field["passwordfill"].boolValue,
+        prompt: field["prompt"].stringValue,
+        regex: field["regex"].stringValue,
+        regexError: field["regexerror"].stringValue,
+        required: field["required"].boolValue,
+        secure: field["secure"].boolValue,
+        title: field["title"].stringValue,
+        name: field["name"].stringValue,
+        value: field["value"].stringValue,
+        date: seedDate,
+        showDate: field["date"].boolValue,
+        showTime: field["time"].boolValue,
+        minDate: minDate,
+        maxDate: maxDate,
+        dateOutputFormat: field["format"].stringValue,
+        confirm: field["confirm"].boolValue,
+        initialPath: field["path"].stringValue)
+}
+
 /// Format a Date using strftime(3) — the same specifiers the shell `date` command uses
 /// (e.g. "+%Y-%m-%d", "+%s" for epoch). A leading "+" is accepted and stripped, matching
 /// the `date` convention. Returns "" if the format produces no output.
@@ -701,38 +733,19 @@ func processCLOptions(json: JSON = getJSON()) {
                 if json[appArguments.textField.long][index]["title"].stringValue == "" {
                     userInputState.textFields.append(TextFieldState(title: String(json[appArguments.textField.long][index].stringValue)))
                 } else {
-                    let field = json[appArguments.textField.long][index]
-                    let jsonMinDate = parseBoundaryDate(String(field["mindate"].stringValue))
-                    let jsonMaxDate = parseBoundaryDate(String(field["maxdate"].stringValue))
-                    let jsonSeedDate = (field["date"].boolValue || field["time"].boolValue)
-                        ? clampDate(parseDateOrNow(String(field["value"].stringValue)), min: jsonMinDate, max: jsonMaxDate)
-                        : Date.now
-                    userInputState.textFields.append(TextFieldState(
-                        editor: Bool(field["editor"].boolValue),
-                        fileSelect: Bool(field["fileselect"].boolValue),
-                        fileType: String(field["filetype"].stringValue),
-                        passwordFill: Bool(field["passwordfill"].boolValue),
-                        prompt: String(field["prompt"].stringValue),
-                        regex: String(field["regex"].stringValue),
-                        regexError: String(field["regexerror"].stringValue),
-                        required: Bool(field["required"].boolValue),
-                        secure: Bool(field["secure"].boolValue),
-                        title: String(field["title"].stringValue),
-                        name: String(field["name"].stringValue),
-                        value: String(field["value"].stringValue),
-                        date: jsonSeedDate,
-                        showDate: Bool(field["date"].boolValue),
-                        showTime: Bool(field["time"].boolValue),
-                        minDate: jsonMinDate,
-                        maxDate: jsonMaxDate,
-                        dateOutputFormat: String(field["format"].stringValue),
-                        confirm: Bool(field["confirm"].boolValue),
-                        initialPath: String(field["path"].stringValue))
-                    )
+                    userInputState.textFields.append(makeTextFieldState(from: json[appArguments.textField.long][index]))
                 }
             }
         } else {
             for textFieldOption in CLOptionMultiOptions(optionName: appArguments.textField.long) {
+                // Per-argument JSON: --textfield '{"secure":true,"prompt":"…"}'. When the value
+                // parses as a JSON object, build the field from it using the same schema as
+                // --jsonstring; otherwise fall through to the comma-separated form below.
+                let parsedJSON = JSON(parseJSON: textFieldOption)
+                if parsedJSON.type == .dictionary {
+                    userInputState.textFields.append(makeTextFieldState(from: parsedJSON))
+                    continue
+                }
                 let items = textFieldOption.split(usingRegex: appDefaults.argRegex)
                 var fieldEditor: Bool = false
                 var fieldFileSelect: Bool = false
