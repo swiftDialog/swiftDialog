@@ -88,6 +88,9 @@ struct SDHelp {
 
         Example1: \"colour=#00A4C7,weight=light,size=60\"
         Example2: \"name=Chalkboard,colour=#FFD012,size=40\"
+
+        These properties may instead be supplied as a JSON object using the same keys, e.g.
+            --\(appArguments.titleFont.long) '{"name":"Chalkboard","colour":"#FFD012","size":40}'
 """
 
         argument.messageOption.helpShort = "Set the dialog message"
@@ -142,6 +145,9 @@ struct SDHelp {
             name=<fontname>           - Name of a font family to use. Show available fonts with --\(argument.listFonts.long)
 
         example: \"colour=#00A4C7,size=60\"
+
+        These properties may instead be supplied as a JSON object using the same keys, e.g.
+            --\(argument.messageFont.long) '{"colour":"#00A4C7","size":16}'
 
         ## NOTE: swiftDialog 2.3 and later do not support changes to font name or weight
 """

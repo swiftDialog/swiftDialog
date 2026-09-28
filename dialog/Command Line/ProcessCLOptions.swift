@@ -370,6 +370,53 @@ func makeDropDownItem(from field: JSON) -> DropDownItems {
         style: field["style"].stringValue)
 }
 
+/// Applies title-font settings from a JSON object to appvars. Shared by the whole-config JSON path
+/// and the per-argument form (`--titlefont '{...}'`) so both accept the same keys.
+func applyTitleFont(from field: JSON) {
+    if field["size"].exists() {
+        appvars.titleFontSize = jsonCGFloat(field["size"], default: appvars.titleFontSize, context: "titlefont size")
+    }
+    if field["weight"].exists() {
+        appvars.titleFontWeight = Font.Weight(argument: field["weight"].stringValue)
+    }
+    if field["colour"].exists() {
+        appvars.titleFontColour = Color(argument: field["colour"].stringValue)
+    } else if field["color"].exists() {
+        appvars.titleFontColour = Color(argument: field["color"].stringValue)
+    }
+    if field["name"].exists() {
+        appvars.titleFontName = field["name"].stringValue
+    }
+    if field["shadow"].exists() {
+        appvars.titleFontShadow = field["shadow"].boolValue
+    }
+    if field["alignment"].exists() {
+        appvars.titleFontAlignment = field["alignment"].stringValue
+    }
+    if field["offset"].exists() {
+        appvars.titleFontOffset = jsonCGFloat(field["offset"], default: appvars.titleFontOffset, context: "titlefont offset")
+    }
+}
+
+/// Applies message-font settings from a JSON object to appvars. Shared by the whole-config JSON
+/// path and the per-argument form (`--messagefont '{...}'`).
+func applyMessageFont(from field: JSON) {
+    if field["size"].exists() {
+        appvars.messageFontSize = jsonCGFloat(field["size"], default: appvars.messageFontSize, context: "messagefont size")
+    }
+    if field["weight"].exists() {
+        appvars.messageFontWeight = Font.Weight(argument: field["weight"].stringValue)
+    }
+    if field["colour"].exists() {
+        appvars.messageFontColour = Color(argument: field["colour"].stringValue)
+    } else if field["color"].exists() {
+        appvars.messageFontColour = Color(argument: field["color"].stringValue)
+    }
+    if field["name"].exists() {
+        appvars.messageFontName = field["name"].stringValue
+    }
+}
+
 /// Format a Date using strftime(3) — the same specifiers the shell `date` command uses
 /// (e.g. "+%Y-%m-%d", "+%s" for epoch). A leading "+" is accepted and stripped, matching
 /// the `date` convention. Returns "" if the format produces no output.
@@ -1163,30 +1210,13 @@ func processCLOptions(json: JSON = getJSON()) {
     if appArguments.titleFont.present {
         writeLog("\(appArguments.titleFont.long) present")
 
-        if appArguments.titleFont.value == "" {
-                                    writeLog("titleFont.object : \(json[appArguments.titleFont.long].object)")
-
-            if json[appArguments.titleFont.long]["size"].exists() {
-                appvars.titleFontSize = jsonCGFloat(json[appArguments.titleFont.long]["size"], default: appvars.titleFontSize, context: "titlefont size")
-            }
-            if json[appArguments.titleFont.long]["weight"].exists() {
-                appvars.titleFontWeight = Font.Weight(argument: json[appArguments.titleFont.long]["weight"].stringValue)
-            }
-            if json[appArguments.titleFont.long]["colour"].exists() {
-                appvars.titleFontColour = Color(argument: json[appArguments.titleFont.long]["colour"].stringValue)
-                writeLog("found a colour of \(json[appArguments.titleFont.long]["colour"].stringValue)", logLevel: .debug)
-            } else if json[appArguments.titleFont.long]["color"].exists() {
-                appvars.titleFontColour = Color(argument: json[appArguments.titleFont.long]["color"].stringValue)
-            }
-            if json[appArguments.titleFont.long]["name"].exists() {
-                appvars.titleFontName = json[appArguments.titleFont.long]["name"].stringValue
-            }
-            if json[appArguments.titleFont.long]["alignment"].exists() {
-                appvars.titleFontAlignment = json[appArguments.titleFont.long]["alignment"].stringValue
-            }
-            if json[appArguments.titleFont.long]["offset"].exists() {
-                appvars.titleFontOffset = jsonCGFloat(json[appArguments.titleFont.long]["offset"], default: appvars.titleFontOffset, context: "titlefont offset")
-            }
+        let titleFontJSON = JSON(parseJSON: appArguments.titleFont.value)
+        if titleFontJSON.type == .dictionary {
+            // Per-argument JSON: --titlefont '{"size":20,"weight":"bold"}'
+            applyTitleFont(from: titleFontJSON)
+        } else if appArguments.titleFont.value == "" {
+            // Whole-config JSON object (--jsonstring/--jsonfile)
+            applyTitleFont(from: json[appArguments.titleFont.long])
         } else {
             writeLog("titleFont.value : \(appArguments.titleFont.value)")
             let fontCLValues = appArguments.titleFont.value
@@ -1231,25 +1261,15 @@ func processCLOptions(json: JSON = getJSON()) {
     if appArguments.messageFont.present {
         writeLog("\(appArguments.messageFont.long) present")
 
-        if appArguments.messageFont.value == "" {
-                                    writeLog("messageFont.object : \(json[appArguments.messageFont.long].object)")
-            if json[appArguments.messageFont.long]["size"].exists() {
-                appvars.messageFontSize = jsonCGFloat(json[appArguments.messageFont.long]["size"], default: appvars.messageFontSize, context: "messagefont size")
-            }
-            if json[appArguments.messageFont.long]["weight"].exists() {
-                appvars.messageFontWeight = Font.Weight(argument: json[appArguments.messageFont.long]["weight"].stringValue)
-            }
-            if json[appArguments.messageFont.long]["colour"].exists() {
-                appvars.messageFontColour = Color(argument: json[appArguments.messageFont.long]["colour"].stringValue)
-            } else if json[appArguments.messageFont.long]["color"].exists() {
-                appvars.messageFontColour = Color(argument: json[appArguments.messageFont.long]["color"].stringValue)
-            }
-            if json[appArguments.messageFont.long]["name"].exists() {
-                appvars.messageFontName = json[appArguments.messageFont.long]["name"].stringValue
-            }
+        let messageFontJSON = JSON(parseJSON: appArguments.messageFont.value)
+        if messageFontJSON.type == .dictionary {
+            // Per-argument JSON: --messagefont '{"size":14,"colour":"#333"}'
+            applyMessageFont(from: messageFontJSON)
+        } else if appArguments.messageFont.value == "" {
+            // Whole-config JSON object (--jsonstring/--jsonfile)
+            applyMessageFont(from: json[appArguments.messageFont.long])
         } else {
-
-                                    writeLog("messageFont.value : \(appArguments.messageFont.value)")
+            writeLog("messageFont.value : \(appArguments.messageFont.value)")
             let fontCLValues = appArguments.messageFont.value
             var fontValues = [""]
             //split by ,
