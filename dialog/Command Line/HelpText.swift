@@ -761,6 +761,9 @@ struct SDHelp {
                                        --\(appArguments.textField.long) <text>,fileselect,filetype="jpeg jpg png"
                                        --\(appArguments.textField.long) <text>,regex="\\d{6}",prompt="000000",regexerror="Enter 6 digits"
         (secure fields cannot have the prompt modifier applied)
+
+        A field may instead be supplied as a JSON object using the same keys, e.g.
+            --\(appArguments.textField.long) '{"title":"Name","secure":true,"prompt":"…","required":true}'
 """
 
         argument.textFieldLiveValidation.helpShort = "Enable live validation of textfield regex requirements"
@@ -782,6 +785,9 @@ struct SDHelp {
 
         Modifiers:
             name       - Output will use this value as the key instead of the title
+
+        A checkbox may instead be supplied as a JSON object using the same keys, e.g.
+            --\(appArguments.checkbox.long) '{"label":"Enable telemetry","checked":true,"enableButton1":true}'
 """
 
         argument.checkboxStyle.helpShort = "Change the appearance of checkboxes"
@@ -828,6 +834,9 @@ struct SDHelp {
         argument.listItem.helpShort = "Enable a list item with the specified label"
         argument.listItem.helpLong = """
         Multiple items can be added by specifying --\(appArguments.listItem.long) multiple times
+
+        A single item may also be supplied as a JSON object using the same keys, e.g.
+            --\(appArguments.listItem.long) '{"title":"Downloading","status":"wait","statustext":"Working"}'
 
         Alternatly, specify a list item with either of the following JSON formats (in conjunction with --\(appArguments.jsonFile.long) or \(appArguments.jsonString.long):
         Simple:

@@ -329,6 +329,32 @@ func makeTextFieldState(from field: JSON) -> TextFieldState {
         initialPath: field["path"].stringValue)
 }
 
+/// Builds a `CheckBoxes` from a JSON object. Shared by the whole-config JSON path and the
+/// per-argument JSON form (`--checkbox '{...}'`) so both accept the same keys.
+func makeCheckBox(from field: JSON) -> CheckBoxes {
+    CheckBoxes(
+        label: field["label"].stringValue,
+        name: field["name"].stringValue,
+        icon: field["icon"].stringValue,
+        checked: field["checked"].boolValue,
+        disabled: field["disabled"].boolValue,
+        enablesButton1: field["enableButton1"].boolValue)
+}
+
+/// Builds a `ListItems` from a JSON object. Shared by the whole-config JSON path and the
+/// per-argument JSON form (`--listitem '{...}'`) so both accept the same keys.
+func makeListItem(from field: JSON) -> ListItems {
+    let iconAlpha = CGFloat(field["iconalpha"].exists() ? field["iconalpha"].floatValue : 1.0)
+    return ListItems(
+        title: field["title"].stringValue,
+        subTitle: field["subtitle"].stringValue,
+        icon: field["icon"].stringValue,
+        iconAlpha: iconAlpha,
+        statusText: field["statustext"].stringValue,
+        statusIcon: field["status"].stringValue,
+        action: field["action"].stringValue)
+}
+
 /// Format a Date using strftime(3) — the same specifiers the shell `date` command uses
 /// (e.g. "+%Y-%m-%d", "+%s" for epoch). A leading "+" is accepted and stripped, matching
 /// the `date` convention. Returns "" if the format produces no output.
@@ -856,17 +882,18 @@ func processCLOptions(json: JSON = getJSON()) {
         writeLog("\(appArguments.checkbox.long) present")
         if json[appArguments.checkbox.long].exists() {
             for index in 0..<json[appArguments.checkbox.long].arrayValue.count {
-                let cbLabel = json[appArguments.checkbox.long][index]["label"].stringValue
-                let cbChecked = json[appArguments.checkbox.long][index]["checked"].boolValue
-                let cbDisabled = json[appArguments.checkbox.long][index]["disabled"].boolValue
-                let cbIcon = json[appArguments.checkbox.long][index]["icon"].stringValue
-                let cbButtonEnable = json[appArguments.checkbox.long][index]["enableButton1"].boolValue
-                let cbName = json[appArguments.checkbox.long][index]["name"].stringValue
-
-                userInputState.checkBoxes.append(CheckBoxes(label: cbLabel, name: cbName, icon: cbIcon, checked: cbChecked, disabled: cbDisabled, enablesButton1: cbButtonEnable))
+                userInputState.checkBoxes.append(makeCheckBox(from: json[appArguments.checkbox.long][index]))
             }
         } else {
             for checkboxes in CLOptionMultiOptions(optionName: appArguments.checkbox.long) {
+                // Per-argument JSON: --checkbox '{"label":"…","checked":true}'. When the value
+                // parses as a JSON object, build from the same schema as --jsonstring; otherwise
+                // fall through to the comma-separated form below.
+                let parsedJSON = JSON(parseJSON: checkboxes)
+                if parsedJSON.type == .dictionary {
+                    userInputState.checkBoxes.append(makeCheckBox(from: parsedJSON))
+                    continue
+                }
                 let items = checkboxes.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
                 var label: String = ""
                 var name: String = ""
@@ -979,22 +1006,21 @@ func processCLOptions(json: JSON = getJSON()) {
                 if json[appArguments.listItem.long][index]["title"].stringValue == "" {
                     userInputState.listItems.append(ListItems(title: String(json[appArguments.listItem.long][index].stringValue)))
                 } else {
-                    let iconAlpha: CGFloat = CGFloat(json[appArguments.listItem.long][index]["iconalpha"].exists() ?
-                                                     json[appArguments.listItem.long][index]["iconalpha"].floatValue : 1.0)
-                    userInputState.listItems.append(ListItems(title: String(json[appArguments.listItem.long][index]["title"].stringValue),
-                                               subTitle: String(json[appArguments.listItem.long][index]["subtitle"].stringValue),
-                                               icon: String(json[appArguments.listItem.long][index]["icon"].stringValue),
-                                               iconAlpha: iconAlpha,
-                                               statusText: String(json[appArguments.listItem.long][index]["statustext"].stringValue),
-                                               statusIcon: String(json[appArguments.listItem.long][index]["status"].stringValue),
-                                                action: String(json[appArguments.listItem.long][index]["action"].stringValue))
-                                )
+                    userInputState.listItems.append(makeListItem(from: json[appArguments.listItem.long][index]))
                 }
             }
 
         } else {
 
             for listItem in CLOptionMultiOptions(optionName: appArguments.listItem.long) {
+                // Per-argument JSON: --listitem '{"title":"…","status":"wait"}'. When the value
+                // parses as a JSON object, build from the same schema as --jsonstring; otherwise
+                // fall through to the comma-separated form below.
+                let parsedJSON = JSON(parseJSON: listItem)
+                if parsedJSON.type == .dictionary {
+                    userInputState.listItems.append(makeListItem(from: parsedJSON))
+                    continue
+                }
                 let items = listItem.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
                 var title: String = ""
                 var subTitle: String = ""
