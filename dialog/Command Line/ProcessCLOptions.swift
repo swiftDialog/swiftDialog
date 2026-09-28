@@ -335,7 +335,7 @@ func makeCheckBox(from field: JSON) -> CheckBoxes {
     CheckBoxes(
         label: field["label"].stringValue,
         name: field["name"].stringValue,
-        icon: field["icon"].stringValue,
+        icon: iconNodeToString(field["icon"]),
         checked: field["checked"].boolValue,
         disabled: field["disabled"].boolValue,
         enablesButton1: field["enableButton1"].boolValue)
@@ -348,7 +348,7 @@ func makeListItem(from field: JSON) -> ListItems {
     return ListItems(
         title: field["title"].stringValue,
         subTitle: field["subtitle"].stringValue,
-        icon: field["icon"].stringValue,
+        icon: iconNodeToString(field["icon"]),
         iconAlpha: iconAlpha,
         statusText: field["statustext"].stringValue,
         statusIcon: field["status"].stringValue,
