@@ -80,3 +80,27 @@ final class IconJSONTests: XCTestCase {
         XCTAssertEqual(normalizedIconValue("{}"), "")
     }
 }
+
+final class ButtonSymbolJSONTests: XCTestCase {
+
+    func testNameColourPosition() {
+        XCTAssertEqual(normalizedButtonSymbol(#"{"name":"checkmark.circle","colour":"green","position":"trailing"}"#),
+                       "checkmark.circle,trailing,colour=green")
+    }
+
+    // Button palettes are dash-joined (the parser splits button palettes on "-").
+    func testPaletteIsDashJoined() {
+        XCTAssertEqual(normalizedButtonSymbol(#"{"name":"paintpalette","rendering":"palette","palette":["red","green","blue"]}"#),
+                       "paintpalette,palette,palette=red-green-blue")
+    }
+
+    func testSizeAndSfAlias() {
+        XCTAssertEqual(normalizedButtonSymbol(#"{"sf":"gear","size":20}"#), "gear,size=20")
+    }
+
+    func testNonJSONUnchanged() {
+        for value in ["gear,trailing,colour=red", "gear", "{nope", #"["a"]"#] {
+            XCTAssertEqual(normalizedButtonSymbol(value), value, "should pass through: \(value)")
+        }
+    }
+}

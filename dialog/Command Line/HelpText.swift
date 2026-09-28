@@ -441,6 +441,11 @@ struct SDHelp {
           size: in the format size=<num>
           color: in the format color=<text|hex> - if multicolour rendering mode is set, color is ignored
 
+        May instead be supplied as a JSON object, e.g.
+            --button1symbol '{"name":"checkmark.circle","colour":"green","position":"trailing"}'
+            --button1symbol '{"name":"paintpalette","rendering":"palette","palette":["red","green","blue"]}'
+        Keys: name|sf|symbol, position, rendering|mode, size, colour|color, palette (array).
+
 """
         
         argument.button1ActionOption.helpShort = "Set the Button1 action"

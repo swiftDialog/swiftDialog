@@ -1310,6 +1310,17 @@ func processCLOptions(json: JSON = getJSON()) {
         }
     }
 
+    // Button symbols supplied as a JSON object in whole-config JSON: serialise the object so the
+    // button view's normaliser converts it to the legacy string. (Per-argument --buttonNsymbol
+    // '{...}' already arrives as a string and is normalised in the view.)
+    for symbol in [\CommandLineArguments.button1Symbol, \CommandLineArguments.button2Symbol, \CommandLineArguments.buttonInfoSymbol] {
+        let long = appArguments[keyPath: symbol].long
+        if json[long].type == .dictionary {
+            appArguments[keyPath: symbol].value = iconNodeToString(json[long])
+            appArguments[keyPath: symbol].present = true
+        }
+    }
+
     if appArguments.iconOption.value != "" {
         writeLog("\(appArguments.iconOption.long) present")
         appArguments.iconOption.present = true

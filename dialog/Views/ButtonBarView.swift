@@ -252,6 +252,11 @@ struct NewButton: View {
     @State private var needsFocusRefresh = false
 
     private func symbolProcessing() {
+        // Accept a JSON object as the symbol value and normalise it to the legacy comma form
+        // (e.g. {"name":"gear","colour":"red"} -> "gear,colour=red"). Non-JSON values are
+        // returned unchanged, so the existing comma-separated form is unaffected.
+        symbolName = normalizedButtonSymbol(symbolName)
+
         // Populate symbol properties from name
         let symbolParts = symbolName.split(separator: ",").map { $0.lowercased() }
         guard let firstName = symbolParts.first else { return }
