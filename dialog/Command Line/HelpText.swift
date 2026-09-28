@@ -88,6 +88,9 @@ struct SDHelp {
 
         Example1: \"colour=#00A4C7,weight=light,size=60\"
         Example2: \"name=Chalkboard,colour=#FFD012,size=40\"
+
+        These properties may instead be supplied as a JSON object using the same keys, e.g.
+            --\(appArguments.titleFont.long) '{"name":"Chalkboard","colour":"#FFD012","size":40}'
 """
 
         argument.messageOption.helpShort = "Set the dialog message"
@@ -142,6 +145,9 @@ struct SDHelp {
             name=<fontname>           - Name of a font family to use. Show available fonts with --\(argument.listFonts.long)
 
         example: \"colour=#00A4C7,size=60\"
+
+        These properties may instead be supplied as a JSON object using the same keys, e.g.
+            --\(argument.messageFont.long) '{"colour":"#00A4C7","size":16}'
 
         ## NOTE: swiftDialog 2.3 and later do not support changes to font name or weight
 """
@@ -358,6 +364,15 @@ struct SDHelp {
         animation=<keyword>  *(macOS 14)* - Uses animated SF symbols. Accepts one of the following keywords:
                                            variable, variable.reversing, variable.iterative, variable.iterative.reversing
                                            variable.cumulative, pulse, pulse.bylayer
+
+        The icon (and overlay icon) may instead be supplied as a JSON object using the same
+        properties as the comma-separated form, e.g.
+            --icon '{"sf":"gear","colour":"blue","weight":"bold"}'
+            --icon '{"sf":"gear","palette":["red","green","blue"]}'
+            --icon '{"path":"/Applications/Chess.app"}'
+            --icon '{"light":{"sf":"sun.max"},"dark":{"sf":"moon","colour":"white"}}'
+        Keys: sf|name|symbol, weight, colour|color, colour2, colour3, palette (array),
+              animation, bgcolour, auto (true|false), icon|path|value (non-symbol), light, dark.
         """
 
         argument.iconOption.helpShort = "Set the dialog icon"
@@ -425,6 +440,11 @@ struct SDHelp {
                      e.g. palette=red-green-blue
           size: in the format size=<num>
           color: in the format color=<text|hex> - if multicolour rendering mode is set, color is ignored
+
+        May instead be supplied as a JSON object, e.g.
+            --button1symbol '{"name":"checkmark.circle","colour":"green","position":"trailing"}'
+            --button1symbol '{"name":"paintpalette","rendering":"palette","palette":["red","green","blue"]}'
+        Keys: name|sf|symbol, position, rendering|mode, size, colour|color, palette (array).
 
 """
         
@@ -704,6 +724,23 @@ struct SDHelp {
             searchable - Marks the List as searchable. Typing in the provided textfield will filter the list of results. Useful
                          for long lists or lists with similar items.
             multiselect- Allows mulltiple options to be selected
+
+        A complete select list may instead be supplied as a single JSON object (using the same keys
+        as "selectitems") via --\(argument.selectItem.long), or by passing the object to --\(argument.dropdownTitle.long):
+            --\(argument.selectItem.long) '{"title":"Region","values":["AU","US","UK"],"default":"AU","required":true}'
+        When using the JSON form, put the whole item in the object rather than pairing it with --\(argument.dropdownValues.long).
+"""
+
+        argument.selectItem.helpShort = "Define a select list item as a JSON object"
+        argument.selectItem.helpUsage = "'{\"title\":\"<text>\",\"values\":[...],\"default\":\"<text>\"}'"
+        argument.selectItem.helpLong = """
+        Defines a single select list item from a JSON object, using the same keys as "selectitems"
+        (title, values, default, required, style, name). Repeatable for multiple lists.
+
+        --\(argument.selectItem.long) '{"title":"Region","values":["AU","US","UK"],"default":"AU","required":true}'
+
+        This is synonymous with passing the same JSON object to --\(argument.dropdownTitle.long). The item is
+        self-contained, so it does not need an accompanying --\(argument.dropdownValues.long).
 """
 
         argument.dropdownValues.helpShort = "Select list values"
@@ -761,6 +798,9 @@ struct SDHelp {
                                        --\(appArguments.textField.long) <text>,fileselect,filetype="jpeg jpg png"
                                        --\(appArguments.textField.long) <text>,regex="\\d{6}",prompt="000000",regexerror="Enter 6 digits"
         (secure fields cannot have the prompt modifier applied)
+
+        A field may instead be supplied as a JSON object using the same keys, e.g.
+            --\(appArguments.textField.long) '{"title":"Name","secure":true,"prompt":"…","required":true}'
 """
 
         argument.textFieldLiveValidation.helpShort = "Enable live validation of textfield regex requirements"
@@ -782,6 +822,9 @@ struct SDHelp {
 
         Modifiers:
             name       - Output will use this value as the key instead of the title
+
+        A checkbox may instead be supplied as a JSON object using the same keys, e.g.
+            --\(appArguments.checkbox.long) '{"label":"Enable telemetry","checked":true,"enableButton1":true}'
 """
 
         argument.checkboxStyle.helpShort = "Change the appearance of checkboxes"
@@ -828,6 +871,9 @@ struct SDHelp {
         argument.listItem.helpShort = "Enable a list item with the specified label"
         argument.listItem.helpLong = """
         Multiple items can be added by specifying --\(appArguments.listItem.long) multiple times
+
+        A single item may also be supplied as a JSON object using the same keys, e.g.
+            --\(appArguments.listItem.long) '{"title":"Downloading","status":"wait","statustext":"Working"}'
 
         Alternatly, specify a list item with either of the following JSON formats (in conjunction with --\(appArguments.jsonFile.long) or \(appArguments.jsonString.long):
         Simple:

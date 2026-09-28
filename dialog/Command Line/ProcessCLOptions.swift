@@ -297,6 +297,133 @@ func clampDate(_ date: Date, min: Date?, max: Date?) -> Date {
     return result
 }
 
+/// Builds a `TextFieldState` from a JSON object. Shared by the whole-config JSON path
+/// (`--jsonstring` / `--jsonfile`) and the per-argument JSON form (`--textfield '{...}'`) so both
+/// accept exactly the same keys and can't drift apart.
+func makeTextFieldState(from field: JSON) -> TextFieldState {
+    let minDate = parseBoundaryDate(field["mindate"].stringValue)
+    let maxDate = parseBoundaryDate(field["maxdate"].stringValue)
+    let seedDate = (field["date"].boolValue || field["time"].boolValue)
+        ? clampDate(parseDateOrNow(field["value"].stringValue), min: minDate, max: maxDate)
+        : Date.now
+    return TextFieldState(
+        editor: field["editor"].boolValue,
+        fileSelect: field["fileselect"].boolValue,
+        fileType: field["filetype"].stringValue,
+        passwordFill: field["passwordfill"].boolValue,
+        prompt: field["prompt"].stringValue,
+        regex: field["regex"].stringValue,
+        regexError: field["regexerror"].stringValue,
+        required: field["required"].boolValue,
+        secure: field["secure"].boolValue,
+        title: field["title"].stringValue,
+        name: field["name"].stringValue,
+        value: field["value"].stringValue,
+        date: seedDate,
+        showDate: field["date"].boolValue,
+        showTime: field["time"].boolValue,
+        minDate: minDate,
+        maxDate: maxDate,
+        dateOutputFormat: field["format"].stringValue,
+        confirm: field["confirm"].boolValue,
+        initialPath: field["path"].stringValue)
+}
+
+/// Builds a `CheckBoxes` from a JSON object. Shared by the whole-config JSON path and the
+/// per-argument JSON form (`--checkbox '{...}'`) so both accept the same keys.
+func makeCheckBox(from field: JSON) -> CheckBoxes {
+    CheckBoxes(
+        label: field["label"].stringValue,
+        name: field["name"].stringValue,
+        icon: iconNodeToString(field["icon"]),
+        checked: field["checked"].boolValue,
+        disabled: field["disabled"].boolValue,
+        enablesButton1: field["enableButton1"].boolValue)
+}
+
+/// Builds a `ListItems` from a JSON object. Shared by the whole-config JSON path and the
+/// per-argument JSON form (`--listitem '{...}'`) so both accept the same keys.
+func makeListItem(from field: JSON) -> ListItems {
+    let iconAlpha = CGFloat(field["iconalpha"].exists() ? field["iconalpha"].floatValue : 1.0)
+    return ListItems(
+        title: field["title"].stringValue,
+        subTitle: field["subtitle"].stringValue,
+        icon: iconNodeToString(field["icon"]),
+        iconAlpha: iconAlpha,
+        statusText: field["statustext"].stringValue,
+        statusIcon: field["status"].stringValue,
+        action: field["action"].stringValue)
+}
+
+/// Builds a `DropDownItems` from a JSON object. Shared by the whole-config `selectitems` path and
+/// the per-argument JSON form (`--selectitem '{...}'`, or a JSON object passed to `--selecttitle`)
+/// so all three accept the same keys.
+func makeDropDownItem(from field: JSON) -> DropDownItems {
+    let values = field["values"].arrayValue.map { $0.stringValue.trimmingCharacters(in: .whitespaces) }
+    return DropDownItems(
+        title: field["title"].stringValue,
+        name: field["name"].stringValue,
+        values: values,
+        defaultValue: field["default"].stringValue,
+        selectedValue: field["default"].stringValue,
+        required: field["required"].boolValue,
+        style: field["style"].stringValue)
+}
+
+/// Applies title-font settings from a JSON object to appvars. Shared by the whole-config JSON path
+/// and the per-argument form (`--titlefont '{...}'`) so both accept the same keys.
+func applyTitleFont(from field: JSON) {
+    if field["size"].exists() {
+        appvars.titleFontSize = jsonCGFloat(field["size"], default: appvars.titleFontSize, context: "titlefont size")
+    }
+    if field["weight"].exists() {
+        appvars.titleFontWeight = Font.Weight(argument: field["weight"].stringValue)
+    }
+    if field["colour"].exists() {
+        appvars.titleFontColour = Color(argument: field["colour"].stringValue)
+    } else if field["color"].exists() {
+        appvars.titleFontColour = Color(argument: field["color"].stringValue)
+    }
+    if field["name"].exists() {
+        appvars.titleFontName = field["name"].stringValue
+    }
+    if field["shadow"].exists() {
+        appvars.titleFontShadow = field["shadow"].boolValue
+    }
+    if field["alignment"].exists() {
+        appvars.titleFontAlignment = field["alignment"].stringValue
+    }
+    if field["offset"].exists() {
+        appvars.titleFontOffset = jsonCGFloat(field["offset"], default: appvars.titleFontOffset, context: "titlefont offset")
+    }
+}
+
+/// Applies message-font settings from a JSON object to appvars. Shared by the whole-config JSON
+/// path and the per-argument form (`--messagefont '{...}'`).
+func applyMessageFont(from field: JSON) {
+    if field["size"].exists() {
+        appvars.messageFontSize = jsonCGFloat(field["size"], default: appvars.messageFontSize, context: "messagefont size")
+    }
+    if field["weight"].exists() {
+        appvars.messageFontWeight = Font.Weight(argument: field["weight"].stringValue)
+    }
+    if field["colour"].exists() {
+        appvars.messageFontColour = Color(argument: field["colour"].stringValue)
+    } else if field["color"].exists() {
+        appvars.messageFontColour = Color(argument: field["color"].stringValue)
+    }
+    if field["name"].exists() {
+        appvars.messageFontName = field["name"].stringValue
+    }
+}
+
+/// Returns an icon value as a string. When the JSON node is an object (the JSON icon schema),
+/// it is serialised back to a JSON string so IconView's normaliser converts it to the legacy
+/// icon string; a plain string node is returned as-is. Keeps IconView the single icon parser.
+func iconNodeToString(_ node: JSON) -> String {
+    node.type == .dictionary ? (node.rawString(options: []) ?? "") : node.stringValue
+}
+
 /// Format a Date using strftime(3) — the same specifiers the shell `date` command uses
 /// (e.g. "+%Y-%m-%d", "+%s" for epoch). A leading "+" is accepted and stripped, matching
 /// the `date` convention. Returns "" if the format produces no output.
@@ -617,8 +744,26 @@ func processCLOptions(json: JSON = getJSON()) {
         appvars.buttonTextSize = appArguments.buttonTextSize.value.floatValue()
     }
 
-    if appArguments.dropdownValues.present {
-        writeLog("\(appArguments.dropdownValues.long) present")
+    // Self-contained JSON select items from --selectitem, or a JSON object passed to --selecttitle.
+    // Each carries its own title/values/default/required/style and is independent of the positional
+    // --selectvalues/--selecttitle/--selectdefault zip.
+    let jsonSelectItems = (CLOptionMultiOptions(optionName: appArguments.selectItem.long)
+                           + CLOptionMultiOptions(optionName: appArguments.dropdownTitle.long))
+        .map { JSON(parseJSON: $0) }
+        .filter { $0.type == .dictionary }
+
+    if appArguments.dropdownValues.present || appArguments.selectItem.present || !jsonSelectItems.isEmpty {
+        writeLog("select list present")
+
+        for item in jsonSelectItems {
+            userInputState.dropdownItems.append(makeDropDownItem(from: item))
+        }
+        if !jsonSelectItems.isEmpty {
+            // Downstream views gate on dropdownValues being present, so ensure the select
+            // renders even when items came only from --selectitem / a JSON --selecttitle.
+            appArguments.dropdownValues.present = true
+        }
+
         // checking for the pre 1.10 way of defining a select list
         if json[appArguments.dropdownValues.long].exists() && !json["selectitems"].exists() {
             writeLog("processing select list from json")
@@ -631,21 +776,16 @@ func processCLOptions(json: JSON = getJSON()) {
         if json["selectitems"].exists() {
             writeLog("processing select items from json")
             for index in 0..<json["selectitems"].count {
-                userInputState.dropdownItems.append(DropDownItems(
-                        title: json["selectitems"][index]["title"].stringValue,
-                        name: json["selectitems"][index]["name"].stringValue,
-                        values: (json["selectitems"][index]["values"].arrayValue.map {$0.stringValue}).map { $0.trimmingCharacters(in: .whitespaces) },
-                        defaultValue: json["selectitems"][index]["default"].stringValue,
-                        selectedValue: json["selectitems"][index]["default"].stringValue,
-                        required: json["selectitems"][index]["required"].boolValue,
-                        style: json["selectitems"][index]["style"].stringValue
-                ))
+                userInputState.dropdownItems.append(makeDropDownItem(from: json["selectitems"][index]))
             }
 
         } else {
             writeLog("processing select list from command line arguments")
             let dropdownValues = CLOptionMultiOptions(optionName: appArguments.dropdownValues.long)
+            // JSON --selecttitle values were handled above as standalone items; keep them out of
+            // the positional label list so they aren't misread as plain labels.
             var dropdownLabels = CLOptionMultiOptions(optionName: appArguments.dropdownTitle.long)
+                .filter { JSON(parseJSON: $0).type != .dictionary }
             var dropdownDefaults = CLOptionMultiOptions(optionName: appArguments.dropdownDefault.long)
 
             // need to make sure the title and default value arrays are at least as
@@ -701,38 +841,19 @@ func processCLOptions(json: JSON = getJSON()) {
                 if json[appArguments.textField.long][index]["title"].stringValue == "" {
                     userInputState.textFields.append(TextFieldState(title: String(json[appArguments.textField.long][index].stringValue)))
                 } else {
-                    let field = json[appArguments.textField.long][index]
-                    let jsonMinDate = parseBoundaryDate(String(field["mindate"].stringValue))
-                    let jsonMaxDate = parseBoundaryDate(String(field["maxdate"].stringValue))
-                    let jsonSeedDate = (field["date"].boolValue || field["time"].boolValue)
-                        ? clampDate(parseDateOrNow(String(field["value"].stringValue)), min: jsonMinDate, max: jsonMaxDate)
-                        : Date.now
-                    userInputState.textFields.append(TextFieldState(
-                        editor: Bool(field["editor"].boolValue),
-                        fileSelect: Bool(field["fileselect"].boolValue),
-                        fileType: String(field["filetype"].stringValue),
-                        passwordFill: Bool(field["passwordfill"].boolValue),
-                        prompt: String(field["prompt"].stringValue),
-                        regex: String(field["regex"].stringValue),
-                        regexError: String(field["regexerror"].stringValue),
-                        required: Bool(field["required"].boolValue),
-                        secure: Bool(field["secure"].boolValue),
-                        title: String(field["title"].stringValue),
-                        name: String(field["name"].stringValue),
-                        value: String(field["value"].stringValue),
-                        date: jsonSeedDate,
-                        showDate: Bool(field["date"].boolValue),
-                        showTime: Bool(field["time"].boolValue),
-                        minDate: jsonMinDate,
-                        maxDate: jsonMaxDate,
-                        dateOutputFormat: String(field["format"].stringValue),
-                        confirm: Bool(field["confirm"].boolValue),
-                        initialPath: String(field["path"].stringValue))
-                    )
+                    userInputState.textFields.append(makeTextFieldState(from: json[appArguments.textField.long][index]))
                 }
             }
         } else {
             for textFieldOption in CLOptionMultiOptions(optionName: appArguments.textField.long) {
+                // Per-argument JSON: --textfield '{"secure":true,"prompt":"…"}'. When the value
+                // parses as a JSON object, build the field from it using the same schema as
+                // --jsonstring; otherwise fall through to the comma-separated form below.
+                let parsedJSON = JSON(parseJSON: textFieldOption)
+                if parsedJSON.type == .dictionary {
+                    userInputState.textFields.append(makeTextFieldState(from: parsedJSON))
+                    continue
+                }
                 let items = textFieldOption.split(usingRegex: appDefaults.argRegex)
                 var fieldEditor: Bool = false
                 var fieldFileSelect: Bool = false
@@ -843,17 +964,18 @@ func processCLOptions(json: JSON = getJSON()) {
         writeLog("\(appArguments.checkbox.long) present")
         if json[appArguments.checkbox.long].exists() {
             for index in 0..<json[appArguments.checkbox.long].arrayValue.count {
-                let cbLabel = json[appArguments.checkbox.long][index]["label"].stringValue
-                let cbChecked = json[appArguments.checkbox.long][index]["checked"].boolValue
-                let cbDisabled = json[appArguments.checkbox.long][index]["disabled"].boolValue
-                let cbIcon = json[appArguments.checkbox.long][index]["icon"].stringValue
-                let cbButtonEnable = json[appArguments.checkbox.long][index]["enableButton1"].boolValue
-                let cbName = json[appArguments.checkbox.long][index]["name"].stringValue
-
-                userInputState.checkBoxes.append(CheckBoxes(label: cbLabel, name: cbName, icon: cbIcon, checked: cbChecked, disabled: cbDisabled, enablesButton1: cbButtonEnable))
+                userInputState.checkBoxes.append(makeCheckBox(from: json[appArguments.checkbox.long][index]))
             }
         } else {
             for checkboxes in CLOptionMultiOptions(optionName: appArguments.checkbox.long) {
+                // Per-argument JSON: --checkbox '{"label":"…","checked":true}'. When the value
+                // parses as a JSON object, build from the same schema as --jsonstring; otherwise
+                // fall through to the comma-separated form below.
+                let parsedJSON = JSON(parseJSON: checkboxes)
+                if parsedJSON.type == .dictionary {
+                    userInputState.checkBoxes.append(makeCheckBox(from: parsedJSON))
+                    continue
+                }
                 let items = checkboxes.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
                 var label: String = ""
                 var name: String = ""
@@ -966,22 +1088,21 @@ func processCLOptions(json: JSON = getJSON()) {
                 if json[appArguments.listItem.long][index]["title"].stringValue == "" {
                     userInputState.listItems.append(ListItems(title: String(json[appArguments.listItem.long][index].stringValue)))
                 } else {
-                    let iconAlpha: CGFloat = CGFloat(json[appArguments.listItem.long][index]["iconalpha"].exists() ?
-                                                     json[appArguments.listItem.long][index]["iconalpha"].floatValue : 1.0)
-                    userInputState.listItems.append(ListItems(title: String(json[appArguments.listItem.long][index]["title"].stringValue),
-                                               subTitle: String(json[appArguments.listItem.long][index]["subtitle"].stringValue),
-                                               icon: String(json[appArguments.listItem.long][index]["icon"].stringValue),
-                                               iconAlpha: iconAlpha,
-                                               statusText: String(json[appArguments.listItem.long][index]["statustext"].stringValue),
-                                               statusIcon: String(json[appArguments.listItem.long][index]["status"].stringValue),
-                                                action: String(json[appArguments.listItem.long][index]["action"].stringValue))
-                                )
+                    userInputState.listItems.append(makeListItem(from: json[appArguments.listItem.long][index]))
                 }
             }
 
         } else {
 
             for listItem in CLOptionMultiOptions(optionName: appArguments.listItem.long) {
+                // Per-argument JSON: --listitem '{"title":"…","status":"wait"}'. When the value
+                // parses as a JSON object, build from the same schema as --jsonstring; otherwise
+                // fall through to the comma-separated form below.
+                let parsedJSON = JSON(parseJSON: listItem)
+                if parsedJSON.type == .dictionary {
+                    userInputState.listItems.append(makeListItem(from: parsedJSON))
+                    continue
+                }
                 let items = listItem.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
                 var title: String = ""
                 var subTitle: String = ""
@@ -1096,30 +1217,13 @@ func processCLOptions(json: JSON = getJSON()) {
     if appArguments.titleFont.present {
         writeLog("\(appArguments.titleFont.long) present")
 
-        if appArguments.titleFont.value == "" {
-                                    writeLog("titleFont.object : \(json[appArguments.titleFont.long].object)")
-
-            if json[appArguments.titleFont.long]["size"].exists() {
-                appvars.titleFontSize = jsonCGFloat(json[appArguments.titleFont.long]["size"], default: appvars.titleFontSize, context: "titlefont size")
-            }
-            if json[appArguments.titleFont.long]["weight"].exists() {
-                appvars.titleFontWeight = Font.Weight(argument: json[appArguments.titleFont.long]["weight"].stringValue)
-            }
-            if json[appArguments.titleFont.long]["colour"].exists() {
-                appvars.titleFontColour = Color(argument: json[appArguments.titleFont.long]["colour"].stringValue)
-                writeLog("found a colour of \(json[appArguments.titleFont.long]["colour"].stringValue)", logLevel: .debug)
-            } else if json[appArguments.titleFont.long]["color"].exists() {
-                appvars.titleFontColour = Color(argument: json[appArguments.titleFont.long]["color"].stringValue)
-            }
-            if json[appArguments.titleFont.long]["name"].exists() {
-                appvars.titleFontName = json[appArguments.titleFont.long]["name"].stringValue
-            }
-            if json[appArguments.titleFont.long]["alignment"].exists() {
-                appvars.titleFontAlignment = json[appArguments.titleFont.long]["alignment"].stringValue
-            }
-            if json[appArguments.titleFont.long]["offset"].exists() {
-                appvars.titleFontOffset = jsonCGFloat(json[appArguments.titleFont.long]["offset"], default: appvars.titleFontOffset, context: "titlefont offset")
-            }
+        let titleFontJSON = JSON(parseJSON: appArguments.titleFont.value)
+        if titleFontJSON.type == .dictionary {
+            // Per-argument JSON: --titlefont '{"size":20,"weight":"bold"}'
+            applyTitleFont(from: titleFontJSON)
+        } else if appArguments.titleFont.value == "" {
+            // Whole-config JSON object (--jsonstring/--jsonfile)
+            applyTitleFont(from: json[appArguments.titleFont.long])
         } else {
             writeLog("titleFont.value : \(appArguments.titleFont.value)")
             let fontCLValues = appArguments.titleFont.value
@@ -1164,25 +1268,15 @@ func processCLOptions(json: JSON = getJSON()) {
     if appArguments.messageFont.present {
         writeLog("\(appArguments.messageFont.long) present")
 
-        if appArguments.messageFont.value == "" {
-                                    writeLog("messageFont.object : \(json[appArguments.messageFont.long].object)")
-            if json[appArguments.messageFont.long]["size"].exists() {
-                appvars.messageFontSize = jsonCGFloat(json[appArguments.messageFont.long]["size"], default: appvars.messageFontSize, context: "messagefont size")
-            }
-            if json[appArguments.messageFont.long]["weight"].exists() {
-                appvars.messageFontWeight = Font.Weight(argument: json[appArguments.messageFont.long]["weight"].stringValue)
-            }
-            if json[appArguments.messageFont.long]["colour"].exists() {
-                appvars.messageFontColour = Color(argument: json[appArguments.messageFont.long]["colour"].stringValue)
-            } else if json[appArguments.messageFont.long]["color"].exists() {
-                appvars.messageFontColour = Color(argument: json[appArguments.messageFont.long]["color"].stringValue)
-            }
-            if json[appArguments.messageFont.long]["name"].exists() {
-                appvars.messageFontName = json[appArguments.messageFont.long]["name"].stringValue
-            }
+        let messageFontJSON = JSON(parseJSON: appArguments.messageFont.value)
+        if messageFontJSON.type == .dictionary {
+            // Per-argument JSON: --messagefont '{"size":14,"colour":"#333"}'
+            applyMessageFont(from: messageFontJSON)
+        } else if appArguments.messageFont.value == "" {
+            // Whole-config JSON object (--jsonstring/--jsonfile)
+            applyMessageFont(from: json[appArguments.messageFont.long])
         } else {
-
-                                    writeLog("messageFont.value : \(appArguments.messageFont.value)")
+            writeLog("messageFont.value : \(appArguments.messageFont.value)")
             let fontCLValues = appArguments.messageFont.value
             var fontValues = [""]
             //split by ,
@@ -1216,18 +1310,29 @@ func processCLOptions(json: JSON = getJSON()) {
         }
     }
 
+    // Button symbols supplied as a JSON object in whole-config JSON: serialise the object so the
+    // button view's normaliser converts it to the legacy string. (Per-argument --buttonNsymbol
+    // '{...}' already arrives as a string and is normalised in the view.)
+    for symbol in [\CommandLineArguments.button1Symbol, \CommandLineArguments.button2Symbol, \CommandLineArguments.buttonInfoSymbol] {
+        let long = appArguments[keyPath: symbol].long
+        if json[long].type == .dictionary {
+            appArguments[keyPath: symbol].value = iconNodeToString(json[long])
+            appArguments[keyPath: symbol].present = true
+        }
+    }
+
     if appArguments.iconOption.value != "" {
         writeLog("\(appArguments.iconOption.long) present")
         appArguments.iconOption.present = true
         if json["icons"].exists() {
             writeLog("processing multiple icons from json")
             for index in 0..<json["icons"].count {
-                userInputState.iconItems.append(Icons(value: json["icons"][index]["icon"].stringValue))
+                userInputState.iconItems.append(Icons(value: iconNodeToString(json["icons"][index]["icon"])))
             }
             // use index 0 for the default icon value
             appArguments.iconOption.value = userInputState.iconItems[0].value
         } else if json["icon"].exists() {
-            userInputState.iconItems.append(Icons(value: json["icon"].stringValue))
+            userInputState.iconItems.append(Icons(value: iconNodeToString(json["icon"])))
         } else {
             for iconOption in CLOptionMultiOptions(optionName: appArguments.iconOption.long) {
                 userInputState.iconItems.append(Icons(value: iconOption))

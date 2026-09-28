@@ -62,6 +62,7 @@ struct CommandLineArguments {
     var dropdownTitle            = CommandlineArgument(long: "selecttitle")
     var dropdownValues           = CommandlineArgument(long: "selectvalues")
     var dropdownDefault          = CommandlineArgument(long: "selectdefault")
+    var selectItem               = CommandlineArgument(long: "selectitem")
     var dropdownStyle            = CommandlineArgument(long: "selectstyle")
     var titleFont                = CommandlineArgument(long: "titlefont")
     var messageFont              = CommandlineArgument(long: "messagefont")
@@ -245,7 +246,7 @@ extension CommandLineArguments {
         \.button1TextOption, \.button1ActionOption, \.button1ShellActionOption, \.button1Symbol, \.button2TextOption,
         \.button2ActionOption, \.button2Symbol, \.buttonInfoTextOption, \.buttonInfoActionOption, \.buttonInfoSymbol,
         \.cardsNextButtonText, \.cardsPreviousButtonText, \.buttonStyle, \.buttonSize, \.buttonTextSize,
-        \.dropdownTitle, \.dropdownValues, \.dropdownDefault, \.dropdownStyle, \.titleFont,
+        \.dropdownTitle, \.dropdownValues, \.dropdownDefault, \.selectItem, \.dropdownStyle, \.titleFont,
         \.messageFont, \.textField, \.textFieldLiveValidation, \.checkbox, \.checkboxStyle,
         \.timerBar, \.progressBar, \.progressText, \.progressTextAlignment, \.mainImage,
         \.mainImageCaption, \.windowWidth, \.windowHeight, \.watermarkImage, \.watermarkAlpha,

@@ -104,6 +104,49 @@ enum IconPosition {
     case trailing
 }
 
+/// If `raw` (trimmed) is a JSON object, returns the equivalent legacy button-symbol string
+/// (e.g. ["name":"gear","position":"trailing","colour":"red"] -> "gear,trailing,colour=red");
+/// otherwise returns `raw` unchanged so the existing comma-separated form is untouched.
+func normalizedButtonSymbol(_ raw: String) -> String {
+    let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard trimmed.hasPrefix("{"),
+          let data = trimmed.data(using: .utf8),
+          let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+        return raw
+    }
+    return buttonSymbolLegacyString(fromJSONObject: object)
+}
+
+/// Converts a JSON button-symbol object into the legacy comma-separated string the button symbol
+/// parser understands. `position`/`rendering` are emitted as bare keywords; `size`/`colour` as
+/// key=value; `palette` as a dash-joined list (the parser splits button palettes on "-").
+func buttonSymbolLegacyString(fromJSONObject object: [String: Any]) -> String {
+    func value(_ keys: String...) -> String? {
+        for (key, val) in object where keys.contains(where: { $0.caseInsensitiveCompare(key) == .orderedSame }) {
+            if val is [Any] { return nil }
+            return "\(val)"
+        }
+        return nil
+    }
+    func array(_ key: String) -> [String]? {
+        for (k, val) in object where k.caseInsensitiveCompare(key) == .orderedSame {
+            if let a = val as? [Any] { return a.map { "\($0)" } }
+        }
+        return nil
+    }
+
+    var tokens: [String] = []
+    if let name = value("name", "sf", "symbol") { tokens.append(name) }
+    if let position = value("position") { tokens.append(position) }
+    if let rendering = value("rendering", "renderingmode", "mode") { tokens.append(rendering) }
+    if let size = value("size") { tokens.append("size=\(size)") }
+    if let colour = value("colour", "color") { tokens.append("colour=\(colour)") }
+    if let palette = array("palette"), !palette.isEmpty {
+        tokens.append("palette=\(palette.joined(separator: "-"))")
+    }
+    return tokens.joined(separator: ",")
+}
+
 extension String {
     var toSymbolPosition: IconPosition? {
         switch self.lowercased() {
