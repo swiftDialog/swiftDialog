@@ -750,6 +750,9 @@ struct SDHelp {
             time       - Presents a time picker instead of a text field. Returns "HH:mm"
                          (combine date and time to pick both; returns "yyyy-MM-dd HH:mm")
                          value= sets the starting date/time (accepts ISO, locale, 12/24h, or epoch)
+            mindate    - With date/time, the earliest selectable date in YYYYMMDD (e.g. mindate=20260101)
+            maxdate    - With date/time, the latest selectable date in YYYYMMDD (e.g. maxdate=20261231)
+                         (set both to limit selection to a range; separators like YYYY-MM-DD are accepted)
             format     - With date/time, sets the returned format using `date` (strftime) syntax,
                          e.g. format="+%s" returns epoch, format="+%Y/%m/%d" returns 2026/07/24
 

@@ -72,6 +72,8 @@ struct TextFieldState: Identifiable, Equatable {
     var date: Date         = Date.now
     var showDate: Bool     = false
     var showTime: Bool     = false
+    var minDate: Date?     = nil        // earliest selectable date (date/time pickers only)
+    var maxDate: Date?     = nil        // latest selectable date (date/time pickers only)
     var dateOutputFormat: String = ""   // strftime-style (e.g. "+%s"); empty = default ISO
     var confirm: Bool     = false
     var validationValue: String = ""
