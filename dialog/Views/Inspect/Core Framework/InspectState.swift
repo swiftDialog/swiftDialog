@@ -1045,7 +1045,8 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                 case "failed", "error":
                     self.failedItems.insert(itemId)
                     self.downloadingItems.remove(itemId)
-                    // Re-evaluate the button: a failed optional item doesn't block it.
+                    // Re-evaluate the button: a failed optional item is settled, so it may have
+                    // been the last thing holding it.
                     if self.allRequiredItemsCompleted {
                         self.checkAndUpdateButtonState()
                     }
@@ -1378,12 +1379,16 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         }
     }
 
-    /// True once every item that must complete has completed. Items are required
-    /// unless their config sets `"required": false`, so optional items may still be
-    /// pending or failed. With no optional items this is the same as "all items complete".
+    /// True once every item has settled. A required item settles only by completing.
+    /// An item that sets `"required": false` also settles by failing, so a failed optional
+    /// item no longer holds the primary button, but one that is still pending does, so the
+    /// user can't click through before anything has been detected or reported as failed.
+    /// With no optional items this is the same as "all items complete".
     var allRequiredItemsCompleted: Bool {
         guard !items.isEmpty else { return false }
-        return items.allSatisfy { $0.required == false || completedItems.contains($0.id) }
+        return items.allSatisfy { item in
+            completedItems.contains(item.id) || (item.required == false && failedItems.contains(item.id))
+        }
     }
 
     /// For best UX, especially in Enrollment scenarios - check if all apps are completed and update button state accordingly
