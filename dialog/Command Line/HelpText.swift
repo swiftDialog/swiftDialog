@@ -790,6 +790,12 @@ struct SDHelp {
             mindate    - With date/time, the earliest selectable date in YYYYMMDD (e.g. mindate=20260101)
             maxdate    - With date/time, the latest selectable date in YYYYMMDD (e.g. maxdate=20261231)
                          (set both to limit selection to a range; separators like YYYY-MM-DD are accepted)
+            mintime    - Earliest selectable time on a time-only field (no date). Accepts h:mm with an
+            maxtime      optional am/pm, e.g. mintime=9am, maxtime=4:30pm. Without am/pm the value is
+                         read as 24-hour, so mintime=16:30 is 4:30pm and mintime=4:30 is 4:30am.
+                         NOTE: the window cannot wrap past midnight — a range such as 6pm to 4am is not
+                         supported and will not behave as expected. mintime/maxtime are ignored (with a
+                         warning) on a combined date+time field.
             format     - With date/time, sets the returned format using `date` (strftime) syntax,
                          e.g. format="+%s" returns epoch, format="+%Y/%m/%d" returns 2026/07/24
 
