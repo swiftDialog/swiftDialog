@@ -74,6 +74,8 @@ struct TextFieldState: Identifiable, Equatable {
     var showTime: Bool     = false
     var minDate: Date?     = nil        // earliest selectable date (date/time pickers only)
     var maxDate: Date?     = nil        // latest selectable date (date/time pickers only)
+    var minTime: DateComponents? = nil  // earliest selectable time (time-only pickers)
+    var maxTime: DateComponents? = nil  // latest selectable time (time-only pickers)
     var dateOutputFormat: String = ""   // strftime-style (e.g. "+%s"); empty = default ISO
     var confirm: Bool     = false
     var validationValue: String = ""
@@ -82,6 +84,16 @@ struct TextFieldState: Identifiable, Equatable {
 
     /// True when this field should render a date/time picker instead of a text field.
     var isDatePicker: Bool { showDate || showTime }
+
+    /// The (min, max) Date bounds handed to the DatePicker. Date and date+time pickers use
+    /// minDate/maxDate directly. A time-only picker translates minTime/maxTime into instants
+    /// anchored to the field's own day — a DatePicker range is a single continuous span, so it
+    /// only behaves as a daily window when the bounds and the selection share a calendar day.
+    /// (A consequence: a window that wraps past midnight, e.g. 6pm–4am, can't be expressed.)
+    var pickerBounds: (min: Date?, max: Date?) {
+        guard showTime && !showDate else { return (minDate, maxDate) }
+        return (anchorTime(minTime, to: date), anchorTime(maxTime, to: date))
+    }
 
     /// The SwiftUI DatePicker components implied by the date/time modifiers.
     var dateComponents: DatePickerComponents {

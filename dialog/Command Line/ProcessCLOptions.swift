@@ -297,15 +297,69 @@ func clampDate(_ date: Date, min: Date?, max: Date?) -> Date {
     return result
 }
 
+/// Parses a time boundary (mintime/maxtime) as `h[:mm]` with an optional am/pm suffix:
+/// `4:30pm` → 16:30, `9am` → 09:00, `17` → 17:00. With no suffix the value is taken literally
+/// as 24-hour, so bare `4:30` is 04:30 (am) and `16:30` is 16:30. Returns hour/minute as
+/// DateComponents, or nil if unparseable so the boundary is simply not applied.
+func parseBoundaryTime(_ string: String) -> DateComponents? {
+    var trimmed = string.lowercased().trimmingCharacters(in: .whitespaces)
+    guard !trimmed.isEmpty else { return nil }
+    var isPM = false, isAM = false
+    if trimmed.hasSuffix("pm") { isPM = true; trimmed.removeLast(2) }
+    else if trimmed.hasSuffix("am") { isAM = true; trimmed.removeLast(2) }
+    trimmed = trimmed.trimmingCharacters(in: .whitespaces)
+    let parts = trimmed.split(separator: ":", maxSplits: 1).map(String.init)
+    guard let first = parts.first, var hour = Int(first) else { return nil }
+    let minute = parts.count > 1 ? (Int(parts[1]) ?? 0) : 0
+    guard (0...23).contains(hour), (0...59).contains(minute) else { return nil }
+    if isPM && hour < 12 { hour += 12 }   // 4pm → 16
+    if isAM && hour == 12 { hour = 0 }    // 12am → 00 (midnight)
+    return DateComponents(hour: hour, minute: minute)
+}
+
+/// Resolves an hour/minute boundary to an instant on the same calendar day as `day`.
+func anchorTime(_ comps: DateComponents?, to day: Date) -> Date? {
+    guard let comps, let hour = comps.hour else { return nil }
+    let cal = Calendar.current
+    return cal.date(bySettingHour: hour, minute: comps.minute ?? 0, second: 0,
+                    of: cal.startOfDay(for: day))
+}
+
+/// Time bounds only make sense on a time-only picker. On a date-only or combined date+time
+/// field they can't express a daily window (the range would span whole days), so they are
+/// dropped and the caller is warned on stderr and in the log. Returns the bounds to keep.
+func resolveTimeBounds(showDate: Bool, showTime: Bool,
+                       minTime: DateComponents?, maxTime: DateComponents?,
+                       fieldTitle: String) -> (min: DateComponents?, max: DateComponents?) {
+    guard minTime != nil || maxTime != nil else { return (nil, nil) }
+    if showDate {
+        let warning = "mintime/maxtime are only supported on time-only textfields and were ignored for field \"\(fieldTitle)\""
+        writeLog(warning, logLevel: .info)
+        printStdErr("WARNING: \(warning)")
+        return (nil, nil)
+    }
+    return (minTime, maxTime)
+}
+
 /// Builds a `TextFieldState` from a JSON object. Shared by the whole-config JSON path
 /// (`--jsonstring` / `--jsonfile`) and the per-argument JSON form (`--textfield '{...}'`) so both
 /// accept exactly the same keys and can't drift apart.
 func makeTextFieldState(from field: JSON) -> TextFieldState {
     let minDate = parseBoundaryDate(field["mindate"].stringValue)
     let maxDate = parseBoundaryDate(field["maxdate"].stringValue)
-    let seedDate = (field["date"].boolValue || field["time"].boolValue)
-        ? clampDate(parseDateOrNow(field["value"].stringValue), min: minDate, max: maxDate)
-        : Date.now
+    let (minTime, maxTime) = resolveTimeBounds(
+        showDate: field["date"].boolValue, showTime: field["time"].boolValue,
+        minTime: parseBoundaryTime(field["mintime"].stringValue),
+        maxTime: parseBoundaryTime(field["maxtime"].stringValue),
+        fieldTitle: field["title"].stringValue)
+    let isTimeOnly = field["time"].boolValue && !field["date"].boolValue
+    let seedDate: Date = {
+        guard field["date"].boolValue || field["time"].boolValue else { return Date.now }
+        let base = parseDateOrNow(field["value"].stringValue)
+        return isTimeOnly
+            ? clampDate(base, min: anchorTime(minTime, to: base), max: anchorTime(maxTime, to: base))
+            : clampDate(base, min: minDate, max: maxDate)
+    }()
     return TextFieldState(
         editor: field["editor"].boolValue,
         fileSelect: field["fileselect"].boolValue,
@@ -324,6 +378,8 @@ func makeTextFieldState(from field: JSON) -> TextFieldState {
         showTime: field["time"].boolValue,
         minDate: minDate,
         maxDate: maxDate,
+        minTime: minTime,
+        maxTime: maxTime,
         dateOutputFormat: field["format"].stringValue,
         confirm: field["confirm"].boolValue,
         initialPath: field["path"].stringValue)
@@ -871,6 +927,8 @@ func processCLOptions(json: JSON = getJSON()) {
                 var fieldShowTime: Bool = false
                 var fieldMinDate: Date?
                 var fieldMaxDate: Date?
+                var fieldMinTime: DateComponents?
+                var fieldMaxTime: DateComponents?
                 var fieldDateFormat: String = ""
                 var fieldConfirm: Bool = false
                 var fieldInitialPath: String = ""
@@ -916,6 +974,10 @@ func processCLOptions(json: JSON = getJSON()) {
                                 fieldMinDate = parseBoundaryDate(nextValue)
                             case "maxdate":
                                 fieldMaxDate = parseBoundaryDate(nextValue)
+                            case "mintime":
+                                fieldMinTime = parseBoundaryTime(nextValue)
+                            case "maxtime":
+                                fieldMaxTime = parseBoundaryTime(nextValue)
                             case "format":
                                 fieldDateFormat = nextValue
                             case "confirm":
@@ -927,10 +989,19 @@ func processCLOptions(json: JSON = getJSON()) {
                         }
                     }
                 }
+                // Time bounds only apply to a time-only picker; drop (and warn) otherwise.
+                let (fieldMinTimeResolved, fieldMaxTimeResolved) = resolveTimeBounds(
+                    showDate: fieldShowDate, showTime: fieldShowTime,
+                    minTime: fieldMinTime, maxTime: fieldMaxTime, fieldTitle: fieldTitle)
                 // Seed the picker from value= when this is a date/time field, clamped into any
-                // mindate/maxdate bounds so the returned initial value matches what the picker allows.
-                let fieldDate = clampDate((fieldShowDate || fieldShowTime) ? parseDateOrNow(fieldValue) : Date.now,
-                                          min: fieldMinDate, max: fieldMaxDate)
+                // mindate/maxdate (or, for a time-only field, mintime/maxtime) bounds so the
+                // returned initial value matches what the picker allows.
+                let fieldIsTimeOnly = fieldShowTime && !fieldShowDate
+                let fieldSeedBase = (fieldShowDate || fieldShowTime) ? parseDateOrNow(fieldValue) : Date.now
+                let fieldDate = fieldIsTimeOnly
+                    ? clampDate(fieldSeedBase, min: anchorTime(fieldMinTimeResolved, to: fieldSeedBase),
+                                max: anchorTime(fieldMaxTimeResolved, to: fieldSeedBase))
+                    : clampDate(fieldSeedBase, min: fieldMinDate, max: fieldMaxDate)
                 userInputState.textFields.append(TextFieldState(
                             editor: fieldEditor,
                             fileSelect: fieldFileSelect,
@@ -949,6 +1020,8 @@ func processCLOptions(json: JSON = getJSON()) {
                             showTime: fieldShowTime,
                             minDate: fieldMinDate,
                             maxDate: fieldMaxDate,
+                            minTime: fieldMinTimeResolved,
+                            maxTime: fieldMaxTimeResolved,
                             dateOutputFormat: fieldDateFormat,
                             confirm: fieldConfirm,
                             initialPath: fieldInitialPath))

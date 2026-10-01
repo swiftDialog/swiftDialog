@@ -84,14 +84,14 @@ struct TextEntryView: View {
     }
 
     /// The date/time picker for a field, using whichever bounded initialiser matches the
-    /// mindate/maxdate the field carries. SwiftUI needs a distinct call per range shape, and
-    /// `min...max` would trap if min > max, so an inverted range falls back to min-only.
+    /// bounds the field carries (mindate/maxdate, or mintime/maxtime for a time-only field —
+    /// see `pickerBounds`). SwiftUI needs a distinct call per range shape, and `min...max`
+    /// would trap if min > max, so an inverted range falls back to min-only.
     @ViewBuilder
     func datePicker(index: Int) -> some View {
         let selection = boundedBinding($observedData.textFieldArray, index, \.date, default: Date())
         let components = observedData.textFieldArray[index].dateComponents
-        let minDate = observedData.textFieldArray[index].minDate
-        let maxDate = observedData.textFieldArray[index].maxDate
+        let (minDate, maxDate) = observedData.textFieldArray[index].pickerBounds
         switch (minDate, maxDate) {
         case let (minDate?, maxDate?) where minDate <= maxDate:
             DatePicker("", selection: selection, in: minDate...maxDate, displayedComponents: components)
