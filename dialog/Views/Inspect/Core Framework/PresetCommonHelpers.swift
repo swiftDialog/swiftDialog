@@ -109,8 +109,8 @@ struct PresetCommonViews {
         tintColor: Color? = nil,
         onButton1Action: (() -> Void)? = nil
     ) -> some View {
-        // Check if all items are completed and auto-enable is configured
-        let allItemsCompleted = !state.items.isEmpty && state.completedItems.count == state.items.count
+        // Check if all required items are completed and auto-enable is configured
+        let allItemsCompleted = state.allRequiredItemsCompleted
         let shouldUseAutoEnableText = allItemsCompleted &&
                                       state.buttonConfiguration.autoEnableButton &&
                                       state.config?.autoEnableButtonText != nil
@@ -124,8 +124,8 @@ struct PresetCommonViews {
                (state.buttonConfiguration.button1Text.isEmpty ? "Continue" : state.buttonConfiguration.button1Text))
 
         HStack(spacing: spacing) {
-            // Button 2 (Secondary) - show in demo mode or when all complete
-            if (state.configurationSource == .testData || state.completedItems.count == state.items.count) &&
+            // Button 2 (Secondary) - show in demo mode or when all required items complete
+            if (state.configurationSource == .testData || allItemsCompleted) &&
                state.buttonConfiguration.button2Visible &&
                !state.buttonConfiguration.button2Text.isEmpty {
                 Button(state.buttonConfiguration.button2Text) {

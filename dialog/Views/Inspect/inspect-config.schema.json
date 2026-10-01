@@ -2811,7 +2811,8 @@
         },
         "required": {
           "type": "boolean",
-          "description": "Mark item as required for completion"
+          "default": true,
+          "description": "Whether this item must complete before the primary button auto-enables (deployment preset). Set false to make the item optional: the button still waits for it to be detected or reported as failed (item:<id>:failed), but a failed optional item no longer keeps the button disabled and stays visible with its failure status."
         },
         "showBundleInfo": {
           "type": "string",
