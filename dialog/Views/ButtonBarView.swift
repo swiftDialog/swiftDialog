@@ -245,7 +245,10 @@ struct NewButton: View {
 
     // Connectable timer: it stays dormant (no run-loop wakeups) until connect() is
     // called, which we only do when this button actually uses the timer behaviour.
-    let timer = Timer.publish(every: 3.0, on: .main, in: .common)
+    // Held as @State so the publisher instance is stable across re-renders; otherwise
+    // a re-render (e.g. textfield edits mutating observedData) would swap in a fresh,
+    // unconnected publisher that onReceive binds to, and the tick would never fire.
+    @State private var timer = Timer.publish(every: 3.0, on: .main, in: .common)
     @State private var timerCancellable: Cancellable?
 
     @FocusState private var isFocused: Bool
