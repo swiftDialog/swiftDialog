@@ -1,3 +1,7 @@
+excluded: # paths to ignore during linting
+  - tools          # local tooling with its own vendored SwiftPM checkouts (e.g. swift-syntax)
+  - .build         # SwiftPM build artifacts / dependency checkouts
+
 disabled_rules: # rule identifiers turned on by default to exclude from running
   - line_length
   - large_tuple
