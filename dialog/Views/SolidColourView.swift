@@ -21,7 +21,10 @@ struct SolidColourView: View {
     var body: some View {
         Color(argument: colourValue.components(separatedBy: "=").last ?? "clear")
             .ignoresSafeArea(.all)
-            .overlay(
+            // Closure form of overlay so the gradient is treated as a View. LinearGradient is
+            // both a View and a ShapeStyle, and with overlay(_:) accepting either, the newer
+            // SDK reports `.opacity` as ambiguous.
+            .overlay {
                 LinearGradient(
                     stops: [
                         Gradient.Stop(color: .white, location: 0.10),
@@ -29,7 +32,7 @@ struct SolidColourView: View {
                         Gradient.Stop(color: .black, location: 0.95)
                     ], startPoint: .top, endPoint: .bottom)
                 .opacity(withGradient ? 0.15 : 0)
-            )
+            }
     }
 }
 
