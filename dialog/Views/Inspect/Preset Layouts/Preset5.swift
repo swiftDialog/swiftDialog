@@ -1814,32 +1814,26 @@ struct Preset5View: View {
                     }
 
                     // Zone 4: Grouped item list with subtle card background.
-                    // Precompute the status-group order up front and render each group as a pure
-                    // function of the data. The previous code mutated a running `lastStatusGroup`
-                    // from inside the ForEach builder; a LazyVStack builds rows on demand and can
-                    // re-evaluate them out of order, so the header attached to whichever row built
-                    // first — landing mid-list or drawing twice. (#691)
-                    // sortedItems is already sorted by group, so groups are contiguous and this
-                    // yields the distinct groups in display order.
-                    let orderedGroups: [Int] = sortedItems.reduce(into: []) { acc, item in
-                        let group = deploymentStatusGroupIndex(item.status)
-                        if acc.last != group { acc.append(group) }
-                    }
+                    // Use a single ForEach keyed by item id so each row keeps a stable identity
+                    // across group reassignment and updates in place. A nested ForEach inside a
+                    // LazyVStack (outer group / inner items) does not redraw a row that moves to a
+                    // different group, leaving it with stale status visuals. (#720)
+                    // The group header is emitted whenever the previous item belongs to a different
+                    // status group; sortedItems is sorted by group, so groups stay contiguous and
+                    // each header still renders once in display order. (#691)
                     LazyVStack(alignment: .leading, spacing: 0) {
-                        ForEach(orderedGroups, id: \.self) { group in
-                            let itemsInGroup = sortedItems.filter { deploymentStatusGroupIndex($0.status) == group }
-                            if let first = itemsInGroup.first {
+                        ForEach(Array(sortedItems.enumerated()), id: \.element.id) { index, item in
+                            let group = deploymentStatusGroupIndex(item.status)
+                            if index == 0 || deploymentStatusGroupIndex(sortedItems[index - 1].status) != group {
                                 DeploymentItemGroupHeader(
-                                    title: deploymentGroupHeader(for: first.status)
+                                    title: deploymentGroupHeader(for: item.status)
                                 )
-                                ForEach(itemsInGroup) { item in
-                                    DeploymentItemRow(
-                                        item: item,
-                                        accentColor: branding.primaryColor,
-                                        basePath: effectiveIconBasePath
-                                    )
-                                }
                             }
+                            DeploymentItemRow(
+                                item: item,
+                                accentColor: branding.primaryColor,
+                                basePath: effectiveIconBasePath
+                            )
                         }
                     }
                     .background(
