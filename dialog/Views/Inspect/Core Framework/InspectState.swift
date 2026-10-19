@@ -759,9 +759,9 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                     self.completedItems.insert(item.id)
                     self.downloadingItems.remove(item.id)
                     
-                    // Check if this was the last item to complete
-                    if self.completedItems.count == self.items.count {
-                        writeLog("InspectState: All items completed - triggering button state update", logLevel: .info)
+                    // Check if this was the last required item to complete
+                    if self.allRequiredItemsCompleted {
+                        writeLog("InspectState: All required items completed - triggering button state update", logLevel: .info)
                         // Introduce a small delay to ensure UI state is updated
                         DispatchQueue.main.asyncAfter(deadline: .now() + InspectConstants.debounceDelay) { [weak self] in
                             self?.checkAndUpdateButtonState()
@@ -1067,13 +1067,18 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                     self.completedItems.insert(itemId)
                     self.downloadingItems.remove(itemId)
                     self.failedItems.remove(itemId)
-                    // Check if all items now complete — enable button if autoEnableButton is on
-                    if self.completedItems.count == self.items.count {
+                    // Check if all required items now complete — enable button if autoEnableButton is on
+                    if self.allRequiredItemsCompleted {
                         self.checkAndUpdateButtonState()
                     }
                 case "failed", "error":
                     self.failedItems.insert(itemId)
                     self.downloadingItems.remove(itemId)
+                    // Re-evaluate the button: a failed optional item is settled, so it may have
+                    // been the last thing holding it.
+                    if self.allRequiredItemsCompleted {
+                        self.checkAndUpdateButtonState()
+                    }
                 default:
                     writeLog("InspectState: Unknown item status '\(status)' for '\(itemId)'", logLevel: .debug)
                     return
@@ -1403,6 +1408,18 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         }
     }
 
+    /// True once every item has settled. A required item settles only by completing.
+    /// An item that sets `"required": false` also settles by failing, so a failed optional
+    /// item no longer holds the primary button, but one that is still pending does, so the
+    /// user can't click through before anything has been detected or reported as failed.
+    /// With no optional items this is the same as "all items complete".
+    var allRequiredItemsCompleted: Bool {
+        guard !items.isEmpty else { return false }
+        return items.allSatisfy { item in
+            completedItems.contains(item.id) || (item.required == false && failedItems.contains(item.id))
+        }
+    }
+
     /// For best UX, especially in Enrollment scenarios - check if all apps are completed and update button state accordingly
     func checkAndUpdateButtonState() {
         let totalApps = items.count
@@ -1410,9 +1427,9 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         
         writeLog("InspectState: Button state check - Total: \(totalApps), Completed: \(completedCount), AutoEnable: \(buttonConfiguration.autoEnableButton)", logLevel: .info)
         
-        // If all apps are completed
-        if totalApps > 0 && completedCount == totalApps {
-            writeLog("InspectState: All apps completed (\(completedCount)/\(totalApps))", logLevel: .info)
+        // If all required apps are completed
+        if allRequiredItemsCompleted {
+            writeLog("InspectState: All required apps completed (\(completedCount)/\(totalApps))", logLevel: .info)
             
             // Validate all completed items to ensure plist validation results are up-to-date
             Task { @MainActor in
