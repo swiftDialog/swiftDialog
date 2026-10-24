@@ -2,10 +2,8 @@
 //  InspectView.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 19/07/2025
-//
-//  Service-based implementation of InspectView
-//  Uses InspectState with clean separation of concerns
+//  Root view of inspect mode: routes to a preset on `InspectState`, with the loading and error
+//  screens.
 //
 
 import SwiftUI
@@ -54,30 +52,29 @@ struct InspectView: View {
             }
             writeLog("InspectViewServiceBased: Initializing with InspectState", logLevel: .info)
             inspectState.initialize()
+            // `--blurscreen` covers only the dialog's display in inspect mode.
+            InspectBlurScope.confineToDialogScreen()
         }
     }
 
     // MARK: - Helper Methods
 
-    /// Factory method for preset creation
+    /// The preset view for a name; every spelling lives in `InspectPresetName`.
     @ViewBuilder
     private func presetView(for presetName: String) -> some View {
-        let preset = presetName.lowercased()
-        // Size mode is now handled by InspectSizes
-        let basePreset = preset
-
-        switch basePreset {
-        case "preset1", "1", "deployment":
+        switch InspectPresetName.number(presetName) {
+        case 1:
             Preset1View(inspectState: inspectState)
-        case "preset2", "2", "cards":
+        case 2:
             Preset2View(inspectState: inspectState)
-        case "preset3", "3", "compact":
-            Preset3Wrapper(coordinator: inspectState)
-        case "preset4", "4", "toast", "compact-installer":
+        case 3:
+            Preset3View(inspectState: inspectState)
+        case 4:
             Preset4Wrapper(coordinator: inspectState)
-        case "preset5", "5", "portal", "self-service", "webview-portal":
+        case 5, 7:
+            // Guided Setup (7) runs on the Preset 5 step engine.
             Preset5Wrapper(coordinator: inspectState)
-        case "preset6", "6", "guidance", "modern-sidebar":
+        case 6:
             Preset6Wrapper(coordinator: inspectState)
         default:
             Preset1View(inspectState: inspectState)
@@ -113,6 +110,7 @@ private struct CoordinatedConfigErrorView: View {
     let onQuit: () -> Void
 
     @State private var copied = false
+    @Environment(\.palette) private var palette
 
     /// Format error details for clipboard
     private var formattedErrorForCopy: String {
@@ -166,9 +164,8 @@ private struct CoordinatedConfigErrorView: View {
     }
 
     // swiftlint:disable:next large_tuple
-    /// Parse error message into structured components for better display
+    /// Parse the error message into file path, type, details, line number, JSON snippet and hint.
     private var parsedError: (filePath: String?, errorType: String, details: String?, lineNumber: Int?, jsonSnippet: String?, hint: String?) {
-        // Extract file path from message like "Invalid JSON in configuration file /path/file.json: ..."
         var filePath: String?
         var errorType = errorMessage
         var details: String?
@@ -183,12 +180,11 @@ private struct CoordinatedConfigErrorView: View {
                 filePath = String(afterFile[..<colonIndex])
                 let remainder = String(afterFile[afterFile.index(after: colonIndex)...]).trimmingCharacters(in: .whitespaces)
 
-                // Check for hint marker (with emoji from Config.swift)
+                // The hint and snippet markers are the ones Config.swift writes.
                 if let hintRange = remainder.range(of: "\n\n💡 Hint: ") {
                     hint = String(remainder[hintRange.upperBound...])
                     let beforeHint = String(remainder[..<hintRange.lowerBound])
 
-                    // Check for JSON snippet marker in the part before hint
                     if let snippetRange = beforeHint.range(of: "\n\n📍") {
                         errorType = String(beforeHint[..<snippetRange.lowerBound])
                         jsonSnippet = String(beforeHint[snippetRange.lowerBound...])
@@ -197,7 +193,6 @@ private struct CoordinatedConfigErrorView: View {
                         errorType = beforeHint
                     }
                 } else if let snippetRange = remainder.range(of: "\n\n📍") {
-                    // No hint, just snippet
                     errorType = String(remainder[..<snippetRange.lowerBound])
                     jsonSnippet = String(remainder[snippetRange.lowerBound...])
                         .replacingOccurrences(of: "\n\n📍 ", with: "")
@@ -210,11 +205,9 @@ private struct CoordinatedConfigErrorView: View {
         // Extract line number from error type (e.g., "(line 5)")
         if let lineRange = errorType.range(of: "\\(line \\d+\\)", options: .regularExpression) {
             let lineStr = errorType[lineRange]
-            // Extract number from "(line X)"
             if let numRange = lineStr.range(of: "\\d+", options: .regularExpression) {
                 lineNumber = Int(lineStr[numRange])
             }
-            // Remove the line number part from error type
             errorType = errorType.replacingCharacters(in: lineRange, with: "").trimmingCharacters(in: .whitespaces)
         }
 
@@ -234,7 +227,7 @@ private struct CoordinatedConfigErrorView: View {
             // Header
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 40))
-                .foregroundStyle(.orange)
+                .foregroundStyle(palette.warning)
 
             Text("Configuration Error")
                 .font(.title2)
@@ -245,7 +238,7 @@ private struct CoordinatedConfigErrorView: View {
                 // Error type (main message)
                 HStack(alignment: .top, spacing: 8) {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(.red)
+                        .foregroundStyle(palette.error)
                     Text(error.errorType)
                         .font(.body)
                         .fontWeight(.medium)
@@ -255,7 +248,7 @@ private struct CoordinatedConfigErrorView: View {
                 if let details = error.details {
                     HStack(alignment: .top, spacing: 8) {
                         Image(systemName: "location.circle.fill")
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(palette.info)
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Location:")
                                 .font(.caption)
@@ -293,7 +286,7 @@ private struct CoordinatedConfigErrorView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: 4) {
                             Image(systemName: "chevron.left.forwardslash.chevron.right")
-                                .foregroundStyle(.orange)
+                                .foregroundStyle(palette.warning)
                             Text(snippet.hasPrefix("Error location") ? "Error location:" : "Around error:")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
@@ -317,7 +310,7 @@ private struct CoordinatedConfigErrorView: View {
                             .clipShape(.rect(cornerRadius: 6))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 6)
-                                    .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                                    .stroke(palette.warning.opacity(0.3), lineWidth: 1)
                             )
                         }
                     }
@@ -327,14 +320,14 @@ private struct CoordinatedConfigErrorView: View {
                 if let hint = error.hint {
                     HStack(alignment: .top, spacing: 8) {
                         Image(systemName: "lightbulb.fill")
-                            .foregroundStyle(.yellow)
+                            .foregroundStyle(palette.warning)
                         Text(hint)
                             .font(.callout)
                             .foregroundStyle(.primary)
                     }
                     .padding(10)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.yellow.opacity(0.1))
+                    .background(palette.warning.opacity(0.1))
                     .clipShape(.rect(cornerRadius: 6))
                 }
             }
@@ -370,33 +363,6 @@ private struct CoordinatedConfigErrorView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
         .background(Color(NSColor.windowBackgroundColor))
-    }
-}
-
-// MARK: - Wrapper for Preset3 to use InspectState
-
-private struct Preset3Wrapper: View {
-    @ObservedObject var coordinator: InspectState
-    @StateObject private var inspectState = InspectState()
-
-    var body: some View {
-        Preset3View(inspectState: inspectState)
-            .onAppear {
-                // Sync initial state from coordinator
-                inspectState.items = coordinator.items
-                inspectState.config = coordinator.config
-                inspectState.uiConfiguration = coordinator.uiConfiguration
-                inspectState.backgroundConfiguration = coordinator.backgroundConfiguration
-                inspectState.buttonConfiguration = coordinator.buttonConfiguration
-                inspectState.completedItems = coordinator.completedItems
-                inspectState.downloadingItems = coordinator.downloadingItems
-            }
-            .onReceive(coordinator.$completedItems) { items in
-                inspectState.completedItems = items
-            }
-            .onReceive(coordinator.$downloadingItems) { items in
-                inspectState.downloadingItems = items
-            }
     }
 }
 

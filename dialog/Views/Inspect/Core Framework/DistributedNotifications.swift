@@ -2,35 +2,17 @@
 //  DistributedNotifications.swift
 //  dialog
 //
-//  DistributedNotificationCenter bridge for cross-process IPC.
-//  External tools (ignitecli, Fleet Desktop, custom scripts) can:
-//    - Observe events posted by Dialog (button clicks, step changes, selections)
-//    - Post commands that Dialog executes (update_guidance, navigate, etc.)
-//
-//  Channels:
-//    Dialog → External:  com.swiftdialog.event     — UI events Dialog emits
-//    External → Dialog:  com.swiftdialog.command    — commands Dialog observes
-//    Dialog → External:  com.swiftdialog.ack       — acknowledgments for commands
-//
-//  Event vocabulary on `com.swiftdialog.event` is locked to the `EventType` enum
-//  below. Every posted event always includes:
-//    event : String  — EventType rawValue (ready | exit | defer | button | step | selection)
-//    pid   : String  — Dialog process id (stringified Int32)
-//
-//  Per-event userInfo extras (all values stringified by callers):
-//    ready      — { triggerFile, preset?, itemCount?, items?, ackChannel }
-//                 items: comma-joined, capped at 50 ids; ackChannel: always "com.swiftdialog.ack"
-//    exit       — { triggerFile, exitCode?, completedCount?, failedCount?, totalSteps?, resultFile? }
-//    defer      — { duration, seconds, exitCode, resultFile }
-//                 duration: human string ("30m", "1h", "tomorrow"); seconds: parsed Int
-//    button     — { stepId, button, action }
-//    step       — { stepId, action }
-//                 action examples: "completed", "all_complete"
-//    selection  — { key, values }
-//                 values: comma-joined String
-//
-//  Adding a new EventType case is a breaking change for consumers — coordinate first.
+//  DistributedNotificationCenter IPC: external tools observe the events the dialog posts and post
+//  commands it runs. Channels are per session (pid-suffixed), with the un-suffixed names kept
+//  for older scripts:
+//    com.swiftdialog.event.<pid>    events the dialog emits
+//    com.swiftdialog.command.<pid>  commands the dialog observes
+//    com.swiftdialog.ack.<pid>      acknowledgments
+//  Every event carries `event` (an `EventType` raw value) and `pid`; the per-event extras are
+//  listed on `EventType`. A tool may send a command on both this channel and the trigger file
+//  with the same `nonce`; `CommandRouter` runs each nonce once.
 
+import AppKit
 import Foundation
 
 @MainActor
@@ -52,21 +34,27 @@ enum DialogNotifications {
 
     // MARK: - Event Vocabulary
 
-    /// Wire-format event types posted on `com.swiftdialog.event`. The raw value
-    /// is what external consumers read from `userInfo["event"]`.
+    /// The event vocabulary; raw values are what consumers read from `userInfo["event"]`, so adding
+    /// or renaming a case is a breaking change. All extra values are strings.
     nonisolated enum EventType: String {
-        /// Dialog started; UI is ready to receive commands.
+        /// Ready for commands. Extras: triggerFile, finalTriggerFile, stepListFile, readinessFile,
+        /// preset?, itemCount?, items? (comma-joined, at most 50), ackChannel, commandChannel, eventChannel.
         case ready
-        /// Dialog is about to terminate (normal close path).
+        /// About to terminate. Extras: triggerFile, exitCode?, completedCount?, failedCount?,
+        /// totalSteps?, resultFile?.
         case exit
-        /// User chose a deferral option from DeferralMenuView.
+        /// A deferral was chosen. Extras: duration ("30m", "1h", "tomorrow"), seconds, exitCode, resultFile.
         case deferred = "defer"
-        /// Button click in any preset.
+        /// Extras: stepId, button, action.
         case button
-        /// Step transition in flow-based presets (4 / 5 / 6).
+        /// A step transition. Extras: stepId, action (e.g. "completed", "all_complete").
         case step
-        /// Picker / grid / wallpaper selection committed.
+        /// A picker, grid or wallpaper selection. Extras: key, values (comma-joined), flavorId?.
         case selection
+        /// The window was miniaturized. No extras.
+        case minimized
+        /// The window was deminiaturized. No extras.
+        case restored
     }
 
     // MARK: - Post Events
@@ -82,7 +70,6 @@ enum DialogNotifications {
         )
     }
 
-    /// Button click event.
     nonisolated static func postButtonClick(stepId: String, label: String, action: String) {
         postEvent(.button, userInfo: [
             "stepId": stepId,
@@ -107,9 +94,26 @@ enum DialogNotifications {
         ])
     }
 
+    // Kept for the process lifetime.
+    private static var windowStateObservers: [NSObjectProtocol] = []
+
+    /// Posts `minimized` / `restored` when `window` is miniaturized or deminiaturized.
+    static func observeWindowState(_ window: NSWindow) {
+        let nc = NotificationCenter.default
+        windowStateObservers.append(
+            nc.addObserver(forName: NSWindow.didMiniaturizeNotification, object: window, queue: .main) { _ in
+                postEvent(.minimized)
+            })
+        windowStateObservers.append(
+            nc.addObserver(forName: NSWindow.didDeminiaturizeNotification, object: window, queue: .main) { _ in
+                postEvent(.restored)
+            })
+    }
+
     // MARK: - Acknowledgments
 
-    /// Post a command acknowledgment notification that external tools can observe.
+    /// Posts a command acknowledgment. `nonce` echoes the inbound command's nonce so same-verb
+    /// acks can be told apart.
     nonisolated static func postAck(command: String, stepId: String, status: String = "OK",
                                     property: String? = nil, value: String? = nil, message: String? = nil) {
         var info: [String: String] = [
@@ -133,10 +137,9 @@ enum DialogNotifications {
     private static var observer: NSObjectProtocol?
     private static var ignitecliObserver: NSObjectProtocol?
 
-    /// Start observing command notifications. The handler receives the raw
-    /// command string (same format as trigger file commands).
+    /// Observes this session's command channel and the legacy names.
     static func startObserving(handler: @escaping CommandHandler) {
-        stopObserving()  // Clean up previous registration to prevent observer leaks
+        stopObserving()
         let center = DistributedNotificationCenter.default()
 
         observer = center.addObserver(
@@ -152,7 +155,6 @@ enum DialogNotifications {
         }
     }
 
-    /// Stop observing command notifications.
     static func stopObserving() {
         if let obs = observer {
             DistributedNotificationCenter.default().removeObserver(obs)

@@ -1628,7 +1628,7 @@ struct SDHelp {
 
         // MARK: - Inspect Mode (Preset 5/6 dashboards)
 
-        argument.inspectMode.helpShort = "Launch Dialog in inspect mode (preset 5/6 dashboards)"
+        argument.inspectMode.helpShort = "Launch Dialog in inspect mode (presets 1-6)"
         argument.inspectMode.helpUsage = ""
         argument.inspectMode.helpLong = """
         Inspect mode renders a preset 5 wizard or preset 6 sidebar dashboard described
@@ -1650,7 +1650,7 @@ struct SDHelp {
         workflow is loaded.
 """
 
-        argument.inspectConfig.helpShort = "Path to an inspect-mode config (preset 5/6)"
+        argument.inspectConfig.helpShort = "Path to an inspect-mode config"
         argument.inspectConfig.helpUsage = "<file>"
         argument.inspectConfig.helpLong = """
         Load the given inspect-mode config file. Used with --\(argument.inspectMode.long). This is the
@@ -1663,7 +1663,7 @@ struct SDHelp {
         Inspect-mode configs use a different schema than standard Dialog configs; the JSON is validated
         on launch and rejected with an error if it isn't an inspect config.
 
-        The env var DIALOG_INSPECT_CONFIG takes precedence over this flag when both are set.
+        When both are set, this flag wins over the env var DIALOG_INSPECT_CONFIG.
 """
 
         argument.publishedSessionsDir.helpShort = "Directory to publish per-PID session discovery JSON"

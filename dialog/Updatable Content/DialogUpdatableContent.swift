@@ -230,6 +230,13 @@ class FileReader {
         }
     }
 
+    /// Inspect mode reads window commands from `InspectConstants.commandFilePath` only; from any
+    /// other command file (`--commandfile`) they are still answered here.
+    private var inspectAnswersWindowCommands: Bool {
+        observedData.args.inspectMode.present
+            && fileURL.resolvingSymlinksInPath() == URL(fileURLWithPath: InspectConstants.commandFilePath).resolvingSymlinksInPath()
+    }
+
     private func processCommands(commands: String) {
         // Ignore content that predates our launch — e.g. stale content in a
         // pre-existing command file that couldn't be truncated at startup (see
@@ -560,6 +567,9 @@ class FileReader {
 
             // minimize
             case "minimize:", "minimise:":
+                // Inspect mode answers window commands itself (InspectState.parseCommandLine),
+                // hiding and restoring the blur with the window — on the file it watches.
+                guard !inspectAnswersWindowCommands else { break }
                 writeToLog("minimizing windows")
                 if observedData.args.blurScreen.present {
                     blurredScreen.hide()
@@ -571,6 +581,7 @@ class FileReader {
 
             // maximize
             case "maximize:", "maximise:":
+                guard !inspectAnswersWindowCommands else { break }
                 writeToLog("maximizing windows")
                 if observedData.args.blurScreen.present {
                     blurredScreen.show()
