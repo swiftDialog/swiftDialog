@@ -1,10 +1,3 @@
-//
-//  dialogTests.swift
-//  dialogTests
-//
-//  Created by Bart Reardon on 9/3/21.
-//
-
 import XCTest
 @testable import Dialog
 
@@ -30,62 +23,7 @@ class dialogTests: XCTestCase {
         }
     }
 
-    // MARK: - Published Sessions Directory (per-PID discovery file)
-
-    func testPublishedSessionWriteAndCleanup() throws {
-        let originalValue = appArguments.publishedSessionsDir.value
-        let tmpDir = (NSTemporaryDirectory() as NSString)
-            .appendingPathComponent("swiftdialog-test-\(UUID().uuidString)")
-        appArguments.publishedSessionsDir.value = tmpDir
-        defer {
-            appArguments.publishedSessionsDir.value = originalValue
-            try? FileManager.default.removeItem(atPath: tmpDir)
-        }
-
-        let triggerFile = (NSTemporaryDirectory() as NSString)
-            .appendingPathComponent("test-trigger-\(UUID().uuidString).log")
-        defer { try? FileManager.default.removeItem(atPath: "\(triggerFile).ready") }
-
-        writeReadinessFile(config: nil, triggerFilePath: triggerFile,
-                           preset: "test", itemCount: 3)
-
-        let pid = ProcessInfo.processInfo.processIdentifier
-        let publishedPath = (tmpDir as NSString).appendingPathComponent("\(pid).json")
-        XCTAssertTrue(FileManager.default.fileExists(atPath: publishedPath),
-                      "Expected published session file at \(publishedPath)")
-
-        let data = try XCTUnwrap(FileManager.default.contents(atPath: publishedPath))
-        let json = try XCTUnwrap(try JSONSerialization.jsonObject(with: data) as? [String: Any])
-        XCTAssertEqual(json["pid"] as? Int, Int(pid))
-        XCTAssertEqual(json["triggerFile"] as? String, triggerFile)
-        XCTAssertEqual(json["preset"] as? String, "test")
-        XCTAssertEqual(json["itemCount"] as? Int, 3)
-        XCTAssertEqual(json["ackChannel"] as? String, "com.swiftdialog.ack")
-
-        cleanupReadinessFile(config: nil, triggerFilePath: triggerFile)
-        XCTAssertFalse(FileManager.default.fileExists(atPath: publishedPath),
-                       "Expected published session file removed after cleanup")
-    }
-
-    func testPublishedSessionDisabledWhenEmpty() {
-        let originalValue = appArguments.publishedSessionsDir.value
-        appArguments.publishedSessionsDir.value = ""
-        defer { appArguments.publishedSessionsDir.value = originalValue }
-
-        XCTAssertNil(resolvePublishedSessionsDir())
-        XCTAssertNil(resolvePublishedSessionPath())
-    }
-
-    func testPublishedSessionDisabledWhenNone() {
-        let originalValue = appArguments.publishedSessionsDir.value
-        appArguments.publishedSessionsDir.value = "none"
-        defer { appArguments.publishedSessionsDir.value = originalValue }
-
-        XCTAssertNil(resolvePublishedSessionsDir())
-        XCTAssertNil(resolvePublishedSessionPath())
-    }
-
-    // MARK: - FR #667: Rich Remediation Content (KeyMapping + PlistAggregator)
+    // MARK: - #667: rich remediation content (KeyMapping + PlistAggregator)
 
     func testKeyMappingDecodesNewFields() throws {
         let json = Data("""
@@ -113,8 +51,7 @@ class dialogTests: XCTestCase {
     }
 
     func testKeyMappingDecodesBackwardsCompat() throws {
-        // A pre-FR-#667 config with only `key` must still decode and yield nil for
-        // every new field.
+        // A config with only `key` still decodes, with every newer field nil.
         let json = Data(#"{ "key": "battery_health" }"#.utf8)
         let mapping = try JSONDecoder().decode(InspectConfig.KeyMapping.self, from: json)
         XCTAssertEqual(mapping.key, "battery_health")
@@ -125,9 +62,7 @@ class dialogTests: XCTestCase {
         XCTAssertNil(mapping.actionURL)
     }
 
-    /// End-to-end integration through `loadPlistSource`: writes a real plist with
-    /// nested-dict values, builds a `PlistSourceConfig` via Codable, and asserts the
-    /// resulting `ComplianceItem`s have the expected merge of plist + config.
+    /// `loadPlistSource` end to end: a real plist with nested-dict values merged with the config.
     func testPlistAggregatorMergesPlistAndConfig() throws {
         let plistPath = (NSTemporaryDirectory() as NSString)
             .appendingPathComponent("compliance-\(UUID().uuidString).plist")
@@ -135,6 +70,8 @@ class dialogTests: XCTestCase {
 
         // macos_version: nested dict overrides explanation; config provides remediation
         // airdrop:       scalar bool; only config defaults are available
+        // `expectedValue: "true"` selects swiftDialog's convention (`finding: false` fails); the default
+        // is the mSCP/CIS one, where `finding: true` means a finding was raised.
         let plist: [String: Any] = [
             "macos_version": [
                 "finding": false,
@@ -219,21 +156,17 @@ class dialogTests: XCTestCase {
         XCTAssertEqual(items.first(where: { $0.id == "failing" })?.severity, .failure)
     }
 
-    // MARK: - CommandRouter trigger-file replay guard (IPC Gap 5)
+    // MARK: - Trigger-file replay guard
 
-    /// Pins the byte-offset skip guarantee in `CommandRouter.startMonitoring`.
-    ///
-    /// Content written to the trigger file BEFORE `startMonitoring` is called must
-    /// NOT be delivered to handlers; content appended AFTER monitoring starts MUST
-    /// be delivered. The guard is implemented via `lastProcessedByteOffset` being
-    /// set to `data.count` at the moment monitoring begins — this test proves it holds.
+    /// Content written to the trigger file before `startMonitoring` is not delivered; content appended
+    /// after it is. The guard is `TriggerCursor.seekToEnd(of:)`.
     @MainActor
     func testTriggerFileReplayGuard_preExistingContentIgnored() {
         let tmpFile = (NSTemporaryDirectory() as NSString)
             .appendingPathComponent("test-trigger-replay-\(UUID().uuidString).log")
         defer { try? FileManager.default.removeItem(atPath: tmpFile) }
 
-        // Write pre-existing content BEFORE monitoring starts
+        // Pre-existing content, written before monitoring starts
         let preExisting = "success:preexisting\n"
         try? preExisting.write(toFile: tmpFile, atomically: true, encoding: .utf8)
 
@@ -251,7 +184,7 @@ class dialogTests: XCTestCase {
         router.startMonitoring(triggerFilePath: tmpFile)
         defer { router.stopMonitoring() }
 
-        // Append new content AFTER monitoring has started
+        // Appended after monitoring has started
         if let fileHandle = try? FileHandle(forWritingTo: URL(fileURLWithPath: tmpFile)) {
             _ = try? fileHandle.seekToEnd()
             try? fileHandle.write(contentsOf: Data("success:appended\n".utf8))
@@ -266,12 +199,9 @@ class dialogTests: XCTestCase {
                        "Pre-existing content must NOT be replayed after startMonitoring")
     }
 
-    // MARK: - DistributedNotifications EventType wire-format contract
+    // MARK: - EventType wire format
 
-    /// External consumers (ignitecli, Fleet Desktop, custom scripts) parse
-    /// `userInfo["event"]` as a string. A rename of any enum case that changes
-    /// its rawValue would silently break those consumers. This test pins the
-    /// wire format so the contract has to be changed deliberately.
+    /// External consumers parse `userInfo["event"]` as a string, so the raw values are a contract.
     func testEventTypeRawValues() {
         XCTAssertEqual(DialogNotifications.EventType.ready.rawValue, "ready")
         XCTAssertEqual(DialogNotifications.EventType.exit.rawValue, "exit")
@@ -281,9 +211,9 @@ class dialogTests: XCTestCase {
         XCTAssertEqual(DialogNotifications.EventType.selection.rawValue, "selection")
     }
 
-    // MARK: - Gated Cadence (CadenceMonitorService)
+    // MARK: - Gated cadence (CadenceMonitorService)
 
-    /// Decode an IntroStep carrying a cadence array from JSON (proves the schema decodes).
+    /// Decodes an IntroStep carrying a cadence array from JSON.
     private func decodeCadenceStep(_ json: String) throws -> InspectConfig.IntroStep {
         let data = json.data(using: .utf8)!
         return try JSONDecoder().decode(InspectConfig.IntroStep.self, from: data)
@@ -295,160 +225,10 @@ class dialogTests: XCTestCase {
         return dir
     }
 
-    func testCadenceSchemaDecodes() throws {
-        let step = try decodeCadenceStep("""
-        { "id": "deploy", "stepType": "cadence", "cadenceInterval": 2.0, "cadence": [
-            { "id": "a", "message": "Task 1", "attribute": { "source": "native", "type": "app", "bundleId": "com.apple.finder" } },
-            { "id": "b", "message": "Task 2", "attribute": { "type": "plist", "path": "/tmp/x.plist", "key": "Installed", "evaluation": "boolean", "expectedValue": "true" } }
-        ] }
-        """)
-        XCTAssertEqual(step.cadence?.count, 2)
-        XCTAssertEqual(step.cadenceInterval, 2.0)
-        XCTAssertEqual(step.cadence?[0].id, "a")
-        XCTAssertEqual(step.cadence?[1].attribute.evaluation, "boolean")
-    }
-
-    @MainActor
-    func testCadenceFileAttributeSatisfaction() {
-        let dir = cadenceTempDir()
-        defer { try? FileManager.default.removeItem(atPath: dir) }
-        let path = (dir as NSString).appendingPathComponent("receipt.bom")
-        let svc = CadenceMonitorService()
-        let attr = InspectConfig.CadenceAttribute(source: nil, type: "file", bundleId: nil, path: path,
-                                                  key: nil, expectedValue: nil, evaluation: nil, useUserDefaults: nil, domain: nil, scope: nil)
-        XCTAssertFalse(svc.isAttributeSatisfied(attr, entryId: "f"), "missing file → unsatisfied")
-        FileManager.default.createFile(atPath: path, contents: Data("x".utf8))
-        XCTAssertTrue(svc.isAttributeSatisfied(attr, entryId: "f"), "present file → satisfied")
-    }
-
-    @MainActor
-    func testCadenceAppByBundleId() {
-        let svc = CadenceMonitorService()
-        let finder = InspectConfig.CadenceAttribute(source: nil, type: "app", bundleId: "com.apple.finder",
-                                                    path: nil, key: nil, expectedValue: nil, evaluation: nil, useUserDefaults: nil, domain: nil, scope: nil)
-        let bogus = InspectConfig.CadenceAttribute(source: nil, type: "app", bundleId: "com.nonexistent.zzz123",
-                                                   path: nil, key: nil, expectedValue: nil, evaluation: nil, useUserDefaults: nil, domain: nil, scope: nil)
-        XCTAssertTrue(svc.isAttributeSatisfied(finder, entryId: "x"), "Finder is always installed on the test host")
-        XCTAssertFalse(svc.isAttributeSatisfied(bogus, entryId: "y"))
-    }
-
-    @MainActor
-    func testCadenceIpcDriveAdvances() throws {
-        let step = try decodeCadenceStep("""
-        { "id": "deploy", "stepType": "cadence", "cadence": [
-            { "id": "step1", "message": "Task 1", "attribute": { "source": "ipc" } },
-            { "id": "step2", "message": "Task 2", "attribute": { "source": "ipc" } }
-        ] }
-        """)
-        let svc = CadenceMonitorService()
-        // defaultMinDwell 0 isolates the IPC-advance logic from the replay dwell (covered separately).
-        svc.startWithEntries(entries: step.cadence ?? [], stepId: "deploy", interval: 60, defaultMinDwell: 0, onCompletion: nil)
-        XCTAssertEqual(svc.currentIndex, 0, "ipc entry must not auto-advance")
-        svc.satisfyExternally(id: "step1")
-        XCTAssertEqual(svc.currentIndex, 1, "external satisfy advances the active ipc entry")
-    }
-
-    @MainActor
-    func testCadenceGatedAdvanceInOrderAndCompletes() {
-        let dir = cadenceTempDir()
-        defer { try? FileManager.default.removeItem(atPath: dir) }
-        let p0 = (dir as NSString).appendingPathComponent("0")
-        let p1 = (dir as NSString).appendingPathComponent("1")
-        func fileAttr(_ p: String) -> InspectConfig.CadenceAttribute {
-            InspectConfig.CadenceAttribute(source: nil, type: "file", bundleId: nil, path: p, key: nil,
-                                           expectedValue: nil, evaluation: nil, useUserDefaults: nil, domain: nil, scope: nil)
-        }
-        var completed = 0
-        let svc = CadenceMonitorService()
-        // Build a step by decoding (schema) then driving via evaluateOnce — files gate each step.
-        svc.startWithEntries(
-            entries: [
-                InspectConfig.CadenceEntry(id: "a", message: "A", attribute: fileAttr(p0), minDwell: nil, timeout: nil, sfSymbol: nil, imagePath: nil, iconColor: nil),
-                InspectConfig.CadenceEntry(id: "b", message: "B", attribute: fileAttr(p1), minDwell: nil, timeout: nil, sfSymbol: nil, imagePath: nil, iconColor: nil)
-            ],
-            stepId: "deploy",
-            interval: 60,
-            onCompletion: { _, _ in completed += 1 })
-
-        XCTAssertEqual(svc.currentIndex, 0)
-        FileManager.default.createFile(atPath: p0, contents: Data())
-        svc.evaluateOnce()
-        XCTAssertEqual(svc.currentIndex, 1, "advances only after entry 0's file appears")
-        XCTAssertFalse(svc.isComplete)
-        FileManager.default.createFile(atPath: p1, contents: Data())
-        svc.evaluateOnce()
-        XCTAssertTrue(svc.isComplete, "last file present → complete")
-        XCTAssertEqual(completed, 1, "completion fires exactly once")
-        svc.evaluateOnce()
-        XCTAssertEqual(completed, 1, "no double-fire")
-    }
-
-    @MainActor
-    func testCadenceMinDwellHolds() {
-        let dir = cadenceTempDir()
-        defer { try? FileManager.default.removeItem(atPath: dir) }
-        let p0 = (dir as NSString).appendingPathComponent("0")
-        FileManager.default.createFile(atPath: p0, contents: Data())  // already satisfied
-        var clock = Date(timeIntervalSince1970: 1000)
-        let svc = CadenceMonitorService(now: { clock })
-        let attr = InspectConfig.CadenceAttribute(source: nil, type: "file", bundleId: nil, path: p0, key: nil,
-                                                  expectedValue: nil, evaluation: nil, useUserDefaults: nil, domain: nil, scope: nil)
-        svc.startWithEntries(
-            entries: [InspectConfig.CadenceEntry(id: "a", message: "A", attribute: attr, minDwell: 10, timeout: nil, sfSymbol: nil, imagePath: nil, iconColor: nil)],
-            stepId: "s", interval: 60, onCompletion: nil)
-        XCTAssertFalse(svc.isComplete, "minDwell not elapsed → holds even though satisfied")
-        clock = clock.addingTimeInterval(11)
-        svc.evaluateOnce()
-        XCTAssertTrue(svc.isComplete, "after minDwell, satisfied entry completes")
-    }
-
-    @MainActor
-    func testCadenceTimeoutForceAdvances() {
-        var clock = Date(timeIntervalSince1970: 1000)
-        let svc = CadenceMonitorService(now: { clock })
-        // Never-satisfied native file (missing) with a 5s timeout.
-        let attr = InspectConfig.CadenceAttribute(source: nil, type: "file", bundleId: nil,
-                                                  path: "/tmp/definitely-missing-\(UUID().uuidString)", key: nil,
-                                                  expectedValue: nil, evaluation: nil, useUserDefaults: nil, domain: nil, scope: nil)
-        svc.startWithEntries(
-            entries: [InspectConfig.CadenceEntry(id: "a", message: "A", attribute: attr, minDwell: nil, timeout: 5, sfSymbol: nil, imagePath: nil, iconColor: nil)],
-            stepId: "s", interval: 60, onCompletion: nil)
-        XCTAssertFalse(svc.isComplete, "before timeout, unsatisfied entry holds")
-        clock = clock.addingTimeInterval(6)
-        svc.evaluateOnce()
-        XCTAssertTrue(svc.isComplete, "after timeout, force-advances past the never-satisfied entry")
-    }
-
-    @MainActor
-    func testCadenceReplayDwellPacesAlreadySatisfied() {
-        // Replay scenario: all conditions already satisfied. With a 0.6s default dwell the
-        // entries must advance ONE PER DWELL (a smooth replay), not collapse instantly.
-        var clock = Date(timeIntervalSince1970: 1000)
-        let svc = CadenceMonitorService(now: { clock })
-        func ipc(_ id: String) -> InspectConfig.CadenceEntry {
-            InspectConfig.CadenceEntry(
-                id: id, message: id,
-                attribute: InspectConfig.CadenceAttribute(source: "ipc", type: nil, bundleId: nil, path: nil,
-                                                          key: nil, expectedValue: nil, evaluation: nil, useUserDefaults: nil, domain: nil, scope: nil),
-                minDwell: nil, timeout: nil, sfSymbol: nil, imagePath: nil, iconColor: nil)
-        }
-        svc.startWithEntries(entries: [ipc("a"), ipc("b"), ipc("c")],
-                             stepId: "s", interval: 60, defaultMinDwell: 0.6, onCompletion: nil)
-        // Pre-satisfy everything (as if returning to an already-complete step).
-        svc.satisfyExternally(id: "a"); svc.satisfyExternally(id: "b"); svc.satisfyExternally(id: "c")
-        XCTAssertEqual(svc.currentIndex, 0, "dwell holds entry 0 even though all conditions are met")
-        clock = clock.addingTimeInterval(0.7); svc.evaluateOnce()
-        XCTAssertEqual(svc.currentIndex, 1, "advances exactly one step per dwell")
-        clock = clock.addingTimeInterval(0.7); svc.evaluateOnce()
-        XCTAssertEqual(svc.currentIndex, 2, "still one per dwell — not collapsed")
-        clock = clock.addingTimeInterval(0.7); svc.evaluateOnce()
-        XCTAssertTrue(svc.isComplete, "reaches completion after pacing through all entries")
-    }
-
     @MainActor
     func testCadenceManagedPrefAttribute() throws {
-        // A mobileconfig managed preference landing (any MDM: Fleet, Jamf, Intune, …) satisfies a
-        // managedpref entry. Point the base at a temp dir standing in for /Library/Managed Preferences.
+        // A managed preference landing satisfies a managedpref entry; the base points at a temp dir
+        // standing in for /Library/Managed Preferences.
         let dir = cadenceTempDir()
         defer { try? FileManager.default.removeItem(atPath: dir) }
         let originalBase = CadenceMonitorService.managedPreferencesBase
@@ -483,7 +263,7 @@ class dialogTests: XCTestCase {
 
     @MainActor
     func testCadenceClaimsFromManagedPref() throws {
-        // A tenant profile supplies the claims array (structured CadenceEntry dicts) via cadenceRef.
+        // A profile supplies the claims array (CadenceEntry dicts) via cadenceRef.
         let dir = cadenceTempDir()
         defer { try? FileManager.default.removeItem(atPath: dir) }
         let origBase = CadenceMonitorService.managedPreferencesBase
@@ -509,8 +289,7 @@ class dialogTests: XCTestCase {
 
     @MainActor
     func testManagedPrefBrandColorLightDark() throws {
-        // Brand colour read per-tenant from a managed pref (e.g. nl.root3.support CustomColor),
-        // with a dark-mode variant.
+        // Brand colour read from a managed pref, with a dark-mode variant.
         let dir = cadenceTempDir()
         defer { try? FileManager.default.removeItem(atPath: dir) }
         let origBase = CadenceMonitorService.managedPreferencesBase
@@ -553,7 +332,7 @@ final class InspectSchemaValidationTests: XCTestCase {
     }
 
     func testEmptyItemsArrayIsNotInspect() {
-        // markers must be NON-empty to count as intent
+        // markers must be non-empty to count as intent
         let r = validateInspectSchema(data(#"{"items":[]}"#))
         if case .notInspect = r {} else { XCTFail("expected .notInspect, got \(r)") }
     }

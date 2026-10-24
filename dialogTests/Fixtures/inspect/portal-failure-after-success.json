@@ -1,0 +1,27 @@
+{
+  "_comment": "A portal step whose page fails right after a portal step whose page loaded must show its failure screen. Needs a live page: a late didFinish from the previous page is what this exercises, so it is run by hand.",
+  "preset": "5",
+  "triggerFile": "/tmp/portal-regression.trigger",
+  "introSteps": [
+    {
+      "id": "loads-fine",
+      "stepType": "portal",
+      "layout": "footer",
+      "title": "A page that loads",
+      "portal": {
+        "portalURL": "https://sofa.macadmins.io"
+      }
+    },
+    {
+      "id": "fails-after-success",
+      "stepType": "portal",
+      "layout": "footer",
+      "title": "A page that does not",
+      "portal": {
+        "portalURL": "https://beta.invalid",
+        "fallbackMessage": "Your network blocks it, or it is down. Nothing else in setup depends on this page.",
+        "supportContact": "help@example.com"
+      }
+    }
+  ]
+}

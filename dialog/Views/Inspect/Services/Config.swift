@@ -2,8 +2,8 @@
 //  Config.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 25/07/2025
-//  Business logic service used for configuration loading and processing
+//  Configuration request/result models and the error type whose messages point at the JSON that failed.
+//  The `Config` service itself is filled in by the Config+*.swift extensions.
 //
 
 import Foundation
@@ -39,7 +39,6 @@ enum ConfigurationError: Error, LocalizedError {
         case .fileNotFound(let path):
             return "Configuration file not found at: \(path)"
         case .invalidJSON(let path, let error):
-            // Read JSON file to provide snippet context in error
             let jsonString = try? String(contentsOfFile: path, encoding: .utf8)
             return "Invalid JSON in configuration file \(path): \(Self.formatJSONError(error, jsonString: jsonString))"
         case .missingEnvironmentVariable(let name):
@@ -51,7 +50,7 @@ enum ConfigurationError: Error, LocalizedError {
         }
     }
 
-    /// Format JSON decoding errors with helpful details including line/column for syntax errors
+    /// Human-readable text for a decoding or syntax error, with line number and snippet when `jsonString` is given.
     static func formatJSONError(_ error: Error, jsonString: String? = nil) -> String {
         if let decodingError = error as? DecodingError {
             switch decodingError {
@@ -60,7 +59,6 @@ enum ConfigurationError: Error, LocalizedError {
                 let location = path.isEmpty ? "root" : "'\(path)'"
                 var message = "Missing required field '\(key.stringValue)' at \(location)"
 
-                // Try to show the JSON section where error occurred
                 if let json = jsonString, !path.isEmpty {
                     let result = extractJSONSnippet(json: json, path: path)
                     if let lineNum = result.lineNumber {
@@ -71,7 +69,6 @@ enum ConfigurationError: Error, LocalizedError {
                     }
                 }
 
-                // Add helpful hint for common missing fields
                 if let hint = fieldHint(for: key.stringValue) {
                     message += "\n\n💡 Hint: \(hint)"
                 }
@@ -91,7 +88,6 @@ enum ConfigurationError: Error, LocalizedError {
                     }
                 }
 
-                // Add type hint for common fields
                 if let hint = typeHint(for: path, expectedType: type) {
                     message += "\n\n💡 Hint: \(hint)"
                 }
@@ -119,15 +115,12 @@ enum ConfigurationError: Error, LocalizedError {
             }
         }
 
-        // For NSError from JSONSerialization (syntax errors)
+        // JSONSerialization syntax errors: the debug description reads "... around line X, column Y".
         let nsError = error as NSError
         if nsError.domain == NSCocoaErrorDomain || nsError.domain == "NSCocoaErrorDomain" {
-            // Try to extract line/column from userInfo if available
             if let debugDesc = nsError.userInfo[NSDebugDescriptionErrorKey] as? String {
-                // Format: "... around line X, column Y"
                 var message = "JSON syntax error (line "
 
-                // Try to extract line number and show context
                 if let json = jsonString,
                    let range = debugDesc.range(of: "line \\d+", options: .regularExpression),
                    let lineNum = Int(debugDesc[range].dropFirst(5)) {
@@ -156,8 +149,6 @@ enum ConfigurationError: Error, LocalizedError {
     /// Extract JSON snippet around a coding path for error context
     /// Returns tuple with optional line number and optional snippet string
     private static func extractJSONSnippet(json: String, path: String) -> (lineNumber: Int?, snippet: String?) {
-        // Parse path to find the item index and field name
-        // e.g., "items.Index 0.guidanceContent.Index 0.state" -> items[0].guidanceContent[0], field: state
         let components = path.split(separator: ".")
 
         var arrayKey = ""
@@ -171,12 +162,11 @@ enum ConfigurationError: Error, LocalizedError {
                     itemIndex = idx
                 }
             } else {
-                // Track nested arrays (items, guidanceContent, etc.)
                 if ["items", "guidanceContent", "plistSources"].contains(comp) {
                     arrayKey = comp
-                    itemIndex = 0  // Reset for nested array
+                    itemIndex = 0
                 } else {
-                    // Last non-index component is the field name (for typeMismatch)
+                    // The last non-index component is the field name.
                     fieldName = comp
                 }
             }
@@ -190,7 +180,7 @@ enum ConfigurationError: Error, LocalizedError {
         var itemStartLine = -1
         var itemEndLine = -1
 
-        // First pass: find the item block
+        // Find the item block by counting braces inside the target array.
         for (lineIdx, line) in lines.enumerated() {
             if line.contains("\"\(arrayKey)\"") && line.contains("[") {
                 inTargetArray = true
@@ -228,7 +218,6 @@ enum ConfigurationError: Error, LocalizedError {
             }
         }
 
-        // If we have a specific field name, search within the item block for it
         if let field = fieldName, itemStartLine >= 0 {
             let searchEnd = itemEndLine >= 0 ? itemEndLine : min(lines.count, itemStartLine + 20)
             for i in itemStartLine...searchEnd where lines[i].contains("\"\(field)\"") {
@@ -297,7 +286,6 @@ enum ConfigurationError: Error, LocalizedError {
         case "guidanceContent":
             return "\"guidanceContent\" must be an array. Use guidanceContent: [{...}], not guidanceContent: {...}"
         default:
-            // Generic type hints
             let typeStr = String(describing: expectedType)
             if typeStr.contains("Int") {
                 return "This field expects a number without quotes."
@@ -496,8 +484,7 @@ class Config {
         }
     }
 
-    /// Fallback: Load configuration from specific file path
-    /// TODO: Reevaluate as this has been brittle - loading from file system to late to initialize UI accordingly
+    /// Loads the configuration from a file path.
     func loadConfigurationFromFile(at path: String) -> Result<ConfigurationResult, ConfigurationError> {
         writeLog("🔧 CONFIG: loadConfigurationFromFile called with path: \(path)", logLevel: .debug)
 
@@ -1216,13 +1203,6 @@ class Config {
             }
         }
 
-        // legacy presets (Picker): Should have pickerConfig
-        if preset == "8" || preset == "9" {
-            if config.pickerConfig == nil {
-                warnings.append("⚠️ Preset\(preset): Missing 'pickerConfig' - recommended for picker mode")
-            }
-        }
-
         return warnings
     }
 
@@ -1464,10 +1444,6 @@ class Config {
             uiConfig.imageFormat = imageShape  // Map to existing imageFormat property
         }
 
-        if let imageSyncMode = config.imageSyncMode {
-            uiConfig.imageSyncMode = imageSyncMode
-        }
-
         if let stepStyle = config.stepStyle {
             uiConfig.stepStyle = stepStyle
         }
@@ -1578,7 +1554,7 @@ enum InspectConfigCoercion {
         "recheckInterval", "retryCount", "row", "rowSpan", "scanInterval", "scriptTimeout",
         "shellTimeout", "sideInterval", "sideMessageInterval", "tokenRefreshInterval",
         "total", "waitLargeOverrideTime", "waitSmallOverrideTime", "waitWarningTime",
-        "wallpaperColumns", "wallpaperMultiSelect", "width",
+        "wallpaperColumns", "wallpaperMultiSelect", "width"
     ]
 
     /// Schema fields declared only as `number` (floating point).
@@ -1592,7 +1568,7 @@ enum InspectConfigCoercion {
         "mediaHeight", "mediaRatio", "min", "minDwell", "monitorRefreshInterval",
         "opacity", "outroScale", "outroVerticalOffset", "padding", "portalHeight",
         "progress", "retryDelay", "scale", "showcaseImageHeight", "step", "thumbnailSize",
-        "timeout", "verticalOffset", "videoHeight", "wallpaperThumbnailHeight", "webHeight",
+        "timeout", "verticalOffset", "videoHeight", "wallpaperThumbnailHeight", "webHeight"
     ]
 
     /// Schema fields declared only as `boolean`.
@@ -1612,7 +1588,7 @@ enum InspectConfigCoercion {
         "showProgressDots", "showProgressInfo", "showStepCounter", "showSystemInfo",
         "showThumbnails", "skipIfComplete", "skipPortal", "startFromEnd", "useUserDefaults",
         "visible", "waitForExternalTrigger", "wallpaperShowPath", "wide",
-        "writeOnDialogExit", "writeOnStepComplete",
+        "writeOnDialogExit", "writeOnStepComplete"
     ]
 
     /// Recursively coerce scalar values in a parsed-JSON object graph

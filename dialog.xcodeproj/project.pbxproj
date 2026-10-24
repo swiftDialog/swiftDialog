@@ -146,6 +146,11 @@
 		E5EB15284862FB119AE272F6 /* NotifierNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCC2439D2F6ABA1200F659CF /* NotifierNotifications.swift */; };
 		E60A5542B491A3CE58D101EF /* NotifierSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCC2439A2F6AB9F100F659CF /* NotifierSystem.swift */; };
 		E6C55B960E864B6E5B688D82 /* NotifierArguments.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCC2439C2F6AB9FD00F659CF /* NotifierArguments.swift */; };
+		96476BA76F225D5F6BA86461 /* CardStatsFoldTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54DA516C2E635E633FEF434 /* CardStatsFoldTests.swift */; };
+		73AE5F3791FFAB8C6E414F39 /* ConfigPrimitiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 828537B77CE33E2F6C6525A3 /* ConfigPrimitiveTests.swift */; };
+		E8D4155BAD1D11560274EF34 /* ListItemDecodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1704076D21E171004B4C031 /* ListItemDecodeTests.swift */; };
+		E8542A5F7FA151CB4D253A55 /* PaletteAndNoticeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2326C8A473B9DB39868F9D18 /* PaletteAndNoticeTests.swift */; };
+		18D1D6D39D6EEDE9DFBA6DE5 /* ResultFileFreezeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5048A98B1EDC9C2244764E1 /* ResultFileFreezeTests.swift */; };
 		3C05E85537C26E7772D65B09 /* RoutingShellTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B0925ED7112E9FBD2A3513 /* RoutingShellTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -362,6 +367,11 @@
 		CCE934AC2ACC29F60094BD06 /* TextFileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFileView.swift; sourceTree = "<group>"; };
 		CCF430592C07562D004DFB4D /* DebugOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugOverlay.swift; sourceTree = "<group>"; };
 		F9F647DDE9CB42EBA9D931B9 /* FileSystemCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystemCache.swift; sourceTree = "<group>"; };
+		B54DA516C2E635E633FEF434 /* CardStatsFoldTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardStatsFoldTests.swift; sourceTree = "<group>"; };
+		828537B77CE33E2F6C6525A3 /* ConfigPrimitiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigPrimitiveTests.swift; sourceTree = "<group>"; };
+		C1704076D21E171004B4C031 /* ListItemDecodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListItemDecodeTests.swift; sourceTree = "<group>"; };
+		2326C8A473B9DB39868F9D18 /* PaletteAndNoticeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaletteAndNoticeTests.swift; sourceTree = "<group>"; };
+		A5048A98B1EDC9C2244764E1 /* ResultFileFreezeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultFileFreezeTests.swift; sourceTree = "<group>"; };
 		87B0925ED7112E9FBD2A3513 /* RoutingShellTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutingShellTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -369,6 +379,26 @@
 		189F38AE497C8CE5F70E53D4 /* Exceptions for "Inspect" folder in "Dialog" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"Core Framework/Components/BentoGridView.swift",
+				"Core Framework/Components/BentoStepViews.swift",
+				"Core Framework/Components/BrandedLogoView.swift",
+				"Core Framework/Components/CarouselStepViews.swift",
+				"Core Framework/Components/ComplianceComponents.swift",
+				"Core Framework/Components/DeferralMenuView.swift",
+				"Core Framework/Components/DeploymentStepViews.swift",
+				"Core Framework/Components/GuidanceContentView.swift",
+				"Core Framework/Components/IconCache.swift",
+				"Core Framework/Components/MediaComponents.swift",
+				"Core Framework/Components/OverrideDialogView.swift",
+				"Core Framework/Components/PresetPhaseViews.swift",
+				"Core Framework/Components/StatusComponents.swift",
+				"Core Framework/Components/StatusIconView.swift",
+				"Core Framework/Components/WallpaperPicker.swift",
+				"Core Framework/Modules/SidebarNavigationModule.swift",
+				Utilities/DetailOverlayView.swift,
+				Utilities/InstallationInfoPopoverView.swift,
+				Utilities/PortalWebView.swift,
+				Utilities/ThumbnailService.swift,
 				"inspect-config.schema.json",
 			);
 			target = 4154C2D925F76BDB00A3D373 /* Dialog */;
@@ -547,6 +577,11 @@
 			isa = PBXGroup;
 			children = (
 				87B0925ED7112E9FBD2A3513 /* RoutingShellTests.swift */,
+				A5048A98B1EDC9C2244764E1 /* ResultFileFreezeTests.swift */,
+				2326C8A473B9DB39868F9D18 /* PaletteAndNoticeTests.swift */,
+				C1704076D21E171004B4C031 /* ListItemDecodeTests.swift */,
+				828537B77CE33E2F6C6525A3 /* ConfigPrimitiveTests.swift */,
+				B54DA516C2E635E633FEF434 /* CardStatsFoldTests.swift */,
 				41AADD45306A4C830024E522 /* IconJSONTests.swift */,
 				4154C2F025F76BDC00A3D373 /* dialogTests.swift */,
 				AA00000000000001AABBCC00 /* LogMonitorServiceTests.swift */,
@@ -1138,6 +1173,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				3C05E85537C26E7772D65B09 /* RoutingShellTests.swift in Sources */,
+				18D1D6D39D6EEDE9DFBA6DE5 /* ResultFileFreezeTests.swift in Sources */,
+				E8542A5F7FA151CB4D253A55 /* PaletteAndNoticeTests.swift in Sources */,
+				E8D4155BAD1D11560274EF34 /* ListItemDecodeTests.swift in Sources */,
+				73AE5F3791FFAB8C6E414F39 /* ConfigPrimitiveTests.swift in Sources */,
+				96476BA76F225D5F6BA86461 /* CardStatsFoldTests.swift in Sources */,
 				41D892E72F754FCA00FA4E01 /* PlistEvaluationTests.swift in Sources */,
 				41D892E52F754FBC00FA4E01 /* DistributedNotificationsTests.swift in Sources */,
 				413BFDBE3099929600604E6A /* NumberInputTests.swift in Sources */,

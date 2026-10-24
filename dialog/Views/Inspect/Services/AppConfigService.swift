@@ -2,17 +2,13 @@
 //  AppConfigService.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 17/01/2026
-//
-//  Service for reading MDM managed preferences and applying as overrides
-//  Implements the "single binary, multiple configurations" model for multi-brand deployments
+//  Reads MDM managed preferences and exposes them as branding overrides that win over JSON config.
 //
 
 import Foundation
 import SwiftUI
 
-/// MDM override values for branding fields
-/// These values take precedence over JSON config when present
+/// Branding values read from MDM; a non-nil value takes precedence over the JSON config.
 struct MDMBrandingOverrides {
     var highlightColor: String?
     var accentBorderColor: String?
@@ -23,7 +19,6 @@ struct MDMBrandingOverrides {
     var supportURL: String?
     var logoPath: String?
 
-    // Button text for localization
     var button1Text: String?
     var button2Text: String?
     var introTitle: String?
@@ -49,8 +44,7 @@ struct MDMBrandingOverrides {
     }
 }
 
-/// Service for reading MDM AppConfig managed preferences
-/// Used to dynamically apply branding based on MDM configuration
+/// Reads MDM AppConfig managed preferences for branding; main-actor singleton.
 @MainActor
 class AppConfigService: ObservableObject {
 
@@ -67,9 +61,7 @@ class AppConfigService: ObservableObject {
 
     // MARK: - Configuration Loading
 
-    /// Load branding overrides from MDM managed preferences
-    /// - Parameter source: AppConfigSource specifying which MDM keys map to which fields
-    /// - Returns: MDMBrandingOverrides if any MDM values found, nil otherwise
+    /// Reads the keys named by `source`; returns nil when no key has a value.
     func loadMDMOverrides(source: InspectConfig.AppConfigSource?) -> MDMBrandingOverrides? {
         guard let source = source else { return nil }
 
@@ -77,7 +69,6 @@ class AppConfigService: ObservableObject {
 
         var overrides = MDMBrandingOverrides()
 
-        // Read each configured key from managed preferences
         if let key = source.highlightColorKey {
             overrides.highlightColor = readManagedPreference(domain: domain, key: key)
         }
@@ -110,7 +101,6 @@ class AppConfigService: ObservableObject {
             overrides.logoPath = readManagedPreference(domain: domain, key: key)
         }
 
-        // Button text for localization
         if let key = source.button1TextKey {
             overrides.button1Text = readManagedPreference(domain: domain, key: key)
         }
@@ -135,7 +125,6 @@ class AppConfigService: ObservableObject {
             overrides.outroButtonText = readManagedPreference(domain: domain, key: key)
         }
 
-        // Only return if at least one value was found
         guard overrides.hasAnyValue else {
             writeLog("AppConfig: No MDM branding overrides found", logLevel: .debug)
             return nil
@@ -149,49 +138,29 @@ class AppConfigService: ObservableObject {
 
     // MARK: - Value Resolution (MDM > JSON)
 
-    /// Get effective highlight color (MDM override or JSON config value)
     func effectiveHighlightColor(jsonValue: String?, mdm: MDMBrandingOverrides?) -> String? {
         return mdm?.highlightColor ?? jsonValue
     }
 
-    /// Get effective accent border color (MDM override or JSON config value)
     func effectiveAccentBorderColor(jsonValue: String?, mdm: MDMBrandingOverrides?) -> String? {
         return mdm?.accentBorderColor ?? jsonValue
     }
 
-    /// Get effective footer background color
     func effectiveFooterBackgroundColor(jsonValue: String?, mdm: MDMBrandingOverrides?) -> String? {
         return mdm?.footerBackgroundColor ?? jsonValue
     }
 
-    /// Get effective footer text color
     func effectiveFooterTextColor(jsonValue: String?, mdm: MDMBrandingOverrides?) -> String? {
         return mdm?.footerTextColor ?? jsonValue
     }
 
-    /// Get effective footer text
-    func effectiveFooterText(jsonValue: String?, mdm: MDMBrandingOverrides?) -> String? {
-        return mdm?.footerText ?? jsonValue
-    }
-
-    /// Get effective portal URL
-    func effectivePortalURL(jsonValue: String?, mdm: MDMBrandingOverrides?) -> String? {
-        return mdm?.portalURL ?? jsonValue
-    }
-
-    /// Get effective support URL
-    func effectiveSupportURL(jsonValue: String?, mdm: MDMBrandingOverrides?) -> String? {
-        return mdm?.supportURL ?? jsonValue
-    }
-
-    /// Get effective logo path
     func effectiveLogoPath(jsonValue: String?, mdm: MDMBrandingOverrides?) -> String? {
         return mdm?.logoPath ?? jsonValue
     }
 
     // MARK: - Array Preference Reading (Brand Picker)
 
-    /// Read a managed array preference (checks MDM forced, then falls back to simple)
+    /// The forced (managed) array when there is one, otherwise any unmanaged value.
     func readManagedArrayPreference(domain: String, key: String) -> [String]? {
         if UserDefaults.standard.objectIsForced(forKey: key, inDomain: domain) {
             if let value = CFPreferencesCopyAppValue(key as CFString, domain as CFString),
@@ -202,7 +171,7 @@ class AppConfigService: ObservableObject {
         return readSimpleArrayPreference(domain: domain, key: key)
     }
 
-    /// Read an array preference without checking if managed (for testing/debugging)
+    /// Reads the array from any preference source, managed or not.
     func readSimpleArrayPreference(domain: String, key: String) -> [String]? {
         if let value = CFPreferencesCopyAppValue(key as CFString, domain as CFString),
            let array = value as? [String] {
@@ -211,7 +180,7 @@ class AppConfigService: ObservableObject {
         return nil
     }
 
-    /// Load allowed brand IDs from MDM managed preferences
+    /// Brand IDs the brand picker may offer, from the `allowedBrandsKey` preference.
     func loadAllowedBrandIds(source: InspectConfig.AppConfigSource?) -> [String]? {
         guard let source = source, let key = source.allowedBrandsKey else { return nil }
         let domain = source.domain ?? Bundle.main.bundleIdentifier ?? "com.dialog.branding"
@@ -220,19 +189,13 @@ class AppConfigService: ObservableObject {
 
     // MARK: - Private Helpers
 
-    /// Read a managed preference value using CFPreferences (reads from /Library/Managed Preferences/)
-    /// - Parameters:
-    ///   - domain: Preference domain
-    ///   - key: Preference key
-    /// - Returns: Value as String if found and managed, nil otherwise
+    /// The forced (managed) value as a String, else any unmanaged value, else nil. Numbers are stringified.
     private func readManagedPreference(domain: String, key: String) -> String? {
-        // Check if the key is managed (forced by MDM)
         guard UserDefaults.standard.objectIsForced(forKey: key, inDomain: domain) else {
-            // Fall back to reading unmanaged preference (for demo/testing)
             return readSimplePreference(domain: domain, key: key)
         }
 
-        // Read using CFPreferences which correctly reads from /Library/Managed Preferences/
+        // CFPreferences is what reads /Library/Managed Preferences/.
         if let value = CFPreferencesCopyAppValue(key as CFString, domain as CFString) {
             if let stringValue = value as? String {
                 return stringValue
@@ -244,10 +207,8 @@ class AppConfigService: ObservableObject {
         return nil
     }
 
-    /// Read a preference without checking if managed (for testing/debugging)
-    /// Also reads from /Library/Managed Preferences/ via CFPreferences
+    /// Reads the value from any preference source, managed or not; numbers are stringified.
     func readSimplePreference(domain: String, key: String) -> String? {
-        // Use CFPreferences to read from all preference sources including managed
         if let value = CFPreferencesCopyAppValue(key as CFString, domain as CFString) {
             if let stringValue = value as? String {
                 return stringValue

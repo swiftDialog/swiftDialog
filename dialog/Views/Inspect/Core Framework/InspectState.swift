@@ -2,7 +2,8 @@
 //  InspectState.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 19/07/2025
+//  The shared observable model behind every inspect preset: loaded config, item and step
+//  status sets, and the file, command-file and log monitors that feed them. Main actor.
 //
 
 import Foundation
@@ -26,12 +27,12 @@ enum ConfigurationSource: Equatable {
 /// Stores form input values for guidance content (checkboxes, dropdowns, radios, toggles, sliders)
 /// Universal structure usable across all presets with guidance content
 struct GuidanceFormInputState: Codable {
-    var checkboxes: [String: Bool] = [:]      // checkbox id -> checked state
-    var dropdowns: [String: String] = [:]     // dropdown id -> selected value
-    var radios: [String: String] = [:]        // radio id -> selected option
-    var toggles: [String: Bool] = [:]         // toggle id -> enabled state
-    var sliders: [String: Double] = [:]       // slider id -> current value
-    var textfields: [String: String] = [:]    // textfield id -> text value
+    var checkboxes: [String: Bool] = [:]
+    var dropdowns: [String: String] = [:]
+    var radios: [String: String] = [:]
+    var toggles: [String: Bool] = [:]
+    var sliders: [String: Double] = [:]
+    var textfields: [String: String] = [:]
 }
 
 // MARK: - Configuration Structs for Grouped State
@@ -89,49 +90,39 @@ struct ButtonConfiguration {
 }
 
 class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
-    // MARK: - Core State (Keep as @Published)
+    // MARK: - Core State
     @Published var loadingState: LoadingState = .loading
     @Published var items: [InspectConfig.ItemConfig] = []
     @Published var config: InspectConfig?
 
-    // MARK: - Debug Mode (Cross-Preset)
+    // MARK: - Debug Mode
 
-    /// Determines if presets should skip completed steps on subsequent launches.
-    /// Returns `false` (don't skip) when debug mode is active via:
-    /// 1. `--debug` CLI flag
-    /// 2. `DIALOG_DEBUG_MODE=1` environment variable
-    /// 3. `debugMode: true` in config JSON
-    /// 4. `--inspect-mode` (always fresh start for development/testing)
-    /// This allows testing/demo scenarios to always start from step 1 while preserving form values.
+    /// Whether presets skip steps completed in an earlier launch. True only when the config sets
+    /// `resumable: true` and no debug switch is on: `--debug`, `--inspect-mode`,
+    /// `DIALOG_DEBUG_MODE` in the environment, or `debugMode: true` in the config.
     var shouldSkipCompletedSteps: Bool {
-        // Opt-in resumable: state persistence only when explicitly enabled
-        // Default is false — always fresh start unless config says "resumable": true
         guard config?.resumable == true else {
             writeLog("InspectState: Resumable mode not enabled, always fresh start", logLevel: .debug)
             return false
         }
 
-        // CLI --debug flag overrides resumable
         if appvars.debugMode {
             writeLog("InspectState: Debug mode enabled via --debug CLI flag", logLevel: .info)
             return false
         }
-        // Inspect mode always implies debug mode (fresh start every launch)
         if !appvars.inspectConfigPath.isEmpty {
             writeLog("InspectState: Debug mode enabled via --inspect-mode (always fresh start)", logLevel: .info)
             return false
         }
-        // Environment variable override
         if ProcessInfo.processInfo.environment["DIALOG_DEBUG_MODE"] != nil {
             writeLog("InspectState: Debug mode enabled via DIALOG_DEBUG_MODE environment variable", logLevel: .info)
             return false
         }
-        // Config-based debug mode
         if config?.debugMode == true {
             writeLog("InspectState: Debug mode enabled via config debugMode: true", logLevel: .info)
             return false
         }
-        return true  // Normal behavior: skip if completed
+        return true
     }
 
     // MARK: - Grouped Configuration State
@@ -142,10 +133,10 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
     // MARK: - Preset-specific State
     @Published var plistSources: [InspectConfig.PlistSourceConfig]?
     @Published var colorThresholds = InspectConfig.ColorThresholds.default
-    @Published var plistValidationResults: [String: Bool] = [:] // Track plist validation results
+    @Published var plistValidationResults: [String: Bool] = [:]
 
-    // MARK: - Pre-cache Progress State (for "Loading configuration files..." indicator)
-    @Published var preCacheProgress: (loaded: Int, total: Int)?  // nil = not started, (x, y) = loading
+    // MARK: - Pre-cache Progress
+    @Published var preCacheProgress: (loaded: Int, total: Int)?  // nil until the pre-cache starts
 
     // MARK: - Plist Monitoring - Generalized from Preset6
     private var plistMonitors: [String: PlistMonitorTask] = [:] // Track active monitoring tasks
@@ -167,29 +158,30 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         let recheckInterval: Int
     }
 
-    // MARK: - View-specific State (Should be @State in views, but keeping for now)
-    @Published var scrollOffset: Int = 0 // Manual scroll offset, currently needed in preset3
-    @Published var lastManualScrollTime: Date? // Track manual scrolling
+    // MARK: - View-specific State
+    @Published var scrollOffset: Int = 0 // preset 3
+    @Published var lastManualScrollTime: Date?
     
     // MARK: - Dynamic State (Needs @Published for UI updates)
     @Published var completedItems: Set<String> = []
     @Published var downloadingItems: Set<String> = []
     @Published var failedItems: Set<String> = []  // Items that failed installation (detected from log monitor)
 
-    // MARK: - Wallpaper Selection State (Preset6 wallpaper-picker)
+    // MARK: - Wallpaper Selection (preset 6)
     @Published var wallpaperSelection: [String: String] = [:]  // selectionKey → full image path
 
-    // MARK: - Form Input State (guidance content)
+    // MARK: - Form Input State
     @Published var guidanceFormInputs: [String: GuidanceFormInputState] = [:]
 
-    // MARK: - Log Monitor State (Cross-Preset)
-    @Published var logMonitorStatuses: [String: String] = [:]  // itemId -> status from log monitoring
+    // MARK: - Log Monitor State
+    @Published var logMonitorStatuses: [String: String] = [:]
     private var logMonitorCancellable: AnyCancellable?
 
-    // MARK: - User Values (for override results, etc.)
-    @Published var userValues: [String: String] = [:]  // General key-value store for user selections/results
+    // MARK: - User Values
+    @Published var userValues: [String: String] = [:]
 
     private var appInspector: AppInspector?
+
     @Published var configurationSource: ConfigurationSource = .testData
     private var configPath: String?
     private var lastCommandFileSize: Int = 0
@@ -224,18 +216,13 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         
         writeLog("InspectState: Memory-safe initialization complete", logLevel: .info)
     }
-    
+
     private func loadConfiguration() {
-        // Use configuration service to load config
-        // TODO: this works when calling the global appvars but really should be passed in as a config item.
-        // Pass the inspect config path from appvars if available
         let result: Result<ConfigurationResult, ConfigurationError>
         if !appvars.inspectConfigPath.isEmpty {
-            // File-based sources (--jsonfile / --inspect-config / env / standard location):
-            // use the file loader so iconBasePath auto-set + brandPalette token resolution run.
+            // The file loader also sets iconBasePath and resolves brandPalette tokens.
             result = configurationService.loadConfiguration(fromFile: appvars.inspectConfigPath)
         } else if let data = appvars.inspectConfigData {
-            // Path-less inline --jsonstring: load from the in-memory bytes.
             result = configurationService.loadConfiguration(fromData: data)
         } else {
             result = configurationService.loadConfiguration(fromFile: appvars.inspectConfigPath)
@@ -243,8 +230,6 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         
         switch result {
         case .success(let configResult):
-            // Log warnings from configuration validation 
-            // TODO: Learn how best type-chcek in swift
             for warning in configResult.warnings {
                 writeLog("InspectState: Configuration warning - \(warning)", logLevel: .info)
             }
@@ -254,17 +239,14 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                 
                 let loadedConfig = configResult.config
 
-                // Set core configuration
                 self.config = loadedConfig
 
-                // Publish forced appearance to the WindowGroup-level modifier (issue #669).
                 DialogUpdatableContent.shared.inspectForcedAppearance = loadedConfig.appearance
 
                 // Configure date display service with style from config
                 DateDisplayService.shared.configure(style: loadedConfig.dateStyle)
 
-                // PRIORITY: Set UI configuration FIRST before items
-                // This ensures button text, title, etc. are ready before view transitions from loading
+                // UI configuration before items: setting items ends the loading view.
                 writeLog("InspectState: About to extract configurations", logLevel: .debug)
                 writeLog("InspectState: loadedConfig.banner = \(loadedConfig.banner ?? "nil")", logLevel: .debug)
                 writeLog("InspectState: loadedConfig.listIndicatorStyle = \(loadedConfig.listIndicatorStyle ?? "nil")", logLevel: .debug)
@@ -289,15 +271,13 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                     writeLog("InspectState: Using default color thresholds", logLevel: .info)
                 }
 
-                // Set items LAST - this triggers view transition from loading to main content
+                // Setting items ends the loading view.
                 self.items = loadedConfig.items.sorted { $0.guiIndex < $1.guiIndex }
                 
-                // Set side message rotation if multiple messages exist
                 if self.uiConfiguration.sideMessages.count > 1, let interval = loadedConfig.sideInterval {
                     self.startSideMessageRotation(interval: TimeInterval(interval))
                 }
                 
-                // Debug logging for preset detection
                 writeLog("loadedConfig.preset = \(loadedConfig.preset)", logLevel: .debug)
                 writeLog("Setting preset to: \(self.uiConfiguration.preset)", logLevel: .debug)
                 
@@ -308,7 +288,6 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                     writeLog("InspectState: Side messages: \(self.uiConfiguration.sideMessages.count)", logLevel: .debug)
                 }
                 
-                // Log configuration source
                 self.configurationSource = configResult.source
                 switch configResult.source {
                 case .file(let path):
@@ -320,19 +299,10 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                     writeLog("InspectState: Using fallback configuration", logLevel: .info)
                 }
                 
-                // Here, configuration loaded successfully
                 self.loadingState = .loaded
-                
-                // Validate items to populate results dict
                 self.validateAllItems()
-
-                // Once config is loaded, start FSEvents monitoring for UI updates
                 self.setupOptimizedFileMonitoring()
-
-                // Initialize progress tracker
                 self.initializeProgressTracker()
-
-                // Setup log monitoring (cross-preset feature)
                 self.setupLogMonitoring(config: loadedConfig)
             }
 
@@ -364,20 +334,14 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
             loadAppInspectConfig(config: config, originalPath: configPath ?? "")
         }
         
-        // Setup command file monitoring for continued status updates
+        // FSEvents monitoring starts in loadConfiguration(): `config` is still nil here.
         setupCommandFileMonitoring()
-        
-        // Setup periodic updates as backup detection method
         setupOptimizedPeriodicUpdates()
-
-        // Note: FSEvents monitoring is setup in loadConfiguration() after config is loaded
-        // Don't call setupOptimizedFileMonitoring() here as config isn't loaded yet
 
         writeLog("InspectState: All monitoring components started successfully", logLevel: .info)
     }
     
     private func setupCommandFileMonitoring() {
-        // Look into this for memory-safety checks - our command file monitoring setup is sensitive, we want avoid leaks
         let commandFilePath = InspectConstants.commandFilePath
         
         guard FileManager.default.fileExists(atPath: commandFilePath) else {
@@ -385,13 +349,11 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
             return
         }
         
-        // Prevent multiple monitoring setups
         guard commandFileMonitor == nil else {
             writeLog("InspectState: Command file monitoring already set up", logLevel: .debug)
             return
         }
         
-        // Create command file monitor with weak self to prevent retain cycles
         let fileHandle = open(commandFilePath, O_EVTONLY)
         guard fileHandle >= 0 else {
             writeLog("InspectState: Unable to open command file for monitoring: \(commandFilePath)", logLevel: .error)
@@ -405,7 +367,6 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         )
         
         commandFileMonitor?.setEventHandler { [weak self] in
-            // Use weak self to prevent memory leaks in nested closures
             guard let self = self else { return }
             self.debouncedUpdater.debounce(key: "command-file-update") { [weak self] in
                 self?.updateAppStatus()
@@ -433,7 +394,6 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
     }
     
     private func setupOptimizedFileMonitoring() {
-        // Instantiate FSEvents monitoring setup
         let cachePaths = config?.cachePaths ?? []
         
         guard !cachePaths.isEmpty else {
@@ -441,7 +401,6 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
             return
         }
         
-        // Set up FSEvents monitor with our delegate pattern
         fsEventsMonitor.delegate = self
         fsEventsMonitor.startMonitoring(items: items, cachePaths: cachePaths, cacheExtensions: config?.resolvedCacheExtensions)
         
@@ -451,22 +410,17 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
     // MARK: - Log Monitoring Setup
 
     private func setupLogMonitoring(config: InspectConfig) {
-        // Check if log monitoring is configured
         guard config.logMonitor != nil || config.logMonitors != nil else {
             return
         }
 
         writeLog("InspectState: Setting up log monitoring", logLevel: .info)
 
-        // Set items for auto-matching
         LogMonitorService.shared.setItems(items)
-
-        // Configure the service
         LogMonitorService.shared.configure(with: config)
 
-        // Subscribe to status changes — only react to NEW or CHANGED statuses
-        // Without this guard, Combine publishes the entire dictionary on every change,
-        // causing stale "Installing..." statuses to demote already-completed items.
+        // React only to changed statuses: the whole dictionary republishes on every change, and a
+        // stale "Installing..." would demote a completed item.
         var previousStatuses: [String: String] = [:]
         logMonitorCancellable = LogMonitorService.shared.$latestStatuses
             .receive(on: DispatchQueue.main)
@@ -474,7 +428,6 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
                 guard let self = self else { return }
                 self.logMonitorStatuses = statuses
 
-                // Only process items whose status actually changed
                 for (itemId, status) in statuses {
                     guard status != previousStatuses[itemId] else { continue }
                     previousStatuses[itemId] = status
@@ -502,8 +455,7 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
             }
     }
 
-    /// Check if a log monitor status indicates an update/install is in progress
-    /// These statuses should move an item from "completed" to "updating" state
+    /// Whether a log monitor status means an install or update is in progress.
     private func isUpdatingStatus(_ status: String) -> Bool {
         let updatingPrefixes = [
             "Installing",
@@ -521,7 +473,6 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
             return true
         }
 
-        // Also check for percentage progress (e.g., "Downloading 45%")
         if status.contains("%") {
             return true
         }
@@ -530,19 +481,12 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
     }
 
     private func performRobustAppCheck() {
-        // Simple, timer-based monitoring - checks all app states every 2 seconds
-        // This ensures 100% reliability for detecting app installations
-        
-        // Only log every 30 seconds to avoid memory accumulation
         if Date().timeIntervalSince(lastLogTime) > 30.0 {
             writeLog("InspectState: App status monitoring active", logLevel: .debug)
             lastLogTime = Date()
         }
         
-        // Always check command file for updates (external status changes)
         checkCommandFileForUpdates()
-        
-        // Check all app installation statuses directly
         checkDirectInstallationStatus()
     }
     
@@ -2138,7 +2082,7 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
 
             // If file exists, read the actual value to display (e.g., timestamp)
             if fileExists {
-                return Validation.shared.getJsonValue(path: monitor.path, key: monitor.key) ?? "Present"
+                return "Present"
             } else {
                 return "Not detected"
             }
@@ -2157,7 +2101,7 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         }
 
         // Standard value reading for other evaluation types
-        return Validation.shared.getJsonValue(path: monitor.path, key: monitor.key) ?? "(not set)"
+        return "(not set)"
     }
 
     /// Force immediate recheck of plist monitors for a specific item
@@ -2448,7 +2392,7 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
             }
         }
     }
-
+    
 
     deinit {
         writeLog("InspectState.deinit() - Starting resource cleanup", logLevel: .info)
@@ -2463,28 +2407,19 @@ class InspectState: ObservableObject, FileMonitorDelegate, @unchecked Sendable {
         fileSystemCheckTimer = nil
         sideMessageTimer?.invalidate()
         sideMessageTimer = nil
-
-        // Stop all plist monitoring
         stopAllPlistMonitors()
-        
-        // Stop DispatchSource monitoring
+
         commandFileMonitor?.cancel()
         commandFileMonitor = nil
-        
-        // Stop FSEvents monitoring and clear delegate to prevent any potential retain cycles
+
         fsEventsMonitor.stopMonitoring()
         fsEventsMonitor.delegate = nil
-        
-        // Cancel all debounced operations
+
         debouncedUpdater.cancelAll()
         
         // Clear AppInspector reference
         appInspector = nil
-        
-        // Note: Services (configurationService) are value types with no explicit cleanup needed
-        // They will be automatically deallocated when InspectState is deallocated
-        // Validation.shared is a singleton and doesn't need explicit cleanup
-        
+
         writeLog("InspectState.deinit() - Resource cleanup completed", logLevel: .info)
     }
     
