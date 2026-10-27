@@ -2,10 +2,8 @@
 //  DetailOverlayView.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH
-//
-//  Configurable detail flyout overlay for Inspect mode
-//  Supports rich content, system info, and customizable sizing
+//  The configurable detail sheet (`detailOverlay` in the config): authored content blocks plus
+//  optional generated system-info and progress sections.
 //
 
 import SwiftUI
@@ -13,14 +11,13 @@ import Foundation
 
 // MARK: - Size Configuration
 
-/// Defines the available sizes for the detail overlay
+/// The `size` values of the detail overlay.
 enum DetailOverlaySize: String {
     case small
     case medium
     case large
     case full
 
-    /// Width for the overlay
     var width: CGFloat {
         switch self {
         case .small: return 320
@@ -30,7 +27,8 @@ enum DetailOverlaySize: String {
         }
     }
 
-    /// Height for the overlay
+    /// A height cap: the sheet hugs its content up to this, except that generated sections take
+    /// the full height and scroll.
     var height: CGFloat {
         switch self {
         case .small: return 400
@@ -40,7 +38,7 @@ enum DetailOverlaySize: String {
         }
     }
 
-    /// Whether to use sheet presentation (large/full) or popover (small/medium)
+    /// Sheet presentation for large and full, popover for small and medium.
     var usesSheet: Bool {
         switch self {
         case .small, .medium: return false
@@ -55,13 +53,13 @@ struct DetailOverlayView: View {
     @ObservedObject var inspectState: InspectState
     let config: InspectConfig.DetailOverlayConfig
     let onClose: () -> Void
+    @Environment(\.inspectLocalization) private var l10n
+    @Environment(\.palette) private var palette
 
-    /// Computed size from config
     private var overlaySize: DetailOverlaySize {
         DetailOverlaySize(rawValue: config.size ?? "medium") ?? .medium
     }
 
-    /// Background color from config or default
     private var backgroundColor: Color {
         if let hexColor = config.backgroundColor {
             return Color(hex: hexColor)
@@ -69,110 +67,86 @@ struct DetailOverlayView: View {
         return Color(NSColor.windowBackgroundColor)
     }
 
-    /// Show dividers between sections
     private var showDividers: Bool {
         config.showDividers ?? true
     }
 
-    var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            headerView
-
-            if showDividers {
-                Divider()
-            }
-
-            // Scrollable content area
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    // Custom content blocks
-                    if let content = config.content, !content.isEmpty {
-                        customContentSection(content)
-                    }
-
-                    // System info section (optional)
-                    if config.showSystemInfo ?? true {
-                        if showDividers && config.content != nil {
-                            Divider()
-                                .padding(.vertical, 8)
-                        }
-                        systemInfoSection
-                    }
-
-                    // Progress info section (optional)
-                    if config.showProgressInfo ?? false {
-                        if showDividers {
-                            Divider()
-                                .padding(.vertical, 8)
-                        }
-                        progressInfoSection
-                    }
-                }
-                .padding(20)
-            }
-
-            if showDividers {
-                Divider()
-            }
-
-            // Footer with close button
-            footerView
-        }
-        .frame(width: overlaySize.width, height: overlaySize.height)
-        .background(backgroundColor)
+    /// Generated sections have no authored length, so the sheet scrolls at full height instead of clipping.
+    private var hasGeneratedSections: Bool {
+        (config.showSystemInfo ?? true) || (config.showProgressInfo ?? false)
     }
 
-    // MARK: - Header View
+    var body: some View {
+        DetailSheetShell(
+            backLabel: config.closeButtonText ?? l10n("ui.detailSheetBack", "Back"),
+            accentColor: inspectState.config?.highlightColor.map { Color(hex: $0) } ?? .accentColor,
+            width: overlaySize.width,
+            minHeight: min(DetailSheetMetrics.minHeight, overlaySize.height),
+            maxHeight: overlaySize.height,
+            background: config.backgroundColor.map { Color(hex: $0) },
+            scrolls: hasGeneratedSections,
+            onClose: onClose
+        ) {
+            VStack(alignment: .leading, spacing: 16) {
+                titleBlock
 
-    private var headerView: some View {
-        HStack(spacing: 12) {
-            // Icon (if provided)
-            if let iconString = config.icon {
-                iconView(for: iconString, size: 32)
-            }
+                if let content = config.content, !content.isEmpty {
+                    customContentSection(content)
+                }
 
-            // Title and subtitle
-            VStack(alignment: .leading, spacing: 2) {
-                Text(config.title ?? "Help")
-                    .font(.title2)
-                    .fontWeight(.bold)
+                if config.showSystemInfo ?? true {
+                    if showDividers && config.content != nil {
+                        Divider()
+                            .padding(.vertical, 8)
+                    }
+                    systemInfoSection
+                }
 
-                if let subtitle = config.subtitle {
-                    Text(subtitle)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                if config.showProgressInfo ?? false {
+                    if showDividers {
+                        Divider()
+                            .padding(.vertical, 8)
+                    }
+                    progressInfoSection
                 }
             }
-
-            Spacer()
-
-            // Close button (X)
-            Button(action: onClose) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.title2)
-                    .foregroundStyle(.secondary)
-            }
-            .buttonStyle(.plain)
-            .help("Close")
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.bottom, 4)
         }
-        .padding(16)
-        .background(Color(NSColor.controlBackgroundColor).opacity(0.5))
+    }
+
+    // MARK: - Title
+
+    /// Title and subtitle inside the content, without an icon; `config.icon` is drawn by the opener.
+    private var titleBlock: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(config.title ?? l10n("ui.detailOverlayTitle", "Help"))
+                .font(.system(size: 26, weight: .bold))
+                .tracking(-0.3)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if let subtitle = config.subtitle {
+                Text(subtitle)
+                    .font(.system(size: 14))
+                    .foregroundStyle(.secondary)
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
 
     // MARK: - Custom Content Section
 
     @ViewBuilder
     private func customContentSection(_ content: [InspectConfig.GuidanceContent]) -> some View {
-        // Pass content blocks directly to GuidanceContentView
-        // Template variable resolution happens via resolveTemplateVariables() in GuidanceContentView
-        // which already calls through to the system template resolution
+        // GuidanceContentView resolves template variables itself.
         GuidanceContentView(
             contentBlocks: content,
             scaleFactor: 1.0,
             iconBasePath: inspectState.config?.iconBasePath,
             inspectState: inspectState,
-            itemId: "__detail_overlay__"
+            itemId: "__detail_overlay__",
+            accentColor: inspectState.config?.highlightColor.map { Color(hex: $0) }
         )
     }
 
@@ -180,16 +154,15 @@ struct DetailOverlayView: View {
 
     private var systemInfoSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("System Information")
+            Text(l10n("ui.detailOverlaySystemInfo", "System Information"))
                 .font(.headline)
                 .fontWeight(.semibold)
                 .foregroundStyle(.secondary)
 
-            // Computer info with icon
             HStack(spacing: 12) {
                 Image(nsImage: NSImage(named: NSImage.computerName) ?? NSImage())
                     .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
                     .frame(width: 48, height: 48)
 
                 VStack(alignment: .leading, spacing: 4) {
@@ -197,7 +170,8 @@ struct DetailOverlayView: View {
                         .font(.headline)
                         .fontWeight(.semibold)
 
-                    Text("Serial: \(getSystemInfo("serialnumber"))")
+                    Text(l10n("ui.detailOverlaySerial", "Serial: {serial}")
+                        .replacingOccurrences(of: "{serial}", with: getSystemInfo("serialnumber")))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .textSelection(.enabled)
@@ -213,7 +187,6 @@ struct DetailOverlayView: View {
                     .fill(Color(NSColor.controlBackgroundColor))
             )
 
-            // User info
             if inspectState.config?.hideSystemDetails != true {
                 HStack(spacing: 12) {
                     Image(systemName: "person.circle.fill")
@@ -245,7 +218,7 @@ struct DetailOverlayView: View {
 
     private var progressInfoSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Installation Progress")
+            Text(l10n("ui.detailOverlayInstallProgress", "Installation Progress"))
                 .font(.headline)
                 .fontWeight(.semibold)
                 .foregroundStyle(.secondary)
@@ -253,16 +226,16 @@ struct DetailOverlayView: View {
             VStack(spacing: 8) {
                 progressRow(label: "Total Items", value: "\(inspectState.items.count)")
                 progressRow(label: "Completed", value: "\(inspectState.completedItems.count)",
-                           valueColor: !inspectState.completedItems.isEmpty ? .green : .primary)
+                           valueColor: !inspectState.completedItems.isEmpty ? palette.success : palette.text)
                 progressRow(label: "Installing", value: "\(inspectState.downloadingItems.count)",
-                           valueColor: !inspectState.downloadingItems.isEmpty ? .blue : .primary)
+                           valueColor: !inspectState.downloadingItems.isEmpty ? palette.info : palette.text)
 
                 let pending = inspectState.items.count - inspectState.completedItems.count - inspectState.downloadingItems.count
                 progressRow(label: "Pending", value: "\(pending)", valueColor: .secondary)
 
                 let progress = inspectState.items.isEmpty ? 0.0 : Double(inspectState.completedItems.count) / Double(inspectState.items.count)
                 progressRow(label: "Progress", value: "\(Int(progress * 100))%",
-                           valueColor: progress == 1.0 ? .green : .blue)
+                           valueColor: progress == 1.0 ? palette.success : palette.info)
             }
             .padding(12)
             .background(
@@ -270,16 +243,14 @@ struct DetailOverlayView: View {
                     .fill(Color(NSColor.controlBackgroundColor))
             )
 
-            // Currently installing items
             if !inspectState.downloadingItems.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
-                    // Header owns the single spinner — motion lives in exactly one
-                    // place, so N concurrent installs don't spawn N competing gears.
+                    // The header owns the only spinner; rows get a static dot.
                     HStack(spacing: 8) {
-                        Text("Currently Installing")
+                        Text(l10n("ui.detailOverlayCurrentlyInstalling", "Currently Installing"))
                             .font(.subheadline)
                             .fontWeight(.medium)
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(palette.info)
                         ProgressView()
                             .controlSize(.small)
                         Spacer()
@@ -287,13 +258,11 @@ struct DetailOverlayView: View {
 
                     ForEach(inspectState.items.filter { inspectState.downloadingItems.contains($0.id) }, id: \.id) { item in
                         HStack(spacing: 8) {
-                            // Static "active" dot — each row reports its own state
-                            // without spinning; the header spinner carries the motion.
                             Circle()
-                                .fill(Color.blue)
+                                .fill(palette.info)
                                 .frame(width: 8, height: 8)
                                 .padding(3)
-                                .background(Circle().fill(Color.blue.opacity(0.18)))
+                                .background(Circle().fill(palette.info.opacity(0.18)))
                             Text(item.displayName)
                                 .font(.caption)
                                 .fontWeight(.medium)
@@ -304,69 +273,12 @@ struct DetailOverlayView: View {
                 .padding(12)
                 .background(
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.blue.opacity(0.1))
+                        .fill(palette.info.opacity(0.1))
                 )
             }
         }
     }
 
-    // MARK: - Footer View
-
-    private var footerView: some View {
-        HStack {
-            Spacer()
-            Button(action: onClose) {
-                Text(config.closeButtonText ?? "Close")
-                    .fontWeight(.medium)
-            }
-            .keyboardShortcut(.escape, modifiers: [])
-            .buttonStyle(.borderedProminent)
-            Spacer()
-        }
-        .padding(16)
-        .background(Color(NSColor.controlBackgroundColor).opacity(0.5))
-    }
-
-    // MARK: - Helper Views
-
-    @ViewBuilder
-    private func iconView(for iconString: String, size: CGFloat) -> some View {
-        if iconString.hasPrefix("sf=") {
-            // SF Symbol with optional color: sf=icon.name,color=#hex
-            let parts = iconString.dropFirst(3).components(separatedBy: ",")
-            let symbolName = parts[0]
-            let iconColor: Color = {
-                if parts.count > 1, let colorPart = parts.first(where: { $0.hasPrefix("color=") }) {
-                    let hex = String(colorPart.dropFirst(6))
-                    return Color(hex: hex)
-                }
-                return .accentColor
-            }()
-
-            Image(systemName: symbolName)
-                .font(.system(size: size))
-                .foregroundStyle(iconColor)
-        } else if iconString.contains("/") || iconString.contains(".") {
-            // File path
-            let expandedPath = (iconString as NSString).expandingTildeInPath
-            if let nsImage = NSImage(contentsOfFile: expandedPath) {
-                Image(nsImage: nsImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: size, height: size)
-            } else {
-                // Fallback to SF Symbol
-                Image(systemName: "questionmark.circle")
-                    .font(.system(size: size))
-                    .foregroundStyle(.secondary)
-            }
-        } else {
-            // Assume SF Symbol name
-            Image(systemName: iconString)
-                .font(.system(size: size))
-                .foregroundStyle(Color.accentColor)
-        }
-    }
 
     private func progressRow(label: String, value: String, valueColor: Color = .primary) -> some View {
         HStack {
@@ -384,9 +296,12 @@ struct DetailOverlayView: View {
 
     // MARK: - System Info Helpers
 
+    /// User-facing fallback for a missing system value, so it is localized.
+    private var unknownValue: String { l10n("ui.detailOverlayUnknown", "Unknown") }
+
     private func getSystemInfo(_ key: String) -> String {
         let systemInfo = getEnvironmentVars()
-        return systemInfo[key] ?? "Unknown"
+        return systemInfo[key] ?? unknownValue
     }
 
     private func getOSDisplayName() -> String {
@@ -395,36 +310,6 @@ struct DetailOverlayView: View {
         return "\(osName) \(osVersion.majorVersion).\(osVersion.minorVersion).\(osVersion.patchVersion)"
     }
 
-    /// Resolve template variables in content strings
-    /// Supports: {{serialNumber}}, {{computerModel}}, {{computerName}}, {{userName}}, {{userFullName}}, {{osVersion}}, {{osName}}
-    private func resolveSystemTemplateVariables(_ text: String) -> String {
-        let systemInfo = getEnvironmentVars()
-        var result = text
-
-        // Map template variables to system info keys
-        let templateMap: [String: String] = [
-            "{{serialNumber}}": systemInfo["serialnumber"] ?? "Unknown",
-            "{{computerModel}}": systemInfo["computermodel"] ?? "Unknown",
-            "{{computerName}}": systemInfo["computername"] ?? "Unknown",
-            "{{userName}}": systemInfo["username"] ?? "Unknown",
-            "{{userFullName}}": systemInfo["userfullname"] ?? "Unknown",
-            "{{osVersion}}": {
-                let v = ProcessInfo.processInfo.operatingSystemVersion
-                return "\(v.majorVersion).\(v.minorVersion).\(v.patchVersion)"
-            }(),
-            "{{osName}}": systemInfo["osname"] ?? "macOS",
-            "{{progress}}": {
-                let progress = inspectState.items.isEmpty ? 0.0 : Double(inspectState.completedItems.count) / Double(inspectState.items.count)
-                return "\(Int(progress * 100))%"
-            }()
-        ]
-
-        for (template, value) in templateMap {
-            result = result.replacingOccurrences(of: template, with: value)
-        }
-
-        return result
-    }
 }
 
 // MARK: - Preview

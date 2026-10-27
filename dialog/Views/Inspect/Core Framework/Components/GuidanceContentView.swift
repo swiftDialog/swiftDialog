@@ -232,6 +232,25 @@ struct GuidanceContentView<Context: UserInputContext & ProgressContext & Observa
                 scaleFactor: scaleFactor
             )
 
+        case "image":
+            GuidanceImageBlock(block: block, iconBasePath: iconBasePath, accentColor: accentColor,
+                               scaleFactor: scaleFactor, contentAlignment: mediaAlignment)
+
+        case "video":
+            GuidanceVideoBlock(block: block, scaleFactor: scaleFactor)
+
+        case "webcontent":
+            GuidanceWebContentBlock(block: block, accentColor: accentColor, scaleFactor: scaleFactor)
+
+        case "portal-webview":
+            GuidancePortalWebViewBlock(
+                block: block,
+                // A block-level `portalConfig` overrides the global one.
+                portalConfig: block.portalConfig ?? inspectState.config?.portalConfig,
+                accentColor: accentColor,
+                scaleFactor: scaleFactor
+            )
+
         case "status-badge":
             // `content` is accepted as the label when `label` is absent.
             if let label = block.label ?? block.content, let state = block.state {
