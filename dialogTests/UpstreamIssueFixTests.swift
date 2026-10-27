@@ -74,3 +74,53 @@ final class UpstreamIssueFixTests: XCTestCase {
         }
     }
 }
+
+/// The 3.1.1 guide picker: decoded keys, selection rules and the plist shape scripts read.
+final class GuidePickerTests: XCTestCase {
+
+    private func config(mode: String, allowEmpty: Bool = false) throws -> InspectConfig {
+        let json = """
+        {"preset": "5", "pickerConfig": {"selectionMode": "\(mode)", "returnSelections": true,
+                                         "allowContinueWithoutSelection": \(allowEmpty)},
+         "introSteps": [{"id": "a", "stepType": "guide", "title": "Alpha", "selectable": true},
+                        {"id": "b", "stepType": "guide", "title": "Beta", "selectable": true},
+                        {"id": "c", "stepType": "guide"}]}
+        """
+        return try JSONDecoder().decode(InspectConfig.self, from: Data(json.utf8))
+    }
+
+    func testTheKeysDecode() throws {
+        let c = try config(mode: "multi")
+        XCTAssertTrue(GuidePicker.isActive(c.pickerConfig))
+        XCTAssertEqual(c.pickerConfig?.returnSelections, true)
+        XCTAssertEqual(c.introSteps?.map { $0.selectable }, [true, true, nil])
+    }
+
+    func testSingleIsExclusiveAndMultiToggles() {
+        XCTAssertEqual(GuidePicker.toggled(["a"], id: "b", mode: "single"), ["b"])
+        XCTAssertEqual(GuidePicker.toggled(["a"], id: "a", mode: "single"), [])
+        XCTAssertEqual(GuidePicker.toggled(["a"], id: "b", mode: "multi"), ["a", "b"])
+        XCTAssertEqual(GuidePicker.toggled(["a", "b"], id: "a", mode: "multi"), ["b"])
+    }
+
+    func testFinishWaitsForASelectionUnlessAllowed() throws {
+        XCTAssertFalse(GuidePicker.canFinish(try config(mode: "single").pickerConfig, selections: []))
+        XCTAssertTrue(GuidePicker.canFinish(try config(mode: "single").pickerConfig, selections: ["a"]))
+        XCTAssertTrue(GuidePicker.canFinish(try config(mode: "multi", allowEmpty: true).pickerConfig, selections: []))
+        XCTAssertTrue(GuidePicker.canFinish(nil, selections: []), "no pickerConfig never holds Finish")
+    }
+
+    func testThePlistHasThe311Shape() throws {
+        let steps = try XCTUnwrap(try config(mode: "multi").introSteps)
+        let multi = GuidePicker.output(mode: "multi", selections: ["b", "a"], steps: steps)
+        XCTAssertEqual(multi["selectedItems"] as? [[String: String]],
+                       [["id": "a", "title": "Alpha"], ["id": "b", "title": "Beta"]], "step order, {id, title}")
+        XCTAssertEqual(multi["selectionCount"] as? Int, 2)
+        XCTAssertEqual(multi["selectionMode"] as? String, "multi")
+        XCTAssertNotNil(multi["timestamp"] as? Date)
+
+        let single = GuidePicker.output(mode: "single", selections: ["b"], steps: steps)
+        XCTAssertEqual(single["selectedItem"] as? [String: String], ["id": "b", "title": "Beta"])
+        XCTAssertNil(single["selectedItems"])
+    }
+}

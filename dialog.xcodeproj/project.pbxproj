@@ -153,6 +153,7 @@
 		6B0DF7C0251DA067D67EFF30 /* BrandMarkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D8571FAEDCDA1F1E41186C /* BrandMarkTests.swift */; };
 		8FCAB41C3A989E68605EB28B /* BrandSlotMetricsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF2E82D59F9D476BF9644832 /* BrandSlotMetricsTests.swift */; };
 		FC0F978B8B584E1375DA0E20 /* BulletMarkerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F1AA0F0017AA54DA5EB73E /* BulletMarkerTests.swift */; };
+		A81DDCEA074C62D77F281C5D /* CadenceCompletionCopyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E621DD14AE8AA7AEF1B3FD83 /* CadenceCompletionCopyTests.swift */; };
 		DE6FA81EB43FF0FF5CCD1825 /* CadenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44A0A0576F108442F732EE9 /* CadenceTests.swift */; };
 		04E4DE9BB8156C006C5FB000 /* CardChromeSizingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01D60E7A0E02C20B9C7A38A8 /* CardChromeSizingTests.swift */; };
 		3C7D44A6D4E34169362AABF9 /* CardHeroPortTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310F09C4AF45577EC6717CB0 /* CardHeroPortTests.swift */; };
@@ -161,6 +162,7 @@
 		7F03DC1803881F7239119A09 /* CardShowcasePortTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FC03C6F868362B64B1B760B /* CardShowcasePortTests.swift */; };
 		96476BA76F225D5F6BA86461 /* CardStatsFoldTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54DA516C2E635E633FEF434 /* CardStatsFoldTests.swift */; };
 		F2CDFD94B67035C50B18EABB /* CatalogueStatusRuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1BAFD7E04165D916E7BE9E /* CatalogueStatusRuleTests.swift */; };
+		7717EDC6702A64F2C1AC4E99 /* ChecklistLineMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5874459C76B0232A8AD0F1B8 /* ChecklistLineMonitorTests.swift */; };
 		5F6EF6C2DA61D3679CA4A2A3 /* ChromeLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A03E25AA030DEF8862BB999 /* ChromeLayoutTests.swift */; };
 		73AE5F3791FFAB8C6E414F39 /* ConfigPrimitiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 828537B77CE33E2F6C6525A3 /* ConfigPrimitiveTests.swift */; };
 		FED1FE862ADE754A404E9347 /* DecisionCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF17B78D8FF6758660FC284 /* DecisionCardTests.swift */; };
@@ -171,6 +173,7 @@
 		D0C1FB0C00DFB102990F057C /* FileMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 865B5C7AD338A1B5B301BDF7 /* FileMonitorTests.swift */; };
 		44ABF7492A7BE38F21455720 /* FilenameMatchingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D7A07949DB38F1263303F4 /* FilenameMatchingTests.swift */; };
 		DB686AD904F55E604E8C2C38 /* FormBlockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D86629475AD6A1844A9CDD25 /* FormBlockTests.swift */; };
+		5690D53A6D8E1CC29F3EFCCD /* GreetingResolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72CBD2B5EE66982CBABEAF8C /* GreetingResolverTests.swift */; };
 		5E5F5EBF90F82AE9288D6F61 /* GuidanceButtonStyleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1287CF179C47B8151A26CB6 /* GuidanceButtonStyleTests.swift */; };
 		3CD5ED61AEA94CF89FB472B0 /* GuidanceMarkdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D365488D8810E3193B53AD /* GuidanceMarkdownTests.swift */; };
 		159B029960B92845F4A6033B /* GuidanceViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 757848EFB19410514CCC271A /* GuidanceViewTests.swift */; };
@@ -184,15 +187,18 @@
 		F75B88CC19CAF23887C8AC23 /* JourneyCardGridTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A6321ED8365611F3227550 /* JourneyCardGridTests.swift */; };
 		2B16BF7905A5448FD61EB3E1 /* JsonMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0BA610CFB799564D7D9659 /* JsonMonitorTests.swift */; };
 		1CF3E7BE49759C8CC21AE144 /* ListItemCommandRuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142F3299C233CCEEB30DAB3E /* ListItemCommandRuleTests.swift */; };
+		DEAFFF1AB58FB6C3792D5A7D /* ListItemCommandTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41513FA4FD0496A02D386E0F /* ListItemCommandTests.swift */; };
 		E8D4155BAD1D11560274EF34 /* ListItemDecodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1704076D21E171004B4C031 /* ListItemDecodeTests.swift */; };
 		C4A24B838F7000A1FBBEA357 /* LiveChecklistTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F36B7936C19688EEE7C4099 /* LiveChecklistTests.swift */; };
 		31285302374B0C633AB37A49 /* LogPatternTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01E7B5A5952B837940BC9645 /* LogPatternTests.swift */; };
 		E8542A5F7FA151CB4D253A55 /* PaletteAndNoticeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2326C8A473B9DB39868F9D18 /* PaletteAndNoticeTests.swift */; };
+		C9ED5E4A12261334346F65ED /* PaletteLiteralTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11F5BFFE2B82CE06E5E3E15 /* PaletteLiteralTests.swift */; };
 		9F857AA28FAA3229A0D68A5F /* PayloadAlignmentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E72F5DDB0D1917CB45F8992E /* PayloadAlignmentTests.swift */; };
 		EBFF25E6B97C315621818367 /* PhaseLocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2BBE09B7494BFAE9204F9ED /* PhaseLocalizationTests.swift */; };
 		A37C38586779E8FC1C41291B /* PhaseTrackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91023BE22C744E3AEFB929EB /* PhaseTrackTests.swift */; };
 		03A086E6F4A06C3565A66AA5 /* PlainSimpleGridTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5493932F0270CDE988407787 /* PlainSimpleGridTests.swift */; };
 		CA8C7801AA7F1989E205219A /* PortalChromeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484C4CA1297D7669ED11985F /* PortalChromeTests.swift */; };
+		44A2F64F8931B1190975322D /* Preset5ArmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E06BDB11D4A542F707CC3A56 /* Preset5ArmTests.swift */; };
 		2BC6E54D51AFBDE9F464CABD /* Preset6PhaseAxisTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CDDB7B775CA73F8803C9006 /* Preset6PhaseAxisTests.swift */; };
 		2FA75B3D1C171DC97C6867B4 /* Preset6StepAdoptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F07BA7C300568C2A5E08F5 /* Preset6StepAdoptionTests.swift */; };
 		0FEC9C8315474AA3D781A7EA /* ProfileConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0873B49D1F9222965E608A /* ProfileConfigTests.swift */; };
@@ -432,6 +438,7 @@
 		87D8571FAEDCDA1F1E41186C /* BrandMarkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandMarkTests.swift; sourceTree = "<group>"; };
 		DF2E82D59F9D476BF9644832 /* BrandSlotMetricsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandSlotMetricsTests.swift; sourceTree = "<group>"; };
 		83F1AA0F0017AA54DA5EB73E /* BulletMarkerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulletMarkerTests.swift; sourceTree = "<group>"; };
+		E621DD14AE8AA7AEF1B3FD83 /* CadenceCompletionCopyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CadenceCompletionCopyTests.swift; sourceTree = "<group>"; };
 		D44A0A0576F108442F732EE9 /* CadenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CadenceTests.swift; sourceTree = "<group>"; };
 		01D60E7A0E02C20B9C7A38A8 /* CardChromeSizingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardChromeSizingTests.swift; sourceTree = "<group>"; };
 		310F09C4AF45577EC6717CB0 /* CardHeroPortTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardHeroPortTests.swift; sourceTree = "<group>"; };
@@ -440,6 +447,7 @@
 		8FC03C6F868362B64B1B760B /* CardShowcasePortTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardShowcasePortTests.swift; sourceTree = "<group>"; };
 		B54DA516C2E635E633FEF434 /* CardStatsFoldTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardStatsFoldTests.swift; sourceTree = "<group>"; };
 		BC1BAFD7E04165D916E7BE9E /* CatalogueStatusRuleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogueStatusRuleTests.swift; sourceTree = "<group>"; };
+		5874459C76B0232A8AD0F1B8 /* ChecklistLineMonitorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecklistLineMonitorTests.swift; sourceTree = "<group>"; };
 		8A03E25AA030DEF8862BB999 /* ChromeLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromeLayoutTests.swift; sourceTree = "<group>"; };
 		828537B77CE33E2F6C6525A3 /* ConfigPrimitiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigPrimitiveTests.swift; sourceTree = "<group>"; };
 		BCF17B78D8FF6758660FC284 /* DecisionCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecisionCardTests.swift; sourceTree = "<group>"; };
@@ -450,6 +458,7 @@
 		865B5C7AD338A1B5B301BDF7 /* FileMonitorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMonitorTests.swift; sourceTree = "<group>"; };
 		C8D7A07949DB38F1263303F4 /* FilenameMatchingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilenameMatchingTests.swift; sourceTree = "<group>"; };
 		D86629475AD6A1844A9CDD25 /* FormBlockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormBlockTests.swift; sourceTree = "<group>"; };
+		72CBD2B5EE66982CBABEAF8C /* GreetingResolverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GreetingResolverTests.swift; sourceTree = "<group>"; };
 		C1287CF179C47B8151A26CB6 /* GuidanceButtonStyleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuidanceButtonStyleTests.swift; sourceTree = "<group>"; };
 		D7D365488D8810E3193B53AD /* GuidanceMarkdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuidanceMarkdownTests.swift; sourceTree = "<group>"; };
 		757848EFB19410514CCC271A /* GuidanceViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuidanceViewTests.swift; sourceTree = "<group>"; };
@@ -463,15 +472,18 @@
 		72A6321ED8365611F3227550 /* JourneyCardGridTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JourneyCardGridTests.swift; sourceTree = "<group>"; };
 		1B0BA610CFB799564D7D9659 /* JsonMonitorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonMonitorTests.swift; sourceTree = "<group>"; };
 		142F3299C233CCEEB30DAB3E /* ListItemCommandRuleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListItemCommandRuleTests.swift; sourceTree = "<group>"; };
+		41513FA4FD0496A02D386E0F /* ListItemCommandTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListItemCommandTests.swift; sourceTree = "<group>"; };
 		C1704076D21E171004B4C031 /* ListItemDecodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListItemDecodeTests.swift; sourceTree = "<group>"; };
 		6F36B7936C19688EEE7C4099 /* LiveChecklistTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveChecklistTests.swift; sourceTree = "<group>"; };
 		01E7B5A5952B837940BC9645 /* LogPatternTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogPatternTests.swift; sourceTree = "<group>"; };
 		2326C8A473B9DB39868F9D18 /* PaletteAndNoticeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaletteAndNoticeTests.swift; sourceTree = "<group>"; };
+		E11F5BFFE2B82CE06E5E3E15 /* PaletteLiteralTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaletteLiteralTests.swift; sourceTree = "<group>"; };
 		E72F5DDB0D1917CB45F8992E /* PayloadAlignmentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayloadAlignmentTests.swift; sourceTree = "<group>"; };
 		D2BBE09B7494BFAE9204F9ED /* PhaseLocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhaseLocalizationTests.swift; sourceTree = "<group>"; };
 		91023BE22C744E3AEFB929EB /* PhaseTrackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhaseTrackTests.swift; sourceTree = "<group>"; };
 		5493932F0270CDE988407787 /* PlainSimpleGridTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlainSimpleGridTests.swift; sourceTree = "<group>"; };
 		484C4CA1297D7669ED11985F /* PortalChromeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortalChromeTests.swift; sourceTree = "<group>"; };
+		E06BDB11D4A542F707CC3A56 /* Preset5ArmTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preset5ArmTests.swift; sourceTree = "<group>"; };
 		7CDDB7B775CA73F8803C9006 /* Preset6PhaseAxisTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preset6PhaseAxisTests.swift; sourceTree = "<group>"; };
 		34F07BA7C300568C2A5E08F5 /* Preset6StepAdoptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preset6StepAdoptionTests.swift; sourceTree = "<group>"; };
 		8D0873B49D1F9222965E608A /* ProfileConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileConfigTests.swift; sourceTree = "<group>"; };
@@ -689,15 +701,18 @@
 				8D0873B49D1F9222965E608A /* ProfileConfigTests.swift */,
 				34F07BA7C300568C2A5E08F5 /* Preset6StepAdoptionTests.swift */,
 				7CDDB7B775CA73F8803C9006 /* Preset6PhaseAxisTests.swift */,
+				E06BDB11D4A542F707CC3A56 /* Preset5ArmTests.swift */,
 				484C4CA1297D7669ED11985F /* PortalChromeTests.swift */,
 				5493932F0270CDE988407787 /* PlainSimpleGridTests.swift */,
 				91023BE22C744E3AEFB929EB /* PhaseTrackTests.swift */,
 				D2BBE09B7494BFAE9204F9ED /* PhaseLocalizationTests.swift */,
 				E72F5DDB0D1917CB45F8992E /* PayloadAlignmentTests.swift */,
+				E11F5BFFE2B82CE06E5E3E15 /* PaletteLiteralTests.swift */,
 				2326C8A473B9DB39868F9D18 /* PaletteAndNoticeTests.swift */,
 				01E7B5A5952B837940BC9645 /* LogPatternTests.swift */,
 				6F36B7936C19688EEE7C4099 /* LiveChecklistTests.swift */,
 				C1704076D21E171004B4C031 /* ListItemDecodeTests.swift */,
+				41513FA4FD0496A02D386E0F /* ListItemCommandTests.swift */,
 				142F3299C233CCEEB30DAB3E /* ListItemCommandRuleTests.swift */,
 				1B0BA610CFB799564D7D9659 /* JsonMonitorTests.swift */,
 				72A6321ED8365611F3227550 /* JourneyCardGridTests.swift */,
@@ -711,6 +726,7 @@
 				757848EFB19410514CCC271A /* GuidanceViewTests.swift */,
 				D7D365488D8810E3193B53AD /* GuidanceMarkdownTests.swift */,
 				C1287CF179C47B8151A26CB6 /* GuidanceButtonStyleTests.swift */,
+				72CBD2B5EE66982CBABEAF8C /* GreetingResolverTests.swift */,
 				D86629475AD6A1844A9CDD25 /* FormBlockTests.swift */,
 				C8D7A07949DB38F1263303F4 /* FilenameMatchingTests.swift */,
 				865B5C7AD338A1B5B301BDF7 /* FileMonitorTests.swift */,
@@ -721,6 +737,7 @@
 				BCF17B78D8FF6758660FC284 /* DecisionCardTests.swift */,
 				828537B77CE33E2F6C6525A3 /* ConfigPrimitiveTests.swift */,
 				8A03E25AA030DEF8862BB999 /* ChromeLayoutTests.swift */,
+				5874459C76B0232A8AD0F1B8 /* ChecklistLineMonitorTests.swift */,
 				BC1BAFD7E04165D916E7BE9E /* CatalogueStatusRuleTests.swift */,
 				B54DA516C2E635E633FEF434 /* CardStatsFoldTests.swift */,
 				8FC03C6F868362B64B1B760B /* CardShowcasePortTests.swift */,
@@ -729,6 +746,7 @@
 				310F09C4AF45577EC6717CB0 /* CardHeroPortTests.swift */,
 				01D60E7A0E02C20B9C7A38A8 /* CardChromeSizingTests.swift */,
 				D44A0A0576F108442F732EE9 /* CadenceTests.swift */,
+				E621DD14AE8AA7AEF1B3FD83 /* CadenceCompletionCopyTests.swift */,
 				83F1AA0F0017AA54DA5EB73E /* BulletMarkerTests.swift */,
 				DF2E82D59F9D476BF9644832 /* BrandSlotMetricsTests.swift */,
 				87D8571FAEDCDA1F1E41186C /* BrandMarkTests.swift */,
@@ -1343,15 +1361,18 @@
 				0FEC9C8315474AA3D781A7EA /* ProfileConfigTests.swift in Sources */,
 				2FA75B3D1C171DC97C6867B4 /* Preset6StepAdoptionTests.swift in Sources */,
 				2BC6E54D51AFBDE9F464CABD /* Preset6PhaseAxisTests.swift in Sources */,
+				44A2F64F8931B1190975322D /* Preset5ArmTests.swift in Sources */,
 				CA8C7801AA7F1989E205219A /* PortalChromeTests.swift in Sources */,
 				03A086E6F4A06C3565A66AA5 /* PlainSimpleGridTests.swift in Sources */,
 				A37C38586779E8FC1C41291B /* PhaseTrackTests.swift in Sources */,
 				EBFF25E6B97C315621818367 /* PhaseLocalizationTests.swift in Sources */,
 				9F857AA28FAA3229A0D68A5F /* PayloadAlignmentTests.swift in Sources */,
+				C9ED5E4A12261334346F65ED /* PaletteLiteralTests.swift in Sources */,
 				E8542A5F7FA151CB4D253A55 /* PaletteAndNoticeTests.swift in Sources */,
 				31285302374B0C633AB37A49 /* LogPatternTests.swift in Sources */,
 				C4A24B838F7000A1FBBEA357 /* LiveChecklistTests.swift in Sources */,
 				E8D4155BAD1D11560274EF34 /* ListItemDecodeTests.swift in Sources */,
+				DEAFFF1AB58FB6C3792D5A7D /* ListItemCommandTests.swift in Sources */,
 				1CF3E7BE49759C8CC21AE144 /* ListItemCommandRuleTests.swift in Sources */,
 				2B16BF7905A5448FD61EB3E1 /* JsonMonitorTests.swift in Sources */,
 				F75B88CC19CAF23887C8AC23 /* JourneyCardGridTests.swift in Sources */,
@@ -1365,6 +1386,7 @@
 				159B029960B92845F4A6033B /* GuidanceViewTests.swift in Sources */,
 				3CD5ED61AEA94CF89FB472B0 /* GuidanceMarkdownTests.swift in Sources */,
 				5E5F5EBF90F82AE9288D6F61 /* GuidanceButtonStyleTests.swift in Sources */,
+				5690D53A6D8E1CC29F3EFCCD /* GreetingResolverTests.swift in Sources */,
 				DB686AD904F55E604E8C2C38 /* FormBlockTests.swift in Sources */,
 				44ABF7492A7BE38F21455720 /* FilenameMatchingTests.swift in Sources */,
 				D0C1FB0C00DFB102990F057C /* FileMonitorTests.swift in Sources */,
@@ -1375,6 +1397,7 @@
 				FED1FE862ADE754A404E9347 /* DecisionCardTests.swift in Sources */,
 				73AE5F3791FFAB8C6E414F39 /* ConfigPrimitiveTests.swift in Sources */,
 				5F6EF6C2DA61D3679CA4A2A3 /* ChromeLayoutTests.swift in Sources */,
+				7717EDC6702A64F2C1AC4E99 /* ChecklistLineMonitorTests.swift in Sources */,
 				F2CDFD94B67035C50B18EABB /* CatalogueStatusRuleTests.swift in Sources */,
 				96476BA76F225D5F6BA86461 /* CardStatsFoldTests.swift in Sources */,
 				7F03DC1803881F7239119A09 /* CardShowcasePortTests.swift in Sources */,
@@ -1383,6 +1406,7 @@
 				3C7D44A6D4E34169362AABF9 /* CardHeroPortTests.swift in Sources */,
 				04E4DE9BB8156C006C5FB000 /* CardChromeSizingTests.swift in Sources */,
 				DE6FA81EB43FF0FF5CCD1825 /* CadenceTests.swift in Sources */,
+				A81DDCEA074C62D77F281C5D /* CadenceCompletionCopyTests.swift in Sources */,
 				FC0F978B8B584E1375DA0E20 /* BulletMarkerTests.swift in Sources */,
 				8FCAB41C3A989E68605EB28B /* BrandSlotMetricsTests.swift in Sources */,
 				6B0DF7C0251DA067D67EFF30 /* BrandMarkTests.swift in Sources */,
