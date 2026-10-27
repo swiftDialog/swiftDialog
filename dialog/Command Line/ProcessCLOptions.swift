@@ -700,7 +700,9 @@ func processCLOptions(json: JSON = getJSON()) {
             return
         }
 
-        switch validateInspectSchema(source.data) {
+        // Validate the config as it will load (with any profile look applied), so the schema
+        // check and the window size below see the same config the window does.
+        switch validateInspectSchema(Config.effectiveData(source.data)) {
         case .notInspect:
             let msg = "Error: \(source.origin) is not an inspect config (expected preset, introSteps, or items). If you meant a standard dialog, drop --inspect-mode.\n"
             FileHandle.standardError.write(Data(msg.utf8))
@@ -719,27 +721,20 @@ func processCLOptions(json: JSON = getJSON()) {
             writeLog("Inspect Mode: config accepted from \(source.origin)", logLevel: .info)
 
             // Window sizing from the already-resolved config (no extra file read).
-            // Priority 1: Explicit width/height
-            if let w = config.width, let h = config.height {
-                appvars.windowWidth = CGFloat(w)
-                appvars.windowHeight = CGFloat(h)
-                writeLog("Inspect Mode: Custom size \(w)×\(h)", logLevel: .info)
-            }
-            // Priority 2: Use shared sizing definitions
-            else if !config.preset.isEmpty {
-                let sizeMode = config.size ?? "standard"
-                let (width, height) = InspectSizes.getSize(preset: config.preset, mode: sizeMode)
-                appvars.windowWidth = width
-                appvars.windowHeight = height
-                writeLog("Inspect Mode: \(config.preset) \(sizeMode) (\(Int(width))×\(Int(height)))", logLevel: .info)
-            }
-            // Priority 3: Default
-            else {
-                let (width, height) = InspectSizes.defaultSize
-                appvars.windowWidth = width
-                appvars.windowHeight = height
-                writeLog("Inspect Mode: Using default size (\(Int(width))×\(Int(height)))", logLevel: .info)
-            }
+            // ONE ladder — InspectSizes.windowSize: explicit width/height →
+            // preset×mode table (item count keeps preset 3's launch sizing consistent
+            // with the rendered frame) → default. Same resolver the runtime
+            // InspectLayoutProtocol.windowSize uses, so launch and render can't drift.
+            let resolved = InspectSizes.windowSize(
+                width: config.width, height: config.height,
+                preset: config.preset, mode: config.size,
+                itemCount: config.items.count,
+                chrome: config.chrome,
+                bandGrowth: InspectSizes.cardBandGrowth(config: config)
+            )
+            appvars.windowWidth = resolved.size.width
+            appvars.windowHeight = resolved.size.height
+            writeLog("Inspect Mode: \(resolved.origin)", logLevel: .info)
 
             // `options` sets the vetted general flags (moveable, ontop, resizable, windowbuttons)
             // here, before the window exists; a flag already given on the command line wins.

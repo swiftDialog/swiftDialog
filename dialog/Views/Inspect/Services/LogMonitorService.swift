@@ -2,41 +2,36 @@
 //  LogMonitorService.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 2026-01-21
-//
-//  Service for monitoring log files and extracting status text via regex patterns.
-//  Works across Presets 1-3 and 6+ for real-time status updates from Installomator, Jamf, Munki, etc.
+//  Tails log files and extracts per-item status with regex presets (Installomator, Jamf, Munki, orbit,
+//  macOS installer, …). Started by InspectState for configs with logMonitor(s), and by Preset 5 software steps.
 //
 
 import Foundation
 import Combine
 
-// MARK: - Log Pattern Presets
-
-/// Named regex presets for common log formats
-/// Simplified: patterns only, status cleanup is a simple shared function
+/// Named regex presets for common log formats.
 struct LogPatternPreset {
     let pattern: String
     let captureGroup: Int
 
     static let presets: [String: LogPatternPreset] = [
-        // Installomator: "2026-02-22 15:23:13 : INFO  : microsoftword : Downloading https://..."
-        // Format: timestamp : LEVEL : label : message
-        // Captures: Downloading/Mounting/Copying/Installing/Verifying/Removing/Running + path, version info
-        // Auto-match works because paths contain app names (e.g., "googlechrome.dmg", "Google Chrome.app")
+        // Installomator: "2026-02-22 15:23:13 : INFO  : exampleapp : Downloading https://..."
+        // Format: timestamp : LEVEL : label : message. Auto-match works because paths contain app names.
         "installomator": LogPatternPreset(
             pattern: #": (?:INFO|DEBUG|REQ|WARN)\s+: \w+ : ((?:Downloading|Mounted|Mounting|Verifying|Copy|Copying|Installing|Unpacking|Unzipping|Removing|Running|Extracting):?\s+.+?(?:\.dmg|\.pkg|\.zip|\.app|$)|(?:Installed|Downloaded) version: [\d.]+|\d+%)"#,
             captureGroup: 1
         ),
-        // Jamf Pro: [timestamp] LEVEL - message
+
+        // Jamf: system log lines such as
+        //   Thu Aug 20 06:59:07 HOSTNAME jamf[33329]: Successfully installed Example-1.12.7.pkg.
+        // The hostname may contain spaces, so `jamf[<pid>]: ` is the anchor.
         "jamf": LogPatternPreset(
             pattern: #"\[.*?\]\s*(?:INFO|DEBUG)\s*-\s*(.+)"#,
             captureGroup: 1
         ),
-        // Munki (ManagedSoftwareUpdate.log): real format is "TIMESTAMP message" (e.g.
-        // "2026-07-06 09:53:12.758+02:00 Installing Firefox") — there is no "INFO:" prefix.
-        // Capture only install-phase lines so the huge volume of manifest/catalog/checking
-        // noise doesn't surface as status.
+        // Munki (ManagedSoftwareUpdate.log): "TIMESTAMP message", e.g. "2026-07-06 09:53:12.758+02:00 Installing
+        // Example".
+        // Only install-phase lines are captured, not manifest or catalog noise.
         "munki": LogPatternPreset(
             pattern: #"^\d{4}-\d{2}-\d{2} [\d:.]+[+-]\d{2}:\d{2}\s+((?:Installing|Downloading|Removing|Staging)\b.*)$"#,
             captureGroup: 1
@@ -47,7 +42,6 @@ struct LogPatternPreset {
             captureGroup: 1
         ),
         // Generic MDM installer pattern: process.name: message
-        // Works with Jamf, Kandji, Mosyle, Munki, etc.
         "mdm-installer": LogPatternPreset(
             pattern: #"[\w.-]+\.installer:\s*(.+?)(?:\s*$)"#,
             captureGroup: 1
@@ -57,7 +51,8 @@ struct LogPatternPreset {
             pattern: #"[\w.-]+:\s*(?:INFO|DEBUG)?\s*(.+?)(?:\s*$)"#,
             captureGroup: 1
         ),
-        // macOS system installer log (/private/var/log/install.log)
+        // macOS installer log (/private/var/log/install.log), present regardless of MDM; fixtures are in
+        // LogMonitorServiceTests. Terminal wording lives in the terminal patterns so a row can finish.
         "macos-installer": LogPatternPreset(
             pattern: #"]: (?:Installed \"([^\"]+)\"|PackageKit: Extracting .*/([^/]+\.pkg)|PackageKit: Touched bundle .*/([^/]+\.app)|Install failed[:\s]*([^\n]*)|PackageKit: Install Failed: ([^\n]*)|installer: Error[:\s]*([^\n]*))"#,
             captureGroup: 1
@@ -69,10 +64,10 @@ struct LogPatternPreset {
         let trimmed = raw.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return "" }
 
-        // Skip bundle ID lines
+        // Skip bundle ID lines.
         if trimmed.hasPrefix("com.") { return "" }
 
-        // Version info: "Installed version: 1.85.0" -> "Installed (v1.85.0)"
+        // "Installed version: 1.85.0" → "Installed (v1.85.0)"
         if trimmed.hasPrefix("Installed version:") || trimmed.hasPrefix("Downloaded version:") {
             let version = trimmed
                 .replacingOccurrences(of: "Installed version: ", with: "")
@@ -80,12 +75,11 @@ struct LogPatternPreset {
             return "Installed (v\(version))"
         }
 
-        // Progress percentage (e.g., "75%")
+        // Progress percentage, e.g. "75%".
         if trimmed.range(of: #"^\d+%$"#, options: .regularExpression) != nil {
             return "Downloading \(trimmed)"
         }
 
-        // Simplify verbose log messages
         if trimmed.hasPrefix("Downloading ") { return "Downloading..." }
         if trimmed.hasPrefix("Mounting ") || trimmed.hasPrefix("Mounted ") { return "Mounting..." }
         if trimmed.hasPrefix("Unpacking ") { return "Unpacking..." }
@@ -96,8 +90,7 @@ struct LogPatternPreset {
         if trimmed.contains("installed successfully") { return "Completed" }
         if trimmed == "Installation completed" { return "Completed" }
 
-        // Copy/Copying: extract app name
-        // Installomator uses "Copy Microsoft Word.app to /Applications"
+        // Copy/Copying: extract the app name ("Copy Example.app to /Applications").
         if trimmed.hasPrefix("Copy ") || trimmed.hasPrefix("Copying ") {
             let stripped = trimmed.hasPrefix("Copy ") ?
                 trimmed.replacingOccurrences(of: "Copy ", with: "") :
@@ -107,12 +100,12 @@ struct LogPatternPreset {
             return "Copying..."
         }
 
-        // .app bundle touched = complete
+        // A bare .app path means complete.
         if trimmed.hasSuffix(".app") { return "Completed" }
 
-        // .pkg extraction: parse package name and preserve phase keyword
+        // .pkg lines: package name with its phase keyword.
         if trimmed.contains(".pkg") {
-            // Detect leading phase keyword (e.g., "Installing foo.pkg" or "Verifying: foo.pkg")
+            // Leading phase keyword, e.g. "Installing foo.pkg" or "Verifying: foo.pkg".
             var phase = "Installing"
             var remainder = trimmed
             for keyword in ["Installing", "Verifying", "Downloading"] where trimmed.hasPrefix(keyword) {
@@ -136,7 +129,6 @@ struct LogPatternPreset {
             return "\(phase) \(pkgName)..."
         }
 
-        // Failure detection
         let lowercased = trimmed.lowercased()
         if lowercased.contains("fail") || lowercased.contains("error") {
             let maxLength = 50
@@ -146,7 +138,7 @@ struct LogPatternPreset {
             return trimmed.isEmpty ? "Failed" : "Failed: \(trimmed)"
         }
 
-        // Add trailing ellipsis to action verbs
+        // Add a trailing ellipsis to action verbs.
         if trimmed.hasPrefix("Installing ") || trimmed.hasPrefix("Verifying ") {
             return "\(trimmed)..."
         }
@@ -154,10 +146,6 @@ struct LogPatternPreset {
         return trimmed
     }
 }
-
-// MARK: - Log Monitor Service
-
-/// Service for monitoring log files and extracting status text
 class LogMonitorService: ObservableObject {
 
     // MARK: - Singleton
@@ -173,8 +161,8 @@ class LogMonitorService: ObservableObject {
 
     private var pendingConfigs: [InspectConfig.LogMonitorConfig] = []
     private var activeMonitors: [String: LogFileMonitor] = [:]  // path -> monitor
-    private var currentItems: [InspectConfig.ItemConfig] = []
-    private var fileCreationObservers: [String: DirectoryWatcher] = [:]  // parent dir -> watcher
+    private var currentItems: [any MonitoredItem] = []
+    private var fileCreationObservers: [String: DirectoryWatcher] = [:]  // awaited file -> watcher
 
     // MARK: - Initialization
 
@@ -184,10 +172,8 @@ class LogMonitorService: ObservableObject {
 
     // MARK: - Public API
 
-    /// Configure the service with an InspectConfig
-    /// - Parameter config: The configuration containing log monitor settings
+    /// Configures the service from an InspectConfig.
     func configure(with config: InspectConfig) {
-        // Collect file-based log monitor configs
         var configs: [InspectConfig.LogMonitorConfig] = []
         if let single = config.logMonitor {
             configs.append(single)
@@ -208,41 +194,30 @@ class LogMonitorService: ObservableObject {
             let path = (monitorConfig.path as NSString).expandingTildeInPath
 
             if FileManager.default.fileExists(atPath: path) {
-                // File exists - start immediately
                 startMonitor(for: monitorConfig, at: path)
             } else {
-                // Register for file creation event
+                // Wait for the file to be created.
                 registerForFileCreation(path: path, config: monitorConfig)
             }
         }
     }
 
-    // Note: Unified log monitoring (OSLogStore) is not supported because Apple
-    // doesn't grant the com.apple.logging.local-store entitlement to third-party apps.
-    // For custom installs, use a log file approach:
-    // - The installer script writes progress to a log file (e.g. /tmp/install.log)
-    // - swiftDialog monitors that file with logMonitor config using a matching preset
-
-    /// Set items for auto-matching
-    /// - Parameter items: The item configurations to use for auto-match routing
-    func setItems(_ items: [InspectConfig.ItemConfig]) {
+    /// Sets the items used for auto-matching.
+    func setItems(_ items: [any MonitoredItem]) {
         currentItems = items
         writeLog("LogMonitorService: Set \(items.count) items for auto-matching", logLevel: .debug)
     }
 
-    /// Stop all monitoring
+    /// Stops all monitoring.
     func stop() {
         writeLog("LogMonitorService: Stopping all monitors", logLevel: .info)
 
-        // Stop all active file monitors
         activeMonitors.values.forEach { $0.stop() }
         activeMonitors.removeAll()
 
-        // Stop all directory watchers
         fileCreationObservers.values.forEach { $0.stop() }
         fileCreationObservers.removeAll()
 
-        // Clear state
         pendingConfigs.removeAll()
         DispatchQueue.main.async { [weak self] in
             self?.latestStatuses.removeAll()
@@ -269,12 +244,13 @@ class LogMonitorService: ObservableObject {
             return
         }
 
-        // Create directory if it doesn't exist
+        // No parent directory to watch: the monitor stays unstarted.
         guard FileManager.default.fileExists(atPath: parentDir) else {
             writeLog("LogMonitorService: Parent directory doesn't exist: \(parentDir)", logLevel: .info)
             return
         }
 
+        // The watcher calls back on its own queue; service state is main-actor.
         let watcher = DirectoryWatcher(path: parentDir) { [weak self] createdPath in
             guard createdPath == path else { return }
             writeLog("LogMonitorService: Detected file creation: \(path)", logLevel: .info)
@@ -308,9 +284,7 @@ class LogMonitorService: ObservableObject {
 
     private func handleFileDeletion(path: String, config: InspectConfig.LogMonitorConfig) {
         writeLog("LogMonitorService: Log file deleted: \(path)", logLevel: .info)
-        // Remove the active monitor
         activeMonitors.removeValue(forKey: path)?.stop()
-        // Re-register for file creation (handles log rotation)
         registerForFileCreation(path: path, config: config)
     }
 
@@ -324,7 +298,7 @@ class LogMonitorService: ObservableObject {
 
             self.globalStatus = cleanedStatus
 
-            // If explicit itemIds configured, route to all listed items
+            // Explicit itemIds: route to all listed items.
             if let itemIds = config.itemIds, !itemIds.isEmpty {
                 for id in itemIds {
                     self.latestStatuses[id] = cleanedStatus
@@ -333,16 +307,14 @@ class LogMonitorService: ObservableObject {
                 return
             }
 
-            // If explicit itemId configured, use it directly
+            // Explicit itemId: use it directly.
             if let itemId = itemId ?? config.itemId {
                 self.latestStatuses[itemId] = cleanedStatus
                 writeLog("LogMonitorService: Status '\(cleanedStatus)' routed to itemId: \(itemId)", logLevel: .debug)
                 return
             }
 
-            // Auto-match against item displayNames and IDs
-            // Use RAW status for matching (cleanupStatus strips displayNames like
-            // "Downloading Microsoft Word …" → "Downloading..." which breaks auto-match)
+            // Auto-match on the raw status; cleanupStatus strips the names matching needs.
             if config.autoMatch ?? true {
                 let targetItems = self.findMatchingItems(for: status)
                 for targetId in targetItems {
@@ -374,15 +346,16 @@ class LogMonitorService: ObservableObject {
 
     #if DEBUG
     /// For testing: get current items
-    func testGetCurrentItems() -> [InspectConfig.ItemConfig] {
+    func testGetCurrentItems() -> [any MonitoredItem] {
         return currentItems
     }
     #endif
+
 }
 
 // MARK: - Log File Monitor
 
-/// Monitors a single log file using DispatchSource
+/// Monitors a single log file with a DispatchSource.
 class LogFileMonitor {
     let config: InspectConfig.LogMonitorConfig
     let path: String
@@ -403,6 +376,7 @@ class LogFileMonitor {
     }
 
     private func compileRegex() -> NSRegularExpression? {
+
         let pattern: String
 
         if let custom = config.pattern {
@@ -432,7 +406,7 @@ class LogFileMonitor {
         }
         fileHandle = handle
 
-        // Start from end (only new content) if configured (default: true)
+        // Start from the end (new content only) unless configured otherwise.
         if config.startFromEnd ?? true {
             handle.seekToEndOfFile()
             lastPosition = handle.offsetInFile
@@ -454,7 +428,7 @@ class LogFileMonitor {
             let flags = self.dispatchSource?.data ?? []
 
             if flags.contains(.delete) || flags.contains(.rename) {
-                // File was deleted or renamed (log rotation)
+                // Deleted or renamed (log rotation).
                 self.handleFileRemoval()
             } else if flags.contains(.extend) || flags.contains(.write) {
                 self.processNewContent()
@@ -484,7 +458,6 @@ class LogFileMonitor {
 
     private func processNewContent() {
         guard let handle = fileHandle, let regex = regex else { return }
-
         handle.seek(toFileOffset: lastPosition)
         let data = handle.readDataToEndOfFile()
         lastPosition = handle.offsetInFile
@@ -493,7 +466,6 @@ class LogFileMonitor {
             return
         }
 
-        // Determine preferred capture group
         let preferredCaptureGroup: Int
         if let group = config.captureGroup {
             preferredCaptureGroup = group
@@ -504,11 +476,10 @@ class LogFileMonitor {
             preferredCaptureGroup = 1
         }
 
-        // Process each line
         for line in content.split(separator: "\n") {
             let lineStr = String(line)
 
-            // Apply predicate filter if configured
+            // Apply the predicate filter, if configured.
             if let predicate = config.predicate, !predicate.isEmpty {
                 guard lineStr.contains(predicate) else { continue }
             }
@@ -516,7 +487,7 @@ class LogFileMonitor {
             let range = NSRange(lineStr.startIndex..., in: lineStr)
 
             if let match = regex.firstMatch(in: lineStr, range: range) {
-                // Try preferred capture group first, then find first non-empty
+                // Preferred capture group first, then the first non-empty one.
                 var extracted: String?
 
                 if preferredCaptureGroup < match.numberOfRanges,
@@ -527,7 +498,6 @@ class LogFileMonitor {
                     }
                 }
 
-                // Fallback: try all groups to find first non-empty
                 if extracted == nil || extracted?.isEmpty == true {
                     for i in 1..<match.numberOfRanges {
                         if let captureRange = Range(match.range(at: i), in: lineStr) {
@@ -551,7 +521,7 @@ class LogFileMonitor {
 
 // MARK: - Directory Watcher
 
-/// Watches a directory for file creation events
+/// Watches a directory for file creation.
 private class DirectoryWatcher {
     private let path: String
     private let callback: (String) -> Void
@@ -563,7 +533,6 @@ private class DirectoryWatcher {
         self.path = path
         self.callback = callback
 
-        // Cache initial contents
         if let contents = try? FileManager.default.contentsOfDirectory(atPath: path) {
             lastContents = Set(contents)
         }

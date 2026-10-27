@@ -2,9 +2,8 @@
 //  PlistEvaluationTests.swift
 //  dialogTests
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 2026-02-10
-//
-//  Unit tests for plist evaluation logic used by InspectState and MonitoringModule
+//  Plist evaluation: operators, value stringification, step canonicalization, operator defaults
+//  shared across engines, and the advisories for silent defaults.
 //
 
 import XCTest
@@ -294,7 +293,6 @@ final class PlistEvaluationTests: XCTestCase {
         var initialized: Set<String> = []
         let itemId = "dark_mode"
 
-        // Write initial plist
         writePlist(["AppleInterfaceStyle": "Dark"])
 
         // First check: read and record baseline
@@ -321,14 +319,12 @@ final class PlistEvaluationTests: XCTestCase {
         var initialized: Set<String> = []
         let itemId = "version_monitor"
 
-        // Write initial plist with version
         writePlist(["AppVersion": "1.0.0"])
         let initialValue = readPlistValue(key: "AppVersion")
         XCTAssertEqual(initialValue, "1.0.0")
         baselines[itemId] = initialValue
         initialized.insert(itemId)
 
-        // Update version
         writePlist(["AppVersion": "2.0.0"])
         let newValue = readPlistValue(key: "AppVersion")
         XCTAssertEqual(newValue, "2.0.0")
@@ -356,7 +352,6 @@ final class PlistEvaluationTests: XCTestCase {
         baselines[itemId] = initialValue
         initialized.insert(itemId)
 
-        // Set value
         defaults.set("TestValue", forKey: testKey)
         let newValue = defaults.string(forKey: testKey)
         XCTAssertEqual(newValue, "TestValue")
@@ -364,7 +359,6 @@ final class PlistEvaluationTests: XCTestCase {
         let baseline = baselines[itemId] ?? nil
         XCTAssertTrue(baseline != newValue, "Should detect change from nil to TestValue")
 
-        // Cleanup
         defaults.removeObject(forKey: testKey)
     }
 
@@ -413,14 +407,11 @@ final class PlistEvaluationTests: XCTestCase {
         XCTAssertTrue(changed, "Should detect change from nil to empty string")
     }
 
-    // MARK: - Bug Report: "equals" with state transition (not_installed → installed)
+    // MARK: - equals across a state transition
 
-    /// Reproduces the reported bug where expectedValue: "not_installed" with evaluation: "equals"
-    /// causes items to show as "failed" when the plist value changes to "installed".
-    /// The user's intent is to detect when installation completes, so expectedValue should be "installed".
+    /// With `expectedValue: "not_installed"` and `equals`, an item reads complete before installation, not after.
     func testEqualsEvaluation_StateTransition_NotInstalledToInstalled() {
-        // User's config: expectedValue = "not_installed", evaluation = "equals"
-        // This means: item is "installed" when plist value EQUALS "not_installed"
+        // The item counts as installed when the value equals "not_installed".
         let expectedValue = "not_installed"
 
         // Initial state: plist says "not_installed" — matches expectedValue
@@ -438,7 +429,7 @@ final class PlistEvaluationTests: XCTestCase {
         XCTAssertFalse(updatedIsInstalled, "Item shows as NOT complete AFTER installation — config is backwards")
     }
 
-    /// Shows the correct config: expectedValue: "installed" detects completion properly
+    /// `expectedValue: "installed"` detects completion.
     func testEqualsEvaluation_CorrectConfig_DetectsInstallation() {
         // Correct config: expectedValue = "installed", evaluation = "equals"
         let expectedValue = "installed"
@@ -456,7 +447,7 @@ final class PlistEvaluationTests: XCTestCase {
         XCTAssertTrue(updatedIsInstalled, "Item should be complete after installation")
     }
 
-    /// The "changed" evaluation is an alternative that detects ANY value change from baseline
+    /// `changed` detects any change from the baseline.
     func testChangedEvaluation_AlternativeForStateTransition() {
         var baselines: [String: String?] = [:]
         var initialized: Set<String> = []
@@ -500,5 +491,553 @@ final class PlistEvaluationTests: XCTestCase {
 
         XCTAssertTrue(changedA, "Item A should detect change")
         XCTAssertFalse(changedB, "Item B should not detect change")
+    }
+}
+
+// MARK: - Stringification Contract
+
+/// How plist/JSON-decoded values become display strings. Fixtures round-trip through real
+/// serialization: a `__NSCFBoolean` casts to `Int` and a `__NSCFNumber` 1 casts to `Bool`, which Swift literals do not reproduce.
+final class ValueStringificationContractTests: XCTestCase {
+
+    /// Round-trips through a real plist so values arrive as the CF types the app sees.
+    private func plistDecoded(_ dict: [String: Any]) throws -> [String: Any] {
+        let data = try PropertyListSerialization.data(fromPropertyList: dict, format: .xml, options: 0)
+        return try PropertyListSerialization.propertyList(from: data, options: [], format: nil) as! [String: Any]
+    }
+
+    private var fixture: [String: Any] { get throws {
+        try plistDecoded([
+            "boolTrue": true,
+            "boolFalse": false,
+            "intZero": 0,
+            "intOne": 1,
+            "intFive": 5,
+            "double": 3.5,
+            "string": "hello",
+            "array": [1, 2, 3],
+            "dict": ["a": 1]
+        ])
+    } }
+
+    // MARK: Bridging premise
+
+    func testPlistRoundTripProducesBridgedCFTypes() throws {
+        let f = try fixture
+        XCTAssertEqual(CFGetTypeID(f["boolTrue"]! as CFTypeRef), CFBooleanGetTypeID(),
+                       "plist bool must arrive as CFBoolean or the rest of this suite proves nothing")
+        XCTAssertNotEqual(CFGetTypeID(f["intOne"]! as CFTypeRef), CFBooleanGetTypeID(),
+                          "plist integer 1 must NOT be a CFBoolean")
+    }
+
+    func testBridgingLeniencyIsSymmetric() throws {
+        let f = try fixture
+        // A CFBoolean answers to `as? Int` ...
+        XCTAssertEqual(f["boolTrue"] as? Int, 1)
+        XCTAssertEqual(f["boolFalse"] as? Int, 0)
+        // ... and a CFNumber holding 0/1 answers to `as? Bool`.
+        XCTAssertEqual(f["intOne"] as? Bool, true)
+        XCTAssertEqual(f["intZero"] as? Bool, false)
+        // So only the CFTypeID discriminates; integers outside 0/1 are unambiguous.
+        XCTAssertNil(f["intFive"] as? Bool)
+    }
+
+    // MARK: readKeyPath (item-level plistMonitors)
+
+    private func readKeyPath(_ key: String) throws -> String? {
+        IntroStepMonitorService().readKeyPath(from: try fixture, keyPath: key)
+    }
+
+    func testReadKeyPathStringifiesBooleans() {
+        XCTAssertEqual(try readKeyPath("boolTrue"), "true")
+        XCTAssertEqual(try readKeyPath("boolFalse"), "false")
+    }
+
+    func testReadKeyPathStringifiesIntegers() {
+        XCTAssertEqual(try readKeyPath("intZero"), "0")
+        XCTAssertEqual(try readKeyPath("intOne"), "1")
+        XCTAssertEqual(try readKeyPath("intFive"), "5")
+    }
+
+    func testReadKeyPathStringifiesScalars() {
+        XCTAssertEqual(try readKeyPath("double"), "3.5")
+        XCTAssertEqual(try readKeyPath("string"), "hello")
+    }
+
+    func testReadKeyPathReturnsNilForContainers() {
+        XCTAssertNil(try readKeyPath("array"))
+        XCTAssertNil(try readKeyPath("dict"))
+    }
+
+    func testReadKeyPathReturnsNilForMissingKey() {
+        XCTAssertNil(try readKeyPath("nope"))
+    }
+
+    func testReadKeyPathTraversesNestedKeyPaths() throws {
+        let nested = try plistDecoded(["outer": ["inner": true]])
+        XCTAssertEqual(IntroStepMonitorService().readKeyPath(from: nested, keyPath: "outer.inner"), "true")
+    }
+
+    // MARK: formatValueForDisplay
+
+    @MainActor
+    private func formatted(_ key: String) throws -> String {
+        Validation.shared.formatValueForDisplay(try fixture[key]!)
+    }
+
+    @MainActor
+    func testFormatValueForDisplayStringifiesBooleans() {
+        XCTAssertEqual(try formatted("boolTrue"), "true")
+        XCTAssertEqual(try formatted("boolFalse"), "false")
+    }
+
+    @MainActor
+    func testFormatValueForDisplayStringifiesIntegers() {
+        XCTAssertEqual(try formatted("intZero"), "0")
+        XCTAssertEqual(try formatted("intOne"), "1")
+        XCTAssertEqual(try formatted("intFive"), "5")
+    }
+
+    @MainActor
+    func testFormatValueForDisplayStringifiesScalars() {
+        XCTAssertEqual(try formatted("double"), "3.5")
+        XCTAssertEqual(try formatted("string"), "hello")
+    }
+
+    @MainActor
+    func testFormatValueForDisplaySummarizesContainers() {
+        XCTAssertEqual(try formatted("array"), "[3 items]")
+        XCTAssertEqual(try formatted("dict"), "{1 keys}")
+    }
+
+    @MainActor
+    func testFormatValueForDisplayHandlesNSNull() {
+        XCTAssertEqual(Validation.shared.formatValueForDisplay(NSNull()), "null")
+    }
+
+    // MARK: Both paths agree
+
+    @MainActor
+    func testBothPathsStringifyScalarsIdentically() {
+        for key in ["boolTrue", "boolFalse", "intZero", "intOne", "intFive", "double", "string"] {
+            XCTAssertEqual(try readKeyPath(key), try formatted(key),
+                           "monitor path and display path disagree on '\(key)'")
+        }
+    }
+
+    // MARK: equals comparison
+
+    /// `equals` (the default when expectedValue is authored) compares the display reading, so a plist
+    /// integer never answers as a Bool.
+    @MainActor
+    private func equalsCheck(_ key: String, _ expected: String) throws -> Bool {
+        Validation.shared.performSmartEvaluation(
+            value: try fixture[key]!, evaluationType: "equals", expectedValue: expected, key: key)
+    }
+
+    @MainActor
+    func testEqualsMatchesAnIntegerAgainstItsOwnDigits() {
+        // A plist integer 1 satisfies "1".
+        XCTAssertTrue(try equalsCheck("intOne", "1"))
+        XCTAssertTrue(try equalsCheck("intZero", "0"))
+        XCTAssertTrue(try equalsCheck("intFive", "5"))
+    }
+
+    @MainActor
+    func testEqualsDoesNotTreatAnIntegerAsABoolean() {
+        // 1 does not match "true"; boolean semantics are `evaluation: "boolean"`.
+        XCTAssertFalse(try equalsCheck("intOne", "true"))
+        XCTAssertFalse(try equalsCheck("intZero", "false"))
+    }
+
+    @MainActor
+    func testEqualsStillMatchesRealBooleans() {
+        // A genuine CFBoolean still reads, and compares, as "true"/"false".
+        XCTAssertTrue(try equalsCheck("boolTrue", "true"))
+        XCTAssertTrue(try equalsCheck("boolFalse", "false"))
+        XCTAssertFalse(try equalsCheck("boolTrue", "false"))
+    }
+
+    @MainActor
+    func testEqualsMatchesStringsAndDoubles() {
+        XCTAssertTrue(try equalsCheck("string", "hello"))
+        XCTAssertTrue(try equalsCheck("double", "3.5"))
+        XCTAssertFalse(try equalsCheck("string", "goodbye"))
+    }
+
+    /// The verdict and the value shown for it must come from the same reading.
+    @MainActor
+    func testEqualsAgreesWithWhatTheDisplayPathWouldShow() throws {
+        for key in ["boolTrue", "boolFalse", "intZero", "intOne", "intFive", "double", "string"] {
+            let shown = Validation.shared.formatValueForDisplay(try fixture[key]!)
+            XCTAssertTrue(try equalsCheck(key, shown),
+                          "'\(key)' displays as '\(shown)' but does not compare equal to it")
+        }
+    }
+
+    // MARK: valueMap boolean-alias retry
+
+    func testValueMapResolvesExactKeyFirst() {
+        let map = ["true": "success", "1": "wrong"]
+        XCTAssertEqual(mapMonitorValue("true", through: map), "success",
+                       "an exact hit must never be overridden by the alias")
+    }
+
+    func testValueMapRetriesBooleanAliasForConfigsAuthoredAgainstTheOldReads() {
+        // A config authored against a boolean key read back as "1"/"0".
+        let legacyMap = ["1": "enabled", "0": "disabled"]
+        XCTAssertEqual(mapMonitorValue("true", through: legacyMap), "enabled")
+        XCTAssertEqual(mapMonitorValue("false", through: legacyMap), "disabled")
+    }
+
+    func testValueMapRetriesInTheOtherDirectionToo() {
+        let currentMap = ["true": "success", "false": "warning"]
+        XCTAssertEqual(mapMonitorValue("1", through: currentMap), "success")
+        XCTAssertEqual(mapMonitorValue("0", through: currentMap), "warning")
+    }
+
+    func testValueMapReturnsNilWhenNeitherFormIsPresent() {
+        XCTAssertNil(mapMonitorValue("5", through: ["true": "success"]))
+        XCTAssertNil(mapMonitorValue("true", through: ["running": "up"]))
+        XCTAssertNil(mapMonitorValue("true", through: nil))
+    }
+
+    func testValueMapDoesNotAliasNonBooleanValues() {
+        // Only true/false/1/0 are retried as boolean aliases, not "yes"/"on".
+        XCTAssertNil(mapMonitorValue("yes", through: ["true": "success"]))
+    }
+
+    /// A CFBoolean key with a valueMap authored on "true", end to end.
+    @MainActor
+    func testFleetDemoScreensaverBadgeResolvesThroughTheMap() throws {
+        let plist = try plistDecoded(["askForPassword": true])
+        let raw = IntroStepMonitorService().readKeyPath(from: plist, keyPath: "askForPassword")
+        XCTAssertEqual(raw, "true")
+        XCTAssertEqual(mapMonitorValue(raw!, through: ["true": "success", "false": "warning"]), "success",
+                       "the screensaver badge must map to a state, not fall through to a raw value")
+        XCTAssertEqual(mapMonitorValue(raw!, through: ["true": "true (locked)", "false": "false"]), "true (locked)")
+    }
+}
+
+// MARK: - Operator defaults
+// Per engine, over (evaluation nil/authored × expectedValue nil/authored); every engine fails
+// closed on an unknown operator and folds case. Operator semantics per engine are a separate contract.
+@MainActor
+final class OperatorDefaultContractTests: XCTestCase {
+
+    // MARK: Derived default
+
+    func testAbsentEvaluationWithAnExpectedValueComparesWithEquals() {
+        XCTAssertEqual(EvaluationOperator.resolve(evaluation: nil, expectedValue: "1"), .equals,
+                       "an author who wrote an expectedValue wrote something to compare against")
+    }
+
+    func testAbsentEvaluationWithoutAnExpectedValueChecksExistence() {
+        XCTAssertEqual(EvaluationOperator.resolve(evaluation: nil, expectedValue: nil), .exists,
+                       "a bare domain/key requirement means 'key present', not equals-nil")
+    }
+
+    func testAnEmptyEvaluationStringIsTreatedAsAbsent() {
+        XCTAssertEqual(EvaluationOperator.resolve(evaluation: "   ", expectedValue: nil), .exists)
+    }
+
+    func testAuthoredEvaluationAlwaysWinsOverTheDerivedDefault() {
+        XCTAssertEqual(EvaluationOperator.resolve(evaluation: "exists", expectedValue: "1"), .exists,
+                       "the derived default must never override what the author wrote")
+    }
+
+    func testUnknownAuthoredOperatorResolvesToNilSoCallersCanFailClosed() {
+        XCTAssertNil(EvaluationOperator.resolve(evaluation: "eqauls", expectedValue: "1"),
+                     "a typo must be visible as a failure, not silently become a comparison")
+    }
+
+    func testOperatorNamesAreCaseAndWhitespaceInsensitive() {
+        XCTAssertEqual(EvaluationOperator(authored: "Exists"), .exists)
+        XCTAssertEqual(EvaluationOperator(authored: " BOOLEAN "), .boolean)
+        XCTAssertEqual(EvaluationOperator(authored: "Range"), .range)
+    }
+
+    func testDerivationNoteNamesTheOperatorAppliedOnlyWhenOneWasDerived() {
+        XCTAssertNotNil(EvaluationOperator.derivationNote(evaluation: nil, expectedValue: "1"))
+        XCTAssertNotNil(EvaluationOperator.derivationNote(evaluation: nil, expectedValue: nil))
+        XCTAssertNil(EvaluationOperator.derivationNote(evaluation: "equals", expectedValue: "1"),
+                     "nothing was derived, so there is nothing to advise about")
+    }
+
+    // MARK: Fail closed: an unknown operator never completes an item
+
+    func testUnknownOperatorDoesNotMarkAnItemComplete() {
+        XCTAssertFalse(PlistStatusPoller.evaluate("no", expected: "yes", evaluation: "bogus"),
+                       "a typo'd operator marking the item complete is the worst outcome available")
+    }
+
+    func testUnknownOperatorFailsClosedEvenWhenValuesHappenToMatch() {
+        XCTAssertFalse(PlistStatusPoller.evaluate("yes", expected: "yes", evaluation: "bogus"),
+                       "matching by accident is not the same as being asked to compare")
+    }
+
+    // MARK: Case folding
+    // The probes use an operator whose correct answer is false, so a fail-open default cannot mask a missing fold.
+
+    func testCapitalisedEqualsIsHonouredRatherThanFallingToTheDefault() {
+        XCTAssertFalse(PlistStatusPoller.evaluate("no", expected: "yes", evaluation: "Equals"),
+                       "'Equals' must compare, and 'no' does not equal 'yes'")
+    }
+
+    func testCapitalisedContainsIsHonouredRatherThanFallingToTheDefault() {
+        XCTAssertFalse(PlistStatusPoller.evaluate("alpha", expected: "beta", evaluation: "CONTAINS"),
+                       "'alpha' does not contain 'beta'")
+    }
+
+    /// `Exists` folds to `exists`; this alone cannot tell folding from fail-open, hence the tests above.
+    func testCapitalisedExistsIsTrueBeforeAndAfterTheFix() {
+        XCTAssertTrue(PlistStatusPoller.evaluate("anything", expected: nil, evaluation: "Exists"))
+    }
+
+    func testValidationAlreadyFoldsCaseAndMustKeepDoingSo() {
+        // Validation folds case through `EvaluationOperator(authored:)`.
+        XCTAssertTrue(Validation.shared.performSmartEvaluation(
+            value: "hello", evaluationType: "EXISTS", expectedValue: nil, key: "k"))
+    }
+
+    // MARK: Cross-engine agreement
+
+    /// Both engines fail closed on an unknown operator.
+    func testEnginesAgreeOnAnUnknownOperator() {
+        let poller = PlistStatusPoller.evaluate("no", expected: "yes", evaluation: "bogus")
+        let validation = Validation.shared.performSmartEvaluation(value: "no",
+                                                                  evaluationType: "bogus",
+                                                                  expectedValue: "yes",
+                                                                  key: "k")
+        XCTAssertEqual(poller, validation,
+                       "unknown operator: poller said \(poller), Validation said \(validation)")
+    }
+
+    /// `contains` means the same in both engines: substring on a string, membership on an array.
+    func testEnginesAgreeOnWhatContainsMeans() {
+        let poller = PlistStatusPoller.evaluate("alpha-beta", expected: "beta", evaluation: "contains")
+        let validation = Validation.shared.performSmartEvaluation(value: "alpha-beta",
+                                                                  evaluationType: "contains",
+                                                                  expectedValue: "beta",
+                                                                  key: "k")
+        XCTAssertEqual(poller, validation,
+                       "'contains' on a string: poller said \(poller), Validation said \(validation)")
+    }
+
+    // MARK: contains reads the value's shape
+
+    /// The `contains` case table, on the operator so every engine shares it.
+
+    func testContainsOnAStringIsCaseFoldedSubstring() {
+        XCTAssertTrue(EvaluationOperator.containsMatch(value: "alpha-BETA", expected: "beta"))
+        XCTAssertTrue(EvaluationOperator.containsMatch(value: "alpha-beta", expected: "BETA"))
+        XCTAssertFalse(EvaluationOperator.containsMatch(value: "alpha-beta", expected: "gamma"))
+    }
+
+    /// Array membership is exact: "lph" is inside "alpha" but is not an element.
+    func testContainsOnAnArrayIsMembershipAndNotSubstring() {
+        XCTAssertTrue(EvaluationOperator.containsMatch(value: ["alpha", "beta"], expected: "beta"))
+        XCTAssertFalse(EvaluationOperator.containsMatch(value: ["alpha", "beta"], expected: "lph"),
+                       "array membership is exact; 'lph' is inside an element but is not one")
+    }
+
+    func testContainsOnAnArrayCoercesNonStringElements() {
+        XCTAssertTrue(EvaluationOperator.containsMatch(value: [1, 2, 3], expected: "2"))
+        XCTAssertFalse(EvaluationOperator.containsMatch(value: [1, 2, 3], expected: "4"))
+    }
+
+    /// An array is not stringified before evaluating, so "(alpha, beta)" punctuation cannot match.
+    func testTheStringifiedArrayFalsePositiveIsGone() {
+        XCTAssertFalse(PlistStatusPoller.evaluate(["alpha", "beta"], expected: "lph",
+                                                  evaluation: "contains"),
+                       "the poller must see the array, not its description")
+        XCTAssertTrue(PlistStatusPoller.evaluate(["alpha", "beta"], expected: "beta",
+                                                 evaluation: "contains"))
+    }
+
+    /// No expected value means false.
+    func testContainsWithNoExpectedValueIsFalse() {
+        XCTAssertFalse(EvaluationOperator.containsMatch(value: "alpha", expected: nil))
+        XCTAssertFalse(EvaluationOperator.containsMatch(value: ["alpha"], expected: nil))
+    }
+
+    func testContainsOnAScalarUsesItsStringForm() {
+        XCTAssertTrue(EvaluationOperator.containsMatch(value: 1234, expected: "23"))
+        XCTAssertFalse(EvaluationOperator.containsMatch(value: 1234, expected: "56"))
+    }
+
+    func testContainsOnNullIsFalse() {
+        XCTAssertFalse(EvaluationOperator.containsMatch(value: NSNull(), expected: "anything"))
+    }
+
+    /// Same verdict for both shapes in both engines.
+    func testBothEnginesAgreeOnContainsForBothShapes() {
+        let probes: [(value: Any, expected: String, what: String)] = [
+            ("alpha-beta", "beta", "substring hit"),
+            ("alpha-beta", "gamma", "substring miss"),
+            ("alpha-BETA", "beta", "case-folded hit"),
+            (["alpha", "beta"], "beta", "membership hit"),
+            (["alpha", "beta"], "lph", "membership miss on a substring of an element")
+        ]
+        for probe in probes {
+            let poller = PlistStatusPoller.evaluate(probe.value, expected: probe.expected,
+                                                    evaluation: "contains")
+            let validation = Validation.shared.performSmartEvaluation(value: probe.value,
+                                                                      evaluationType: "contains",
+                                                                      expectedValue: probe.expected,
+                                                                      key: "k")
+            XCTAssertEqual(poller, validation,
+                           "\(probe.what): poller said \(poller), Validation said \(validation)")
+        }
+    }
+
+    /// `RequirementEvaluator.plistSatisfied` fails closed on an unknown operator. The stored value
+    /// equals the expected one, so a `default: equals` would answer true.
+    func testTheRequirementEvaluatorFailsClosedOnAnUnknownOperator() throws {
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("req-eval-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+
+        let plist = dir.appendingPathComponent("probe.plist")
+        try (["state": "ready"] as NSDictionary).write(to: plist)
+
+        func requirement(evaluation: String) throws -> InspectConfig.ItemConfig.Requirement {
+            let json = """
+            {"type":"plist","path":"\(plist.path)","key":"state",
+             "evaluation":"\(evaluation)","expectedValue":"ready"}
+            """
+            return try JSONDecoder().decode(InspectConfig.ItemConfig.Requirement.self,
+                                            from: Data(json.utf8))
+        }
+
+        XCTAssertTrue(RequirementEvaluator.isSatisfied(try requirement(evaluation: "equals"),
+                                                       receiptsBasePath: "/var/db/receipts"),
+                      "control: the probe really does satisfy 'equals'")
+        XCTAssertFalse(RequirementEvaluator.isSatisfied(try requirement(evaluation: "bogus"),
+                                                        receiptsBasePath: "/var/db/receipts"),
+                       "an unrecognised operator must not silently become 'equals'")
+    }
+
+    // MARK: Compliance auto-discovery synthesises requirements
+
+    // `Config+Helpers.swift` mints requirements from an mSCP-style findings plist, where
+    // `finding == false` means compliant, so it stamps `boolean`/`"false"` rather than the derived default.
+
+    private func findingsPlist() throws -> (dir: URL, path: String) {
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("synthesis-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let path = dir.appendingPathComponent("findings.plist").path
+        let findings: NSDictionary = [
+            "os_gatekeeper_enable": ["finding": false, "title": "Enable Gatekeeper"],
+            "pwpolicy_account_lockout": ["finding": true, "title": "Account lockout"],
+            "audit_folder_owner": ["finding": false, "title": "Audit folder owner"],
+            // Excluded by the default excludeKeys set.
+            "lastComplianceCheck": ["finding": false],
+            // No finding subkey: skipped, not synthesised.
+            "not_a_finding": ["title": "unrelated"]
+        ]
+        XCTAssertTrue(findings.write(toFile: path, atomically: true))
+        return (dir, path)
+    }
+
+    private func plistSource(_ json: String) throws -> InspectConfig.PlistSourceConfig {
+        try JSONDecoder().decode(InspectConfig.PlistSourceConfig.self, from: Data(json.utf8))
+    }
+
+    func testEverySynthesisedItemCarriesTheConventionExplicitly() throws {
+        let fixture = try findingsPlist()
+        defer { try? FileManager.default.removeItem(at: fixture.dir) }
+
+        let source = try plistSource(#"{"path": "\#(fixture.path)", "type": "compliance", "displayName": "Compliance"}"#)
+        let items = Config().discoverItemsFromPlist(source: source, basePath: nil)
+
+        XCTAssertEqual(items.count, 3, "one item per key carrying a finding, excludes filtered")
+        for item in items {
+            XCTAssertEqual(item.evaluation, "boolean",
+                           "\(item.id): synthesised items must carry the operator EXPLICITLY, "
+                           + "so no downstream engine has to derive one")
+            XCTAssertEqual(item.expectedValue, "false",
+                           "\(item.id): finding=false ⇒ compliant is the convention")
+        }
+    }
+
+    /// A synthesised item carries its operator explicitly, so the derived default (`equals`) is never consulted.
+    func testTheDerivedDefaultIsNeverConsultedForASynthesisedItem() throws {
+        let fixture = try findingsPlist()
+        defer { try? FileManager.default.removeItem(at: fixture.dir) }
+
+        let source = try plistSource(#"{"path": "\#(fixture.path)", "type": "compliance", "displayName": "Compliance"}"#)
+        for item in Config().discoverItemsFromPlist(source: source, basePath: nil) {
+            XCTAssertNil(EvaluationOperator.derivationNote(evaluation: item.evaluation,
+                                                           expectedValue: item.expectedValue),
+                         "\(item.id): a synthesised item must never look like an un-authored one")
+            XCTAssertEqual(EvaluationOperator.resolve(evaluation: item.evaluation,
+                                                      expectedValue: item.expectedValue),
+                           .boolean)
+        }
+    }
+
+    /// An authored source grammar wins over the convention.
+    func testAnAuthoredSourceGrammarWinsOverTheConvention() throws {
+        let fixture = try findingsPlist()
+        defer { try? FileManager.default.removeItem(at: fixture.dir) }
+
+        let source = try plistSource(
+            #"{"path": "\#(fixture.path)", "type": "compliance", "displayName": "Compliance", "evaluation": "equals", "expectedValue": "true"}"#)
+        let items = Config().discoverItemsFromPlist(source: source, basePath: nil)
+
+        XCTAssertFalse(items.isEmpty)
+        for item in items {
+            XCTAssertEqual(item.evaluation, "equals")
+            XCTAssertEqual(item.expectedValue, "true")
+        }
+    }
+
+    /// `boolean` reads every spelling of false (`false`, `0`, `"NO"`); `equals` matches only the literal "false".
+    func testTheConventionsOperatorReadsEverySpellingOfFalseAndEqualsDoesNot() {
+        for spelling in [false, 0, "NO", "no"] as [Any] {
+            XCTAssertTrue(Validation.shared.performSmartEvaluation(
+                value: spelling, evaluationType: "boolean", expectedValue: "false", key: "finding"),
+                "finding=\(spelling) ⇒ compliant under the convention")
+        }
+
+        XCTAssertFalse(Validation.shared.performSmartEvaluation(
+            value: 0, evaluationType: "equals", expectedValue: "false", key: "finding"),
+            "a finding stored as 0 is compliant, but `equals` compares \"0\" to \"false\" "
+            + "— the wrong answer the derived default would have produced")
+        XCTAssertFalse(Validation.shared.performSmartEvaluation(
+            value: "NO", evaluationType: "equals", expectedValue: "false", key: "finding"))
+
+        // The operator the derived default would pick.
+        XCTAssertEqual(EvaluationOperator.resolve(evaluation: nil, expectedValue: "false"), .equals)
+    }
+
+    /// Recognised operators give the same verdict in both engines.
+    func testEnginesAgreeOnRecognisedOperators() {
+        let probes: [(actual: String, expected: String?, op: String)] = [
+            ("hello", nil, "exists"),
+            ("yes", "yes", "equals"),
+            ("no", "yes", "equals")
+        ]
+        for probe in probes {
+            let poller = PlistStatusPoller.evaluate(probe.actual,
+                                                    expected: probe.expected,
+                                                    evaluation: probe.op)
+            let validation = Validation.shared.performSmartEvaluation(value: probe.actual,
+                                                                      evaluationType: probe.op,
+                                                                      expectedValue: probe.expected,
+                                                                      key: "k")
+            XCTAssertEqual(poller, validation,
+                           "'\(probe.op)' on '\(probe.actual)' vs \(probe.expected ?? "nil"): "
+                           + "poller said \(poller), Validation said \(validation)")
+        }
+    }
+
+    /// `RequirementEvaluator` derives its operator through `EvaluationOperator.resolve`.
+    func testRequirementEvaluatorKeepsTheDerivationItAlreadyHad() {
+        XCTAssertEqual(EvaluationOperator.resolve(evaluation: nil, expectedValue: "42"), .equals)
+        XCTAssertEqual(EvaluationOperator.resolve(evaluation: nil, expectedValue: nil), .exists)
     }
 }
