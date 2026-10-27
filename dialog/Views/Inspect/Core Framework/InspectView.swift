@@ -48,6 +48,13 @@ struct InspectView: View {
                             writeLog("InspectViewServiceBased: Loading preset '\(inspectState.uiConfiguration.preset)' with new coordinator", logLevel: .debug)
                         }
                     }
+                    // Provenance chip for the `--debug` CLI flag (`appvars.debugMode`, not a config
+                    // key), seated here so it shows on every preset.
+                    .overlay(alignment: .bottomLeading) {
+                        if appvars.debugMode {
+                            DebugConfigChip(path: inspectState.configPath)
+                        }
+                    }
             }
         }
         .onAppear {
@@ -377,5 +384,52 @@ private struct Preset5Wrapper: View {
 
     var body: some View {
         Preset5View(inspectState: coordinator)
+    }
+}
+
+/// `--debug`'s provenance chip: the running config's file name, directory, copy and reveal
+/// buttons. Outside the palette system because it never renders for an end user.
+private struct DebugConfigChip: View {
+    let path: String?
+    @State private var copied = false
+
+    var body: some View {
+        if let path, !path.isEmpty {
+            HStack(spacing: 8) {
+                Text((path as NSString).lastPathComponent)
+                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                Text((path as NSString).deletingLastPathComponent)
+                    .font(.system(size: 10, design: .monospaced))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.head)
+                    .frame(maxWidth: 220, alignment: .trailing)
+                Button {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(path, forType: .string)
+                    copied = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { copied = false }
+                } label: {
+                    Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                        .font(.system(size: 10, weight: .semibold))
+                        .frame(width: 14, height: 14)   // constant box — the icon swap never reflows the chip
+                }
+                .buttonStyle(.plain)
+                .help("Copy config path")
+                Button {
+                    NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: path)])
+                } label: {
+                    Image(systemName: "arrow.up.forward.square")
+                        .font(.system(size: 10, weight: .semibold))
+                        .frame(width: 14, height: 14)
+                }
+                .buttonStyle(.plain)
+                .help("Reveal in Finder")
+            }
+            .padding(.vertical, 5)
+            .padding(.horizontal, 9)
+            .background(.ultraThinMaterial, in: Capsule())
+            .padding(10)
+        }
     }
 }

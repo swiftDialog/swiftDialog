@@ -1666,6 +1666,24 @@ struct SDHelp {
         When both are set, this flag wins over the env var DIALOG_INSPECT_CONFIG.
 """
 
+        argument.inspectLint.helpShort = "Check an inspect-mode config and exit"
+        argument.inspectLint.helpUsage = "<file> [--json | --explain]"
+        argument.inspectLint.helpLong = """
+        Reports every finding for an inspect-mode config without opening a window: unknown keys,
+        keys with no effect, loader warnings and whole-flow checks. --json prints the findings as JSON.
+
+            dialog --\(argument.inspectLint.long) /path/to/config.json
+
+        Exit code: 0 no findings, 1 errors, 2 warnings only.
+
+        --explain checks the config against this Mac instead: per item, how it will be detected and
+        why a row would never move (for example a path or log pattern that cannot match).
+
+            dialog --\(argument.inspectLint.long) /path/to/config.json --explain
+
+        Exit code: 0 no faults, 1 faults found or the config does not decode.
+"""
+
         argument.publishedSessionsDir.helpShort = "Directory to publish per-PID session discovery JSON"
         argument.publishedSessionsDir.helpUsage = "<dir>"
         argument.publishedSessionsDir.helpLong = """

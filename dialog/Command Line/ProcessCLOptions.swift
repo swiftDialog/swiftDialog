@@ -1484,6 +1484,37 @@ func processCLOptions(json: JSON = getJSON()) {
         appvars.willDisturb = true
     }
 
+    // `--inspect-lint <path> [--json]` — every finding for an inspect config, then out
+    // (0 clean, 1 errors, 2 warnings). The checks live in Inspect (`InspectLint`).
+    // `--inspect-lint <path> --explain` — the detection report instead (`DetectionExplain`):
+    // 0 no detection fault, 1 faults or a config that does not decode. Neither opens a window or
+    // starts monitoring, so running it cannot change what it reports on.
+    if appArguments.inspectLint.present {
+        let path = CLOptionText(optionName: appArguments.inspectLint)
+        writeLog("\(appArguments.inspectLint.long) called for \(path)")
+        if CommandLine.arguments.contains("--explain") {
+            guard let data = FileManager.default.contents(atPath: path) else {
+                print("explain: cannot read \(path)")
+                exit(1)
+            }
+            do {
+                let config = try JSONDecoder().decode(InspectConfig.self, from: data)
+                let result = DetectionExplain.evaluate(for: config)
+                print(result.text)
+                exit(result.faults == 0 ? 0 : 1)
+            } catch {
+                print("explain: \(path) does not decode as an inspect config — \(error)")
+                exit(1)
+            }
+        }
+        let code = MainActor.assumeIsolated {   // option processing runs on the main thread at launch
+            InspectLint.runCommandLine(path: path, json: CommandLine.arguments.contains("--json"))
+        }
+        // `exit`, not `quitDialog`: there is no dialog result to report, and quitDialog would print
+        // one — `--json` is also the classic "print results as JSON" flag.
+        exit(code)
+    }
+
     if appArguments.listFonts.present {
         writeLog("\(appArguments.listFonts.long) called")
         //All font Families

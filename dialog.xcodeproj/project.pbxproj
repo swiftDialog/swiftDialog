@@ -165,8 +165,10 @@
 		7717EDC6702A64F2C1AC4E99 /* ChecklistLineMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5874459C76B0232A8AD0F1B8 /* ChecklistLineMonitorTests.swift */; };
 		5F6EF6C2DA61D3679CA4A2A3 /* ChromeLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A03E25AA030DEF8862BB999 /* ChromeLayoutTests.swift */; };
 		73AE5F3791FFAB8C6E414F39 /* ConfigPrimitiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 828537B77CE33E2F6C6525A3 /* ConfigPrimitiveTests.swift */; };
+		1D30CD5424FA0171AD913548 /* DebugConfigChipGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E7F793C461310E75224709E /* DebugConfigChipGateTests.swift */; };
 		FED1FE862ADE754A404E9347 /* DecisionCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF17B78D8FF6758660FC284 /* DecisionCardTests.swift */; };
 		DB86AB89D979501A3A3F39AA /* DeferralAndHostLineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E823D43CB670AE7FBE48F9F5 /* DeferralAndHostLineTests.swift */; };
+		EBB2F7B46A7662BEDA68C008 /* DetectionExplainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C5F867EC74F7B5B7F448784 /* DetectionExplainTests.swift */; };
 		3DFD150985A56F347F192D1A /* DetectionLogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 547D6E75109356FD6735E6FA /* DetectionLogTests.swift */; };
 		FCEA9F4F36B547C078E4A28C /* DoorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2E8667715C73EC838921757 /* DoorTests.swift */; };
 		1C6F1FF3EAE67C79F76BBB00 /* ExternalFactStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F7A5728AC46E9D7A30B0B04 /* ExternalFactStatusTests.swift */; };
@@ -450,8 +452,10 @@
 		5874459C76B0232A8AD0F1B8 /* ChecklistLineMonitorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecklistLineMonitorTests.swift; sourceTree = "<group>"; };
 		8A03E25AA030DEF8862BB999 /* ChromeLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromeLayoutTests.swift; sourceTree = "<group>"; };
 		828537B77CE33E2F6C6525A3 /* ConfigPrimitiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigPrimitiveTests.swift; sourceTree = "<group>"; };
+		6E7F793C461310E75224709E /* DebugConfigChipGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugConfigChipGateTests.swift; sourceTree = "<group>"; };
 		BCF17B78D8FF6758660FC284 /* DecisionCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecisionCardTests.swift; sourceTree = "<group>"; };
 		E823D43CB670AE7FBE48F9F5 /* DeferralAndHostLineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeferralAndHostLineTests.swift; sourceTree = "<group>"; };
+		0C5F867EC74F7B5B7F448784 /* DetectionExplainTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetectionExplainTests.swift; sourceTree = "<group>"; };
 		547D6E75109356FD6735E6FA /* DetectionLogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetectionLogTests.swift; sourceTree = "<group>"; };
 		B2E8667715C73EC838921757 /* DoorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoorTests.swift; sourceTree = "<group>"; };
 		9F7A5728AC46E9D7A30B0B04 /* ExternalFactStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalFactStatusTests.swift; sourceTree = "<group>"; };
@@ -733,8 +737,10 @@
 				9F7A5728AC46E9D7A30B0B04 /* ExternalFactStatusTests.swift */,
 				B2E8667715C73EC838921757 /* DoorTests.swift */,
 				547D6E75109356FD6735E6FA /* DetectionLogTests.swift */,
+				0C5F867EC74F7B5B7F448784 /* DetectionExplainTests.swift */,
 				E823D43CB670AE7FBE48F9F5 /* DeferralAndHostLineTests.swift */,
 				BCF17B78D8FF6758660FC284 /* DecisionCardTests.swift */,
+				6E7F793C461310E75224709E /* DebugConfigChipGateTests.swift */,
 				828537B77CE33E2F6C6525A3 /* ConfigPrimitiveTests.swift */,
 				8A03E25AA030DEF8862BB999 /* ChromeLayoutTests.swift */,
 				5874459C76B0232A8AD0F1B8 /* ChecklistLineMonitorTests.swift */,
@@ -1393,8 +1399,10 @@
 				1C6F1FF3EAE67C79F76BBB00 /* ExternalFactStatusTests.swift in Sources */,
 				FCEA9F4F36B547C078E4A28C /* DoorTests.swift in Sources */,
 				3DFD150985A56F347F192D1A /* DetectionLogTests.swift in Sources */,
+				EBB2F7B46A7662BEDA68C008 /* DetectionExplainTests.swift in Sources */,
 				DB86AB89D979501A3A3F39AA /* DeferralAndHostLineTests.swift in Sources */,
 				FED1FE862ADE754A404E9347 /* DecisionCardTests.swift in Sources */,
+				1D30CD5424FA0171AD913548 /* DebugConfigChipGateTests.swift in Sources */,
 				73AE5F3791FFAB8C6E414F39 /* ConfigPrimitiveTests.swift in Sources */,
 				5F6EF6C2DA61D3679CA4A2A3 /* ChromeLayoutTests.swift in Sources */,
 				7717EDC6702A64F2C1AC4E99 /* ChecklistLineMonitorTests.swift in Sources */,
