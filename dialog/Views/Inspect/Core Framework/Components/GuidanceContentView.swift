@@ -2,139 +2,156 @@
 //  GuidanceContentView.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 17/01/2026
-//
-//  Extracted from PresetCommonHelpers.swift
-//  Renders rich guidance content for Migration Assistant-style workflows
+//  The shared guidance block router used by every preset; per-block views live in Guidance Blocks/.
+//  Generic over the context protocols, so nesting containers do not need `InspectState`.
 //
 
 import SwiftUI
-import AVKit
-import WebViewKit
 
-// MARK: - Guidance Content View (Shared content renderer)
+// MARK: - Guidance Content View
 
-/// Renders rich guidance content for Migration Assistant-style workflows
-/// Shared across all presets for consistent rich content display
-struct GuidanceContentView: View {
+/// Renders a step's guidance blocks; shared across all presets.
+struct GuidanceContentView<Context: UserInputContext & ProgressContext & ObservableObject>: View {
     let contentBlocks: [InspectConfig.GuidanceContent]
     let scaleFactor: CGFloat
     let iconBasePath: String?  // Optional base path for resolving relative image paths
-    @ObservedObject var inspectState: InspectState
+    @ObservedObject var inspectState: Context
     let itemId: String
     let onOverlayTap: (() -> Void)?  // Optional callback when a block with opensOverlay=true is tapped
-    let accentColor: Color?              // Optional branded accent (arrow icons, highlight, explainer, button tint, radio selection)
-    let contentAlignment: HorizontalAlignment  // Text block alignment (.leading default, .center for Preset5 intro)
-    let refreshToken: Int                // Changes on dynamic updates to force SwiftUI re-render
+    /// Called with a bundle id when a `bundle-list` row's detail is opened; step navigation stays with the host.
+    let onOpenSoftwareDetail: ((String) -> Void)?
+    let accentColor: Color?              // Optional branded accent for icons, highlights and controls
     @Environment(\.palette) private var palette
+    let contentAlignment: HorizontalAlignment  // Text block alignment (.leading default)
+    /// The gap between stacked blocks. nil spaces by the `GuidanceBlockSpacing` ladder (see `stack(_:)`);
+    /// a value is one flat, unscaled gap, for hosts that own their vertical rhythm (`plain-branded`).
+    let blockSpacing: CGFloat?
+    /// Horizontal placement of `image` blocks; `.center` except for `plain-branded`. Separate from
+    /// `contentAlignment`, which applies to text only.
+    let mediaAlignment: HorizontalAlignment
+    /// The host's interaction-log dialect for form blocks, and any commit side effect. Default: 4-part item lines.
+    let formWire: FormWire
+    /// Per-line watch results for a "checklist" block, index-aligned with its `checklist` array.
+    /// nil reads as no line satisfied; only lines that author `paths` consult it.
+    let checklistLineSatisfied: [Bool]?
     @Environment(\.complianceAggregator) private var complianceAggregator
 
-    // Initialize with required parameters for interactive form support
-    init(contentBlocks: [InspectConfig.GuidanceContent], scaleFactor: CGFloat, iconBasePath: String? = nil, inspectState: InspectState, itemId: String, onOverlayTap: (() -> Void)? = nil, accentColor: Color? = nil, contentAlignment: HorizontalAlignment = .leading, refreshToken: Int = 0) {
+    init(contentBlocks: [InspectConfig.GuidanceContent], scaleFactor: CGFloat, iconBasePath: String? = nil, inspectState: Context, itemId: String, onOverlayTap: (() -> Void)? = nil, onOpenSoftwareDetail: ((String) -> Void)? = nil, accentColor: Color? = nil, contentAlignment: HorizontalAlignment = .leading, blockSpacing: CGFloat? = nil, mediaAlignment: HorizontalAlignment = .center, formWire: FormWire = FormWire(), checklistLineSatisfied: [Bool]? = nil) {
         self.contentBlocks = contentBlocks
         self.scaleFactor = scaleFactor
         self.iconBasePath = iconBasePath
         self.inspectState = inspectState
         self.itemId = itemId
         self.onOverlayTap = onOverlayTap
+        self.onOpenSoftwareDetail = onOpenSoftwareDetail
         self.accentColor = accentColor
         self.contentAlignment = contentAlignment
-        self.refreshToken = refreshToken
+        self.blockSpacing = blockSpacing
+        self.mediaAlignment = mediaAlignment
+        self.formWire = formWire
+        self.checklistLineSatisfied = checklistLineSatisfied
     }
 
-    /// Group comparison-table blocks by category for collapsible rendering
-    /// Filters out blocks where visible == false
-    private var groupedBlocks: [(category: String?, items: [InspectConfig.GuidanceContent])] {
-        var groups: [(String?, [InspectConfig.GuidanceContent])] = []
-        var currentCategory: String?
-        var currentItems: [InspectConfig.GuidanceContent] = []
-
-        // Filter out hidden blocks (visible == false)
-        let visibleBlocks = contentBlocks.filter { $0.visible != false }
-
-        for block in visibleBlocks {
-            if block.type == "comparison-table" && block.category != nil {
-                // Comparison table with category
-                if block.category != currentCategory {
-                    // Save previous group if exists
-                    if !currentItems.isEmpty {
-                        groups.append((currentCategory, currentItems))
-                        currentItems = []
-                    }
-                    currentCategory = block.category
-                }
-                currentItems.append(block)
-            } else {
-                // Non-categorized block or different type
-                // Save previous group if exists
-                if !currentItems.isEmpty {
-                    groups.append((currentCategory, currentItems))
-                    currentItems = []
-                    currentCategory = nil
-                }
-                // Add as single-item group
-                groups.append((nil, [block]))
-            }
-        }
-
-        // Save last group
-        if !currentItems.isEmpty {
-            groups.append((currentCategory, currentItems))
-        }
-
-        return groups
+    /// The blocks to render, in authored order, minus `visible: false`. `canonicalizeStep` has already
+    /// folded consecutive `comparison-table` blocks into one table.
+    private var visibleBlocks: [InspectConfig.GuidanceContent] {
+        let values = inspectState.userValues
+        return cadenceResolved(contentBlocks.filter { $0.visible != false && ($0.showWhen?.matches(values) ?? true) }
+            .map(InspectConfig.GuidanceContent.normalized))
     }
 
-    private func attributedMarkdown(_ markdown: String) -> AttributedString {
-        do {
-            return try AttributedString(
-                markdown: markdown,
-                options: AttributedString.MarkdownParsingOptions(
-                    interpretedSyntax: .inlineOnlyPreservingWhitespace
-                )
-            )
-        } catch {
-            // Fallback to plain text if markdown parsing fails
-            return AttributedString(markdown)
-        }
+    /// Resolves measured cadence tokens (`{cadenceCount}` etc.). A conditional cast, since not every
+    /// context owns a cadence.
+    private func cadenceResolved(_ blocks: [InspectConfig.GuidanceContent]) -> [InspectConfig.GuidanceContent] {
+        guard blocks.contains(where: CadenceTokens.mentioned(in:)),
+              let cadence = inspectState as? CadenceContext else { return blocks }
+        let key = inspectState.config?.localization?.selectionKey ?? "preferredLanguage"
+        let language = inspectState.userValues[key].flatMap { $0.isEmpty ? nil : $0 }
+        return blocks.map { CadenceTokens.resolve($0, monitor: cadence.cadenceMonitor, languageCode: language) }
     }
 
     var body: some View {
-        VStack(alignment: contentAlignment, spacing: 8 * scaleFactor) {
-            ForEach(Array(groupedBlocks.enumerated()), id: \.offset) { groupIndex, group in
-                if let category = group.category, !group.items.isEmpty, group.items.allSatisfy({ $0.type == "comparison-table" }) {
-                    // Render as collapsible category group
-                    ComparisonGroupView(
-                        category: category,
-                        comparisons: group.items,
-                        scaleFactor: scaleFactor
-                    )
-                    .id("comparison-group-\(category)-\(groupIndex)")
-                } else {
-                    // Render individual blocks normally
-                    ForEach(Array(group.items.enumerated()), id: \.offset) { _, block in
-                        wrappedContentBlockView(for: block)
-                    }
-                }
+        arrangedBody
+            .onAppear {
+                inspectState.initializeGuidanceFormState(for: self.itemId)
+                GuidanceSelectionKeys.logFallbacks(in: visibleBlocks)
+                GuidanceAdvisories.warnOnceAboutSynonyms(in: contentBlocks, itemId: itemId)
             }
-        }
-        .onAppear {
-            inspectState.initializeGuidanceFormState(for: self.itemId)
+    }
+
+    /// Media either takes the whole band or sits in the stack, never a shrunken thumbnail; `MediaArrangement` decides.
+    @ViewBuilder
+    private var arrangedBody: some View {
+        let blocks = visibleBlocks
+        switch MediaArrangement.resolve(blocks) {
+        case .stacked:
+            stack(blocks)
+
+        case .fill(let index):
+            // The picture takes the whole band; `Preset6View.footerBar` draws its caption.
+            wrappedContentBlockView(for: blocks[index])
+                .environment(\.mediaBandRole, .fill)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+        case .split(let mediaIndex):
+            // Two equal flexible columns: "roughly half" at any content width.
+            HStack(alignment: .top, spacing: 24 * scaleFactor) {
+                wrappedContentBlockView(for: blocks[mediaIndex])
+                    .environment(\.mediaBandRole, .split)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                stack(blocks.enumerated().filter { $0.offset != mediaIndex }.map(\.element))
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
     }
 
-    /// Wraps content block with overlay tap gesture if opensOverlay is true
+    /// The block run, spaced by `GuidanceBlockSpacing`. Spacing is asymmetric around headings, so the stack
+    /// runs at 0 and each block carries its own leading gap. An explicit `blockSpacing` wins.
+    @ViewBuilder
+    private func stack(_ blocks: [InspectConfig.GuidanceContent]) -> some View {
+        if let blockSpacing {
+            VStack(alignment: contentAlignment, spacing: blockSpacing) {
+                ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
+                    wrappedContentBlockView(for: block)
+                }
+            }
+        } else {
+            let gaps = GuidanceBlockSpacing.gaps(for: blocks)
+            VStack(alignment: contentAlignment, spacing: 0) {
+                ForEach(Array(blocks.enumerated()), id: \.offset) { index, block in
+                    wrappedContentBlockView(for: block)
+                        .padding(.top, index == 0 ? 0 : gaps[index - 1] * scaleFactor)
+                }
+            }
+        }
+    }
+
+    /// The specimen frame sits outside the overlay wrap, so a framed block keeps its overlay and the
+    /// frame encloses the chevron. `block.specimenNote` arrives already localized; the name never localizes.
     @ViewBuilder
     private func wrappedContentBlockView(for block: InspectConfig.GuidanceContent) -> some View {
+        if block.wantsSpecimenFrame {
+            SpecimenFrame(name: block.specimen ?? "",
+                          note: block.specimenNote,
+                          scaleFactor: scaleFactor) {
+                overlayWrappedContentBlockView(for: block)
+            }
+        } else {
+            overlayWrappedContentBlockView(for: block)
+        }
+    }
+
+    /// Wraps a block with an overlay tap gesture when `opensOverlay` is true.
+    @ViewBuilder
+    private func overlayWrappedContentBlockView(for block: InspectConfig.GuidanceContent) -> some View {
         if block.opensOverlay == true, let onTap = onOverlayTap {
-            // Make the content clickable to open overlay
             contentBlockView(for: block)
                 .contentShape(Rectangle())
                 .onTapGesture {
                     onTap()
                 }
                 .overlay(alignment: .trailing) {
-                    // Add subtle indicator that this is clickable
                     Image(systemName: "chevron.right.circle.fill")
                         .font(.system(size: 12 * scaleFactor))
                         .foregroundStyle(.secondary.opacity(0.5))
@@ -146,827 +163,78 @@ struct GuidanceContentView: View {
         }
     }
 
+    /// Routes a block to its per-block view. Every arm is one small expression (type-check budget).
     @ViewBuilder
     private func contentBlockView(for block: InspectConfig.GuidanceContent) -> some View {
-        let isBold = block.bold ?? false
         let textColor = getTextColor(for: block)
 
         switch block.type {
-        case "text":
-            let resolvedContent = resolveTemplateVariables(block.content ?? "", inspectState: inspectState)
-            Text(attributedMarkdown(resolvedContent))
-                .font(.system(size: 13 * scaleFactor, weight: isBold ? .semibold : .regular))
-                .foregroundStyle(textColor)
-                .multilineTextAlignment(contentAlignment == .center ? .center : .leading)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: Alignment(horizontal: contentAlignment, vertical: .center))
+        // `paragraph` is accepted as a synonym; `GuidanceAdvisories` points authors to `text`.
+        case "text", "paragraph":
+            GuidanceTextBlock(
+                content: resolveTemplates(block.content ?? ""),
+                isBold: block.bold ?? false,
+                textColor: textColor,
+                contentAlignment: contentAlignment,
+                scaleFactor: scaleFactor
+            )
 
         case "highlight":
-            // Emphasized instruction line — plain centered prose (no chip box) so it reads as
-            // onboarding copy, not a button/tag. Semibold keeps the emphasis vs body text.
-            Text(block.content ?? "")
-                .font(.system(size: 14 * scaleFactor, weight: .semibold))
-                .foregroundStyle(.primary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .center)
+            GuidanceHighlightBlock(content: block.content ?? "", scaleFactor: scaleFactor)
 
         case "arrow":
-            HStack(spacing: 6 * scaleFactor) {
-                Image(systemName: "arrow.right.circle.fill")
-                    .foregroundStyle(accentColor ?? .primary)
-                    .font(.system(size: 14 * scaleFactor))
-                Text(block.content ?? "")
-                    .font(.system(size: 13 * scaleFactor, weight: .medium))
-                    .foregroundStyle(textColor)
-            }
+            GuidanceArrowBlock(content: block.content ?? "", textColor: textColor, accentColor: accentColor, scaleFactor: scaleFactor)
 
         case "warning":
-            HStack(alignment: .top, spacing: 8 * scaleFactor) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 13 * scaleFactor))
-                    .foregroundStyle(palette.warning)
-                Text(attributedMarkdown(block.content ?? ""))
-                    .font(.system(size: 13 * scaleFactor))
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(12 * scaleFactor)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(palette.warningBackground)
-            )
+            GuidanceCalloutBlock(content: block.content ?? "", style: .warning, scaleFactor: scaleFactor,
+                                 rawStyle: block.style, title: block.title, iconOverride: block.icon)
 
         case "info":
-            HStack(alignment: .top, spacing: 8 * scaleFactor) {
-                Image(systemName: "info.circle.fill")
-                    .font(.system(size: 13 * scaleFactor))
-                    .foregroundStyle(palette.info)
-                Text(attributedMarkdown(block.content ?? ""))
-                    .font(.system(size: 13 * scaleFactor))
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(12 * scaleFactor)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(palette.infoBackground)
-            )
+            // Chip by default for info; any other `style` or a `title` draws the panel.
+            // `GuidanceCalloutBlock.resolveForm` decides, from the raw `style` string.
+            GuidanceCalloutBlock(content: block.content ?? "", style: .info, scaleFactor: scaleFactor,
+                                 rawStyle: block.style, title: block.title, iconOverride: block.icon)
 
         case "success":
-            HStack(alignment: .top, spacing: 8 * scaleFactor) {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 13 * scaleFactor))
-                    .foregroundStyle(palette.success)
-                Text(attributedMarkdown(block.content ?? ""))
-                    .font(.system(size: 13 * scaleFactor))
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(12 * scaleFactor)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(palette.successBackground)
-            )
+            GuidanceCalloutBlock(content: block.content ?? "", style: .success, scaleFactor: scaleFactor,
+                                 rawStyle: block.style, title: block.title, iconOverride: block.icon)
+
+        case "prose":
+            GuidanceProseBlock(content: resolveTemplates(block.content ?? ""),
+                               placeholder: block.placeholder,
+                               streaming: GuidanceProseBlock.streaming(from: block.state),
+                               scaleFactor: scaleFactor)
 
         case "explainer":
-            // Explainer with inline markdown support and optional styled box
-            // Supports: "plain" (no box), "info" (blue), "warning" (orange), "success" (green)
-            let resolvedContent = resolveTemplateVariables(block.content ?? "", inspectState: inspectState)
-            let explainerStyle = block.style ?? "plain"
-
-            // Determine icon and colors based on style
-            let (icon, iconColor, backgroundColor): (String?, Color, Color) = {
-                switch explainerStyle {
-                case "info":
-                    return ("info.circle.fill", palette.info, palette.infoBackground)
-                case "warning":
-                    return ("exclamationmark.triangle.fill", palette.warning, palette.warningBackground)
-                case "success":
-                    return ("checkmark.circle.fill", palette.success, palette.successBackground)
-                default: // "plain"
-                    if let accent = accentColor {
-                        return (block.icon, accent, accent.opacity(0.06))
-                    }
-                    return (nil, .primary, .clear)
-                }
-            }()
-
-            Group {
-                if let iconName = icon {
-                    // Box style with icon
-                    HStack(alignment: .top, spacing: 8 * scaleFactor) {
-                        Image(systemName: iconName)
-                            .font(.system(size: 13 * scaleFactor))
-                            .foregroundStyle(iconColor)
-
-                        // Native SwiftUI markdown support
-                        Text(attributedMarkdown(resolvedContent))
-                            .font(.system(size: 13 * scaleFactor))
-                            .foregroundStyle(.primary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(12 * scaleFactor)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(backgroundColor)
-                    )
-                } else {
-                    // Plain style without box
-                    Text(attributedMarkdown(resolvedContent))
-                        .font(.system(size: 13 * scaleFactor))
-                        .foregroundStyle(.primary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
+            GuidanceExplainerBlock(
+                content: resolveTemplates(block.content ?? ""),
+                style: block.style,
+                icon: block.icon,
+                accentColor: accentColor,
+                scaleFactor: scaleFactor,
+                label: block.label.map { resolveTemplates($0) }
+            )
 
         case "bullets":
-            if let items = block.items {
-                VStack(alignment: .leading, spacing: 16 * scaleFactor) {
-                    ForEach(Array(items.enumerated()), id: \.offset) { index, item in
-                        if !item.isEmpty {
-                            HStack(alignment: .top, spacing: 12 * scaleFactor) {
-                                if block.numbered == true {
-                                    // Numbered mode: 1.circle.fill, 2.circle.fill, etc. (up to 50)
-                                    Image(systemName: "\(index + 1).circle.fill")
-                                        .font(.system(size: 15 * scaleFactor))
-                                        .foregroundStyle(accentColor ?? .blue)
-                                } else if let sfIcon = block.icon {
-                                    Image(systemName: sfIcon)
-                                        .font(.system(size: 13 * scaleFactor))
-                                        .foregroundStyle(accentColor ?? .secondary)
-                                } else {
-                                    Text("•")
-                                        .font(.system(size: 13 * scaleFactor))
-                                        .foregroundStyle(.secondary)
-                                }
-                                Text(attributedMarkdown(item))
-                                    .font(.system(size: 13 * scaleFactor))
-                                    .foregroundStyle(.primary)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                        }
-                    }
-                }
-            }
+            GuidanceBulletsBlock(
+                items: block.items,
+                numbered: block.numbered == true,
+                icon: block.icon,
+                accentColor: accentColor,
+                scaleFactor: scaleFactor,
+                style: block.style
+            )
 
         case "label-value":
-            // Format label-value pairs with visual distinction
-            // Expects content in format "Label: Value" or uses separate label/value fields
-            // Supports style variants: "default", "success" (green labels), "table" (no bullet, green labels)
-            let resolvedContent = resolveTemplateVariables(block.content ?? "", inspectState: inspectState)
-            let style = block.style ?? "default"  // default, success, table
-
-            // Parse label and value
-            let (label, value): (String, String) = {
-                // Option 1: Use separate label/value fields if provided
-                if let blockLabel = block.label, let blockValue = block.value {
-                    return (blockLabel, blockValue)
-                }
-
-                // Option 2: Parse from content string (split on first colon)
-                if let colonIndex = resolvedContent.firstIndex(of: ":") {
-                    let labelPart = String(resolvedContent[..<colonIndex]).trimmingCharacters(in: .whitespaces)
-                    let valuePart = String(resolvedContent[resolvedContent.index(after: colonIndex)...]).trimmingCharacters(in: .whitespaces)
-                    return (labelPart, valuePart)
-                }
-
-                // Fallback: treat entire content as value
-                return ("", resolvedContent)
-            }()
-
-            // Determine styling based on style parameter
-            let (labelColor, valueFontSize, showBullet): (Color, CGFloat, Bool) = {
-                switch style {
-                case "success":
-                    return (palette.success, 15, true)  // Green labels, larger values, with bullet
-                case "table":
-                    return (palette.success, 15, false)  // Green labels, larger values, no bullet
-                default:
-                    return (.secondary, 13, true)  // Default: grey labels, normal size, with bullet
-                }
-            }()
-
-            HStack(alignment: .top, spacing: 8 * scaleFactor) {
-                // Bullet point (optional based on style)
-                if showBullet {
-                    Text("•")
-                        .font(.system(size: 13 * scaleFactor, weight: .bold))
-                        .foregroundStyle(.primary)
-                }
-
-                // Label part (styled based on variant)
-                if !label.isEmpty {
-                    Text(label + ":")
-                        .font(.system(size: 13 * scaleFactor, weight: .regular))
-                        .foregroundStyle(labelColor)
-                }
-
-                // Value part (bold, larger if table/success style)
-                Text(value)
-                    .font(.system(size: valueFontSize * scaleFactor, weight: .bold))
-                    .foregroundStyle(.primary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .padding(.leading, showBullet ? 0 : 6 * scaleFactor)  // Add slight indent if no bullet
-
-        case "image":
-            // Only render if content path is provided and not empty
-            if let contentPath = block.content, !contentPath.isEmpty {
-                VStack(spacing: 4 * scaleFactor) {
-                    if contentPath.hasPrefix("sf=") || contentPath.hasPrefix("SF=") {
-                        // SF Symbol rendering
-                        let symbolName = String(contentPath.dropFirst(3))
-                        Image(systemName: symbolName)
-                            .font(.system(size: (CGFloat(block.imageHeight ?? 200) * scaleFactor) * 0.5))
-                            .foregroundStyle(accentColor ?? .secondary)
-                            .frame(height: CGFloat(block.imageHeight ?? 200) * scaleFactor)
-
-                        if let caption = block.caption {
-                            Text(caption)
-                                .font(.system(size: 11 * scaleFactor))
-                                .foregroundStyle(.secondary)
-                                .italic()
-                                .multilineTextAlignment(.center)
-                                .padding(.top, 2 * scaleFactor)
-                        }
-                    } else if contentPath.lowercased() == "computer" {
-                        // Device-specific hardware icon (same as --icon computer)
-                        Image(nsImage: NSImage(named: NSImage.computerName) ?? NSImage())
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(maxWidth: CGFloat(block.imageWidth ?? 128) * scaleFactor)
-                            .padding(.vertical, 4 * scaleFactor)
-
-                        if let caption = block.caption {
-                            Text(caption)
-                                .font(.system(size: 11 * scaleFactor))
-                                .foregroundStyle(.secondary)
-                                .italic()
-                                .multilineTextAlignment(.center)
-                                .padding(.top, 2 * scaleFactor)
-                        }
-                    } else if contentPath.lowercased().hasSuffix(".gif") {
-                        // Animated GIF — use AsyncImageView which handles GIF playback
-                        let imageWidth = CGFloat(block.imageWidth ?? 400) * scaleFactor
-                        AsyncImageView(
-                            iconPath: contentPath,
-                            basePath: nil,
-                            maxWidth: imageWidth,
-                            maxHeight: imageWidth * 0.75,
-                            imageFit: .fit,
-                            fallback: { EmptyView() }
-                        )
-                        .padding(.vertical, 4 * scaleFactor)
-                    } else if let image = loadInstructionalImage(path: contentPath) {
-                        let imageWidth = CGFloat(block.imageWidth ?? 400) * scaleFactor
-                        let shape = block.imageShape ?? "rectangle"
-                        let showBorder = block.imageBorder ?? true
-
-                        Image(nsImage: image)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(maxWidth: imageWidth)
-                            .clipShape(getImageClipShape(for: shape))
-                            .overlay(
-                                showBorder ? getImageClipShape(for: shape)
-                                    .stroke(Color.secondary.opacity(0.2), lineWidth: 1) : nil
-                            )
-                            .shadow(color: showBorder ? Color.black.opacity(0.15) : Color.clear, radius: 4, x: 0, y: 2)
-                            .padding(.vertical, 4 * scaleFactor)
-
-                        if let caption = block.caption {
-                            Text(caption)
-                                .font(.system(size: 11 * scaleFactor))
-                                .foregroundStyle(.secondary)
-                                .italic()
-                                .multilineTextAlignment(.center)
-                                .padding(.top, 2 * scaleFactor)
-                        }
-                    } else {
-                        // Fallback if image not found - only show in debug mode
-                        if appvars.debugMode {
-                            HStack(spacing: 8 * scaleFactor) {
-                                Image(systemName: "photo")
-                                    .font(.system(size: 13 * scaleFactor))
-                                    .foregroundStyle(.secondary)
-                                Text("Image not found: \(contentPath)")
-                                    .font(.system(size: 11 * scaleFactor))
-                                    .foregroundStyle(.secondary)
-                                    .italic()
-                            }
-                            .padding(10 * scaleFactor)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(Color.secondary.opacity(0.1))
-                            )
-                        }
-                    }
-                }
-            }
-
-        case "video":
-            // Video player sized to the video's natural aspect ratio
-            // so the frame matches content exactly (no letterbox bars).
-            // videoHeight from config acts as a max-height cap.
-            if let videoPath = block.content, !videoPath.isEmpty {
-                VStack(spacing: 4 * scaleFactor) {
-                    let autoPlay = block.autoplay ?? false
-                    let maxHeight = CGFloat(block.videoHeight ?? 400) * scaleFactor
-
-                    AspectFitVideoView(
-                        videoPath: videoPath,
-                        autoPlay: autoPlay,
-                        caption: block.caption ?? "",
-                        maxHeight: maxHeight
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
-                    .padding(.vertical, 4 * scaleFactor)
-                }
-            }
-
-        case "webcontent":
-            // Embedded web content - simplified version for overlay use
-            if let webURL = block.content, !webURL.isEmpty, let url = URL(string: webURL) {
-                VStack(spacing: 4 * scaleFactor) {
-                    let webHeight = CGFloat(block.webHeight ?? 400) * scaleFactor
-
-                    WebView(url: url) { _ in }
-                        .frame(height: webHeight)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
-                        )
-                        .padding(.vertical, 4 * scaleFactor)
-
-                    if let caption = block.caption {
-                        Text(caption)
-                            .font(.system(size: 11 * scaleFactor))
-                            .foregroundStyle(.secondary)
-                            .italic()
-                            .multilineTextAlignment(.center)
-                            .padding(.top, 2 * scaleFactor)
-                    }
-                }
-            }
-
-        case "portal-webview":
-            // Embedded self-service portal with authentication support (bearer tokens, custom headers)
-            // Use portalURL from block, fallback to global portalConfig, or use content field
-            let baseURL = block.portalURL ?? inspectState.config?.portalConfig?.portalURL ?? block.content ?? ""
-            let pathString = block.portalPath ?? inspectState.config?.portalConfig?.selfServicePath ?? ""
-            let fullURLString = pathString.isEmpty ? baseURL : baseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/")) + pathString
-
-            if !fullURLString.isEmpty, let url = URL(string: fullURLString) {
-                let portalHeight = CGFloat(block.portalHeight ?? 400) * scaleFactor
-                let userAgent = block.portalUserAgent ?? inspectState.config?.portalConfig?.userAgent
-
-                // Build custom headers using helper
-                let customHeaders = buildPortalHeaders(
-                    brandingKey: block.portalBrandingKey ?? inspectState.config?.portalConfig?.brandingKey,
-                    brandingHeaderName: block.portalBrandingHeader ?? inspectState.config?.portalConfig?.brandingHeaderName,
-                    blockHeaders: block.portalCustomHeaders
-                )
-
-                VStack(spacing: 4 * scaleFactor) {
-                    // Use full PortalWebView with authentication support
-                    EmbeddedPortalWebView(
-                        url: url,
-                        customHeaders: customHeaders,
-                        userAgent: userAgent,
-                        ephemeralSession: inspectState.config?.portalConfig?.ephemeralSession ?? false,
-                        errorDetectionPhrases: inspectState.config?.portalConfig?.errorDetectionPhrases ?? [],
-                        errorDetectionThreshold: inspectState.config?.portalConfig?.errorDetectionThreshold ?? 2,
-                        openExternalLinksInBrowser: inspectState.config?.portalConfig?.openExternalLinksInBrowser ?? true,
-                        height: portalHeight
-                    )
-                    .id("portal-\(url.absoluteString)")  // Force recreation on URL change
-                    .padding(.vertical, 4 * scaleFactor)
-
-                    if let caption = block.caption {
-                        Text(caption)
-                            .font(.system(size: 11 * scaleFactor))
-                            .foregroundStyle(.secondary)
-                            .italic()
-                            .multilineTextAlignment(.center)
-                            .padding(.top, 2 * scaleFactor)
-                    }
-                }
-            }
-
-        case "checkbox":
-            VStack(alignment: .leading, spacing: 6 * scaleFactor) {
-                HStack {
-                    if let fieldId = block.id {
-                        Toggle(isOn: Binding(
-                            get: {
-                                // Check state first, then fall back to default value from config
-                                if let checked = inspectState.guidanceFormInputs[itemId]?.checkboxes[fieldId] {
-                                    return checked
-                                }
-                                // Parse default from block.value ("true", "yes", "1" → true)
-                                if let value = block.value?.lowercased() {
-                                    return value == "true" || value == "yes" || value == "1"
-                                }
-                                return false
-                            },
-                            set: { newValue in
-                                // Ensure state exists before setting (fixes race condition with async init)
-                                if inspectState.guidanceFormInputs[itemId] == nil {
-                                    inspectState.initializeGuidanceFormState(for: itemId)
-                                }
-                                inspectState.guidanceFormInputs[itemId]?.checkboxes[fieldId] = newValue
-                                writeLog("GuidanceContentView: Checkbox '\(fieldId)' set to \(newValue)", logLevel: .info)
-                                // Live event so external monitors can react mid-session (symmetric with toggle/slider/textfield).
-                                inspectState.writeToInteractionLog("checkbox:\(itemId):\(fieldId):\(newValue)")
-                            }
-                        )) {
-                            Text(block.content ?? "")
-                                .font(.system(size: 13 * scaleFactor))
-                                .foregroundStyle(.primary)
-                        }
-                        .toggleStyle(.checkbox)
-                    } else {
-                        // Fallback for checkbox without id (display-only)
-                        Toggle(isOn: .constant(false)) {
-                            Text(block.content ?? "")
-                                .font(.system(size: 13 * scaleFactor))
-                                .foregroundStyle(.primary)
-                        }
-                        .toggleStyle(.checkbox)
-                        .disabled(true)
-                    }
-                }
-
-                if block.required == true {
-                    Text("* Required")
-                        .font(.system(size: 11 * scaleFactor))
-                        .foregroundStyle(palette.warning)
-                        .italic()
-                }
-            }
-            .padding(.vertical, 4 * scaleFactor)
-
-        case "dropdown":
-            VStack(alignment: .leading, spacing: 6 * scaleFactor) {
-                HStack {
-                    Text(block.content ?? "")
-                        .font(.system(size: 13 * scaleFactor))
-                        .foregroundStyle(.primary)
-
-                    Spacer()
-
-                    if let options = block.options, !options.isEmpty, let fieldId = block.id {
-                        Picker("", selection: Binding(
-                            get: {
-                                inspectState.guidanceFormInputs[itemId]?.dropdowns[fieldId] ?? block.value ?? options.first ?? ""
-                            },
-                            set: { newValue in
-                                // Ensure state exists before setting (fixes race condition with async init)
-                                if inspectState.guidanceFormInputs[itemId] == nil {
-                                    inspectState.initializeGuidanceFormState(for: itemId)
-                                }
-                                inspectState.guidanceFormInputs[itemId]?.dropdowns[fieldId] = newValue
-                                writeLog("GuidanceContentView: Dropdown '\(fieldId)' set to '\(newValue)'", logLevel: .info)
-                                // Live event so external monitors can react mid-session (symmetric with toggle/slider/textfield).
-                                inspectState.writeToInteractionLog("dropdown:\(itemId):\(fieldId):\(newValue)")
-                            }
-                        )) {
-                            ForEach(options, id: \.self) { option in
-                                Text(option).tag(option)
-                            }
-                        }
-                        .pickerStyle(.menu)
-                        .frame(maxWidth: 200 * scaleFactor)
-                    } else if let options = block.options, !options.isEmpty {
-                        // Fallback for dropdown without id (display-only)
-                        Menu {
-                            ForEach(options, id: \.self) { option in
-                                Button(option) { }
-                            }
-                        } label: {
-                            HStack {
-                                Text(block.value ?? "Select...")
-                                    .font(.system(size: 12 * scaleFactor))
-                                Image(systemName: "chevron.down")
-                                    .font(.system(size: 10 * scaleFactor))
-                            }
-                            .padding(.horizontal, 12 * scaleFactor)
-                            .padding(.vertical, 6 * scaleFactor)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(Color.secondary.opacity(0.1))
-                            )
-                        }
-                        .frame(maxWidth: 200 * scaleFactor)
-                        .disabled(true)
-                    }
-                }
-
-                if block.required == true {
-                    Text("* Required")
-                        .font(.system(size: 11 * scaleFactor))
-                        .foregroundStyle(palette.warning)
-                        .italic()
-                }
-            }
-            .padding(.vertical, 4 * scaleFactor)
-
-        case "radio":
-            VStack(alignment: .leading, spacing: 8 * scaleFactor) {
-                if let content = block.content, !content.isEmpty {
-                    Text(content)
-                        .font(.system(size: 13 * scaleFactor, weight: .medium))
-                        .foregroundStyle(.primary)
-                }
-
-                if let options = block.options, !options.isEmpty, let fieldId = block.id {
-                    let selectedValue = Binding(
-                        get: {
-                            inspectState.guidanceFormInputs[itemId]?.radios[fieldId] ?? block.value ?? ""
-                        },
-                        set: { newValue in
-                            // Ensure state exists before setting (fixes race condition with async init)
-                            if inspectState.guidanceFormInputs[itemId] == nil {
-                                inspectState.initializeGuidanceFormState(for: itemId)
-                            }
-                            inspectState.guidanceFormInputs[itemId]?.radios[fieldId] = newValue
-                            writeLog("GuidanceContentView: Radio '\(fieldId)' set to '\(newValue)'", logLevel: .info)
-                            // Live event so external monitors can react mid-session (symmetric with toggle/slider/textfield).
-                            inspectState.writeToInteractionLog("radio:\(itemId):\(fieldId):\(newValue)")
-                        }
-                    )
-
-                    VStack(alignment: .leading, spacing: 6 * scaleFactor) {
-                        ForEach(options, id: \.self) { option in
-                            HStack {
-                                Image(systemName: option == selectedValue.wrappedValue ? "circle.inset.filled" : "circle")
-                                    .font(.system(size: 14 * scaleFactor))
-                                    .foregroundStyle(option == selectedValue.wrappedValue ? (accentColor ?? .blue) : .secondary)
-
-                                Text(option)
-                                    .font(.system(size: 13 * scaleFactor))
-                                    .foregroundStyle(.primary)
-                            }
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                selectedValue.wrappedValue = option
-                            }
-                        }
-                    }
-                    .padding(.leading, 4 * scaleFactor)
-                } else if let options = block.options, !options.isEmpty {
-                    // Fallback for radio without id (display-only)
-                    VStack(alignment: .leading, spacing: 6 * scaleFactor) {
-                        ForEach(options, id: \.self) { option in
-                            HStack {
-                                Image(systemName: option == block.value ? "circle.inset.filled" : "circle")
-                                    .font(.system(size: 14 * scaleFactor))
-                                    .foregroundStyle(option == block.value ? (accentColor ?? .blue) : .secondary)
-
-                                Text(option)
-                                    .font(.system(size: 13 * scaleFactor))
-                                    .foregroundStyle(.primary)
-                            }
-                        }
-                    }
-                    .padding(.leading, 4 * scaleFactor)
-                }
-
-                if block.required == true {
-                    Text("* Required")
-                        .font(.system(size: 11 * scaleFactor))
-                        .foregroundStyle(palette.warning)
-                        .italic()
-                }
-            }
-            .padding(.vertical, 4 * scaleFactor)
-
-        case "toggle":
-            HStack {
-                if let content = block.content {
-                    Text(content)
-                        .font(.system(size: 13 * scaleFactor))
-                        .foregroundStyle(.primary)
-                }
-
-                if let helpText = block.helpText, !helpText.isEmpty {
-                    InfoPopoverButton(helpText: helpText, scaleFactor: scaleFactor)
-                }
-
-                Spacer()
-
-                if let fieldId = block.id {
-                    let isOn = Binding(
-                        get: {
-                            inspectState.guidanceFormInputs[itemId]?.toggles[fieldId] ?? (block.value == "true")
-                        },
-                        set: { newValue in
-                            if inspectState.guidanceFormInputs[itemId] == nil {
-                                inspectState.initializeGuidanceFormState(for: itemId)
-                            }
-                            inspectState.guidanceFormInputs[itemId]?.toggles[fieldId] = newValue
-                            writeLog("GuidanceContentView: Toggle '\(fieldId)' set to \(newValue)", logLevel: .info)
-
-                            // Write to interaction log for script monitoring
-                            inspectState.writeToInteractionLog("toggle:\(itemId):\(fieldId):\(newValue)")
-                        }
-                    )
-
-                    Toggle("", isOn: isOn)
-                        .toggleStyle(.switch)
-                        .labelsHidden()
-                }
-            }
-            .padding(.vertical, 4 * scaleFactor)
-
-        case "slider":
-            VStack(alignment: .leading, spacing: 8 * scaleFactor) {
-                HStack {
-                    if let label = block.label {
-                        Text(label)
-                            .font(.system(size: 13 * scaleFactor, weight: .medium))
-                            .foregroundStyle(.primary)
-                    }
-
-                    if let helpText = block.helpText, !helpText.isEmpty {
-                        InfoPopoverButton(helpText: helpText, scaleFactor: scaleFactor)
-                    }
-
-                    Spacer()
-
-                    if let fieldId = block.id {
-                        let currentValue = inspectState.guidanceFormInputs[itemId]?.sliders[fieldId] ??
-                                          Double(block.value ?? "0") ?? 0.0
-
-                        // Show label from discreteSteps if available, otherwise show numeric value
-                        if let steps = block.discreteSteps,
-                           let matchingStep = steps.first(where: { $0.value == currentValue }) {
-                            Text(matchingStep.label)
-                                .font(.system(size: 13 * scaleFactor, weight: .medium))
-                                .foregroundStyle(.secondary)
-                        } else {
-                            HStack(spacing: 4 * scaleFactor) {
-                                Text("\(Int(currentValue))")
-                                    .font(.system(size: 13 * scaleFactor, weight: .medium))
-                                    .foregroundStyle(.secondary)
-
-                                if let unit = block.unit {
-                                    Text(unit)
-                                        .font(.system(size: 12 * scaleFactor))
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if let fieldId = block.id {
-                    // Check if discrete steps are defined
-                    if let steps = block.discreteSteps, steps.count >= 2 {
-                        // Discrete steps mode - slider moves between step indices
-                        let stepCount = steps.count
-                        let sortedSteps = steps.sorted { $0.value < $1.value }
-
-                        let discreteBinding = Binding(
-                            get: {
-                                let value = inspectState.guidanceFormInputs[itemId]?.sliders[fieldId] ??
-                                           Double(block.value ?? "\(sortedSteps[0].value)") ?? sortedSteps[0].value
-                                return Double(sortedSteps.firstIndex { $0.value == value } ?? 0)
-                            },
-                            set: { newIndex in
-                                let clampedIndex = Int(max(0, min(newIndex, Double(stepCount - 1))))
-                                let newValue = sortedSteps[clampedIndex].value
-
-                                if inspectState.guidanceFormInputs[itemId] == nil {
-                                    inspectState.initializeGuidanceFormState(for: itemId)
-                                }
-                                inspectState.guidanceFormInputs[itemId]?.sliders[fieldId] = newValue
-                                writeLog("GuidanceContentView: Slider '\(fieldId)' set to \(newValue) (\(sortedSteps[clampedIndex].label))", logLevel: .info)
-
-                                // Write to interaction log for script monitoring
-                                inspectState.writeToInteractionLog("slider:\(itemId):\(fieldId):\(newValue)")
-                            }
-                        )
-
-                        Slider(value: discreteBinding, in: 0...Double(stepCount - 1), step: 1)
-                    } else {
-                        // Standard continuous slider mode
-                        let minValue = block.min ?? 0.0
-                        let maxValue = block.max ?? 100.0
-                        let stepValue = block.step ?? 1.0
-
-                        let sliderBinding = Binding(
-                            get: {
-                                inspectState.guidanceFormInputs[itemId]?.sliders[fieldId] ??
-                                Double(block.value ?? "\(minValue)") ?? minValue
-                            },
-                            set: { newValue in
-                                if inspectState.guidanceFormInputs[itemId] == nil {
-                                    inspectState.initializeGuidanceFormState(for: itemId)
-                                }
-                                inspectState.guidanceFormInputs[itemId]?.sliders[fieldId] = newValue
-                                writeLog("GuidanceContentView: Slider '\(fieldId)' set to \(newValue)", logLevel: .info)
-
-                                // Write to interaction log for script monitoring
-                                inspectState.writeToInteractionLog("slider:\(itemId):\(fieldId):\(newValue)")
-                            }
-                        )
-
-                        Slider(value: sliderBinding, in: minValue...maxValue, step: stepValue)
-                    }
-                }
-            }
-            .padding(.vertical, 4 * scaleFactor)
-
-        case "textfield":
-            VStack(alignment: .leading, spacing: 6 * scaleFactor) {
-                HStack {
-                    if let content = block.content, !content.isEmpty {
-                        Text(content)
-                            .font(.system(size: 13 * scaleFactor))
-                            .foregroundStyle(.primary)
-                    }
-
-                    if let helpText = block.helpText, !helpText.isEmpty {
-                        InfoPopoverButton(helpText: helpText, scaleFactor: scaleFactor)
-                    }
-
-                    Spacer()
-
-                    if let fieldId = block.id {
-                        let textBinding = Binding(
-                            get: {
-                                // 1. Check user input first
-                                if let userValue = inspectState.guidanceFormInputs[itemId]?.textfields[fieldId] {
-                                    return userValue
-                                }
-                                // 2. Resolve inherit source
-                                if let inheritSpec = block.inherit {
-                                    if let inherited = inspectState.resolveInheritValue(inheritSpec, basePath: inspectState.uiConfiguration.iconBasePath) {
-                                        return inherited
-                                    }
-                                }
-                                // 3. Fall back to default value
-                                return block.value ?? ""
-                            },
-                            set: { newValue in
-                                if inspectState.guidanceFormInputs[itemId] == nil {
-                                    inspectState.initializeGuidanceFormState(for: itemId)
-                                }
-                                inspectState.guidanceFormInputs[itemId]?.textfields[fieldId] = newValue
-                                writeLog("GuidanceContentView: Textfield '\(fieldId)' updated", logLevel: .info)
-                                inspectState.writeToInteractionLog("textfield:\(itemId):\(fieldId):\(newValue)")
-                            }
-                        )
-
-                        Group {
-                            if block.secure == true {
-                                SecureField(block.placeholder ?? "", text: textBinding)
-                            } else {
-                                TextField(block.placeholder ?? "", text: textBinding)
-                            }
-                        }
-                        .textFieldStyle(.roundedBorder)
-                        .frame(maxWidth: 200 * scaleFactor)
-                    }
-                }
-
-                if block.required == true {
-                    Text("* Required")
-                        .font(.system(size: 11 * scaleFactor))
-                        .foregroundStyle(palette.warning)
-                        .italic()
-                }
-            }
-            .padding(.vertical, 4 * scaleFactor)
-
-        case "button":
-            if let buttonLabel = block.content {
-                applyButtonStyle(
-                    Button(action: {
-                        handleButtonAction(block: block, itemId: itemId, inspectState: inspectState)
-                    }) {
-                        if let icon = block.icon {
-                            Label(buttonLabel, systemImage: icon)
-                        } else {
-                            Text(buttonLabel)
-                        }
-                    }
-                    .controlSize(.regular),
-                    styleString: block.buttonStyle
-                )
-                .tint(accentColor)
-            }
+            GuidanceLabelValueBlock(
+                block: block,
+                resolvedContent: resolveTemplates(block.content ?? ""),
+                scaleFactor: scaleFactor
+            )
 
         case "status-badge":
-            if let label = block.label, let state = block.state {
+            // `content` is accepted as the label when `label` is absent.
+            if let label = block.label ?? block.content, let state = block.state {
                 let autoColor = block.autoColor ?? true
                 let customColor: Color? = {
                     if let colorHex = block.color {
@@ -982,98 +250,44 @@ struct GuidanceContentView: View {
                     icon: block.icon,
                     autoColor: autoColor,
                     customColor: customColor,
-                    scaleFactor: scaleFactor
+                    scaleFactor: scaleFactor,
+                    iconBasePath: iconBasePath
                 )
                 .id("status-badge-\(label)-\(state)-\(block.actual ?? "")")
-            } else if appvars.debugMode {
-                Text("status-badge requires 'label' and 'state' properties")
-                    .font(.system(size: 11 * scaleFactor))
-                    .foregroundStyle(.red)
-                    .italic()
+            } else {
+                GuidanceDebugHint(message: "status-badge requires 'label' and 'state' properties", scaleFactor: scaleFactor)
             }
 
         case "comparison-table":
-            // swiftlint:disable:next redundant_nil_coalescing
-            if let label = block.label ?? block.content.map({ $0.isEmpty ? nil : $0 }) ?? nil,  // Flatten Optional<String?> to String?
-               let expected = block.expected,
-               let actual = block.actual {
-                let autoColor = block.autoColor ?? true
-                let customColor: Color? = {
-                    if let colorHex = block.color {
-                        return Color(hex: colorHex)
-                    }
-                    return nil
-                }()
-
-                ComparisonTableView(
-                    label: label,
-                    expected: expected,
-                    actual: actual,
-                    expectedLabel: block.expectedLabel ?? "Expected",
-                    actualLabel: block.actualLabel ?? "Actual",
-                    expectedIcon: block.expectedIcon,
-                    actualIcon: block.actualIcon,
-                    comparisonStyle: block.comparisonStyle,
-                    highlightCells: block.highlightCells ?? false,
-                    autoColor: autoColor,
-                    customColor: customColor,
-                    expectedColor: block.expectedColor.flatMap { Color(hex: $0) },
-                    actualColor: block.actualColor.flatMap { Color(hex: $0) },
-                    scaleFactor: scaleFactor,
-                    stateOverride: block.state
+            // `checks` draws one table with its headers once.
+            if let checks = block.checks, !checks.isEmpty {
+                ComparisonChecksTable(
+                    label: block.label,
+                    requiredLabel: block.expectedLabel,
+                    foundLabel: block.actualLabel,
+                    checks: checks,
+                    accentColor: accentColor ?? palette.accent,
+                    scaleFactor: scaleFactor
                 )
-                .id("comparison-\(label)-\(actual)-\(block.state ?? "")-\(block.comparisonStyle ?? "stacked")")
-            } else if appvars.debugMode {
-                Text("comparison-table requires 'expected' and 'actual' properties")
-                    .font(.system(size: 11 * scaleFactor))
-                    .foregroundStyle(.red)
-                    .italic()
+            // Scalar `expected`/`actual` are folded into `checks[]` by `canonicalizeStep`, so only the plural arrives.
+            } else {
+                GuidanceDebugHint(message: "comparison-table requires 'checks' (or 'expected'/'actual', which fold into it)", scaleFactor: scaleFactor)
             }
 
         case "phase-tracker":
             if let currentPhase = block.currentPhase,
                let phases = block.phases, !phases.isEmpty {
-                let style = block.style ?? "stepper"
-
                 PhaseTrackerView(
                     currentPhase: currentPhase,
-                    phases: phases,
-                    style: style,
-                    scaleFactor: scaleFactor
+                    phases: Array(phases),
+                    style: block.style ?? "stepper",
+                    scaleFactor: scaleFactor,
+                    caption: block.label,
+                    progress: block.progress
                 )
                 .id("phase-tracker-\(currentPhase)")
-            } else if appvars.debugMode {
-                Text("phase-tracker requires 'currentPhase' and 'phases' properties")
-                    .font(.system(size: 11 * scaleFactor))
-                    .foregroundStyle(.red)
-                    .italic()
-            }
-
-        case "progress-bar":
-            let progressStyle = block.style ?? "indeterminate"
-            let progressValue = block.progress ?? 0.0
-            let progressLabel = block.label ?? block.content
-            // Auto-detect determinate mode: if progress value is set (non-zero), use determinate style
-            let isDeterminate = progressStyle == "determinate" || (block.progress != nil && progressValue > 0)
-
-            VStack(alignment: .leading, spacing: 6 * scaleFactor) {
-                if let label = progressLabel, !label.isEmpty {
-                    Text(label)
-                        .font(.system(size: 12 * scaleFactor, weight: .medium))
-                        .foregroundStyle(.secondary)
-                }
-
-                if isDeterminate {
-                    // Determinate progress with value
-                    ProgressView(value: progressValue)
-                        .progressViewStyle(.linear)
-                        .scaleEffect(y: 1.5 * scaleFactor, anchor: .center)
-                        .frame(height: 12 * scaleFactor)
-                } else {
-                    // Indeterminate animated progress (brownian/spinner)
-                    IndeterminateProgressView()
-                        .frame(height: 8 * scaleFactor)
-                }
+            } else {
+                GuidanceDebugHint(message: "phase-tracker requires 'currentPhase' and 'phases' properties", scaleFactor: scaleFactor)
             }
 
         case "image-carousel":
@@ -1085,6 +299,8 @@ struct GuidanceContentView: View {
                     imageWidth: CGFloat(block.imageWidth ?? 400),
                     imageHeight: CGFloat(block.imageHeight ?? 300),
                     imageShape: block.imageShape ?? "rectangle",
+                    // "fill" is the view's default, kept for carousels that author no `imageFit`.
+                    imageFit: block.imageFit ?? "fill",
                     showDots: block.showDots ?? true,
                     showArrows: block.showArrows ?? true,
                     captions: block.captions,
@@ -1094,51 +310,8 @@ struct GuidanceContentView: View {
                     currentIndex: block.currentIndex ?? 0
                 )
                 .id("carousel-\(images.joined(separator: ","))-\(block.currentIndex ?? 0)")
-            } else if appvars.debugMode {
-                Text("image-carousel requires 'images' array with at least one image path")
-                    .font(.system(size: 11 * scaleFactor))
-                    .foregroundStyle(.red)
-                    .italic()
-            }
-
-        case "compliance-card":
-            if let categoryName = block.categoryName,
-               let passed = block.passed,
-               let total = block.total {
-                ComplianceCardView(
-                    categoryName: categoryName,
-                    passed: passed,
-                    total: total,
-                    icon: block.cardIcon,
-                    checkDetails: block.checkDetails,
-                    scaleFactor: scaleFactor,
-                    colorThresholds: inspectState.colorThresholds
-                )
-            } else if appvars.debugMode {
-                Text("compliance-card requires 'categoryName', 'passed', and 'total' fields")
-                    .font(.system(size: 11 * scaleFactor))
-                    .foregroundStyle(.red)
-                    .italic()
-            }
-
-        case "compliance-header":
-            if let passed = block.passed,
-               let total = block.total {
-                let failed = total - passed
-                ComplianceDashboardHeader(
-                    title: block.label ?? "Compliance Dashboard",
-                    subtitle: block.content,
-                    icon: block.icon,
-                    passed: passed,
-                    failed: failed,
-                    scaleFactor: scaleFactor,
-                    colorThresholds: inspectState.colorThresholds
-                )
-            } else if appvars.debugMode {
-                Text("compliance-header requires 'passed' and 'total' fields")
-                    .font(.system(size: 11 * scaleFactor))
-                    .foregroundStyle(.red)
-                    .italic()
+            } else {
+                GuidanceDebugHint(message: "image-carousel requires 'images' array with at least one image path", scaleFactor: scaleFactor)
             }
 
         case "feature-table":
@@ -1148,161 +321,52 @@ struct GuidanceContentView: View {
                     columns: columns,
                     rows: rows,
                     style: block.style,
-                    scaleFactor: scaleFactor
+                    scaleFactor: scaleFactor,
+                    label: block.label
                 )
-            } else if appvars.debugMode {
-                Text("feature-table requires non-empty 'columns' and 'rows' arrays")
-                    .font(.system(size: 11 * scaleFactor))
-                    .foregroundStyle(.red)
-                    .italic()
+            } else {
+                GuidanceDebugHint(message: "feature-table requires non-empty 'columns' and 'rows' arrays", scaleFactor: scaleFactor)
             }
 
-        case "wallpaper-picker":
-            if let categories = block.wallpaperCategories, !categories.isEmpty {
-                let layoutMode: WallpaperPickerView.WallpaperLayout = {
-                    switch block.wallpaperLayout?.lowercased() {
-                    case "grid": return .grid
-                    case "row": return .row
-                    default: return .categories
-                    }
-                }()
-                WallpaperPickerView(
-                    categories: categories,
-                    columns: block.wallpaperColumns ?? 3,
-                    imageFit: block.wallpaperImageFit ?? "fill",
-                    thumbnailHeight: block.wallpaperThumbnailHeight ?? 100,
-                    selectionKey: block.wallpaperSelectionKey ?? "wallpaper",
-                    showPath: block.wallpaperShowPath ?? false,
-                    confirmButtonText: block.wallpaperConfirmButton,
-                    multiSelectCount: block.wallpaperMultiSelect ?? 0,
+        case "media-carousel":
+            // Mixed-media carousel (`IntroMediaCarousel`): images, GIFs, video and YouTube/Vimeo embeds.
+            // `image-carousel` remains the images-only block.
+            if let mediaItems = block.mediaItems, !mediaItems.isEmpty {
+                IntroMediaCarousel(
+                    items: mediaItems,
+                    height: CGFloat(block.mediaHeight ?? 400) * scaleFactor,
+                    autoplay: block.mediaAutoplay ?? true,
+                    showArrows: block.mediaShowArrows ?? true,
+                    showDots: block.mediaShowDots ?? true,
+                    accentColor: accentColor ?? palette.accent,
+                    fit: MediaFit(block.mediaFit)
+                )
+            } else {
+                GuidanceDebugHint(message: "media-carousel requires non-empty 'mediaItems' array", scaleFactor: scaleFactor)
+            }
+
+        case "dock-picker":
+            // Guided-setup dock chooser / builder.
+            if (block.dockFlavors?.isEmpty == false) || (block.dockItems?.isEmpty == false) {
+                DockPickerView(
+                    mode: block.dockMode ?? "flavors",
+                    flavors: block.dockFlavors ?? [],
+                    items: block.dockItems ?? [],
+                    selectionKey: GuidanceSelectionKeys.resolvedKey(for: block) ?? "dock",
+                    confirmButtonText: block.dockConfirmButton,
+                    showUnavailable: block.dockShowUnavailable ?? false,
+                    // Pass everything the block model carries, so `dockDecline` actually renders.
+                    decline: block.dockDecline,
+                    applyMode: block.dockApplyMode ?? "additive",
                     scaleFactor: scaleFactor,
-                    layout: layoutMode,
+                    // The colour this payload was handed.
+                    tint: accentColor,
+                    layout: block.dockLayout,
                     inspectState: inspectState,
                     itemId: itemId
                 )
-            } else if appvars.debugMode {
-                Text("wallpaper-picker requires non-empty 'wallpaperCategories' array")
-                    .font(.system(size: 11 * scaleFactor))
-                    .foregroundStyle(.red)
-                    .italic()
-            }
-
-        case "install-list":
-            // Traditional installation progress list with app icons and status indicators
-            // Dynamically resolves status from inspectState when installItem.itemId links to items[]
-            if let installItems = block.installItems, !installItems.isEmpty {
-                VStack(alignment: .leading, spacing: 8 * scaleFactor) {
-                    ForEach(installItems.indices, id: \.self) { index in
-                        let item = installItems[index]
-                        let resolvedStatus: String = {
-                            if let linkedId = item.itemId {
-                                if inspectState.completedItems.contains(linkedId) {
-                                    return "success"
-                                } else if inspectState.downloadingItems.contains(linkedId) {
-                                    return "progress"
-                                }
-                            }
-                            return item.status ?? "pending"
-                        }()
-                        InstallListRowView(
-                            title: item.title,
-                            subtitle: item.subtitle,
-                            icon: item.icon,
-                            status: resolvedStatus,
-                            progress: item.progress ?? 0,
-                            scaleFactor: scaleFactor,
-                            iconBasePath: iconBasePath
-                        )
-                    }
-                }
-            } else if appvars.debugMode {
-                Text("install-list requires non-empty 'installItems' array")
-                    .font(.system(size: 11 * scaleFactor))
-                    .foregroundStyle(.red)
-                    .italic()
-            }
-
-        case "compliance-summary":
-            // Plist-driven hero with overall compliance banner + 3 stat cards.
-            // Requires a ComplianceAggregatorService injected via environment.
-            // Available in both Preset 5 and Preset 6.
-            if let aggregator = complianceAggregator {
-                ComplianceSummaryBlock(
-                    block: block,
-                    totalChecks: aggregator.totalChecks,
-                    totalPassed: aggregator.totalPassed,
-                    healthyLabel: aggregator.healthyLabel,
-                    attentionLabel: aggregator.attentionLabel,
-                    scaleFactor: scaleFactor,
-                    colorThresholds: inspectState.colorThresholds
-                )
-                .frame(maxWidth: 720)
-                .padding(.horizontal, 16 * scaleFactor)
-                .id("compliance-summary-\(itemId)-\(aggregator.totalPassed)-\(aggregator.totalChecks)")
-            } else if appvars.debugMode {
-                Text("compliance-summary requires plistSources to be configured")
-                    .font(.system(size: 11 * scaleFactor))
-                    .foregroundStyle(.red)
-                    .italic()
-            }
-
-        case "findings-list":
-            // Plist-driven category-grouped list with "View all" disclosure.
-            // Default: attention-only (audience-friendly); content="all" to expand by default.
-            if let aggregator = complianceAggregator {
-                FindingsListBlock(
-                    block: block,
-                    categories: aggregator.categories,
-                    healthyLabel: aggregator.healthyLabel,
-                    attentionLabel: aggregator.attentionLabel,
-                    scaleFactor: scaleFactor
-                )
-                .frame(maxWidth: 720)
-                .padding(.horizontal, 16 * scaleFactor)
-                .id("findings-list-\(itemId)-\(aggregator.totalPassed)-\(aggregator.totalChecks)")
-            } else if appvars.debugMode {
-                Text("findings-list requires plistSources to be configured")
-                    .font(.system(size: 11 * scaleFactor))
-                    .foregroundStyle(.red)
-                    .italic()
-            }
-
-        case "bento-grid":
-            // Bento grid layout with variable cell sizes (1x1, 2x1, 1x2, 2x2)
-            if let cells = block.bentoCells, !cells.isEmpty {
-                let columns = block.bentoColumns ?? 4
-                let rowHeight = block.bentoRowHeight ?? 140
-                let gap = block.bentoGap ?? 12
-
-                let accentColor: Color = {
-                    if let hex = inspectState.config?.highlightColor {
-                        return Color(hex: hex)
-                    }
-                    return .accentColor
-                }()
-
-                BentoGridView(
-                    cells: cells,
-                    columns: columns,
-                    rowHeight: CGFloat(rowHeight),
-                    gap: CGFloat(gap),
-                    scaleFactor: scaleFactor,
-                    accentColor: accentColor,
-                    iconBasePath: iconBasePath,
-                    tintColor: block.bentoTintColor.flatMap { Color(hex: $0) },
-                    inspectState: inspectState
-                )
-                // Claim the full horizontal space of whatever container this block lives in
-                // (Preset 5 full-width step, or Preset 6's narrower guidance pane). Without
-                // this, GeometryReader inside BentoGridView gets a small intrinsic width and
-                // packs cells into the top-left, leaving the rest of the pane empty.
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 16 * scaleFactor)
-            } else if appvars.debugMode {
-                Text("bento-grid requires non-empty 'bentoCells' array")
-                    .font(.system(size: 11 * scaleFactor))
-                    .foregroundStyle(.red)
-                    .italic()
+            } else {
+                GuidanceDebugHint(message: "dock-picker requires non-empty 'dockFlavors' or 'dockItems'", scaleFactor: scaleFactor)
             }
 
         default:
@@ -1313,59 +377,10 @@ struct GuidanceContentView: View {
         }
     }
 
-    // MARK: - Image Loading Helper
+    // MARK: - Helpers
 
-    /// Load instructional image from absolute or relative path using ImageResolver
-    private func loadInstructionalImage(path: String) -> NSImage? {
-        writeLog("GuidanceContentView: Loading image from path='\(path)' with iconBasePath='\(iconBasePath ?? "nil")'", logLevel: .info)
-
-        // Use ImageResolver for consistent path resolution across the app
-        let resolver = ImageResolver.shared
-
-        // Resolve the path using basePath (if provided) or standard search locations
-        if let resolvedPath = resolver.resolveImagePath(path, basePath: iconBasePath, fallbackIcon: nil) {
-            writeLog("GuidanceContentView: ImageResolver returned resolvedPath='\(resolvedPath)'", logLevel: .info)
-
-            // Only try to load as a file if it looks like a file path (starts with /)
-            // This excludes SF Symbols and other special formats that ImageResolver might return
-            if resolvedPath.hasPrefix("/") && FileManager.default.fileExists(atPath: resolvedPath) {
-                writeLog("GuidanceContentView: Loading image from resolved file path: \(resolvedPath)", logLevel: .info)
-                return NSImage(contentsOfFile: resolvedPath)
-            } else if !resolvedPath.hasPrefix("/") {
-                // Not a file path - ImageResolver returned it as-is (like SF Symbol or URL)
-                // These aren't supported for instructional images which must be actual image files
-                writeLog("GuidanceContentView: Resolved path is not a file path (SF Symbol or URL?): \(resolvedPath)", logLevel: .info)
-            } else {
-                writeLog("GuidanceContentView: Resolved file path does not exist: \(resolvedPath)", logLevel: .info)
-            }
-        } else {
-            writeLog("GuidanceContentView: ImageResolver returned nil for path: \(path)", logLevel: .info)
-        }
-
-        // If ImageResolver doesn't find it, try absolute path as last resort
-        if path.hasPrefix("/") {
-            if FileManager.default.fileExists(atPath: path) {
-                writeLog("GuidanceContentView: Loading image from original absolute path: \(path)", logLevel: .info)
-                return NSImage(contentsOfFile: path)
-            } else {
-                writeLog("GuidanceContentView: Original absolute path does not exist: \(path)", logLevel: .info)
-            }
-        }
-
-        writeLog("GuidanceContentView: Failed to load image from path: \(path)", logLevel: .info)
-        return nil
-    }
-
-    /// Get the appropriate clip shape for image display
-    private func getImageClipShape(for shape: String) -> AnyShape {
-        switch shape.lowercased() {
-        case "square":
-            return AnyShape(RoundedRectangle(cornerRadius: 8))
-        case "circle":
-            return AnyShape(Circle())
-        default: // "rectangle"
-            return AnyShape(RoundedRectangle(cornerRadius: 12))
-        }
+    private func resolveTemplates(_ content: String) -> String {
+        GuidanceTemplateResolver.resolve(content, formInputs: inspectState.guidanceFormInputs)
     }
 
     private func getTextColor(for block: InspectConfig.GuidanceContent) -> Color {
@@ -1375,356 +390,79 @@ struct GuidanceContentView: View {
         return .primary
     }
 
-    // MARK: - Template Variable Resolution
+    /// Resolves a `compliance-card`: the category (`content` or `categoryName`) takes live counts from
+    /// `plistSources` when it matches, else the authored values. Kept out of the ViewBuilder.
+    private func complianceCardData(for block: InspectConfig.GuidanceContent)
+        -> (name: String, passed: Int, total: Int, details: String?)? {
+        guard let name = block.categoryName ?? block.content, !name.isEmpty else { return nil }
 
-    /// Resolve template variables in content string (e.g., {{fieldId}} or {{stepId.fieldId}})
-    /// Looks up values from inspectState.guidanceFormInputs and replaces placeholders with actual values
-    private func resolveTemplateVariables(_ content: String, inspectState: InspectState) -> String {
-        var resolved = content
-
-        // Find all {{variable}} patterns
-        let pattern = "\\{\\{([^}]+)\\}\\}"
-        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
-            return content
+        if let live = complianceAggregator?.category(named: name) {
+            // maxItems 500, so a real baseline is never silently truncated.
+            let details = complianceAggregator?.checkDetails(for: name, maxItems: 500)
+            return (name, live.passed, live.total, details ?? block.checkDetails)
         }
 
-        let matches = regex.matches(in: content, options: [], range: NSRange(content.startIndex..., in: content))
-
-        // Process matches in reverse order to preserve string indices
-        for match in matches.reversed() {
-            guard let matchRange = Range(match.range, in: content),
-                  let variableRange = Range(match.range(at: 1), in: content) else {
-                continue
-            }
-
-            let variable = String(content[variableRange])
-            let value = resolveVariable(variable, from: inspectState)
-
-            resolved.replaceSubrange(matchRange, with: value)
-        }
-
-        return resolved
+        guard let passed = block.passed, let total = block.total else { return nil }
+        return (name, passed, total, block.checkDetails)
     }
 
-    /// Resolve a single variable (fieldId or stepId.fieldId) to its actual value
-    /// Also supports system variables like serialNumber, computerModel, userName, etc.
-    private func resolveVariable(_ variable: String, from inspectState: InspectState) -> String {
-        let trimmed = variable.trimmingCharacters(in: .whitespaces)
-
-        // Check for system variables first
-        if let systemValue = resolveSystemVariable(trimmed) {
-            return systemValue
+    /// Same shape for `compliance-header`: authored counts, or the aggregator's totals when
+    /// `plistSources` is configured and the config named none.
+    private func complianceHeaderData(for block: InspectConfig.GuidanceContent)
+        -> (passed: Int, total: Int)? {
+        if let passed = block.passed, let total = block.total {
+            return (passed, total)
         }
-
-        // Check if it's a stepId.fieldId pattern
-        if trimmed.contains(".") {
-            let components = trimmed.split(separator: ".", maxSplits: 1).map(String.init)
-            guard components.count == 2 else {
-                return "(invalid variable format)"
-            }
-
-            let stepId = components[0]
-            let fieldId = components[1]
-
-            // Look up value in specific step
-            if let formState = inspectState.guidanceFormInputs[stepId] {
-                // Check dropdowns first (most common)
-                if let value = formState.dropdowns[fieldId], !value.isEmpty {
-                    return value
-                }
-                // Then radios
-                if let value = formState.radios[fieldId], !value.isEmpty {
-                    return value
-                }
-                // Then checkboxes (return Yes/No)
-                if let checked = formState.checkboxes[fieldId] {
-                    return checked ? "Yes" : "No"
-                }
-            }
-
-            return "(not set)"
-        } else {
-            // Simple fieldId - search all steps
-            let fieldId = trimmed
-
-            // Search through all form states
-            for (_, formState) in inspectState.guidanceFormInputs {
-                // Check dropdowns
-                if let value = formState.dropdowns[fieldId], !value.isEmpty {
-                    return value
-                }
-                // Check radios
-                if let value = formState.radios[fieldId], !value.isEmpty {
-                    return value
-                }
-                // Check checkboxes
-                if let checked = formState.checkboxes[fieldId] {
-                    return checked ? "Yes" : "No"
-                }
-            }
-
-            return "(not set)"
+        if let aggregator = complianceAggregator, !aggregator.categories.isEmpty {
+            return (aggregator.totalPassed, aggregator.totalChecks)
         }
-    }
-
-    /// Resolve system template variables like serialNumber, computerModel, userName, etc.
-    /// Returns nil if the variable name is not a recognized system variable.
-    private func resolveSystemVariable(_ variable: String) -> String? {
-        let systemInfo = getEnvironmentVars()
-
-        switch variable {
-        case "serialNumber":
-            return systemInfo["serialnumber"] ?? "Unknown"
-        case "computerModel":
-            return systemInfo["computermodel"] ?? "Unknown"
-        case "computerName":
-            return systemInfo["computername"] ?? "Unknown"
-        case "userName":
-            return systemInfo["username"] ?? "Unknown"
-        case "userFullName":
-            return systemInfo["userfullname"] ?? "Unknown"
-        case "osVersion":
-            let v = ProcessInfo.processInfo.operatingSystemVersion
-            return "\(v.majorVersion).\(v.minorVersion).\(v.patchVersion)"
-        case "osName":
-            return systemInfo["osname"] ?? "macOS"
-        default:
-            return nil  // Not a system variable
-        }
+        return nil
     }
 }
 
+// MARK: - Debug Hint
 
-// MARK: - Guidance Helper Functions
-
-/// Get default button text for step type
-func getDefaultButtonText(for stepType: String?) -> String {
-    guard let stepType = stepType else { return "Continue" }
-
-    switch stepType {
-    case "confirmation":
-        return "Confirm"
-    case "processing":
-        return "Start"
-    case "completion":
-        return "Continue"
-    default:
-        return "Continue"
-    }
-}
-
-/// Check if step has guidance content
-func hasGuidanceContent(_ item: InspectConfig.ItemConfig) -> Bool {
-    return item.guidanceContent?.isEmpty == false
-}
-
-// MARK: - Install List Row View
-
-/// Individual row in an install list showing app icon, title, and status indicator
-struct InstallListRowView: View {
-    let title: String
-    let subtitle: String?
-    let icon: String?
-    let status: String
-    let progress: Double
+/// Red italic config-error hint, debug mode only, so each switch arm stays one expression.
+struct GuidanceDebugHint: View {
+    let message: String
     let scaleFactor: CGFloat
-    let iconBasePath: String?
-    @Environment(\.palette) private var palette
-
-    private var statusColor: Color {
-        switch status {
-        case "success": return palette.success
-        case "fail": return palette.error
-        case "wait", "pending": return .gray
-        default: return .gray
-        }
-    }
 
     var body: some View {
-        HStack(spacing: 12 * scaleFactor) {
-            // App icon
-            iconView
-                .frame(width: 40 * scaleFactor, height: 40 * scaleFactor)
-
-            // Title and subtitle
-            VStack(alignment: .leading, spacing: 2 * scaleFactor) {
-                Text(title)
-                    .font(.system(size: 14 * scaleFactor, weight: .medium))
-                    .foregroundStyle(.primary)
-                    .lineLimit(1)
-
-                if let subtitle = subtitle, !subtitle.isEmpty {
-                    Text(subtitle)
-                        .font(.system(size: 12 * scaleFactor))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
-            }
-
-            Spacer()
-
-            // Status indicator
-            statusView
+        if appvars.debugMode {
+            Text(message)
+                .font(.system(size: 11 * scaleFactor))
+                .foregroundStyle(.red)
+                .italic()
         }
-        .padding(.vertical, 6 * scaleFactor)
-        .padding(.horizontal, 12 * scaleFactor)
-        .background(
-            RoundedRectangle(cornerRadius: 8 * scaleFactor)
-                .fill(Color.gray.opacity(0.08))
-        )
-    }
-
-    @ViewBuilder
-    private var iconView: some View {
-        if let iconPath = icon {
-            if iconPath.hasPrefix("/") || iconPath.contains(".") {
-                // File path - load image
-                if let nsImage = loadIcon(path: iconPath) {
-                    Image(nsImage: nsImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .clipShape(RoundedRectangle(cornerRadius: 8 * scaleFactor))
-                } else {
-                    defaultIcon
-                }
-            } else {
-                // SF Symbol
-                Image(systemName: iconPath)
-                    .font(.system(size: 24 * scaleFactor))
-                    .foregroundStyle(.secondary)
-            }
-        } else {
-            defaultIcon
-        }
-    }
-
-    private var defaultIcon: some View {
-        RoundedRectangle(cornerRadius: 8 * scaleFactor)
-            .fill(Color.gray.opacity(0.2))
-            .overlay(
-                Image(systemName: "app.fill")
-                    .font(.system(size: 20 * scaleFactor))
-                    .foregroundStyle(.secondary)
-            )
-    }
-
-    @ViewBuilder
-    private var statusView: some View {
-        switch status {
-        case "success":
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 22 * scaleFactor))
-                .foregroundStyle(palette.success)
-
-        case "fail":
-            Image(systemName: "xmark.circle.fill")
-                .font(.system(size: 22 * scaleFactor))
-                .foregroundStyle(palette.error)
-
-        case "wait":
-            ProgressView()
-                .scaleEffect(0.8 * scaleFactor)
-
-        case "progress":
-            ProgressView(value: progress, total: 100)
-                .progressViewStyle(CircularProgressViewStyle(size: 22 * scaleFactor))
-                .frame(width: 22 * scaleFactor, height: 22 * scaleFactor)
-
-        case "pending":
-            Image(systemName: "circle")
-                .font(.system(size: 20 * scaleFactor))
-                .foregroundStyle(.gray.opacity(0.5))
-
-        default:
-            Image(systemName: "circle")
-                .font(.system(size: 20 * scaleFactor))
-                .foregroundStyle(.gray.opacity(0.5))
-        }
-    }
-
-    private func loadIcon(path: String) -> NSImage? {
-        // Resolve path using base path if available
-        let fullPath: String
-        if path.hasPrefix("/") {
-            fullPath = path
-        } else if let basePath = iconBasePath {
-            fullPath = (basePath as NSString).appendingPathComponent(path)
-        } else {
-            fullPath = path
-        }
-        return NSImage(contentsOfFile: fullPath)
     }
 }
 
-// MARK: - Aspect-Fit Video Player
+// MARK: - Authoring advisories
 
-/// AVPlayerView with a clear background so no black letterbox bars
-/// appear. Sized to the video's natural aspect ratio.
-private struct InspectPlayerView: NSViewRepresentable {
-    let player: AVPlayer
+/// Advisories for blocks that render correctly but not canonically. Never gates a render.
+enum GuidanceAdvisories {
 
-    func makeNSView(context: Context) -> AVPlayerView {
-        let view = AVPlayerView()
-        view.player = player
-        view.controlsStyle = .inline
-        view.wantsLayer = true
-        view.layer?.backgroundColor = .clear
-        return view
-    }
+    /// Once per item id per session, since Back can revisit a step.
+    private static let warnedItemIds = LockedValue(Set<String>())
 
-    func updateNSView(_ nsView: AVPlayerView, context: Context) {
-        nsView.player = player
-    }
-}
-
-/// Self-sizing video player for Inspect/Preset5 content blocks.
-/// Reads the video's natural aspect ratio so the frame matches the
-/// content exactly — no letterbox bars, transparent background.
-/// `maxHeight` caps the player height; width is derived from the ratio.
-private struct AspectFitVideoView: View {
-    let videoPath: String
-    let autoPlay: Bool
-    let caption: String
-    let maxHeight: CGFloat
-
-    @State private var player = AVPlayer()
-    @State private var aspectRatio: CGFloat = 16.0 / 9.0
-
-    private var videoURL: URL {
-        if videoPath.hasPrefix("http") {
-            return URL(string: videoPath)!
+    static func warnOnceAboutSynonyms(in blocks: [InspectConfig.GuidanceContent], itemId: String) {
+        guard !warnedItemIds.value.contains(itemId) else { return }
+        let paragraphs = blocks.filter { $0.type == "paragraph" }.count
+        let aliasedText = blocks.filter { $0.content == nil && $0.text?.isEmpty == false }.count
+        guard paragraphs > 0 || aliasedText > 0 else { return }
+        warnedItemIds.withLock { _ = $0.insert(itemId) }
+        if paragraphs > 0 {
+            writeLog("guidance: \(paragraphs) block(s) on '\(itemId)' use type \"paragraph\" — it "
+                     + "renders as \"text\", which is the spelling the schema documents.",
+                     logLevel: .info)
         }
-        return URL(fileURLWithPath: videoPath)
-    }
-
-    var body: some View {
-        VStack {
-            InspectPlayerView(player: player)
-                .aspectRatio(aspectRatio, contentMode: .fit)
-                .frame(maxHeight: maxHeight)
-
-            if !caption.isEmpty {
-                Text(caption)
-                    .font(.system(size: 20))
-                    .italic()
-            }
-        }
-        .onAppear {
-            player.replaceCurrentItem(with: AVPlayerItem(url: videoURL))
-            if autoPlay { player.play() }
-            loadNaturalSize()
+        if aliasedText > 0 {
+            writeLog("guidance: \(aliasedText) block(s) on '\(itemId)' author \"text\" — it is read "
+                     + "as \"content\", which is the spelling the schema documents.",
+                     logLevel: .info)
         }
     }
 
-    private func loadNaturalSize() {
-        let asset = AVURLAsset(url: videoURL)
-        Task {
-            guard let track = try? await asset.loadTracks(withMediaType: .video).first,
-                  let size = try? await track.load(.naturalSize),
-                  size.height > 0 else { return }
-            await MainActor.run {
-                aspectRatio = size.width / size.height
-            }
-        }
-    }
+    /// Test seam: resets the once-per-session record.
+    static func resetForTesting() { warnedItemIds.value = [] }
 }

@@ -3,7 +3,7 @@
 //  dialogTests
 //
 //  Plist evaluation: operators, value stringification, step canonicalization, operator defaults
-//  shared across engines, and the advisories for silent defaults.
+//  shared across engines, the advisories for silent defaults, and the preferences-output defaults.
 //
 
 import XCTest
@@ -1039,5 +1039,55 @@ final class OperatorDefaultContractTests: XCTestCase {
     func testRequirementEvaluatorKeepsTheDerivationItAlreadyHad() {
         XCTAssertEqual(EvaluationOperator.resolve(evaluation: nil, expectedValue: "42"), .equals)
         XCTAssertEqual(EvaluationOperator.resolve(evaluation: nil, expectedValue: nil), .exists)
+    }
+}
+
+/// `preferencesOutput` flags left out of a config arrive as nil and must act as their documented default, true.
+final class PreferencesOutputDefaultTests: XCTestCase {
+
+    private var dir: URL!
+    private var plistPath: String { dir.appendingPathComponent("prefs.plist").path }
+
+    override func setUpWithError() throws {
+        dir = FileManager.default.temporaryDirectory.appendingPathComponent("prefs-out-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+    }
+
+    override func tearDownWithError() throws {
+        try? FileManager.default.removeItem(at: dir)
+    }
+
+    private func service(stepComplete: Bool?, exit: Bool?, merge: Bool?,
+                         statics: [String: AnyCodable]? = nil) -> PreferencesService {
+        PreferencesService(config: PreferencesOutputConfig(plistPath: plistPath, writeOnStepComplete: stepComplete,
+                                                           writeOnDialogExit: exit, mergeWithExisting: merge,
+                                                           staticValues: statics))
+    }
+
+    private func written() -> [String: Any]? { NSDictionary(contentsOfFile: plistPath) as? [String: Any] }
+
+    func testAbsentFlagsWriteOnSetAndKeepExistingKeys() throws {
+        XCTAssertTrue(NSDictionary(dictionary: ["Keep": "yes"]).write(toFile: plistPath, atomically: true))
+        service(stepComplete: nil, exit: nil, merge: nil, statics: ["Site": AnyCodable("Berlin")])
+            .setValue("safari", forKey: "browser")
+        let plist = try XCTUnwrap(written(), "an absent writeOnStepComplete must write after setValue")
+        XCTAssertEqual(plist["browser"] as? String, "safari")
+        XCTAssertEqual(plist["Keep"] as? String, "yes", "an absent mergeWithExisting must merge, not overwrite")
+        XCTAssertEqual(plist["Site"] as? String, "Berlin")
+    }
+
+    func testAbsentExitFlagWritesOnExit() throws {
+        let prefs = service(stepComplete: false, exit: nil, merge: nil)
+        prefs.setValue("chrome", forKey: "browser")
+        XCTAssertNil(written())
+        prefs.writeOnExitIfNeeded()
+        XCTAssertEqual(written()?["browser"] as? String, "chrome")
+    }
+
+    func testExplicitFalseStillTurnsWritingOff() {
+        let prefs = service(stepComplete: false, exit: false, merge: nil)
+        prefs.setValue("firefox", forKey: "browser")
+        prefs.writeOnExitIfNeeded()
+        XCTAssertNil(written())
     }
 }
