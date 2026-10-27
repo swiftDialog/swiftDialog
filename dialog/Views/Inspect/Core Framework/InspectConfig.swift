@@ -146,9 +146,6 @@ struct InspectConfig: Codable, Sendable {
     let button2Symbol: String?      // SF Symbol for button2, same grammar as button1Symbol
     let enableOnTimer: Double?      // Seconds after launch to enable a disabled button1 (one-shot)
     let receiptsBasePath: String?   // Base dir for `receipt` requirements (default /var/db/receipts)
-    /// Where the detection log goes (`DetectionLog`). `DIALOG_DETECTION_LOG` overrides it, but an
-    /// env var never reaches a dialog that launchd starts; this key travels with the config.
-    let detectionLog: String?
     /// Count receipts instead of naming them (`ReceiptCensus`): every receipt that appears in
     /// `receiptsBasePath` after launch completes the next pending row. Off unless authored.
     let receiptCensus: Bool?
@@ -167,6 +164,7 @@ struct InspectConfig: Codable, Sendable {
     let complianceLabels: ComplianceLabels? // Legacy: use `labels`
     let instructionBanner: InstructionBannerConfig? // Instruction banner (all presets)
     let pickerLabels: PickerLabels?         // Legacy: use `labels`
+    let pickerConfig: PickerConfig?         // 3.1.1 guide picker: selectable steps, selections plist
 
     let iconBasePath: String?                // Base path for relative icon paths
     let overlayicon: String?                  // Overlay icon for brand identity badges
@@ -200,8 +198,6 @@ struct InspectConfig: Codable, Sendable {
     let button2Action: String?
     let greetingNameSource: ManagedValueRef? // Preset3: managed-pref domain+key holding the user's display name
     let completedTitle: String?             // Preset3: main-phase title once all items complete (supports {userName})
-    /// Accepted so configs that author it keep validating; no preset draws a top progress strip.
-    let showStepProgress: Bool?
     /// Content orientation every step inherits unless it sets its own. P5/P6/P7 default to
     /// top-left; `"center"` restores the centred look for a whole flow. See `ContentStance`.
     let contentAnchor: String?              // "top" | "center"     (vertical)
@@ -248,8 +244,6 @@ struct InspectConfig: Codable, Sendable {
     /// wins; the inline `brandPalette` is the fallback. The ref's `key` holds a dictionary of
     /// role → hex and `darkKey` the dark set; a partial dictionary fills only the roles it names.
     let brandPaletteRef: ManagedValueRef?
-    /// Show the opt-in debug panel. `DIALOG_INSPECT_DEBUG` or this turns it on.
-    let debugPanel: Bool?
     /// Reload the config file whenever it is saved, staying on the current step. An invalid save
     /// keeps the last good version on screen and says why.
     let watch: Bool?
@@ -314,6 +308,10 @@ struct InspectConfig: Codable, Sendable {
     /// resolved form through `GuidanceCalloutBlock.resolveForm`: `.chip` and `.card` are admitted,
     /// `.flat` is not.
     static func plainBrandedPermits(_ block: GuidanceContent) -> Bool {
+        if block.type == "info" {
+            let form = GuidanceCalloutBlock.resolveForm(style: .info, rawStyle: block.style, title: block.title)
+            return form == .chip || form == .card
+        }
         return plainBrandedAllowedBlockTypes.contains(block.type)
     }
 
@@ -401,7 +399,6 @@ struct InspectConfig: Codable, Sendable {
         button2Symbol = try container.decodeIfPresent(String.self, forKey: .button2Symbol)
         enableOnTimer = try container.decodeIfPresent(Double.self, forKey: .enableOnTimer)
         receiptsBasePath = try container.decodeIfPresent(String.self, forKey: .receiptsBasePath)
-        detectionLog = try container.decodeIfPresent(String.self, forKey: .detectionLog)
         receiptCensus = try container.decodeIfPresent(Bool.self, forKey: .receiptCensus)
 
         // Deprecated; decoded and ignored so older configs keep validating.
@@ -424,6 +421,7 @@ struct InspectConfig: Codable, Sendable {
         complianceLabels = try container.decodeIfPresent(ComplianceLabels.self, forKey: .complianceLabels)
         instructionBanner = try container.decodeIfPresent(InstructionBannerConfig.self, forKey: .instructionBanner)
         pickerLabels = try container.decodeIfPresent(PickerLabels.self, forKey: .pickerLabels)
+        pickerConfig = try container.decodeIfPresent(PickerConfig.self, forKey: .pickerConfig)
 
         banner = try container.decodeIfPresent(String.self, forKey: .banner)
         bannerHeight = try container.decodeIfPresent(Int.self, forKey: .bannerHeight)
@@ -458,7 +456,6 @@ struct InspectConfig: Codable, Sendable {
         button2Action = try container.decodeIfPresent(String.self, forKey: .button2Action)
         greetingNameSource = try container.decodeIfPresent(ManagedValueRef.self, forKey: .greetingNameSource)
         completedTitle = try container.decodeIfPresent(String.self, forKey: .completedTitle)
-        showStepProgress = try container.decodeIfPresent(Bool.self, forKey: .showStepProgress)
         contentAnchor = try container.decodeIfPresent(String.self, forKey: .contentAnchor)
         contentAlign = try container.decodeIfPresent(String.self, forKey: .contentAlign)
         phaseBackground = try container.decodeIfPresent(String.self, forKey: .phaseBackground)
@@ -486,7 +483,6 @@ struct InspectConfig: Codable, Sendable {
 
         brandPalette = try container.decodeIfPresent(BrandPalette.self, forKey: .brandPalette)
         brandPaletteRef = try container.decodeIfPresent(ManagedValueRef.self, forKey: .brandPaletteRef)
-        debugPanel = try container.decodeIfPresent(Bool.self, forKey: .debugPanel)
         watch = try container.decodeIfPresent(Bool.self, forKey: .watch)
         brandPaletteDark = try container.decodeIfPresent(BrandPalette.self, forKey: .brandPaletteDark)
 
@@ -509,9 +505,17 @@ struct InspectConfig: Codable, Sendable {
         // presets 1-4 `items[]` is a row list and stays ItemConfig.
         if let authored = try container.decodeIfPresent([IntroStep].self, forKey: .steps) {
             steps = InspectConfig.canonicalizeSteps(authored)
-        } else if InspectPresetName.normalizePreset(preset) == "preset6",
-                  let asSteps = try? container.decodeIfPresent([IntroStep].self, forKey: .items) {
-            steps = InspectConfig.canonicalizeSteps(asSteps)
+        } else if InspectPresetName.normalizePreset(preset) == "preset6" {
+            do {
+                let asSteps = try container.decodeIfPresent([IntroStep].self, forKey: .items)
+                let rows = items
+                steps = InspectConfig.canonicalizeSteps(asSteps.map { InspectConfig.orderedByGuiIndex($0, rows: rows) })
+            } catch {
+                // A step-only type mismatch must not silently blank the wizard.
+                InspectConfig.unknownKeyWarnings.append("Preset 6 items[] could not be read as steps: \(error)")
+                writeLog("InspectConfig: Preset 6 items[] could not be read as steps: \(error)", logLevel: .error)
+                steps = nil
+            }
         } else {
             steps = nil
         }
@@ -521,16 +525,6 @@ struct InspectConfig: Codable, Sendable {
         // authored.
         let decodedSteps = decodedIntroSteps ?? steps
 
-        // The bookend projection owns `_intro`/`_outro`; a config claiming one is rejected.
-        if let claimed = decodedSteps?.first(where: { InspectConfig.reservedBookendIds.contains($0.id) }) {
-            throw DecodingError.dataCorrupted(.init(
-                codingPath: [CodingKeys.introSteps],
-                debugDescription: """
-                    Step id '\(claimed.id)' is reserved for the bookend projection \
-                    (introScreen -> '\(InspectConfig.reservedIntroStepId)', \
-                    summaryScreen -> '\(InspectConfig.reservedOutroStepId)'). Rename the step.
-                    """))
-        }
         introSteps = decodedSteps
 
         introScreen = try container.decodeIfPresent(PresetIntroScreen.self, forKey: .introScreen)
@@ -550,6 +544,22 @@ struct InspectConfig: Codable, Sendable {
             summaryScreen = nil
         }
 
+        // `_intro`/`_outro` belong to the bookend projection only when its screen exists: then a
+        // step with that id would collide with the projected one. Without the screen the id is an
+        // ordinary step id, as in 3.1.1, which reserved neither.
+        var claimedIds: Set<String> = []
+        if introScreen != nil { claimedIds.insert(InspectConfig.reservedIntroStepId) }
+        if summaryScreen != nil { claimedIds.insert(InspectConfig.reservedOutroStepId) }
+        if let claimed = decodedSteps?.first(where: { claimedIds.contains($0.id) }) {
+            throw DecodingError.dataCorrupted(.init(
+                codingPath: [CodingKeys.introSteps],
+                debugDescription: """
+                    Step id '\(claimed.id)' is reserved for the bookend projection \
+                    (introScreen -> '\(InspectConfig.reservedIntroStepId)', \
+                    summaryScreen -> '\(InspectConfig.reservedOutroStepId)'). Rename the step.
+                    """))
+        }
+
         // Root-level blocks go through the same `canonicalizeBlocks` seam as step and item
         // blocks; the key folds only fill holes, so canonical spellings decode unchanged.
         var decodedGuidanceContent = try container.decodeIfPresent([GuidanceContent].self, forKey: .guidanceContent)
@@ -559,7 +569,55 @@ struct InspectConfig: Codable, Sendable {
                                          advisories: &guidanceBlockAdvisories)
         InspectConfig.unknownKeyWarnings.append(contentsOf: guidanceBlockAdvisories)
 
-        guidanceContent = decodedGuidanceContent
+        // Warn, never drop: every authored block renders, and one outside plain-branded's
+        // allowlist earns an advisory. Gated on `chrome` because the field is inert elsewhere.
+        if chrome.flatMap(InspectSizes.Construction.init(rawValue:)) == .plainBranded,
+           let decodedGuidanceContent {
+            for (index, block) in decodedGuidanceContent.enumerated()
+            where !InspectConfig.plainBrandedPermits(block) {
+                // Types turned away for a reason the author cannot guess from the JSON get it by
+                // name; anything else is an untried type.
+                let namedReason: String
+                switch block.type {
+                case "compliance-header":
+                    namedReason = " It fits at 500 and was still turned away: it draws a second, "
+                        + "LARGER header pair under the construction's own."
+                case "option-picker":
+                    namedReason = " It draws its selection in the flow's accent (highlightColor), "
+                        + "the action pill's own colour; and in its default layout the selected "
+                        + "row's tint starts left of the title's edge and each card's subtitle "
+                        + "is dropped."
+                case "dock-picker":
+                    namedReason = " It draws its selection in the flow's accent (highlightColor), "
+                        + "the action pill's own colour; and at 500pt its flavour cards are about "
+                        + "150pt each, so every line wraps mid-phrase."
+                case "bento-grid":
+                    namedReason = " bentoLayout 'hero' and 'summary' draw BentoModule and render "
+                        + "in this column, but neither has been judged against this "
+                        + "construction's composition rules, so they are untried rather than "
+                        + "approved. The default grid arm does render, and WAS judged and turned "
+                        + "away: three cells at the "
+                        + "schema's own row height leave 86.5 of 572pt below them (15%) where "
+                        + "rule 6 asks for 40%, the hero tile carries a further 41.5pt void of "
+                        + "its own inside a composition whose ONE void is the layout, and "
+                        + "BentoCellView draws no actionLabel, meta or badge — so the reference "
+                        + "shape's inner button silently never appears."
+                default:
+                    namedReason = ""
+                }
+                InspectConfig.unknownKeyWarnings.append(
+                    "plain-branded is built around 'text'/'bullets'/'info', images, controls, "
+                    + "and the catalogue's callout, list, table and interactive families; see "
+                    + "InspectConfig.plainBrandedAllowedBlockTypes for the set judged to fit "
+                    + "its 500pt column. guidanceContent[\(index)], type '\(block.type)', is "
+                    + "outside that set and is RENDERED ANYWAY — check it against the column "
+                    + "width and this construction's composition rather than assuming it fits."
+                    + namedReason)
+            }
+            guidanceContent = decodedGuidanceContent
+        } else {
+            guidanceContent = decodedGuidanceContent
+        }
 
         // `items[]` beside `introSteps[]` would render a blank panel; fail loudly instead.
         let hasItems = container.contains(.items)
@@ -590,7 +648,6 @@ struct InspectConfig: Codable, Sendable {
         case button2Symbol = "button2symbol"
         case enableOnTimer
         case receiptsBasePath
-        case detectionLog
         case receiptCensus
 
         // Deprecated: decoded and ignored.
@@ -600,7 +657,7 @@ struct InspectConfig: Codable, Sendable {
 
         // Deprecated: decoded and ignored.
         case buttonStyle
-        case autoEnableButton, autoEnableButtonText, hideSystemDetails, observeOnly, autoAdvanceOnComplete, autoAdvanceDelay, colorThresholds, plistSources, labels, uiLabels, complianceLabels, instructionBanner, pickerLabels, items
+        case autoEnableButton, autoEnableButtonText, hideSystemDetails, observeOnly, autoAdvanceOnComplete, autoAdvanceDelay, colorThresholds, plistSources, labels, uiLabels, complianceLabels, instructionBanner, pickerLabels, pickerConfig, items
         case introSteps
         case steps
         case iconBasePath, overlayicon, rotatingImages, imageRotationInterval, imageShape, backButtonStyle, stepStyle, listIndicatorStyle
@@ -612,7 +669,6 @@ struct InspectConfig: Codable, Sendable {
         case successColor
         case detailOverlay, helpButton, actionPipe, triggerFile, skipPortal, debugMode, resumable, showProfilesRow, dateStyle
         case windowPosition, windowPositionOffset, button1Action, button2Action, greetingNameSource, completedTitle, phaseBackground
-        case showStepProgress
         case contentAnchor, contentAlign
         case phaseBackgroundSource, phaseBackgroundPalette, phaseBackgroundPaletteDark
         case readinessFile, resultFile, eventFile, deferralConfig
@@ -623,7 +679,6 @@ struct InspectConfig: Codable, Sendable {
         case localization
         case brandPalette
         case brandPaletteRef
-        case debugPanel
         case watch
         case brandPaletteDark
         case accentBorderColor, showAccentBorder, footerBackgroundColor, footerTextColor, footerText, copyrightText, supportText
@@ -673,7 +728,6 @@ extension InspectConfig {
         try container.encodeIfPresent(button2Symbol, forKey: .button2Symbol)
         try container.encodeIfPresent(enableOnTimer, forKey: .enableOnTimer)
         try container.encodeIfPresent(receiptsBasePath, forKey: .receiptsBasePath)
-        try container.encodeIfPresent(detectionLog, forKey: .detectionLog)
         try container.encodeIfPresent(receiptCensus, forKey: .receiptCensus)
         try container.encodeIfPresent(button2Visible, forKey: .button2Visible)
         try container.encodeIfPresent(autoEnableButton, forKey: .autoEnableButton)
@@ -685,6 +739,7 @@ extension InspectConfig {
         try container.encodeIfPresent(complianceLabels, forKey: .complianceLabels)
         try container.encodeIfPresent(instructionBanner, forKey: .instructionBanner)
         try container.encodeIfPresent(pickerLabels, forKey: .pickerLabels)
+        try container.encodeIfPresent(pickerConfig, forKey: .pickerConfig)
         try container.encodeIfPresent(banner, forKey: .banner)
         try container.encodeIfPresent(bannerHeight, forKey: .bannerHeight)
         try container.encodeIfPresent(bannerTitle, forKey: .bannerTitle)
@@ -710,7 +765,6 @@ extension InspectConfig {
         try container.encodeIfPresent(brandSelectionKey, forKey: .brandSelectionKey)
         try container.encodeIfPresent(brandPalette, forKey: .brandPalette)
         try container.encodeIfPresent(brandPaletteRef, forKey: .brandPaletteRef)
-        try container.encodeIfPresent(debugPanel, forKey: .debugPanel)
         try container.encodeIfPresent(watch, forKey: .watch)
         try container.encodeIfPresent(brandPaletteDark, forKey: .brandPaletteDark)
         try container.encodeIfPresent(accentBorderColor, forKey: .accentBorderColor)
@@ -736,53 +790,4 @@ extension InspectConfig {
         }
         return "Unknown key '\(key)' in root config"
     }
-}
-
-// The status enums the current preset views read.
-// MARK: - Unified Status Enum
-
-/// Unified status enum for all Inspect mode items
-enum InspectItemStatus: Equatable {
-    case pending
-    case downloading
-    case completed
-    case failed(String)
-
-    /// Handler for simple status without associated values for basic comparisons
-    var simpleStatus: SimpleItemStatus {
-        switch self {
-        case .pending: return .pending
-        case .downloading: return .downloading
-        case .completed: return .completed
-        case .failed: return .failed
-        }
-    }
-}
-
-/// Simple download status enum
-///
-/// **EXTERNAL API**: This enum is maintained for backward compatibility with external scripts
-/// that may rely on parsing Dialog's state output.
-///
-/// **Internal Usage**: Prefer `InspectItemStatus` with Swift pattern matching:
-/// ```swift
-/// // Preferred internal approach:
-/// if case .failed = itemStatus {
-///     // Handle failure
-/// }
-///
-/// // Avoid in internal code:
-/// if itemStatus.simpleStatus == .failed {
-///     // Less type-safe
-/// }
-/// ```
-///
-/// **Note**: `InspectItemStatus` provides richer information via associated values
-/// (e.g., `.failed(String)` includes error message), while `SimpleItemStatus` only
-/// indicates state without context.
-enum SimpleItemStatus {
-    case pending
-    case downloading
-    case completed
-    case failed
 }

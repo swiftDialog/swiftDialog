@@ -364,6 +364,21 @@ struct GuidanceContentView<Context: UserInputContext & ProgressContext & Observa
                 GuidanceDebugHint(message: "media-carousel requires non-empty 'mediaItems' array", scaleFactor: scaleFactor)
             }
 
+        case "grid-picker":
+            // Renders the grid (`IntroGridPicker`, honouring `gridColumns`); see `GuidanceGridPickerBlock`.
+            if let gridItems = block.gridItems, !gridItems.isEmpty {
+                GuidanceGridPickerBlock(
+                    items: gridItems,
+                    columns: block.gridColumns ?? 3,
+                    selectionMode: block.gridSelectionMode ?? "single",
+                    selectionKey: GuidanceSelectionKeys.resolvedKey(for: block) ?? "grid",
+                    accentColor: accentColor ?? palette.accent,
+                    inspectState: inspectState
+                )
+            } else {
+                GuidanceDebugHint(message: "grid-picker requires non-empty 'gridItems' array", scaleFactor: scaleFactor)
+            }
+
         case "dock-picker":
             // Guided-setup dock chooser / builder.
             if (block.dockFlavors?.isEmpty == false) || (block.dockItems?.isEmpty == false) {

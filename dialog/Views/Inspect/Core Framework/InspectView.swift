@@ -39,6 +39,10 @@ struct InspectView: View {
 
             case .loaded:
                 presetView(for: inspectState.uiConfiguration.preset)
+                    // Injected above the preset switch so `buttonShape` reaches every preset.
+                    .environment(\.inspectButtonShape,
+                                 InspectButtonShape(inspectState.config?.buttonShape))
+                    .environment(\.inspectGlow, InspectGlow(inspectState.config?.glow))
                     .onAppear {
                         if appvars.debugMode {
                             writeLog("InspectViewServiceBased: Loading preset '\(inspectState.uiConfiguration.preset)' with new coordinator", logLevel: .debug)
