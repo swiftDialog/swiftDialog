@@ -563,6 +563,60 @@ struct GuidanceContentView<Context: UserInputContext & ProgressContext & Observa
                 GuidanceDebugHint(message: "option-picker requires non-empty 'optionCards' array", scaleFactor: scaleFactor)
             }
 
+        case "handoff-list":
+            // The software step's `layout: "handoff"` as a block; cards and rows split by `detail`.
+            if let handoffs = block.handoffs, !handoffs.isEmpty {
+                GuidanceHandoffListBlock(
+                    handoffs: handoffs,
+                    accent: accentColor ?? palette.accent,
+                    scaleFactor: scaleFactor,
+                    iconBasePath: iconBasePath,
+                    inspectState: inspectState,
+                    onAction: { handoff in
+                        // Same signature as the bento and detail-rows hosts, so handoffs launch identically.
+                        handleRowAction(action: handoff.action ?? "app",
+                                        url: handoff.url ?? handoff.target,
+                                        requestId: handoff.requestId,
+                                        label: handoff.buttonLabel ?? handoff.title,
+                                        itemId: handoff.handoffId, inspectState: inspectState)
+                    }
+                )
+            } else {
+                GuidanceDebugHint(message: "handoff-list requires non-empty 'handoffs' array", scaleFactor: scaleFactor)
+            }
+
+        case "bundle-list":
+            // The software step's `layout: "bundles"` as a block; rows arrive resolved.
+            if let bundles = block.bundleRows, !bundles.isEmpty {
+                GuidanceBundleListBlock(
+                    bundles: bundles,
+                    accent: accentColor ?? palette.accent,
+                    scaleFactor: scaleFactor,
+                    iconBasePath: iconBasePath,
+                    inspectState: inspectState,
+                    onOpenDetail: { bundleId in onOpenSoftwareDetail?(bundleId) }
+                )
+            } else {
+                GuidanceDebugHint(message: "bundle-list requires non-empty 'bundleRows' array", scaleFactor: scaleFactor)
+            }
+
+        case "bundle-detail":
+            // The software step's `layout: "detail"` as a block. The bundle's command uses its own keys
+            // (`bundleCommand`/`bundleCommandNote`) so a shell command never shares a key with prose.
+            if let rows = block.detailRows, !rows.isEmpty {
+                GuidanceBundleDetailBlock(
+                    rows: rows,
+                    accent: accentColor ?? palette.accent,
+                    scaleFactor: scaleFactor,
+                    iconBasePath: iconBasePath,
+                    inspectState: inspectState,
+                    command: block.bundleCommand,
+                    commandNote: block.bundleCommandNote
+                )
+            } else {
+                GuidanceDebugHint(message: "bundle-detail requires non-empty 'detailRows' array", scaleFactor: scaleFactor)
+            }
+
         case "media-carousel":
             // Mixed-media carousel (`IntroMediaCarousel`): images, GIFs, video and YouTube/Vimeo embeds.
             // `image-carousel` remains the images-only block.
@@ -838,6 +892,4 @@ enum GuidanceAdvisories {
         }
     }
 
-    /// Test seam: resets the once-per-session record.
-    static func resetForTesting() { warnedItemIds.value = [] }
 }
