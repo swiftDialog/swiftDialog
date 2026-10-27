@@ -285,8 +285,66 @@ struct GuidanceContentView<Context: UserInputContext & ProgressContext & Observa
         case "form-section":
             GuidanceFormSectionBlock(block: block, scaleFactor: scaleFactor)
 
+        case "checkbox":
+            GuidanceCheckboxBlock(block: block, itemId: itemId, inspectState: inspectState, accentColor: accentColor, scaleFactor: scaleFactor, wire: formWire)
+
+        case "dropdown":
+            GuidanceDropdownBlock(block: block, itemId: itemId, inspectState: inspectState, accentColor: accentColor, scaleFactor: scaleFactor, wire: formWire, iconBasePath: iconBasePath)
+
+        case "radio":
+            GuidanceRadioBlock(block: block, itemId: itemId, inspectState: inspectState, accentColor: accentColor, scaleFactor: scaleFactor, wire: formWire)
+
+        case "toggle":
+            GuidanceToggleBlock(block: block, itemId: itemId, inspectState: inspectState, accentColor: accentColor, scaleFactor: scaleFactor, wire: formWire)
+
+        case "slider":
+            GuidanceSliderBlock(block: block, itemId: itemId, inspectState: inspectState, accentColor: accentColor, scaleFactor: scaleFactor, wire: formWire)
+
+        case "textfield":
+            GuidanceTextFieldBlock(block: block, itemId: itemId, inspectState: inspectState, scaleFactor: scaleFactor, wire: formWire)
+
+        case "drop-zone":
+            GuidanceDropZoneBlock(block: block, itemId: itemId, inspectState: inspectState, scaleFactor: scaleFactor)
+
+        case "color-picker":
+            GuidanceColorPickerBlock(block: block, itemId: itemId, inspectState: inspectState, scaleFactor: scaleFactor)
+
         case "advisory":
             GuidanceAdvisoryBlock(block: block, accentColor: accentColor, scaleFactor: scaleFactor, iconBasePath: iconBasePath)
+
+        case "segmented":
+            GuidanceSegmentedBlock(block: block, itemId: itemId, inspectState: inspectState, accentColor: accentColor, scaleFactor: scaleFactor, wire: formWire)
+
+        case "stepper":
+            GuidanceStepperBlock(block: block, itemId: itemId, inspectState: inspectState, accentColor: accentColor, scaleFactor: scaleFactor)
+
+        case "search":
+            GuidanceSearchBlock(block: block, itemId: itemId, inspectState: inspectState, accentColor: accentColor, scaleFactor: scaleFactor)
+
+        case "multi-select":
+            GuidanceMultiSelectBlock(block: block, itemId: itemId, inspectState: inspectState, accentColor: accentColor, scaleFactor: scaleFactor)
+
+        // Identity header card, live signature preview, status rows with action pills.
+        case "identity":
+            GuidanceIdentityBlock(block: block, scaleFactor: scaleFactor,
+                                  accentColor: accentColor, iconBasePath: iconBasePath)
+        case "signature-preview":
+            GuidanceSignaturePreviewBlock(block: block, itemId: itemId,
+                                          inspectState: inspectState,
+                                          scaleFactor: scaleFactor, iconBasePath: iconBasePath)
+        case "action-rows":
+            GuidanceActionRowsBlock(block: block, itemId: itemId, inspectState: inspectState,
+                                    accentColor: accentColor, scaleFactor: scaleFactor,
+                                    iconBasePath: iconBasePath)
+
+        // The check-row list and the 2-up tile grid, one storage model.
+        case "select-list", "select-grid":
+            GuidanceSelectBlock(block: block, itemId: itemId, inspectState: inspectState,
+                                accentColor: accentColor, scaleFactor: scaleFactor,
+                                iconBasePath: iconBasePath)
+
+        case "button":
+            GuidanceActionButtonBlock(block: block, itemId: itemId, inspectState: inspectState, accentColor: accentColor, scaleFactor: scaleFactor)
 
         case "status-badge":
             // `content` is accepted as the label when `label` is absent.
@@ -387,6 +445,26 @@ struct GuidanceContentView<Context: UserInputContext & ProgressContext & Observa
                 GuidanceDebugHint(message: "feature-table requires non-empty 'columns' and 'rows' arrays", scaleFactor: scaleFactor)
             }
 
+        case "option-picker":
+            // Guided-setup default-app / appearance chooser.
+            if let cards = block.optionCards, !cards.isEmpty {
+                OptionPickerView(
+                    cards: cards,
+                    selectionKey: GuidanceSelectionKeys.resolvedKey(for: block) ?? "option",
+                    multiSelect: block.optionMultiSelect ?? false,
+                    layout: OptionPickerLayout(block.optionLayout),
+                    confirmButtonText: block.optionConfirmButton,
+                    preferenceKey: block.optionPreferenceKey,
+                    scaleFactor: scaleFactor,
+                    // The colour this payload was handed, not the config key the pill draws from.
+                    tint: accentColor,
+                    inspectState: inspectState,
+                    itemId: itemId
+                )
+            } else {
+                GuidanceDebugHint(message: "option-picker requires non-empty 'optionCards' array", scaleFactor: scaleFactor)
+            }
+
         case "media-carousel":
             // Mixed-media carousel (`IntroMediaCarousel`): images, GIFs, video and YouTube/Vimeo embeds.
             // `image-carousel` remains the images-only block.
@@ -418,6 +496,15 @@ struct GuidanceContentView<Context: UserInputContext & ProgressContext & Observa
             } else {
                 GuidanceDebugHint(message: "grid-picker requires non-empty 'gridItems' array", scaleFactor: scaleFactor)
             }
+
+        case "slot-picker":
+            // A continuous slot-before-deadline strip. The view validates the deadline; invalid configs render nothing.
+            SlotPickerView(
+                block: block,
+                inspectState: inspectState,
+                accentColor: accentColor,
+                scaleFactor: scaleFactor
+            )
 
         case "dock-picker":
             // Guided-setup dock chooser / builder.
