@@ -168,6 +168,21 @@ struct GuidanceContentView<Context: UserInputContext & ProgressContext & Observa
     private func contentBlockView(for block: InspectConfig.GuidanceContent) -> some View {
         let textColor = getTextColor(for: block)
 
+        // Catalog rows are handled before the switch so it stays dispatch-only (see `DetailRowsBlock`).
+        if block.type == "detail-rows" {
+            if let rows = block.installItems, !rows.isEmpty {
+                DetailRowsBlock(
+                    rows: rows,
+                    scaleFactor: scaleFactor,
+                    iconBasePath: iconBasePath,
+                    accentColor: accentColor ?? palette.accent,
+                    itemId: itemId,
+                    inspectState: inspectState
+                )
+            } else {
+                GuidanceDebugHint(message: "detail-rows requires non-empty 'installItems' array", scaleFactor: scaleFactor)
+            }
+        } else {
         switch block.type {
         // `paragraph` is accepted as a synonym; `GuidanceAdvisories` points authors to `text`.
         case "text", "paragraph":
@@ -225,6 +240,22 @@ struct GuidanceContentView<Context: UserInputContext & ProgressContext & Observa
                 style: block.style
             )
 
+        case "stat-row":
+            if let stats = block.stats, !stats.isEmpty {
+                GuidanceStatRowBlock(stats: stats, scaleFactor: scaleFactor, style: block.style)
+            } else {
+                GuidanceDebugHint(message: "stat-row requires non-empty 'stats' array", scaleFactor: scaleFactor)
+            }
+
+        case "checklist":
+            if let lines = block.checklist, !lines.isEmpty {
+                let satisfied = checklistLineSatisfied ?? Array(repeating: false, count: lines.count)
+                let states = ChecklistState.resolve(lines: lines, satisfied: satisfied)
+                GuidanceChecklistBlock(lines: lines, states: states, accentColor: accentColor, scaleFactor: scaleFactor)
+            } else {
+                GuidanceDebugHint(message: "checklist requires non-empty 'checklist' array", scaleFactor: scaleFactor)
+            }
+
         case "label-value":
             GuidanceLabelValueBlock(
                 block: block,
@@ -250,6 +281,12 @@ struct GuidanceContentView<Context: UserInputContext & ProgressContext & Observa
                 accentColor: accentColor,
                 scaleFactor: scaleFactor
             )
+
+        case "form-section":
+            GuidanceFormSectionBlock(block: block, scaleFactor: scaleFactor)
+
+        case "advisory":
+            GuidanceAdvisoryBlock(block: block, accentColor: accentColor, scaleFactor: scaleFactor, iconBasePath: iconBasePath)
 
         case "status-badge":
             // `content` is accepted as the label when `label` is absent.
@@ -308,6 +345,9 @@ struct GuidanceContentView<Context: UserInputContext & ProgressContext & Observa
             } else {
                 GuidanceDebugHint(message: "phase-tracker requires 'currentPhase' and 'phases' properties", scaleFactor: scaleFactor)
             }
+
+        case "progress-bar":
+            GuidanceProgressBarBlock(block: block, scaleFactor: scaleFactor, accentColor: accentColor)
 
         case "image-carousel":
             if let images = block.images, !images.isEmpty {
@@ -403,11 +443,28 @@ struct GuidanceContentView<Context: UserInputContext & ProgressContext & Observa
                 GuidanceDebugHint(message: "dock-picker requires non-empty 'dockFlavors' or 'dockItems'", scaleFactor: scaleFactor)
             }
 
+        case "install-list":
+            if let installItems = block.installItems, !installItems.isEmpty {
+                GuidanceInstallListBlock(
+                    installItems: installItems,
+                    completedItems: inspectState.completedItems,
+                    downloadingItems: inspectState.downloadingItems,
+                    iconBasePath: iconBasePath,
+                    scaleFactor: scaleFactor,
+                    // `cards` or `manifest`; absent draws `.rows`.
+                    layout: InstallListLayout(block.installLayout),
+                    accentColor: accentColor ?? palette.accent
+                )
+            } else {
+                GuidanceDebugHint(message: "install-list requires non-empty 'installItems' array", scaleFactor: scaleFactor)
+            }
+
         default:
             Text(block.content ?? "")
                 .font(.system(size: 13 * scaleFactor))
                 .foregroundStyle(textColor)
                 .fixedSize(horizontal: false, vertical: true)
+        }
         }
     }
 
