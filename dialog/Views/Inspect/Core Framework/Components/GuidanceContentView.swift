@@ -240,6 +240,46 @@ struct GuidanceContentView<Context: UserInputContext & ProgressContext & Observa
                 style: block.style
             )
 
+        case "settings-mockup":
+            // `style` names the pane, `title` the row to highlight, `items` replaces default rows,
+            // `caption` is the footnote.
+            if let paneName = block.style, let pane = SettingsPaneKind(authored: paneName) {
+                SettingsPaneMockup(
+                    pane: pane,
+                    highlighted: block.title,
+                    rows: block.items,
+                    footnote: block.caption,
+                    // `palette.accent`, not the passed (possibly muted) `accentColor`: the highlight is the point.
+                    accent: palette.accent
+                )
+                .frame(height: CGFloat(block.imageWidth.map { $0 * 0.5 } ?? 210))
+                .frame(maxWidth: .infinity)
+            } else {
+                GuidanceDebugHint(message: "settings-mockup needs a 'style' naming the pane — users, network, vpn, displays, privacy, accessibility, software-update, wifi, appearance, desktop-dock or screen-recording",
+                                  scaleFactor: scaleFactor)
+            }
+
+        case "desktop-mockup":
+            // `title` and `content` are the notification's lines, `caption` the app name, `color` the desktop
+            // ground, `autoplay` picks slide-in.
+            if let title = block.title, !title.isEmpty {
+                DesktopNotificationMockup(
+                    title: title,
+                    body_: block.content,
+                    appName: block.caption,
+                    ground: block.color,
+                    symbol: block.items?.first.flatMap(IconRef.symbolOrBareName),
+                    animated: block.autoplay ?? false,
+                    // `palette.accent` for the same reason: a muted app tile stops reading as the brand.
+                    accent: palette.accent
+                )
+                .frame(height: CGFloat(block.imageWidth.map { $0 * 0.58 } ?? 232))
+                .frame(maxWidth: .infinity)
+            } else {
+                GuidanceDebugHint(message: "desktop-mockup requires a 'title' — the notification's own first line",
+                                  scaleFactor: scaleFactor)
+            }
+
         case "stat-row":
             if let stats = block.stats, !stats.isEmpty {
                 GuidanceStatRowBlock(stats: stats, scaleFactor: scaleFactor, style: block.style)
@@ -474,6 +514,33 @@ struct GuidanceContentView<Context: UserInputContext & ProgressContext & Observa
                 )
             } else {
                 GuidanceDebugHint(message: "feature-table requires non-empty 'columns' and 'rows' arrays", scaleFactor: scaleFactor)
+            }
+
+        case "wallpaper-picker":
+            if let categories = block.wallpaperCategories, !categories.isEmpty {
+                let layoutMode: WallpaperLayout = {
+                    switch block.wallpaperLayout?.lowercased() {
+                    case "grid": return .grid
+                    case "row": return .row
+                    default: return .categories
+                    }
+                }()
+                WallpaperPickerView(
+                    categories: categories,
+                    columns: block.wallpaperColumns ?? 3,
+                    imageFit: block.wallpaperImageFit ?? "fill",
+                    thumbnailHeight: block.wallpaperThumbnailHeight ?? 88,
+                    selectionKey: GuidanceSelectionKeys.resolvedKey(for: block) ?? "wallpaper",
+                    showPath: block.wallpaperShowPath ?? false,
+                    confirmButtonText: block.wallpaperConfirmButton,
+                    multiSelectCount: block.wallpaperMultiSelect ?? 0,
+                    scaleFactor: scaleFactor,
+                    layout: layoutMode,
+                    inspectState: inspectState,
+                    itemId: itemId
+                )
+            } else {
+                GuidanceDebugHint(message: "wallpaper-picker requires non-empty 'wallpaperCategories' array", scaleFactor: scaleFactor)
             }
 
         case "option-picker":
