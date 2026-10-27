@@ -431,6 +431,37 @@ struct GuidanceContentView<Context: UserInputContext & ProgressContext & Observa
                 GuidanceDebugHint(message: "image-carousel requires 'images' array with at least one image path", scaleFactor: scaleFactor)
             }
 
+        case "compliance-card":
+            if let card = complianceCardData(for: block) {
+                ComplianceCardView(
+                    categoryName: card.name,
+                    passed: card.passed,
+                    total: card.total,
+                    icon: block.cardIcon,
+                    checkDetails: card.details,
+                    scaleFactor: scaleFactor,
+                    colorThresholds: inspectState.colorThresholds,
+                    accentColor: accentColor ?? palette.accent
+                )
+            } else {
+                GuidanceDebugHint(message: "compliance-card requires a category name (`categoryName` or `content`) plus either 'passed'/'total' or a matching plistSources category", scaleFactor: scaleFactor)
+            }
+
+        case "compliance-header":
+            if let header = complianceHeaderData(for: block) {
+                ComplianceDashboardHeader(
+                    title: block.label,
+                    subtitle: block.content,
+                    icon: block.icon,
+                    passed: header.passed,
+                    failed: header.total - header.passed,
+                    scaleFactor: scaleFactor,
+                    colorThresholds: inspectState.colorThresholds
+                )
+            } else {
+                GuidanceDebugHint(message: "compliance-header requires 'passed' and 'total' fields, or configured plistSources", scaleFactor: scaleFactor)
+            }
+
         case "feature-table":
             if let columns = block.columns, !columns.isEmpty,
                let rows = block.rows, !rows.isEmpty {
@@ -544,6 +575,105 @@ struct GuidanceContentView<Context: UserInputContext & ProgressContext & Observa
                 )
             } else {
                 GuidanceDebugHint(message: "install-list requires non-empty 'installItems' array", scaleFactor: scaleFactor)
+            }
+
+        case "compliance-details-button":
+            ComplianceDetailsButtonBlock(
+                block: block,
+                accentColor: accentColor ?? palette.accent,
+                maxWidth: .infinity
+            )
+
+        case "compliance-summary":
+            // Plist-driven compliance hero; needs a `ComplianceAggregatorService` from the environment.
+            if let aggregator = complianceAggregator {
+                ComplianceSummaryBlock(
+                    block: block,
+                    totalChecks: aggregator.totalChecks,
+                    totalPassed: aggregator.totalPassed,
+                    healthyLabel: aggregator.healthyLabel,
+                    attentionLabel: aggregator.attentionLabel,
+                    scaleFactor: scaleFactor,
+                    colorThresholds: inspectState.colorThresholds,
+                    categories: aggregator.categories,
+                    lastChecked: aggregator.lastRefresh
+                )
+                .frame(maxWidth: 720)
+                .padding(.horizontal, 16 * scaleFactor)
+                .id("compliance-summary-\(itemId)-\(aggregator.totalPassed)-\(aggregator.totalChecks)")
+            } else {
+                GuidanceDebugHint(message: "compliance-summary requires plistSources to be configured", scaleFactor: scaleFactor)
+            }
+
+        case "findings-list":
+            // Plist-driven grouped findings; `content="all"` expands by default.
+            if let aggregator = complianceAggregator {
+                FindingsListBlock(
+                    block: block,
+                    categories: aggregator.categories,
+                    healthyLabel: aggregator.healthyLabel,
+                    attentionLabel: aggregator.attentionLabel,
+                    scaleFactor: scaleFactor
+                )
+                .frame(maxWidth: 720)
+                .padding(.horizontal, 16 * scaleFactor)
+                .id("findings-list-\(itemId)-\(aggregator.totalPassed)-\(aggregator.totalChecks)")
+            } else {
+                GuidanceDebugHint(message: "findings-list requires plistSources to be configured", scaleFactor: scaleFactor)
+            }
+
+        case "bento-grid":
+            // Bento grid, or with `bentoLayout` the step arm's `hero`/`summary` arrangements.
+            // Nested inside this case so the switch keeps its arm count; changing it has crashed the type checker.
+            if let cells = block.bentoCells, !cells.isEmpty {
+                // The handed colour, else the flow's accent; never `config.highlightColor` directly.
+                let bentoAccent: Color = accentColor ?? palette.accent
+
+                let bentoKind: BentoArrangementKind? = {
+                    switch block.bentoLayout {
+                    case "hero":    return .heroRow
+                    case "summary": return .heroColumn
+                    default:        return nil
+                    }
+                }()
+
+                if let bentoKind {
+                    AnyView(
+                        BentoModule(
+                            cells: cells,
+                            kind: bentoKind,
+                            accent: bentoAccent,
+                            iconBasePath: iconBasePath,
+                            inspectState: inspectState,
+                            onAction: { cell in
+                                // Same six-argument wiring as the card and rail hosts, so `actionLabel` buttons work.
+                                handleRowAction(action: cell.action, url: cell.url,
+                                                requestId: cell.requestId,
+                                                label: cell.actionLabel ?? "",
+                                                itemId: cell.id, inspectState: inspectState)
+                            }
+                        )
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 16 * scaleFactor)
+                    )
+                } else {
+                    BentoGridView(
+                        cells: cells,
+                        columns: block.bentoColumns ?? 2,
+                        rowHeight: CGFloat(block.bentoRowHeight ?? 140),
+                        gap: CGFloat(block.bentoGap ?? 12),
+                        scaleFactor: scaleFactor,
+                        accentColor: bentoAccent,
+                        iconBasePath: iconBasePath,
+                        tintColor: block.bentoTintColor.flatMap { Color(hex: $0) },
+                        inspectState: inspectState
+                    )
+                    // Claim the container's full width, so `BentoGridView` does not pack cells top-left.
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 16 * scaleFactor)
+                }
+            } else {
+                GuidanceDebugHint(message: "bento-grid requires non-empty 'bentoCells' array", scaleFactor: scaleFactor)
             }
 
         default:

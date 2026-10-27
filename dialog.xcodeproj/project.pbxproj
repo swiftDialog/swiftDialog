@@ -146,6 +146,9 @@
 		E5EB15284862FB119AE272F6 /* NotifierNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCC2439D2F6ABA1200F659CF /* NotifierNotifications.swift */; };
 		E60A5542B491A3CE58D101EF /* NotifierSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCC2439A2F6AB9F100F659CF /* NotifierSystem.swift */; };
 		E6C55B960E864B6E5B688D82 /* NotifierArguments.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCC2439C2F6AB9FD00F659CF /* NotifierArguments.swift */; };
+		084B4A0507376DB2DD383291 /* BentoDetailRouteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D9F1403CF2DE5BFF6E7056 /* BentoDetailRouteTests.swift */; };
+		544D57C809A1D39FFBB9C485 /* BentoFillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B73FDE3B20D22EAF62B4EF89 /* BentoFillTests.swift */; };
+		DAE77C440CD8B1907E4368C7 /* BentoSlotConflictTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20F6334E1B42278AFB3BCD68 /* BentoSlotConflictTests.swift */; };
 		9963ABED14AFA4056D0108AE /* BlockSemanticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95602D1615185FEF1186EA01 /* BlockSemanticsTests.swift */; };
 		6B0DF7C0251DA067D67EFF30 /* BrandMarkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D8571FAEDCDA1F1E41186C /* BrandMarkTests.swift */; };
 		8FCAB41C3A989E68605EB28B /* BrandSlotMetricsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF2E82D59F9D476BF9644832 /* BrandSlotMetricsTests.swift */; };
@@ -412,6 +415,9 @@
 		CCE934AC2ACC29F60094BD06 /* TextFileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFileView.swift; sourceTree = "<group>"; };
 		CCF430592C07562D004DFB4D /* DebugOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugOverlay.swift; sourceTree = "<group>"; };
 		F9F647DDE9CB42EBA9D931B9 /* FileSystemCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSystemCache.swift; sourceTree = "<group>"; };
+		C3D9F1403CF2DE5BFF6E7056 /* BentoDetailRouteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BentoDetailRouteTests.swift; sourceTree = "<group>"; };
+		B73FDE3B20D22EAF62B4EF89 /* BentoFillTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BentoFillTests.swift; sourceTree = "<group>"; };
+		20F6334E1B42278AFB3BCD68 /* BentoSlotConflictTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BentoSlotConflictTests.swift; sourceTree = "<group>"; };
 		95602D1615185FEF1186EA01 /* BlockSemanticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockSemanticsTests.swift; sourceTree = "<group>"; };
 		87D8571FAEDCDA1F1E41186C /* BrandMarkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandMarkTests.swift; sourceTree = "<group>"; };
 		DF2E82D59F9D476BF9644832 /* BrandSlotMetricsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandSlotMetricsTests.swift; sourceTree = "<group>"; };
@@ -469,7 +475,6 @@
 		189F38AE497C8CE5F70E53D4 /* Exceptions for "Inspect" folder in "Dialog" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				"Core Framework/Components/ComplianceComponents.swift",
 				"Core Framework/Components/WallpaperPicker.swift",
 				"Core Framework/Modules/SidebarNavigationModule.swift",
 				"inspect-config.schema.json",
@@ -700,6 +705,9 @@
 				DF2E82D59F9D476BF9644832 /* BrandSlotMetricsTests.swift */,
 				87D8571FAEDCDA1F1E41186C /* BrandMarkTests.swift */,
 				95602D1615185FEF1186EA01 /* BlockSemanticsTests.swift */,
+				20F6334E1B42278AFB3BCD68 /* BentoSlotConflictTests.swift */,
+				B73FDE3B20D22EAF62B4EF89 /* BentoFillTests.swift */,
+				C3D9F1403CF2DE5BFF6E7056 /* BentoDetailRouteTests.swift */,
 				41AADD45306A4C830024E522 /* IconJSONTests.swift */,
 				4154C2F025F76BDC00A3D373 /* dialogTests.swift */,
 				AA00000000000001AABBCC00 /* LogMonitorServiceTests.swift */,
@@ -1341,6 +1349,9 @@
 				8FCAB41C3A989E68605EB28B /* BrandSlotMetricsTests.swift in Sources */,
 				6B0DF7C0251DA067D67EFF30 /* BrandMarkTests.swift in Sources */,
 				9963ABED14AFA4056D0108AE /* BlockSemanticsTests.swift in Sources */,
+				DAE77C440CD8B1907E4368C7 /* BentoSlotConflictTests.swift in Sources */,
+				544D57C809A1D39FFBB9C485 /* BentoFillTests.swift in Sources */,
+				084B4A0507376DB2DD383291 /* BentoDetailRouteTests.swift in Sources */,
 				41D892E72F754FCA00FA4E01 /* PlistEvaluationTests.swift in Sources */,
 				41D892E52F754FBC00FA4E01 /* DistributedNotificationsTests.swift in Sources */,
 				413BFDBE3099929600604E6A /* NumberInputTests.swift in Sources */,
