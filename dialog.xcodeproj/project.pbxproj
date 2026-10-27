@@ -188,6 +188,8 @@
 		EBFF25E6B97C315621818367 /* PhaseLocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2BBE09B7494BFAE9204F9ED /* PhaseLocalizationTests.swift */; };
 		A37C38586779E8FC1C41291B /* PhaseTrackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91023BE22C744E3AEFB929EB /* PhaseTrackTests.swift */; };
 		03A086E6F4A06C3565A66AA5 /* PlainSimpleGridTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5493932F0270CDE988407787 /* PlainSimpleGridTests.swift */; };
+		2BC6E54D51AFBDE9F464CABD /* Preset6PhaseAxisTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CDDB7B775CA73F8803C9006 /* Preset6PhaseAxisTests.swift */; };
+		2FA75B3D1C171DC97C6867B4 /* Preset6StepAdoptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F07BA7C300568C2A5E08F5 /* Preset6StepAdoptionTests.swift */; };
 		0FEC9C8315474AA3D781A7EA /* ProfileConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0873B49D1F9222965E608A /* ProfileConfigTests.swift */; };
 		2D69EF29FEE3452F4860EE3B /* ProvisioningGridTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1EFE3A425DE5932ABB8F191 /* ProvisioningGridTests.swift */; };
 		0AA0CB475A687830C9CE67B2 /* ReadinessExitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BDBEED5DE2666DFAE13D5EB /* ReadinessExitTests.swift */; };
@@ -196,6 +198,7 @@
 		18D1D6D39D6EEDE9DFBA6DE5 /* ResultFileFreezeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5048A98B1EDC9C2244764E1 /* ResultFileFreezeTests.swift */; };
 		3C05E85537C26E7772D65B09 /* RoutingShellTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B0925ED7112E9FBD2A3513 /* RoutingShellTests.swift */; };
 		333A974F725CD226C7F6EA37 /* StateStepsAndSizingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6A6E530FD196FBFAEE3DB44 /* StateStepsAndSizingTests.swift */; };
+		CAEC0B68D16E48A8836D2E29 /* StepPayloadNestingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32FB55A3ADBA9E4F328BAD9 /* StepPayloadNestingTests.swift */; };
 		0C8673B10122112B0D6E494C /* StepStatusVocabularyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1601BCA95D484C2CD705EF /* StepStatusVocabularyTests.swift */; };
 		296D0B2E089CAECA53A83504 /* TriggerCursorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D77356C5EC0F3ECEB61A511 /* TriggerCursorTests.swift */; };
 		64587012358B97A1D8FF1045 /* UpstreamIssueFixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1010C7B8C96125EF031968 /* UpstreamIssueFixTests.swift */; };
@@ -457,6 +460,8 @@
 		D2BBE09B7494BFAE9204F9ED /* PhaseLocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhaseLocalizationTests.swift; sourceTree = "<group>"; };
 		91023BE22C744E3AEFB929EB /* PhaseTrackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhaseTrackTests.swift; sourceTree = "<group>"; };
 		5493932F0270CDE988407787 /* PlainSimpleGridTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlainSimpleGridTests.swift; sourceTree = "<group>"; };
+		7CDDB7B775CA73F8803C9006 /* Preset6PhaseAxisTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preset6PhaseAxisTests.swift; sourceTree = "<group>"; };
+		34F07BA7C300568C2A5E08F5 /* Preset6StepAdoptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preset6StepAdoptionTests.swift; sourceTree = "<group>"; };
 		8D0873B49D1F9222965E608A /* ProfileConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileConfigTests.swift; sourceTree = "<group>"; };
 		D1EFE3A425DE5932ABB8F191 /* ProvisioningGridTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProvisioningGridTests.swift; sourceTree = "<group>"; };
 		8BDBEED5DE2666DFAE13D5EB /* ReadinessExitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadinessExitTests.swift; sourceTree = "<group>"; };
@@ -465,6 +470,7 @@
 		A5048A98B1EDC9C2244764E1 /* ResultFileFreezeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultFileFreezeTests.swift; sourceTree = "<group>"; };
 		87B0925ED7112E9FBD2A3513 /* RoutingShellTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutingShellTests.swift; sourceTree = "<group>"; };
 		E6A6E530FD196FBFAEE3DB44 /* StateStepsAndSizingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateStepsAndSizingTests.swift; sourceTree = "<group>"; };
+		E32FB55A3ADBA9E4F328BAD9 /* StepPayloadNestingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepPayloadNestingTests.swift; sourceTree = "<group>"; };
 		DC1601BCA95D484C2CD705EF /* StepStatusVocabularyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepStatusVocabularyTests.swift; sourceTree = "<group>"; };
 		9D77356C5EC0F3ECEB61A511 /* TriggerCursorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerCursorTests.swift; sourceTree = "<group>"; };
 		1A1010C7B8C96125EF031968 /* UpstreamIssueFixTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpstreamIssueFixTests.swift; sourceTree = "<group>"; };
@@ -476,7 +482,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"Core Framework/Components/WallpaperPicker.swift",
-				"Core Framework/Modules/SidebarNavigationModule.swift",
 				"inspect-config.schema.json",
 			);
 			target = 4154C2D925F76BDB00A3D373 /* Dialog */;
@@ -658,6 +663,7 @@
 				1A1010C7B8C96125EF031968 /* UpstreamIssueFixTests.swift */,
 				9D77356C5EC0F3ECEB61A511 /* TriggerCursorTests.swift */,
 				DC1601BCA95D484C2CD705EF /* StepStatusVocabularyTests.swift */,
+				E32FB55A3ADBA9E4F328BAD9 /* StepPayloadNestingTests.swift */,
 				E6A6E530FD196FBFAEE3DB44 /* StateStepsAndSizingTests.swift */,
 				87B0925ED7112E9FBD2A3513 /* RoutingShellTests.swift */,
 				A5048A98B1EDC9C2244764E1 /* ResultFileFreezeTests.swift */,
@@ -666,6 +672,8 @@
 				8BDBEED5DE2666DFAE13D5EB /* ReadinessExitTests.swift */,
 				D1EFE3A425DE5932ABB8F191 /* ProvisioningGridTests.swift */,
 				8D0873B49D1F9222965E608A /* ProfileConfigTests.swift */,
+				34F07BA7C300568C2A5E08F5 /* Preset6StepAdoptionTests.swift */,
+				7CDDB7B775CA73F8803C9006 /* Preset6PhaseAxisTests.swift */,
 				5493932F0270CDE988407787 /* PlainSimpleGridTests.swift */,
 				91023BE22C744E3AEFB929EB /* PhaseTrackTests.swift */,
 				D2BBE09B7494BFAE9204F9ED /* PhaseLocalizationTests.swift */,
@@ -1302,6 +1310,7 @@
 				64587012358B97A1D8FF1045 /* UpstreamIssueFixTests.swift in Sources */,
 				296D0B2E089CAECA53A83504 /* TriggerCursorTests.swift in Sources */,
 				0C8673B10122112B0D6E494C /* StepStatusVocabularyTests.swift in Sources */,
+				CAEC0B68D16E48A8836D2E29 /* StepPayloadNestingTests.swift in Sources */,
 				333A974F725CD226C7F6EA37 /* StateStepsAndSizingTests.swift in Sources */,
 				3C05E85537C26E7772D65B09 /* RoutingShellTests.swift in Sources */,
 				18D1D6D39D6EEDE9DFBA6DE5 /* ResultFileFreezeTests.swift in Sources */,
@@ -1310,6 +1319,8 @@
 				0AA0CB475A687830C9CE67B2 /* ReadinessExitTests.swift in Sources */,
 				2D69EF29FEE3452F4860EE3B /* ProvisioningGridTests.swift in Sources */,
 				0FEC9C8315474AA3D781A7EA /* ProfileConfigTests.swift in Sources */,
+				2FA75B3D1C171DC97C6867B4 /* Preset6StepAdoptionTests.swift in Sources */,
+				2BC6E54D51AFBDE9F464CABD /* Preset6PhaseAxisTests.swift in Sources */,
 				03A086E6F4A06C3565A66AA5 /* PlainSimpleGridTests.swift in Sources */,
 				A37C38586779E8FC1C41291B /* PhaseTrackTests.swift in Sources */,
 				EBFF25E6B97C315621818367 /* PhaseLocalizationTests.swift in Sources */,

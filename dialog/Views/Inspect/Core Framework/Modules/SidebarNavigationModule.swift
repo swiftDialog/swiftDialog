@@ -2,22 +2,17 @@
 //  SidebarNavigationModule.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 25/01/2026
-//
-//  Reusable sidebar navigation module for step-based workflows.
-//  Provides a modern vertical stepper with clean Preset5-style aesthetics.
-//
-//  Used by: Preset6 (modern sidebar variant)
+//  Sidebar step navigation for preset 6: header, grouped step list with progress marks, and an
+//  optional bottom logo.
 //
 
 import SwiftUI
 
 // MARK: - Sidebar Navigation Module
 
-/// A reusable sidebar navigation component for step-based workflows.
-/// Displays a vertical list of steps with progress indicators and selection support.
+/// A vertical list of the flow's main-phase steps with progress indicators and selection.
 struct SidebarNavigationModule: View {
-    let items: [InspectConfig.ItemConfig]
+    let items: [InspectConfig.IntroStep]
     let currentStep: Int
     let completedSteps: Set<String>
     let downloadingSteps: Set<String>
@@ -27,6 +22,8 @@ struct SidebarNavigationModule: View {
     let subtitle: String?
     let iconPath: String?
     let iconBasePath: String?
+    /// The `--overlayicon` mark blended into the header icon's corner.
+    var overlayIconPath: String?
     let showStepNumbers: Bool
     let showCompletionMarks: Bool
     let width: CGFloat
@@ -35,16 +32,17 @@ struct SidebarNavigationModule: View {
     let isNavigationBlocked: Bool
 
     init(
-        items: [InspectConfig.ItemConfig],
+        items: [InspectConfig.IntroStep],
         currentStep: Int,
         completedSteps: Set<String>,
         downloadingSteps: Set<String> = [],
-        accentColor: Color = .blue,
+        accentColor: Color = .accentColor,
         logoPath: String? = nil,
         title: String? = nil,
         subtitle: String? = nil,
         iconPath: String? = nil,
         iconBasePath: String? = nil,
+        overlayIconPath: String? = nil,
         showStepNumbers: Bool = true,
         showCompletionMarks: Bool = true,
         width: CGFloat = 220,
@@ -62,6 +60,7 @@ struct SidebarNavigationModule: View {
         self.subtitle = subtitle
         self.iconPath = iconPath
         self.iconBasePath = iconBasePath
+        self.overlayIconPath = overlayIconPath
         self.showStepNumbers = showStepNumbers
         self.showCompletionMarks = showCompletionMarks
         self.width = width
@@ -70,29 +69,61 @@ struct SidebarNavigationModule: View {
         self.isNavigationBlocked = isNavigationBlocked
     }
 
-    /// Filter to display only non-intro/outro steps in sidebar
-    private var displayItems: [(index: Int, item: InspectConfig.ItemConfig)] {
+    @Environment(\.palette) private var palette
+
+    /// Main-phase steps only; intro and outro steps stay off the rail.
+    private var displayItems: [(index: Int, item: InspectConfig.IntroStep)] {
         items.enumerated().filter { _, item in
-            item.stepType != "intro" && item.stepType != "outro"
+            item.resolvedPhase == "main"
         }.map { ($0.offset, $0.element) }
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header with logo and title
             headerSection
                 .padding(.top, 16 * scaleFactor)
                 .padding(.bottom, 12 * scaleFactor)
 
-            Divider()
+            // The header divider fades at both ends, the same 26pt fade the vertical rule uses.
+            Rectangle()
+                .fill(Color.secondary.opacity(0.2))
+                .frame(height: 1)
+                .mask(
+                    HStack(spacing: 0) {
+                        LinearGradient(colors: [.clear, .black],
+                                       startPoint: .leading, endPoint: .trailing)
+                            .frame(width: 26 * scaleFactor)
+                        Rectangle()
+                        LinearGradient(colors: [.black, .clear],
+                                       startPoint: .leading, endPoint: .trailing)
+                            .frame(width: 26 * scaleFactor)
+                    }
+                )
                 .padding(.horizontal, 16 * scaleFactor)
 
-            // Step list
+            // Step list: centred inside the scroll view when the items fit (minHeight plus the
+            // spacers), top-anchored and scrolling when they do not.
             ScrollViewReader { proxy in
+              GeometryReader { geo in
                 ScrollView(.vertical, showsIndicators: false) {
-                    LazyVStack(spacing: 4 * scaleFactor) {
+                  VStack(spacing: 0) {
+                    // The top gap is capped so the list stays near its header; slack pools below.
+                    Spacer(minLength: 0)
+                        .frame(maxHeight: 24 * scaleFactor)
+                    // Not a LazyVStack: rows outside the viewport must still exist for VoiceOver.
+                    VStack(alignment: .leading, spacing: 4 * scaleFactor) {
                         ForEach(displayItems, id: \.index) { displayIndex, item in
                             let actualIndex = displayIndex
+                            // A heading whenever the group changes.
+                            if let group = item.group, group != groupOfItem(before: displayIndex) {
+                                Text(group.uppercased())
+                                    .font(.system(size: 11 * scaleFactor, weight: .semibold, design: .monospaced))
+                                    .tracking(0.6)
+                                    .foregroundStyle(palette.textFaint)
+                                    .padding(.horizontal, 12 * scaleFactor)
+                                    .padding(.top, displayIndex == 0 ? 2 * scaleFactor : 12 * scaleFactor)
+                                    .padding(.bottom, 2 * scaleFactor)
+                            }
                             ModernStepRow(
                                 index: displayIndex,
                                 item: item,
@@ -100,7 +131,7 @@ struct SidebarNavigationModule: View {
                                 isCompleted: completedSteps.contains(item.id),
                                 isDownloading: downloadingSteps.contains(item.id),
                                 accentColor: accentColor,
-                                showStepNumber: showStepNumbers,
+                                showStepNumber: showStepNumbers && !isCatalogue,
                                 showCompletionMark: showCompletionMarks,
                                 scaleFactor: scaleFactor,
                                 isNavigationBlocked: isNavigationBlocked
@@ -115,124 +146,144 @@ struct SidebarNavigationModule: View {
                     }
                     .padding(.vertical, 8 * scaleFactor)
                     .padding(.horizontal, 12 * scaleFactor)
+                    Spacer(minLength: 0)
+                  }
+                  .frame(minHeight: geo.size.height)
                 }
+                // Rows fade at both edges; the fade is the scroll affordance in place of indicators.
+                .mask(
+                    VStack(spacing: 0) {
+                        LinearGradient(colors: [.clear, .black],
+                                       startPoint: .top, endPoint: .bottom)
+                            .frame(height: 16 * scaleFactor)
+                        Rectangle()
+                        LinearGradient(colors: [.black, .clear],
+                                       startPoint: .top, endPoint: .bottom)
+                            .frame(height: 20 * scaleFactor)
+                    }
+                )
                 .onChange(of: currentStep) { _, newStep in
                     withAnimation(.easeInOut(duration: 0.3)) {
                         proxy.scrollTo("step_\(newStep)", anchor: .center)
                     }
                 }
+              }
             }
 
             Spacer(minLength: 0)
 
-            // Bottom logo section (optional)
             if let logoPath = logoPath {
                 bottomLogoSection(logoPath: logoPath)
             }
         }
         .frame(width: width * scaleFactor)
-        .background(
-            Color(NSColor.controlBackgroundColor)
-                .opacity(0.5)
-        )
+        // No background: the host paints the column's ground behind the whole window, since only
+        // it knows the column's full extent.
     }
 
     // MARK: - Header Section
 
-    /// Resolved icon: static `iconPath` from config, or dynamic from the current step's icon.
+    /// Static `iconPath` from config, else the current step's icon.
     private var resolvedHeaderIcon: String? {
         if let iconPath = iconPath { return iconPath }
-        return items[safe: currentStep]?.icon
+        return items[safe: currentStep]?.heroImage
     }
 
-    /// Whether the header icon is present (static or dynamic).
     private var hasHeaderIcon: Bool { resolvedHeaderIcon != nil }
 
+    /// Icon and title on one leading-aligned row. Text sizes are explicit so they scale with
+    /// `scaleFactor` like the rows.
     @ViewBuilder
     private var headerSection: some View {
-        VStack(spacing: 8 * scaleFactor) {
-            // Prominent icon — static (config-level) or dynamic (current step's icon)
-            if let icon = resolvedHeaderIcon {
-                if icon.hasPrefix("SF=") {
-                    // Native SF Symbol rendering — no async loading needed
-                    let symbolName = String(icon.dropFirst(3)).components(separatedBy: ",").first ?? ""
-                    Image(systemName: symbolName)
-                        .font(.system(size: 32 * scaleFactor, weight: .medium))
-                        .foregroundStyle(accentColor)
-                        .frame(width: 64 * scaleFactor, height: 64 * scaleFactor)
-                        .background(accentColor.opacity(0.1), in: RoundedRectangle(cornerRadius: 14 * scaleFactor, style: .continuous))
-                        .id(icon)
-                        .transition(.opacity)
-                        .animation(.easeInOut(duration: 0.25), value: icon)
-                } else {
-                    AsyncImageView(
-                        iconPath: icon,
-                        basePath: iconBasePath,
-                        maxWidth: 64 * scaleFactor,
-                        maxHeight: 64 * scaleFactor,
-                        imageFit: .fit
-                    ) {
-                        EmptyView()
-                    }
-                    .frame(width: 64 * scaleFactor, height: 64 * scaleFactor)
-                    .id(icon)
-                    .transition(.opacity)
-                    .animation(.easeInOut(duration: 0.25), value: icon)
+        HStack(alignment: .center, spacing: 8 * scaleFactor) {
+            headerIcon
+            VStack(alignment: .leading, spacing: 3 * scaleFactor) {
+                if let title = title, !title.isEmpty {
+                    Text(title)
+                        .font(.system(size: 15 * scaleFactor, weight: .semibold))
+                        .foregroundStyle(.primary)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-            }
 
-            // Title
-            if let title = title, !title.isEmpty {
-                Text(title)
-                    .font(hasHeaderIcon ? .title3.bold() : .headline)
-                    .foregroundStyle(.primary)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.center)
-            }
-
-            // Subtitle
             if let subtitle = subtitle, !subtitle.isEmpty {
                 Text(subtitle)
-                    .font(.subheadline)
+                    .font(.system(size: 12 * scaleFactor))
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
-                    .multilineTextAlignment(.center)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
-            // Progress indicator
-            progressIndicator
+            // No progress indicator here; the footer cluster is the one place that states progress.
+            }
         }
-        .padding(.horizontal, 16 * scaleFactor)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        // 24pt, where the section headings and row labels begin (12pt list + 12pt row padding).
+        .padding(.horizontal, 24 * scaleFactor)
     }
 
+    /// The header icon with the `--overlayicon` mark in its bottom-trailing corner. Badge size
+    /// and offset match `AppIconView.badgeSize` (`max(12, size * 0.36)`, offset 0.28).
     @ViewBuilder
-    private var progressIndicator: some View {
-        let totalRealSteps = displayItems.count
-        let completedCount = displayItems.filter { completedSteps.contains($0.item.id) }.count
-        let progress = totalRealSteps > 0 ? Double(completedCount) / Double(totalRealSteps) : 0
-
-        VStack(spacing: 4 * scaleFactor) {
-            // Progress bar
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(accentColor.opacity(0.2))
-                        .frame(height: 4 * scaleFactor)
-
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(accentColor)
-                        .frame(width: geometry.size.width * progress, height: 4 * scaleFactor)
-                        .animation(.easeInOut(duration: 0.3), value: progress)
+    private var headerIcon: some View {
+        if let icon = resolvedHeaderIcon {
+            iconImage(icon, size: headerIconSize)
+                .overlay(alignment: .bottomTrailing) {
+                    if let overlay = overlayIconPath, !overlay.isEmpty {
+                        iconImage(overlay, size: headerOverlaySize)
+                            // The ring makes the badge read as blended into the mark.
+                            .background(Circle().fill(Color(NSColor.windowBackgroundColor)))
+                            .offset(x: headerOverlaySize * 0.28, y: headerOverlaySize * 0.28)
+                    }
                 }
-            }
-            .frame(height: 4 * scaleFactor)
-
-            // Step counter text
-            Text("\(completedCount) of \(totalRealSteps) completed")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .monospacedDigit()
+                .id(icon)
+                .transition(.opacity)
+                .animation(.easeInOut(duration: 0.25), value: icon)
         }
+    }
+
+    /// 32pt plus the 8pt gap puts the title at 64pt, where the row labels begin
+    /// (12 + 12 padding + 28 glyph + 12 gap), so header and rows share one grid.
+    private var headerIconSize: CGFloat { 32 * scaleFactor }
+    private var headerOverlaySize: CGFloat { max(12, headerIconSize * 0.36) }
+
+    /// Renders the icon or its overlay: an SF Symbol when the reference names one, else a file path.
+    @ViewBuilder
+    private func iconImage(_ icon: String, size: CGFloat) -> some View {
+        if let symbolRef = IconRef.symbol(icon) {
+            // "SF=a,b" names alternates; the first wins.
+            let symbolName = symbolRef.components(separatedBy: ",").first ?? ""
+            Image(systemName: symbolName)
+                .font(.system(size: size * 0.5, weight: .medium))
+                .foregroundStyle(accentColor)
+                .frame(width: size, height: size)
+                .background(accentColor.opacity(0.1),
+                            in: RoundedRectangle(cornerRadius: size * 0.28, style: .continuous))
+        } else {
+            AsyncImageView(
+                iconPath: icon,
+                basePath: iconBasePath,
+                maxWidth: size,
+                maxHeight: size,
+                imageFit: .fit
+            ) {
+                EmptyView()
+            }
+            .frame(width: size, height: size)
+        }
+    }
+
+    /// The group of the item before `index`, so a heading is drawn only when the group changes.
+    private func groupOfItem(before index: Int) -> String? {
+        guard index > 0, index - 1 < displayItems.count else { return nil }
+        return displayItems[index - 1].item.group
+    }
+
+    /// A grouped rail is a catalogue of kinds, not a queue of work, so it shows no step numbers.
+    private var isCatalogue: Bool {
+        displayItems.contains { $0.item.group?.isEmpty == false }
     }
 
     // MARK: - Bottom Logo Section
@@ -242,10 +293,10 @@ struct SidebarNavigationModule: View {
         Divider()
             .padding(.horizontal, 16 * scaleFactor)
 
-        if let nsImage = NSImage(contentsOfFile: logoPath) {
+        if let nsImage = InspectImageCache.shared.image(atPath: logoPath) {
             Image(nsImage: nsImage)
                 .resizable()
-                .aspectRatio(contentMode: .fit)
+                .scaledToFit()
                 .frame(maxWidth: 100 * scaleFactor, maxHeight: 32 * scaleFactor)
                 .padding(.vertical, 12 * scaleFactor)
                 .padding(.horizontal, 16 * scaleFactor)
@@ -255,11 +306,10 @@ struct SidebarNavigationModule: View {
 
 // MARK: - Modern Step Row
 
-/// A single step row in the sidebar navigation.
-/// Clean, minimal design matching Preset5's aesthetics.
+/// One step row in the sidebar.
 struct ModernStepRow: View {
     let index: Int
-    let item: InspectConfig.ItemConfig
+    let item: InspectConfig.IntroStep
     let isActive: Bool
     let isCompleted: Bool
     let isDownloading: Bool
@@ -269,22 +319,36 @@ struct ModernStepRow: View {
     let scaleFactor: CGFloat
     let isNavigationBlocked: Bool
 
-    /// Get step number for display (1-indexed, excluding intro steps)
+    @Environment(\.palette) private var palette
+
+    /// 1-based; `index` already excludes intro and outro steps.
     private var displayStepNumber: Int {
-        // The index is already filtered to exclude intro/outro, so just add 1 for 1-indexed display
         return index + 1
+    }
+
+    /// SF Symbol name when the step's icon is authored as `SF=name`; nil keeps the numbered circle.
+    private var leadingSymbol: String? {
+        guard let icon = item.heroImage, let symbolRef = IconRef.symbol(icon) else { return nil }
+        let name = symbolRef.components(separatedBy: ",").first ?? ""
+        return name.isEmpty ? nil : name
+    }
+
+    /// The leading bar carries the accent, so the label stays plain text on the 8% tint.
+    private var contentColor: Color {
+        if isActive { return .primary }
+        return isCompleted ? .primary : .secondary
     }
 
     var body: some View {
         HStack(spacing: 12 * scaleFactor) {
-            // Step indicator (number, checkmark, or spinner)
-            stepIndicator
+            leadingGlyph
                 .frame(width: 28 * scaleFactor, height: 28 * scaleFactor)
 
-            // Step content — no subtitle to keep uniform row height
-            Text(item.displayName)
-                .font(.subheadline.weight(isActive ? .semibold : .regular))
-                .foregroundStyle(isActive ? .primary : (isCompleted ? .primary : .secondary))
+            // No subtitle, so every row has the same height. Explicit size so the label scales
+            // with the glyph; semantic styles ignore `scaleFactor`.
+            Text(item.displayName ?? item.title ?? item.id)
+                .font(.system(size: 14 * scaleFactor, weight: isActive ? .semibold : .regular))
+                .foregroundStyle(contentColor)
                 .lineLimit(1)
 
             Spacer(minLength: 0)
@@ -292,16 +356,45 @@ struct ModernStepRow: View {
         .padding(.horizontal, 12 * scaleFactor)
         .padding(.vertical, 8 * scaleFactor)
         .background(
-            RoundedRectangle(cornerRadius: 8 * scaleFactor)
-                .fill(isActive ? accentColor.opacity(0.12) : Color.clear)
+            // An 8% tint plus the 3pt leading bar marks the active row without a saturated fill.
+            RoundedRectangle(cornerRadius: 8 * scaleFactor, style: .continuous)
+                .fill(isActive ? accentColor.opacity(0.08) : Color.clear)
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: 8 * scaleFactor)
-                .strokeBorder(isActive ? accentColor.opacity(0.3) : Color.clear, lineWidth: 1)
-        )
+        .overlay(alignment: .leading) {
+            if isActive {
+                RoundedRectangle(cornerRadius: 1.5 * scaleFactor, style: .continuous)
+                    .fill(accentColor)
+                    .frame(width: 3 * scaleFactor)
+                    .padding(.vertical, 4 * scaleFactor)
+            }
+        }
         .contentShape(Rectangle())
         .opacity(isNavigationBlocked && !isActive ? 0.6 : 1.0)
         .animation(.easeInOut(duration: 0.2), value: isActive)
+    }
+
+    // MARK: - Leading Glyph
+
+    @ViewBuilder
+    private var leadingGlyph: some View {
+        if let symbol = leadingSymbol {
+            // A completed, non-active step gets a small check badge so progress stays legible.
+            ZStack(alignment: .bottomTrailing) {
+                Image(systemName: symbol)
+                    .font(.system(size: 17 * scaleFactor, weight: .medium))
+                    .foregroundStyle(isActive || isCompleted ? accentColor : Color.secondary)
+                    .symbolEffect(.pulse, options: .repeating, isActive: isDownloading)
+                if isCompleted && showCompletionMark && !isActive {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 11 * scaleFactor, weight: .bold))
+                        .foregroundStyle(palette.success)
+                        .background(Circle().fill(.background))
+                        .offset(x: 3 * scaleFactor, y: 3 * scaleFactor)
+                }
+            }
+        } else {
+            stepIndicator
+        }
     }
 
     // MARK: - Step Indicator
@@ -309,32 +402,29 @@ struct ModernStepRow: View {
     @ViewBuilder
     private var stepIndicator: some View {
         ZStack {
-            if isCompleted && showCompletionMark {
-                // Completed state - checkmark
+            if isCompleted && showCompletionMark && !isActive {
                 Circle()
-                    .fill(Color.green)
+                    .fill(palette.success)
                 Image(systemName: "checkmark")
                     .font(.caption.bold())
                     .foregroundStyle(.white)
             } else if isDownloading {
-                // Downloading/processing state - pulsing icon
                 Circle()
-                    .fill(accentColor.opacity(0.15))
+                    .fill(accentColor.opacity(isActive ? 0.18 : 0.10))
                 Image(systemName: "ellipsis")
                     .font(.system(size: 10 * scaleFactor, weight: .bold))
                     .foregroundStyle(accentColor)
                     .symbolEffect(.pulse, options: .repeating)
             } else if isActive {
-                // Active state - filled circle with number
+                // Accent ring and number; white would vanish on the row's tint in light mode.
                 Circle()
-                    .fill(accentColor)
+                    .strokeBorder(accentColor, lineWidth: 1.5)
                 if showStepNumber {
                     Text("\(displayStepNumber)")
                         .font(.caption.bold())
-                        .foregroundStyle(.white)
+                        .foregroundStyle(accentColor)
                 }
             } else {
-                // Pending state - outlined circle with number
                 Circle()
                     .strokeBorder(Color.secondary.opacity(0.3), lineWidth: 1.5)
                 if showStepNumber {
@@ -361,7 +451,7 @@ struct ModernStepRow: View {
 
     private var subtitleColor: Color {
         if isCompleted {
-            return .green
+            return palette.success
         } else if isDownloading {
             return accentColor
         }
@@ -373,14 +463,21 @@ struct ModernStepRow: View {
 
 #if DEBUG
 struct SidebarNavigationModule_Previews: PreviewProvider {
+    /// Decoded from JSON because `IntroStep` has no usable memberwise initializer.
+    static let sampleSteps: [InspectConfig.IntroStep] = {
+        let json = """
+        [{"id": "step1", "title": "Welcome"},
+         {"id": "step2", "title": "Configure Settings"},
+         {"id": "step3", "title": "Install Software"},
+         {"id": "step4", "title": "Complete Setup"}]
+        """
+        return (try? JSONDecoder().decode([InspectConfig.IntroStep].self,
+                                          from: Data(json.utf8))) ?? []
+    }()
+
     static var previews: some View {
         SidebarNavigationModule(
-            items: [
-                InspectConfig.ItemConfig(id: "step1", displayName: "Welcome"),
-                InspectConfig.ItemConfig(id: "step2", displayName: "Configure Settings"),
-                InspectConfig.ItemConfig(id: "step3", displayName: "Install Software"),
-                InspectConfig.ItemConfig(id: "step4", displayName: "Complete Setup")
-            ],
+            items: SidebarNavigationModule_Previews.sampleSteps,
             currentStep: 1,
             completedSteps: ["step1"],
             accentColor: .blue,
