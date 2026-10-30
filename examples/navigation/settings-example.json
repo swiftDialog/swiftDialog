@@ -1,0 +1,153 @@
+{
+  "cardstyle": "navigation",
+  "title": "Settings",
+  "icon": "SF=gearshape.fill,colour=gray",
+  "width": 960,
+  "height": 640,
+  "button1text": "Apply",
+  "button2text": "Cancel",
+  "checkboxstyle": { "style": "switch", "size": "regular" },
+  "cards": [
+    {
+      "cardId": "about",
+      "title": "About This Mac",
+      "sidebartitle": "About",
+      "icon": "SF=laptopcomputer",
+      "message": "### {computername}\n\n| | |\n|---|---|\n| **Model** | {computermodel} |\n| **macOS** | {osname} {osversion} |\n| **Serial Number** | {serialnumber} |\n| **Signed in as** | {userfullname} ({username}) |\n\nReview and change your settings using the pages in the sidebar, then click **Apply**."
+    },
+
+    {
+      "cardId": "profile",
+      "section": "Account",
+      "title": "Profile",
+      "icon": "SF=person.crop.circle.fill,colour=blue",
+      "message": "Your directory details. Changes are synced to the company directory overnight.",
+      "textfield": [
+        { "title": "Display Name", "name": "displayname", "value": "Jane Appleseed" },
+        { "title": "Job Title", "name": "jobtitle", "value": "Systems Engineer" },
+        { "title": "Email", "name": "email", "value": "jane.appleseed@example.com" },
+        { "title": "Phone", "name": "phone", "value": "+61 2 5550 1234", "prompt": "Optional" },
+        { "title": "Location", "name": "location", "value": "Sydney" }
+      ]
+    },
+    {
+      "cardId": "contact",
+      "section": "Account",
+      "title": "Contact Preferences",
+      "sidebartitle": "Contact",
+      "icon": "SF=bubble.left.and.bubble.right.fill,colour=green",
+      "message": "How should IT get in touch with you about your Mac?",
+      "selectitems": [
+        { "title": "Preferred Channel", "name": "contactchannel", "values": ["Email", "Chat", "Phone"], "default": "Chat", "style": "radio" }
+      ],
+      "checkbox": [
+        { "label": "Notify me before scheduled maintenance", "name": "notifymaintenance", "checked": true },
+        { "label": "Include me in beta testing programs", "name": "betaprogram", "checked": false }
+      ]
+    },
+
+    {
+      "cardId": "appearance",
+      "section": "Preferences",
+      "title": "Appearance",
+      "icon": "SF=circle.lefthalf.filled",
+      "message": "Choose how your Mac looks.",
+      "selectitems": [
+        { "title": "Appearance", "name": "appearance", "values": ["Light", "Dark", "Auto"], "default": "Auto", "style": "radio" },
+        { "title": "Accent Colour", "name": "accentcolour", "values": ["Multicolour", "Blue", "Purple", "Pink", "Red", "Orange", "Yellow", "Green", "Graphite"], "default": "Multicolour" },
+        { "title": "Sidebar Icon Size", "name": "sidebariconsize", "values": ["Small", "Medium", "Large"], "default": "Medium" }
+      ]
+    },
+    {
+      "cardId": "notifications",
+      "section": "Preferences",
+      "title": "Notifications",
+      "icon": "SF=bell.badge.fill,colour=red",
+      "message": "Choose which company apps can send you notifications.",
+      "checkbox": [
+        { "label": "Self Service", "name": "notify_selfservice", "checked": true },
+        { "label": "Software Updates", "name": "notify_updates", "checked": true },
+        { "label": "Security Alerts", "name": "notify_security", "checked": true, "disabled": true },
+        { "label": "Company News", "name": "notify_news", "checked": false }
+      ]
+    },
+    {
+      "cardId": "region",
+      "section": "Preferences",
+      "title": "Language & Region",
+      "icon": "SF=globe,colour=blue",
+      "message": "Set your preferred language and regional formats.",
+      "selectitems": [
+        { "title": "Language", "name": "language", "values": ["English (Australia)", "English (UK)", "English (US)", "Deutsch", "Français", "日本語"], "default": "English (Australia)", "style": "searchable" },
+        { "title": "Time Format", "name": "timeformat", "values": ["12-hour", "24-hour"], "default": "24-hour", "style": "radio" },
+        { "title": "First Day of Week", "name": "firstday", "values": ["Monday", "Sunday"], "default": "Monday" }
+      ]
+    },
+
+    {
+      "cardId": "apps",
+      "section": "Software",
+      "title": "Optional Apps",
+      "icon": "SF=square.grid.2x2.fill,colour=purple",
+      "message": "Turn on any apps you'd like installed. Turning an app off removes it at the next check-in.",
+      "checkbox": [
+        { "label": "Slack", "name": "app_slack", "checked": true },
+        { "label": "Zoom", "name": "app_zoom", "checked": true },
+        { "label": "Microsoft Office", "name": "app_office", "checked": false },
+        { "label": "Visual Studio Code", "name": "app_vscode", "checked": false },
+        { "label": "Docker Desktop", "name": "app_docker", "checked": false }
+      ]
+    },
+    {
+      "cardId": "updates",
+      "section": "Software",
+      "title": "Software Updates",
+      "sidebartitle": "Updates",
+      "icon": "SF=arrow.triangle.2.circlepath.circle.fill,colour=gray",
+      "message": "Control when updates are installed on this Mac.",
+      "selectitems": [
+        { "title": "Install Window", "name": "updatewindow", "values": ["Overnight (1am - 5am)", "Lunchtime (12pm - 1pm)", "Whenever idle"], "default": "Overnight (1am - 5am)", "style": "radio" }
+      ],
+      "checkbox": [
+        { "label": "Automatically install app updates", "name": "autoappupdates", "checked": true },
+        { "label": "Restart automatically if required", "name": "autorestart", "checked": false }
+      ]
+    },
+
+    {
+      "cardId": "vpn",
+      "section": "Network",
+      "title": "VPN",
+      "icon": "SF=network.badge.shield.half.filled,colour=blue",
+      "message": "Company VPN settings.",
+      "selectitems": [
+        { "title": "Gateway", "name": "vpngateway", "values": ["Automatic", "Sydney", "Singapore", "London", "New York"], "default": "Automatic" }
+      ],
+      "checkbox": [
+        { "label": "Connect at login", "name": "vpnatlogin", "checked": true },
+        { "label": "Always-on for untrusted networks", "name": "vpnuntrusted", "checked": true }
+      ]
+    },
+    {
+      "cardId": "proxy",
+      "section": "Network",
+      "title": "Proxy",
+      "icon": "SF=server.rack,colour=gray",
+      "message": "Only change these if asked to by IT.",
+      "textfield": [
+        { "title": "Proxy Host", "name": "proxyhost", "prompt": "proxy.example.com" },
+        { "title": "Port", "name": "proxyport", "prompt": "8080", "regex": "^[0-9]{0,5}$", "regexerror": "Port must be a number" },
+        { "title": "Bypass for", "name": "proxybypass", "value": "*.local, 169.254/16" }
+      ]
+    },
+
+    {
+      "cardId": "support",
+      "section": "Help",
+      "title": "Get Support",
+      "sidebartitle": "Support",
+      "icon": "SF=questionmark.circle.fill,colour=orange",
+      "message": "Need a hand?\n\n- **Service Desk:** [help.example.com](https://help.example.com)\n- **Chat:** #it-help\n- **Phone:** 1800 555 123 (8am - 6pm)\n\nWhen contacting support, quote serial number **{serialnumber}**."
+    }
+  ]
+}
