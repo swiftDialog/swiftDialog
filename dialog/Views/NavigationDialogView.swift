@@ -28,6 +28,31 @@ struct NavigationDialogView: View {
         )
     }
 
+    /// Sidebar width: the top-level `sidebarwidth` if set, otherwise wide enough that no
+    /// row, section header or sidebar header title is truncated (System Settings style).
+    private var sidebarWidth: CGFloat {
+        if let configured = cards.globalConfiguration["sidebarwidth"].double {
+            return CGFloat(configured)
+        }
+
+        func textWidth(_ text: String, _ font: NSFont) -> CGFloat {
+            ceil((text as NSString).size(withAttributes: [.font: font]).width)
+        }
+        let rowFont = NSFont.systemFont(ofSize: NSFont.systemFontSize)
+        let sectionFont = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize, weight: .semibold)
+        let headerFont = NSFont.boldSystemFont(ofSize: NSFont.systemFontSize)
+
+        // Row: list insets + icon + label spacing + text + warning indicator
+        let rowWidth = cards.cards.indices.map { index in
+            textWidth(cards.cards[index].sidebarTitle ?? "Page \(index + 1)", rowFont)
+        }.max() ?? 0
+        let sectionWidth = cards.sections.compactMap(\.title).map { textWidth($0, sectionFont) }.max() ?? 0
+        let headerWidth = cards.globalConfiguration["title"].string.map { textWidth($0, headerFont) } ?? 0
+
+        let required = max(rowWidth + 96, sectionWidth + 64, headerWidth + 82)
+        return min(max(required, 220), 360)
+    }
+
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             VStack(alignment: .leading, spacing: 0) {
@@ -50,12 +75,11 @@ struct NavigationDialogView: View {
                 }
                 .listStyle(.sidebar)
             }
-            .navigationSplitViewColumnWidth(min: 180, ideal: 220, max: 320)
+            .navigationSplitViewColumnWidth(sidebarWidth)
             .toolbar(removing: .sidebarToggle)
         } detail: {
             ContentView(observedDialogContent: observedData)
         }
-        .navigationSplitViewStyle(.balanced)
         .onChange(of: columnVisibility) { _, newValue in
             // Pages are only reachable from the sidebar, so it can't be collapsed
             if newValue != .all {
@@ -106,9 +130,7 @@ struct NavigationSidebarHeader: View {
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, 16)
-            // Clear the window controls; the title bar is hidden
-            .padding(.top, 36)
-            .padding(.bottom, 8)
+            .padding(.vertical, 8)
         }
     }
 }

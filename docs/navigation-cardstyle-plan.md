@@ -45,6 +45,11 @@ New keys:
 | `section` | card | Sidebar section header. A new header starts whenever the value changes between consecutive cards; cards without it have no header. Keeps the flat array so the same JSON still works as a wizard. |
 | `sidebartitle` | card | Optional override for the sidebar label (defaults to the card's `title`). |
 | `sidebaricon` | card | Optional override for the sidebar icon (defaults to the card's `icon`). |
+| `sidebarwidth` | top | Optional fixed sidebar width. By default the sidebar is sized to fit the longest label (220–360pt). |
+
+The navigation sidebar replaces the standard icon / infobox column, so a card's `icon` is shown
+only in the sidebar (`centreicon` still places it above the message), and `infobox` /
+`infoboxwidth` are unavailable in navigation style (ignored with a log warning).
 
 Label rules:
 

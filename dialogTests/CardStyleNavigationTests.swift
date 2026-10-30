@@ -77,6 +77,17 @@ struct CardStyleNavigationTests {
         #expect(state.getMergedConfiguration(for: state.cards[0])["width"].intValue == 900)
     }
 
+    @Test func infoboxIsUnavailableInNavigationStyle() {
+        let state = load(JSON([
+            "cardstyle": "navigation",
+            "infobox": "global info",
+            "cards": [["title": "One", "infobox": "card info", "infoboxwidth": 200]]
+        ]))
+        let merged = state.getMergedConfiguration(for: state.cards[0])
+        #expect(!merged["infobox"].exists())
+        #expect(!merged["infoboxwidth"].exists())
+    }
+
     @Test func wizardKeepsPerCardKeys() {
         let state = load(JSON(["cards": [["title": "One", "width": 1200, "nextpage": 1], ["title": "Two"]]]))
         #expect(state.cards[0].configuration["width"].intValue == 1200)

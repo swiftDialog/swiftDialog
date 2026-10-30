@@ -108,7 +108,8 @@ class CardState: ObservableObject {
     ]
 
     /// Wizard-only routing keys that have no meaning when any page can be opened at any time.
-    static let navigationIgnoredKeys: [String] = ["branch", "nextpage", "finalpage"]
+    /// The infobox is also unavailable - the sidebar replaces the icon / infobox column.
+    static let navigationIgnoredKeys: [String] = ["branch", "nextpage", "finalpage", "infobox", "infoboxwidth"]
 
     /// True when cards are shown as linear Next / Back pages
     var isWizardMode: Bool {
@@ -231,6 +232,10 @@ class CardState: ObservableObject {
         if style == .navigation {
             if !globalConfiguration["width"].exists() { globalConfiguration["width"] = JSON(900) }
             if !globalConfiguration["height"].exists() { globalConfiguration["height"] = JSON(600) }
+            for key in ["infobox", "infoboxwidth"] where globalConfiguration[key].exists() {
+                globalConfiguration.dictionaryObject?.removeValue(forKey: key)
+                writeLog("Navigation style: ignoring '\(key)' - not available with a navigation sidebar", logLevel: .error)
+            }
         }
 
         // Parse cards with explicit id or inferred order
@@ -305,9 +310,13 @@ class CardState: ObservableObject {
     /// Remove keys a navigation page is not allowed to set, logging each one so authors can see why.
     private func stripNavigationKeys(from cardJSON: JSON, cardIndex: Int) -> JSON {
         var configuration = cardJSON
-        for key in Self.navigationTopLevelOnlyKeys + Self.navigationIgnoredKeys where configuration[key].exists() {
+        for key in Self.navigationTopLevelOnlyKeys where configuration[key].exists() {
             configuration.dictionaryObject?.removeValue(forKey: key)
             writeLog("Navigation style: ignoring '\(key)' on card \(cardIndex) - set it at the top level instead", logLevel: .error)
+        }
+        for key in Self.navigationIgnoredKeys where configuration[key].exists() {
+            configuration.dictionaryObject?.removeValue(forKey: key)
+            writeLog("Navigation style: ignoring '\(key)' on card \(cardIndex) - not available with a navigation sidebar", logLevel: .error)
         }
         return configuration
     }

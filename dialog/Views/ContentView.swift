@@ -83,7 +83,8 @@ struct ContentView: View {
                 }
             }
         }
-        .edgesIgnoringSafeArea(.all)
+        // Navigation style: keep detail content clear of the (floating) sidebar
+        .edgesIgnoringSafeArea(cardState.isNavigationStyle ? .top : .all)
         .sheet(isPresented: $observedData.showSheet, content: {
             ErrorView(observedContent: observedData)
                 .background(WindowAccessor { window in
