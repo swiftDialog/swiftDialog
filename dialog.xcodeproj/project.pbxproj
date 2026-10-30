@@ -82,6 +82,8 @@
 		41D892E52F754FBC00FA4E01 /* DistributedNotificationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D892E42F754FBC00FA4E01 /* DistributedNotificationsTests.swift */; };
 		41D892E72F754FCA00FA4E01 /* PlistEvaluationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D892E62F754FCA00FA4E01 /* PlistEvaluationTests.swift */; };
 		41D892E92F76085A00FA4E01 /* PseudoNotificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D892E82F76085A00FA4E01 /* PseudoNotificationView.swift */; };
+		41ECBC4D30944DEA005B1B6B /* NavigationDialogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41ECBC4C30944DEA005B1B6B /* NavigationDialogView.swift */; };
+		41ECBC4F30944E77005B1B6B /* CardStyleNavigationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41ECBC4E30944E77005B1B6B /* CardStyleNavigationTests.swift */; };
 		41FCF1F32EA8553700E3C47D /* CKJSONView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FCF1F22EA8553700E3C47D /* CKJSONView.swift */; };
 		41FCF1F62EA9CFB000E3C47D /* CKMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FCF1F52EA9CFB000E3C47D /* CKMessageView.swift */; };
 		4798E0B1BC024F44BF094D82 /* CarouselStepViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D7BDEBE83A4272AD647901 /* CarouselStepViews.swift */; };
@@ -365,6 +367,8 @@
 		41D892E42F754FBC00FA4E01 /* DistributedNotificationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistributedNotificationsTests.swift; sourceTree = "<group>"; };
 		41D892E62F754FCA00FA4E01 /* PlistEvaluationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlistEvaluationTests.swift; sourceTree = "<group>"; };
 		41D892E82F76085A00FA4E01 /* PseudoNotificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PseudoNotificationView.swift; sourceTree = "<group>"; };
+		41ECBC4C30944DEA005B1B6B /* NavigationDialogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationDialogView.swift; sourceTree = "<group>"; };
+		41ECBC4E30944E77005B1B6B /* CardStyleNavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardStyleNavigationTests.swift; sourceTree = "<group>"; };
 		41FCF1F22EA8553700E3C47D /* CKJSONView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKJSONView.swift; sourceTree = "<group>"; };
 		41FCF1F52EA9CFB000E3C47D /* CKMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CKMessageView.swift; sourceTree = "<group>"; };
 		41FD45FD26C40366006976FC /* TimerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimerView.swift; sourceTree = "<group>"; };
@@ -648,6 +652,7 @@
 				AA00000000000008AABBCC00 /* DebouncedUpdaterTests.swift */,
 				AA00000000000009AABBCC00 /* WindowPlacementTests.swift */,
 				AA00000000000007AABBCC00 /* FileSystemCacheTests.swift */,
+				41ECBC4E30944E77005B1B6B /* CardStyleNavigationTests.swift */,
 			);
 			path = dialogTests;
 			sourceTree = "<group>";
@@ -725,6 +730,7 @@
 				CC7D43CE2B972976004B9E65 /* PresentationView.swift */,
 				CCF430592C07562D004DFB4D /* DebugOverlay.swift */,
 				41D892E82F76085A00FA4E01 /* PseudoNotificationView.swift */,
+				41ECBC4C30944DEA005B1B6B /* NavigationDialogView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1263,6 +1269,7 @@
 				418A7B512759949A00E4D6F1 /* VideoView.swift in Sources */,
 				BAB7C3CB2F39187B0033C0DC /* InspectBannerView.swift in Sources */,
 				BA05AF212F1C37DA001367A5 /* SharedIntroComponents.swift in Sources */,
+				41ECBC4D30944DEA005B1B6B /* NavigationDialogView.swift in Sources */,
 				CA22BB012F390600001367A5 /* PresetCommonHelpers.swift in Sources */,
 				BAEFDFE12E83FB310017CFC2 /* ErrorHandling.swift in Sources */,
 				BAEFDFE22E83FB310017CFC2 /* InstallationInfoPopoverView.swift in Sources */,
@@ -1418,6 +1425,7 @@
 				AA00000000000002AABBCC01 /* ColourAdditionsTests.swift in Sources */,
 				AA00000000000003AABBCC01 /* StringProcessingTests.swift in Sources */,
 				AA00000000000004AABBCC01 /* VideoURLTests.swift in Sources */,
+				41ECBC4F30944E77005B1B6B /* CardStyleNavigationTests.swift in Sources */,
 				AA00000000000005AABBCC01 /* FileModificationDateTests.swift in Sources */,
 				AA00000000000006AABBCC01 /* CommandLineArgumentsTests.swift in Sources */,
 				41AADD46306A4C830024E522 /* IconJSONTests.swift in Sources */,

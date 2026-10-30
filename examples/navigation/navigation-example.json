@@ -1,0 +1,57 @@
+{
+  "cardstyle": "navigation",
+  "title": "Company Setup",
+  "icon": "SF=building.2.fill,colour=accent",
+  "button1text": "Done",
+  "button2text": "Cancel",
+  "cards": [
+    {
+      "cardId": "welcome",
+      "section": "Getting Started",
+      "title": "Welcome",
+      "icon": "SF=hand.wave.fill",
+      "message": "Welcome to your new Mac. Work through each page in the sidebar, in any order.\n\nPages with incomplete details are marked with a warning."
+    },
+    {
+      "cardId": "account",
+      "section": "Getting Started",
+      "title": "Your Account",
+      "icon": "SF=person.crop.circle.fill",
+      "message": "Tell us who you are.",
+      "textfield": [
+        { "title": "Full Name", "name": "fullname", "required": true },
+        { "title": "Email", "name": "email", "required": true, "regex": ".+@.+", "regexerror": "Enter a valid email address" }
+      ]
+    },
+    {
+      "cardId": "department",
+      "section": "Getting Started",
+      "title": "Department",
+      "sidebartitle": "Team",
+      "icon": "SF=person.3.fill",
+      "message": "Hi {fullname} - which team are you joining?",
+      "selectitems": [
+        { "title": "Department", "name": "department", "values": ["Engineering", "Sales", "Support"], "required": true }
+      ]
+    },
+    {
+      "cardId": "apps",
+      "section": "Software",
+      "title": "Applications",
+      "icon": "SF=square.grid.2x2.fill",
+      "message": "Choose optional software.",
+      "checkbox": [
+        { "label": "Slack", "name": "slack" },
+        { "label": "Zoom", "name": "zoom" }
+      ]
+    },
+    {
+      "cardId": "security",
+      "section": "Software",
+      "title": "Security",
+      "icon": "SF=lock.shield.fill",
+      "width": 1200,
+      "message": "FileVault and the firewall will be enabled automatically."
+    }
+  ]
+}

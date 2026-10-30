@@ -84,29 +84,29 @@ struct ButtonBarView: View {
             // In cards mode: button1 = Next (or Finish on last card), button2 = Previous
             let buttonArray: [AnyView]   = [
                 // Button 2: Cancel in normal mode, Previous in cards mode
-                AnyView(NewButton(label: cardState.isCardsMode
+                AnyView(NewButton(label: cardState.isWizardMode
                           ? (cardState.isFirstCard ? "" : observedData.args.cardsPreviousButtonText.value)
                           : (observedData.args.button2TextOption.value == "nil" ? "" : observedData.args.button2TextOption.value),
-                          isVisible: cardState.isCardsMode
+                          isVisible: cardState.isWizardMode
                           ? !cardState.isFirstCard
                           : (observedData.args.button2Option.present || observedData.args.button2TextOption.present),
-                          isDisabled: cardState.isCardsMode
+                          isDisabled: cardState.isWizardMode
                           ? false
                           : observedData.args.button2Disabled.present,
                           enableOnChangeOf: $observedData.args.button2Disabled.present,
                           isStacked: buttonStackStyle,
-                          symbolName: cardState.isCardsMode ? "" : observedData.args.button2Symbol.value,
-                          symbolIsVisible: cardState.isCardsMode ? false : observedData.args.button2Symbol.present,
+                          symbolName: cardState.isWizardMode ? "" : observedData.args.button2Symbol.value,
+                          symbolIsVisible: cardState.isWizardMode ? false : observedData.args.button2Symbol.present,
                           keyboardShortcut: observedData.appProperties.button2DefaultAction,
                           buttonFontSize: observedData.appProperties.buttonTextSize,
                           buttonStyle: observedData.appProperties.buttonSize,
-                          isCardsPreviousButton: cardState.isCardsMode && !cardState.isFirstCard,
-                          shouldQuit: cardState.isCardsMode ? false : true,
+                          isCardsPreviousButton: cardState.isWizardMode && !cardState.isFirstCard,
+                          shouldQuit: cardState.isWizardMode ? false : true,
                           exitCode: 2,
                           observedData: observedData
-                ).id(cardState.isCardsMode ? "" : observedData.args.button2Symbol.value)),
+                ).id(cardState.isWizardMode ? "" : observedData.args.button2Symbol.value)),
                 // Button 1: OK in normal mode, Next/Finish in cards mode
-                AnyView(NewButton(label: cardState.isCardsMode
+                AnyView(NewButton(label: cardState.isWizardMode
                           ? (cardState.isLastCard ? (observedData.args.button1TextOption.value == appDefaults.button1Default ? "Finish".localized : observedData.args.button1TextOption.value) : observedData.args.cardsNextButtonText.value)
                           : (observedData.args.button1TextOption.value == "nil" ? "" : observedData.args.button1TextOption.value),
                           isVisible: (observedData.args.button1TextOption.value != "none"),
@@ -119,8 +119,9 @@ struct ButtonBarView: View {
                           keyboardShortcut: observedData.appProperties.button1DefaultAction,
                           buttonFontSize: observedData.appProperties.buttonTextSize,
                           buttonStyle: observedData.appProperties.buttonSize,
-                          isCardsNextButton: cardState.isCardsMode,
-                          shouldQuit: cardState.isCardsMode ? cardState.isLastCard : true,
+                          isCardsNextButton: cardState.isWizardMode,
+                          isNavigationDoneButton: cardState.isNavigationStyle,
+                          shouldQuit: cardState.isWizardMode ? cardState.isLastCard : true,
                           exitCode: 0,
                           observedData: observedData
                 ).id(observedData.args.button1Symbol.value))
@@ -236,6 +237,7 @@ struct NewButton: View {
     var isShellCommand: Bool = false
     var isCardsNextButton: Bool = false      // Cards mode: this is the Next/Finish button
     var isCardsPreviousButton: Bool = false  // Cards mode: this is the Previous button
+    var isNavigationDoneButton: Bool = false // Navigation style: dismisses once every page is complete
     var shouldQuit: Bool = false
     var exitCode: Int32 = 0
     @ObservedObject var observedData: DialogUpdatableContent
@@ -299,8 +301,13 @@ struct NewButton: View {
             let symbolLayout = (symbolPosition == .top || symbolPosition == .bottom) ? AnyLayout(VStackLayout()) : AnyLayout(HStackLayout())
 
             Button(action: {
+                // Navigation style: only dismiss once every page is complete
+                if isNavigationDoneButton && cardState.isNavigationStyle {
+                    if observedData.validateNavigationForDismissal() {
+                        buttonAction(action: action, exitCode: exitCode, executeShell: isShellCommand, shouldQuit: true, observedObject: observedData, isCardsMode: true)
+                    }
                 // Handle cards mode navigation
-                if isCardsNextButton && cardState.isCardsMode {
+                } else if isCardsNextButton && cardState.isWizardMode {
                     // Validate required fields before advancing or finishing
                     let validation = validateRequiredFields(observedObject: observedData)
                     if !validation.isValid {
@@ -337,7 +344,7 @@ struct NewButton: View {
                         // Advance to next card
                         _ = observedData.advanceToNextCard()
                     }
-                } else if isCardsPreviousButton && cardState.isCardsMode {
+                } else if isCardsPreviousButton && cardState.isWizardMode {
                     // Previous button in cards mode - go back (no validation needed)
                     _ = observedData.goToPreviousCard()
                 } else {

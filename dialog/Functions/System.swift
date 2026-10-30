@@ -61,9 +61,11 @@ func checkRegexPattern(regexPattern: String, textToValidate: String) -> Bool {
 }
 
 /// Validates required fields and regex patterns for the current card/dialog
-/// - Parameter observedObject: The dialog content to validate
+/// - Parameters:
+///   - observedObject: The dialog content to validate
+///   - beep: Sound an alert for each failure (off when silently checking a page being left)
 /// - Returns: A tuple of (isValid, errorMessage) where isValid is true if validation passed
-func validateRequiredFields(observedObject: DialogUpdatableContent) -> (isValid: Bool, errorMessage: String) {
+func validateRequiredFields(observedObject: DialogUpdatableContent, beep: Bool = true) -> (isValid: Bool, errorMessage: String) {
     var requiredString = ""
     var isValid = true
     
@@ -81,7 +83,7 @@ func validateRequiredFields(observedObject: DialogUpdatableContent) -> (isValid:
             userInputState.textFields[index].requiredTextfieldHighlight = Color.clear
             
             if textfieldRequired && textfieldValue == "" {
-                NSSound.beep()
+                if beep { NSSound.beep() }
                 requiredString += "  - \"\(textfieldTitle)\" \("is required".localized)<br>"
                 userInputState.textFields[index].requiredTextfieldHighlight = Color.red
                 isValid = false
@@ -89,13 +91,13 @@ func validateRequiredFields(observedObject: DialogUpdatableContent) -> (isValid:
             } else if !(textfieldValue.isEmpty)
                         && !(textField.regex.isEmpty)
                         && !checkRegexPattern(regexPattern: textField.regex, textToValidate: textfieldValue) {
-                NSSound.beep()
+                if beep { NSSound.beep() }
                 userInputState.textFields[index].requiredTextfieldHighlight = Color.green
                 requiredString += "  - "+(textField.regexError)+"<br>"
                 isValid = false
                 writeLog("Textfield \(textfieldTitle) value \(textfieldValue) does not meet regex requirements \(String(describing: textField.regex))")
             } else if textfieldValidation && textFieldValidationValue != textfieldValue {
-                NSSound.beep()
+                if beep { NSSound.beep() }
                 requiredString += "  - \"\(textfieldTitle)\" \("confirmation failed  <br>values do not match".localized)<br>"
                 userInputState.textFields[index].requiredTextfieldHighlight = Color.red
                 isValid = false
@@ -115,7 +117,7 @@ func validateRequiredFields(observedObject: DialogUpdatableContent) -> (isValid:
             userInputState.dropdownItems[index].requiredfieldHighlight = Color.clear
             
             if dropdownItemRequired && dropdownItemSelectedValue == "" {
-                NSSound.beep()
+                if beep { NSSound.beep() }
                 requiredString += "  - \"\(dropdownItem.title)\" \("is required".localized)<br>"
                 userInputState.dropdownItems[index].requiredfieldHighlight = Color.red
                 isValid = false

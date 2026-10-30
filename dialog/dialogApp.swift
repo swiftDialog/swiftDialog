@@ -367,6 +367,10 @@ struct dialogApp: App {
                         let _ = appvars.debugMode ? writeLog("Loading PresentationView", logLevel: .debug) : ()
                         PresentationView(observedData: observedData)
                             .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
+                    } else if cardState.isNavigationStyle {
+                        let _ = appvars.debugMode ? writeLog("Loading NavigationDialogView", logLevel: .debug) : ()
+                        NavigationDialogView(observedData: observedData)
+                            .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
                     } else {
                         let _ = appvars.debugMode ? writeLog("Loading default ContentView", logLevel: .debug) : ()
                         if appArguments.windowResizable.present {
