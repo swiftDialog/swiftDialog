@@ -45,7 +45,7 @@ New keys:
 | `section` | card | Sidebar section header. A new header starts whenever the value changes between consecutive cards; cards without it have no header. Keeps the flat array so the same JSON still works as a wizard. |
 | `sidebartitle` | card | Optional override for the sidebar label (defaults to the card's `title`). |
 | `sidebaricon` | card | Optional override for the sidebar icon (defaults to the card's `icon`). |
-| `sidebarwidth` | top | Optional fixed sidebar width. By default the sidebar is sized to fit the longest label (220–360pt). |
+| `sidebarwidth` | top | Sidebar width in points. The sidebar is a fixed width (default 260pt, roughly System Settings). |
 
 The navigation sidebar replaces the standard icon / infobox column, so a card's `icon` is shown
 only in the sidebar (`centreicon` still places it above the message), and `infobox` /
@@ -89,6 +89,9 @@ Top-level only (ignored on individual cards, with a log warning): `width`, `heig
   5. **Never block the switch** — the user can always move to another page.
 - Per-page status is shown in the sidebar: a warning indicator on the incomplete item, and the
   section header also shows a warning when any item within it is incomplete.
+- Warnings are only shown for pages the user has visited (left at least once). Unvisited pages
+  never show a warning, though their required fields still block Done. A blocked Done reveals
+  the warnings on every incomplete page.
 - **Dismissal is blocked at the top level**: on Done, the current page is validated (same steps
   as leaving), then if any page is incomplete the dialog does not exit. Show the existing error
   sheet summarising which pages need attention, and select the first incomplete page.

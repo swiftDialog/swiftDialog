@@ -1123,6 +1123,7 @@ final class DialogUpdatableContent: ObservableObject {
         } else {
             cardState.pageIssues.removeValue(forKey: index)
         }
+        cardState.visitedPages.insert(index)
     }
 
     /// Switch the navigation view to another page.
@@ -1142,6 +1143,9 @@ final class DialogUpdatableContent: ObservableObject {
 
         let issueIndices = cardState.pageIssues.keys.sorted()
         guard let firstIssue = issueIndices.first else { return true }
+
+        // A blocked Done reveals every incomplete page in the sidebar, visited or not
+        cardState.visitedPages.formUnion(issueIndices)
 
         var summary = ""
         for index in issueIndices {

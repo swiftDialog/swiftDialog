@@ -99,6 +99,25 @@ struct CardStyleNavigationTests {
         #expect(Set(state.pageIssues.keys) == [1, 3])
     }
 
+    @Test func issuesHiddenUntilPageVisited() {
+        let state = load(navigationJSON)
+        // Pre-scanned issue exists (blocks Done) but is not shown yet
+        #expect(state.pageIssues[1] != nil)
+        #expect(state.visibleIssue(for: 1) == nil)
+
+        state.visitedPages.insert(1)
+        #expect(state.visibleIssue(for: 1) != nil)
+        // Visited but complete pages show nothing
+        state.visitedPages.insert(0)
+        #expect(state.visibleIssue(for: 0) == nil)
+    }
+
+    @Test func sectionIdsDoNotCollideWithCardIndexTags() {
+        // Section ids are used as implicit List tags; they must not be Ints matching card indices
+        let ids = load(navigationJSON).sections.map(\.id)
+        #expect(ids == ["section-0", "section-1", "section-2"])
+    }
+
     @Test func selectChangesPageWithoutHistory() {
         let state = load(navigationJSON)
         #expect(state.select(index: 2))
@@ -132,5 +151,6 @@ struct CardStyleNavigationTests {
         state.reset()
         #expect(state.style == .wizard)
         #expect(state.pageIssues.isEmpty)
+        #expect(state.visitedPages.isEmpty)
     }
 }

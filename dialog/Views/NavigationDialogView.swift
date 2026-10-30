@@ -28,29 +28,15 @@ struct NavigationDialogView: View {
         )
     }
 
-    /// Sidebar width: the top-level `sidebarwidth` if set, otherwise wide enough that no
-    /// row, section header or sidebar header title is truncated (System Settings style).
+    /// Default sidebar width, roughly matching System Settings.
+    static let defaultSidebarWidth: CGFloat = 260
+
+    /// Fixed sidebar width: the top-level `sidebarwidth` if set, otherwise the default.
     private var sidebarWidth: CGFloat {
-        if let configured = cards.globalConfiguration["sidebarwidth"].double {
-            return CGFloat(configured)
+        guard let configured = cards.globalConfiguration["sidebarwidth"].double, configured > 0 else {
+            return Self.defaultSidebarWidth
         }
-
-        func textWidth(_ text: String, _ font: NSFont) -> CGFloat {
-            ceil((text as NSString).size(withAttributes: [.font: font]).width)
-        }
-        let rowFont = NSFont.systemFont(ofSize: NSFont.systemFontSize)
-        let sectionFont = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize, weight: .semibold)
-        let headerFont = NSFont.boldSystemFont(ofSize: NSFont.systemFontSize)
-
-        // Row: list insets + icon + label spacing + text + warning indicator
-        let rowWidth = cards.cards.indices.map { index in
-            textWidth(cards.cards[index].sidebarTitle ?? "Page \(index + 1)", rowFont)
-        }.max() ?? 0
-        let sectionWidth = cards.sections.compactMap(\.title).map { textWidth($0, sectionFont) }.max() ?? 0
-        let headerWidth = cards.globalConfiguration["title"].string.map { textWidth($0, headerFont) } ?? 0
-
-        let required = max(rowWidth + 96, sectionWidth + 64, headerWidth + 82)
-        return min(max(required, 220), 360)
+        return CGFloat(configured)
     }
 
     var body: some View {
@@ -65,7 +51,7 @@ struct NavigationDialogView: View {
                             } header: {
                                 NavigationSectionHeader(
                                     title: title,
-                                    hasIssue: section.cardIndices.contains { cards.pageIssues[$0] != nil }
+                                    hasIssue: section.cardIndices.contains { cards.visibleIssue(for: $0) != nil }
                                 )
                             }
                         } else {
@@ -94,7 +80,7 @@ struct NavigationDialogView: View {
             NavigationSidebarRow(
                 title: cards.cards[index].sidebarTitle ?? "Page \(index + 1)",
                 icon: cards.cards[index].sidebarIcon,
-                issue: cards.pageIssues[index]
+                issue: cards.visibleIssue(for: index)
             )
             .tag(index)
         }

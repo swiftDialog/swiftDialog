@@ -74,7 +74,9 @@ enum CardStyle: String {
 
 /// A run of consecutive cards sharing the same `section` value, for the navigation sidebar.
 struct CardSection: Identifiable {
-    let id: Int
+    /// String rather than Int: List uses ForEach ids as implicit selection tags, and an Int
+    /// id would collide with the card-index tags, highlighting a section header alongside a row.
+    let id: String
     let title: String?
     let cardIndices: [Int]
 }
@@ -97,6 +99,17 @@ class CardState: ObservableObject {
     /// Navigation style: cards that failed validation or onAdvance when last left.
     /// Key: card index, Value: message describing what needs attention.
     @Published var pageIssues: [Int: String] = [:]
+
+    /// Navigation style: cards the user has left at least once (or that were revealed by a
+    /// blocked Done). Issues are only shown in the sidebar for these, so unvisited pages
+    /// don't start out covered in warnings.
+    @Published var visitedPages: Set<Int> = []
+
+    /// Navigation style: the issue to display for a card, or nil if it is complete or not yet visited.
+    func visibleIssue(for index: Int) -> String? {
+        guard visitedPages.contains(index) else { return nil }
+        return pageIssues[index]
+    }
 
     /// Keys that only make sense once for the whole window in navigation style.
     /// They are stripped from individual cards so page switches never resize or restyle the window.
@@ -194,6 +207,7 @@ class CardState: ObservableObject {
             navigationHistory = []
             style = .wizard
             pageIssues = [:]
+            visitedPages = []
             return false
         }
 
@@ -208,6 +222,7 @@ class CardState: ObservableObject {
             navigationHistory = []
             style = .wizard
             pageIssues = [:]
+            visitedPages = []
             return false
         }
 
@@ -297,6 +312,7 @@ class CardState: ObservableObject {
 
         // Pages with required fields start incomplete so Done can't succeed without visiting them
         pageIssues = [:]
+        visitedPages = []
         if style == .navigation {
             for (index, card) in cards.enumerated() where Self.hasRequiredFields(getMergedConfiguration(for: card)) {
                 pageIssues[index] = "Required fields have not been completed".localized
@@ -339,14 +355,14 @@ class CardState: ObservableObject {
 
         for (index, card) in cards.enumerated() {
             if index > 0 && card.section != currentTitle {
-                result.append(CardSection(id: result.count, title: currentTitle, cardIndices: currentIndices))
+                result.append(CardSection(id: "section-\(result.count)", title: currentTitle, cardIndices: currentIndices))
                 currentIndices = []
             }
             currentTitle = card.section
             currentIndices.append(index)
         }
         if !currentIndices.isEmpty {
-            result.append(CardSection(id: result.count, title: currentTitle, cardIndices: currentIndices))
+            result.append(CardSection(id: "section-\(result.count)", title: currentTitle, cardIndices: currentIndices))
         }
         return result
     }
@@ -541,6 +557,7 @@ class CardState: ObservableObject {
         navigationHistory = []
         style = .wizard
         pageIssues = [:]
+        visitedPages = []
     }
 }
 
