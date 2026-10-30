@@ -2,8 +2,9 @@
   "cardstyle": "navigation",
   "title": "Settings",
   "icon": "SF=gearshape.fill,colour=gray",
-  "width": 960,
+  "width": 900,
   "height": 640,
+  "resizable": true,
   "button1text": "Apply",
   "button2text": "Cancel",
   "checkboxstyle": { "style": "switch", "size": "regular" },
@@ -95,8 +96,23 @@
         { "label": "Zoom", "name": "app_zoom", "checked": true },
         { "label": "Microsoft Office", "name": "app_office", "checked": false },
         { "label": "Visual Studio Code", "name": "app_vscode", "checked": false },
-        { "label": "Docker Desktop", "name": "app_docker", "checked": false }
-      ]
+        { "label": "Slack", "name": "app_slack", "checked": true },
+        { "label": "Slack", "name": "app_slack", "checked": true },
+        { "label": "Slack", "name": "app_slack", "checked": true },
+        { "label": "Slack", "name": "app_slack", "checked": true },
+        { "label": "Zoom", "name": "app_zoom", "checked": true },
+        { "label": "Microsoft Office", "name": "app_office", "checked": false },
+        { "label": "Visual Studio Code", "name": "app_vscode", "checked": false },
+        { "label": "Zoom", "name": "app_zoom", "checked": true },
+        { "label": "Microsoft Office", "name": "app_office", "checked": false },
+        { "label": "Visual Studio Code", "name": "app_vscode", "checked": false },
+        { "label": "Zoom", "name": "app_zoom", "checked": true },
+        { "label": "Microsoft Office", "name": "app_office", "checked": false },
+        { "label": "Visual Studio Code", "name": "app_vscode", "checked": false },
+        { "label": "Zoom", "name": "app_zoom", "checked": true },
+        { "label": "Microsoft Office", "name": "app_office", "checked": false },
+        { "label": "Visual Studio Code", "name": "app_vscode", "checked": false }
+     ]
     },
     {
       "cardId": "updates",

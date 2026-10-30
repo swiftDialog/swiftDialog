@@ -124,7 +124,8 @@ struct TextEntryView: View {
                                 .background(Color("editorBackgroundColour"))
                                 .font(.custom("HelveticaNeue", size: 14))
                                 .cornerRadius(3.0)
-                                .frame(minHeight: 80, maxHeight: observedData.appProperties.windowHeight/2)
+                                // Navigation style pages scroll, so the editor gets its minimum height - make that usable
+                                .frame(minHeight: cardState.isNavigationStyle ? 150 : 80, maxHeight: observedData.appProperties.windowHeight/2)
                                 .requiredFieldHighlight(userInputState.textFields[index].requiredTextfieldHighlight, trigger: observedData.showSheet)
                         }
                         .padding(.bottom, appDefaults.contentPadding)
