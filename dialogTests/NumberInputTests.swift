@@ -113,3 +113,45 @@ struct NumberInputTests {
         #expect(groups.last?.rows == [.slider(0), .stepper(1)])
     }
 }
+
+struct NumberColumnWidthTests {
+
+    @Test func labelSlotsAppearWhenAnyRowHasLabels() {
+        var labelled = NumberInput(); labelled.minLabel = "Quiet"; labelled.maxLabel = "Loud"
+        let plain = NumberInput()
+        #expect(NumberColumnWidths.measuring([labelled, plain], fontSize: 13).minLabel > 0)
+        #expect(NumberColumnWidths.measuring([plain], fontSize: 13).minLabel == 0)
+    }
+
+    @Test func everyRowGetsTheWidestLabel() {
+        var short = NumberInput(); short.minLabel = "Lo"
+        var long = NumberInput(); long.minLabel = "Very quiet"
+        let together = NumberColumnWidths.measuring([short, long], fontSize: 13)
+        #expect(together.minLabel == NumberColumnWidths.measuring([long], fontSize: 13).minLabel)
+    }
+
+    @Test func valueWidthCoversTheWholeRange() {
+        var narrow = NumberInput(); narrow.minValue = 0; narrow.maxValue = 9; narrow.unit = "%"
+        var wide = NumberInput(); wide.minValue = 0; wide.maxValue = 100; wide.unit = "%"
+        #expect(NumberColumnWidths.measuring([wide], fontSize: 13).value > NumberColumnWidths.measuring([narrow], fontSize: 13).value)
+    }
+
+    @Test func valueWidthIsIndependentOfTheCurrentValue() {
+        var low = NumberInput(); low.value = 1
+        var high = NumberInput(); high.value = 100
+        #expect(NumberColumnWidths.measuring([low], fontSize: 13).value == NumberColumnWidths.measuring([high], fontSize: 13).value)
+    }
+
+    @Test func hiddenValueReservesNothingUnlessOthersShowOne() {
+        var hidden = NumberInput(); hidden.showValue = false
+        #expect(NumberColumnWidths.measuring([hidden], fontSize: 13).value == 0)
+    }
+
+    @Test func stepperUnitsShareTheWidestUnit() {
+        var minutes = NumberInput(); minutes.kind = "stepper"; minutes.unit = "minutes"
+        var days = NumberInput(); days.kind = "stepper"; days.unit = "days"
+        let widths = NumberColumnWidths.measuring([minutes, days], fontSize: 13)
+        #expect(widths.unit == NumberColumnWidths.measuring([minutes], fontSize: 13).unit)
+        #expect(widths.unit > NumberColumnWidths.measuring([days], fontSize: 13).unit)
+    }
+}

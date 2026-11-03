@@ -6,57 +6,62 @@
 //
 
 import SwiftUI
+import AppKit
 
 // MARK: - Shared column widths
 
-/// Widths of the pieces around a slider or stepper. Every number row reports what it needs and rows
-/// that sit together use the widest, so sliders are the same length and stepper arrows line up.
+/// Widths of the pieces around a slider or stepper. Rows that sit together (in a group, or one
+/// view) all use the widest, so sliders are the same length and stepper arrows line up.
+///
+/// The widths are measured up front from the text itself rather than reported back by the rows:
+/// a value that arrives a layout pass late makes rows size themselves twice and jump.
 struct NumberColumnWidths: Equatable {
     var minLabel: CGFloat = 0
     var maxLabel: CGFloat = 0
     var value: CGFloat = 0
     var unit: CGFloat = 0
-}
 
-private struct NumberColumnKey: PreferenceKey {
-    static var defaultValue = NumberColumnWidths()
-    static func reduce(value: inout NumberColumnWidths, nextValue: () -> NumberColumnWidths) {
-        let next = nextValue()
-        value.minLabel = max(value.minLabel, next.minLabel)
-        value.maxLabel = max(value.maxLabel, next.maxLabel)
-        value.value = max(value.value, next.value)
-        value.unit = max(value.unit, next.unit)
+    /// The widths needed by `inputs`, for text drawn at `fontSize` (captions are 10pt).
+    static func measuring(_ inputs: [NumberInput], fontSize: CGFloat) -> NumberColumnWidths {
+        func width(_ text: String, _ font: NSFont) -> CGFloat {
+            text.isEmpty ? 0 : ceil((text as NSString).size(withAttributes: [.font: font]).width) + 2
+        }
+        let caption = NSFont.systemFont(ofSize: 10)
+        let digits = NSFont.monospacedDigitSystemFont(ofSize: fontSize, weight: .regular)
+        let plain = NSFont.systemFont(ofSize: fontSize)
+
+        var widths = NumberColumnWidths()
+        for input in inputs {
+            if input.kind == "stepper" {
+                widths.unit = max(widths.unit, width(input.unit, plain))
+            } else {
+                widths.minLabel = max(widths.minLabel, width(input.minLabel, caption))
+                widths.maxLabel = max(widths.maxLabel, width(input.maxLabel, caption))
+                if input.showValue {
+                    // the widest the readout gets while dragging: the longer end of the range
+                    var low = input; low.value = input.minValue
+                    var high = input; high.value = input.maxValue
+                    let widest = [low.displayValue, high.displayValue].max { $0.count < $1.count } ?? ""
+                    widths.value = max(widths.value, width(widest + input.unit, digits))
+                }
+            }
+        }
+        return widths
     }
 }
 
-private struct NumberColumnsEnvironmentKey: EnvironmentKey {
+private struct NumberColumnsKey: EnvironmentKey {
     static let defaultValue = NumberColumnWidths()
 }
 
 extension EnvironmentValues {
-    fileprivate var numberColumns: NumberColumnWidths {
-        get { self[NumberColumnsEnvironmentKey.self] }
-        set { self[NumberColumnsEnvironmentKey.self] = newValue }
+    var numberColumns: NumberColumnWidths {
+        get { self[NumberColumnsKey.self] }
+        set { self[NumberColumnsKey.self] = newValue }
     }
 }
 
-/// Collects the widths reported by number rows inside and hands the widest back to them.
-struct AlignedNumberColumns: ViewModifier {
-    @State private var widths = NumberColumnWidths()
-
-    func body(content: Content) -> some View {
-        content
-            .environment(\.numberColumns, widths)
-            .onPreferenceChange(NumberColumnKey.self) { widths = $0 }
-    }
-}
-
-extension View {
-    /// Rows of sliders / steppers inside share column widths so they line up
-    func alignedNumberColumns() -> some View {
-        modifier(AlignedNumberColumns())
-    }
-}
+// MARK: - View
 
 struct NumberInputView: View {
 
@@ -66,8 +71,10 @@ struct NumberInputView: View {
     var kind: String?
     /// Only draw these items (nil = all of `kind`). Used when `vieworder` places inputs individually.
     var indices: [Int]?
-    /// Drawn inside a group, which supplies the surrounding box
+    /// Drawn inside a group, which supplies the surrounding box and the shared column widths
     var embedded: Bool = false
+
+    @Environment(\.numberColumns) private var inheritedColumns
 
     init(observedDialogContent: DialogUpdatableContent, kind: String? = nil, indices: [Int]? = nil, embedded: Bool = false) {
         self.observedData = observedDialogContent
@@ -82,15 +89,18 @@ struct NumberInputView: View {
             inputs.indices.contains(index) && (kind == nil || inputs[index].kind == kind)
         }
         if !visible.isEmpty {
+            // Embedded rows use the widths their group measured; otherwise measure the rows shown here
+            let columns = embedded
+                ? inheritedColumns
+                : NumberColumnWidths.measuring(visible.map { inputs[$0] }, fontSize: observedData.appProperties.labelFontSize)
             VStack {
                 ForEach(visible, id: \.self) { index in
-                    NumberRow(observedData: observedData, input: inputs[index])
+                    NumberRow(observedData: observedData, input: inputs[index], columns: columns)
                     if !embedded && index != visible.last {
                         Divider().opacity(0.5)
                     }
                 }
             }
-            .alignedNumberColumns()
             .font(.system(size: observedData.appProperties.labelFontSize))
             .inputBox(embedded: embedded)
         }
@@ -101,27 +111,7 @@ private struct NumberRow: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
     let input: NumberInput
-    @Environment(\.numberColumns) private var columns
-
-    /// The widest the value readout gets while dragging (monospaced digits, so the longest end of the range)
-    private var widestValueText: String {
-        var low = input; low.value = input.minValue
-        var high = input; high.value = input.maxValue
-        let text = [low.displayValue, high.displayValue].max { $0.count < $1.count } ?? ""
-        return text + input.unit
-    }
-
-    /// Report a piece's natural width without affecting layout
-    private func measure(_ text: String, font: Font? = nil, into report: @escaping (CGFloat) -> NumberColumnWidths) -> some View {
-        Text(text)
-            .font(font)
-            .monospacedDigit()
-            .fixedSize()
-            .hidden()
-            .background(GeometryReader { proxy in
-                Color.clear.preference(key: NumberColumnKey.self, value: report(proxy.size.width))
-            })
-    }
+    let columns: NumberColumnWidths
 
     private var value: Binding<Double> {
         Binding(get: { input.value },
@@ -147,28 +137,27 @@ private struct NumberRow: View {
 
     private var slider: some View {
         HStack(spacing: 8) {
-            Text(input.minLabel)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(minWidth: columns.minLabel, alignment: .trailing)
-                .background(measure(input.minLabel, font: .caption) { NumberColumnWidths(minLabel: $0) })
+            if columns.minLabel > 0 {
+                Text(input.minLabel)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(width: columns.minLabel, alignment: .trailing)
+            }
             Slider(value: value, in: input.minValue...input.maxValue, step: input.step)
                 .frame(width: 220)
                 .accessibilityLabel(input.title)
-            Text(input.maxLabel)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .frame(minWidth: columns.maxLabel, alignment: .leading)
-                .background(measure(input.maxLabel, font: .caption) { NumberColumnWidths(maxLabel: $0) })
-            if input.showValue {
-                Text(input.displayValue + input.unit)
+            if columns.maxLabel > 0 {
+                Text(input.maxLabel)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(width: columns.maxLabel, alignment: .leading)
+            }
+            if columns.value > 0 {
+                // Fixed width, so the slider keeps its length however the number changes
+                Text(input.showValue ? input.displayValue + input.unit : "")
                     .monospacedDigit()
                     .foregroundStyle(.secondary)
-                    .frame(minWidth: columns.value, alignment: .trailing)
-                    .background(measure(widestValueText) { NumberColumnWidths(value: $0) })
-            } else if columns.value > 0 {
-                // keep the slider aligned with rows in the same group that do show a value
-                Color.clear.frame(width: columns.value, height: 1)
+                    .frame(width: columns.value, alignment: .trailing)
             }
         }
     }
@@ -184,10 +173,11 @@ private struct NumberRow: View {
                 .onSubmit { observedData.setNumberValue(id: input.id, input.value) }
             Stepper("", value: value, in: input.minValue...input.maxValue, step: input.step)
                 .labelsHidden()
-            Text(input.unit)
-                .foregroundStyle(.secondary)
-                .frame(minWidth: columns.unit, alignment: .leading)
-                .background(measure(input.unit) { NumberColumnWidths(unit: $0) })
+            if columns.unit > 0 {
+                Text(input.unit)
+                    .foregroundStyle(.secondary)
+                    .frame(width: columns.unit, alignment: .leading)
+            }
         }
     }
 }
