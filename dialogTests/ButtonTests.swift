@@ -171,6 +171,9 @@ struct ButtonLayoutTests {
     }
 }
 
+/// Serialised: the runner is a shared singleton, so one test's long-running action (or killAll) would
+/// otherwise leak into another test's "nothing is running" check.
+@Suite(.serialized)
 struct ButtonRunnerTests {
 
     private func run(_ command: String) async -> Int32 {
