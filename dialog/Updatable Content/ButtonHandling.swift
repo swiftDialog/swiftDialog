@@ -252,3 +252,48 @@ extension DialogUpdatableContent {
         controlValues(textFields: textFieldArray, state: observedUserInputState)
     }
 }
+
+extension DialogUpdatableContent {
+    /// Put controls that are disabled or hidden by a condition back to their defaults, so they
+    /// neither keep nor report a value set while they were available. Runs whenever an input changes;
+    /// a reset can make another control inactive, which the resulting change then picks up.
+    func resetInactiveControls() {
+        let resets = inactiveControlResets(textFields: textFieldArray, state: observedUserInputState, defaults: controlDefaults)
+        guard !resets.isEmpty else { return }
+
+        for (index, value) in resets.textFields {
+            for isObserved in [true, false] {
+                if isObserved {
+                    guard textFieldArray.indices.contains(index) else { continue }
+                    textFieldArray[index].value = value
+                    textFieldArray[index].validationValue = ""
+                } else {
+                    guard userInputState.textFields.indices.contains(index) else { continue }
+                    userInputState.textFields[index].value = value
+                    userInputState.textFields[index].validationValue = ""
+                }
+            }
+        }
+        for (index, checked) in resets.checkboxes {
+            if observedUserInputState.checkBoxes.indices.contains(index) { observedUserInputState.checkBoxes[index].checked = checked }
+            if userInputState.checkBoxes.indices.contains(index) { userInputState.checkBoxes[index].checked = checked }
+        }
+        for (index, value) in resets.selects {
+            if observedUserInputState.dropdownItems.indices.contains(index) { observedUserInputState.dropdownItems[index].selectedValue = value }
+            if userInputState.dropdownItems.indices.contains(index) { userInputState.dropdownItems[index].selectedValue = value }
+        }
+        for (index, value) in resets.numbers {
+            if observedUserInputState.numberInputs.indices.contains(index) { setNumberValue(id: observedUserInputState.numberInputs[index].id, value) }
+        }
+        for (index, value) in resets.buttonRowSelections {
+            if observedUserInputState.buttonRows.indices.contains(index) { setButtonSelection(rowID: observedUserInputState.buttonRows[index].id, value: value) }
+        }
+        for (position, value) in resets.colours {
+            let row = position[0], item = position[1]
+            if observedUserInputState.buttonRows.indices.contains(row), observedUserInputState.buttonRows[row].items.indices.contains(item) {
+                updateButton(id: observedUserInputState.buttonRows[row].items[item].id) { $0.value = value }
+            }
+        }
+        writeLog("Reset inactive controls to their defaults", logLevel: .debug)
+    }
+}

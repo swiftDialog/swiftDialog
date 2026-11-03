@@ -124,6 +124,13 @@ struct DropdownView: View {
                         }
                     }
                     }
+                    // a reset (see enabledif) changes the data; follow it so the control shows the same choice
+                    .onChange(of: observedData.observedUserInputState.dropdownItems.indices.contains(index)
+                                ? observedData.observedUserInputState.dropdownItems[index].selectedValue : "") { _, newValue in
+                        if selectedOption.indices.contains(index), selectedOption[index] != newValue {
+                            selectedOption[index] = newValue
+                        }
+                    }
                     .controlDependencies(observedData, enabledIf: userInputState.dropdownItems[index].enabledIf,
                                          visibleIf: userInputState.dropdownItems[index].visibleIf)
                 }

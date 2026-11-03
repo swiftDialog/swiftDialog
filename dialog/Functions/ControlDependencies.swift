@@ -153,3 +153,68 @@ func controlValues(textFields: [TextFieldState], state: UserInputState) -> [Stri
     }
     return values
 }
+
+// MARK: - Resetting inactive controls
+
+/// Values that inactive controls (disabled by `enabledif` or hidden by `visibleif`) should be put
+/// back to, keyed by index into the matching array. A control the user can't reach shouldn't keep
+/// (or report) a value they set before it became unavailable.
+struct ControlResets: Equatable {
+    var textFields: [Int: String] = [:]
+    var checkboxes: [Int: Bool] = [:]
+    var selects: [Int: String] = [:]
+    var numbers: [Int: Double] = [:]
+    var buttonRowSelections: [Int: String] = [:]
+    /// Colour wells: (row, item) -> hex
+    var colours: [[Int]: String] = [:]
+
+    var isEmpty: Bool {
+        textFields.isEmpty && checkboxes.isEmpty && selects.isEmpty && numbers.isEmpty
+            && buttonRowSelections.isEmpty && colours.isEmpty
+    }
+}
+
+/// Work out which inactive controls differ from their defaults.
+///
+/// - Parameter defaults: values as loaded (see `controlValues`), used for text fields, checkboxes,
+///   sliders / steppers and colour wells. Selects use their configured default (a radio without one
+///   uses its first option, as it does when shown).
+/// - Date / time fields are left alone: they set their own value when shown.
+func inactiveControlResets(textFields: [TextFieldState], state: UserInputState, defaults: [String: String]) -> ControlResets {
+    var resets = ControlResets()
+    let values = controlValues(textFields: textFields, state: state)
+    func inactive(_ enabledIf: String, _ visibleIf: String) -> Bool {
+        (!enabledIf.isEmpty || !visibleIf.isEmpty)
+            && !ControlCondition.isActive(enabledIf: enabledIf, visibleIf: visibleIf, values: values)
+    }
+
+    for (index, field) in textFields.enumerated() where !field.isDatePicker && inactive(field.enabledIf, field.visibleIf) {
+        let key = field.name.isEmpty ? field.title : field.name
+        let target = defaults[key] ?? ""
+        if field.value != target || !field.validationValue.isEmpty { resets.textFields[index] = target }
+    }
+    for (index, box) in state.checkBoxes.enumerated() where inactive(box.enabledIf, box.visibleIf) {
+        let key = box.name.isEmpty ? box.label : box.name
+        let target = (defaults[key] ?? "false") == "true"
+        if box.checked != target { resets.checkboxes[index] = target }
+    }
+    for (index, item) in state.dropdownItems.enumerated() where inactive(item.enabledIf, item.visibleIf) {
+        let target = item.defaultValue.isEmpty && item.style == "radio" ? (item.values.first ?? "") : item.defaultValue
+        if item.selectedValue != target { resets.selects[index] = target }
+    }
+    for (index, number) in state.numberInputs.enumerated() where inactive(number.enabledIf, number.visibleIf) {
+        let target = number.constrained(Double(defaults[number.key] ?? "") ?? number.minValue)
+        if number.value != target { resets.numbers[index] = target }
+    }
+    for (rowIndex, row) in state.buttonRows.enumerated() {
+        let rowInactive = inactive(row.enabledIf, row.visibleIf)
+        if row.selectable && rowInactive && row.selectedValue != row.defaultValue {
+            resets.buttonRowSelections[rowIndex] = row.defaultValue
+        }
+        for (itemIndex, item) in row.items.enumerated() where item.type == "colour" && (rowInactive || inactive(item.enabledIf, "")) {
+            let key = !item.name.isEmpty ? item.name : (!row.name.isEmpty ? row.name : item.label)
+            if let target = defaults[key], item.value != target { resets.colours[[rowIndex, itemIndex]] = target }
+        }
+    }
+    return resets
+}

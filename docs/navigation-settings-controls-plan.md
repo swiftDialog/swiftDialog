@@ -603,8 +603,12 @@ Rules:
   button rows (their selected value) and colour wells (hex).
 - A condition that can't be understood never locks a control: unknown names read as empty (and
   are logged); non-numeric ordering is false.
-- Hidden or disabled controls **still output their value** (output is unchanged) but their
-  `required` / regex checks are skipped, since the user can't reach them.
+- A control that is disabled or hidden is **reset to its default** (the value it loaded with; a
+  select's configured default, or the first option for a radio without one) and stays there while
+  it is unavailable, so it never reports a value set before it became unavailable (e.g. a
+  "restart" switch left on after its "automatic updates" parent is turned off). It still appears
+  in the output with that default. Date / time fields are not reset. Resetting never runs a
+  button action. Their `required` / regex checks are skipped, since the user can't reach them.
 - In navigation style a required field that has `enabledif` / `visibleif` doesn't force an
   unvisited page to be "incomplete"; it is checked when the page is visited.
 - Inside `vieworder` groups hidden rows leave no gap or divider, and a group with nothing visible

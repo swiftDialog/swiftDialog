@@ -725,6 +725,9 @@ final class DialogUpdatableContent: ObservableObject {
     /// Markdown message sheet opened by a button's `sheet` action
     @Published var messageSheet: MessageSheetContent?
 
+    /// Values of every input as loaded, which inactive controls (enabledif / visibleif) go back to
+    var controlDefaults: [String: String] = [:]
+
     @Published var constructionKitShown: Bool = false
 
     // Builder: markdown source references (file path / URL). When set, the message /
@@ -778,6 +781,7 @@ final class DialogUpdatableContent: ObservableObject {
         listItemsArray = userInputState.listItems
         
         observedUserInputState = userInputState
+        controlDefaults = controlValues(textFields: userInputState.textFields, state: userInputState)
 
         showSheet = false
         sheetErrorMessage = ""
@@ -1009,6 +1013,10 @@ final class DialogUpdatableContent: ObservableObject {
                        animated: true)
         }
         
+        // Remember the values as loaded, before any stored input is restored: they are the defaults for
+        // controls that become inactive (enabledif / visibleif)
+        controlDefaults = controlValues(textFields: userInputState.textFields, state: userInputState)
+
         // Check if we have stored input for this card (user navigated back)
         // and restore the values
         if let storedInput = cardState.getStoredInput(for: cardState.currentCardIndex) {

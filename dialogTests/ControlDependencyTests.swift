@@ -187,3 +187,100 @@ struct ControlDependencyConfigTests {
         #expect(CardState.hasRequiredFields(plain))
     }
 }
+
+struct ControlResetTests {
+
+    private func state() -> UserInputState {
+        var state = UserInputState()
+        state.checkBoxes = [
+            CheckBoxes(label: "Auto updates", name: "autoupdates", checked: true),
+            CheckBoxes(label: "Restart", name: "restart", checked: false, enabledIf: "autoupdates")
+        ]
+        return state
+    }
+
+    @Test func activeControlsAreLeftAlone() {
+        var state = state()
+        state.checkBoxes[1].checked = true                       // user turned it on while enabled
+        let resets = inactiveControlResets(textFields: [], state: state, defaults: controlValues(textFields: [], state: self.state()))
+        #expect(resets.isEmpty)
+    }
+
+    @Test func disabledCheckboxGoesBackToItsDefault() {
+        let defaults = controlValues(textFields: [], state: state())
+        var state = state()
+        state.checkBoxes[1].checked = true
+        state.checkBoxes[0].checked = false                      // parent turned off
+        let resets = inactiveControlResets(textFields: [], state: state, defaults: defaults)
+        #expect(resets.checkboxes == [1: false])
+    }
+
+    @Test func alreadyAtDefaultNeedsNoReset() {
+        let defaults = controlValues(textFields: [], state: state())
+        var state = state()
+        state.checkBoxes[0].checked = false
+        #expect(inactiveControlResets(textFields: [], state: state, defaults: defaults).isEmpty)
+    }
+
+    @Test func hiddenControlsResetToo() {
+        var field = TextFieldState(title: "Bypass"); field.name = "bypass"; field.value = "*.local"; field.visibleIf = "useproxy"
+        var state = UserInputState()
+        state.checkBoxes = [CheckBoxes(label: "Use proxy", name: "useproxy", checked: false)]
+        let defaults = ["bypass": "*.local", "useproxy": "false"]
+        field.value = "typed"
+        let resets = inactiveControlResets(textFields: [field], state: state, defaults: defaults)
+        #expect(resets.textFields == [0: "*.local"])
+    }
+
+    @Test func dateFieldsAreNeverReset() {
+        var field = TextFieldState(title: "When"); field.name = "when"; field.showDate = true
+        field.value = "2026-01-01"; field.enabledIf = "never"
+        let resets = inactiveControlResets(textFields: [field], state: UserInputState(), defaults: ["when": ""])
+        #expect(resets.textFields.isEmpty)
+    }
+
+    @Test func selectGoesBackToItsDefault() {
+        var state = UserInputState()
+        state.checkBoxes = [CheckBoxes(label: "On", name: "on", checked: false)]
+        state.dropdownItems = [DropDownItems(title: "Gateway", name: "gateway", values: ["Auto", "Sydney"],
+                                             defaultValue: "Auto", selectedValue: "Sydney", enabledIf: "on")]
+        #expect(inactiveControlResets(textFields: [], state: state, defaults: [:]).selects == [0: "Auto"])
+    }
+
+    @Test func radioWithoutDefaultFallsBackToItsFirstOption() {
+        var state = UserInputState()
+        state.checkBoxes = [CheckBoxes(label: "On", name: "on", checked: false)]
+        state.dropdownItems = [DropDownItems(title: "Mode", name: "mode", values: ["A", "B"], defaultValue: "",
+                                             selectedValue: "B", style: "radio", enabledIf: "on")]
+        #expect(inactiveControlResets(textFields: [], state: state, defaults: [:]).selects == [0: "A"])
+    }
+
+    @Test func numbersGoBackToTheirStartingValue() {
+        var number = NumberInput(); number.name = "volume"; number.value = 80; number.enabledIf = "on"
+        var state = UserInputState()
+        state.checkBoxes = [CheckBoxes(label: "On", name: "on", checked: false)]
+        state.numberInputs = [number]
+        let resets = inactiveControlResets(textFields: [], state: state, defaults: ["volume": "30"])
+        #expect(resets.numbers == [0: 30])
+    }
+
+    @Test func selectableButtonRowAndColourReset() {
+        var row = makeButtonRow(from: JSON(["name": "accent", "selectable": true, "default": "blue", "enabledif": "on",
+                                            "items": [["value": "blue", "label": "Blue"], ["value": "red", "label": "Red"]]]))
+        row.selectedValue = "red"
+        var colour = makeButtonRow(from: JSON(["name": "brand", "type": "colour", "value": "#0066FF", "enabledif": "on"]))
+        colour.items[0].value = "#FF0000"
+        var state = UserInputState()
+        state.checkBoxes = [CheckBoxes(label: "On", name: "on", checked: false)]
+        state.buttonRows = [row, colour]
+        let resets = inactiveControlResets(textFields: [], state: state, defaults: ["brand": "#0066FF"])
+        #expect(resets.buttonRowSelections == [0: "blue"])
+        #expect(resets.colours == [[1, 0]: "#0066FF"])
+    }
+
+    @Test func controlsWithoutConditionsAreNeverTouched() {
+        var state = UserInputState()
+        state.checkBoxes = [CheckBoxes(label: "A", name: "a", checked: true)]
+        #expect(inactiveControlResets(textFields: [], state: state, defaults: ["a": "false"]).isEmpty)
+    }
+}

@@ -256,6 +256,11 @@ struct MessageContent: View {
             withAnimation(.easeInOut(duration: 0.25)) {
                 contentOpacity = 1
             }
+            observedData.resetInactiveControls()
+        }
+        // enabledif / visibleif: controls that become unavailable go back to their defaults
+        .onChange(of: observedData.currentControlValues()) { _, _ in
+            observedData.resetInactiveControls()
         }
     }
 

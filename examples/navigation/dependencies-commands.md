@@ -41,6 +41,7 @@ dialog --jsonfile examples/navigation/settings-example.json --json
 
 ## What to look for
 
-- A disabled control is dimmed and can't be changed; its value is still in the output.
+- A disabled or hidden control is put back to its default and stays there. Try it: tick "Use proxy", type a host, untick "Use proxy" and the Host field clears; the output shows the default.
+- A disabled control is dimmed and can't be changed; it is still in the output, with its default.
 - A required field that is disabled or hidden doesn't block the OK button.
 - In a vieworder group, hiding a row leaves no gap and no double divider.
