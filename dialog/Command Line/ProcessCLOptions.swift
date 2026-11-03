@@ -382,7 +382,8 @@ func makeTextFieldState(from field: JSON) -> TextFieldState {
         maxTime: maxTime,
         dateOutputFormat: field["format"].stringValue,
         confirm: field["confirm"].boolValue,
-        initialPath: field["path"].stringValue)
+        initialPath: field["path"].stringValue,
+        detail: field["detail"].stringValue)
 }
 
 /// Builds a `CheckBoxes` from a JSON object. Shared by the whole-config JSON path and the
@@ -394,7 +395,8 @@ func makeCheckBox(from field: JSON) -> CheckBoxes {
         icon: iconNodeToString(field["icon"]),
         checked: field["checked"].boolValue,
         disabled: field["disabled"].boolValue,
-        enablesButton1: field["enableButton1"].boolValue)
+        enablesButton1: field["enableButton1"].boolValue,
+        detail: field["detail"].stringValue)
 }
 
 /// Builds a `ListItems` from a JSON object. Shared by the whole-config JSON path and the
@@ -423,7 +425,8 @@ func makeDropDownItem(from field: JSON) -> DropDownItems {
         defaultValue: field["default"].stringValue,
         selectedValue: field["default"].stringValue,
         required: field["required"].boolValue,
-        style: field["style"].stringValue)
+        style: field["style"].stringValue,
+        detail: field["detail"].stringValue)
 }
 
 /// Applies title-font settings from a JSON object to appvars. Shared by the whole-config JSON path
@@ -860,6 +863,7 @@ func processCLOptions(json: JSON = getJSON()) {
                 var dropdownStyle: String = "list"
                 let dropdownTitle: String = labelItems[0]
                 var dropdownName: String = ""
+                var dropdownDetail: String = ""
                 for item in labelItems {
                     var itemKeyValuePair = item.split(separator: "=", maxSplits: 1)
                     for _ in itemKeyValuePair.count...2 {
@@ -878,10 +882,12 @@ func processCLOptions(json: JSON = getJSON()) {
                             dropdownStyle = "multiselect"
                         case "name":
                             dropdownName = itemValue
+                        case "detail":
+                            dropdownDetail = itemValue
                         default: ()
                         }
                 }
-                userInputState.dropdownItems.append(DropDownItems(title: dropdownTitle, name: dropdownName, values: dropdownValues[index].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[index], selectedValue: dropdownDefaults[index], required: dropdownRequired, style: dropdownStyle))
+                userInputState.dropdownItems.append(DropDownItems(title: dropdownTitle, name: dropdownName, values: dropdownValues[index].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[index], selectedValue: dropdownDefaults[index], required: dropdownRequired, style: dropdownStyle, detail: dropdownDetail))
             }
         }
         for index in 0..<userInputState.dropdownItems.count where userInputState.dropdownItems[index].required {
@@ -932,6 +938,7 @@ func processCLOptions(json: JSON = getJSON()) {
                 var fieldDateFormat: String = ""
                 var fieldConfirm: Bool = false
                 var fieldInitialPath: String = ""
+                var fieldDetail: String = ""
                 if items.count > 0 {
                     fieldTitle = items[0]
                     if items.count > 1 {
@@ -984,6 +991,8 @@ func processCLOptions(json: JSON = getJSON()) {
                                 fieldConfirm = true
                             case "path":
                                 fieldInitialPath = nextValue
+                            case "detail":
+                                fieldDetail = nextValue
                             default: ()
                             }
                         }
@@ -1024,7 +1033,8 @@ func processCLOptions(json: JSON = getJSON()) {
                             maxTime: fieldMaxTimeResolved,
                             dateOutputFormat: fieldDateFormat,
                             confirm: fieldConfirm,
-                            initialPath: fieldInitialPath))
+                            initialPath: fieldInitialPath,
+                            detail: fieldDetail))
             }
         }
         for index in 0..<userInputState.textFields.count where userInputState.textFields[index].required {
@@ -1056,6 +1066,7 @@ func processCLOptions(json: JSON = getJSON()) {
                 var checked: Bool = false
                 var disabled: Bool = false
                 var enableButton1: Bool = false
+                var detail: String = ""
                 for item in items {
                     var itemKeyValuePair = item.split(separator: "=", maxSplits: 1)
                     for _ in itemKeyValuePair.count...2 {
@@ -1076,11 +1087,13 @@ func processCLOptions(json: JSON = getJSON()) {
                         disabled = true
                     case "enablebutton1":
                         enableButton1 = true
+                    case "detail":
+                        detail = itemValue
                     default:
                         label = itemName
                     }
                 }
-                userInputState.checkBoxes.append(CheckBoxes(label: label, name: name, icon: icon, checked: checked, disabled: disabled, enablesButton1: enableButton1))
+                userInputState.checkBoxes.append(CheckBoxes(label: label, name: name, icon: icon, checked: checked, disabled: disabled, enablesButton1: enableButton1, detail: detail))
                 //appvars.checkboxArray.append(CheckBoxes(label: label, name: name, icon: icon, checked: checked, disabled: disabled, enablesButton1: enableButton1))
             }
         }
@@ -1219,8 +1232,37 @@ func processCLOptions(json: JSON = getJSON()) {
     }
 
     // Process view order
-    if appArguments.preferredViewOrder.present {
-        appvars.viewOrder = reorderViewArray(orderList: appArguments.preferredViewOrder.value, viewOrderArray: appvars.viewOrder) ?? appvars.viewOrder
+    // Reset first: processCLOptions runs again for each card and a layout must not leak between them
+    appvars.viewLayout = nil
+    if appArguments.preferredViewOrder.present || json["vieworder"].type == .dictionary {
+        let layoutInputs = ViewLayoutInputs(
+            textFields: userInputState.textFields.map { $0.name.isEmpty ? $0.title : $0.name },
+            checkboxes: userInputState.checkBoxes.map { $0.name.isEmpty ? $0.label : $0.name },
+            selects: userInputState.dropdownItems.map { (name: $0.name.isEmpty ? $0.title : $0.name, isRadio: $0.style == "radio") },
+            blocks: {
+                var blocks = Set<ViewType>()
+                if appArguments.logFileToTail.present { blocks.insert(.textfile) }
+                if appArguments.webcontent.present { blocks.insert(.webcontent) }
+                if !userInputState.listItems.isEmpty { blocks.insert(.listitem) }
+                return blocks
+            }())
+
+        // A JSON object in the config file arrives as JSON; on the command line it's a string
+        let orderValue: String
+        if json["vieworder"].type == .dictionary {
+            orderValue = json["vieworder"].rawString(options: []) ?? ""
+        } else {
+            orderValue = appArguments.preferredViewOrder.value
+        }
+
+        switch ViewLayoutParser.classify(orderValue, inputNames: layoutInputs.allNames, log: { writeLog($0, logLevel: .error) }) {
+        case .layout(let spec):
+            appvars.viewLayout = ViewLayoutParser.resolve(spec, inputs: layoutInputs, log: { writeLog($0, logLevel: .error) })
+            writeLog("vieworder: placing inputs in \(appvars.viewLayout?.count ?? 0) group(s)")
+        case .typeOrder:
+            // original behaviour, unchanged
+            appvars.viewOrder = reorderViewArray(orderList: appArguments.preferredViewOrder.value, viewOrderArray: appvars.viewOrder) ?? appvars.viewOrder
+        }
     }
 
     if !json[appArguments.autoPlay.long].exists() && !appArguments.autoPlay.present {

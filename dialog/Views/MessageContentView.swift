@@ -162,6 +162,11 @@ struct MessageContent: View {
                 AudioControl()
             }
 
+            if let layout = observedData.appProperties.viewLayout {
+                // Extended vieworder: individual inputs placed in groups
+                GroupedInputsView(observedData: observedData, groups: layout)
+                    .frame(maxWidth: dataEntryMaxWidth, alignment: isNavigation ? .leading : .center)
+            } else {
             Group {
                 ForEach(Array(observedData.appProperties.viewOrder.indices), id: \.self) { index in
                     switch index {
@@ -207,6 +212,7 @@ struct MessageContent: View {
                             EmptyView()
                     }
                 }
+            }
             }
 
 

@@ -872,6 +872,17 @@ struct SDHelp {
         e.g.
         --\(argument.preferredViewOrder.long) \"textfield,checkbox,dropdown\"
 
+        Individual inputs can also be placed by their name, in any order and mixing types, and collected
+        into groups using [Title]. Input names are set with name= (or default to the title/label).
+        Names of the types above are reserved: a type name always means every input of that type
+        that has not been placed individually. Inputs that are not listed are shown at the end.
+        e.g.
+        --\(argument.preferredViewOrder.long) \"[Account],fullname,email,newsletter,[Preferences],textfield,checkbox\"
+
+        For group descriptions and footers, or titles containing commas, use a JSON object (also valid
+        as \"\(argument.preferredViewOrder.long)\" in a JSON config file):
+        --\(argument.preferredViewOrder.long) '{\"groups\":[{\"title\":\"Account\",\"description\":\"Used for sign in\",\"items\":[\"fullname\",\"email\"]}]}'
+
 """
 
         argument.listItem.helpShort = "Enable a list item with the specified label"

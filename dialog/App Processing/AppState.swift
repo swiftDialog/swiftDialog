@@ -81,6 +81,8 @@ struct TextFieldState: Identifiable, Equatable {
     var validationValue: String = ""
     var requiredTextfieldHighlight: Color = .clear
     var initialPath: String = ""
+    /// Subtext shown under the title when not empty
+    var detail: String = ""
 
     /// True when this field should render a date/time picker instead of a text field.
     var isDatePicker: Bool { showDate || showTime }
@@ -142,6 +144,8 @@ struct DropDownItems: Equatable, Identifiable {
     var required: Bool   = false
     var style: String = "list"
     var requiredfieldHighlight: Color = .clear
+    /// Subtext shown under the title when not empty
+    var detail: String = ""
 }
 
 struct CheckBoxes: Identifiable, Equatable {
@@ -155,6 +159,8 @@ struct CheckBoxes: Identifiable, Equatable {
     var checked: Bool = false
     var disabled: Bool = false
     var enablesButton1: Bool = false
+    /// Subtext shown under the label when not empty
+    var detail: String = ""
     var dictionary: [String: Any] {
             return ["label": label,
                     "name": name,

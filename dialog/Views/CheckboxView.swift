@@ -14,8 +14,15 @@ struct RenderToggles: View {
     var iconPresent: Bool = false
     var rowHeight: CGFloat = 10
 
-    init(observedDialogContent: DialogUpdatableContent) {
+    /// Only draw these checkboxes (nil = all). Used when `vieworder` places inputs individually.
+    var indices: [Int]?
+    /// Drawn inside a group, which supplies the surrounding box and dividers
+    var embedded: Bool = false
+
+    init(observedDialogContent: DialogUpdatableContent, indices: [Int]? = nil, embedded: Bool = false) {
         self.observedData = observedDialogContent
+        self.indices = indices
+        self.embedded = embedded
         //self.checkboxContent = checkboxContent
         if observedData.appProperties.checkboxControlSize == .large {
             rowHeight = observedData.appProperties.messageFontSize + 24
@@ -34,7 +41,7 @@ struct RenderToggles: View {
         let checkboxCount = observedData.observedUserInputState.checkBoxes.count
         if checkboxCount > 0 && checkboxCount == userInputState.checkBoxes.count {
             VStack {
-                ForEach(0..<checkboxCount, id: \.self) {index in
+                ForEach(indices?.filter { $0 < checkboxCount } ?? Array(0..<checkboxCount), id: \.self) {index in
                     HStack {
                         if observedData.appProperties.checkboxControlStyle == "switch" {
                         let _ = writeLog("Displaying switches instead of checkboxes", logLevel: .debug)
@@ -49,7 +56,10 @@ struct RenderToggles: View {
                                     .frame(height: rowHeight)
                             }
                         }
-                        Text(observedData.observedUserInputState.checkBoxes[index].label)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(observedData.observedUserInputState.checkBoxes[index].label)
+                            DetailText(observedData.observedUserInputState.checkBoxes[index].detail)
+                        }
                         Spacer()
                         Toggle("", isOn: boundedBinding($observedData.observedUserInputState.checkBoxes, index, \.checked, default: false))
                             .toggleStyle(.switch)
@@ -60,7 +70,10 @@ struct RenderToggles: View {
                             }
                     } else {
                         Toggle(isOn: boundedBinding($observedData.observedUserInputState.checkBoxes, index, \.checked, default: false)) {
-                            Text(observedData.observedUserInputState.checkBoxes[index].label)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(observedData.observedUserInputState.checkBoxes[index].label)
+                                DetailText(observedData.observedUserInputState.checkBoxes[index].detail)
+                            }
                                 .padding(.leading, 5)
                         }
                             .toggleStyle(.checkbox)
@@ -79,15 +92,13 @@ struct RenderToggles: View {
                 .frame(width: .infinity)
 
                 // Horozontal Line
-                if index < observedData.observedUserInputState.checkBoxes.count-1 {
+                if !embedded && index < observedData.observedUserInputState.checkBoxes.count-1 {
                     Divider().opacity(0.5)
                 }
             }
             }
             .font(.system(size: observedData.appProperties.labelFontSize))
-            .padding(10)
-            .background(Color.background.opacity(0.5))
-            .cornerRadius(8)
+            .inputBox(embedded: embedded)
         }
     }
 }

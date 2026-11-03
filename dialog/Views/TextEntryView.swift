@@ -15,10 +15,17 @@ struct TextEntryView: View {
     var fieldwidth: CGFloat = 0
     var textFieldValidationOpacity: CGFloat = 0
 
+    /// Only draw these text fields (nil = all). Used when `vieworder` places inputs individually.
+    var indices: [Int]?
+    /// Drawn inside a group, which supplies the surrounding box
+    var embedded: Bool = false
+
     let dateFormatter = DateFormatter()
 
-    init(observedDialogContent: DialogUpdatableContent) {
+    init(observedDialogContent: DialogUpdatableContent, indices: [Int]? = nil, embedded: Bool = false) {
         self.observedData = observedDialogContent
+        self.indices = indices
+        self.embedded = embedded
         if !observedDialogContent.args.hideIcon.present { //} appArguments.hideIcon.present {
             fieldwidth = observedDialogContent.args.windowWidth.value.floatValue()
         } else {
@@ -109,7 +116,7 @@ struct TextEntryView: View {
         let textFieldCount = observedData.textFieldArray.count
         if observedData.args.textField.present && textFieldCount == userInputState.textFields.count {
             VStack {
-                ForEach(0..<textFieldCount, id: \.self) {index in
+                ForEach(indices?.filter { $0 < textFieldCount } ?? Array(0..<textFieldCount), id: \.self) {index in
                     if observedData.textFieldArray[index].editor {
                         VStack {
                             HStack {
@@ -117,6 +124,7 @@ struct TextEntryView: View {
                                     .frame(alignment: .leading)
                                 Spacer()
                             }
+                            DetailText(observedData.textFieldArray[index].detail)
                             TextEditor(text: boundedBinding($observedData.textFieldArray, index, \.value, default: ""))
                                 .onChange(of: observedData.textFieldArray[index].value) { _, textContent in
                                     setIfInBounds(&userInputState.textFields, index, \.value, textContent)
@@ -136,6 +144,7 @@ struct TextEntryView: View {
                                     Text(observedData.textFieldArray[index].title + (observedData.textFieldArray[index].required ? " *":""))
                                     Spacer()
                                 }
+                                DetailText(observedData.textFieldArray[index].detail)
                                 if observedData.textFieldArray[index].confirm {
                                     HStack {
                                         Text("Confirm".localized + " \(observedData.textFieldArray[index].title)")
@@ -310,9 +319,7 @@ struct TextEntryView: View {
                 }
             }
             .font(.system(size: observedData.appProperties.labelFontSize))
-            .padding(10)
-            .background(Color.background.opacity(0.5))
-            .cornerRadius(8)
+            .inputBox(embedded: embedded)
         }
     }
 }
