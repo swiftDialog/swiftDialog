@@ -722,6 +722,9 @@ final class DialogUpdatableContent: ObservableObject {
     @Published var showSheet: Bool
     @Published var sheetErrorMessage: String
 
+    /// Markdown message sheet opened by a button's `sheet` action
+    @Published var messageSheet: MessageSheetContent?
+
     @Published var constructionKitShown: Bool = false
 
     // Builder: markdown source references (file path / URL). When set, the message /
@@ -881,6 +884,9 @@ final class DialogUpdatableContent: ObservableObject {
                 input[item.title] = item.selected
             }
         }
+
+        // Collect page button state (selection, colour, clicked)
+        input.merge(collectButtonInput()) { current, _ in current }
         
         return input
     }
@@ -892,6 +898,7 @@ final class DialogUpdatableContent: ObservableObject {
         userInputState.checkBoxes.removeAll()
         userInputState.listItems.removeAll()
         userInputState.iconItems.removeAll()
+        userInputState.buttonRows.removeAll()
         
         // Update observed arrays and state
         textFieldArray = []
@@ -1053,6 +1060,9 @@ final class DialogUpdatableContent: ObservableObject {
             }
         }
         
+        // Restore page button state
+        restoreButtonInput(from: storedInput)
+
         // Restore list selections
         for index in 0..<userInputState.listItems.count {
             if let selected = storedInput[userInputState.listItems[index].title] as? Bool {

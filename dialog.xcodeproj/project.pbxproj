@@ -32,6 +32,10 @@
 		413BFDAE309972BD00604E6A /* ViewLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413BFDAD309972BD00604E6A /* ViewLayout.swift */; };
 		413BFDB0309972D000604E6A /* ViewLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413BFDAF309972D000604E6A /* ViewLayoutTests.swift */; };
 		413BFDB23099736500604E6A /* GroupedInputsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413BFDB13099736500604E6A /* GroupedInputsView.swift */; };
+		413BFDB43099772900604E6A /* ButtonActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413BFDB33099772800604E6A /* ButtonActions.swift */; };
+		413BFDB63099779500604E6A /* ButtonHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413BFDB53099779500604E6A /* ButtonHandling.swift */; };
+		413BFDB8309977AE00604E6A /* ButtonRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413BFDB7309977AE00604E6A /* ButtonRowView.swift */; };
+		413BFDBA3099781A00604E6A /* ButtonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413BFDB93099781A00604E6A /* ButtonTests.swift */; };
 		414550AA27C799D000D756E3 /* BackgroundBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414550A927C799D000D756E3 /* BackgroundBlur.swift */; };
 		41512CC2286C77F200F22B86 /* ConstructionKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41512CC1286C77F200F22B86 /* ConstructionKitView.swift */; };
 		4153784E2604B71800AA0E76 /* TitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153784D2604B71800AA0E76 /* TitleView.swift */; };
@@ -305,7 +309,11 @@
 		413563A92F50231B006D177B /* CardState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardState.swift; sourceTree = "<group>"; };
 		413BFDAD309972BD00604E6A /* ViewLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewLayout.swift; sourceTree = "<group>"; };
 		413BFDAF309972D000604E6A /* ViewLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewLayoutTests.swift; sourceTree = "<group>"; };
-		413BFDB13099736500604E6A /* GroupedInputsView.swift */ = {isa = PBXFileReference; path = GroupedInputsView.swift; sourceTree = "<group>"; };
+		413BFDB13099736500604E6A /* GroupedInputsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupedInputsView.swift; sourceTree = "<group>"; };
+		413BFDB33099772800604E6A /* ButtonActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonActions.swift; sourceTree = "<group>"; };
+		413BFDB53099779500604E6A /* ButtonHandling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonHandling.swift; sourceTree = "<group>"; };
+		413BFDB7309977AE00604E6A /* ButtonRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonRowView.swift; sourceTree = "<group>"; };
+		413BFDB93099781A00604E6A /* ButtonTests.swift */ = {isa = PBXFileReference; path = ButtonTests.swift; sourceTree = "<group>"; };
 		414550A927C799D000D756E3 /* BackgroundBlur.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundBlur.swift; sourceTree = "<group>"; };
 		41512CC1286C77F200F22B86 /* ConstructionKitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstructionKitView.swift; sourceTree = "<group>"; };
 		4153784D2604B71800AA0E76 /* TitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleView.swift; sourceTree = "<group>"; };
@@ -660,6 +668,7 @@
 				AA00000000000007AABBCC00 /* FileSystemCacheTests.swift */,
 				41ECBC4E30944E77005B1B6B /* CardStyleNavigationTests.swift */,
 				413BFDAF309972D000604E6A /* ViewLayoutTests.swift */,
+				413BFDB93099781A00604E6A /* ButtonTests.swift */,
 			);
 			path = dialogTests;
 			sourceTree = "<group>";
@@ -739,6 +748,7 @@
 				41D892E82F76085A00FA4E01 /* PseudoNotificationView.swift */,
 				41ECBC4C30944DEA005B1B6B /* NavigationDialogView.swift */,
 				413BFDB13099736500604E6A /* GroupedInputsView.swift */,
+				413BFDB7309977AE00604E6A /* ButtonRowView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -910,6 +920,7 @@
 				411FC34528E2DDFD003EA2C2 /* Notifications.swift */,
 				CCB35CB32BCFF4460041A701 /* SystemInfo.swift */,
 				413BFDAD309972BD00604E6A /* ViewLayout.swift */,
+				413BFDB33099772800604E6A /* ButtonActions.swift */,
 			);
 			path = Functions;
 			sourceTree = "<group>";
@@ -947,6 +958,7 @@
 			isa = PBXGroup;
 			children = (
 				417BD4342798FE38009AE34A /* DialogUpdatableContent.swift */,
+				413BFDB53099779500604E6A /* ButtonHandling.swift */,
 			);
 			path = "Updatable Content";
 			sourceTree = "<group>";
@@ -1276,6 +1288,7 @@
 				41876684275D88D60023A6A1 /* ImageSlider.swift in Sources */,
 				414550AA27C799D000D756E3 /* BackgroundBlur.swift in Sources */,
 				418A7B512759949A00E4D6F1 /* VideoView.swift in Sources */,
+				413BFDB8309977AE00604E6A /* ButtonRowView.swift in Sources */,
 				BAB7C3CB2F39187B0033C0DC /* InspectBannerView.swift in Sources */,
 				BA05AF212F1C37DA001367A5 /* SharedIntroComponents.swift in Sources */,
 				41ECBC4D30944DEA005B1B6B /* NavigationDialogView.swift in Sources */,
@@ -1289,6 +1302,7 @@
 				BAEFDFE72E83FB310017CFC2 /* Preset2.swift in Sources */,
 				41BD41CB2EA8348200DA7124 /* CKCheckboxesView.swift in Sources */,
 				BA7CA5812F231618005A922A /* IntroStepMonitorService.swift in Sources */,
+				413BFDB63099779500604E6A /* ButtonHandling.swift in Sources */,
 				413BFDAE309972BD00604E6A /* ViewLayout.swift in Sources */,
 				BAEFDFE82E83FB310017CFC2 /* InspectState.swift in Sources */,
 				BAEFDFE92E83FB310017CFC2 /* InspectSizes.swift in Sources */,
@@ -1298,6 +1312,7 @@
 				BA56BA962EC5F41000055C7F /* InspectStateMachines.swift in Sources */,
 				CA56BA112F3904C000000001 /* InstallationProgressModule.swift in Sources */,
 				CA56BA122F3904C000000002 /* MonitoringModule.swift in Sources */,
+				413BFDB43099772900604E6A /* ButtonActions.swift in Sources */,
 				CA56BA162F3904C000000006 /* ComplianceAggregatorService.swift in Sources */,
 				CA56BA132F3904C000000003 /* PreferencesModule.swift in Sources */,
 				CA56BA142F3904C000000004 /* ProcessingStateModule.swift in Sources */,
@@ -1440,6 +1455,7 @@
 				AA00000000000005AABBCC01 /* FileModificationDateTests.swift in Sources */,
 				AA00000000000006AABBCC01 /* CommandLineArgumentsTests.swift in Sources */,
 				41AADD46306A4C830024E522 /* IconJSONTests.swift in Sources */,
+				413BFDBA3099781A00604E6A /* ButtonTests.swift in Sources */,
 				AA00000000000008AABBCC01 /* DebouncedUpdaterTests.swift in Sources */,
 				AA00000000000009AABBCC01 /* WindowPlacementTests.swift in Sources */,
 				413BFDB0309972D000604E6A /* ViewLayoutTests.swift in Sources */,

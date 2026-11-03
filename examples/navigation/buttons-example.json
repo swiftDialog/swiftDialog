@@ -1,0 +1,110 @@
+{
+  "cardstyle": "navigation",
+  "title": "Button demo",
+  "icon": "SF=hand.tap.fill,colour=blue",
+  "width": 920,
+  "height": 640,
+  "button1text": "Apply",
+  "button2text": "Cancel",
+  "cards": [
+    {
+      "cardId": "desktop",
+      "title": "Desktop",
+      "icon": "SF=desktopcomputer",
+      "message": "Rows of buttons that act immediately. The commands here only write to /tmp so they are safe to try.",
+      "vieworder": {
+        "groups": [
+          { "title": "Look", "items": ["appearance", "accent", "brand"] },
+          { "title": "Tools", "items": ["tools"] },
+          { "title": "This Mac", "items": ["serial", "model"] }
+        ]
+      },
+      "buttons": [
+        {
+          "name": "appearance",
+          "title": "Appearance",
+          "style": "plain",
+          "selectable": true,
+          "default": "auto",
+          "labelposition": "below",
+          "size": 34,
+          "items": [
+            { "name": "light", "value": "light", "label": "Light", "symbol": "sun.max.fill,colour=orange",
+              "shell": "echo light > /tmp/swiftdialog-demo-appearance" },
+            { "name": "dark",  "value": "dark",  "label": "Dark",  "symbol": "moon.fill,colour=indigo",
+              "shell": "echo dark > /tmp/swiftdialog-demo-appearance" },
+            { "name": "auto",  "value": "auto",  "label": "Auto",  "symbol": "circle.lefthalf.filled,colour=gray",
+              "shell": "echo auto > /tmp/swiftdialog-demo-appearance" }
+          ]
+        },
+        {
+          "name": "accent",
+          "title": "Colour",
+          "style": "plain",
+          "selectable": true,
+          "default": "blue",
+          "labelposition": "selected",
+          "size": 26,
+          "items": [
+            { "value": "blue",   "label": "Blue",   "symbol": "circle.fill,colour=blue",   "shell": "echo blue > /tmp/swiftdialog-demo-accent" },
+            { "value": "purple", "label": "Purple", "symbol": "circle.fill,colour=purple", "shell": "echo purple > /tmp/swiftdialog-demo-accent" },
+            { "value": "pink",   "label": "Pink",   "symbol": "circle.fill,colour=pink",   "shell": "echo pink > /tmp/swiftdialog-demo-accent" },
+            { "value": "red",    "label": "Red",    "symbol": "circle.fill,colour=red",    "shell": "echo red > /tmp/swiftdialog-demo-accent" },
+            { "value": "orange", "label": "Orange", "symbol": "circle.fill,colour=orange", "shell": "echo orange > /tmp/swiftdialog-demo-accent" },
+            { "value": "green",  "label": "Green",  "symbol": "circle.fill,colour=green",  "shell": "echo green > /tmp/swiftdialog-demo-accent" }
+          ]
+        },
+        {
+          "name": "brand",
+          "title": "Highlight colour",
+          "detail": "A colour well. The chosen colour is returned in the output.",
+          "type": "colour",
+          "value": "#0066FF",
+          "label": "Highlight colour"
+        },
+        {
+          "name": "tools",
+          "title": "Keyboard & Dock",
+          "detail": "Open a URL, run a command, show a sheet",
+          "items": [
+            { "name": "shortcuts", "label": "Shortcuts…", "url": "x-apple.systempreferences:com.apple.Keyboard-Settings.extension" },
+            { "name": "hotcorners", "label": "Hot Corners…", "shell": "echo hot corners > /tmp/swiftdialog-demo-hotcorners" },
+            { "name": "help", "label": "Help", "symbol": "questionmark", "display": "symbol",
+              "sheet": "## Hot Corners\n\nMove the pointer to a screen corner to trigger an action.\n\nSerial number: **{serialnumber}**" }
+          ]
+        },
+        { "name": "serial", "title": "Serial Number", "type": "info", "value": "{serialnumber}" },
+        { "name": "model",  "title": "Model", "type": "info", "value": "{computermodel}" }
+      ]
+    },
+    {
+      "cardId": "actions",
+      "title": "Actions",
+      "icon": "SF=bolt.fill,colour=orange",
+      "message": "Things to try:\n\n- **Slow** takes 5 seconds: a spinner appears after half a second, clicking it again does nothing, and Apply/Cancel show a 'still running' sheet until it finishes.\n- **Fails** exits with code 7, shown in the output.\n- **Confirm first** asks before running.\n\nPress Apply afterwards and look at the output.",
+      "buttons": [
+        {
+          "name": "slowrow",
+          "title": "Long running",
+          "items": [
+            { "name": "slow", "label": "Slow (5s)", "symbol": "hourglass", "shell": "sleep 5" }
+          ]
+        },
+        {
+          "name": "failrow",
+          "title": "Failing",
+          "items": [
+            { "name": "fails", "label": "Fails", "symbol": "xmark.octagon", "shell": "echo about to fail; exit 7" }
+          ]
+        },
+        {
+          "name": "confirmrow",
+          "title": "Needs a yes",
+          "items": [
+            { "name": "confirmed", "label": "Confirm first", "confirm": "Really run this?", "shell": "echo confirmed > /tmp/swiftdialog-demo-confirm" }
+          ]
+        }
+      ]
+    }
+  ]
+}

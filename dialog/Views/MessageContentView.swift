@@ -208,6 +208,12 @@ struct MessageContent: View {
                             .padding(.bottom, appDefaults.contentPadding)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
                             .frame(maxWidth: dataEntryMaxWidth, alignment: isNavigation ? .leading : .center)
+                    case observedData.appProperties.viewOrder.firstIndex(of: ViewType.button.rawValue):
+                        ButtonRowView(observedDialogContent: observedData)
+                            .id(observedData.currentCardIndex)
+                            .padding(.bottom, appDefaults.contentPadding)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .frame(maxWidth: dataEntryMaxWidth, alignment: isNavigation ? .leading : .center)
                     default:
                             EmptyView()
                     }

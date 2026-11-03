@@ -40,6 +40,7 @@ enum ViewLayoutRow: Equatable {
     case checkbox(Int)
     case radio(Int)
     case dropdown(Int)
+    case button(Int)
     /// Self-contained blocks that aren't per-item rows: textfile, webcontent, listitem
     case block(ViewType)
 }
@@ -58,11 +59,13 @@ struct ViewLayoutInputs {
     var checkboxes: [String] = []
     /// Select items; radio style items are drawn by `RadioView`, the rest by `DropdownView`
     var selects: [(name: String, isRadio: Bool)] = []
+    /// Button rows, by their layout name
+    var buttons: [String] = []
     /// Which self-contained blocks have content
     var blocks: Set<ViewType> = []
 
     var allNames: Set<String> {
-        Set(textFields + checkboxes + selects.map { $0.name }).subtracting([""])
+        Set(textFields + checkboxes + selects.map { $0.name } + buttons).subtracting([""])
     }
 }
 
@@ -70,13 +73,18 @@ enum ViewLayoutParser {
 
     /// Reserved words in the input ordering path: the seven input types.
     static let reservedWords: Set<String> = [
-        ViewType.textfile, .webcontent, .listitem, .checkbox, .textfield, .radiobutton, .dropdown
-    ].reduce(into: Set<String>()) { $0.insert($1.rawValue) }
+        ViewType.textfile, .webcontent, .listitem, .checkbox, .textfield, .radiobutton, .dropdown, .button
+    ].reduce(into: Set<String>()) { $0.insert($1.rawValue) }.union(["buttons"])
 
     /// Default order types are appended in when inputs aren't placed anywhere.
     static let defaultTypeOrder: [ViewType] = [
-        .textfile, .webcontent, .listitem, .checkbox, .textfield, .radiobutton, .dropdown
+        .textfile, .webcontent, .listitem, .checkbox, .textfield, .radiobutton, .dropdown, .button
     ]
+
+    /// The type a reserved word stands for ("buttons" is a synonym of "button")
+    static func viewType(for word: String) -> ViewType? {
+        word == "buttons" ? .button : ViewType(rawValue: word)
+    }
 
     // MARK: - Classify and parse
 
@@ -176,6 +184,9 @@ enum ViewLayoutParser {
         for (index, item) in inputs.selects.enumerated() where !item.name.isEmpty && byName[item.name] == nil {
             byName[item.name] = item.isRadio ? .radio(index) : .dropdown(index)
         }
+        for (index, name) in inputs.buttons.enumerated() where !name.isEmpty && byName[name] == nil {
+            byName[name] = .button(index)
+        }
 
         // Warn about inputs that can't be placed individually because their name is a reserved word
         for name in inputs.allNames.intersection(reservedWords) {
@@ -206,6 +217,7 @@ enum ViewLayoutParser {
             case .checkbox:  candidates = inputs.checkboxes.indices.map { .checkbox($0) }
             case .radiobutton: candidates = inputs.selects.enumerated().filter { $0.element.isRadio }.map { .radio($0.offset) }
             case .dropdown:  candidates = inputs.selects.enumerated().filter { !$0.element.isRadio }.map { .dropdown($0.offset) }
+            case .button:    candidates = inputs.buttons.indices.map { .button($0) }
             case .textfile, .webcontent, .listitem: candidates = inputs.blocks.contains(type) ? [.block(type)] : []
             }
             return candidates.filter { !placedIndividually.contains($0) }
@@ -216,7 +228,7 @@ enum ViewLayoutParser {
         for group in spec.groups {
             var groupRows: [ViewLayoutRow] = []
             for token in group.items {
-                if reservedWords.contains(token), let type = ViewType(rawValue: token) {
+                if reservedWords.contains(token), let type = viewType(for: token) {
                     rows(ofType: type).forEach { emit($0, into: &groupRows) }
                 } else if let row = byName[token] {
                     if emitted.contains(row) {

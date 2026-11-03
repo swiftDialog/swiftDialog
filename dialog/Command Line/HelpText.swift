@@ -833,6 +833,41 @@ struct SDHelp {
             --\(appArguments.checkbox.long) '{"label":"Enable telemetry","checked":true,"enableButton1":true}'
 """
 
+        argument.button.helpShort = "Add a button to the page that acts immediately (open a URL, run a command or show a sheet)"
+        argument.button.helpUsage = "<text>"
+        argument.button.helpLong = """
+        Adds a row containing a button to the dialog. Unlike the main buttons, it does not close the dialog.
+        Specify --\(argument.button.long) multiple times for multiple rows. \(argument.buttons.long) is a synonym.
+
+        Keys (comma separated, the first unkeyed item is the label):
+            name=       name used to report the button and to place it with --\(argument.preferredViewOrder.long)
+            label=      button text
+            symbol=     SF Symbol, same options as --\(argument.button1Symbol.long) e.g. symbol=gear,colour=blue
+            image=      image path or URL
+            display=    both (default), symbol (symbol/image only) or label
+            url=        open this URL when clicked
+            shell=      run this command when clicked (runs in the background, output is logged)
+            sheet=      show this markdown text (or .md file) in a sheet when clicked
+            confirm=    ask for confirmation before acting
+            disabled    show the button but don't allow clicks
+            detail=     subtext shown under the title
+
+        e.g.
+        --\(argument.button.long) "label=Open Self Service,url=selfservice://"
+        --\(argument.button.long) "label=Reset,shell=/usr/local/bin/reset-thing,confirm=Reset now?"
+        --\(argument.button.long) "name=help,symbol=questionmark,display=symbol,sheet=Some **markdown** help"
+
+        A JSON object gives access to everything, including several buttons on one row and
+        rows of selectable swatches. Items share the row:
+        --\(argument.button.long) '{"name":"tools","items":[{"label":"One","url":"https://example.com"},{"label":"Two","shell":"true"}]}'
+
+        While a button's command is running, clicking it again does nothing and button1/button2 will not
+        close the dialog. Any other way of quitting stops running commands. Output includes whether
+        each button was clicked and the exit code of its command.
+        """
+        argument.buttons.helpShort = "Synonym of --\(argument.button.long)"
+        argument.buttons.helpLong = "See --\(argument.button.long)"
+
         argument.checkboxStyle.helpShort = "Change the appearance of checkboxes"
         argument.checkboxStyle.helpUsage = "default|checkbox|switch[,<size>]"
         argument.checkboxStyle.helpLong = """

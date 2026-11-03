@@ -208,6 +208,11 @@ func executeOnAdvanceCallback(command: String, cardIndex: Int, cardId: String?, 
 }
 
 func buttonAction(action: String, exitCode: Int32, executeShell: Bool, shouldQuit: Bool = true, observedObject: DialogUpdatableContent, isCardsMode: Bool = false) {
+    // button1 / button2 can't dismiss the dialog while page button actions are still running.
+    // (Every other way of quitting is a force quit and kills them.)
+    if shouldQuit && (exitCode == 0 || exitCode == 2) && observedObject.blockDismissalWhileButtonActionsRun() {
+        return
+    }
     writeLog("processing button action \(action)")
     if action != "" {
         if executeShell {
@@ -232,6 +237,8 @@ func printVersionString() {
 
 func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: DialogUpdatableContent? = nil) {
     writeLog("About to quit with exit code \(exitCode)")
+    // Anything still running from a page button is killed as we go
+    ButtonActionRunner.shared.killAll()
     if exitMessage != "" {
         print("\(exitMessage!)")
     }
@@ -367,6 +374,12 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
                 outputArray.append("\"\(checkboxName)\" : \"\(checkBox.checked)\"")
                 json[checkboxName].boolValue = checkBox.checked
             }
+        }
+
+        // page buttons: clicked state / exit code, selected value, chosen colour
+        for entry in buttonOutputEntries(userInputState.buttonRows) {
+            outputArray.append(contentsOf: entry.lines)
+            json[entry.key] = JSON(entry.value)
         }
 
         // print the output

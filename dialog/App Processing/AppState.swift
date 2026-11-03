@@ -51,6 +51,7 @@ struct UserInputState {
     var listItems = [ListItems]()
     var textFields = [TextFieldState]()
     var checkBoxes = [CheckBoxes]()
+    var buttonRows = [ButtonRow]()
     var iconItems = [Icons]()
 }
 
@@ -170,6 +171,68 @@ struct CheckBoxes: Identifiable, Equatable {
                     "enablesButton1": enablesButton1
             ]
         }
+}
+
+/// One button in a row. `type` decides what it is: "action" runs url / shell / sheet when clicked,
+/// "colour" is a colour well (value = hex), "info" is a read-only value.
+struct ButtonItem: Identifiable, Equatable {
+    var id = UUID()
+    var name: String = ""
+    var label: String = ""
+    /// SF Symbol spec, same vocabulary as --button1symbol
+    var symbol: String = ""
+    var image: String = ""
+    /// "both" (default), "symbol" (symbol/image only) or "label"
+    var display: String = "both"
+    var value: String = ""
+    var type: String = "action"
+    var url: String = ""
+    var shell: String = ""
+    var sheet: String = ""
+    var sheetImage: String = ""
+    var sheetButtonText: String = ""
+    var confirm: String = ""
+    var disabled: Bool = false
+    /// colour type: allow choosing opacity
+    var opacity: Bool = false
+
+    // Runtime state (not configuration)
+    var clicked: Bool = false
+    var isRunning: Bool = false
+    /// Set 500ms after a click if the action is still running, so quick actions never show a spinner
+    var showSpinner: Bool = false
+    var lastExitCode: Int32?
+}
+
+/// A row of one or more buttons laid out horizontally. One --button / --buttons argument = one row.
+struct ButtonRow: Identifiable, Equatable {
+    var id = UUID()
+    var name: String = ""
+    var title: String = ""
+    var detail: String = ""
+    /// "bordered" (standard push buttons) or "plain" (no surround - swatches, thumbnails)
+    var style: String = "bordered"
+    /// Row behaves like a radio choice: the clicked item is selected and its value output
+    var selectable: Bool = false
+    var selectedValue: String = ""
+    var defaultValue: String = ""
+    /// "leading", "trailing" or "center"; applies when the row has no title
+    var alignment: String = "trailing"
+    /// Symbol/image size in points (0 = automatic)
+    var size: CGFloat = 0
+    /// "inline", "below", "selected" or "hidden"
+    var labelPosition: String = "inline"
+    var items: [ButtonItem] = []
+
+    /// Name used by vieworder to place the row
+    var layoutName: String {
+        if !name.isEmpty { return name }
+        if let first = items.first {
+            if !first.name.isEmpty { return first.name }
+            return first.label
+        }
+        return title
+    }
 }
 
 struct ListItems: Codable, Identifiable, Equatable {

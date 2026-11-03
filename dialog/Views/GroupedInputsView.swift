@@ -84,6 +84,7 @@ struct GroupedInputsView: View {
                 }
             }
         }
+        .padding(.top, 8)
         .padding(.bottom, appDefaults.contentPadding)
     }
 
@@ -102,6 +103,9 @@ struct GroupedInputsView: View {
         case .dropdown(let index):
             DropdownView(observedDialogContent: observedData, indices: [index], embedded: true)
                 .id("\(observedData.currentCardIndex)-select-\(index)")
+        case .button(let index):
+            ButtonRowView(observedDialogContent: observedData, indices: [index], embedded: true)
+                .id("\(observedData.currentCardIndex)-button-\(index)")
         case .block(let type):
             switch type {
             case .textfile:

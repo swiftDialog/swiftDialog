@@ -386,6 +386,88 @@ func makeTextFieldState(from field: JSON) -> TextFieldState {
         detail: field["detail"].stringValue)
 }
 
+/// Text a button config may contain system tags ({serialnumber}) and the usual \n / <br> handling.
+private func buttonText(_ value: String) -> String {
+    processTextString(value, tags: appvars.systemInfo)
+}
+
+/// Builds a `ButtonItem` from a JSON object (a button in a row, or a single button).
+func makeButtonItem(from field: JSON) -> ButtonItem {
+    var item = ButtonItem()
+    item.name = field["name"].stringValue
+    item.label = buttonText(field["label"].stringValue)
+    item.symbol = field["symbol"].string ?? (field["symbol"].type == .dictionary ? (field["symbol"].rawString(options: []) ?? "") : "")
+    item.image = field["image"].stringValue
+    item.display = field["display"].string?.lowercased() ?? "both"
+    switch field["type"].stringValue.lowercased() {
+    case "colour", "color": item.type = "colour"
+    case "info": item.type = "info"
+    default: item.type = "action"
+    }
+    item.value = item.type == "action" ? field["value"].stringValue : buttonText(field["value"].stringValue)
+    item.url = field["url"].stringValue
+    item.shell = field["shell"].stringValue
+    if field["sheet"].type == .dictionary {
+        item.sheet = buttonText(field["sheet"]["message"].stringValue)
+        item.sheetImage = field["sheet"]["image"].stringValue
+        item.sheetButtonText = field["sheet"]["buttontext"].stringValue
+    } else {
+        item.sheet = buttonText(field["sheet"].stringValue)
+    }
+    item.confirm = buttonText(field["confirm"].stringValue)
+    item.disabled = field["disabled"].boolValue
+    item.opacity = field["opacity"].boolValue
+    return item
+}
+
+/// Builds a `ButtonRow` from a JSON object. An object with an `items` array is a row of several
+/// buttons; an object without one is a single button (a row of one) using the same keys.
+func makeButtonRow(from field: JSON) -> ButtonRow {
+    var row = ButtonRow()
+    row.name = field["name"].stringValue
+    row.title = buttonText(field["title"].stringValue)
+    row.detail = buttonText(field["detail"].stringValue)
+    row.style = field["style"].string?.lowercased() == "plain" ? "plain" : "bordered"
+    row.selectable = field["selectable"].boolValue
+    row.defaultValue = field["default"].stringValue
+    row.selectedValue = row.defaultValue
+    row.alignment = field["alignment"].string?.lowercased() ?? (row.title.isEmpty ? "trailing" : "trailing")
+    row.size = CGFloat(field["size"].doubleValue)
+    row.labelPosition = field["labelposition"].string?.lowercased() ?? "inline"
+    if field["items"].type == .array {
+        row.items = field["items"].arrayValue.map { makeButtonItem(from: $0) }
+    } else {
+        row.items = [makeButtonItem(from: field)]
+    }
+    // Selectable rows need a value per item
+    for index in row.items.indices where row.items[index].value.isEmpty && row.items[index].type == "action" {
+        row.items[index].value = row.items[index].name.isEmpty ? row.items[index].label : row.items[index].name
+    }
+    return row
+}
+
+/// Builds a single-button `ButtonRow` from the comma separated command line form:
+/// `--button "label=Shortcuts…,url=x-apple.systempreferences:…"` (the first unkeyed item is the label).
+func makeButtonRow(fromCSV text: String) -> ButtonRow {
+    var json = JSON()
+    for part in text.components(separatedBy: ",").map({ $0.trimmingCharacters(in: .whitespaces) }) where !part.isEmpty {
+        let pair = part.split(separator: "=", maxSplits: 1).map(String.init)
+        if pair.count == 2 {
+            let key = pair[0].lowercased()
+            if ["disabled", "selectable", "opacity"].contains(key) {
+                json[key].bool = ["true", "1", "yes"].contains(pair[1].lowercased())
+            } else {
+                json[key].string = pair[1]
+            }
+        } else if ["disabled", "selectable", "opacity"].contains(part.lowercased()) {
+            json[part.lowercased()].bool = true
+        } else if json["label"].string == nil {
+            json["label"].string = part
+        }
+    }
+    return makeButtonRow(from: json)
+}
+
 /// Builds a `CheckBoxes` from a JSON object. Shared by the whole-config JSON path and the
 /// per-argument JSON form (`--checkbox '{...}'`) so both accept the same keys.
 func makeCheckBox(from field: JSON) -> CheckBoxes {
@@ -1100,6 +1182,30 @@ func processCLOptions(json: JSON = getJSON()) {
                                 writeLog("checkboxOptionsArray : \(appvars.checkboxArray)")
     }
 
+    // Page buttons: --button / --buttons (synonyms), one argument = one row.
+    userInputState.buttonRows.removeAll()
+    if appArguments.button.present || appArguments.buttons.present {
+        for key in [appArguments.button.long, appArguments.buttons.long] {
+            if json[key].exists() {
+                // JSON config: an object is one row, an array is several rows
+                let entries = json[key].type == .array ? json[key].arrayValue : [json[key]]
+                for entry in entries where entry.type == .dictionary {
+                    userInputState.buttonRows.append(makeButtonRow(from: entry))
+                }
+            } else {
+                for option in CLOptionMultiOptions(optionName: key) {
+                    let parsedJSON = JSON(parseJSON: option)
+                    if parsedJSON.type == .dictionary {
+                        userInputState.buttonRows.append(makeButtonRow(from: parsedJSON))
+                    } else {
+                        userInputState.buttonRows.append(makeButtonRow(fromCSV: option))
+                    }
+                }
+            }
+        }
+        writeLog("Processed \(userInputState.buttonRows.count) button row(s)")
+    }
+
     if appArguments.checkboxStyle.present {
         writeLog("\(appArguments.checkboxStyle.long) present")
         var controlSize = ""
@@ -1239,6 +1345,7 @@ func processCLOptions(json: JSON = getJSON()) {
             textFields: userInputState.textFields.map { $0.name.isEmpty ? $0.title : $0.name },
             checkboxes: userInputState.checkBoxes.map { $0.name.isEmpty ? $0.label : $0.name },
             selects: userInputState.dropdownItems.map { (name: $0.name.isEmpty ? $0.title : $0.name, isRadio: $0.style == "radio") },
+            buttons: userInputState.buttonRows.map { $0.layoutName },
             blocks: {
                 var blocks = Set<ViewType>()
                 if appArguments.logFileToTail.present { blocks.insert(.textfile) }

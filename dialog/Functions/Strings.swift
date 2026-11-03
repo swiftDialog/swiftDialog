@@ -15,6 +15,7 @@ enum ViewType: String {
     case textfield
     case radiobutton
     case dropdown
+    case button
 }
 
 func getVersionString() -> String {
