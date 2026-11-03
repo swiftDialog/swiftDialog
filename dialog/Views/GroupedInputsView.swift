@@ -72,6 +72,7 @@ struct GroupedInputsView: View {
                                 .padding(.vertical, 6)
                         }
                     }
+                    .alignedNumberColumns()
                     .font(.system(size: observedData.appProperties.labelFontSize))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
