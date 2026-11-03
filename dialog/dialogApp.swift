@@ -367,6 +367,16 @@ struct dialogApp: App {
                         let _ = appvars.debugMode ? writeLog("Loading PresentationView", logLevel: .debug) : ()
                         PresentationView(observedData: observedData)
                             .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
+                    } else if cardState.isNavigationStyle {
+                        let _ = appvars.debugMode ? writeLog("Loading NavigationDialogView", logLevel: .debug) : ()
+                        if appArguments.windowResizable.present {
+                            // Keep the sidebar and a usable detail pane on screen while resizing
+                            NavigationDialogView(observedData: observedData)
+                                .frame(minWidth: 600, minHeight: 400)
+                        } else {
+                            NavigationDialogView(observedData: observedData)
+                                .frame(width: observedData.appProperties.windowWidth, height: observedData.appProperties.windowHeight)
+                        }
                     } else {
                         let _ = appvars.debugMode ? writeLog("Loading default ContentView", logLevel: .debug) : ()
                         if appArguments.windowResizable.present {

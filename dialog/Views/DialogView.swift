@@ -30,6 +30,11 @@ struct DialogView: View {
         }
         showSideBar = observedDialogContent.args.iconOption.present && !observedDialogContent.args.centreIcon.present && observedDialogContent.args.iconOption.value != "none"
         showInfoBox = observedDialogContent.args.infoBox.present
+        // Navigation style: the sidebar replaces the icon / infobox column
+        if cardState.isNavigationStyle {
+            showSideBar = false
+            showInfoBox = false
+        }
         self.observedData = observedDialogContent
     }
 

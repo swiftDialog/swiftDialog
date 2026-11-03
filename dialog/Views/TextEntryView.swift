@@ -124,7 +124,8 @@ struct TextEntryView: View {
                                 .background(Color("editorBackgroundColour"))
                                 .font(.custom("HelveticaNeue", size: 14))
                                 .cornerRadius(3.0)
-                                .frame(minHeight: 80, maxHeight: observedData.appProperties.windowHeight/2)
+                                // Navigation style pages scroll, so the editor gets its minimum height - make that usable
+                                .frame(minHeight: cardState.isNavigationStyle ? 150 : 80, maxHeight: observedData.appProperties.windowHeight/2)
                                 .requiredFieldHighlight(userInputState.textFields[index].requiredTextfieldHighlight, trigger: observedData.showSheet)
                         }
                         .padding(.bottom, appDefaults.contentPadding)
@@ -223,8 +224,17 @@ struct TextEntryView: View {
                                             guard observedData.textFieldArray.indices.contains(index) else { return }
                                             setIfInBounds(&userInputState.textFields, index, \.value, observedData.textFieldArray[index].value)
                                             
+                                            // Navigation style - same as pressing Done: dismiss only once every page is complete
+                                            if cardState.isNavigationStyle {
+                                                if observedData.validateNavigationForDismissal() {
+                                                    let button1action = observedData.args.button1ShellActionOption.present ?
+                                                        observedData.args.button1ShellActionOption.value :
+                                                        (observedData.args.button1ActionOption.present ? observedData.args.button1ActionOption.value : "")
+                                                    let buttonShellAction = observedData.args.button1ShellActionOption.present
+                                                    buttonAction(action: button1action, exitCode: 0, executeShell: buttonShellAction, shouldQuit: true, observedObject: observedData, isCardsMode: true)
+                                                }
                                             // Handle cards mode - advance to next card instead of exiting
-                                            if cardState.isCardsMode {
+                                            } else if cardState.isWizardMode {
                                                 // Validate required fields first
                                                 let validation = validateRequiredFields(observedObject: observedData)
                                                 if !validation.isValid {

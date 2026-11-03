@@ -33,6 +33,52 @@ struct DialogCard: Identifiable {
         let b = configuration["branch"]
         return b.exists() ? b : nil
     }
+
+    /// Author-supplied stable identifier for the card.
+    var cardId: String? {
+        return configuration["cardId"].string
+    }
+
+    /// Navigation style: sidebar section header this card belongs to.
+    var section: String? {
+        guard let value = configuration["section"].string, !value.isEmpty else { return nil }
+        return value
+    }
+
+    /// Navigation style: sidebar label. `sidebartitle` wins, then the card's own `title`.
+    /// Inherited (global) titles are deliberately ignored so every row doesn't repeat them.
+    var sidebarTitle: String? {
+        if let value = configuration["sidebartitle"].string, !value.isEmpty { return value }
+        if let value = configuration["title"].string, !value.isEmpty, value != "none" { return value }
+        return nil
+    }
+
+    /// Navigation style: sidebar icon. `sidebaricon` wins, then the card's own `icon`.
+    var sidebarIcon: String? {
+        for key in ["sidebaricon", "icon"] {
+            if let value = configuration[key].string, !value.isEmpty {
+                return value == "none" ? nil : value
+            }
+        }
+        return nil
+    }
+}
+
+/// How a multi-card workflow is presented.
+enum CardStyle: String {
+    /// Linear Next / Back pages (the original cards behaviour).
+    case wizard
+    /// Sidebar of pages, any of which can be opened at any time.
+    case navigation
+}
+
+/// A run of consecutive cards sharing the same `section` value, for the navigation sidebar.
+struct CardSection: Identifiable {
+    /// String rather than Int: List uses ForEach ids as implicit selection tags, and an Int
+    /// id would collide with the card-index tags, highlighting a section header alongside a row.
+    let id: String
+    let title: String?
+    let cardIndices: [Int]
 }
 
 /// Manages the state of a multi-card dialog workflow
@@ -46,6 +92,47 @@ class CardState: ObservableObject {
 
     /// Whether cards mode is active
     @Published var isCardsMode: Bool = false
+
+    /// Presentation style for the cards (`cardstyle` top-level key)
+    @Published var style: CardStyle = .wizard
+
+    /// Navigation style: cards that failed validation or onAdvance when last left.
+    /// Key: card index, Value: message describing what needs attention.
+    @Published var pageIssues: [Int: String] = [:]
+
+    /// Navigation style: cards the user has left at least once (or that were revealed by a
+    /// blocked Done). Issues are only shown in the sidebar for these, so unvisited pages
+    /// don't start out covered in warnings.
+    @Published var visitedPages: Set<Int> = []
+
+    /// Navigation style: the issue to display for a card, or nil if it is complete or not yet visited.
+    func visibleIssue(for index: Int) -> String? {
+        guard visitedPages.contains(index) else { return nil }
+        return pageIssues[index]
+    }
+
+    /// Keys that only make sense once for the whole window in navigation style.
+    /// They are stripped from individual cards so page switches never resize or restyle the window.
+    static let navigationTopLevelOnlyKeys: [String] = [
+        "width", "height", "big", "small", "resizable",
+        "position", "positionoffset", "blurscreen", "ontop", "moveable",
+        "button1text", "button1symbol", "button2", "button2text", "button2symbol",
+        "timer", "hidetimerbar"
+    ]
+
+    /// Wizard-only routing keys that have no meaning when any page can be opened at any time.
+    /// The infobox is also unavailable - the sidebar replaces the icon / infobox column.
+    static let navigationIgnoredKeys: [String] = ["branch", "nextpage", "finalpage", "infobox", "infoboxwidth"]
+
+    /// True when cards are shown as linear Next / Back pages
+    var isWizardMode: Bool {
+        return isCardsMode && style == .wizard
+    }
+
+    /// True when cards are shown as a sidebar navigation view
+    var isNavigationStyle: Bool {
+        return isCardsMode && style == .navigation
+    }
 
     /// Accumulated user input from all cards
     /// Key: card index, Value: dictionary of field name to value
@@ -118,6 +205,9 @@ class CardState: ObservableObject {
             globalConfiguration = JSON()
             idToIndex = [:]
             navigationHistory = []
+            style = .wizard
+            pageIssues = [:]
+            visitedPages = []
             return false
         }
 
@@ -130,6 +220,9 @@ class CardState: ObservableObject {
             globalConfiguration = JSON()
             idToIndex = [:]
             navigationHistory = []
+            style = .wizard
+            pageIssues = [:]
+            visitedPages = []
             return false
         }
 
@@ -143,13 +236,34 @@ class CardState: ObservableObject {
             writeLog("Cards mode: loaded global configuration with \(globalConfiguration.dictionaryObject?.count ?? 0) properties")
         }
 
+        // Presentation style - defaults to the linear wizard
+        let styleValue = json["cardstyle"].stringValue.lowercased()
+        style = CardStyle(rawValue: styleValue) ?? .wizard
+        if !styleValue.isEmpty && CardStyle(rawValue: styleValue) == nil {
+            writeLog("Unknown cardstyle '\(styleValue)' - using wizard", logLevel: .error)
+        }
+
+        // A sidebar needs more room than the standard dialog default
+        if style == .navigation {
+            if !globalConfiguration["width"].exists() { globalConfiguration["width"] = JSON(900) }
+            if !globalConfiguration["height"].exists() { globalConfiguration["height"] = JSON(600) }
+            for key in ["infobox", "infoboxwidth"] where globalConfiguration[key].exists() {
+                globalConfiguration.dictionaryObject?.removeValue(forKey: key)
+                writeLog("Navigation style: ignoring '\(key)' - not available with a navigation sidebar", logLevel: .error)
+            }
+        }
+
         // Parse cards with explicit id or inferred order
         var loadedCards: [DialogCard] = []
 
         for (index, cardJSON) in cardsArray.enumerated() {
             // Use explicit "id" if provided, otherwise use array position
             let cardId = cardJSON["id"].int ?? index
-            loadedCards.append(DialogCard(id: cardId, configuration: cardJSON))
+            var configuration = cardJSON
+            if style == .navigation {
+                configuration = stripNavigationKeys(from: cardJSON, cardIndex: index)
+            }
+            loadedCards.append(DialogCard(id: cardId, configuration: configuration))
         }
 
         // Sort cards by id for explicit ordering
@@ -196,7 +310,69 @@ class CardState: ObservableObject {
             }
         }
 
-        writeLog("Block mode activated using keyword '\(blocktype)': loaded \(cards.count) cards")
+        // Pages with required fields start incomplete so Done can't succeed without visiting them
+        pageIssues = [:]
+        visitedPages = []
+        if style == .navigation {
+            for (index, card) in cards.enumerated() where Self.hasRequiredFields(getMergedConfiguration(for: card)) {
+                pageIssues[index] = "Required fields have not been completed".localized
+            }
+        }
+
+        writeLog("Block mode activated using keyword '\(blocktype)' (\(style.rawValue) style): loaded \(cards.count) cards")
+        return true
+    }
+
+    /// Remove keys a navigation page is not allowed to set, logging each one so authors can see why.
+    private func stripNavigationKeys(from cardJSON: JSON, cardIndex: Int) -> JSON {
+        var configuration = cardJSON
+        for key in Self.navigationTopLevelOnlyKeys where configuration[key].exists() {
+            configuration.dictionaryObject?.removeValue(forKey: key)
+            writeLog("Navigation style: ignoring '\(key)' on card \(cardIndex) - set it at the top level instead", logLevel: .error)
+        }
+        for key in Self.navigationIgnoredKeys where configuration[key].exists() {
+            configuration.dictionaryObject?.removeValue(forKey: key)
+            writeLog("Navigation style: ignoring '\(key)' on card \(cardIndex) - not available with a navigation sidebar", logLevel: .error)
+        }
+        return configuration
+    }
+
+    /// True if the configuration contains any text field or select item marked as required.
+    static func hasRequiredFields(_ configuration: JSON) -> Bool {
+        for key in ["textfield", "selectitems"] {
+            for field in configuration[key].arrayValue where field["required"].boolValue {
+                return true
+            }
+        }
+        return false
+    }
+
+    /// Navigation style: sidebar sections built from runs of consecutive cards sharing a `section` value.
+    var sections: [CardSection] {
+        var result: [CardSection] = []
+        var currentTitle: String?
+        var currentIndices: [Int] = []
+
+        for (index, card) in cards.enumerated() {
+            if index > 0 && card.section != currentTitle {
+                result.append(CardSection(id: "section-\(result.count)", title: currentTitle, cardIndices: currentIndices))
+                currentIndices = []
+            }
+            currentTitle = card.section
+            currentIndices.append(index)
+        }
+        if !currentIndices.isEmpty {
+            result.append(CardSection(id: "section-\(result.count)", title: currentTitle, cardIndices: currentIndices))
+        }
+        return result
+    }
+
+    /// Navigation style: open any card directly. No history is kept - the sidebar replaces Back.
+    /// - Returns: True if the selection changed.
+    func select(index: Int) -> Bool {
+        guard isNavigationStyle, cards.indices.contains(index), index != currentCardIndex else { return false }
+        currentCardIndex = index
+        writeLog("Selected card id \(cards[index].id) (index \(index + 1) of \(totalCards))")
         return true
     }
 
@@ -334,12 +510,17 @@ class CardState: ObservableObject {
     }
 
     /// Get accumulated input as string values for variable substitution.
-    /// Only substitutes values from cards actually visited before the current one.
+    /// Wizard style only substitutes values from cards visited before the current one;
+    /// navigation style has no ordering, so every other card with stored input is used.
     /// - Returns: Dictionary suitable for use with processTextString tags
     func getInputAsVariables() -> [String: String] {
         var result: [String: String] = [:]
 
-        for cardIndex in navigationHistory {
+        let sourceIndices = style == .navigation
+            ? accumulatedInput.keys.sorted().filter { $0 != currentCardIndex }
+            : navigationHistory
+
+        for cardIndex in sourceIndices {
             if let cardInput = accumulatedInput[cardIndex] {
                 for (key, value) in cardInput {
                     if let stringValue = value as? String {
@@ -374,6 +555,9 @@ class CardState: ObservableObject {
         globalConfiguration = JSON()
         idToIndex = [:]
         navigationHistory = []
+        style = .wizard
+        pageIssues = [:]
+        visitedPages = []
     }
 }
 

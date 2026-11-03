@@ -980,7 +980,9 @@ final class DialogUpdatableContent: ObservableObject {
         // Only request a window resize when the card itself explicitly asked for new
         // dimensions — otherwise placeWindow snaps the window back to the configured offset
         // and looks like a "jump" during every card transition.
-        let cardSpecifiesSize = appArguments.windowWidth.present || appArguments.windowHeight.present
+        // Navigation style keeps one window size for every page (size keys are top-level only).
+        let cardSpecifiesSize = !cardState.isNavigationStyle &&
+            (appArguments.windowWidth.present || appArguments.windowHeight.present)
         let windowSizeChanged = cardSpecifiesSize && (appProperties.windowWidth != appvars.windowWidth ||
                                                      appProperties.windowHeight != appvars.windowHeight)
         appProperties = appvars
@@ -1088,6 +1090,77 @@ final class DialogUpdatableContent: ObservableObject {
             }
         }
 
+        return false
+    }
+
+    // MARK: - Navigation Style Support
+
+    /// Store, validate and run onAdvance for the page being left, recording the outcome for the sidebar.
+    /// Never blocks leaving the page - problems are only enforced when the dialog is dismissed.
+    func leaveCurrentNavigationPage() {
+        let index = cardState.currentCardIndex
+        let input = collectCurrentUserInput()
+        cardState.storeCurrentCardInput(input)
+
+        var issue: String?
+        let validation = validateRequiredFields(observedObject: self, beep: false)
+        if !validation.isValid {
+            issue = validation.errorMessage
+        } else if appArguments.onAdvance.present && !appArguments.onAdvance.value.isEmpty {
+            let callbackResult = executeOnAdvanceCallback(
+                command: appArguments.onAdvance.value,
+                cardIndex: index,
+                cardId: cardState.currentCard?.cardId,
+                input: input
+            )
+            if !callbackResult.success {
+                issue = callbackResult.errorMessage
+            }
+        }
+
+        if let issue {
+            cardState.pageIssues[index] = issue
+        } else {
+            cardState.pageIssues.removeValue(forKey: index)
+        }
+        cardState.visitedPages.insert(index)
+    }
+
+    /// Switch the navigation view to another page.
+    func navigateToPage(_ index: Int) {
+        guard cardState.isNavigationStyle, index != cardState.currentCardIndex else { return }
+        leaveCurrentNavigationPage()
+        if cardState.select(index: index), let card = cardState.currentCard {
+            applyCardConfiguration(card)
+        }
+    }
+
+    /// Check every page before the navigation view is dismissed with button 1.
+    /// If any page needs attention, the first one is opened and a summary sheet is shown.
+    /// - Returns: True if all pages are complete and the dialog may exit.
+    func validateNavigationForDismissal() -> Bool {
+        leaveCurrentNavigationPage()
+
+        let issueIndices = cardState.pageIssues.keys.sorted()
+        guard let firstIssue = issueIndices.first else { return true }
+
+        // A blocked Done reveals every incomplete page in the sidebar, visited or not
+        cardState.visitedPages.formUnion(issueIndices)
+
+        var summary = ""
+        for index in issueIndices {
+            let title = cardState.cards[index].sidebarTitle ?? "Page \(index + 1)"
+            summary += "\(title)\n\(cardState.pageIssues[index] ?? "")\n"
+        }
+
+        if cardState.select(index: firstIssue), let card = cardState.currentCard {
+            applyCardConfiguration(card)
+        }
+        // Re-validate the page now on screen so its offending fields are highlighted
+        _ = validateRequiredFields(observedObject: self)
+
+        sheetErrorMessage = summary
+        showSheet = true
         return false
     }
 }

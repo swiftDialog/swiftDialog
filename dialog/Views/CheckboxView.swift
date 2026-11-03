@@ -106,7 +106,11 @@ struct CheckboxView: View {
 
     var body: some View {
         if observedData.args.checkbox.present {
-            if observedData.appProperties.checkboxControlStyle.lowercased() == "switch" {
+            if cardState.isNavigationStyle {
+                // Navigation style: the page scrolls, so render at natural height. The
+                // overflow wrapper's GeometryReader collapses inside the page's ScrollView.
+                RenderToggles(observedDialogContent: observedData)
+            } else if observedData.appProperties.checkboxControlStyle.lowercased() == "switch" {
                 VStack {
                     //Spacer()
                     RenderToggles(observedDialogContent: observedData)
