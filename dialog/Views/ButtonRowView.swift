@@ -167,14 +167,26 @@ struct ButtonItemView: View {
             observedData.clickButton(rowID: row.id, itemID: item.id)
         } label: {
             content
-                .opacity(item.isRunning ? 0.5 : 1)
-                .overlay { if item.showSpinner { ProgressView().controlSize(.small) } }
+                // While the spinner is up the label is dimmed right back so it doesn't compete with it
+                .opacity(item.showSpinner ? 0.2 : (item.isRunning ? 0.5 : 1))
+                .overlay { if item.showSpinner { spinnerBadge } }
         }
         .modifier(ButtonRowStyle(plain: row.style == "plain", circular: symbolOnly))
         .overlay { selectionRing }
         .disabled(item.disabled)
         .help(item.label)
         .accessibilityLabel(item.label.isEmpty ? item.name : item.label)
+    }
+
+    /// The spinner on a backing layer, so it reads clearly over the dimmed label. A material adapts to
+    /// light and dark appearance by itself.
+    private var spinnerBadge: some View {
+        ProgressView()
+            .controlSize(.small)
+            .padding(5)
+            .background(.regularMaterial, in: Circle())
+            .overlay(Circle().strokeBorder(Color.primary.opacity(0.12), lineWidth: 0.5))
+            .allowsHitTesting(false)
     }
 
     @ViewBuilder
