@@ -51,6 +51,8 @@ struct UserInputState {
     var listItems = [ListItems]()
     var textFields = [TextFieldState]()
     var checkBoxes = [CheckBoxes]()
+    var buttonRows = [ButtonRow]()
+    var numberInputs = [NumberInput]()
     var iconItems = [Icons]()
 }
 
@@ -81,6 +83,12 @@ struct TextFieldState: Identifiable, Equatable {
     var validationValue: String = ""
     var requiredTextfieldHighlight: Color = .clear
     var initialPath: String = ""
+    /// Subtext shown under the title when not empty
+    var detail: String = ""
+    /// Only enabled while this condition holds (see ControlCondition). Empty = always.
+    var enabledIf: String = ""
+    /// Only shown while this condition holds. Empty = always.
+    var visibleIf: String = ""
 
     /// True when this field should render a date/time picker instead of a text field.
     var isDatePicker: Bool { showDate || showTime }
@@ -142,6 +150,12 @@ struct DropDownItems: Equatable, Identifiable {
     var required: Bool   = false
     var style: String = "list"
     var requiredfieldHighlight: Color = .clear
+    /// Subtext shown under the title when not empty
+    var detail: String = ""
+    /// Only enabled while this condition holds (see ControlCondition). Empty = always.
+    var enabledIf: String = ""
+    /// Only shown while this condition holds. Empty = always.
+    var visibleIf: String = ""
 }
 
 struct CheckBoxes: Identifiable, Equatable {
@@ -155,6 +169,12 @@ struct CheckBoxes: Identifiable, Equatable {
     var checked: Bool = false
     var disabled: Bool = false
     var enablesButton1: Bool = false
+    /// Subtext shown under the label when not empty
+    var detail: String = ""
+    /// Only enabled while this condition holds (see ControlCondition). Empty = always.
+    var enabledIf: String = ""
+    /// Only shown while this condition holds. Empty = always.
+    var visibleIf: String = ""
     var dictionary: [String: Any] {
             return ["label": label,
                     "name": name,
@@ -164,6 +184,136 @@ struct CheckBoxes: Identifiable, Equatable {
                     "enablesButton1": enablesButton1
             ]
         }
+}
+
+/// A slider or stepper: one shared numeric model (min / max / step / value), two views.
+struct NumberInput: Identifiable, Equatable {
+    var id = UUID()
+    /// "slider" or "stepper"
+    var kind: String = "slider"
+    var title: String = ""
+    var name: String = ""
+    /// Subtext shown under the title when not empty
+    var detail: String = ""
+    var minValue: Double = 0
+    var maxValue: Double = 100
+    var step: Double = 1
+    var value: Double = 0
+    var unit: String = ""
+    var minLabel: String = ""
+    var maxLabel: String = ""
+    /// slider: show the current value next to the slider
+    var showValue: Bool = true
+    /// Only enabled while this condition holds (see ControlCondition). Empty = always.
+    var enabledIf: String = ""
+    /// Only shown while this condition holds. Empty = always.
+    var visibleIf: String = ""
+
+    /// Name used in the output and by vieworder
+    var key: String { name.isEmpty ? title : name }
+
+    /// Decimal places implied by the step (0.25 -> 2). Values are never reported with more than 2.
+    var decimals: Int {
+        var places = 0
+        while places < 2 && abs(step * pow(10, Double(places)) - (step * pow(10, Double(places))).rounded()) > 1e-9 {
+            places += 1
+        }
+        return places
+    }
+
+    /// The value as text, with as many decimals as the step needs ("42", "0.75")
+    var displayValue: String { String(format: "%.\(decimals)f", value) }
+
+    /// A raw value (e.g. from dragging) held to the range, optionally snapped to the nearest step
+    /// from `minValue`, and rounded to 2 decimal places so floating point noise never reaches the output.
+    func constrained(_ raw: Double, snapToStep: Bool = false) -> Double {
+        var result = min(max(raw, minValue), maxValue)
+        if snapToStep && step > 0 {
+            result = minValue + ((result - minValue) / step).rounded() * step
+            result = min(max(result, minValue), maxValue)
+        }
+        return (result * 100).rounded() / 100
+    }
+
+    /// Make the configuration safe: positive step, max above min, value inside the range.
+    func sanitised() -> NumberInput {
+        var input = self
+        if input.step <= 0 { input.step = 1 }
+        if input.maxValue <= input.minValue {
+            writeLog("\(input.kind) '\(input.key)': max must be greater than min - using max = min + 100", logLevel: .error)
+            input.maxValue = input.minValue + 100
+        }
+        input.value = input.constrained(input.value)
+        return input
+    }
+}
+
+/// One button in a row. `type` decides what it is: "action" runs url / shell / sheet when clicked,
+/// "colour" is a colour well (value = hex), "info" is a read-only value.
+struct ButtonItem: Identifiable, Equatable {
+    var id = UUID()
+    var name: String = ""
+    var label: String = ""
+    /// SF Symbol spec, same vocabulary as --button1symbol
+    var symbol: String = ""
+    var image: String = ""
+    /// "both" (default), "symbol" (symbol/image only) or "label"
+    var display: String = "both"
+    var value: String = ""
+    var type: String = "action"
+    var url: String = ""
+    var shell: String = ""
+    var sheet: String = ""
+    var sheetImage: String = ""
+    var sheetButtonText: String = ""
+    var confirm: String = ""
+    var disabled: Bool = false
+    /// colour type: allow choosing opacity
+    var opacity: Bool = false
+    /// This button is only enabled while the condition holds
+    var enabledIf: String = ""
+
+    // Runtime state (not configuration)
+    var clicked: Bool = false
+    var isRunning: Bool = false
+    /// Set 500ms after a click if the action is still running, so quick actions never show a spinner
+    var showSpinner: Bool = false
+    var lastExitCode: Int32?
+}
+
+/// A row of one or more buttons laid out horizontally. One --button / --buttons argument = one row.
+struct ButtonRow: Identifiable, Equatable {
+    var id = UUID()
+    var name: String = ""
+    var title: String = ""
+    var detail: String = ""
+    /// "bordered" (standard push buttons) or "plain" (no surround - swatches, thumbnails)
+    var style: String = "bordered"
+    /// Row behaves like a radio choice: the clicked item is selected and its value output
+    var selectable: Bool = false
+    var selectedValue: String = ""
+    var defaultValue: String = ""
+    /// "leading", "trailing" or "center"; applies when the row has no title
+    var alignment: String = "trailing"
+    /// Symbol/image size in points (0 = automatic)
+    var size: CGFloat = 0
+    /// "inline", "below", "selected" or "hidden"
+    var labelPosition: String = "inline"
+    var items: [ButtonItem] = []
+    /// Only enabled while this condition holds (see ControlCondition). Empty = always.
+    var enabledIf: String = ""
+    /// Only shown while this condition holds. Empty = always.
+    var visibleIf: String = ""
+
+    /// Name used by vieworder to place the row
+    var layoutName: String {
+        if !name.isEmpty { return name }
+        if let first = items.first {
+            if !first.name.isEmpty { return first.name }
+            return first.label
+        }
+        return title
+    }
 }
 
 struct ListItems: Codable, Identifiable, Equatable {

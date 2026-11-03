@@ -70,6 +70,11 @@ struct CommandLineArguments {
     var textFieldLiveValidation  = CommandlineArgument(long: "textfieldlivevalidation", isbool: true)
     var checkbox                 = CommandlineArgument(long: "checkbox")
     var checkboxStyle            = CommandlineArgument(long: "checkboxstyle")
+    // page buttons: one argument = one row of buttons ("buttons" is a synonym)
+    var button                   = CommandlineArgument(long: "button")
+    var buttons                  = CommandlineArgument(long: "buttons")
+    var slider                   = CommandlineArgument(long: "slider")
+    var stepper                  = CommandlineArgument(long: "stepper")
     var timerBar                 = CommandlineArgument(long: "timer", defaultValue: appDefaults.timerDefaultSeconds)
     var progressBar              = CommandlineArgument(long: "progress")
     var progressText             = CommandlineArgument(long: "progresstext", defaultValue: " ")
@@ -247,7 +252,7 @@ extension CommandLineArguments {
         \.button2ActionOption, \.button2Symbol, \.buttonInfoTextOption, \.buttonInfoActionOption, \.buttonInfoSymbol,
         \.cardsNextButtonText, \.cardsPreviousButtonText, \.buttonStyle, \.buttonSize, \.buttonTextSize,
         \.dropdownTitle, \.dropdownValues, \.dropdownDefault, \.selectItem, \.dropdownStyle, \.titleFont,
-        \.messageFont, \.textField, \.textFieldLiveValidation, \.checkbox, \.checkboxStyle,
+        \.messageFont, \.textField, \.textFieldLiveValidation, \.checkbox, \.checkboxStyle, \.button, \.buttons, \.slider, \.stepper,
         \.timerBar, \.progressBar, \.progressText, \.progressTextAlignment, \.mainImage,
         \.mainImageCaption, \.windowWidth, \.windowHeight, \.watermarkImage, \.watermarkAlpha,
         \.watermarkPosition, \.watermarkFill, \.watermarkScale, \.position, \.positionOffset,

@@ -766,6 +766,8 @@ struct SDHelp {
         argument.textField.helpShort = "Enable a textfield with the specified label"
         argument.textField.helpUsage = "<text>[,required,secure,prompt=\"<text>\",name=\"<text>\"]"
         argument.textField.helpLong = """
+        Also accepts detail=<text> (subtext under the title) and enabledif= / visibleif= (see --\(argument.slider.long)).
+
         When swiftDialog exits the contents of the textfield will be presented as <text> : <user_input>
         in plain or as json using [-\(appArguments.jsonOutPut.short), --\(appArguments.jsonOutPut.long)] option
         Multiple textfields can be specified as required.
@@ -820,6 +822,8 @@ struct SDHelp {
         
         argument.checkbox.helpShort = "Enable a checkbox with the specified label"
         argument.checkbox.helpLong = """
+        Also accepts detail=<text> (subtext under the title) and enabledif= / visibleif= (see --\(argument.slider.long)).
+
         When swiftDialog exits the status of the checkbox will be presented as <text> : [true|false]
         in plain or as json using [-\(appArguments.jsonOutPut.short), --\(appArguments.jsonOutPut.long)] option
         Multiple checkboxes can be specified as required.
@@ -832,6 +836,83 @@ struct SDHelp {
         A checkbox may instead be supplied as a JSON object using the same keys, e.g.
             --\(appArguments.checkbox.long) '{"label":"Enable telemetry","checked":true,"enableButton1":true}'
 """
+
+        argument.button.helpShort = "Add a button to the page that acts immediately (open a URL, run a command or show a sheet)"
+        argument.button.helpUsage = "<text>"
+        argument.button.helpLong = """
+        Adds a row containing a button to the dialog. Unlike the main buttons, it does not close the dialog.
+        Specify --\(argument.button.long) multiple times for multiple rows. \(argument.buttons.long) is a synonym.
+
+        Keys (comma separated, the first unkeyed item is the label):
+            name=       name used to report the button and to place it with --\(argument.preferredViewOrder.long)
+            label=      button text
+            symbol=     SF Symbol, same options as --\(argument.button1Symbol.long) e.g. symbol=gear,colour=blue
+            image=      image path or URL
+            display=    both (default), symbol (symbol/image only) or label
+            url=        open this URL when clicked
+            shell=      run this command when clicked (runs in the background, output is logged)
+            sheet=      show this markdown text (or .md file) in a sheet when clicked
+            confirm=    ask for confirmation before acting
+            disabled    show the button but don't allow clicks
+            detail=     subtext shown under the title
+
+        e.g.
+        --\(argument.button.long) "label=Open Self Service,url=selfservice://"
+        --\(argument.button.long) "label=Reset,shell=/usr/local/bin/reset-thing,confirm=Reset now?"
+        --\(argument.button.long) "name=help,symbol=questionmark,display=symbol,sheet=Some **markdown** help"
+
+        A JSON object gives access to everything, including several buttons on one row and
+        rows of selectable swatches. Items share the row:
+        --\(argument.button.long) '{"name":"tools","items":[{"label":"One","url":"https://example.com"},{"label":"Two","shell":"true"}]}'
+
+        While a button's command is running, clicking it again does nothing and button1/button2 will not
+        close the dialog. Any other way of quitting stops running commands. Output includes whether
+        each button was clicked and the exit code of its command.
+
+        Dependencies: add enabledif=<condition> or visibleif=<condition> to disable or hide an input
+        depending on others on the same page, e.g. enabledif=useproxy, visibleif=channel=Phone or
+        enabledif="volume>50 && !mute". Conditions use the input names (name=), support = != > < >= <=,
+        && and ||, and a bare name means a checkbox is on / a field has text / a number is not 0.
+        """
+        argument.slider.helpShort = "Add a slider that returns a number"
+        argument.slider.helpUsage = "<text>"
+        argument.slider.helpLong = """
+        Adds a slider. Specify --\(argument.slider.long) multiple times for multiple sliders.
+        The first unkeyed item is the title. The chosen value is returned as a number.
+
+        Keys (comma separated):
+            name=       name used in the output and to place it with --\(argument.preferredViewOrder.long)
+            min=        lowest value (default 0)
+            max=        highest value (default 100)
+            step=       increment (default 1). Values are snapped to the step and returned with at most 2 decimal places
+            value=      starting value (default min)
+            unit=       text shown after the value e.g. unit=%
+            minlabel=   text shown at the left of the slider
+            maxlabel=   text shown at the right of the slider
+            showvalue=  false to hide the current value (default true)
+            detail=     subtext shown under the title
+
+        e.g.
+        --\(argument.slider.long) "Volume,name=volume,min=0,max=100,step=5,value=50,unit=%"
+
+        A JSON object may also be supplied using the same keys.
+
+        Dependencies: add enabledif=<condition> or visibleif=<condition> to disable or hide an input
+        depending on others on the same page, e.g. enabledif=useproxy, visibleif=channel=Phone or
+        enabledif="volume>50 && !mute". Conditions use the input names (name=), support = != > < >= <=,
+        && and ||, and a bare name means a checkbox is on / a field has text / a number is not 0.
+        """
+        argument.stepper.helpShort = "Add a stepper (number field with +/- buttons) that returns a number"
+        argument.stepper.helpUsage = "<text>"
+        argument.stepper.helpLong = """
+        Adds a stepper: a number field with increment and decrement buttons. Uses the same keys as
+        --\(argument.slider.long) (minlabel, maxlabel and showvalue do not apply).
+
+        e.g.
+        --\(argument.stepper.long) "Keep logs for,name=days,min=1,max=90,value=30,unit=days"
+        """
+        argument.buttons.helpShort = "Synonym of --\(argument.button.long)"
+        argument.buttons.helpLong = "See --\(argument.button.long)"
 
         argument.checkboxStyle.helpShort = "Change the appearance of checkboxes"
         argument.checkboxStyle.helpUsage = "default|checkbox|switch[,<size>]"
@@ -871,6 +952,17 @@ struct SDHelp {
         Only the items being displayed need to be specified.
         e.g.
         --\(argument.preferredViewOrder.long) \"textfield,checkbox,dropdown\"
+
+        Individual inputs can also be placed by their name, in any order and mixing types, and collected
+        into groups using [Title]. Input names are set with name= (or default to the title/label).
+        Names of the types above are reserved: a type name always means every input of that type
+        that has not been placed individually. Inputs that are not listed are shown at the end.
+        e.g.
+        --\(argument.preferredViewOrder.long) \"[Account],fullname,email,newsletter,[Preferences],textfield,checkbox\"
+
+        For group descriptions and footers, or titles containing commas, use a JSON object (also valid
+        as \"\(argument.preferredViewOrder.long)\" in a JSON config file):
+        --\(argument.preferredViewOrder.long) '{\"groups\":[{\"title\":\"Account\",\"description\":\"Used for sign in\",\"items\":[\"fullname\",\"email\"]}]}'
 
 """
 

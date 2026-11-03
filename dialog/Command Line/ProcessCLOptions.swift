@@ -382,7 +382,136 @@ func makeTextFieldState(from field: JSON) -> TextFieldState {
         maxTime: maxTime,
         dateOutputFormat: field["format"].stringValue,
         confirm: field["confirm"].boolValue,
-        initialPath: field["path"].stringValue)
+        initialPath: field["path"].stringValue,
+        detail: field["detail"].stringValue,
+        enabledIf: field["enabledif"].stringValue,
+        visibleIf: field["visibleif"].stringValue)
+}
+
+/// Builds a `NumberInput` (slider or stepper) from a JSON object. Shared by the whole-config JSON path
+/// and the per-argument JSON form (`--slider '{...}'`) so both accept the same keys.
+func makeNumberInput(from field: JSON, kind: String) -> NumberInput {
+    func number(_ key: String, _ fallback: Double) -> Double {
+        guard field[key].exists() else { return fallback }
+        return Double(jsonCGFloat(field[key], default: CGFloat(fallback), context: "\(kind) \(key)"))
+    }
+    var input = NumberInput()
+    input.kind = kind
+    input.title = processTextString(field["title"].stringValue, tags: appvars.systemInfo)
+    input.name = field["name"].stringValue
+    input.detail = processTextString(field["detail"].stringValue, tags: appvars.systemInfo)
+    input.minValue = number("min", 0)
+    input.maxValue = number("max", 100)
+    input.step = number("step", 1)
+    input.value = number("value", input.minValue)
+    input.unit = field["unit"].stringValue
+    input.minLabel = field["minlabel"].stringValue
+    input.maxLabel = field["maxlabel"].stringValue
+    input.showValue = field["showvalue"].bool ?? true
+    input.enabledIf = field["enabledif"].stringValue
+    input.visibleIf = field["visibleif"].stringValue
+    return input.sanitised()
+}
+
+/// Builds a `NumberInput` from the comma separated command line form:
+/// `--slider "Volume,name=volume,min=0,max=100,step=5,value=50,unit=%"` (the first unkeyed item is the title).
+func makeNumberInput(fromCSV text: String, kind: String) -> NumberInput {
+    var json = JSON()
+    for part in text.components(separatedBy: ",").map({ $0.trimmingCharacters(in: .whitespaces) }) where !part.isEmpty {
+        let pair = part.split(separator: "=", maxSplits: 1).map(String.init)
+        if pair.count == 2 {
+            json[pair[0].lowercased()].string = pair[1]
+        } else if json["title"].string == nil {
+            json["title"].string = part
+        }
+    }
+    if let show = json["showvalue"].string { json["showvalue"].bool = !["false", "0", "no"].contains(show.lowercased()) }
+    return makeNumberInput(from: json, kind: kind)
+}
+
+/// Text a button config may contain system tags ({serialnumber}) and the usual \n / <br> handling.
+private func buttonText(_ value: String) -> String {
+    processTextString(value, tags: appvars.systemInfo)
+}
+
+/// Builds a `ButtonItem` from a JSON object (a button in a row, or a single button).
+func makeButtonItem(from field: JSON) -> ButtonItem {
+    var item = ButtonItem()
+    item.name = field["name"].stringValue
+    item.label = buttonText(field["label"].stringValue)
+    item.symbol = field["symbol"].string ?? (field["symbol"].type == .dictionary ? (field["symbol"].rawString(options: []) ?? "") : "")
+    item.image = field["image"].stringValue
+    item.display = field["display"].string?.lowercased() ?? "both"
+    switch field["type"].stringValue.lowercased() {
+    case "colour", "color": item.type = "colour"
+    case "info": item.type = "info"
+    default: item.type = "action"
+    }
+    item.value = item.type == "action" ? field["value"].stringValue : buttonText(field["value"].stringValue)
+    item.url = field["url"].stringValue
+    item.shell = field["shell"].stringValue
+    if field["sheet"].type == .dictionary {
+        item.sheet = buttonText(field["sheet"]["message"].stringValue)
+        item.sheetImage = field["sheet"]["image"].stringValue
+        item.sheetButtonText = field["sheet"]["buttontext"].stringValue
+    } else {
+        item.sheet = buttonText(field["sheet"].stringValue)
+    }
+    item.confirm = buttonText(field["confirm"].stringValue)
+    item.disabled = field["disabled"].boolValue
+    item.opacity = field["opacity"].boolValue
+    item.enabledIf = field["enabledif"].stringValue
+    return item
+}
+
+/// Builds a `ButtonRow` from a JSON object. An object with an `items` array is a row of several
+/// buttons; an object without one is a single button (a row of one) using the same keys.
+func makeButtonRow(from field: JSON) -> ButtonRow {
+    var row = ButtonRow()
+    row.name = field["name"].stringValue
+    row.title = buttonText(field["title"].stringValue)
+    row.detail = buttonText(field["detail"].stringValue)
+    row.style = field["style"].string?.lowercased() == "plain" ? "plain" : "bordered"
+    row.selectable = field["selectable"].boolValue
+    row.defaultValue = field["default"].stringValue
+    row.selectedValue = row.defaultValue
+    row.alignment = field["alignment"].string?.lowercased() ?? (row.title.isEmpty ? "trailing" : "trailing")
+    row.size = CGFloat(field["size"].doubleValue)
+    row.labelPosition = field["labelposition"].string?.lowercased() ?? "inline"
+    row.enabledIf = field["enabledif"].stringValue
+    row.visibleIf = field["visibleif"].stringValue
+    if field["items"].type == .array {
+        row.items = field["items"].arrayValue.map { makeButtonItem(from: $0) }
+    } else {
+        row.items = [makeButtonItem(from: field)]
+    }
+    // Selectable rows need a value per item
+    for index in row.items.indices where row.items[index].value.isEmpty && row.items[index].type == "action" {
+        row.items[index].value = row.items[index].name.isEmpty ? row.items[index].label : row.items[index].name
+    }
+    return row
+}
+
+/// Builds a single-button `ButtonRow` from the comma separated command line form:
+/// `--button "label=Shortcuts…,url=x-apple.systempreferences:…"` (the first unkeyed item is the label).
+func makeButtonRow(fromCSV text: String) -> ButtonRow {
+    var json = JSON()
+    for part in text.components(separatedBy: ",").map({ $0.trimmingCharacters(in: .whitespaces) }) where !part.isEmpty {
+        let pair = part.split(separator: "=", maxSplits: 1).map(String.init)
+        if pair.count == 2 {
+            let key = pair[0].lowercased()
+            if ["disabled", "selectable", "opacity"].contains(key) {
+                json[key].bool = ["true", "1", "yes"].contains(pair[1].lowercased())
+            } else {
+                json[key].string = pair[1]
+            }
+        } else if ["disabled", "selectable", "opacity"].contains(part.lowercased()) {
+            json[part.lowercased()].bool = true
+        } else if json["label"].string == nil {
+            json["label"].string = part
+        }
+    }
+    return makeButtonRow(from: json)
 }
 
 /// Builds a `CheckBoxes` from a JSON object. Shared by the whole-config JSON path and the
@@ -394,7 +523,10 @@ func makeCheckBox(from field: JSON) -> CheckBoxes {
         icon: iconNodeToString(field["icon"]),
         checked: field["checked"].boolValue,
         disabled: field["disabled"].boolValue,
-        enablesButton1: field["enableButton1"].boolValue)
+        enablesButton1: field["enableButton1"].boolValue,
+        detail: field["detail"].stringValue,
+        enabledIf: field["enabledif"].stringValue,
+        visibleIf: field["visibleif"].stringValue)
 }
 
 /// Builds a `ListItems` from a JSON object. Shared by the whole-config JSON path and the
@@ -423,7 +555,10 @@ func makeDropDownItem(from field: JSON) -> DropDownItems {
         defaultValue: field["default"].stringValue,
         selectedValue: field["default"].stringValue,
         required: field["required"].boolValue,
-        style: field["style"].stringValue)
+        style: field["style"].stringValue,
+        detail: field["detail"].stringValue,
+        enabledIf: field["enabledif"].stringValue,
+        visibleIf: field["visibleif"].stringValue)
 }
 
 /// Applies title-font settings from a JSON object to appvars. Shared by the whole-config JSON path
@@ -860,6 +995,9 @@ func processCLOptions(json: JSON = getJSON()) {
                 var dropdownStyle: String = "list"
                 let dropdownTitle: String = labelItems[0]
                 var dropdownName: String = ""
+                var dropdownDetail: String = ""
+                var dropdownEnabledIf: String = ""
+                var dropdownVisibleIf: String = ""
                 for item in labelItems {
                     var itemKeyValuePair = item.split(separator: "=", maxSplits: 1)
                     for _ in itemKeyValuePair.count...2 {
@@ -878,10 +1016,16 @@ func processCLOptions(json: JSON = getJSON()) {
                             dropdownStyle = "multiselect"
                         case "name":
                             dropdownName = itemValue
+                        case "detail":
+                            dropdownDetail = itemValue
+                        case "enabledif":
+                            dropdownEnabledIf = itemValue
+                        case "visibleif":
+                            dropdownVisibleIf = itemValue
                         default: ()
                         }
                 }
-                userInputState.dropdownItems.append(DropDownItems(title: dropdownTitle, name: dropdownName, values: dropdownValues[index].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[index], selectedValue: dropdownDefaults[index], required: dropdownRequired, style: dropdownStyle))
+                userInputState.dropdownItems.append(DropDownItems(title: dropdownTitle, name: dropdownName, values: dropdownValues[index].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[index], selectedValue: dropdownDefaults[index], required: dropdownRequired, style: dropdownStyle, detail: dropdownDetail, enabledIf: dropdownEnabledIf, visibleIf: dropdownVisibleIf))
             }
         }
         for index in 0..<userInputState.dropdownItems.count where userInputState.dropdownItems[index].required {
@@ -932,6 +1076,9 @@ func processCLOptions(json: JSON = getJSON()) {
                 var fieldDateFormat: String = ""
                 var fieldConfirm: Bool = false
                 var fieldInitialPath: String = ""
+                var fieldDetail: String = ""
+                var fieldEnabledIf: String = ""
+                var fieldVisibleIf: String = ""
                 if items.count > 0 {
                     fieldTitle = items[0]
                     if items.count > 1 {
@@ -984,6 +1131,12 @@ func processCLOptions(json: JSON = getJSON()) {
                                 fieldConfirm = true
                             case "path":
                                 fieldInitialPath = nextValue
+                            case "detail":
+                                fieldDetail = nextValue
+                            case "enabledif":
+                                fieldEnabledIf = nextValue
+                            case "visibleif":
+                                fieldVisibleIf = nextValue
                             default: ()
                             }
                         }
@@ -1024,7 +1177,10 @@ func processCLOptions(json: JSON = getJSON()) {
                             maxTime: fieldMaxTimeResolved,
                             dateOutputFormat: fieldDateFormat,
                             confirm: fieldConfirm,
-                            initialPath: fieldInitialPath))
+                            initialPath: fieldInitialPath,
+                            detail: fieldDetail,
+                            enabledIf: fieldEnabledIf,
+                            visibleIf: fieldVisibleIf))
             }
         }
         for index in 0..<userInputState.textFields.count where userInputState.textFields[index].required {
@@ -1056,6 +1212,9 @@ func processCLOptions(json: JSON = getJSON()) {
                 var checked: Bool = false
                 var disabled: Bool = false
                 var enableButton1: Bool = false
+                var detail: String = ""
+                var enabledIf: String = ""
+                var visibleIf: String = ""
                 for item in items {
                     var itemKeyValuePair = item.split(separator: "=", maxSplits: 1)
                     for _ in itemKeyValuePair.count...2 {
@@ -1076,15 +1235,65 @@ func processCLOptions(json: JSON = getJSON()) {
                         disabled = true
                     case "enablebutton1":
                         enableButton1 = true
+                    case "detail":
+                        detail = itemValue
+                    case "enabledif":
+                        enabledIf = itemValue
+                    case "visibleif":
+                        visibleIf = itemValue
                     default:
                         label = itemName
                     }
                 }
-                userInputState.checkBoxes.append(CheckBoxes(label: label, name: name, icon: icon, checked: checked, disabled: disabled, enablesButton1: enableButton1))
+                userInputState.checkBoxes.append(CheckBoxes(label: label, name: name, icon: icon, checked: checked, disabled: disabled, enablesButton1: enableButton1, detail: detail, enabledIf: enabledIf, visibleIf: visibleIf))
                 //appvars.checkboxArray.append(CheckBoxes(label: label, name: name, icon: icon, checked: checked, disabled: disabled, enablesButton1: enableButton1))
             }
         }
                                 writeLog("checkboxOptionsArray : \(appvars.checkboxArray)")
+    }
+
+    // Sliders and steppers
+    userInputState.numberInputs.removeAll()
+    for (argument, kind) in [(appArguments.slider, "slider"), (appArguments.stepper, "stepper")] where argument.present {
+        if json[argument.long].exists() {
+            let entries = json[argument.long].type == .array ? json[argument.long].arrayValue : [json[argument.long]]
+            for entry in entries where entry.type == .dictionary {
+                userInputState.numberInputs.append(makeNumberInput(from: entry, kind: kind))
+            }
+        } else {
+            for option in CLOptionMultiOptions(optionName: argument.long) {
+                let parsedJSON = JSON(parseJSON: option)
+                if parsedJSON.type == .dictionary {
+                    userInputState.numberInputs.append(makeNumberInput(from: parsedJSON, kind: kind))
+                } else {
+                    userInputState.numberInputs.append(makeNumberInput(fromCSV: option, kind: kind))
+                }
+            }
+        }
+    }
+
+    // Page buttons: --button / --buttons (synonyms), one argument = one row.
+    userInputState.buttonRows.removeAll()
+    if appArguments.button.present || appArguments.buttons.present {
+        for key in [appArguments.button.long, appArguments.buttons.long] {
+            if json[key].exists() {
+                // JSON config: an object is one row, an array is several rows
+                let entries = json[key].type == .array ? json[key].arrayValue : [json[key]]
+                for entry in entries where entry.type == .dictionary {
+                    userInputState.buttonRows.append(makeButtonRow(from: entry))
+                }
+            } else {
+                for option in CLOptionMultiOptions(optionName: key) {
+                    let parsedJSON = JSON(parseJSON: option)
+                    if parsedJSON.type == .dictionary {
+                        userInputState.buttonRows.append(makeButtonRow(from: parsedJSON))
+                    } else {
+                        userInputState.buttonRows.append(makeButtonRow(fromCSV: option))
+                    }
+                }
+            }
+        }
+        writeLog("Processed \(userInputState.buttonRows.count) button row(s)")
     }
 
     if appArguments.checkboxStyle.present {
@@ -1219,8 +1428,39 @@ func processCLOptions(json: JSON = getJSON()) {
     }
 
     // Process view order
-    if appArguments.preferredViewOrder.present {
-        appvars.viewOrder = reorderViewArray(orderList: appArguments.preferredViewOrder.value, viewOrderArray: appvars.viewOrder) ?? appvars.viewOrder
+    // Reset first: processCLOptions runs again for each card and a layout must not leak between them
+    appvars.viewLayout = nil
+    if appArguments.preferredViewOrder.present || json["vieworder"].type == .dictionary {
+        let layoutInputs = ViewLayoutInputs(
+            textFields: userInputState.textFields.map { $0.name.isEmpty ? $0.title : $0.name },
+            checkboxes: userInputState.checkBoxes.map { $0.name.isEmpty ? $0.label : $0.name },
+            selects: userInputState.dropdownItems.map { (name: $0.name.isEmpty ? $0.title : $0.name, isRadio: $0.style == "radio") },
+            buttons: userInputState.buttonRows.map { $0.layoutName },
+            numbers: userInputState.numberInputs.map { (name: $0.key, kind: $0.kind) },
+            blocks: {
+                var blocks = Set<ViewType>()
+                if appArguments.logFileToTail.present { blocks.insert(.textfile) }
+                if appArguments.webcontent.present { blocks.insert(.webcontent) }
+                if !userInputState.listItems.isEmpty { blocks.insert(.listitem) }
+                return blocks
+            }())
+
+        // A JSON object in the config file arrives as JSON; on the command line it's a string
+        let orderValue: String
+        if json["vieworder"].type == .dictionary {
+            orderValue = json["vieworder"].rawString(options: []) ?? ""
+        } else {
+            orderValue = appArguments.preferredViewOrder.value
+        }
+
+        switch ViewLayoutParser.classify(orderValue, inputNames: layoutInputs.allNames, log: { writeLog($0, logLevel: .error) }) {
+        case .layout(let spec):
+            appvars.viewLayout = ViewLayoutParser.resolve(spec, inputs: layoutInputs, log: { writeLog($0, logLevel: .error) })
+            writeLog("vieworder: placing inputs in \(appvars.viewLayout?.count ?? 0) group(s)")
+        case .typeOrder:
+            // original behaviour, unchanged
+            appvars.viewOrder = reorderViewArray(orderList: appArguments.preferredViewOrder.value, viewOrderArray: appvars.viewOrder) ?? appvars.viewOrder
+        }
     }
 
     if !json[appArguments.autoPlay.long].exists() && !appArguments.autoPlay.present {

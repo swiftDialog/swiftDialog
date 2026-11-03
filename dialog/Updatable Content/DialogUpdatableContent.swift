@@ -722,6 +722,12 @@ final class DialogUpdatableContent: ObservableObject {
     @Published var showSheet: Bool
     @Published var sheetErrorMessage: String
 
+    /// Markdown message sheet opened by a button's `sheet` action
+    @Published var messageSheet: MessageSheetContent?
+
+    /// Values of every input as loaded, which inactive controls (enabledif / visibleif) go back to
+    var controlDefaults: [String: String] = [:]
+
     @Published var constructionKitShown: Bool = false
 
     // Builder: markdown source references (file path / URL). When set, the message /
@@ -775,6 +781,7 @@ final class DialogUpdatableContent: ObservableObject {
         listItemsArray = userInputState.listItems
         
         observedUserInputState = userInputState
+        controlDefaults = controlValues(textFields: userInputState.textFields, state: userInputState)
 
         showSheet = false
         sheetErrorMessage = ""
@@ -881,6 +888,10 @@ final class DialogUpdatableContent: ObservableObject {
                 input[item.title] = item.selected
             }
         }
+
+        // Collect page button state (selection, colour, clicked)
+        input.merge(collectButtonInput()) { current, _ in current }
+        input.merge(collectNumberInput()) { current, _ in current }
         
         return input
     }
@@ -892,6 +903,8 @@ final class DialogUpdatableContent: ObservableObject {
         userInputState.checkBoxes.removeAll()
         userInputState.listItems.removeAll()
         userInputState.iconItems.removeAll()
+        userInputState.buttonRows.removeAll()
+        userInputState.numberInputs.removeAll()
         
         // Update observed arrays and state
         textFieldArray = []
@@ -1000,6 +1013,10 @@ final class DialogUpdatableContent: ObservableObject {
                        animated: true)
         }
         
+        // Remember the values as loaded, before any stored input is restored: they are the defaults for
+        // controls that become inactive (enabledif / visibleif)
+        controlDefaults = controlValues(textFields: userInputState.textFields, state: userInputState)
+
         // Check if we have stored input for this card (user navigated back)
         // and restore the values
         if let storedInput = cardState.getStoredInput(for: cardState.currentCardIndex) {
@@ -1053,6 +1070,10 @@ final class DialogUpdatableContent: ObservableObject {
             }
         }
         
+        // Restore page button state
+        restoreButtonInput(from: storedInput)
+        restoreNumberInput(from: storedInput)
+
         // Restore list selections
         for index in 0..<userInputState.listItems.count {
             if let selected = storedInput[userInputState.listItems[index].title] as? Bool {

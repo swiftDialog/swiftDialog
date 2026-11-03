@@ -14,7 +14,29 @@
       "title": "About This Mac",
       "sidebartitle": "About",
       "icon": "SF=laptopcomputer",
-      "message": "### {computername}\n\n| | |\n|---|---|\n| **Model** | {computermodel} |\n| **macOS** | {osname} {osversion} |\n| **Serial Number** | {serialnumber} |\n| **Signed in as** | {userfullname} ({username}) |\n\nReview and change your settings using the pages in the sidebar, then click **Apply**."
+      "message": "### {computername}\n\nReview and change your settings using the pages in the sidebar, then click **Apply**.",
+      "vieworder": {
+        "groups": [
+          { "title": "This Mac", "items": ["about_model", "about_os", "about_serial", "about_user"] },
+          { "title": "Need more detail?", "items": ["about_actions"] }
+        ]
+      },
+      "buttons": [
+        { "name": "about_model",  "title": "Model", "type": "info", "value": "{computermodel}" },
+        { "name": "about_os",     "title": "macOS", "type": "info", "value": "{osname} {osversion}" },
+        { "name": "about_serial", "title": "Serial Number", "type": "info", "value": "{serialnumber}" },
+        { "name": "about_user",   "title": "Signed in as", "type": "info", "value": "{userfullname} ({username})" },
+        {
+          "name": "about_actions",
+          "title": "System Information",
+          "detail": "Opens in a separate app",
+          "items": [
+            { "name": "about_report", "label": "System Report…", "shell": "open -a 'System Information'" },
+            { "name": "about_help", "label": "What's this?", "symbol": "questionmark", "display": "symbol",
+              "sheet": "## About this page\n\nThese values are read from your Mac when the dialog opens.\n\nIf **{serialnumber}** doesn't match the label on the bottom of your Mac, contact the service desk." }
+          ]
+        }
+      ]
     },
 
     {
@@ -23,12 +45,23 @@
       "title": "Profile",
       "icon": "SF=person.crop.circle.fill,colour=blue",
       "message": "Your directory details. Changes are synced to the company directory overnight.",
+      "vieworder": {
+        "groups": [
+          { "title": "Directory", "description": "Shown to colleagues",
+            "items": ["displayname", "jobtitle", "publicprofile", "email"] },
+          { "title": "Contact details", "footer": "Only used by IT and HR.",
+            "items": ["phone", "location"] }
+        ]
+      },
       "textfield": [
         { "title": "Display Name", "name": "displayname", "value": "Jane Appleseed" },
         { "title": "Job Title", "name": "jobtitle", "value": "Systems Engineer" },
-        { "title": "Email", "name": "email", "value": "jane.appleseed@example.com" },
+        { "title": "Email", "name": "email", "value": "jane.appleseed@example.com", "detail": "Used to sign in to company apps" },
         { "title": "Phone", "name": "phone", "value": "+61 2 5550 1234", "prompt": "Optional" },
         { "title": "Location", "name": "location", "value": "Sydney" }
+      ],
+      "checkbox": [
+        { "label": "Public profile", "name": "publicprofile", "checked": true, "detail": "Let colleagues find you in the directory" }
       ]
     },
     {
@@ -38,12 +71,19 @@
       "sidebartitle": "Contact",
       "icon": "SF=bubble.left.and.bubble.right.fill,colour=green",
       "message": "How should IT get in touch with you about your Mac?",
+      "vieworder": {
+        "groups": [
+          { "title": "Preferred channel", "items": ["contactchannel"] },
+          { "title": "Messages", "items": ["notifymaintenance", "betaprogram"] }
+        ]
+      },
       "selectitems": [
-        { "title": "Preferred Channel", "name": "contactchannel", "values": ["Email", "Chat", "Phone"], "default": "Chat", "style": "radio" }
+        { "title": "Contact me by", "name": "contactchannel", "values": ["Email", "Chat", "Phone"], "default": "Chat", "style": "radio",
+          "detail": "IT will try this first" }
       ],
       "checkbox": [
         { "label": "Notify me before scheduled maintenance", "name": "notifymaintenance", "checked": true },
-        { "label": "Include me in beta testing programs", "name": "betaprogram", "checked": false }
+        { "label": "Include me in beta testing programs", "name": "betaprogram", "checked": false, "detail": "Early access to new software, with the occasional rough edge" }
       ]
     },
 
@@ -52,10 +92,60 @@
       "section": "Preferences",
       "title": "Appearance",
       "icon": "SF=circle.lefthalf.filled",
-      "message": "Choose how your Mac looks.",
+      "message": "Choose how your Mac looks. Each choice acts straight away.",
+      "vieworder": {
+        "groups": [
+          { "title": "Theme", "items": ["appearance", "accent"] },
+          { "title": "Details", "items": ["sidebariconsize", "highlight"] }
+        ]
+      },
+      "buttons": [
+        {
+          "name": "appearance",
+          "title": "Appearance",
+          "style": "plain",
+          "selectable": true,
+          "default": "auto",
+          "labelposition": "below",
+          "size": 34,
+          "items": [
+            { "name": "appearance_light", "value": "light", "label": "Light", "symbol": "sun.max.fill,colour=orange",
+              "shell": "echo light > /tmp/swiftdialog-demo-appearance" },
+            { "name": "appearance_dark", "value": "dark", "label": "Dark", "symbol": "moon.fill,colour=indigo",
+              "shell": "echo dark > /tmp/swiftdialog-demo-appearance" },
+            { "name": "appearance_auto", "value": "auto", "label": "Auto", "symbol": "circle.lefthalf.filled,colour=gray",
+              "shell": "echo auto > /tmp/swiftdialog-demo-appearance" }
+          ]
+        },
+        {
+          "name": "accent",
+          "title": "Colour",
+          "style": "plain",
+          "selectable": true,
+          "default": "blue",
+          "labelposition": "selected",
+          "size": 26,
+          "items": [
+            { "value": "blue",   "label": "Blue",   "symbol": "circle.fill,colour=blue",   "shell": "echo blue > /tmp/swiftdialog-demo-accent" },
+            { "value": "purple", "label": "Purple", "symbol": "circle.fill,colour=purple", "shell": "echo purple > /tmp/swiftdialog-demo-accent" },
+            { "value": "pink",   "label": "Pink",   "symbol": "circle.fill,colour=pink",   "shell": "echo pink > /tmp/swiftdialog-demo-accent" },
+            { "value": "red",    "label": "Red",    "symbol": "circle.fill,colour=red",    "shell": "echo red > /tmp/swiftdialog-demo-accent" },
+            { "value": "orange", "label": "Orange", "symbol": "circle.fill,colour=orange", "shell": "echo orange > /tmp/swiftdialog-demo-accent" },
+            { "value": "yellow", "label": "Yellow", "symbol": "circle.fill,colour=yellow", "shell": "echo yellow > /tmp/swiftdialog-demo-accent" },
+            { "value": "green",  "label": "Green",  "symbol": "circle.fill,colour=green",  "shell": "echo green > /tmp/swiftdialog-demo-accent" },
+            { "value": "graphite", "label": "Graphite", "symbol": "circle.fill,colour=gray", "shell": "echo graphite > /tmp/swiftdialog-demo-accent" }
+          ]
+        },
+        {
+          "name": "highlight",
+          "title": "Highlight colour",
+          "detail": "A colour well; the colour you pick is returned in the output",
+          "type": "colour",
+          "value": "#0066FF",
+          "label": "Highlight colour"
+        }
+      ],
       "selectitems": [
-        { "title": "Appearance", "name": "appearance", "values": ["Light", "Dark", "Auto"], "default": "Auto", "style": "radio" },
-        { "title": "Accent Colour", "name": "accentcolour", "values": ["Multicolour", "Blue", "Purple", "Pink", "Red", "Orange", "Yellow", "Green", "Graphite"], "default": "Multicolour" },
         { "title": "Sidebar Icon Size", "name": "sidebariconsize", "values": ["Small", "Medium", "Large"], "default": "Medium" }
       ]
     },
@@ -65,10 +155,18 @@
       "title": "Notifications",
       "icon": "SF=bell.badge.fill,colour=red",
       "message": "Choose which company apps can send you notifications.",
+      "vieworder": {
+        "groups": [
+          { "title": "Company apps",
+            "items": ["notify_selfservice", "notify_updates", "notify_news"] },
+          { "title": "Required", "footer": "Security alerts can't be turned off.",
+            "items": ["notify_security"] }
+        ]
+      },
       "checkbox": [
-        { "label": "Self Service", "name": "notify_selfservice", "checked": true },
-        { "label": "Software Updates", "name": "notify_updates", "checked": true },
-        { "label": "Security Alerts", "name": "notify_security", "checked": true, "disabled": true },
+        { "label": "Self Service", "name": "notify_selfservice", "checked": true, "detail": "New software and available installs" },
+        { "label": "Software Updates", "name": "notify_updates", "checked": true, "detail": "When an update is ready to install" },
+        { "label": "Security Alerts", "name": "notify_security", "checked": true, "disabled": true, "detail": "Required by company policy" },
         { "label": "Company News", "name": "notify_news", "checked": false }
       ]
     },
@@ -78,41 +176,74 @@
       "title": "Language & Region",
       "icon": "SF=globe,colour=blue",
       "message": "Set your preferred language and regional formats.",
+      "vieworder": {
+        "groups": [
+          { "title": "Language", "items": ["language"] },
+          { "title": "Formats", "items": ["timeformat", "firstday"] }
+        ]
+      },
       "selectitems": [
-        { "title": "Language", "name": "language", "values": ["English (Australia)", "English (UK)", "English (US)", "Deutsch", "Français", "日本語"], "default": "English (Australia)", "style": "searchable" },
+        { "title": "Language", "name": "language", "values": ["English (Australia)", "English (UK)", "English (US)", "Deutsch", "Français", "日本語"], "default": "English (Australia)", "style": "searchable",
+          "detail": "Type to search" },
         { "title": "Time Format", "name": "timeformat", "values": ["12-hour", "24-hour"], "default": "24-hour", "style": "radio" },
         { "title": "First Day of Week", "name": "firstday", "values": ["Monday", "Sunday"], "default": "Monday" }
       ]
     },
 
     {
+      "cardId": "sound",
+      "section": "Preferences",
+      "title": "Sound & Display",
+      "icon": "SF=speaker.wave.2.fill,colour=pink",
+      "message": "Sliders and steppers return numbers. Decimal steps return decimals.",
+      "vieworder": {
+        "groups": [
+          { "title": "Levels", "description": "Drag, or use the arrow keys", "items": ["volume", "brightness", "balance"] },
+          { "title": "Power", "items": ["idlemins", "keeplogs", "autodim"] }
+        ]
+      },
+      "slider": [
+        { "title": "Output volume", "name": "volume", "min": 0, "max": 100, "step": 5, "value": 60, "unit": "%", "minlabel": "Quiet", "maxlabel": "Loud" },
+        { "title": "Brightness", "name": "brightness", "min": 0, "max": 100, "step": 1, "value": 75, "unit": "%", "detail": "Adjusts automatically in low light when Auto-dim is on", "enabledif": "!autodim" },
+        { "title": "Balance", "name": "balance", "min": -1, "max": 1, "step": 0.25, "value": 0, "minlabel": "Left", "maxlabel": "Right" }
+      ],
+      "stepper": [
+        { "title": "Sleep after", "name": "idlemins", "min": 1, "max": 60, "step": 1, "value": 10, "unit": "minutes", "detail": "When the Mac isn't being used" },
+        { "title": "Keep logs for", "name": "keeplogs", "min": 1, "max": 90, "step": 1, "value": 30, "unit": "days" }
+      ],
+      "checkbox": [
+        { "label": "Auto-dim", "name": "autodim", "checked": false }
+      ]
+    },
+    {
       "cardId": "apps",
       "section": "Software",
       "title": "Optional Apps",
       "icon": "SF=square.grid.2x2.fill,colour=purple",
       "message": "Turn on any apps you'd like installed. Turning an app off removes it at the next check-in.",
+      "vieworder": {
+        "groups": [
+          { "title": "Productivity", "items": ["app_slack", "app_zoom", "app_office"] },
+          { "title": "Developer tools", "items": ["app_vscode"] },
+          { "title": "More software", "items": ["app_links"] }
+        ]
+      },
       "checkbox": [
         { "label": "Slack", "name": "app_slack", "checked": true },
         { "label": "Zoom", "name": "app_zoom", "checked": true },
-        { "label": "Microsoft Office", "name": "app_office", "checked": false },
-        { "label": "Visual Studio Code", "name": "app_vscode", "checked": false },
-        { "label": "Slack", "name": "app_slack", "checked": true },
-        { "label": "Slack", "name": "app_slack", "checked": true },
-        { "label": "Slack", "name": "app_slack", "checked": true },
-        { "label": "Slack", "name": "app_slack", "checked": true },
-        { "label": "Zoom", "name": "app_zoom", "checked": true },
-        { "label": "Microsoft Office", "name": "app_office", "checked": false },
-        { "label": "Visual Studio Code", "name": "app_vscode", "checked": false },
-        { "label": "Zoom", "name": "app_zoom", "checked": true },
-        { "label": "Microsoft Office", "name": "app_office", "checked": false },
-        { "label": "Visual Studio Code", "name": "app_vscode", "checked": false },
-        { "label": "Zoom", "name": "app_zoom", "checked": true },
-        { "label": "Microsoft Office", "name": "app_office", "checked": false },
-        { "label": "Visual Studio Code", "name": "app_vscode", "checked": false },
-        { "label": "Zoom", "name": "app_zoom", "checked": true },
-        { "label": "Microsoft Office", "name": "app_office", "checked": false },
+        { "label": "Microsoft Office", "name": "app_office", "checked": false, "detail": "Word, Excel, PowerPoint and Outlook" },
         { "label": "Visual Studio Code", "name": "app_vscode", "checked": false }
-     ]
+      ],
+      "buttons": [
+        {
+          "name": "app_links",
+          "title": "Can't see what you need?",
+          "items": [
+            { "name": "app_selfservice", "label": "Open Self Service", "url": "selfservice://" },
+            { "name": "app_request", "label": "Request Software…", "url": "https://help.example.com/software" }
+          ]
+        }
+      ]
     },
     {
       "cardId": "updates",
@@ -121,12 +252,28 @@
       "sidebartitle": "Updates",
       "icon": "SF=arrow.triangle.2.circlepath.circle.fill,colour=gray",
       "message": "Control when updates are installed on this Mac.",
+      "vieworder": {
+        "groups": [
+          { "title": "When to install", "items": ["updatewindow"] },
+          { "title": "Behaviour", "items": ["autoappupdates", "autorestart", "checknow"] }
+        ]
+      },
       "selectitems": [
         { "title": "Install Window", "name": "updatewindow", "values": ["Overnight (1am - 5am)", "Lunchtime (12pm - 1pm)", "Whenever idle"], "default": "Overnight (1am - 5am)", "style": "radio" }
       ],
       "checkbox": [
         { "label": "Automatically install app updates", "name": "autoappupdates", "checked": true },
-        { "label": "Restart automatically if required", "name": "autorestart", "checked": false }
+        { "label": "Restart automatically if required", "name": "autorestart", "checked": false, "detail": "You'll get a 10 minute warning first (needs automatic updates)", "enabledif": "autoappupdates" }
+      ],
+      "buttons": [
+        {
+          "name": "checknow",
+          "title": "Check for updates now",
+          "detail": "Runs for a few seconds: watch the spinner, and note Apply is blocked until it finishes",
+          "items": [
+            { "name": "updatecheck", "label": "Check Now", "symbol": "arrow.clockwise", "shell": "sleep 3; echo checked > /tmp/swiftdialog-demo-updatecheck" }
+          ]
+        }
       ]
     },
 
@@ -135,13 +282,33 @@
       "section": "Network",
       "title": "VPN",
       "icon": "SF=network.badge.shield.half.filled,colour=blue",
-      "message": "Company VPN settings.",
+      "message": "Company VPN settings. Inputs of different types sit together in one group.",
+      "vieworder": {
+        "groups": [
+          { "title": "Connection", "description": "Switches and a menu, in one list",
+            "items": ["vpnatlogin", "vpngateway", "vpnuntrusted"] },
+          { "title": "Network settings", "items": ["vpn_tools"] }
+        ]
+      },
       "selectitems": [
-        { "title": "Gateway", "name": "vpngateway", "values": ["Automatic", "Sydney", "Singapore", "London", "New York"], "default": "Automatic" }
+        { "title": "Gateway", "name": "vpngateway", "values": ["Automatic", "Sydney", "Singapore", "London", "New York"], "default": "Automatic",
+          "detail": "Automatic picks the nearest" }
       ],
       "checkbox": [
         { "label": "Connect at login", "name": "vpnatlogin", "checked": true },
-        { "label": "Always-on for untrusted networks", "name": "vpnuntrusted", "checked": true }
+        { "label": "Always-on for untrusted networks", "name": "vpnuntrusted", "checked": true, "detail": "Cafés, airports and hotels" }
+      ],
+      "buttons": [
+        {
+          "name": "vpn_tools",
+          "title": "Troubleshooting",
+          "items": [
+            { "name": "vpn_settings", "label": "Network Settings…", "url": "x-apple.systempreferences:com.apple.Network-Settings.extension" },
+            { "name": "vpn_diag", "label": "Run Diagnostics", "shell": "sleep 1; echo ok > /tmp/swiftdialog-demo-vpn" },
+            { "name": "vpn_help", "symbol": "questionmark", "display": "symbol", "label": "Help",
+              "sheet": "## VPN troubleshooting\n\n1. Check you're online\n2. Try a different **Gateway**\n3. Run diagnostics and send the log to the service desk" }
+          ]
+        }
       ]
     },
     {
@@ -149,11 +316,20 @@
       "section": "Network",
       "title": "Proxy",
       "icon": "SF=server.rack,colour=gray",
-      "message": "Only change these if asked to by IT.",
+      "message": "Only change these if asked to by IT. The fields stay disabled until Use proxy is on (enabledif), and the exceptions only appear then (visibleif).",
+      "vieworder": {
+        "groups": [
+          { "title": "Server", "items": ["useproxy", "proxyhost", "proxyport"] },
+          { "title": "Exceptions", "footer": "Comma separated hosts and subnets.", "items": ["proxybypass"] }
+        ]
+      },
       "textfield": [
-        { "title": "Proxy Host", "name": "proxyhost", "prompt": "proxy.example.com" },
-        { "title": "Port", "name": "proxyport", "prompt": "8080", "regex": "^[0-9]{0,5}$", "regexerror": "Port must be a number" },
-        { "title": "Bypass for", "name": "proxybypass", "value": "*.local, 169.254/16" }
+        { "title": "Proxy Host", "name": "proxyhost", "prompt": "proxy.example.com", "enabledif": "useproxy" },
+        { "title": "Port", "name": "proxyport", "prompt": "8080", "regex": "^[0-9]{0,5}$", "regexerror": "Port must be a number", "detail": "Numbers only", "enabledif": "useproxy" },
+        { "title": "Bypass for", "name": "proxybypass", "value": "*.local, 169.254/16", "visibleif": "useproxy" }
+      ],
+      "checkbox": [
+        { "label": "Use proxy", "name": "useproxy", "checked": false }
       ]
     },
 
@@ -163,7 +339,24 @@
       "title": "Get Support",
       "sidebartitle": "Support",
       "icon": "SF=questionmark.circle.fill,colour=orange",
-      "message": "Need a hand?\n\n- **Service Desk:** [help.example.com](https://help.example.com)\n- **Chat:** #it-help\n- **Phone:** 1800 555 123 (8am - 6pm)\n\nWhen contacting support, quote serial number **{serialnumber}**."
+      "message": "Need a hand? When contacting support, quote serial number **{serialnumber}**.",
+      "vieworder": {
+        "groups": [
+          { "title": "Get in touch", "items": ["support_links", "support_hours"] }
+        ]
+      },
+      "buttons": [
+        {
+          "name": "support_links",
+          "title": "Service Desk",
+          "detail": "Chat is quickest during business hours",
+          "items": [
+            { "name": "support_web", "label": "Open Portal", "url": "https://help.example.com" },
+            { "name": "support_chat", "label": "Start Chat", "symbol": "bubble.left.fill", "url": "https://chat.example.com/it-help" }
+          ]
+        },
+        { "name": "support_hours", "title": "Phone", "type": "info", "value": "1800 555 123 (8am - 6pm)" }
+      ]
     }
   ]
 }

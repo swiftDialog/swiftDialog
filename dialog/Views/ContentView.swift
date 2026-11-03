@@ -91,6 +91,12 @@ struct ContentView: View {
                     window?.canBecomeVisibleWithoutLogin = true
                 })
         })
+        .sheet(item: $observedData.messageSheet) { content in
+            MessageSheetView(content: content, onClose: { observedData.messageSheet = nil })
+                .background(WindowAccessor { window in
+                    window?.canBecomeVisibleWithoutLogin = true
+                })
+        }
         .onReceive(screenResChanged) {_ in
             placeWindow(observedData.mainWindow ?? NSApp.windows[0],
                         size: CGSize(width: appvars.windowWidth,

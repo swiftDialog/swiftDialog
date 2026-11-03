@@ -19,8 +19,15 @@ struct DropdownView: View {
 
     var dropdownCount = 0
 
-    init(observedDialogContent: DialogUpdatableContent) {
+    /// Only draw these select items (nil = all). Used when `vieworder` places inputs individually.
+    var indices: [Int]?
+    /// Drawn inside a group, which supplies the surrounding box
+    var embedded: Bool = false
+
+    init(observedDialogContent: DialogUpdatableContent, indices: [Int]? = nil, embedded: Bool = false) {
         self.observedData = observedDialogContent
+        self.indices = indices
+        self.embedded = embedded
 
         if !observedDialogContent.args.hideIcon.present {
             fieldwidth = observedDialogContent.args.windowWidth.value.floatValue()
@@ -59,13 +66,17 @@ struct DropdownView: View {
                 // Iterate the collection's indices, not 0..<count: a Range-based ForEach pins to the
                 // count it first saw and keeps evaluating stale indices after the array shrinks on a
                 // card change, which traps on subscript. Array(indices) always tracks the current list.
-                ForEach(Array(userInputState.dropdownItems.indices), id: \.self) {index in
+                ForEach(Array(userInputState.dropdownItems.indices).filter { indices?.contains($0) ?? true }, id: \.self) {index in
+                    Group {
                     if userInputState.dropdownItems[index].style != "radio" {
                         HStack {
                             // we could print the title as part of the picker control but then we don't get easy access to swiftui text formatting
                             // so we print it seperatly and use a blank value in the picker
                             HStack {
-                                Text(userInputState.dropdownItems[index].title + (userInputState.dropdownItems[index].required ? " *":""))
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(userInputState.dropdownItems[index].title + (userInputState.dropdownItems[index].required ? " *":""))
+                                    DetailText(userInputState.dropdownItems[index].detail)
+                                }
                                     .frame(idealWidth: fieldwidth*0.20, alignment: .leading)
                                 Spacer()
                             }
@@ -79,6 +90,7 @@ struct DropdownView: View {
                                 )
                                     .onChange(of: selectedOption[index]) { _, selectedOption in
                                         setIfInBounds(&userInputState.dropdownItems, index, \.selectedValue, selectedOption)
+                                        setIfInBounds(&observedData.observedUserInputState.dropdownItems, index, \.selectedValue, selectedOption)
                                     }
                                     .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
                                     .requiredFieldHighlight(userInputState.dropdownItems[index].requiredfieldHighlight, trigger: observedData.showSheet)
@@ -103,6 +115,7 @@ struct DropdownView: View {
                                 .pickerStyle(MenuPickerStyle())
                                 .onChange(of: selectedOption[index]) { _, selectedOption in
                                     setIfInBounds(&userInputState.dropdownItems, index, \.selectedValue, selectedOption)
+                                    setIfInBounds(&observedData.observedUserInputState.dropdownItems, index, \.selectedValue, selectedOption)
                                 }
                                 .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
                                 .buttonSizeFit()
@@ -110,12 +123,20 @@ struct DropdownView: View {
                             }
                         }
                     }
+                    }
+                    // a reset (see enabledif) changes the data; follow it so the control shows the same choice
+                    .onChange(of: observedData.observedUserInputState.dropdownItems.indices.contains(index)
+                                ? observedData.observedUserInputState.dropdownItems[index].selectedValue : "") { _, newValue in
+                        if selectedOption.indices.contains(index), selectedOption[index] != newValue {
+                            selectedOption[index] = newValue
+                        }
+                    }
+                    .controlDependencies(observedData, enabledIf: userInputState.dropdownItems[index].enabledIf,
+                                         visibleIf: userInputState.dropdownItems[index].visibleIf)
                 }
             }
             .font(.system(size: observedData.appProperties.labelFontSize))
-            .padding(10)
-            .background(Color.background.opacity(0.5))
-            .cornerRadius(8)
+            .inputBox(embedded: embedded)
 
         }
     }

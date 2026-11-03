@@ -17,8 +17,15 @@ struct RadioView: View {
 
     var radioCount = 0
 
-    init(observedDialogContent: DialogUpdatableContent) {
+    /// Only draw these select items (nil = all). Used when `vieworder` places inputs individually.
+    var indices: [Int]?
+    /// Drawn inside a group, which supplies the surrounding box and dividers
+    var embedded: Bool = false
+
+    init(observedDialogContent: DialogUpdatableContent, indices: [Int]? = nil, embedded: Bool = false) {
         self.observedData = observedDialogContent
+        self.indices = indices
+        self.embedded = embedded
 
         if !observedDialogContent.args.hideIcon.present {
             fieldwidth = observedDialogContent.args.windowWidth.value.floatValue()
@@ -55,7 +62,8 @@ struct RadioView: View {
                 // Iterate the collection's indices, not 0..<count: a Range-based ForEach pins to the
                 // count it first saw and keeps evaluating stale indices after the array shrinks on a
                 // card change, which traps on subscript. Array(indices) always tracks the current list.
-                ForEach(Array(userInputState.dropdownItems.indices), id: \.self) {index in
+                ForEach(Array(userInputState.dropdownItems.indices).filter { indices?.contains($0) ?? true }, id: \.self) {index in
+                    Group {
                     if userInputState.dropdownItems[index].style == "radio" {
                         VStack {
                             HStack {
@@ -64,6 +72,11 @@ struct RadioView: View {
                                 Spacer()
                             }
                             .padding(.bottom, 8)
+                            if !userInputState.dropdownItems[index].detail.isEmpty {
+                                DetailText(userInputState.dropdownItems[index].detail)
+                                    .padding(.top, -6)
+                                    .padding(.bottom, 8)
+                            }
                             HStack {
                                 Picker("", selection: $selectedOption[index]) {
                                     ForEach(userInputState.dropdownItems[index].values, id: \.self) {
@@ -73,23 +86,32 @@ struct RadioView: View {
                                 }
                                 .onChange(of: selectedOption[index]) { _, selectedOption in
                                     setIfInBounds(&userInputState.dropdownItems, index, \.selectedValue, selectedOption)
+                                    setIfInBounds(&observedData.observedUserInputState.dropdownItems, index, \.selectedValue, selectedOption)
                                 }
                                 .pickerStyle(RadioGroupPickerStyle())
                                 Spacer()
                             }
                             // Horozontal Line
-                            if index < radioCount-1 {
+                            if !embedded && index < radioCount-1 {
                                 Divider().opacity(0.5)
                                     .padding(.top, 10)
                             }
                         }
                     }
+                    }
+                    // a reset (see enabledif) changes the data; follow it so the control shows the same choice
+                    .onChange(of: observedData.observedUserInputState.dropdownItems.indices.contains(index)
+                                ? observedData.observedUserInputState.dropdownItems[index].selectedValue : "") { _, newValue in
+                        if selectedOption.indices.contains(index), selectedOption[index] != newValue {
+                            selectedOption[index] = newValue
+                        }
+                    }
+                    .controlDependencies(observedData, enabledIf: userInputState.dropdownItems[index].enabledIf,
+                                         visibleIf: userInputState.dropdownItems[index].visibleIf)
                 }
             }
             .font(.system(size: observedData.appProperties.labelFontSize))
-            .padding(10)
-            .background(Color.background.opacity(0.5))
-            .cornerRadius(8)
+            .inputBox(embedded: embedded)
         }
     }
 }

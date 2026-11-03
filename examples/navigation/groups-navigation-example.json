@@ -1,0 +1,60 @@
+{
+  "cardstyle": "navigation",
+  "title": "Settings",
+  "icon": "SF=gearshape.fill,colour=gray",
+  "width": 900,
+  "height": 600,
+  "button1text": "Apply",
+  "button2text": "Cancel",
+  "checkboxstyle": { "style": "switch", "size": "regular" },
+  "cards": [
+    {
+      "cardId": "account",
+      "title": "Account",
+      "icon": "SF=person.crop.circle.fill,colour=blue",
+      "message": "Textfields, a switch and a select mixed together, in two groups.",
+      "vieworder": {
+        "groups": [
+          { "title": "Profile", "description": "Shown in the company directory",
+            "items": ["displayname", "email", "publicprofile"] },
+          { "title": "Contact", "footer": "IT only contacts you about your Mac.",
+            "items": ["channel", "phone"] }
+        ]
+      },
+      "textfield": [
+        { "title": "Display Name", "name": "displayname", "value": "Jane Appleseed" },
+        { "title": "Email", "name": "email", "value": "jane@example.com", "detail": "Used for sign in" },
+        { "title": "Phone", "name": "phone", "prompt": "Optional" }
+      ],
+      "checkbox": [
+        { "label": "Public profile", "name": "publicprofile", "checked": true, "detail": "Let colleagues find you" }
+      ],
+      "selectitems": [
+        { "title": "Preferred Channel", "name": "channel", "values": ["Email", "Chat", "Phone"], "default": "Chat" }
+      ]
+    },
+    {
+      "cardId": "network",
+      "title": "Network",
+      "icon": "SF=network,colour=green",
+      "message": "Same inputs, different order. 'proxyhost' is placed first, the rest follow by type.",
+      "vieworder": "[Proxy],proxyhost,useproxy,[Everything else],checkbox,textfield",
+      "textfield": [
+        { "title": "Proxy Host", "name": "proxyhost", "prompt": "proxy.example.com" },
+        { "title": "Bypass for", "name": "bypass", "value": "*.local" }
+      ],
+      "checkbox": [
+        { "label": "Use proxy", "name": "useproxy" },
+        { "label": "Connect VPN at login", "name": "vpnlogin", "checked": true }
+      ]
+    },
+    {
+      "cardId": "plain",
+      "title": "No vieworder",
+      "icon": "SF=list.bullet",
+      "message": "A page without vieworder renders exactly as before.",
+      "textfield": [ { "title": "Name", "name": "plainname" } ],
+      "checkbox": [ { "label": "Enabled", "name": "plainenabled" } ]
+    }
+  ]
+}

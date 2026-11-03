@@ -162,6 +162,11 @@ struct MessageContent: View {
                 AudioControl()
             }
 
+            if let layout = observedData.appProperties.viewLayout {
+                // Extended vieworder: individual inputs placed in groups
+                GroupedInputsView(observedData: observedData, groups: layout)
+                    .frame(maxWidth: dataEntryMaxWidth, alignment: isNavigation ? .leading : .center)
+            } else {
             Group {
                 ForEach(Array(observedData.appProperties.viewOrder.indices), id: \.self) { index in
                     switch index {
@@ -203,10 +208,29 @@ struct MessageContent: View {
                             .padding(.bottom, appDefaults.contentPadding)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
                             .frame(maxWidth: dataEntryMaxWidth, alignment: isNavigation ? .leading : .center)
+                    case observedData.appProperties.viewOrder.firstIndex(of: ViewType.button.rawValue):
+                        ButtonRowView(observedDialogContent: observedData)
+                            .id(observedData.currentCardIndex)
+                            .padding(.bottom, appDefaults.contentPadding)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .frame(maxWidth: dataEntryMaxWidth, alignment: isNavigation ? .leading : .center)
+                    case observedData.appProperties.viewOrder.firstIndex(of: ViewType.slider.rawValue):
+                        NumberInputView(observedDialogContent: observedData, kind: "slider")
+                            .id(observedData.currentCardIndex)
+                            .padding(.bottom, appDefaults.contentPadding)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .frame(maxWidth: dataEntryMaxWidth, alignment: isNavigation ? .leading : .center)
+                    case observedData.appProperties.viewOrder.firstIndex(of: ViewType.stepper.rawValue):
+                        NumberInputView(observedDialogContent: observedData, kind: "stepper")
+                            .id(observedData.currentCardIndex)
+                            .padding(.bottom, appDefaults.contentPadding)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .frame(maxWidth: dataEntryMaxWidth, alignment: isNavigation ? .leading : .center)
                     default:
                             EmptyView()
                     }
                 }
+            }
             }
 
 
@@ -232,6 +256,11 @@ struct MessageContent: View {
             withAnimation(.easeInOut(duration: 0.25)) {
                 contentOpacity = 1
             }
+            observedData.resetInactiveControls()
+        }
+        // enabledif / visibleif: controls that become unavailable go back to their defaults
+        .onChange(of: observedData.currentControlValues()) { _, _ in
+            observedData.resetInactiveControls()
         }
     }
 

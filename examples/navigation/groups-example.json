@@ -1,0 +1,33 @@
+{
+  "title": "Network Settings",
+  "icon": "SF=network",
+  "message": "Inputs of different types placed in groups with **vieworder**, with `detail` subtext under titles.",
+  "width": 760,
+  "height": 640,
+  "vieworder": {
+    "groups": [
+      {
+        "title": "VPN",
+        "description": "Company VPN settings",
+        "items": ["vpnatlogin", "vpngateway", "vpnuser"]
+      },
+      {
+        "title": "Proxy",
+        "footer": "Only change these if asked to by IT.",
+        "items": ["proxyhost", "useproxy", "proxyport"]
+      }
+    ]
+  },
+  "textfield": [
+    { "title": "VPN Username", "name": "vpnuser", "detail": "Usually your email address" },
+    { "title": "Proxy Host", "name": "proxyhost", "prompt": "proxy.example.com" },
+    { "title": "Proxy Port", "name": "proxyport", "prompt": "8080", "detail": "Numbers only" }
+  ],
+  "checkbox": [
+    { "label": "Connect at login", "name": "vpnatlogin", "checked": true, "detail": "Start the VPN when you sign in" },
+    { "label": "Use proxy", "name": "useproxy" }
+  ],
+  "selectitems": [
+    { "title": "Gateway", "name": "vpngateway", "values": ["Automatic", "Sydney", "Singapore"], "default": "Automatic" }
+  ]
+}

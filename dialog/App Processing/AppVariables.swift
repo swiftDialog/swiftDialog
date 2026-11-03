@@ -96,8 +96,15 @@ struct AppVariables {
         ViewType.checkbox.rawValue,
         ViewType.textfield.rawValue,
         ViewType.radiobutton.rawValue,
-        ViewType.dropdown.rawValue
+        ViewType.dropdown.rawValue,
+        ViewType.button.rawValue,
+        ViewType.slider.rawValue,
+        ViewType.stepper.rawValue
     ]
+
+    /// Resolved input layout from an extended `vieworder` (placed inputs and groups).
+    /// nil means the original per-type ordering in `viewOrder` is used.
+    var viewLayout: [ResolvedViewLayoutGroup]? = nil
 
     // button default strings
     // work out how to define a default width button that does what you tell it to. in the meantime, diry hack with spaces

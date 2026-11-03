@@ -225,6 +225,9 @@ struct dialogApp: App {
 
         writeLog("Dialog Launched", logLevel: .info)
 
+        // Kill any running page button actions if we're terminated (re-raises the signal afterwards)
+        installButtonActionSignalHandlers()
+
         // Ensure the singleton NSApplication exists.
         // required for correct determination of screen dimentions for the screen in use in multi screen scenarios
         _ = NSApplication.shared
