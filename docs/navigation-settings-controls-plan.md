@@ -589,8 +589,14 @@ in macOS 28." with a "Details…" button on the right).
 - **Changed-values-only output**: `"outputchanges": true` → only emit values that differ from
   the defaults in the JSON. Needs defaults captured per card at load time (including unvisited
   pages).
-- **Command-file updates** for the new types (set slider value, update info row, enable/disable
-  action).
+- **Command-file updates** for the new types: **deliberately not planned** (decided 2026-11-03).
+  The command file earns its place for background-task feedback (status text, progress), and
+  forms built from inputs are largely static after launch. Revisit only if there's feedback that
+  a specific function is needed. Candidates if that happens, roughly by likely value: set an
+  input's value, enable/disable an input, update an `info` row or button, update `detail`
+  text, navigation (select/next/previous page, page warning), and a values snapshot. In
+  navigation style, hidden pages are rebuilt on each visit, so changes to them would need the
+  per-page stored input plus a small pending-changes layer.
 
 ## Suggested phasing
 
