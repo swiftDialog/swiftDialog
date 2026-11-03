@@ -85,6 +85,10 @@ struct TextFieldState: Identifiable, Equatable {
     var initialPath: String = ""
     /// Subtext shown under the title when not empty
     var detail: String = ""
+    /// Only enabled while this condition holds (see ControlCondition). Empty = always.
+    var enabledIf: String = ""
+    /// Only shown while this condition holds. Empty = always.
+    var visibleIf: String = ""
 
     /// True when this field should render a date/time picker instead of a text field.
     var isDatePicker: Bool { showDate || showTime }
@@ -148,6 +152,10 @@ struct DropDownItems: Equatable, Identifiable {
     var requiredfieldHighlight: Color = .clear
     /// Subtext shown under the title when not empty
     var detail: String = ""
+    /// Only enabled while this condition holds (see ControlCondition). Empty = always.
+    var enabledIf: String = ""
+    /// Only shown while this condition holds. Empty = always.
+    var visibleIf: String = ""
 }
 
 struct CheckBoxes: Identifiable, Equatable {
@@ -163,6 +171,10 @@ struct CheckBoxes: Identifiable, Equatable {
     var enablesButton1: Bool = false
     /// Subtext shown under the label when not empty
     var detail: String = ""
+    /// Only enabled while this condition holds (see ControlCondition). Empty = always.
+    var enabledIf: String = ""
+    /// Only shown while this condition holds. Empty = always.
+    var visibleIf: String = ""
     var dictionary: [String: Any] {
             return ["label": label,
                     "name": name,
@@ -192,6 +204,10 @@ struct NumberInput: Identifiable, Equatable {
     var maxLabel: String = ""
     /// slider: show the current value next to the slider
     var showValue: Bool = true
+    /// Only enabled while this condition holds (see ControlCondition). Empty = always.
+    var enabledIf: String = ""
+    /// Only shown while this condition holds. Empty = always.
+    var visibleIf: String = ""
 
     /// Name used in the output and by vieworder
     var key: String { name.isEmpty ? title : name }
@@ -254,6 +270,8 @@ struct ButtonItem: Identifiable, Equatable {
     var disabled: Bool = false
     /// colour type: allow choosing opacity
     var opacity: Bool = false
+    /// This button is only enabled while the condition holds
+    var enabledIf: String = ""
 
     // Runtime state (not configuration)
     var clicked: Bool = false
@@ -282,6 +300,10 @@ struct ButtonRow: Identifiable, Equatable {
     /// "inline", "below", "selected" or "hidden"
     var labelPosition: String = "inline"
     var items: [ButtonItem] = []
+    /// Only enabled while this condition holds (see ControlCondition). Empty = always.
+    var enabledIf: String = ""
+    /// Only shown while this condition holds. Empty = always.
+    var visibleIf: String = ""
 
     /// Name used by vieworder to place the row
     var layoutName: String {

@@ -117,6 +117,7 @@ struct TextEntryView: View {
         if observedData.args.textField.present && textFieldCount == userInputState.textFields.count {
             VStack {
                 ForEach(indices?.filter { $0 < textFieldCount } ?? Array(0..<textFieldCount), id: \.self) {index in
+                    Group {
                     if observedData.textFieldArray[index].editor {
                         VStack {
                             HStack {
@@ -316,6 +317,9 @@ struct TextEntryView: View {
                                      )
                         }
                     }
+                    }
+                    .controlDependencies(observedData, enabledIf: observedData.textFieldArray[index].enabledIf,
+                                         visibleIf: observedData.textFieldArray[index].visibleIf)
                 }
             }
             .font(.system(size: observedData.appProperties.labelFontSize))

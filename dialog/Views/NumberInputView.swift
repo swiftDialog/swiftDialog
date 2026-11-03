@@ -146,10 +146,13 @@ extension NumberInputView {
     fileprivate func rows(_ visible: [Int], inputs: [NumberInput], columns: NumberColumnWidths?) -> some View {
         VStack {
             ForEach(visible, id: \.self) { index in
-                NumberRow(observedData: observedData, input: inputs[index], explicitColumns: columns)
-                if !embedded && index != visible.last {
-                    Divider().opacity(0.5)
+                Group {
+                    NumberRow(observedData: observedData, input: inputs[index], explicitColumns: columns)
+                    if !embedded && index != visible.last {
+                        Divider().opacity(0.5)
+                    }
                 }
+                .controlDependencies(observedData, enabledIf: inputs[index].enabledIf, visibleIf: inputs[index].visibleIf)
             }
         }
     }

@@ -45,6 +45,31 @@ extension View {
     }
 }
 
+/// Applies `enabledif` / `visibleif`: hides the control while `visibleIf` is false and disables it
+/// while `enabledIf` is false. Without conditions the content is passed through untouched.
+struct ControlDependencyModifier: ViewModifier {
+    @ObservedObject var observedData: DialogUpdatableContent
+    let enabledIf: String
+    let visibleIf: String
+
+    func body(content: Content) -> some View {
+        if enabledIf.isEmpty && visibleIf.isEmpty {
+            content
+        } else {
+            let values = observedData.currentControlValues()
+            if ControlCondition.evaluate(visibleIf, values: values) {
+                content.disabled(!ControlCondition.evaluate(enabledIf, values: values))
+            }
+        }
+    }
+}
+
+extension View {
+    func controlDependencies(_ observedData: DialogUpdatableContent, enabledIf: String, visibleIf: String) -> some View {
+        modifier(ControlDependencyModifier(observedData: observedData, enabledIf: enabledIf, visibleIf: visibleIf))
+    }
+}
+
 struct GroupedInputsView: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
@@ -53,6 +78,8 @@ struct GroupedInputsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             ForEach(groups) { group in
+                let rows = visibleRows(in: group)
+                if !rows.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
                     if let title = group.title {
                         Text(title)
@@ -64,7 +91,7 @@ struct GroupedInputsView: View {
                             .padding(.leading, 4)
                     }
                     VStack(spacing: 0) {
-                        ForEach(Array(group.rows.enumerated()), id: \.offset) { position, row in
+                        ForEach(Array(rows.enumerated()), id: \.offset) { position, row in
                             if position > 0 {
                                 Divider().opacity(0.5)
                             }
@@ -84,10 +111,39 @@ struct GroupedInputsView: View {
                             .padding(.leading, 4)
                     }
                 }
+                }
             }
         }
         .padding(.top, 8)
         .padding(.bottom, appDefaults.contentPadding)
+    }
+
+    /// `visibleif` of a placed row ("" when it has none)
+    private func visibleIf(for row: ViewLayoutRow) -> String {
+        let state = observedData.observedUserInputState
+        switch row {
+        case .textField(let index):
+            return observedData.textFieldArray.indices.contains(index) ? observedData.textFieldArray[index].visibleIf : ""
+        case .checkbox(let index):
+            return state.checkBoxes.indices.contains(index) ? state.checkBoxes[index].visibleIf : ""
+        case .radio(let index), .dropdown(let index):
+            return state.dropdownItems.indices.contains(index) ? state.dropdownItems[index].visibleIf : ""
+        case .slider(let index), .stepper(let index):
+            return state.numberInputs.indices.contains(index) ? state.numberInputs[index].visibleIf : ""
+        case .button(let index):
+            return state.buttonRows.indices.contains(index) ? state.buttonRows[index].visibleIf : ""
+        case .block:
+            return ""
+        }
+    }
+
+    /// The rows of a group that are currently shown, so hidden rows leave no gap or extra divider
+    /// (and a group with nothing to show disappears with its title and footer)
+    private func visibleRows(in group: ResolvedViewLayoutGroup) -> [ViewLayoutRow] {
+        let conditions = group.rows.map { visibleIf(for: $0) }
+        guard conditions.contains(where: { !$0.isEmpty }) else { return group.rows }
+        let values = observedData.currentControlValues()
+        return zip(group.rows, conditions).filter { ControlCondition.evaluate($0.1, values: values) }.map { $0.0 }
     }
 
     /// The sliders and steppers in a group, whose column widths are shared so they line up

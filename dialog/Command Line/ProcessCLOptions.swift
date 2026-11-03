@@ -383,7 +383,9 @@ func makeTextFieldState(from field: JSON) -> TextFieldState {
         dateOutputFormat: field["format"].stringValue,
         confirm: field["confirm"].boolValue,
         initialPath: field["path"].stringValue,
-        detail: field["detail"].stringValue)
+        detail: field["detail"].stringValue,
+        enabledIf: field["enabledif"].stringValue,
+        visibleIf: field["visibleif"].stringValue)
 }
 
 /// Builds a `NumberInput` (slider or stepper) from a JSON object. Shared by the whole-config JSON path
@@ -406,6 +408,8 @@ func makeNumberInput(from field: JSON, kind: String) -> NumberInput {
     input.minLabel = field["minlabel"].stringValue
     input.maxLabel = field["maxlabel"].stringValue
     input.showValue = field["showvalue"].bool ?? true
+    input.enabledIf = field["enabledif"].stringValue
+    input.visibleIf = field["visibleif"].stringValue
     return input.sanitised()
 }
 
@@ -456,6 +460,7 @@ func makeButtonItem(from field: JSON) -> ButtonItem {
     item.confirm = buttonText(field["confirm"].stringValue)
     item.disabled = field["disabled"].boolValue
     item.opacity = field["opacity"].boolValue
+    item.enabledIf = field["enabledif"].stringValue
     return item
 }
 
@@ -473,6 +478,8 @@ func makeButtonRow(from field: JSON) -> ButtonRow {
     row.alignment = field["alignment"].string?.lowercased() ?? (row.title.isEmpty ? "trailing" : "trailing")
     row.size = CGFloat(field["size"].doubleValue)
     row.labelPosition = field["labelposition"].string?.lowercased() ?? "inline"
+    row.enabledIf = field["enabledif"].stringValue
+    row.visibleIf = field["visibleif"].stringValue
     if field["items"].type == .array {
         row.items = field["items"].arrayValue.map { makeButtonItem(from: $0) }
     } else {
@@ -517,7 +524,9 @@ func makeCheckBox(from field: JSON) -> CheckBoxes {
         checked: field["checked"].boolValue,
         disabled: field["disabled"].boolValue,
         enablesButton1: field["enableButton1"].boolValue,
-        detail: field["detail"].stringValue)
+        detail: field["detail"].stringValue,
+        enabledIf: field["enabledif"].stringValue,
+        visibleIf: field["visibleif"].stringValue)
 }
 
 /// Builds a `ListItems` from a JSON object. Shared by the whole-config JSON path and the
@@ -547,7 +556,9 @@ func makeDropDownItem(from field: JSON) -> DropDownItems {
         selectedValue: field["default"].stringValue,
         required: field["required"].boolValue,
         style: field["style"].stringValue,
-        detail: field["detail"].stringValue)
+        detail: field["detail"].stringValue,
+        enabledIf: field["enabledif"].stringValue,
+        visibleIf: field["visibleif"].stringValue)
 }
 
 /// Applies title-font settings from a JSON object to appvars. Shared by the whole-config JSON path
@@ -985,6 +996,8 @@ func processCLOptions(json: JSON = getJSON()) {
                 let dropdownTitle: String = labelItems[0]
                 var dropdownName: String = ""
                 var dropdownDetail: String = ""
+                var dropdownEnabledIf: String = ""
+                var dropdownVisibleIf: String = ""
                 for item in labelItems {
                     var itemKeyValuePair = item.split(separator: "=", maxSplits: 1)
                     for _ in itemKeyValuePair.count...2 {
@@ -1005,10 +1018,14 @@ func processCLOptions(json: JSON = getJSON()) {
                             dropdownName = itemValue
                         case "detail":
                             dropdownDetail = itemValue
+                        case "enabledif":
+                            dropdownEnabledIf = itemValue
+                        case "visibleif":
+                            dropdownVisibleIf = itemValue
                         default: ()
                         }
                 }
-                userInputState.dropdownItems.append(DropDownItems(title: dropdownTitle, name: dropdownName, values: dropdownValues[index].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[index], selectedValue: dropdownDefaults[index], required: dropdownRequired, style: dropdownStyle, detail: dropdownDetail))
+                userInputState.dropdownItems.append(DropDownItems(title: dropdownTitle, name: dropdownName, values: dropdownValues[index].components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }, defaultValue: dropdownDefaults[index], selectedValue: dropdownDefaults[index], required: dropdownRequired, style: dropdownStyle, detail: dropdownDetail, enabledIf: dropdownEnabledIf, visibleIf: dropdownVisibleIf))
             }
         }
         for index in 0..<userInputState.dropdownItems.count where userInputState.dropdownItems[index].required {
@@ -1060,6 +1077,8 @@ func processCLOptions(json: JSON = getJSON()) {
                 var fieldConfirm: Bool = false
                 var fieldInitialPath: String = ""
                 var fieldDetail: String = ""
+                var fieldEnabledIf: String = ""
+                var fieldVisibleIf: String = ""
                 if items.count > 0 {
                     fieldTitle = items[0]
                     if items.count > 1 {
@@ -1114,6 +1133,10 @@ func processCLOptions(json: JSON = getJSON()) {
                                 fieldInitialPath = nextValue
                             case "detail":
                                 fieldDetail = nextValue
+                            case "enabledif":
+                                fieldEnabledIf = nextValue
+                            case "visibleif":
+                                fieldVisibleIf = nextValue
                             default: ()
                             }
                         }
@@ -1155,7 +1178,9 @@ func processCLOptions(json: JSON = getJSON()) {
                             dateOutputFormat: fieldDateFormat,
                             confirm: fieldConfirm,
                             initialPath: fieldInitialPath,
-                            detail: fieldDetail))
+                            detail: fieldDetail,
+                            enabledIf: fieldEnabledIf,
+                            visibleIf: fieldVisibleIf))
             }
         }
         for index in 0..<userInputState.textFields.count where userInputState.textFields[index].required {
@@ -1188,6 +1213,8 @@ func processCLOptions(json: JSON = getJSON()) {
                 var disabled: Bool = false
                 var enableButton1: Bool = false
                 var detail: String = ""
+                var enabledIf: String = ""
+                var visibleIf: String = ""
                 for item in items {
                     var itemKeyValuePair = item.split(separator: "=", maxSplits: 1)
                     for _ in itemKeyValuePair.count...2 {
@@ -1210,11 +1237,15 @@ func processCLOptions(json: JSON = getJSON()) {
                         enableButton1 = true
                     case "detail":
                         detail = itemValue
+                    case "enabledif":
+                        enabledIf = itemValue
+                    case "visibleif":
+                        visibleIf = itemValue
                     default:
                         label = itemName
                     }
                 }
-                userInputState.checkBoxes.append(CheckBoxes(label: label, name: name, icon: icon, checked: checked, disabled: disabled, enablesButton1: enableButton1, detail: detail))
+                userInputState.checkBoxes.append(CheckBoxes(label: label, name: name, icon: icon, checked: checked, disabled: disabled, enablesButton1: enableButton1, detail: detail, enabledIf: enabledIf, visibleIf: visibleIf))
                 //appvars.checkboxArray.append(CheckBoxes(label: label, name: name, icon: icon, checked: checked, disabled: disabled, enablesButton1: enableButton1))
             }
         }

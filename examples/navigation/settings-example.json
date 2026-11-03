@@ -204,7 +204,7 @@
       },
       "slider": [
         { "title": "Output volume", "name": "volume", "min": 0, "max": 100, "step": 5, "value": 60, "unit": "%", "minlabel": "Quiet", "maxlabel": "Loud" },
-        { "title": "Brightness", "name": "brightness", "min": 0, "max": 100, "step": 1, "value": 75, "unit": "%", "detail": "Adjusts automatically in low light when Auto-dim is on" },
+        { "title": "Brightness", "name": "brightness", "min": 0, "max": 100, "step": 1, "value": 75, "unit": "%", "detail": "Adjusts automatically in low light when Auto-dim is on", "enabledif": "!autodim" },
         { "title": "Balance", "name": "balance", "min": -1, "max": 1, "step": 0.25, "value": 0, "minlabel": "Left", "maxlabel": "Right" }
       ],
       "stepper": [
@@ -212,7 +212,7 @@
         { "title": "Keep logs for", "name": "keeplogs", "min": 1, "max": 90, "step": 1, "value": 30, "unit": "days" }
       ],
       "checkbox": [
-        { "label": "Auto-dim", "name": "autodim", "checked": true }
+        { "label": "Auto-dim", "name": "autodim", "checked": false }
       ]
     },
     {
@@ -263,7 +263,7 @@
       ],
       "checkbox": [
         { "label": "Automatically install app updates", "name": "autoappupdates", "checked": true },
-        { "label": "Restart automatically if required", "name": "autorestart", "checked": false, "detail": "You'll get a 10 minute warning first" }
+        { "label": "Restart automatically if required", "name": "autorestart", "checked": false, "detail": "You'll get a 10 minute warning first (needs automatic updates)", "enabledif": "autoappupdates" }
       ],
       "buttons": [
         {
@@ -316,17 +316,17 @@
       "section": "Network",
       "title": "Proxy",
       "icon": "SF=server.rack,colour=gray",
-      "message": "Only change these if asked to by IT. The switch is placed between the text fields.",
+      "message": "Only change these if asked to by IT. The fields stay disabled until Use proxy is on (enabledif), and the exceptions only appear then (visibleif).",
       "vieworder": {
         "groups": [
-          { "title": "Server", "items": ["proxyhost", "useproxy", "proxyport"] },
+          { "title": "Server", "items": ["useproxy", "proxyhost", "proxyport"] },
           { "title": "Exceptions", "footer": "Comma separated hosts and subnets.", "items": ["proxybypass"] }
         ]
       },
       "textfield": [
-        { "title": "Proxy Host", "name": "proxyhost", "prompt": "proxy.example.com" },
-        { "title": "Port", "name": "proxyport", "prompt": "8080", "regex": "^[0-9]{0,5}$", "regexerror": "Port must be a number", "detail": "Numbers only" },
-        { "title": "Bypass for", "name": "proxybypass", "value": "*.local, 169.254/16" }
+        { "title": "Proxy Host", "name": "proxyhost", "prompt": "proxy.example.com", "enabledif": "useproxy" },
+        { "title": "Port", "name": "proxyport", "prompt": "8080", "regex": "^[0-9]{0,5}$", "regexerror": "Port must be a number", "detail": "Numbers only", "enabledif": "useproxy" },
+        { "title": "Bypass for", "name": "proxybypass", "value": "*.local, 169.254/16", "visibleif": "useproxy" }
       ],
       "checkbox": [
         { "label": "Use proxy", "name": "useproxy", "checked": false }

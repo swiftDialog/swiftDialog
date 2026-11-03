@@ -38,6 +38,8 @@
 		413BFDBA3099781A00604E6A /* ButtonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413BFDB93099781A00604E6A /* ButtonTests.swift */; };
 		413BFDBC3099926300604E6A /* NumberInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413BFDBB3099926300604E6A /* NumberInputView.swift */; };
 		413BFDBE3099929600604E6A /* NumberInputTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413BFDBD3099929600604E6A /* NumberInputTests.swift */; };
+		413BFDC030999F4D00604E6A /* ControlDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413BFDBF30999F4D00604E6A /* ControlDependencies.swift */; };
+		413BFDC230999F6300604E6A /* ControlDependencyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413BFDC130999F6300604E6A /* ControlDependencyTests.swift */; };
 		414550AA27C799D000D756E3 /* BackgroundBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414550A927C799D000D756E3 /* BackgroundBlur.swift */; };
 		41512CC2286C77F200F22B86 /* ConstructionKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41512CC1286C77F200F22B86 /* ConstructionKitView.swift */; };
 		4153784E2604B71800AA0E76 /* TitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153784D2604B71800AA0E76 /* TitleView.swift */; };
@@ -317,7 +319,9 @@
 		413BFDB7309977AE00604E6A /* ButtonRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonRowView.swift; sourceTree = "<group>"; };
 		413BFDB93099781A00604E6A /* ButtonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonTests.swift; sourceTree = "<group>"; };
 		413BFDBB3099926300604E6A /* NumberInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberInputView.swift; sourceTree = "<group>"; };
-		413BFDBD3099929600604E6A /* NumberInputTests.swift */ = {isa = PBXFileReference; path = NumberInputTests.swift; sourceTree = "<group>"; };
+		413BFDBD3099929600604E6A /* NumberInputTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberInputTests.swift; sourceTree = "<group>"; };
+		413BFDBF30999F4D00604E6A /* ControlDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlDependencies.swift; sourceTree = "<group>"; };
+		413BFDC130999F6300604E6A /* ControlDependencyTests.swift */ = {isa = PBXFileReference; path = ControlDependencyTests.swift; sourceTree = "<group>"; };
 		414550A927C799D000D756E3 /* BackgroundBlur.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundBlur.swift; sourceTree = "<group>"; };
 		41512CC1286C77F200F22B86 /* ConstructionKitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstructionKitView.swift; sourceTree = "<group>"; };
 		4153784D2604B71800AA0E76 /* TitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleView.swift; sourceTree = "<group>"; };
@@ -674,6 +678,7 @@
 				413BFDAF309972D000604E6A /* ViewLayoutTests.swift */,
 				413BFDB93099781A00604E6A /* ButtonTests.swift */,
 				413BFDBD3099929600604E6A /* NumberInputTests.swift */,
+				413BFDC130999F6300604E6A /* ControlDependencyTests.swift */,
 			);
 			path = dialogTests;
 			sourceTree = "<group>";
@@ -927,6 +932,7 @@
 				CCB35CB32BCFF4460041A701 /* SystemInfo.swift */,
 				413BFDAD309972BD00604E6A /* ViewLayout.swift */,
 				413BFDB33099772800604E6A /* ButtonActions.swift */,
+				413BFDBF30999F4D00604E6A /* ControlDependencies.swift */,
 			);
 			path = Functions;
 			sourceTree = "<group>";
@@ -1345,6 +1351,7 @@
 				BAEFDFF32E83FB310017CFC2 /* Preset1.swift in Sources */,
 				BAEFDFF42E83FB310017CFC2 /* ImageResolver.swift in Sources */,
 				BA7TS0012F242B0000ABCDEF /* ThumbnailService.swift in Sources */,
+				413BFDC030999F4D00604E6A /* ControlDependencies.swift in Sources */,
 				BAEFDFF52E83FB310017CFC2 /* Progress.swift in Sources */,
 				BAEFDFF62E83FB310017CFC2 /* FileMonitor.swift in Sources */,
 				BAEFDFF72E83FB310017CFC2 /* InspectLayoutProtocol.swift in Sources */,
@@ -1457,6 +1464,7 @@
 				4154C2F125F76BDC00A3D373 /* dialogTests.swift in Sources */,
 				AA00000000000001AABBCC01 /* LogMonitorServiceTests.swift in Sources */,
 				AA00000000000002AABBCC01 /* ColourAdditionsTests.swift in Sources */,
+				413BFDC230999F6300604E6A /* ControlDependencyTests.swift in Sources */,
 				AA00000000000003AABBCC01 /* StringProcessingTests.swift in Sources */,
 				AA00000000000004AABBCC01 /* VideoURLTests.swift in Sources */,
 				41ECBC4F30944E77005B1B6B /* CardStyleNavigationTests.swift in Sources */,

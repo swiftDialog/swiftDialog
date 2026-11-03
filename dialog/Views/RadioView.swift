@@ -63,6 +63,7 @@ struct RadioView: View {
                 // count it first saw and keeps evaluating stale indices after the array shrinks on a
                 // card change, which traps on subscript. Array(indices) always tracks the current list.
                 ForEach(Array(userInputState.dropdownItems.indices).filter { indices?.contains($0) ?? true }, id: \.self) {index in
+                    Group {
                     if userInputState.dropdownItems[index].style == "radio" {
                         VStack {
                             HStack {
@@ -85,6 +86,7 @@ struct RadioView: View {
                                 }
                                 .onChange(of: selectedOption[index]) { _, selectedOption in
                                     setIfInBounds(&userInputState.dropdownItems, index, \.selectedValue, selectedOption)
+                                    setIfInBounds(&observedData.observedUserInputState.dropdownItems, index, \.selectedValue, selectedOption)
                                 }
                                 .pickerStyle(RadioGroupPickerStyle())
                                 Spacer()
@@ -96,6 +98,9 @@ struct RadioView: View {
                             }
                         }
                     }
+                    }
+                    .controlDependencies(observedData, enabledIf: userInputState.dropdownItems[index].enabledIf,
+                                         visibleIf: userInputState.dropdownItems[index].visibleIf)
                 }
             }
             .font(.system(size: observedData.appProperties.labelFontSize))

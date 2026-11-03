@@ -67,6 +67,7 @@ struct DropdownView: View {
                 // count it first saw and keeps evaluating stale indices after the array shrinks on a
                 // card change, which traps on subscript. Array(indices) always tracks the current list.
                 ForEach(Array(userInputState.dropdownItems.indices).filter { indices?.contains($0) ?? true }, id: \.self) {index in
+                    Group {
                     if userInputState.dropdownItems[index].style != "radio" {
                         HStack {
                             // we could print the title as part of the picker control but then we don't get easy access to swiftui text formatting
@@ -89,6 +90,7 @@ struct DropdownView: View {
                                 )
                                     .onChange(of: selectedOption[index]) { _, selectedOption in
                                         setIfInBounds(&userInputState.dropdownItems, index, \.selectedValue, selectedOption)
+                                        setIfInBounds(&observedData.observedUserInputState.dropdownItems, index, \.selectedValue, selectedOption)
                                     }
                                     .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
                                     .requiredFieldHighlight(userInputState.dropdownItems[index].requiredfieldHighlight, trigger: observedData.showSheet)
@@ -113,6 +115,7 @@ struct DropdownView: View {
                                 .pickerStyle(MenuPickerStyle())
                                 .onChange(of: selectedOption[index]) { _, selectedOption in
                                     setIfInBounds(&userInputState.dropdownItems, index, \.selectedValue, selectedOption)
+                                    setIfInBounds(&observedData.observedUserInputState.dropdownItems, index, \.selectedValue, selectedOption)
                                 }
                                 .frame(idealWidth: fieldwidth*0.50, maxWidth: 350, alignment: .trailing)
                                 .buttonSizeFit()
@@ -120,6 +123,9 @@ struct DropdownView: View {
                             }
                         }
                     }
+                    }
+                    .controlDependencies(observedData, enabledIf: userInputState.dropdownItems[index].enabledIf,
+                                         visibleIf: userInputState.dropdownItems[index].visibleIf)
                 }
             }
             .font(.system(size: observedData.appProperties.labelFontSize))

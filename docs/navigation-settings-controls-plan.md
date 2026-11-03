@@ -581,11 +581,40 @@ in macOS 28." with a "Details…" button on the right).
 - Supports `{system tags}` like other text. Markdown? (open question — plain text suggested.)
 - Independent of groups (works in any layout) but most useful with them.
 
+## 4b. Control dependencies (implemented)
+
+`enabledif` and `visibleif` on any input (text field, checkbox, select / radio, slider, stepper,
+button row, and `enabledif` on an individual button). `visibleif` hides the control while false,
+`enabledif` disables it. In JSON and in the comma separated forms (`enabledif=useproxy`).
+
+Conditions use the output names (`name`, falling back to title / label):
+
+| Condition | True when |
+|---|---|
+| `useproxy` | a checkbox is on / a field has text / a select has a choice / a number is not 0 |
+| `!useproxy` | the opposite |
+| `channel=Phone`, `channel!=Email` | equals / not equals (not case sensitive; numbers compare as numbers) |
+| `volume>50`, `<`, `>=`, `<=` | numeric comparison |
+| `a && b`, `a \|\| b` | both / either. `&&` binds tighter than `\|\|`. No brackets |
+
+Rules:
+- Conditions see inputs **on the same page** (in navigation style other pages aren't loaded).
+- Sources: text fields, checkboxes, selects (including radio), sliders / steppers, selectable
+  button rows (their selected value) and colour wells (hex).
+- A condition that can't be understood never locks a control: unknown names read as empty (and
+  are logged); non-numeric ordering is false.
+- Hidden or disabled controls **still output their value** (output is unchanged) but their
+  `required` / regex checks are skipped, since the user can't reach them.
+- In navigation style a required field that has `enabledif` / `visibleif` doesn't force an
+  unvisited page to be "incomplete"; it is checked when the page is visited.
+- Inside `vieworder` groups hidden rows leave no gap or divider, and a group with nothing visible
+  disappears with its title and footer.
+- Not supported: brackets, `visibleif` on one button in a row, and references to other pages.
+
 ## 5. Later
 
-- **Dependencies**: `"enabledif": "useproxy"` (disable unless another control is on/has a
-  value); possibly `visibleif`. Needs a small expression rule set — keep it to
-  "checkbox is on" / "select equals X" initially.
+- **Dependencies** (`enabledif` / `visibleif`): **implemented** (2026-11-03) - see "Control
+  dependencies" below.
 - **Changed-values-only output**: `"outputchanges": true` → only emit values that differ from
   the defaults in the JSON. Needs defaults captured per card at load time (including unvisited
   pages).

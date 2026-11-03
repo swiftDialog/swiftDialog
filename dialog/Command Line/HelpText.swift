@@ -766,6 +766,8 @@ struct SDHelp {
         argument.textField.helpShort = "Enable a textfield with the specified label"
         argument.textField.helpUsage = "<text>[,required,secure,prompt=\"<text>\",name=\"<text>\"]"
         argument.textField.helpLong = """
+        Also accepts detail=<text> (subtext under the title) and enabledif= / visibleif= (see --\(argument.slider.long)).
+
         When swiftDialog exits the contents of the textfield will be presented as <text> : <user_input>
         in plain or as json using [-\(appArguments.jsonOutPut.short), --\(appArguments.jsonOutPut.long)] option
         Multiple textfields can be specified as required.
@@ -820,6 +822,8 @@ struct SDHelp {
         
         argument.checkbox.helpShort = "Enable a checkbox with the specified label"
         argument.checkbox.helpLong = """
+        Also accepts detail=<text> (subtext under the title) and enabledif= / visibleif= (see --\(argument.slider.long)).
+
         When swiftDialog exits the status of the checkbox will be presented as <text> : [true|false]
         in plain or as json using [-\(appArguments.jsonOutPut.short), --\(appArguments.jsonOutPut.long)] option
         Multiple checkboxes can be specified as required.
@@ -864,6 +868,11 @@ struct SDHelp {
         While a button's command is running, clicking it again does nothing and button1/button2 will not
         close the dialog. Any other way of quitting stops running commands. Output includes whether
         each button was clicked and the exit code of its command.
+
+        Dependencies: add enabledif=<condition> or visibleif=<condition> to disable or hide an input
+        depending on others on the same page, e.g. enabledif=useproxy, visibleif=channel=Phone or
+        enabledif="volume>50 && !mute". Conditions use the input names (name=), support = != > < >= <=,
+        && and ||, and a bare name means a checkbox is on / a field has text / a number is not 0.
         """
         argument.slider.helpShort = "Add a slider that returns a number"
         argument.slider.helpUsage = "<text>"
@@ -887,6 +896,11 @@ struct SDHelp {
         --\(argument.slider.long) "Volume,name=volume,min=0,max=100,step=5,value=50,unit=%"
 
         A JSON object may also be supplied using the same keys.
+
+        Dependencies: add enabledif=<condition> or visibleif=<condition> to disable or hide an input
+        depending on others on the same page, e.g. enabledif=useproxy, visibleif=channel=Phone or
+        enabledif="volume>50 && !mute". Conditions use the input names (name=), support = != > < >= <=,
+        && and ||, and a bare name means a checkbox is on / a field has text / a number is not 0.
         """
         argument.stepper.helpShort = "Add a stepper (number field with +/- buttons) that returns a number"
         argument.stepper.helpUsage = "<text>"

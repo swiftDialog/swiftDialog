@@ -42,6 +42,7 @@ struct RenderToggles: View {
         if checkboxCount > 0 && checkboxCount == userInputState.checkBoxes.count {
             VStack {
                 ForEach(indices?.filter { $0 < checkboxCount } ?? Array(0..<checkboxCount), id: \.self) {index in
+                    Group {
                     HStack {
                         if observedData.appProperties.checkboxControlStyle == "switch" {
                         let _ = writeLog("Displaying switches instead of checkboxes", logLevel: .debug)
@@ -95,6 +96,9 @@ struct RenderToggles: View {
                 if !embedded && index < observedData.observedUserInputState.checkBoxes.count-1 {
                     Divider().opacity(0.5)
                 }
+                }
+                .controlDependencies(observedData, enabledIf: observedData.observedUserInputState.checkBoxes[index].enabledIf,
+                                     visibleIf: observedData.observedUserInputState.checkBoxes[index].visibleIf)
             }
             }
             .font(.system(size: observedData.appProperties.labelFontSize))

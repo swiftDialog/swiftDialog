@@ -340,7 +340,9 @@ class CardState: ObservableObject {
     /// True if the configuration contains any text field or select item marked as required.
     static func hasRequiredFields(_ configuration: JSON) -> Bool {
         for key in ["textfield", "selectitems"] {
-            for field in configuration[key].arrayValue where field["required"].boolValue {
+            // A field that can be disabled or hidden might not be required in the end, so it doesn't count
+            for field in configuration[key].arrayValue where field["required"].boolValue
+                && field["enabledif"].stringValue.isEmpty && field["visibleif"].stringValue.isEmpty {
                 return true
             }
         }

@@ -243,3 +243,12 @@ extension DialogUpdatableContent {
         }
     }
 }
+
+// MARK: - Control dependencies
+
+extension DialogUpdatableContent {
+    /// Current value of every input, read from the published copies so views refresh when one changes.
+    func currentControlValues() -> [String: String] {
+        controlValues(textFields: textFieldArray, state: observedUserInputState)
+    }
+}

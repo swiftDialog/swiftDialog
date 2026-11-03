@@ -31,10 +31,13 @@ struct ButtonRowView: View {
             let visible = (indices ?? Array(rows.indices)).filter { rows.indices.contains($0) }
             VStack {
                 ForEach(visible, id: \.self) { rowIndex in
-                    rowView(rows[rowIndex])
-                    if !embedded && rowIndex != visible.last {
-                        Divider().opacity(0.5)
+                    Group {
+                        rowView(rows[rowIndex])
+                        if !embedded && rowIndex != visible.last {
+                            Divider().opacity(0.5)
+                        }
                     }
+                    .controlDependencies(observedData, enabledIf: rows[rowIndex].enabledIf, visibleIf: rows[rowIndex].visibleIf)
                 }
             }
             .font(.system(size: observedData.appProperties.labelFontSize))
@@ -58,6 +61,7 @@ struct ButtonRowView: View {
             HStack(alignment: .top, spacing: row.style == "plain" ? 14 : 8) {
                 ForEach(row.items) { item in
                     ButtonItemView(observedData: observedData, row: row, item: item)
+                        .controlDependencies(observedData, enabledIf: item.enabledIf, visibleIf: "")
                 }
             }
             if !hasTitle && row.alignment != "trailing" {
