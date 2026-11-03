@@ -382,6 +382,12 @@ func quitDialog(exitCode: Int32, exitMessage: String? = "", observedObject: Dial
             json[entry.key] = JSON(entry.value)
         }
 
+        // sliders and steppers: the chosen number
+        for entry in numberOutputEntries(userInputState.numberInputs) {
+            outputArray.append(entry.line)
+            json[entry.key] = JSON(entry.value)
+        }
+
         // print the output
         if cardState.isCardsMode {
             // Cards mode: output all accumulated input from all cards

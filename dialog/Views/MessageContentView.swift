@@ -214,6 +214,18 @@ struct MessageContent: View {
                             .padding(.bottom, appDefaults.contentPadding)
                             .border(observedData.appProperties.debugBorderColour, width: 2)
                             .frame(maxWidth: dataEntryMaxWidth, alignment: isNavigation ? .leading : .center)
+                    case observedData.appProperties.viewOrder.firstIndex(of: ViewType.slider.rawValue):
+                        NumberInputView(observedDialogContent: observedData, kind: "slider")
+                            .id(observedData.currentCardIndex)
+                            .padding(.bottom, appDefaults.contentPadding)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .frame(maxWidth: dataEntryMaxWidth, alignment: isNavigation ? .leading : .center)
+                    case observedData.appProperties.viewOrder.firstIndex(of: ViewType.stepper.rawValue):
+                        NumberInputView(observedDialogContent: observedData, kind: "stepper")
+                            .id(observedData.currentCardIndex)
+                            .padding(.bottom, appDefaults.contentPadding)
+                            .border(observedData.appProperties.debugBorderColour, width: 2)
+                            .frame(maxWidth: dataEntryMaxWidth, alignment: isNavigation ? .leading : .center)
                     default:
                             EmptyView()
                     }

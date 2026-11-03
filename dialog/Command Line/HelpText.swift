@@ -865,6 +865,38 @@ struct SDHelp {
         close the dialog. Any other way of quitting stops running commands. Output includes whether
         each button was clicked and the exit code of its command.
         """
+        argument.slider.helpShort = "Add a slider that returns a number"
+        argument.slider.helpUsage = "<text>"
+        argument.slider.helpLong = """
+        Adds a slider. Specify --\(argument.slider.long) multiple times for multiple sliders.
+        The first unkeyed item is the title. The chosen value is returned as a number.
+
+        Keys (comma separated):
+            name=       name used in the output and to place it with --\(argument.preferredViewOrder.long)
+            min=        lowest value (default 0)
+            max=        highest value (default 100)
+            step=       increment (default 1). Decimal steps return decimal values
+            value=      starting value (default min)
+            unit=       text shown after the value e.g. unit=%
+            minlabel=   text shown at the left of the slider
+            maxlabel=   text shown at the right of the slider
+            showvalue=  false to hide the current value (default true)
+            detail=     subtext shown under the title
+
+        e.g.
+        --\(argument.slider.long) "Volume,name=volume,min=0,max=100,step=5,value=50,unit=%"
+
+        A JSON object may also be supplied using the same keys.
+        """
+        argument.stepper.helpShort = "Add a stepper (number field with +/- buttons) that returns a number"
+        argument.stepper.helpUsage = "<text>"
+        argument.stepper.helpLong = """
+        Adds a stepper: a number field with increment and decrement buttons. Uses the same keys as
+        --\(argument.slider.long) (minlabel, maxlabel and showvalue do not apply).
+
+        e.g.
+        --\(argument.stepper.long) "Keep logs for,name=days,min=1,max=90,value=30,unit=days"
+        """
         argument.buttons.helpShort = "Synonym of --\(argument.button.long)"
         argument.buttons.helpLong = "See --\(argument.button.long)"
 

@@ -191,6 +191,31 @@
     },
 
     {
+      "cardId": "sound",
+      "section": "Preferences",
+      "title": "Sound & Display",
+      "icon": "SF=speaker.wave.2.fill,colour=pink",
+      "message": "Sliders and steppers return numbers. Decimal steps return decimals.",
+      "vieworder": {
+        "groups": [
+          { "title": "Levels", "description": "Drag, or use the arrow keys", "items": ["volume", "brightness", "balance"] },
+          { "title": "Power", "items": ["idlemins", "keeplogs", "autodim"] }
+        ]
+      },
+      "slider": [
+        { "title": "Output volume", "name": "volume", "min": 0, "max": 100, "step": 5, "value": 60, "unit": "%", "minlabel": "Quiet", "maxlabel": "Loud" },
+        { "title": "Brightness", "name": "brightness", "min": 0, "max": 100, "step": 1, "value": 75, "unit": "%", "detail": "Adjusts automatically in low light when Auto-dim is on" },
+        { "title": "Balance", "name": "balance", "min": -1, "max": 1, "step": 0.25, "value": 0, "minlabel": "Left", "maxlabel": "Right" }
+      ],
+      "stepper": [
+        { "title": "Sleep after", "name": "idlemins", "min": 1, "max": 60, "step": 1, "value": 10, "unit": "minutes", "detail": "When the Mac isn't being used" },
+        { "title": "Keep logs for", "name": "keeplogs", "min": 1, "max": 90, "step": 1, "value": 30, "unit": "days" }
+      ],
+      "checkbox": [
+        { "label": "Auto-dim", "name": "autodim", "checked": true }
+      ]
+    },
+    {
       "cardId": "apps",
       "section": "Software",
       "title": "Optional Apps",

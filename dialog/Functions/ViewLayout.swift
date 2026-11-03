@@ -41,6 +41,8 @@ enum ViewLayoutRow: Equatable {
     case radio(Int)
     case dropdown(Int)
     case button(Int)
+    case slider(Int)
+    case stepper(Int)
     /// Self-contained blocks that aren't per-item rows: textfile, webcontent, listitem
     case block(ViewType)
 }
@@ -61,11 +63,13 @@ struct ViewLayoutInputs {
     var selects: [(name: String, isRadio: Bool)] = []
     /// Button rows, by their layout name
     var buttons: [String] = []
+    /// Sliders and steppers share one array; `kind` is "slider" or "stepper"
+    var numbers: [(name: String, kind: String)] = []
     /// Which self-contained blocks have content
     var blocks: Set<ViewType> = []
 
     var allNames: Set<String> {
-        Set(textFields + checkboxes + selects.map { $0.name } + buttons).subtracting([""])
+        Set(textFields + checkboxes + selects.map { $0.name } + buttons + numbers.map { $0.name }).subtracting([""])
     }
 }
 
@@ -73,12 +77,12 @@ enum ViewLayoutParser {
 
     /// Reserved words in the input ordering path: the seven input types.
     static let reservedWords: Set<String> = [
-        ViewType.textfile, .webcontent, .listitem, .checkbox, .textfield, .radiobutton, .dropdown, .button
+        ViewType.textfile, .webcontent, .listitem, .checkbox, .textfield, .radiobutton, .dropdown, .button, .slider, .stepper
     ].reduce(into: Set<String>()) { $0.insert($1.rawValue) }.union(["buttons"])
 
     /// Default order types are appended in when inputs aren't placed anywhere.
     static let defaultTypeOrder: [ViewType] = [
-        .textfile, .webcontent, .listitem, .checkbox, .textfield, .radiobutton, .dropdown, .button
+        .textfile, .webcontent, .listitem, .checkbox, .textfield, .radiobutton, .dropdown, .button, .slider, .stepper
     ]
 
     /// The type a reserved word stands for ("buttons" is a synonym of "button")
@@ -187,6 +191,9 @@ enum ViewLayoutParser {
         for (index, name) in inputs.buttons.enumerated() where !name.isEmpty && byName[name] == nil {
             byName[name] = .button(index)
         }
+        for (index, item) in inputs.numbers.enumerated() where !item.name.isEmpty && byName[item.name] == nil {
+            byName[item.name] = item.kind == "stepper" ? .stepper(index) : .slider(index)
+        }
 
         // Warn about inputs that can't be placed individually because their name is a reserved word
         for name in inputs.allNames.intersection(reservedWords) {
@@ -218,6 +225,8 @@ enum ViewLayoutParser {
             case .radiobutton: candidates = inputs.selects.enumerated().filter { $0.element.isRadio }.map { .radio($0.offset) }
             case .dropdown:  candidates = inputs.selects.enumerated().filter { !$0.element.isRadio }.map { .dropdown($0.offset) }
             case .button:    candidates = inputs.buttons.indices.map { .button($0) }
+            case .slider:    candidates = inputs.numbers.enumerated().filter { $0.element.kind == "slider" }.map { .slider($0.offset) }
+            case .stepper:   candidates = inputs.numbers.enumerated().filter { $0.element.kind == "stepper" }.map { .stepper($0.offset) }
             case .textfile, .webcontent, .listitem: candidates = inputs.blocks.contains(type) ? [.block(type)] : []
             }
             return candidates.filter { !placedIndividually.contains($0) }

@@ -36,6 +36,8 @@
 		413BFDB63099779500604E6A /* ButtonHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413BFDB53099779500604E6A /* ButtonHandling.swift */; };
 		413BFDB8309977AE00604E6A /* ButtonRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413BFDB7309977AE00604E6A /* ButtonRowView.swift */; };
 		413BFDBA3099781A00604E6A /* ButtonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413BFDB93099781A00604E6A /* ButtonTests.swift */; };
+		413BFDBC3099926300604E6A /* NumberInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413BFDBB3099926300604E6A /* NumberInputView.swift */; };
+		413BFDBE3099929600604E6A /* NumberInputTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413BFDBD3099929600604E6A /* NumberInputTests.swift */; };
 		414550AA27C799D000D756E3 /* BackgroundBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414550A927C799D000D756E3 /* BackgroundBlur.swift */; };
 		41512CC2286C77F200F22B86 /* ConstructionKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41512CC1286C77F200F22B86 /* ConstructionKitView.swift */; };
 		4153784E2604B71800AA0E76 /* TitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4153784D2604B71800AA0E76 /* TitleView.swift */; };
@@ -313,7 +315,9 @@
 		413BFDB33099772800604E6A /* ButtonActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonActions.swift; sourceTree = "<group>"; };
 		413BFDB53099779500604E6A /* ButtonHandling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonHandling.swift; sourceTree = "<group>"; };
 		413BFDB7309977AE00604E6A /* ButtonRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonRowView.swift; sourceTree = "<group>"; };
-		413BFDB93099781A00604E6A /* ButtonTests.swift */ = {isa = PBXFileReference; path = ButtonTests.swift; sourceTree = "<group>"; };
+		413BFDB93099781A00604E6A /* ButtonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonTests.swift; sourceTree = "<group>"; };
+		413BFDBB3099926300604E6A /* NumberInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberInputView.swift; sourceTree = "<group>"; };
+		413BFDBD3099929600604E6A /* NumberInputTests.swift */ = {isa = PBXFileReference; path = NumberInputTests.swift; sourceTree = "<group>"; };
 		414550A927C799D000D756E3 /* BackgroundBlur.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundBlur.swift; sourceTree = "<group>"; };
 		41512CC1286C77F200F22B86 /* ConstructionKitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstructionKitView.swift; sourceTree = "<group>"; };
 		4153784D2604B71800AA0E76 /* TitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleView.swift; sourceTree = "<group>"; };
@@ -669,6 +673,7 @@
 				41ECBC4E30944E77005B1B6B /* CardStyleNavigationTests.swift */,
 				413BFDAF309972D000604E6A /* ViewLayoutTests.swift */,
 				413BFDB93099781A00604E6A /* ButtonTests.swift */,
+				413BFDBD3099929600604E6A /* NumberInputTests.swift */,
 			);
 			path = dialogTests;
 			sourceTree = "<group>";
@@ -749,6 +754,7 @@
 				41ECBC4C30944DEA005B1B6B /* NavigationDialogView.swift */,
 				413BFDB13099736500604E6A /* GroupedInputsView.swift */,
 				413BFDB7309977AE00604E6A /* ButtonRowView.swift */,
+				413BFDBB3099926300604E6A /* NumberInputView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1364,6 +1370,7 @@
 				418A7B582759949B00E4D6F1 /* NSWindow+Additions.swift in Sources */,
 				41BD41C72EA5771C00DA7124 /* CKIconView.swift in Sources */,
 				418A7B592759949B00E4D6F1 /* HelpText.swift in Sources */,
+				413BFDBC3099926300604E6A /* NumberInputView.swift in Sources */,
 				4116923528939E4D00A88700 /* CKButtonView.swift in Sources */,
 				417BD471279CB658009AE34A /* CheckboxView.swift in Sources */,
 				4116923228939DEB00A88700 /* CKSidebarView.swift in Sources */,
@@ -1446,6 +1453,7 @@
 			files = (
 				41D892E72F754FCA00FA4E01 /* PlistEvaluationTests.swift in Sources */,
 				41D892E52F754FBC00FA4E01 /* DistributedNotificationsTests.swift in Sources */,
+				413BFDBE3099929600604E6A /* NumberInputTests.swift in Sources */,
 				4154C2F125F76BDC00A3D373 /* dialogTests.swift in Sources */,
 				AA00000000000001AABBCC01 /* LogMonitorServiceTests.swift in Sources */,
 				AA00000000000002AABBCC01 /* ColourAdditionsTests.swift in Sources */,

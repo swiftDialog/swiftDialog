@@ -194,3 +194,52 @@ extension DialogUpdatableContent {
         }
     }
 }
+
+// MARK: - Sliders and steppers
+
+/// A slider/stepper in the final output: plain text line and the `--json` value (a number).
+struct NumberOutputEntry {
+    let key: String
+    let value: Any
+    let line: String
+}
+
+func numberOutputEntries(_ inputs: [NumberInput]) -> [NumberOutputEntry] {
+    inputs.compactMap { input in
+        guard !input.key.isEmpty else { return nil }
+        let value: Any = input.decimals == 0 ? Int(input.value.rounded()) as Any : (Double(input.displayValue) ?? input.value) as Any
+        return NumberOutputEntry(key: input.key, value: value, line: "\"\(input.key)\" : \"\(input.displayValue)\"")
+    }
+}
+
+extension DialogUpdatableContent {
+
+    /// Set a slider/stepper value (kept inside its range) in both the observed and global copy.
+    func setNumberValue(id: UUID, _ newValue: Double) {
+        func apply(_ inputs: inout [NumberInput]) {
+            guard let index = inputs.firstIndex(where: { $0.id == id }) else { return }
+            inputs[index].value = min(max(newValue, inputs[index].minValue), inputs[index].maxValue)
+        }
+        apply(&observedUserInputState.numberInputs)
+        apply(&userInputState.numberInputs)
+    }
+
+    /// Slider/stepper values for cards, as text so plain and --json output stay consistent.
+    func collectNumberInput() -> [String: Any] {
+        var input: [String: Any] = [:]
+        for number in userInputState.numberInputs where !number.key.isEmpty {
+            input[number.key] = number.displayValue
+        }
+        return input
+    }
+
+    func restoreNumberInput(from stored: [String: Any]) {
+        for index in userInputState.numberInputs.indices {
+            let key = userInputState.numberInputs[index].key
+            if let text = stored[key] as? String, let value = Double(text) {
+                let number = userInputState.numberInputs[index]
+                userInputState.numberInputs[index].value = min(max(value, number.minValue), number.maxValue)
+            }
+        }
+    }
+}

@@ -386,6 +386,45 @@ func makeTextFieldState(from field: JSON) -> TextFieldState {
         detail: field["detail"].stringValue)
 }
 
+/// Builds a `NumberInput` (slider or stepper) from a JSON object. Shared by the whole-config JSON path
+/// and the per-argument JSON form (`--slider '{...}'`) so both accept the same keys.
+func makeNumberInput(from field: JSON, kind: String) -> NumberInput {
+    func number(_ key: String, _ fallback: Double) -> Double {
+        guard field[key].exists() else { return fallback }
+        return Double(jsonCGFloat(field[key], default: CGFloat(fallback), context: "\(kind) \(key)"))
+    }
+    var input = NumberInput()
+    input.kind = kind
+    input.title = processTextString(field["title"].stringValue, tags: appvars.systemInfo)
+    input.name = field["name"].stringValue
+    input.detail = processTextString(field["detail"].stringValue, tags: appvars.systemInfo)
+    input.minValue = number("min", 0)
+    input.maxValue = number("max", 100)
+    input.step = number("step", 1)
+    input.value = number("value", input.minValue)
+    input.unit = field["unit"].stringValue
+    input.minLabel = field["minlabel"].stringValue
+    input.maxLabel = field["maxlabel"].stringValue
+    input.showValue = field["showvalue"].bool ?? true
+    return input.sanitised()
+}
+
+/// Builds a `NumberInput` from the comma separated command line form:
+/// `--slider "Volume,name=volume,min=0,max=100,step=5,value=50,unit=%"` (the first unkeyed item is the title).
+func makeNumberInput(fromCSV text: String, kind: String) -> NumberInput {
+    var json = JSON()
+    for part in text.components(separatedBy: ",").map({ $0.trimmingCharacters(in: .whitespaces) }) where !part.isEmpty {
+        let pair = part.split(separator: "=", maxSplits: 1).map(String.init)
+        if pair.count == 2 {
+            json[pair[0].lowercased()].string = pair[1]
+        } else if json["title"].string == nil {
+            json["title"].string = part
+        }
+    }
+    if let show = json["showvalue"].string { json["showvalue"].bool = !["false", "0", "no"].contains(show.lowercased()) }
+    return makeNumberInput(from: json, kind: kind)
+}
+
 /// Text a button config may contain system tags ({serialnumber}) and the usual \n / <br> handling.
 private func buttonText(_ value: String) -> String {
     processTextString(value, tags: appvars.systemInfo)
@@ -1182,6 +1221,26 @@ func processCLOptions(json: JSON = getJSON()) {
                                 writeLog("checkboxOptionsArray : \(appvars.checkboxArray)")
     }
 
+    // Sliders and steppers
+    userInputState.numberInputs.removeAll()
+    for (argument, kind) in [(appArguments.slider, "slider"), (appArguments.stepper, "stepper")] where argument.present {
+        if json[argument.long].exists() {
+            let entries = json[argument.long].type == .array ? json[argument.long].arrayValue : [json[argument.long]]
+            for entry in entries where entry.type == .dictionary {
+                userInputState.numberInputs.append(makeNumberInput(from: entry, kind: kind))
+            }
+        } else {
+            for option in CLOptionMultiOptions(optionName: argument.long) {
+                let parsedJSON = JSON(parseJSON: option)
+                if parsedJSON.type == .dictionary {
+                    userInputState.numberInputs.append(makeNumberInput(from: parsedJSON, kind: kind))
+                } else {
+                    userInputState.numberInputs.append(makeNumberInput(fromCSV: option, kind: kind))
+                }
+            }
+        }
+    }
+
     // Page buttons: --button / --buttons (synonyms), one argument = one row.
     userInputState.buttonRows.removeAll()
     if appArguments.button.present || appArguments.buttons.present {
@@ -1346,6 +1405,7 @@ func processCLOptions(json: JSON = getJSON()) {
             checkboxes: userInputState.checkBoxes.map { $0.name.isEmpty ? $0.label : $0.name },
             selects: userInputState.dropdownItems.map { (name: $0.name.isEmpty ? $0.title : $0.name, isRadio: $0.style == "radio") },
             buttons: userInputState.buttonRows.map { $0.layoutName },
+            numbers: userInputState.numberInputs.map { (name: $0.key, kind: $0.kind) },
             blocks: {
                 var blocks = Set<ViewType>()
                 if appArguments.logFileToTail.present { blocks.insert(.textfile) }

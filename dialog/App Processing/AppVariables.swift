@@ -97,7 +97,9 @@ struct AppVariables {
         ViewType.textfield.rawValue,
         ViewType.radiobutton.rawValue,
         ViewType.dropdown.rawValue,
-        ViewType.button.rawValue
+        ViewType.button.rawValue,
+        ViewType.slider.rawValue,
+        ViewType.stepper.rawValue
     ]
 
     /// Resolved input layout from an extended `vieworder` (placed inputs and groups).

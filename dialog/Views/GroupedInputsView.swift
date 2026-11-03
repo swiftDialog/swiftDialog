@@ -106,6 +106,9 @@ struct GroupedInputsView: View {
         case .button(let index):
             ButtonRowView(observedDialogContent: observedData, indices: [index], embedded: true)
                 .id("\(observedData.currentCardIndex)-button-\(index)")
+        case .slider(let index), .stepper(let index):
+            NumberInputView(observedDialogContent: observedData, indices: [index], embedded: true)
+                .id("\(observedData.currentCardIndex)-number-\(index)")
         case .block(let type):
             switch type {
             case .textfile:

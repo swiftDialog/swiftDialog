@@ -52,6 +52,7 @@ struct UserInputState {
     var textFields = [TextFieldState]()
     var checkBoxes = [CheckBoxes]()
     var buttonRows = [ButtonRow]()
+    var numberInputs = [NumberInput]()
     var iconItems = [Icons]()
 }
 
@@ -171,6 +172,53 @@ struct CheckBoxes: Identifiable, Equatable {
                     "enablesButton1": enablesButton1
             ]
         }
+}
+
+/// A slider or stepper: one shared numeric model (min / max / step / value), two views.
+struct NumberInput: Identifiable, Equatable {
+    var id = UUID()
+    /// "slider" or "stepper"
+    var kind: String = "slider"
+    var title: String = ""
+    var name: String = ""
+    /// Subtext shown under the title when not empty
+    var detail: String = ""
+    var minValue: Double = 0
+    var maxValue: Double = 100
+    var step: Double = 1
+    var value: Double = 0
+    var unit: String = ""
+    var minLabel: String = ""
+    var maxLabel: String = ""
+    /// slider: show the current value next to the slider
+    var showValue: Bool = true
+
+    /// Name used in the output and by vieworder
+    var key: String { name.isEmpty ? title : name }
+
+    /// Decimal places implied by the step (0.25 -> 2), capped at 4
+    var decimals: Int {
+        var places = 0
+        while places < 4 && abs(step * pow(10, Double(places)) - (step * pow(10, Double(places))).rounded()) > 1e-9 {
+            places += 1
+        }
+        return places
+    }
+
+    /// The value as text, with as many decimals as the step needs ("42", "0.75")
+    var displayValue: String { String(format: "%.\(decimals)f", value) }
+
+    /// Make the configuration safe: positive step, max above min, value inside the range.
+    func sanitised() -> NumberInput {
+        var input = self
+        if input.step <= 0 { input.step = 1 }
+        if input.maxValue <= input.minValue {
+            writeLog("\(input.kind) '\(input.key)': max must be greater than min - using max = min + 100", logLevel: .error)
+            input.maxValue = input.minValue + 100
+        }
+        input.value = min(max(input.value, input.minValue), input.maxValue)
+        return input
+    }
 }
 
 /// One button in a row. `type` decides what it is: "action" runs url / shell / sheet when clicked,

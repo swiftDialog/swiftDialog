@@ -887,6 +887,7 @@ final class DialogUpdatableContent: ObservableObject {
 
         // Collect page button state (selection, colour, clicked)
         input.merge(collectButtonInput()) { current, _ in current }
+        input.merge(collectNumberInput()) { current, _ in current }
         
         return input
     }
@@ -899,6 +900,7 @@ final class DialogUpdatableContent: ObservableObject {
         userInputState.listItems.removeAll()
         userInputState.iconItems.removeAll()
         userInputState.buttonRows.removeAll()
+        userInputState.numberInputs.removeAll()
         
         // Update observed arrays and state
         textFieldArray = []
@@ -1062,6 +1064,7 @@ final class DialogUpdatableContent: ObservableObject {
         
         // Restore page button state
         restoreButtonInput(from: storedInput)
+        restoreNumberInput(from: storedInput)
 
         // Restore list selections
         for index in 0..<userInputState.listItems.count {
