@@ -155,3 +155,61 @@ struct NumberColumnWidthTests {
         #expect(widths.unit > NumberColumnWidths.measuring([days], fontSize: 13).unit)
     }
 }
+
+struct NumberRoundingAndFitTests {
+
+    @Test func valuesAreRoundedToTwoDecimals() {
+        var input = NumberInput(); input.maxValue = 1
+        #expect(input.constrained(0.30000000000000004) == 0.3)
+        #expect(input.constrained(0.123456) == 0.12)
+    }
+
+    @Test func decimalsAreNeverMoreThanTwo() {
+        var input = NumberInput(); input.step = 0.125
+        #expect(input.decimals == 2)
+    }
+
+    @Test func snapsToTheStepFromMin() {
+        var input = NumberInput(); input.minValue = 0; input.maxValue = 100; input.step = 5
+        #expect(input.constrained(63, snapToStep: true) == 65)
+        #expect(input.constrained(62, snapToStep: true) == 60)
+        input.minValue = 2
+        #expect(input.constrained(9, snapToStep: true) == 7)    // steps are 2, 7, 12 ...
+    }
+
+    @Test func snappingStaysInsideTheRange() {
+        var input = NumberInput(); input.minValue = 0; input.maxValue = 98; input.step = 5
+        #expect(input.constrained(98, snapToStep: true) <= 98)
+        #expect(input.constrained(-50, snapToStep: true) == 0)
+    }
+
+    @Test func notSnappedUnlessAsked() {
+        var input = NumberInput(); input.step = 5
+        #expect(input.constrained(63) == 63)
+    }
+
+    @Test func sliderLengthFollowsTheWidth() {
+        var input = NumberInput(); input.title = "Output volume"; input.showValue = true; input.unit = "%"
+        let measured = NumberColumnWidths.measuring([input], fontSize: 13)
+        let narrow = measured.fitting(boxWidth: 300).slider
+        let medium = measured.fitting(boxWidth: 500).slider
+        let wide = measured.fitting(boxWidth: 2000).slider
+        #expect(narrow <= medium)
+        #expect(medium <= wide)
+        #expect(narrow >= NumberColumnWidths.minSlider)
+        #expect(wide <= NumberColumnWidths.maxSlider)
+    }
+
+    @Test func unmeasuredWidthKeepsTheIdealLength() {
+        let widths = NumberColumnWidths.measuring([NumberInput()], fontSize: 13)
+        #expect(widths.fitting(boxWidth: 0).slider == NumberColumnWidths.idealSlider)
+    }
+
+    @Test func rowsInAGroupGetTheSameSliderLength() {
+        // the length depends only on the group, not on which row is asking
+        var a = NumberInput(); a.title = "Volume"
+        var b = NumberInput(); b.title = "A much longer title for brightness"
+        let group = NumberColumnWidths.measuring([a, b], fontSize: 13).fitting(boxWidth: 600)
+        #expect(group.slider == NumberColumnWidths.measuring([a, b], fontSize: 13).fitting(boxWidth: 600).slider)
+    }
+}

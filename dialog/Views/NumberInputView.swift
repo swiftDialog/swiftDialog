@@ -20,6 +20,28 @@ struct NumberColumnWidths: Equatable {
     var maxLabel: CGFloat = 0
     var value: CGFloat = 0
     var unit: CGFloat = 0
+    /// Widest title (on one line), used to share space between titles and sliders
+    var title: CGFloat = 0
+    /// Length of every slider in the group. Flexible: set from the width of the group by `fitting`.
+    var slider: CGFloat = NumberColumnWidths.idealSlider
+
+    static let idealSlider: CGFloat = 220
+    static let minSlider: CGFloat = 90
+    static let maxSlider: CGFloat = 280
+
+    /// Give every slider the same length for a group `boxWidth` wide: as much as is left after the
+    /// titles and fixed columns, held between `minSlider` and `maxSlider`, so it shrinks with the
+    /// window before titles are squeezed and grows up to a limit.
+    func fitting(boxWidth: CGFloat) -> NumberColumnWidths {
+        guard boxWidth > 0 else { return self }
+        var widths = self
+        let fixed = [minLabel, maxLabel, value].filter { $0 > 0 }
+        let spacing = CGFloat(fixed.count) * 8                       // between the pieces and the slider
+        let titleShare = min(title, boxWidth * 0.4)
+        let available = boxWidth - titleShare - fixed.reduce(0, +) - spacing - 16
+        widths.slider = min(max(available, NumberColumnWidths.minSlider), NumberColumnWidths.maxSlider)
+        return widths
+    }
 
     /// The widths needed by `inputs`, for text drawn at `fontSize` (captions are 10pt).
     static func measuring(_ inputs: [NumberInput], fontSize: CGFloat) -> NumberColumnWidths {
@@ -32,6 +54,7 @@ struct NumberColumnWidths: Equatable {
 
         var widths = NumberColumnWidths()
         for input in inputs {
+            widths.title = max(widths.title, width(input.title, plain))
             if input.kind == "stepper" {
                 widths.unit = max(widths.unit, width(input.unit, plain))
             } else {
@@ -58,6 +81,20 @@ extension EnvironmentValues {
     var numberColumns: NumberColumnWidths {
         get { self[NumberColumnsKey.self] }
         set { self[NumberColumnsKey.self] = newValue }
+    }
+}
+
+/// Measures the width it is given and sets the shared column widths for the sliders and steppers
+/// inside, so the sliders resize with the window but stay the same length as each other.
+struct NumberColumnsModifier: ViewModifier {
+    let inputs: [NumberInput]
+    let fontSize: CGFloat
+    @State private var boxWidth: CGFloat = 0
+
+    func body(content: Content) -> some View {
+        content
+            .environment(\.numberColumns, NumberColumnWidths.measuring(inputs, fontSize: fontSize).fitting(boxWidth: boxWidth))
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { boxWidth = $0 }
     }
 }
 
@@ -89,20 +126,31 @@ struct NumberInputView: View {
             inputs.indices.contains(index) && (kind == nil || inputs[index].kind == kind)
         }
         if !visible.isEmpty {
-            // Embedded rows use the widths their group measured; otherwise measure the rows shown here
-            let columns = embedded
-                ? inheritedColumns
-                : NumberColumnWidths.measuring(visible.map { inputs[$0] }, fontSize: observedData.appProperties.labelFontSize)
-            VStack {
-                ForEach(visible, id: \.self) { index in
-                    NumberRow(observedData: observedData, input: inputs[index], columns: columns)
-                    if !embedded && index != visible.last {
-                        Divider().opacity(0.5)
-                    }
+            if embedded {
+                // The group measured the widths for all of its number rows
+                rows(visible, inputs: inputs, columns: inheritedColumns)
+            } else {
+                rows(visible, inputs: inputs, columns: nil)
+                    .modifier(NumberColumnsModifier(inputs: visible.map { inputs[$0] },
+                                                    fontSize: observedData.appProperties.labelFontSize))
+                    .font(.system(size: observedData.appProperties.labelFontSize))
+                    .inputBox(embedded: false)
+            }
+        }
+    }
+}
+
+extension NumberInputView {
+    /// `columns` nil means "use the environment" (set by `NumberColumnsModifier` for standalone views)
+    @ViewBuilder
+    fileprivate func rows(_ visible: [Int], inputs: [NumberInput], columns: NumberColumnWidths?) -> some View {
+        VStack {
+            ForEach(visible, id: \.self) { index in
+                NumberRow(observedData: observedData, input: inputs[index], explicitColumns: columns)
+                if !embedded && index != visible.last {
+                    Divider().opacity(0.5)
                 }
             }
-            .font(.system(size: observedData.appProperties.labelFontSize))
-            .inputBox(embedded: embedded)
         }
     }
 }
@@ -111,11 +159,20 @@ private struct NumberRow: View {
 
     @ObservedObject var observedData: DialogUpdatableContent
     let input: NumberInput
-    let columns: NumberColumnWidths
+    let explicitColumns: NumberColumnWidths?
+    @Environment(\.numberColumns) private var environmentColumns
+
+    private var columns: NumberColumnWidths { explicitColumns ?? environmentColumns }
 
     private var value: Binding<Double> {
         Binding(get: { input.value },
                 set: { observedData.setNumberValue(id: input.id, $0) })
+    }
+
+    /// Sliders snap to the step themselves: the native `step` would draw a tick mark for each one
+    private var sliderValue: Binding<Double> {
+        Binding(get: { input.value },
+                set: { observedData.setNumberValue(id: input.id, $0, snapToStep: true) })
     }
 
     var body: some View {
@@ -124,7 +181,8 @@ private struct NumberRow: View {
                 Text(input.title)
                 DetailText(input.detail)
             }
-            Spacer()
+            .layoutPriority(1)
+            Spacer(minLength: 8)
             if input.kind == "stepper" {
                 stepper
             } else {
@@ -143,8 +201,8 @@ private struct NumberRow: View {
                     .foregroundStyle(.secondary)
                     .frame(width: columns.minLabel, alignment: .trailing)
             }
-            Slider(value: value, in: input.minValue...input.maxValue, step: input.step)
-                .frame(width: 220)
+            Slider(value: sliderValue, in: input.minValue...input.maxValue)
+                .frame(width: columns.slider)
                 .accessibilityLabel(input.title)
             if columns.maxLabel > 0 {
                 Text(input.maxLabel)

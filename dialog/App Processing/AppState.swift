@@ -196,10 +196,10 @@ struct NumberInput: Identifiable, Equatable {
     /// Name used in the output and by vieworder
     var key: String { name.isEmpty ? title : name }
 
-    /// Decimal places implied by the step (0.25 -> 2), capped at 4
+    /// Decimal places implied by the step (0.25 -> 2). Values are never reported with more than 2.
     var decimals: Int {
         var places = 0
-        while places < 4 && abs(step * pow(10, Double(places)) - (step * pow(10, Double(places))).rounded()) > 1e-9 {
+        while places < 2 && abs(step * pow(10, Double(places)) - (step * pow(10, Double(places))).rounded()) > 1e-9 {
             places += 1
         }
         return places
@@ -207,6 +207,17 @@ struct NumberInput: Identifiable, Equatable {
 
     /// The value as text, with as many decimals as the step needs ("42", "0.75")
     var displayValue: String { String(format: "%.\(decimals)f", value) }
+
+    /// A raw value (e.g. from dragging) held to the range, optionally snapped to the nearest step
+    /// from `minValue`, and rounded to 2 decimal places so floating point noise never reaches the output.
+    func constrained(_ raw: Double, snapToStep: Bool = false) -> Double {
+        var result = min(max(raw, minValue), maxValue)
+        if snapToStep && step > 0 {
+            result = minValue + ((result - minValue) / step).rounded() * step
+            result = min(max(result, minValue), maxValue)
+        }
+        return (result * 100).rounded() / 100
+    }
 
     /// Make the configuration safe: positive step, max above min, value inside the range.
     func sanitised() -> NumberInput {
@@ -216,7 +227,7 @@ struct NumberInput: Identifiable, Equatable {
             writeLog("\(input.kind) '\(input.key)': max must be greater than min - using max = min + 100", logLevel: .error)
             input.maxValue = input.minValue + 100
         }
-        input.value = min(max(input.value, input.minValue), input.maxValue)
+        input.value = input.constrained(input.value)
         return input
     }
 }

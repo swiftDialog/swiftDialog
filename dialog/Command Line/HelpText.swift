@@ -875,7 +875,7 @@ struct SDHelp {
             name=       name used in the output and to place it with --\(argument.preferredViewOrder.long)
             min=        lowest value (default 0)
             max=        highest value (default 100)
-            step=       increment (default 1). Decimal steps return decimal values
+            step=       increment (default 1). Values are snapped to the step and returned with at most 2 decimal places
             value=      starting value (default min)
             unit=       text shown after the value e.g. unit=%
             minlabel=   text shown at the left of the slider

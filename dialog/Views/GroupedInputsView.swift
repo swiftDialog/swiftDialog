@@ -72,7 +72,8 @@ struct GroupedInputsView: View {
                                 .padding(.vertical, 6)
                         }
                     }
-                    .environment(\.numberColumns, numberColumns(for: group))
+                    .modifier(NumberColumnsModifier(inputs: numberInputs(in: group),
+                                                    fontSize: observedData.appProperties.labelFontSize))
                     .font(.system(size: observedData.appProperties.labelFontSize))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
@@ -89,10 +90,10 @@ struct GroupedInputsView: View {
         .padding(.bottom, appDefaults.contentPadding)
     }
 
-    /// Column widths shared by the sliders and steppers in a group, so they line up
-    private func numberColumns(for group: ResolvedViewLayoutGroup) -> NumberColumnWidths {
+    /// The sliders and steppers in a group, whose column widths are shared so they line up
+    private func numberInputs(in group: ResolvedViewLayoutGroup) -> [NumberInput] {
         let numbers = observedData.observedUserInputState.numberInputs
-        let shown: [NumberInput] = group.rows.compactMap { row in
+        return group.rows.compactMap { row in
             switch row {
             case .slider(let index), .stepper(let index):
                 return numbers.indices.contains(index) ? numbers[index] : nil
@@ -100,7 +101,6 @@ struct GroupedInputsView: View {
                 return nil
             }
         }
-        return NumberColumnWidths.measuring(shown, fontSize: observedData.appProperties.labelFontSize)
     }
 
     @ViewBuilder

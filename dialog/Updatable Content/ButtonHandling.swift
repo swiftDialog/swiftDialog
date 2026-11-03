@@ -215,10 +215,10 @@ func numberOutputEntries(_ inputs: [NumberInput]) -> [NumberOutputEntry] {
 extension DialogUpdatableContent {
 
     /// Set a slider/stepper value (kept inside its range) in both the observed and global copy.
-    func setNumberValue(id: UUID, _ newValue: Double) {
+    func setNumberValue(id: UUID, _ newValue: Double, snapToStep: Bool = false) {
         func apply(_ inputs: inout [NumberInput]) {
             guard let index = inputs.firstIndex(where: { $0.id == id }) else { return }
-            inputs[index].value = min(max(newValue, inputs[index].minValue), inputs[index].maxValue)
+            inputs[index].value = inputs[index].constrained(newValue, snapToStep: snapToStep)
         }
         apply(&observedUserInputState.numberInputs)
         apply(&userInputState.numberInputs)
@@ -238,7 +238,7 @@ extension DialogUpdatableContent {
             let key = userInputState.numberInputs[index].key
             if let text = stored[key] as? String, let value = Double(text) {
                 let number = userInputState.numberInputs[index]
-                userInputState.numberInputs[index].value = min(max(value, number.minValue), number.maxValue)
+                userInputState.numberInputs[index].value = number.constrained(value)
             }
         }
     }
