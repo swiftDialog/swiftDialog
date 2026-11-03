@@ -73,16 +73,23 @@ struct ButtonItemView: View {
     let row: ButtonRow
     let item: ButtonItem
 
+    @State private var hovering = false
+
     private var isSelected: Bool {
         row.selectable && !item.value.isEmpty && row.selectedValue == item.value
     }
 
     private var hasGraphic: Bool { !item.symbol.isEmpty || !item.image.isEmpty }
 
-    /// Labels drawn under the button (swatch / thumbnail rows) rather than inside it
-    private var captionBelow: Bool {
+    /// This row draws labels under its buttons (swatches / thumbnails) rather than inside them
+    private var usesCaptions: Bool {
         item.display != "symbol" && !item.label.isEmpty &&
-        (row.labelPosition == "below" || (row.labelPosition == "selected" && isSelected))
+        (row.labelPosition == "below" || row.labelPosition == "selected")
+    }
+
+    /// The caption is visible: always for "below", only for the selected or hovered item for "selected"
+    private var captionBelow: Bool {
+        usesCaptions && (row.labelPosition == "below" || isSelected || hovering)
     }
 
     /// Text shown inside the button
@@ -102,26 +109,38 @@ struct ButtonItemView: View {
     }
 
     var body: some View {
-        VStack(spacing: 4) {
-            switch item.type {
-            case "info":
-                Text(item.value)
-                    .foregroundStyle(.secondary)
-                    .textSelection(.enabled)
-            case "colour":
-                ColorPicker(item.label, selection: colourBinding, supportsOpacity: item.opacity)
-                    .labelsHidden()
-                    .disabled(item.disabled)
-                    .help(item.label)
-            default:
-                actionButton
+        control
+            // Room for the caption is always reserved, and the caption is drawn as an overlay, so showing
+            // or hiding it (or making it bold) never changes the size of an item or moves its neighbours.
+            .padding(.bottom, usesCaptions ? 18 : 0)
+            .overlay(alignment: .bottom) {
+                if captionBelow {
+                    Text(item.label)
+                        .font(.caption)
+                        .fontWeight(isSelected ? .semibold : .regular)
+                        .foregroundStyle(isSelected ? .primary : .secondary)
+                        .lineLimit(1)
+                        .fixedSize()
+                        .allowsHitTesting(false)
+                }
             }
-            if captionBelow {
-                Text(item.label)
-                    .font(.caption)
-                    .fontWeight(isSelected ? .semibold : .regular)
-                    .foregroundStyle(isSelected ? .primary : .secondary)
-            }
+            .onHover { hovering = $0 }
+    }
+
+    @ViewBuilder
+    private var control: some View {
+        switch item.type {
+        case "info":
+            Text(item.value)
+                .foregroundStyle(.secondary)
+                .textSelection(.enabled)
+        case "colour":
+            ColorPicker(item.label, selection: colourBinding, supportsOpacity: item.opacity)
+                .labelsHidden()
+                .disabled(item.disabled)
+                .help(item.label)
+        default:
+            actionButton
         }
     }
 
@@ -188,11 +207,11 @@ struct ButtonItemView: View {
     private var selectionRing: some View {
         if isSelected {
             if item.image.isEmpty && row.style == "plain" {
-                Circle().stroke(Color.accentColor, lineWidth: 3).padding(-5).allowsHitTesting(false)
+                Circle().stroke(Color.accentColor, lineWidth: 2.5).padding(-2).allowsHitTesting(false)
             } else {
                 RoundedRectangle(cornerRadius: item.image.isEmpty ? 8 : 10)
-                    .stroke(Color.accentColor, lineWidth: 3)
-                    .padding(-3)
+                    .stroke(Color.accentColor, lineWidth: 2.5)
+                    .padding(-2)
                     .allowsHitTesting(false)
             }
         }
