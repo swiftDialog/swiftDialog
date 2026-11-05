@@ -293,7 +293,7 @@ func parseBoundaryDate(_ string: String) -> Date? {
 func clampDate(_ date: Date, min: Date?, max: Date?) -> Date {
     var result = date
     if let min, result < min { result = min }
-    if let max, (min == nil || min! <= max), result > max { result = max }
+    if let max, min == nil || !(min! > max), result > max { result = max }   // not <= on Date: see TextEntryView
     return result
 }
 
