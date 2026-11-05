@@ -100,7 +100,9 @@ struct TextEntryView: View {
         let components = observedData.textFieldArray[index].dateComponents
         let (minDate, maxDate) = observedData.textFieldArray[index].pickerBounds
         switch (minDate, maxDate) {
-        case let (minDate?, maxDate?) where minDate <= maxDate:
+        // `!(a > b)`, not `a <= b`: Foundation's Date <= and >= are new in the macOS 27.2 SDK and missing
+        // from some 27.2 builds, where a call jumps to address 0. <, > and == exist everywhere.
+        case let (minDate?, maxDate?) where !(minDate > maxDate):
             DatePicker("", selection: selection, in: minDate...maxDate, displayedComponents: components)
         case let (minDate?, _):
             DatePicker("", selection: selection, in: minDate..., displayedComponents: components)

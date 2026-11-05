@@ -50,7 +50,7 @@ final class FileModificationDateTests: XCTestCase {
         let before = Date().addingTimeInterval(-2)
         let result = getModificationDateOf(url)
         let after = Date().addingTimeInterval(2)
-        XCTAssertTrue(result >= before && result <= after,
+        XCTAssertTrue(!(result < before) && !(result > after),
                       "A missing file should fall back to approximately the current time")
     }
 }

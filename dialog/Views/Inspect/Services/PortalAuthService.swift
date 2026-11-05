@@ -154,7 +154,7 @@ struct AuthCredentials {
 
     var isExpired: Bool {
         guard let expiry = expiresAt else { return false }
-        return Date() >= expiry
+        return !(Date() < expiry)   // not >= on Date: see TextEntryView
     }
 
     var timeUntilExpiry: TimeInterval? {
