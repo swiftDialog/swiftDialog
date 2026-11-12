@@ -2,18 +2,15 @@
 //  StatusComponents.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 17/01/2026
-//
-//  Extracted from PresetCommonHelpers.swift
-//  Status badges, comparison tables, feature tables, phase trackers
+//  Status badges, the feature and comparison tables, the phase tracker and the shared status
+//  circle, drawn by the guidance blocks and the item rows.
 //
 
 import SwiftUI
 
 // MARK: - Status Monitoring Components
 
-/// Status badge showing binary or multi-state status with icon and color
-/// Used for compliance checks, service status, feature states
+/// A status row: icon, label and the value or state word, auto-coloured from the state.
 struct StatusBadgeView: View {
     let label: String
     let state: String
@@ -22,7 +19,21 @@ struct StatusBadgeView: View {
     let autoColor: Bool
     let customColor: Color?
     let scaleFactor: CGFloat
+    /// Resolves a relative `icon` path.
+    let iconBasePath: String?
     @Environment(\.palette) private var palette
+
+    init(label: String, state: String, actual: String?, icon: String?, autoColor: Bool,
+         customColor: Color?, scaleFactor: CGFloat, iconBasePath: String? = nil) {
+        self.label = label
+        self.state = state
+        self.actual = actual
+        self.icon = icon
+        self.autoColor = autoColor
+        self.customColor = customColor
+        self.scaleFactor = scaleFactor
+        self.iconBasePath = iconBasePath
+    }
 
     private var stateColor: Color {
         if let customColor = customColor {
@@ -33,61 +44,32 @@ struct StatusBadgeView: View {
             return .secondary
         }
 
-        // Auto-color based on semantic state (prefix/contains matching for flexibility)
-        let lowercaseState = state.lowercased()
-        let successStates = ["enabled", "active", "pass", "success", "valid", "enrolled", "connected", "on", "true", "yes", "installed", "present", "compliant"]
-        let failStates = ["disabled", "inactive", "fail", "failure", "invalid", "unenrolled", "disconnected", "off", "false", "no", "not found", "missing", "error", "non-compliant"]
-        let pendingStates = ["pending", "in-progress", "waiting", "unknown", "partial", "checking"]
-
-        // Check if state starts with or contains any success keywords
-        if successStates.contains(where: { lowercaseState.hasPrefix($0) || lowercaseState == $0 }) {
-            return palette.success
-        }
-        // Check if state starts with or contains any fail keywords
-        if failStates.contains(where: { lowercaseState.hasPrefix($0) || lowercaseState.contains($0) }) {
-            return palette.error
-        }
-        // Check if state matches any pending keywords
-        if pendingStates.contains(where: { lowercaseState.hasPrefix($0) || lowercaseState == $0 }) {
-            return palette.warning
-        }
-
-        return .secondary
+        // Hue and glyph come from one classification so they cannot disagree.
+        return ExternalFactStatus.classify(state).color(palette: palette)
     }
 
     private var defaultIcon: String {
-        let lowercaseState = state.lowercased()
-        let successStates = ["enabled", "active", "pass", "success", "valid", "enrolled", "connected", "on", "true", "yes", "installed", "present", "compliant"]
-        let failStates = ["disabled", "inactive", "fail", "failure", "invalid", "unenrolled", "disconnected", "off", "false", "no", "not found", "missing", "error", "non-compliant"]
-        let pendingStates = ["pending", "in-progress", "waiting", "checking"]
-        let unknownStates = ["unknown", "partial"]
-
-        if successStates.contains(where: { lowercaseState.hasPrefix($0) || lowercaseState == $0 }) {
-            return "checkmark.circle.fill"
-        }
-        if failStates.contains(where: { lowercaseState.hasPrefix($0) || lowercaseState.contains($0) }) {
-            return "xmark.circle.fill"
-        }
-        if pendingStates.contains(where: { lowercaseState.hasPrefix($0) || lowercaseState == $0 }) {
-            return "clock.fill"
-        }
-        if unknownStates.contains(where: { lowercaseState.hasPrefix($0) || lowercaseState == $0 }) {
-            return "questionmark.circle.fill"
-        }
-
-        return "circle.fill"
+        ExternalFactStatus.classify(state).symbol
     }
 
-    /// Renders the icon as a file-based image (if path exists on disk) or SF Symbol
+    /// A file image (relative paths resolve against `iconBasePath`) or an SF Symbol.
     @ViewBuilder
     private var statusBadgeIcon: some View {
-        if let iconPath = icon, isFilePath(iconPath),
-           FileManager.default.fileExists(atPath: iconPath),
-           let nsImage = NSImage(contentsOfFile: iconPath) {
-            Image(nsImage: nsImage)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .clipShape(RoundedRectangle(cornerRadius: 4 * scaleFactor))
+        if let iconPath = icon, Self.isFilePath(iconPath) {
+            AsyncImageView(
+                iconPath: iconPath,
+                basePath: iconBasePath,
+                maxWidth: 20 * scaleFactor,
+                maxHeight: 20 * scaleFactor,
+                imageFit: .fit,
+                showLoadingState: false,
+                fallback: {
+                    Image(systemName: defaultIcon)
+                        .font(.system(size: 16 * scaleFactor))
+                        .foregroundStyle(stateColor)
+                }
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 4 * scaleFactor))
         } else {
             Image(systemName: icon ?? defaultIcon)
                 .font(.system(size: 16 * scaleFactor))
@@ -95,12 +77,9 @@ struct StatusBadgeView: View {
         }
     }
 
-    /// Check if a string looks like a file path (starts with / or contains a file extension)
-    private func isFilePath(_ value: String) -> Bool {
-        value.hasPrefix("/") || (value.contains(".") && !value.hasPrefix("SF="))
-    }
+    /// File path or SF Symbol name; the rule lives once in `IconRef`.
+    static func isFilePath(_ value: String) -> Bool { IconRef.isFilePath(value) }
 
-    /// Display text: shows actual value if set, otherwise falls back to state
     private var displayText: String {
         actual ?? state
     }
@@ -117,643 +96,702 @@ struct StatusBadgeView: View {
                     .font(.system(size: 13 * scaleFactor, weight: .medium))
                     .foregroundStyle(.primary)
 
+                // The glyph carries the state; the text carries the value, uncoloured.
                 Text(displayText)
                     .font(.system(size: 12 * scaleFactor))
-                    .foregroundStyle(actual != nil ? .primary : stateColor)
-                    .fontWeight(actual != nil ? .regular : .semibold)
+                    .foregroundStyle(.secondary)
             }
 
             Spacer(minLength: 0)
         }
         .frame(minWidth: 60 * scaleFactor, alignment: .leading)
-        .padding(.horizontal, 12 * scaleFactor)
-        .padding(.vertical, 10 * scaleFactor)
-        .background(
-            RoundedRectangle(cornerRadius: 8 * scaleFactor)
-                .fill(stateColor.opacity(0.1))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 8 * scaleFactor)
-                .stroke(stateColor.opacity(0.3), lineWidth: 1)
-        )
+        .padding(.vertical, 8 * scaleFactor)
+        // A hairline row, not a tinted banner.
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(Color.secondary.opacity(0.15))
+                .frame(height: 1)
+        }
+        // A monitor- or IPC-driven state flip must show at once, not inherit the host's animation.
+        .transaction { $0.animation = nil }
     }
 }
 
-/// Comparison table showing expected vs actual values
-/// Used for configuration validation, version checks, server comparisons
-struct ComparisonTableView: View {
-    let label: String
-    let expected: String
-    let actual: String
-    let expectedLabel: String
-    let actualLabel: String
-    let expectedIcon: String?
-    let actualIcon: String?
-    let comparisonStyle: String?
-    let highlightCells: Bool
-    let autoColor: Bool
-    let customColor: Color?
-    let expectedColor: Color?
-    let actualColor: Color?
-    let scaleFactor: CGFloat
-    let stateOverride: String?  // Optional: "pass", "fail", "pending" to override auto-match
-    @Environment(\.palette) private var palette
-
-    /// Smart comparison that handles common edge cases
-    /// Can be overridden by stateOverride for evaluation types like withinSeconds, notExists
-    private var isMatch: Bool {
-        // Check for explicit state override first
-        if let state = stateOverride?.lowercased() {
-            switch state {
-            case "pass", "passed", "success", "true", "yes", "enabled", "enrolled", "detected":
-                return true
-            case "fail", "failed", "failure", "false", "no", "disabled", "error", "not detected":
-                return false
-            default:
-                break  // Fall through to auto-detect
-            }
-        }
-
-        // Auto-detect based on string comparison
-        let expectedNorm = normalizeForComparison(expected)
-        let actualNorm = normalizeForComparison(actual)
-        return expectedNorm == actualNorm
-    }
-
-    /// Normalize strings for flexible comparison
-    /// Handles: URL protocols, trailing slashes, case differences
-    private func normalizeForComparison(_ value: String) -> String {
-        var normalized = value.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-
-        // Remove common URL protocols
-        let protocols = ["https://", "http://", "ftp://", "ftps://"]
-        for proto in protocols where normalized.hasPrefix(proto) {
-            normalized = String(normalized.dropFirst(proto.count))
-            break
-        }
-
-        // Remove trailing slashes
-        while normalized.hasSuffix("/") {
-            normalized = String(normalized.dropLast())
-        }
-
-        return normalized
-    }
-
-    private var comparisonColor: Color {
-        if let customColor = customColor {
-            return customColor
-        }
-
-        if !autoColor {
-            return .secondary
-        }
-
-        return palette.colorForMatch(isMatch)
-    }
-
-    /// Effective color for expected column (with override support)
-    private var effectiveExpectedColor: Color {
-        if let expectedColor = expectedColor {
-            return expectedColor
-        }
-        // Default to secondary (neutral) for expected column
-        return .secondary
-    }
-
-    /// Effective color for actual column (with override support)
-    private var effectiveActualColor: Color {
-        if let actualColor = actualColor {
-            return actualColor
-        }
-        // Default to match-based color
-        return comparisonColor
-    }
-
-    /// Auto-assign SF Symbol icon based on match state or color semantics when not explicitly provided
-    private func getIconForState(isExpected: Bool) -> String {
-        if isExpected {
-            // Expected value icon (always neutral)
-            return "circle.fill"
-        } else {
-            // Actual value icon: Consider color override semantics first
-            if let actualColor = actualColor {
-                // When actualColor is specified, choose icon based on color semantics
-                // This allows migration scenarios to show green/checkmark for "new" state
-                // even when values don't match
-                let nsColor = NSColor(actualColor)
-                let red = nsColor.redComponent
-                let green = nsColor.greenComponent
-                let blue = nsColor.blueComponent
-
-                // Check for standard swiftDialog colors by RGB components
-                if abs(red - 0.204) < 0.01 && abs(green - 0.780) < 0.01 && abs(blue - 0.349) < 0.01 {
-                    // Green #34C759 (0.204, 0.780, 0.349) → success/checkmark
-                    return "checkmark.circle.fill"
-                } else if abs(red - 1.0) < 0.01 && abs(green - 0.231) < 0.01 && abs(blue - 0.188) < 0.01 {
-                    // Red #FF3B30 (1.0, 0.231, 0.188) → error/X
-                    return "xmark.circle.fill"
-                } else if abs(red - 1.0) < 0.01 && abs(green - 0.624) < 0.01 && abs(blue - 0.039) < 0.01 {
-                    // Orange #FF9F0A (1.0, 0.624, 0.039) → warning
-                    return "exclamationmark.triangle.fill"
-                } else {
-                    // Other colors → generic circle
-                    return "circle.fill"
-                }
-            }
-
-            // Default: icon based on match state
-            return isMatch ? "checkmark.circle.fill" : "xmark.circle.fill"
-        }
-    }
-
-    /// Render stacked layout (existing behavior)
-    private var stackedLayout: some View {
-        VStack(alignment: .leading, spacing: 8 * scaleFactor) {
-            if !label.isEmpty {
-                Text(label)
-                    .font(.system(size: 13 * scaleFactor, weight: .semibold))
-                    .foregroundStyle(.primary)
-            }
-
-            VStack(spacing: 6 * scaleFactor) {
-                // Expected row
-                HStack {
-                    Text(expectedLabel + ":")
-                        .font(.system(size: 12 * scaleFactor, weight: .medium))
-                        .foregroundStyle(.secondary)
-                        .frame(width: 80 * scaleFactor, alignment: .leading)
-
-                    Text(expected)
-                        .font(.system(size: 12 * scaleFactor))
-                        .foregroundStyle(.primary)
-                        .padding(.horizontal, 8 * scaleFactor)
-                        .padding(.vertical, 4 * scaleFactor)
-                        .background(
-                            RoundedRectangle(cornerRadius: 4 * scaleFactor)
-                                .fill(Color.secondary.opacity(0.1))
-                        )
-
-                    Spacer()
-                }
-
-                // Actual row
-                HStack {
-                    Text(actualLabel + ":")
-                        .font(.system(size: 12 * scaleFactor, weight: .medium))
-                        .foregroundStyle(.secondary)
-                        .frame(width: 80 * scaleFactor, alignment: .leading)
-
-                    Text(actual)
-                        .font(.system(size: 12 * scaleFactor))
-                        .foregroundStyle(comparisonColor)
-                        .fontWeight(.semibold)
-                        .padding(.horizontal, 8 * scaleFactor)
-                        .padding(.vertical, 4 * scaleFactor)
-                        .background(
-                            RoundedRectangle(cornerRadius: 4 * scaleFactor)
-                                .fill(comparisonColor.opacity(0.1))
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 4 * scaleFactor)
-                                .stroke(comparisonColor.opacity(0.3), lineWidth: 1)
-                        )
-
-                    Image(systemName: isMatch ? "checkmark.circle.fill" : "xmark.circle.fill")
-                        .font(.system(size: 14 * scaleFactor))
-                        .foregroundStyle(comparisonColor)
-
-                    Spacer()
-                }
-            }
-        }
-        .padding(12 * scaleFactor)
-        .background(
-            RoundedRectangle(cornerRadius: 8 * scaleFactor)
-                .fill(Color(.textBackgroundColor).opacity(0.5))
-        )
-    }
-
-    /// Render columns layout (A | B side-by-side)
-    private var columnsLayout: some View {
-        VStack(alignment: .leading, spacing: 8 * scaleFactor) {
-            if !label.isEmpty {
-                Text(label)
-                    .font(.system(size: 13 * scaleFactor, weight: .semibold))
-                    .foregroundStyle(.primary)
-            }
-
-            HStack(spacing: 12 * scaleFactor) {
-                // Expected column
-                VStack(spacing: 4 * scaleFactor) {
-                    Text(expectedLabel)
-                        .font(.system(size: 11 * scaleFactor, weight: .medium))
-                        .foregroundStyle(.secondary)
-
-                    VStack(spacing: 6 * scaleFactor) {
-                        if let icon = expectedIcon {
-                            Image(systemName: icon)
-                                .font(.system(size: 24 * scaleFactor))
-                                .foregroundStyle(expectedColor != nil ? effectiveExpectedColor : .secondary)
-                                .frame(height: 24 * scaleFactor)
-                        }
-
-                        Text(expected)
-                            .font(.system(size: highlightCells ? 14 * scaleFactor : 12 * scaleFactor, weight: highlightCells ? .bold : .regular))
-                            .foregroundStyle(expectedColor != nil ? effectiveExpectedColor : .primary)
-                            .multilineTextAlignment(.center)
-                            .lineLimit(3)
-                    }
-                    .frame(maxWidth: .infinity, minHeight: 60 * scaleFactor, alignment: .center)
-                    .padding(10 * scaleFactor)
-                    .background(
-                        RoundedRectangle(cornerRadius: 6 * scaleFactor)
-                            .fill(expectedColor != nil ? effectiveExpectedColor.opacity(highlightCells ? 0.2 : 0.1) : Color.secondary.opacity(highlightCells ? 0.15 : 0.1))
-                    )
-                }
-                .frame(maxWidth: .infinity)
-
-                // Divider
-                Rectangle()
-                    .fill(Color.secondary.opacity(0.3))
-                    .frame(width: 1)
-
-                // Actual column
-                VStack(spacing: 4 * scaleFactor) {
-                    Text(actualLabel)
-                        .font(.system(size: 11 * scaleFactor, weight: .medium))
-                        .foregroundStyle(.secondary)
-
-                    VStack(spacing: 6 * scaleFactor) {
-                        if let icon = actualIcon {
-                            Image(systemName: icon)
-                                .font(.system(size: 24 * scaleFactor))
-                                .foregroundStyle(effectiveActualColor)
-                                .frame(height: 24 * scaleFactor)
-                        } else {
-                            // Auto-assign icon based on match
-                            Image(systemName: getIconForState(isExpected: false))
-                                .font(.system(size: 24 * scaleFactor))
-                                .foregroundStyle(effectiveActualColor)
-                                .frame(height: 24 * scaleFactor)
-                        }
-
-                        Text(actual)
-                            .font(.system(size: highlightCells ? 14 * scaleFactor : 12 * scaleFactor, weight: highlightCells ? .bold : .semibold))
-                            .foregroundStyle(effectiveActualColor)
-                            .multilineTextAlignment(.center)
-                            .lineLimit(3)
-                    }
-                    .frame(maxWidth: .infinity, minHeight: 60 * scaleFactor, alignment: .center)
-                    .padding(10 * scaleFactor)
-                    .background(
-                        RoundedRectangle(cornerRadius: 6 * scaleFactor)
-                            .fill(effectiveActualColor.opacity(highlightCells ? 0.2 : 0.1))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 6 * scaleFactor)
-                            .stroke(effectiveActualColor.opacity(highlightCells ? 0.4 : 0.3), lineWidth: highlightCells ? 2 : 1.5)
-                    )
-                }
-                .frame(maxWidth: .infinity)
-            }
-        }
-        .padding(12 * scaleFactor)
-        .background(
-            RoundedRectangle(cornerRadius: 8 * scaleFactor)
-                .fill(Color(.textBackgroundColor).opacity(0.5))
-        )
-    }
-
-    var body: some View {
-        let _ = writeLog("🟡 VIEW: ComparisonTableView rendering label='\(label)' actual='\(actual)' match=\(isMatch) color=\(comparisonColor) style=\(comparisonStyle ?? "stacked")", logLevel: .debug)
-
-        return Group {
-            if comparisonStyle == "columns" {
-                columnsLayout
-            } else {
-                stackedLayout
-            }
-        }
-    }
-}
-
-/// Comparison group for organizing related comparisons under collapsible categories
-/// Used for CIS compliance, security baselines, multi-section configurations
-struct ComparisonGroupView: View {
-    let category: String
-    let comparisons: [InspectConfig.GuidanceContent]
-    let scaleFactor: CGFloat
-    @State private var isExpanded: Bool = true
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8 * scaleFactor) {
-            // Category header (collapsible)
-            Button(action: {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    isExpanded.toggle()
-                }
-            }) {
-                HStack(spacing: 8 * scaleFactor) {
-                    Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
-                        .font(.system(size: 12 * scaleFactor, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                        .frame(width: 12 * scaleFactor)
-
-                    Text(category)
-                        .font(.system(size: 14 * scaleFactor, weight: .semibold))
-                        .foregroundStyle(.primary)
-
-                    Spacer()
-
-                    // Summary badge (count of items)
-                    Text("\(comparisons.count)")
-                        .font(.system(size: 11 * scaleFactor, weight: .medium))
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 6 * scaleFactor)
-                        .padding(.vertical, 2 * scaleFactor)
-                        .background(
-                            RoundedRectangle(cornerRadius: 4 * scaleFactor)
-                                .fill(Color.secondary.opacity(0.15))
-                        )
-                }
-                .padding(.horizontal, 12 * scaleFactor)
-                .padding(.vertical, 10 * scaleFactor)
-                .background(
-                    RoundedRectangle(cornerRadius: 8 * scaleFactor)
-                        .fill(Color(.textBackgroundColor).opacity(0.3))
-                )
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(PlainButtonStyle())
-
-            // Expandable comparison items
-            if isExpanded {
-                VStack(spacing: 8 * scaleFactor) {
-                    ForEach(Array(comparisons.enumerated()), id: \.offset) { index, comparison in
-                        if comparison.type == "comparison-table",
-                           let label = comparison.label ?? comparison.content,
-                           let expected = comparison.expected,
-                           let actual = comparison.actual {
-
-                            let autoColor = comparison.autoColor ?? true
-                            let customColor: Color? = {
-                                if let colorHex = comparison.color {
-                                    return Color(hex: colorHex)
-                                }
-                                return nil
-                            }()
-
-                            ComparisonTableView(
-                                label: label,
-                                expected: expected,
-                                actual: actual,
-                                expectedLabel: comparison.expectedLabel ?? "Expected",
-                                actualLabel: comparison.actualLabel ?? "Actual",
-                                expectedIcon: comparison.expectedIcon,
-                                actualIcon: comparison.actualIcon,
-                                comparisonStyle: comparison.comparisonStyle,
-                                highlightCells: comparison.highlightCells ?? false,
-                                autoColor: autoColor,
-                                customColor: customColor,
-                                expectedColor: comparison.expectedColor.flatMap { Color(hex: $0) },
-                                actualColor: comparison.actualColor.flatMap { Color(hex: $0) },
-                                scaleFactor: scaleFactor,
-                                stateOverride: comparison.state
-                            )
-                            .id("comparison-group-\(category)-\(index)-\(actual)-\(comparison.state ?? "")")
-                        }
-                    }
-                }
-                .padding(.leading, 20 * scaleFactor)
-                .transition(.opacity)
-            }
-        }
-    }
-}
-
-/// Feature comparison table showing checkmark/X indicators across columns
-/// Used for comparing features between products, services, or options (e.g., Safari vs Chrome privacy features)
+/// A feature table: tick or cross per column, one row per feature.
 struct FeatureTableView: View {
     let columns: [InspectConfig.GuidanceContent.FeatureTableColumn]
     let rows: [InspectConfig.GuidanceContent.FeatureTableRow]
     let style: String?
     let scaleFactor: CGFloat
+    /// The authored `label`, drawn as a heading.
+    var label: String?
     @Environment(\.palette) private var palette
+    @Environment(\.inspectLocalization) private var l10n
 
     private var isDarkStyle: Bool {
         style == "dark"
     }
 
     private var backgroundColor: Color {
-        isDarkStyle ? Color.black.opacity(0.85) : Color(.textBackgroundColor).opacity(0.5)
+        isDarkStyle ? Color.black.opacity(0.85) : palette.cardSurface.opacity(0.5)
     }
 
     private var textColor: Color {
-        isDarkStyle ? .white : .primary
+        isDarkStyle ? .white : palette.text
     }
 
     private var secondaryTextColor: Color {
-        isDarkStyle ? .white.opacity(0.7) : .secondary
+        isDarkStyle ? .white.opacity(0.7) : palette.textMuted
     }
 
     private var dividerColor: Color {
-        isDarkStyle ? Color.white.opacity(0.2) : Color.secondary.opacity(0.3)
+        isDarkStyle ? Color.white.opacity(0.2) : palette.hairline
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header row with column labels
-            HStack(spacing: 0) {
-                // Empty space for feature column
-                Spacer()
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            if let label, !label.isEmpty {
+                Text(label)
+                    .font(.system(size: 13 * scaleFactor, weight: .semibold))
+                    .padding(.bottom, 8 * scaleFactor)
+            }
 
-                // Column headers (right-aligned)
+            // Header columns carry words only; a glyph in a header reads as a result.
+            HStack(spacing: 12 * scaleFactor) {
+                Text(l10n("ui.tableApp", "App"))
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 ForEach(Array(columns.enumerated()), id: \.offset) { _, column in
-                    VStack(spacing: 4 * scaleFactor) {
-                        if let icon = column.icon {
-                            Image(systemName: icon)
-                                .font(.system(size: 20 * scaleFactor))
-                                .foregroundStyle(secondaryTextColor)
-                        }
-                        Text(column.label)
-                            .font(.system(size: 12 * scaleFactor, weight: .semibold))
-                            .foregroundStyle(textColor)
-                    }
-                    .frame(width: 80 * scaleFactor)
+                    Text(column.label)
+                        .frame(width: 96 * scaleFactor, alignment: .leading)
                 }
             }
-            .padding(.horizontal, 12 * scaleFactor)
-            .padding(.vertical, 10 * scaleFactor)
+            .font(.system(size: 10 * scaleFactor, weight: .semibold, design: .monospaced))
+            .tracking(0.6)
+            .foregroundStyle(isDarkStyle ? secondaryTextColor : Color.secondary.opacity(0.8))
+            .padding(.bottom, 7 * scaleFactor)
 
-            // Divider
-            Rectangle()
-                .fill(dividerColor)
-                .frame(height: 1)
+            Rectangle().fill(dividerColor).frame(height: 1)
 
-            // Feature rows
-            ForEach(Array(rows.enumerated()), id: \.offset) { rowIndex, row in
-                VStack(spacing: 0) {
-                    HStack(spacing: 0) {
-                        // Feature text (left-aligned)
+            ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+                HStack(alignment: .top, spacing: 12 * scaleFactor) {
+                    VStack(alignment: .leading, spacing: 2 * scaleFactor) {
                         Text(row.feature)
                             .font(.system(size: 13 * scaleFactor))
                             .foregroundStyle(textColor)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .lineLimit(2)
                             .fixedSize(horizontal: false, vertical: true)
-
-                        // Value indicators for each column
-                        ForEach(Array(row.values.prefix(columns.count).enumerated()), id: \.offset) { _, value in
-                            Image(systemName: value ? "checkmark.circle.fill" : "xmark.circle.fill")
-                                .font(.system(size: 18 * scaleFactor))
-                                .foregroundStyle(value ? palette.success : palette.error)
-                                .frame(width: 80 * scaleFactor)
+                        if let detail = row.detail, !detail.isEmpty {
+                            Text(detail)
+                                .font(.system(size: 11 * scaleFactor))
+                                .foregroundStyle(secondaryTextColor)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                     }
-                    .padding(.horizontal, 12 * scaleFactor)
-                    .padding(.vertical, 10 * scaleFactor)
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
-                    // Row divider (except for last row)
-                    if rowIndex < rows.count - 1 {
-                        Rectangle()
-                            .fill(dividerColor)
-                            .frame(height: 1)
-                            .padding(.leading, 12 * scaleFactor)
+                    ForEach(Array(row.values.prefix(columns.count).enumerated()), id: \.offset) { _, value in
+                        Image(systemName: value ? "checkmark" : "xmark")
+                            .font(.system(size: 12 * scaleFactor, weight: .semibold))
+                            .foregroundStyle(value ? palette.success : palette.error)
+                            .frame(width: 96 * scaleFactor, alignment: .leading)
                     }
                 }
+                .padding(.vertical, 9 * scaleFactor)
+
+                Rectangle().fill(dividerColor).frame(height: 1)
             }
         }
-        .background(
-            RoundedRectangle(cornerRadius: 10 * scaleFactor)
-                .fill(backgroundColor)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 10 * scaleFactor)
-                .stroke(dividerColor, lineWidth: 1)
-        )
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
-/// Phase tracker showing multi-step progress
-/// Used for workflows like MDM migration, software installation, onboarding
+/// Multi-phase progress: a horizontal track, a proportional timeline bar, a vertical list or a
+/// progress bar, chosen by the phases' content and `style`.
 struct PhaseTrackerView: View {
     let currentPhase: Int
-    let phases: [String]
+    let phases: [InspectConfig.GuidanceContent.PhaseSpec]
     let style: String
     let scaleFactor: CGFloat
+    var activeColor: Color?              // nil → BlockSemantics.tint(for: .active)
+    var caption: String?                 // heading above the track
+    /// Live 0…1 progress of the phase in flight; only the timeline bar reads it. Absent means
+    /// "started", not "half".
+    var progress: Double?
     @Environment(\.palette) private var palette
+    /// Measured track width for the timeline bar's segments; zero until the first layout pass,
+    /// when the segments fall back to equal flexible frames.
+    @State private var trackWidth: CGFloat = 0
 
     private var defaultPhaseLabels: [String] {
         ["Prepare", "Execute", "Verify", "Complete"]
     }
 
-    private var phaseLabels: [String] {
-        phases.isEmpty ? defaultPhaseLabels : phases
+    private var trackPhases: [InspectConfig.GuidanceContent.PhaseSpec] {
+        phases.isEmpty
+            ? defaultPhaseLabels.map { .init(label: $0) }
+            : phases
+    }
+
+    private var phaseLabels: [String] { trackPhases.map(\.label) }
+
+    private var resolvedActiveColor: Color {
+        activeColor ?? BlockSemantics.tint(for: .active, palette: palette) ?? palette.accent
     }
 
     var body: some View {
         if style == "progress" {
             progressBarStyle
-        } else if style == "checklist" {
-            checklistStyle
+        } else if PhaseTrack.prefersProportional(trackPhases) && !PhaseTrack.prefersVertical(trackPhases) {
+            // Phases with durations draw to scale; a phase with a sentence cannot fit on a bar.
+            proportionalBarStyle
+        } else if PhaseTrack.prefersVertical(trackPhases) {
+            // A phase that needs a sentence has nowhere to put one on a horizontal track.
+            verticalTrackStyle
         } else {
-            stepperStyle // default
+            // Every other style value renders the one track; the values stay accepted so existing
+            // configs keep validating.
+            trackStyle
         }
     }
 
-    // Stepper style - horizontal numbered steps
-    private var stepperStyle: some View {
-        HStack(spacing: 0) {
-            ForEach(0..<phaseLabels.count, id: \.self) { index in
-                let phaseNum = index + 1
-                let isActive = phaseNum == currentPhase
-                let isCompleted = phaseNum < currentPhase
+    /// The horizontal track: no numerals, one accent in three weights (filled behind, ringed now,
+    /// hairline ahead), equal-width columns so labels share one baseline, `time` under the label.
+    private var trackStyle: some View {
+        let phases = trackPhases
+        return VStack(alignment: .leading, spacing: 10 * scaleFactor) {
+            if let caption {
+                Text(caption)
+                    .font(.system(size: 12 * scaleFactor, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
+            HStack(alignment: .top, spacing: 0) {
+                ForEach(phases.indices, id: \.self) { index in
+                    let state = PhaseTrack.state(at: index, in: phases, currentPhase: currentPhase)
+                    VStack(spacing: 7 * scaleFactor) {
+                        ZStack {
+                            // Connector halves live inside each column so they meet at the column
+                            // boundary, and stop short of the mark: the step background is a
+                            // gradient, so the line cannot be hidden behind a filled mark.
+                            HStack(spacing: 0) {
+                                connector(visible: index > 0,
+                                          covered: PhaseTrack.isCovered(segmentBefore: index, currentPhase: currentPhase))
+                                    .padding(.trailing, markClearance)
+                                connector(visible: index < phases.count - 1,
+                                          covered: PhaseTrack.isCovered(segmentBefore: index + 1, currentPhase: currentPhase))
+                                    .padding(.leading, markClearance)
+                            }
+                            mark(for: state)
+                        }
+                        .frame(height: 22 * scaleFactor)
 
-                HStack(spacing: 8 * scaleFactor) {
-                    // Phase circle
-                    ZStack {
-                        Circle()
-                            .fill(isCompleted ? palette.success :
-                                    isActive ? palette.warning :
-                                  Color.secondary.opacity(0.3))
-                            .frame(width: 28 * scaleFactor, height: 28 * scaleFactor)
+                        Text(phases[index].label)
+                            .font(.system(size: 12 * scaleFactor,
+                                          weight: state == .current ? .semibold : .regular))
+                            .foregroundStyle(state == .pending ? .secondary : .primary)
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
 
-                        if isCompleted {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 12 * scaleFactor, weight: .bold))
-                                .foregroundStyle(.white)
-                        } else {
-                            Text("\(phaseNum)")
-                                .font(.system(size: 12 * scaleFactor, weight: .bold))
-                                .foregroundStyle(isActive ? .white : .secondary)
+                        if let time = phases[index].time {
+                            Text(time)
+                                .font(.system(size: 11 * scaleFactor))
+                                .foregroundStyle(palette.textFaint)
+                                .lineLimit(1)
                         }
                     }
-
-                    // Phase label
-                    Text(phaseLabels[index])
-                        .font(.system(size: 11 * scaleFactor, weight: isActive ? .semibold : .regular))
-                        .foregroundStyle(isActive ? .primary : .secondary)
-
-                    // Connector line (except for last item)
-                    if index < phaseLabels.count - 1 {
-                        Rectangle()
-                            .fill(phaseNum < currentPhase ? palette.success : Color.secondary.opacity(0.3))
-                            .frame(width: 20 * scaleFactor, height: 2 * scaleFactor)
-                    }
+                    .frame(maxWidth: .infinity, alignment: .top)
                 }
             }
         }
-        .padding(12 * scaleFactor)
     }
 
-    // Progress bar style
+    // MARK: - The timeline bar
+
+    /// The timeline bar: segment width is the phase's share of the total time. A phase with an
+    /// empty label is an unnamed stretch of time; only the phase in flight shows a partial fill.
+    @ViewBuilder
+    private var proportionalBarStyle: some View {
+        let phases = trackPhases
+        let widths = barSegmentWidths(for: phases)
+        VStack(alignment: .leading, spacing: 14 * scaleFactor) {
+            if let caption {
+                Text(caption)
+                    .font(.system(size: 12 * scaleFactor, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
+
+            VStack(alignment: .leading, spacing: 10 * scaleFactor) {
+                HStack(spacing: barGap) {
+                    ForEach(phases.indices, id: \.self) { index in
+                        segment(PhaseTrack.fill(at: index, in: phases,
+                                                currentPhase: currentPhase, progress: progress),
+                                shape: barShape(at: index, count: phases.count))
+                            .frame(width: widths[safe: index])
+                            .frame(maxWidth: widths.isEmpty ? .infinity : nil)
+                    }
+                }
+                .frame(height: barHeight)
+
+                // The label row mirrors the bar's widths so a label sits under its stretch of time.
+                HStack(alignment: .top, spacing: barGap) {
+                    ForEach(phases.indices, id: \.self) { index in
+                        segmentLabel(phases[index],
+                                     isCurrent: PhaseTrack.state(at: index, in: phases,
+                                                                 currentPhase: currentPhase) == .current)
+                            .frame(width: widths[safe: index], alignment: .leading)
+                            .frame(maxWidth: widths.isEmpty ? .infinity : nil, alignment: .leading)
+                    }
+                }
+            }
+            // Keep filling the container once columns have explicit widths, or the measurement
+            // below would only ever re-measure the sum it just produced.
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                GeometryReader { geo in
+                    Color.clear.preference(key: TrackWidthKey.self, value: geo.size.width)
+                }
+            )
+            .onPreferenceChange(TrackWidthKey.self) { trackWidth = $0 }
+        }
+    }
+
+    private var barHeight: CGFloat { 14 * scaleFactor }
+    private var barGap: CGFloat { 3 * scaleFactor }
+
+    /// Segment widths; empty until the row has been measured, when the segments are flexible.
+    private func barSegmentWidths(for phases: [InspectConfig.GuidanceContent.PhaseSpec]) -> [CGFloat] {
+        guard trackWidth > 0, phases.count > 1 else { return [] }
+        let usable = trackWidth - barGap * CGFloat(phases.count - 1)
+        guard usable > 0 else { return [] }
+        return PhaseTrack.segmentWidths(for: phases,
+                                        total: usable,
+                                        minimum: labelledSegmentMinimum,
+                                        spacerMinimum: spacerSegmentMinimum)
+    }
+
+    /// Room for a label under a named segment.
+    private var labelledSegmentMinimum: CGFloat { 68 * scaleFactor }
+    /// Room for an unnamed segment to still be visible.
+    private var spacerSegmentMinimum: CGFloat { 10 * scaleFactor }
+
+    private func barShape(at index: Int, count: Int) -> (leading: CGFloat, trailing: CGFloat) {
+        let outer = barHeight / 2
+        let inner = 3 * scaleFactor
+        return (leading: index == 0 ? outer : inner,
+                trailing: index == count - 1 ? outer : inner)
+    }
+
+    @ViewBuilder
+    private func segment(_ fill: PhaseTrack.SegmentFill,
+                         shape: (leading: CGFloat, trailing: CGFloat)) -> some View {
+        let clip = UnevenRoundedRectangle(topLeadingRadius: shape.leading,
+                                          bottomLeadingRadius: shape.leading,
+                                          bottomTrailingRadius: shape.trailing,
+                                          topTrailingRadius: shape.trailing,
+                                          style: .continuous)
+        let empty = Color.secondary.opacity(0.18)
+        switch fill {
+        case .full:
+            clip.fill(resolvedActiveColor)
+        case .partial(let fraction):
+            clip.fill(empty)
+                .overlay(alignment: .leading) {
+                    GeometryReader { geo in
+                        resolvedActiveColor.frame(width: geo.size.width * fraction)
+                    }
+                }
+                .clipShape(clip)
+        case .inFlight:
+            // Running with no progress reported: a wash, not a fraction nobody supplied.
+            clip.fill(resolvedActiveColor.opacity(0.38))
+        case .blocked:
+            clip.fill(empty)
+                .overlay(clip.stroke(resolvedActiveColor, lineWidth: 1.5 * scaleFactor))
+        case .failed:
+            clip.fill(palette.error)
+        case .empty:
+            clip.fill(empty)
+        }
+    }
+
+    @ViewBuilder
+    private func segmentLabel(_ phase: InspectConfig.GuidanceContent.PhaseSpec,
+                              isCurrent: Bool) -> some View {
+        if phase.label.isEmpty && phase.time == nil {
+            Color.clear.frame(height: 0)
+        } else {
+            VStack(alignment: .leading, spacing: 3 * scaleFactor) {
+                if !phase.label.isEmpty {
+                    Text(phase.label)
+                        .font(.system(size: 12 * scaleFactor,
+                                      weight: isCurrent ? .semibold : .medium))
+                        .foregroundStyle(isCurrent ? .primary : .secondary)
+                }
+                if let time = phase.time {
+                    // Monospaced so a row of durations does not look ragged.
+                    Text(time)
+                        .font(.system(size: 11 * scaleFactor, design: .monospaced))
+                        .foregroundStyle(isCurrent ? AnyShapeStyle(resolvedActiveColor)
+                                                   : AnyShapeStyle(palette.textFaint))
+                }
+            }
+            .lineLimit(1)
+            .truncationMode(.tail)
+        }
+    }
+
+    /// The vertical list: the track's marks and accent on the other axis, with room for a sentence
+    /// per phase. The connector is drawn within each row so it stretches with the row's text.
+    private var verticalTrackStyle: some View {
+        let phases = trackPhases
+        return VStack(alignment: .leading, spacing: 0) {
+            if let caption {
+                Text(caption)
+                    .font(.system(size: 12 * scaleFactor, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .padding(.bottom, 10 * scaleFactor)
+            }
+            ForEach(phases.indices, id: \.self) { index in
+                let state = PhaseTrack.state(at: index, in: phases, currentPhase: currentPhase)
+                HStack(alignment: .top, spacing: 12 * scaleFactor) {
+                    VStack(spacing: 0) {
+                        // A short stub lands the mark on the label's first line.
+                        connector(visible: index > 0,
+                                  covered: PhaseTrack.isCovered(segmentBefore: index, currentPhase: currentPhase),
+                                  vertical: true)
+                            .frame(height: 3 * scaleFactor)
+                        mark(for: state)
+                        connector(visible: index < phases.count - 1,
+                                  covered: PhaseTrack.isCovered(segmentBefore: index + 1, currentPhase: currentPhase),
+                                  vertical: true)
+                            .frame(maxHeight: .infinity)
+                    }
+                    .frame(width: 16 * scaleFactor)
+
+                    VStack(alignment: .leading, spacing: 2 * scaleFactor) {
+                        Text(phases[index].label)
+                            .font(.system(size: 13 * scaleFactor,
+                                          weight: state == .current ? .semibold : .regular))
+                            .foregroundStyle(state == .pending ? .secondary : .primary)
+                        if let detail = phases[index].detail, !detail.isEmpty {
+                            Text(detail)
+                                .font(.system(size: 12 * scaleFactor))
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    if let time = phases[index].time {
+                        Text(time)
+                            .font(.system(size: 11 * scaleFactor))
+                            .foregroundStyle(palette.textFaint)
+                            .lineLimit(1)
+                    }
+                }
+                .padding(.bottom, index < phases.count - 1 ? 14 * scaleFactor : 0)
+            }
+        }
+    }
+
+    /// Half the mark plus air, so a connector stops before it.
+    private var markClearance: CGFloat { 13 * scaleFactor }
+
+    /// One accent, three weights; only the done mark carries a glyph.
+    @ViewBuilder
+    private func mark(for state: PhaseTrack.MarkState) -> some View {
+        let size = 16 * scaleFactor
+        switch state {
+        case .done:
+            Circle().fill(resolvedActiveColor)
+                .frame(width: size, height: size)
+                .overlay(Image(systemName: "checkmark")
+                    .font(.system(size: 8.5 * scaleFactor, weight: .bold))
+                    .foregroundStyle(.white))
+        case .current:
+            // A ring, so "now" differs from "done" in kind without a second hue.
+            Circle().stroke(resolvedActiveColor, lineWidth: 3 * scaleFactor)
+                .frame(width: size, height: size)
+        case .blocked:
+            Circle().stroke(resolvedActiveColor, lineWidth: 2 * scaleFactor)
+                .frame(width: size, height: size)
+                .overlay(Circle().fill(resolvedActiveColor)
+                    .frame(width: size * 0.32, height: size * 0.32))
+        case .failed:
+            // Red appears on the mark only, never the connector or the label.
+            Circle().fill(palette.error)
+                .frame(width: size, height: size)
+                .overlay(Image(systemName: "xmark")
+                    .font(.system(size: 8.5 * scaleFactor, weight: .bold))
+                    .foregroundStyle(.white))
+        case .pending:
+            Circle().stroke(Color.secondary.opacity(0.40), lineWidth: 1.5 * scaleFactor)
+                .frame(width: size, height: size)
+        }
+    }
+
+    @ViewBuilder
+    private func connector(visible: Bool, covered: Bool, vertical: Bool = false) -> some View {
+        let paint = visible ? (covered ? resolvedActiveColor : Color.secondary.opacity(0.25)) : Color.clear
+        if vertical {
+            Rectangle().fill(paint).frame(width: 2 * scaleFactor)
+        } else {
+            Rectangle().fill(paint).frame(height: 2 * scaleFactor)
+        }
+    }
+
     private var progressBarStyle: some View {
         VStack(alignment: .leading, spacing: 8 * scaleFactor) {
             HStack {
-                Text("Phase \(currentPhase) of \(phaseLabels.count)")
+                Text("Phase \(PhaseTrack.clamped(phaseNumber: currentPhase, count: phaseLabels.count)) of \(phaseLabels.count)")
                     .font(.system(size: 12 * scaleFactor, weight: .medium))
                     .foregroundStyle(.secondary)
 
                 Spacer()
 
-                Text(phaseLabels[safe: currentPhase - 1] ?? "")
+                Text(phaseLabels[safe: PhaseTrack.clamped(phaseNumber: currentPhase,
+                                                         count: phaseLabels.count) - 1] ?? "")
                     .font(.system(size: 12 * scaleFactor, weight: .semibold))
                     .foregroundStyle(.primary)
             }
 
-            ProgressView(value: Double(currentPhase), total: Double(phaseLabels.count))
+            // Not `currentPhase / count`: that reads full while the last phase still runs and
+            // disagrees with weighted phases.
+            ProgressView(value: PhaseTrack.coveredFraction(for: trackPhases,
+                                                           currentPhase: currentPhase))
                 .progressViewStyle(LinearProgressViewStyle())
-                .tint(palette.warning)
+                .tint(resolvedActiveColor)
         }
         .padding(12 * scaleFactor)
     }
 
-    // Checklist style - vertical checkboxes
-    private var checklistStyle: some View {
+}
+
+// MARK: - Status Indicator Circle (shared)
+
+/// The one status circle, drawn by the Preset 1 item rows, the plain-simple list screen and
+/// `AppIconView`'s install badge. Non-circle status shapes keep their own renderers.
+struct StatusIndicatorCircle: View {
+    @Environment(\.palette) private var palette
+    enum ActiveStyle {
+        case haloDot      // accent dot on a soft accent halo, static
+        case accentDot    // white dot on a filled accent circle, static
+        case spinner      // spinning ProgressView
+    }
+
+    let status: StepStatus
+    /// Completed, but plist validation failed: a flag beside the state, not a state.
+    var hasWarning: Bool = false
+    let accent: Color
+    var size: CGFloat = 20
+    var glyphSize: CGFloat?          // default: size * 0.6
+    var activeStyle: ActiveStyle = .haloDot
+    var showPending: Bool = true           // false draws nothing for .pending
+    var completedHelp: String = "Installed and validated"
+    /// A ring of this colour around the disc, so a badge set on an icon reads as cut out of it.
+    var ring: Color?
+    var ringWidth: CGFloat = 3
+
+    private var glyph: CGFloat { glyphSize ?? size * 0.6 }
+
+    var body: some View {
+        switch status {
+        case .failed:
+            circle(StatusGlyph.failure)
+                .help("Installation failed")
+        case .completed:
+            if hasWarning {
+                circle(StatusGlyph.warning)
+                    .help("Installed, but a setting couldn't be verified")
+            } else {
+                circle(StatusGlyph.success)
+                    .help(completedHelp)
+            }
+        case .skipped:
+            circle(StatusGlyph.success)
+                .help("Skipped")
+        case .active:
+            activeBadge
+                .help("Installing…")
+        case .pending:
+            if showPending {
+                Circle()
+                    .stroke(palette.text.opacity(0.3), lineWidth: 2)
+                    .frame(width: size, height: size)
+            }
+        }
+    }
+
+    private func circle(_ status: StatusGlyph) -> some View {
+        ZStack {
+            if let ring {
+                Circle().fill(ring).frame(width: size + ringWidth * 2, height: size + ringWidth * 2)
+            }
+            disc(status)
+        }
+    }
+
+    private func disc(_ status: StatusGlyph) -> some View {
+        Circle()
+            // The palette's colour, so a branded success or error hue applies here too.
+            .fill(status.paletteColor(palette))
+            .frame(width: size, height: size)
+            .overlay(
+                Image(systemName: status.discSymbol ?? status.symbol)
+                    .font(.system(size: glyph, weight: .bold))
+                    .foregroundStyle(.white)
+            )
+    }
+
+    @ViewBuilder
+    private var activeBadge: some View {
+        switch activeStyle {
+        case .haloDot:
+            Circle()
+                .fill(accent.opacity(0.18))
+                .frame(width: size, height: size)
+                .overlay(
+                    Circle()
+                        .fill(accent)
+                        .frame(width: size * 0.5, height: size * 0.5)
+                )
+        case .accentDot:
+            Circle()
+                .fill(accent)
+                .frame(width: size, height: size)
+                .overlay(
+                    Circle()
+                        .fill(.white)
+                        .frame(width: size * (9.0 / 26.0), height: size * (9.0 / 26.0))
+                )
+        case .spinner:
+            ProgressView()
+                .scaleEffect(0.8)
+                .tint(StatusGlyph.paletteActiveColor(palette))
+                .frame(width: size, height: size)
+        }
+    }
+}
+
+// MARK: - Comparison Checks Table
+
+/// Required-versus-found checks as one table with headers once. A found cell states its result
+/// once, a glyph and a value; colour appears only where something failed.
+struct ComparisonChecksTable: View {
+    let label: String?
+    /// Authored `expectedLabel`/`actualLabel`; nil falls back to the localized `ui.*` key here.
+    let requiredLabel: String?
+    let foundLabel: String?
+    let checks: [InspectConfig.GuidanceContent.ComparisonCheck]
+    let accentColor: Color
+    var scaleFactor: CGFloat = 1.0
+    @Environment(\.inspectLocalization) private var l10n
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if let label {
+                Text(label)
+                    .font(.system(size: 13 * scaleFactor, weight: .semibold))
+                    .padding(.bottom, 8 * scaleFactor)
+            }
+
+            HStack(spacing: 12 * scaleFactor) {
+                Text(l10n("ui.tableCheck", "Check"))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Text(requiredLabel ?? l10n("ui.tableRequired", "Required"))
+                    .frame(width: 150 * scaleFactor, alignment: .leading)
+                Text(foundLabel ?? l10n("ui.tableFound", "Found"))
+                    .frame(width: 190 * scaleFactor, alignment: .leading)
+            }
+            .font(.system(size: 10 * scaleFactor, weight: .semibold, design: .monospaced))
+            .tracking(0.6)
+            .foregroundStyle(palette.textFaint)
+            .padding(.bottom, 7 * scaleFactor)
+
+            Divider()
+
+            ForEach(Array(checks.enumerated()), id: \.offset) { _, row in
+                rowView(row)
+                Divider()
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// The found cell's glyph and tint, or nil for none. Gating on `mark != nil` is right for this
+    /// binary vocabulary; `GuidanceAdvisoryBlock` keeps its own signal because its `warning` is
+    /// markless but tinted.
+    static func rowSignal(for row: InspectConfig.GuidanceContent.ComparisonCheck,
+                          palette: ResolvedPalette) -> (symbol: String, tint: Color)? {
+        let passed = row.pass ?? (row.required == row.found)
+        let state: BlockSemantics.State = passed ? .pass : .fail
+        guard let mark = BlockSemantics.mark(for: state) else { return nil }
+        return (mark, BlockSemantics.tint(for: state, palette: palette) ?? .primary)
+    }
+
+    @ViewBuilder
+    private func rowView(_ row: InspectConfig.GuidanceContent.ComparisonCheck) -> some View {
+        let isExpanded = row.expanded == true
+
         VStack(alignment: .leading, spacing: 8 * scaleFactor) {
-            ForEach(0..<phaseLabels.count, id: \.self) { index in
-                let phaseNum = index + 1
-                let isActive = phaseNum == currentPhase
-                let isCompleted = phaseNum < currentPhase
+            HStack(alignment: .top, spacing: 12 * scaleFactor) {
+                Text(row.check)
+                    .font(.system(size: 13 * scaleFactor))
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
-                HStack(spacing: 8 * scaleFactor) {
-                    Image(systemName: isCompleted ? "checkmark.square.fill" :
-                          isActive ? "square.fill" :
-                          "square")
-                        .font(.system(size: 16 * scaleFactor))
-                        .foregroundStyle(isCompleted ? palette.success :
-                                       isActive ? palette.warning : Color.secondary)
+                Text(row.required)
+                    .font(.system(size: 13 * scaleFactor))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 150 * scaleFactor, alignment: .leading)
 
-                    Text(phaseLabels[index])
-                        .font(.system(size: 12 * scaleFactor, weight: isActive ? .semibold : .regular))
-                        .foregroundStyle(isActive ? .primary : .secondary)
+                HStack(spacing: 6 * scaleFactor) {
+                    if let signal = Self.rowSignal(for: row, palette: palette) {
+                        Image(systemName: signal.symbol)
+                            .font(.system(size: 12 * scaleFactor, weight: .semibold))
+                            .foregroundStyle(signal.tint)
+                    }
+                    Text(row.found)
+                        .font(.system(size: 13 * scaleFactor))
+                        .foregroundStyle(.primary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(width: 190 * scaleFactor, alignment: .leading)
+            }
 
-                    Spacer()
+            if isExpanded {
+                HStack(alignment: .top, spacing: 12 * scaleFactor) {
+                    if let actionLabel = row.actionLabel {
+                        Button(actionLabel) {
+                            if let urlString = row.actionURL, let url = URL(string: urlString) {
+                                NSWorkspace.shared.open(url)
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                        .tint(accentColor)
+                    }
+                    if let note = row.note {
+                        Text(note)
+                            .font(.system(size: 12 * scaleFactor))
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
             }
         }
-        .padding(12 * scaleFactor)
+        .padding(.vertical, 9 * scaleFactor)
+        .padding(.horizontal, isExpanded ? 10 * scaleFactor : 0)
+        // Only the row the user can act on gets a tint and a button.
+        .background(isExpanded ? palette.error.opacity(0.06) : Color.clear)
+        .clipShape(RoundedRectangle(cornerRadius: 8 * scaleFactor, style: .continuous))
+    }
+}
+
+
+/// The measured phase-track width for `PhaseTrack.segmentWidths`. Internal because a
+/// PreferenceKey used in a `some View` body cannot be more constrained than the view.
+struct TrackWidthKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
     }
 }

@@ -2,647 +2,258 @@
 //  Preset3.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 19/07/2025
 //
-//  Compact and ultra-compact list style layout with gradient background and option for banner image
+//  Preset 3: onboarding card with a greeting header, overall progress, category rows of item
+//  tiles, an admin-details layer and the shared intro/outro phases.
 //
 
 import SwiftUI
 
 struct Preset3View: View, InspectLayoutProtocol {
     @ObservedObject var inspectState: InspectState
-    @State private var showDetailOverlay = false
-    @State private var showItemDetailOverlay = false
-    @State private var selectedItemForDetail: InspectConfig.ItemConfig?
     @StateObject private var iconCache = PresetIconCache()
+    @StateObject private var commandRouter = CommandRouter()
     @State private var localizationService = LocalizationService()
-    @Environment(\.colorScheme) private var colorScheme
+    @State private var showDetails = false
+    @State private var showHelpOverlay = false
+    /// The plist / managed-pref status poll.
+    @State private var statusPoll: Poll?
+
+    /// Unauthored falls through to the system accent, never to a grey.
+    private var primaryColor: Color {
+        inspectState.uiConfiguration.highlightColor.nilIfEmpty
+            .map { Color(hex: $0) } ?? .accentColor
+    }
+
+    /// Readiness trigger file, also the command IPC path.
+    private var triggerFilePath: String {
+        presetTriggerFilePath(config: inspectState.config)
+    }
+
+    private var loc: PresetLocalization {
+        PresetLocalization(state: inspectState, service: localizationService)
+    }
+
+    private var basePath: String? {
+        inspectState.uiConfiguration.iconBasePath
+    }
+
+    private var hasPolledSources: Bool {
+        inspectState.items.contains { $0.plistKey != nil || $0.managedPrefDomain != nil }
+    }
+
+    private var allComplete: Bool {
+        !inspectState.trackedItems.isEmpty &&
+        inspectState.trackedCompletedCount == inspectState.trackedItems.count
+    }
 
     init(inspectState: InspectState) {
         self.inspectState = inspectState
     }
 
-    /// Trigger file path for readiness signalling (mirrors Preset4/6). Additive only —
-    /// Preset3 remains headless for commands (FSEvents); this just lets `wait-ready` succeed.
-    private var triggerFilePath: String {
-        if let customPath = inspectState.config?.triggerFile { return customPath }
-        if appArguments.inspectMode.present { return "/tmp/swiftdialog_dev_preset3.trigger" }
-        return "/tmp/swiftdialog_\(ProcessInfo.processInfo.processIdentifier)_preset3.trigger"
-    }
-
     var body: some View {
-        let textColor = getTextColor()
-        
-        ZStack {
-            // Custom background (gradient, image, or color)
-            customBackground()
-            
-            VStack(spacing: 0) {
-                // Clean layout: no top header bar. The title lives in the hero block
-                // below; the action buttons live in the bottom footer.
-                
-                // Banner image at top if available
-                if inspectState.uiConfiguration.bannerImage != nil {
-                    if let bannerNSImage = iconCache.bannerImage {
-                        ZStack(alignment: .bottomLeading) {
-                            Image(nsImage: bannerNSImage)
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(maxHeight: CGFloat(inspectState.uiConfiguration.bannerHeight))
-                                .clipped()
-
-                            // Optional title overlay on banner
-                            if let bannerTitle = localized("bannerTitle", fallback: inspectState.uiConfiguration.bannerTitle) {
-                                Text(bannerTitle)
-                                    .font(.title2)
-                                    .fontWeight(.bold)
-                                    .foregroundStyle(.white)
-                                    .shadow(radius: 2)
-                                    .padding()
-                            }
-                        }
-                        .frame(height: CGFloat(inspectState.uiConfiguration.bannerHeight))
-                    }
-                }
-
-                // Company icon section - more compact
-                HStack(spacing: 20) {
-                    IconView(
-                        image: iconCache.getMainIconPath(for: inspectState),
-                        overlay: iconCache.getOverlayIconPath(for: inspectState),
-                        sfPaddingEnabled: false,
-                        corners: false,
-                        defaultImage: "building.2.fill",
-                        defaultColour: "accent"
-                    )
-                    .frame(width: 96 * scaleFactor, height: 96 * scaleFactor)
-                        .onAppear {
-                            iconCache.cacheMainIcon(for: inspectState)
-                            iconCache.cacheBannerImage(for: inspectState)
-                        }
-
-                    VStack(alignment: .leading, spacing: InspectConstants.spacingIntra) {
-                        // Big hero title (moved here from the old top header)
-                        Text(localized("title", fallback: inspectState.uiConfiguration.windowTitle) ?? "")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .foregroundStyle(textColor)
-
-                        if let subtitle = localized("subtitle", fallback: inspectState.uiConfiguration.subtitleMessage) {
-                            Text(subtitle)
-                                .font(.title3)
-                                .foregroundStyle(textColor.opacity(0.75))
-                        }
-
-                        if let currentMessage = localizedSideMessage() {
-                            Text(currentMessage)
-                                .font(.subheadline)
-                                .foregroundStyle(textColor.opacity(0.9))
-                                .lineLimit(2)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .padding(.horizontal, 32)
-                .padding(.top, InspectConstants.spacingOuter)
-                .padding(.bottom, InspectConstants.spacingSection)
-                
-                // Removed - message is now inline with logo
-                
-                // Scrollable app list with auto-scrolling
-                ScrollViewReader { proxy in
-                    ScrollView(.vertical, showsIndicators: true) {
-                        // Use two columns in compact mode, one column otherwise
-                        let columns = sizeMode == "compact" ?
-                            [GridItem(.flexible()), GridItem(.flexible())] :
-                            [GridItem(.flexible())]
-
-                        LazyVGrid(columns: columns, spacing: InspectConstants.spacingInner) {
-                            let sortedItems = getSortedItemsByStatus() // Use simple order: Latest Completed → Installing → Waiting
-                            ForEach(sortedItems, id: \.id) { item in
-                                HStack(spacing: 14) {
-                                    // Item icon - use resolved path from cache
-                                    IconView(image: iconCache.getItemIconPath(for: item, state: inspectState), sfPaddingEnabled: false, corners: false, defaultImage: "app.badge.fill", defaultColour: "accent")
-                                        .frame(width: 36 * scaleFactor, height: 36 * scaleFactor)
-                                        .id("icon-\(item.id)") // Stable ID to prevent recreation
-
-                                    // Item name + optional description (issue #663)
-                                    VStack(alignment: .leading, spacing: 1) {
-                                        HStack(spacing: 4) {
-                                            Text(localized("\(item.id).displayName", fallback: item.displayName) ?? item.displayName)
-                                                .font(.body)
-                                                .foregroundStyle(textColor)
-
-                                            // Info button (only show if detailOverlay is configured)
-                                            if inspectState.config?.detailOverlay != nil || item.itemOverlay != nil {
-                                                ItemInfoButton(item: item, action: {
-                                                    selectedItemForDetail = item
-                                                    showItemDetailOverlay = true
-                                                }, size: 16 * scaleFactor,
-                                                   tint: Color(hex: inspectState.uiConfiguration.highlightColor))
-                                            }
-                                        }
-
-                                        // Per-item description — capped to one line so a long
-                                        // string can never deform a compact grid cell.
-                                        if let description = localized("\(item.id).subtitle", fallback: item.subtitle),
-                                           !description.isEmpty {
-                                            Text(description)
-                                                .font(.caption)
-                                                .foregroundStyle(textColor.opacity(0.7))
-                                                .lineLimit(1)
-                                                .truncationMode(.tail)
-                                        }
-                                    }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                                    // Status indicator with validation support
-                                    statusIndicatorWithValidation(for: item, textColor: textColor)
-                                }
-                                .padding(.vertical, 10)
-                                .padding(.horizontal, 14)
-                                .background(
-                                    // Subtle brand tint marks the actively-installing cell.
-                                    inspectState.downloadingItems.contains(item.id)
-                                        ? Color(hex: inspectState.uiConfiguration.highlightColor).opacity(0.10)
-                                        : Color.primary.opacity(0.04)
-                                )
-                                .clipShape(.rect(cornerRadius: 12))
-                            }
-                        }
-                        .padding(.horizontal, 32)
-                        .padding(.vertical, 6)
-                        .onChange(of: inspectState.completedItems.count) { _, _ in
-                            // Auto-scroll to top when new item completes
-                            let sortedItems = getSortedItemsByStatus()
-                            if let firstItem = sortedItems.first {
-                                withAnimation(.easeInOut(duration: InspectConstants.longAnimationDuration)) {
-                                    proxy.scrollTo(firstItem.id, anchor: .top)
-                                }
-                            }
-                            
-                            // Auto-enable button when all items are completed
-                            inspectState.checkAndUpdateButtonState()
-                            
-                            // Also trigger validation for completed items manually if needed
-                            if inspectState.completedItems.count == inspectState.items.count {
-                                // Ensure validation results are populated for UI display
-                                Task { @MainActor in
-                                    let completedItemsNeedingValidation = inspectState.items.filter { item in
-                                        inspectState.completedItems.contains(item.id) &&
-                                        (item.plistKey != nil || inspectState.plistSources?.contains(where: { source in
-                                            item.paths.contains(source.path)
-                                        }) == true)
-                                    }
-                                    
-                                    for item in completedItemsNeedingValidation where inspectState.plistValidationResults[item.id] == nil {
-                                        writeLog("Preset3: Manual validation trigger for '\(item.id)' - missing from results dict", logLevel: .info)
-                                        _ = inspectState.validatePlistItem(item)
-                                    }
-                                }
-                            }
-                        }
-                        .onChange(of: inspectState.downloadingItems.count) { _, _ in
-                            // Auto-scroll when installing status changes
-                            let sortedItems = getSortedItemsByStatus()
-                            if let firstInstalling = sortedItems.first(where: { inspectState.downloadingItems.contains($0.id) }) {
-                                withAnimation(.easeInOut(duration: InspectConstants.longAnimationDuration)) {
-                                    proxy.scrollTo(firstInstalling.id, anchor: .center)
-                                }
-                            }
-                            
-                            // Check button state when downloading status changes
-                            inspectState.checkAndUpdateButtonState()
-                        }
-                        .onChange(of: inspectState.plistValidationResults) { _, _ in
-                            writeLog("DEBUG Preset3: plistValidationResults changed: \(inspectState.plistValidationResults)", logLevel: .debug)
-                            // Force UI update when validation results change
-                        }
-                    }
-                    .scrollIndicators(.visible, axes: .vertical)
-                }
-                
-                // Progress bar section - moved to bottom as requested
-                if !inspectState.items.isEmpty {
-                    let progress = Double(inspectState.completedItems.count) / Double(inspectState.items.count)
-                    let isComplete = inspectState.completedItems.count == inspectState.items.count
-                    
-                    let brand = Color(hex: inspectState.uiConfiguration.highlightColor)
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(spacing: 6) {
-                            if isComplete {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.green)
-                            } else if !inspectState.downloadingItems.isEmpty {
-                                // The list's single spinner — one motion source, not one
-                                // per grid cell.
-                                ProgressView().controlSize(.small)
-                            }
-                            Text(isComplete
-                                 ? (localized("completionMessage", fallback: inspectState.config?.uiLabels?.completionMessage) ?? "Installation complete")
-                                 : (localized("installationProgress", fallback: nil) ?? "Installing…"))
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                                .foregroundStyle(textColor.opacity(0.85))
-                            Spacer()
-                            Text("\(inspectState.completedItems.count) of \(inspectState.items.count)")
-                                .font(.subheadline)
-                                .monospacedDigit()
-                                .foregroundStyle(textColor.opacity(0.5))
-                        }
-
-                        // Slim, rounded, brand-tinted progress line — no heavy box.
-                        GeometryReader { geo in
-                            ZStack(alignment: .leading) {
-                                Capsule().fill(Color.primary.opacity(0.08))
-                                Capsule()
-                                    .fill(isComplete ? Color.green : brand)
-                                    .frame(width: max(0, geo.size.width * progress))
-                                    .animation(.easeInOut(duration: 0.35), value: progress)
-                            }
-                        }
-                        .frame(height: 6)
-                    }
-                    .padding(.horizontal, 32)
-                    .padding(.top, 8)
-                    .padding(.bottom, 10)
-                }
-
-                Divider()
-                    .padding(.horizontal, 32)
-
-                // Footer: brand wordmark (logoConfig) on the left, action buttons on the right.
-                HStack(spacing: 12) {
-                    if let lc = inspectState.config?.logoConfig {
-                        // Dark-aware (imagePathDark) + honours logoConfig.maxHeight (capped),
-                        // matching the footer-logo handling in Preset 5/6.
-                        let logoPath = (colorScheme == .dark ? (lc.imagePathDark ?? lc.imagePath) : lc.imagePath)
-                        if let nsLogo = NSImage(contentsOfFile: (logoPath as NSString).expandingTildeInPath) {
-                            Image(nsImage: nsLogo)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxHeight: min(CGFloat(lc.maxHeight ?? 26), 48) * scaleFactor)
-                                .opacity(lc.opacity ?? 1.0)
-                                .accessibilityHidden(true)
-                        }
-                    }
-
-                    Spacer()
-
-                    // Button 2 (Secondary/Cancel) — only when all items complete
-                    if inspectState.completedItems.count == inspectState.items.count &&
-                       inspectState.buttonConfiguration.button2Visible && !inspectState.buttonConfiguration.button2Text.isEmpty {
-                        Button(inspectState.buttonConfiguration.button2Text) {
-                            writeLog("Preset3: button2 (\(inspectState.buttonConfiguration.button2Text)) → exit 2", logLevel: .info)
-                            cleanupReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath, exitCode: 2)
-                            exit(2)
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.large)
-                    }
-
-                    // Button 1 (Primary) — finalButtonText fallback chain
-                    let finalButtonText = inspectState.config?.finalButtonText ??
-                                         inspectState.config?.button1Text ??
-                                         (inspectState.buttonConfiguration.button1Text.isEmpty ? "Continue" : inspectState.buttonConfiguration.button1Text)
-                    Button(finalButtonText) {
-                        writeLog("Preset3: button1 (\(finalButtonText)) → exit 0", logLevel: .info)
-                        cleanupReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath, exitCode: 0)
-                        exit(0)
-                    }
-                    .keyboardShortcut(.defaultAction)
-                    .buttonStyle(.borderedProminent)
-                    .tint(inspectState.uiConfiguration.highlightColor.isEmpty ? Color.accentColor : Color(hex: inspectState.uiConfiguration.highlightColor))
-                    .controlSize(.large)
-                    .disabled(inspectState.buttonConfiguration.button1Disabled)
-                }
-                .padding(.horizontal, 32)
-                .padding(.vertical, 18)
-            }
+        PhaseContainer(
+            state: inspectState,
+            accent: primaryColor,
+            scaleFactor: scaleFactor,
+            windowSize: windowSize,
+            triggerFilePath: triggerFilePath,
+            presetLabel: "Preset3View",
+            presetNumber: "3",
+            localize: { loc.string($0, fallback: nil) },
+            footerHorizontalPadding: FooterBandM.rail  // same rail as OnboardingFooter
+        ) { proxy in
+            mainPhaseView(summaryAction: proxy.summaryAction)
+                .sourceTag()
         }
-        .frame(width: windowSize.width, height: windowSize.height)
-        .overlay {
-            // Help button (positioned according to config)
-            // Supports action types: overlay (default), url, custom
-            if let helpButtonConfig = inspectState.config?.helpButton,
-               helpButtonConfig.enabled ?? true {
-                PositionedHelpButton(
-                    config: helpButtonConfig,
-                    action: {
-                        handleHelpButtonAction(
-                            config: helpButtonConfig,
-                            showOverlay: $showDetailOverlay
-                        )
-                    },
-                    padding: 16
-                )
-            }
-        }
-        .detailOverlay(
-            inspectState: inspectState,
-            isPresented: $showDetailOverlay,
-            config: inspectState.config?.detailOverlay
-        )
-        .itemDetailOverlay(
-            inspectState: inspectState,
-            isPresented: $showItemDetailOverlay,
-            item: selectedItemForDetail
-        )
         .onAppear {
             if let locConfig = inspectState.config?.localization {
-                let basePath = inspectState.uiConfiguration.iconBasePath ?? ""
-                localizationService.loadLanguages(from: locConfig, basePath: basePath)
+                localizationService.loadLanguages(from: locConfig, iconBasePath: inspectState.uiConfiguration.iconBasePath,
+                                                   configPath: inspectState.configPath)
             }
-            // Announce readiness so `ignitecli ipc wait-ready` returns (FSEvents path unchanged).
-            writeReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath,
-                               preset: "3", itemCount: inspectState.items.count,
-                               itemIDs: inspectState.items.map { $0.id })
+            setupCommandRouter()
+            startStatusPoll()
+            writeLog("Preset3View: Using onboarding assembly (redesign)", logLevel: .info)
         }
+        .onDisappear {
+            commandRouter.stopMonitoring()
+            statusPoll?.cancel()
+            statusPoll = nil
+        }
+        // Help lives at phase level so the intro footer can seat the control and open the overlay.
+        .environment(\.cardHeaderHelp, inspectState.config?.helpButton.flatMap { help in
+            help.isShown
+                ? CardHeaderHelp(icon: help.icon ?? "questionmark.circle",
+                                 tooltip: help.tooltip ?? ChromeCopy.getHelp,
+                                 action: { handleHelpButtonAction(config: help, showOverlay: $showHelpOverlay) })
+                : nil
+        })
+        .detailOverlay(
+            inspectState: inspectState,
+            isPresented: $showHelpOverlay,
+            config: inspectState.config?.detailOverlay
+        )
+        // Without `inspectPalette` every child reads the default palette.
+        .inspectPalette(config: inspectState.config, primaryColor: primaryColor)
     }
 
-    // MARK: - Icon Resolution Methods
+    // MARK: - Main phase (assembled)
 
-    // Icon caching is now handled by PresetIconCache
+    private func mainPhaseView(summaryAction: (() -> Void)?) -> some View {
+        let userName = OnboardingGreeting.resolveUserName(config: inspectState.config)
+        // Once every tile is complete the greeting swaps to `completedTitle`, when authored.
+        let completedOverride = allComplete
+            ? loc.string("completedTitle", fallback: inspectState.config?.completedTitle)
+            : nil
+        let title = OnboardingGreeting.substitute(
+            completedOverride ?? loc.string("title", fallback: inspectState.uiConfiguration.windowTitle) ?? "",
+            userName: userName
+        )
+        let message = (loc.string("subtitle", fallback: inspectState.uiConfiguration.subtitleMessage))
+            .map { OnboardingGreeting.substitute($0, userName: userName) }
 
-    // MARK: - Private Helper Methods
-    
-    @ViewBuilder
-    private func customBackground() -> some View {
-        if !inspectState.backgroundConfiguration.gradientColors.isEmpty && inspectState.backgroundConfiguration.gradientColors.count >= 2 {
-            // Gradient background
-            LinearGradient(
-                gradient: Gradient(colors: inspectState.backgroundConfiguration.gradientColors.compactMap { Color(hex: $0) }),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
+        return VStack(spacing: 0) {
+            OnboardingHeader(
+                inspectState: inspectState,
+                iconCache: iconCache,
+                title: title,
+                message: message,
+                sideMessage: loc.sideMessage(),
+                sideMessages: loc.sideMessages(),
+                showDetails: $showDetails
             )
-        } else if let backgroundImage = inspectState.backgroundConfiguration.backgroundImage,
-                  FileManager.default.fileExists(atPath: backgroundImage),
-                  let nsImage = NSImage(contentsOfFile: backgroundImage) {
-            // Background image with proper frame constraints
-            GeometryReader { geometry in
-                Image(nsImage: nsImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: geometry.size.width, height: geometry.size.height)
-                    .clipped()
-                    .opacity(inspectState.backgroundConfiguration.backgroundOpacity)
-            }
-        } else if let backgroundColor = inspectState.backgroundConfiguration.backgroundColor {
-            // Solid color background
-            Color(hex: backgroundColor)
-        } else {
-            // Default background
-            Color(NSColor.windowBackgroundColor)
-        }
-    }
-    
-    private func getTextColor() -> Color {
-        if let textColor = inspectState.backgroundConfiguration.textOverlayColor {
-            return Color(hex: textColor)
-        }
-        
-        // Auto-contrast logic - if we have dark background, use light text
-        if !inspectState.backgroundConfiguration.gradientColors.isEmpty || inspectState.backgroundConfiguration.backgroundImage != nil {
-            return .white
-        } else if let bgColor = inspectState.backgroundConfiguration.backgroundColor {
-            // Simple heuristic: if color contains dark values, use white text
-            if bgColor.lowercased().contains("dark") || bgColor == "#000000" {
-                return .white
-            }
-        }
-        
-        return Color.primary // Default system color
-    }
-    
-    private func getSortedItemsByStatus() -> [InspectConfig.ItemConfig] {
-        return inspectState.items.sorted { item1, item2 in
-            let status1 = getItemStatusPriority(item1)
-            let status2 = getItemStatusPriority(item2)
-            
-            if status1 != status2 {
-                return status1 < status2
-            }
-            
-            // Same status - maintain original GUI order
-            return item1.guiIndex < item2.guiIndex
-        }
-    }
-    
-    private func getItemStatusPriority(_ item: InspectConfig.ItemConfig) -> Int {
-        if inspectState.downloadingItems.contains(item.id) {
-            return 0 // Installing items first
-        } else if inspectState.completedItems.contains(item.id) {
-            return 1 // Completed items second
-        } else {
-            return 2 // Pending items last
-        }
-    }
 
-    // MARK: - Localization
+            // Progress and items align with the header text column (Preset3M.textColumn).
+            progressZone
+                .padding(.leading, Preset3M.textColumn * scaleFactor)
+                .padding(.trailing, FooterBandM.rail * scaleFactor)
+                .padding(.top, 10 * scaleFactor)
 
-    private var effectiveLanguage: String? {
-        guard let locConfig = inspectState.config?.localization else { return nil }
-        return localizationService.resolveDefaultLanguage(from: locConfig)
-    }
-
-    private func localized(_ key: String, fallback: String?) -> String? {
-        guard let lang = effectiveLanguage else { return fallback }
-        return localizationService.string(forLanguage: lang, key: key) ?? fallback
-    }
-
-    private func localizedArray(_ key: String, fallback: [String]?) -> [String]? {
-        guard let lang = effectiveLanguage else { return fallback }
-        return localizationService.stringArray(forLanguage: lang, key: key) ?? fallback
-    }
-
-    private func localizedSideMessage() -> String? {
-        let messages = localizedArray("sideMessages", fallback: inspectState.uiConfiguration.sideMessages) ?? inspectState.uiConfiguration.sideMessages
-        guard !messages.isEmpty else { return nil }
-        let index = min(inspectState.uiConfiguration.currentSideMessageIndex, messages.count - 1)
-        return messages[index]
-    }
-
-    private func localizedItemStatus(for item: InspectConfig.ItemConfig) -> String {
-        let baseStatus = getStatusText(for: item)
-        guard effectiveLanguage != nil else { return baseStatus }
-
-        if inspectState.completedItems.contains(item.id) {
-            return localized("\(item.id).completedStatus", fallback: nil)
-                ?? localized("completedStatus", fallback: nil)
-                ?? baseStatus
-        } else if inspectState.downloadingItems.contains(item.id) {
-            return localized("\(item.id).downloadingStatus", fallback: nil)
-                ?? localized("downloadingStatus", fallback: nil)
-                ?? baseStatus
-        } else if inspectState.failedItems.contains(item.id) {
-            return localized("\(item.id).failedStatus", fallback: nil)
-                ?? localized("failedStatus", fallback: nil)
-                ?? baseStatus
-        } else {
-            return localized("\(item.id).pendingStatus", fallback: nil)
-                ?? localized("pendingStatus", fallback: nil)
-                ?? baseStatus
-        }
-    }
-
-    // MARK: - Validation Support
-
-    private func hasValidationWarning(for item: InspectConfig.ItemConfig) -> Bool {
-        // Only check validation for completed items
-        guard inspectState.completedItems.contains(item.id) else { return false }
-
-        // Check if item has any plist validation configuration
-        let hasPlistValidation = item.plistKey != nil ||
-                               inspectState.plistSources?.contains(where: { source in
-                                   item.paths.contains(source.path)
-                               }) == true
-
-        // If item has plist validation, check the results
-        if hasPlistValidation {
-            // Missing result → assume validation passed (no warning); false → warning.
-            let validationResultFromDict = inspectState.plistValidationResults[item.id]
-
-            // If the result is missing but the item has plist validation config, trigger
-            // validation manually; assume no warning until it completes.
-            if validationResultFromDict == nil {
-                Task { @MainActor in
-                    _ = inspectState.validatePlistItem(item)
+            ScrollView {
+                // `chrome: "grid"` opts in to the tiles; the list is the default (the 3.1.1 look).
+                Group {
+                    if InspectSizes.preset3UsesGrid(chrome: inspectState.config?.chrome) {
+                        AppTileGrid(inspectState: inspectState, iconCache: iconCache,
+                                    accent: primaryColor, showDetails: showDetails)
+                    } else {
+                        AppRowList(inspectState: inspectState, iconCache: iconCache,
+                                   accent: primaryColor, showDetails: showDetails)
+                    }
                 }
-                return false
+                .padding(.vertical, 18 * scaleFactor)
             }
 
-            return !(validationResultFromDict ?? true)
+            OnboardingFooter(
+                inspectState: inspectState,
+                accent: primaryColor,
+                showDetails: showDetails,
+                onButton1Action: summaryAction,
+                triggerFilePath: triggerFilePath
+            )
         }
-
-        return false
+        .animation(.easeInOut(duration: 0.2), value: showDetails)
+        .frame(width: windowSize.width, height: windowSize.height)
+        // Without it a gradient config flashes plain during the main phase.
+        .background(PhaseBackdrop(config: inspectState.config))
     }
 
-    private func getStatusText(for item: InspectConfig.ItemConfig) -> String {
-        // Priority 1: Log monitor status (includes failure messages)
-        if let logStatus = inspectState.logMonitorStatuses[item.id] {
-            return logStatus
-        }
+    // MARK: - Overall progress zone
 
-        if inspectState.failedItems.contains(item.id) {
-            // Use custom failed status if available
-            return inspectState.config?.uiLabels?.failedStatus ?? "Failed"
-        } else if inspectState.completedItems.contains(item.id) {
-            if hasValidationWarning(for: item) {
-                // Use custom validation warning text if available, otherwise default
-                return inspectState.config?.uiLabels?.failedStatus ?? "Failed"
-            } else {
-                // Use the new customization system for completed status
-                if let customStatus = item.completedStatus {
-                    return customStatus
-                } else if let globalStatus = inspectState.config?.uiLabels?.completedStatus {
-                    return globalStatus
+    private var progressZone: some View {
+        let total = inspectState.trackedItems.count
+        let done = inspectState.trackedCompletedCount
+        let fraction = total == 0 ? 0 : Double(done) / Double(total)
+
+        return VStack(spacing: 7 * scaleFactor) {
+            FractionBar(
+                fraction: fraction,
+                height: 6 * scaleFactor,
+                cornerRadius: 3,
+                fill: allComplete ? StatusGlyph.success.color : primaryColor,
+                animateChanges: true
+            )
+
+            HStack {
+                Text(progressLeftText)
+                Spacer()
+                Text("\(Int(fraction * 100))%")
+            }
+            .font(.system(size: 12 * scaleFactor))
+            .foregroundStyle(.secondary)
+        }
+    }
+
+    private var progressLeftText: String {
+        if allComplete {
+            // The authored completion text, as in 3.1.1 (`completionMessage`), before v6's own key.
+            return loc.string("completionMessage", fallback: inspectState.config?.uiLabels?.completionMessage)
+                ?? loc.string("setupComplete", fallback: nil) ?? "Setup complete"
+        }
+        return PresetCommonViews.getProgressText(
+            state: inspectState,
+            localizedFormat: loc.string("progressFormat", fallback: nil)
+        )
+    }
+
+    // MARK: - Managed-pref (mobileconfig) item polling
+
+    /// Polls plist and managed-pref items at `InspectConstants.plistPollInterval`, reading once
+    /// immediately. A `Poll` in `@State`, because a timer publisher rebuilt per body pass never
+    /// completes an interval on this view.
+    private func startStatusPoll() {
+        guard hasPolledSources, statusPoll == nil else { return }
+        pollStatusSources()
+        let poll = Poll(every: InspectConstants.plistPollInterval)
+        statusPoll = poll
+        poll.start { self.pollStatusSources() }
+    }
+
+    private func pollStatusSources() {
+        PlistStatusPoller.pollItemStatuses(state: inspectState, basePath: basePath)
+        pollManagedPrefItems()
+    }
+
+    /// Marks items complete once their managed preference has landed in /Library/Managed
+    /// Preferences. Monotonic: a satisfied item stays completed.
+    private func pollManagedPrefItems() {
+        for item in inspectState.items {
+            guard let domain = item.managedPrefDomain,
+                  !inspectState.completedItems.contains(item.id) else { continue }
+            let prefPath = "\(CadenceMonitorService.managedPreferencesBase)/\(domain).plist"
+            let satisfied: Bool
+            if let key = item.managedPrefKey {
+                if let value = Validation.shared.getPlistValue(at: prefPath, key: key) {
+                    satisfied = Validation.shared.performSmartEvaluation(
+                        value: value,
+                        evaluationType: EvaluationOperator
+                            .resolve(evaluation: item.evaluation,
+                                     expectedValue: item.expectedValue)?.rawValue
+                            ?? (item.evaluation ?? ""),
+                        expectedValue: item.expectedValue,
+                        key: key
+                    )
                 } else {
-                    return "Completed"
+                    satisfied = false
                 }
-            }
-        } else if inspectState.downloadingItems.contains(item.id) {
-            // Use the new customization system for downloading status
-            if let customStatus = item.downloadingStatus {
-                return customStatus
-            } else if let globalStatus = inspectState.config?.uiLabels?.downloadingStatus {
-                return globalStatus
             } else {
-                return "Installing..."
+                // No key: the domain plist existing is the check.
+                satisfied = FileManager.default.fileExists(atPath: prefPath)
             }
-        } else {
-            // Use the new customization system for pending status
-            if let customStatus = item.pendingStatus {
-                return customStatus
-            } else if let globalStatus = inspectState.config?.uiLabels?.pendingStatus {
-                return globalStatus
-            } else {
-                return "Waiting"
+            if satisfied {
+                inspectState.applyItemStatus(item.id, .completed)
+                writeLog("Preset3View: managed pref '\(domain)' satisfied for item '\(item.id)'", logLevel: .info)
             }
         }
     }
 
-    private func getStatusColor(for item: InspectConfig.ItemConfig) -> Color {
-        if inspectState.failedItems.contains(item.id) {
-            return .red
-        } else if inspectState.completedItems.contains(item.id) {
-            return hasValidationWarning(for: item) ? .orange : .green
-        } else if inspectState.downloadingItems.contains(item.id) {
-            return .blue
-        } else {
-            return .secondary
-        }
-    }
+    // MARK: - Command router
 
-    @ViewBuilder
-    private func statusIndicatorWithValidation(for item: InspectConfig.ItemConfig, textColor: Color) -> some View {
-        let isFailed = inspectState.failedItems.contains(item.id)
-        let isCompleted = inspectState.completedItems.contains(item.id)
-        let hasWarning = hasValidationWarning(for: item)
-        let brand = Color(hex: inspectState.uiConfiguration.highlightColor)
-
-        if isFailed {
-            // Failed - show red X and error message
-            HStack(spacing: 4) {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(.red)
-                    .font(.caption)
-                Text(localizedItemStatus(for: item))
-                    .font(.caption)
-                    .foregroundStyle(.red)
-                    .fontWeight(.medium)
-                    .lineLimit(1)
-            }
-            .help("Installation failed")
-        } else if isCompleted {
-            // Completed - check for validation warnings (using same logic as Preset2)
-            if hasWarning {
-                HStack(spacing: 4) {
-                    Image(systemName: "exclamationmark.circle.fill")
-                        .foregroundStyle(.orange)
-                        .font(.caption)
-                    Text("Check Config")
-                        .font(.caption)
-                        .foregroundStyle(.orange)
-                        .fontWeight(.medium)
-                }
-                .help("Configuration validation failed - check plist settings")
-            } else {
-                HStack(spacing: 4) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
-                        .font(.caption)
-                    Text(localizedItemStatus(for: item))
-                        .font(.caption)
-                        .foregroundStyle(.green)
-                        .fontWeight(.medium)
-                }
-                .help("\(localizedItemStatus(for: item)) and validated")
-            }
-        } else if inspectState.downloadingItems.contains(item.id) {
-            // Static accent dot beside the status text — the single header spinner owns
-            // the motion, so concurrent installs don't fill the grid with spinners.
-            HStack(spacing: 4) {
-                Circle()
-                    .fill(brand.opacity(0.2))
-                    .frame(width: 12, height: 12)
-                    .overlay(Circle().fill(brand).frame(width: 6, height: 6))
-                Text(localizedItemStatus(for: item))
-                    .font(.caption)
-                    .foregroundStyle(textColor.opacity(0.7))
-                    .fontWeight(.medium)
-            }
-        } else {
-            HStack(spacing: 4) {
-                Image(systemName: "clock.fill")
-                    .foregroundStyle(textColor.opacity(0.5))
-                    .font(.caption)
-                Text(localizedItemStatus(for: item))
-                    .font(.caption)
-                    .foregroundStyle(textColor.opacity(0.7))
-                    .fontWeight(.medium)
-            }
-        }
+    /// Shared item-set command wiring; `progress:<id>:<pct>` drives the per-tile bars.
+    private func setupCommandRouter() {
+        commandRouter.wireItemBase(
+            state: inspectState,
+            presetLabel: "Preset3",
+            triggerFilePath: triggerFilePath
+        )
     }
 }

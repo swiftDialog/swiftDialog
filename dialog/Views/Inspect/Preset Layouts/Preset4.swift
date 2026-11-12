@@ -2,23 +2,9 @@
 //  Preset4.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH
-//
-//  Preset4: Compact Toast Installer
-//  Minimal ~550×180 window showing one item at a time.
-//  Supports intro → items → summary flow, all in the same compact window.
-//
-//  Features:
-//    - Back/forth chevron navigation to browse items manually
-//    - Colored status indicators (StatusIconView) for real-time feedback
-//    - Plist-based status monitoring (items with plistKey get polled)
-//    - Auto-advance on item completion, auto-transition to summary
-//
-//  Progress modes (config `progressMode`):
-//    "shared"  — Single progress bar showing "X of Y completed" (default)
-//    "perItem" — Indeterminate progress per item, auto-advances on completion
-//    "report"  — All items at once as a scrollable check-report list; persists
-//                until the user taps Done (ideal for plist/compliance checks)
+//  Preset 4: a compact (~550×180) toast showing one item at a time. `progressMode`: "shared" (default),
+//  "perItem" or "report" (a check list until Done). Phase views are in Preset4Components.swift.
+//  It does not use the shared PhaseContainer/footer chrome by design; keep the toast's size and look.
 //
 
 import SwiftUI
@@ -28,17 +14,22 @@ struct Preset4View: View, InspectLayoutProtocol {
     @StateObject private var iconCache = PresetIconCache()
     @StateObject private var commandRouter = CommandRouter()
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.palette) private var palette
 
     @State private var currentPhase: PresetPhase = .main
     @State private var currentItemIndex: Int = 0
     @State private var isUserNavigating: Bool = false
-    @State private var progressCount: Int = 0  // High-water-mark: only goes up
-    @State private var externalProgressPct: Int? = nil  // Live `progress:` override (0-100); nil = derive from item count
+    /// The plist status poll (a `Poll`, as in Preset 3's `startStatusPoll()`).
+    @State private var statusPoll: Poll?
+    @State private var progressCount: Int = 0  // only increases
+    @State private var externalProgressPct: Int?  // live `progress:` value (0-100); nil derives it from the item count
 
     // MARK: - Derived properties
 
     private var primaryColor: Color {
-        let color = Color(hex: inspectState.uiConfiguration.highlightColor)
+        // Unset falls back to the system accent (see `InspectState.highlightColor`).
+        let color = inspectState.uiConfiguration.highlightColor.nilIfEmpty
+            .map { Color(hex: $0) } ?? Color.accentColor
         return colorScheme == .dark ? color.darkModeAdapted : color
     }
 
@@ -57,28 +48,24 @@ struct Preset4View: View, InspectLayoutProtocol {
         return inspectState.items[currentItemIndex]
     }
 
-    /// Whether any items use plist-based status monitoring
+    /// Whether any item uses plist status monitoring.
     private var hasPlistMonitoring: Bool {
         inspectState.items.contains(where: { $0.plistKey != nil })
     }
 
-    /// Total items in terminal state (completed + failed)
+    /// Items in a terminal state (completed or failed).
     private var terminalCount: Int {
-        inspectState.completedItems.count + inspectState.failedItems.count
+        inspectState.trackedCompletedCount + inspectState.trackedFailedCount
     }
 
-    /// Whether all items have reached a terminal state
+    /// Whether every item is in a terminal state.
     private var allItemsTerminal: Bool {
-        !inspectState.items.isEmpty && terminalCount >= inspectState.items.count
+        !inspectState.trackedItems.isEmpty && terminalCount >= inspectState.trackedItems.count
     }
 
-    /// Trigger file path for external command IPC
+    /// Trigger file path for IPC commands.
     private var triggerFilePath: String {
-        if let customPath = inspectState.config?.triggerFile { return customPath }
-        if appArguments.inspectMode.present {
-            return "/tmp/swiftdialog_dev_preset4.trigger"
-        }
-        return "/tmp/swiftdialog_\(ProcessInfo.processInfo.processIdentifier)_preset4.trigger"
+        presetTriggerFilePath(config: inspectState.config)
     }
 
     // MARK: - Body
@@ -87,19 +74,41 @@ struct Preset4View: View, InspectLayoutProtocol {
         ZStack {
             Color(NSColor.windowBackgroundColor)
 
+            if inspectState.config?.messageStyle == "info" {
+                // Info cards: one card per item (or the intro screen when there are none); the last one exits like
+                // Done.
+                ToastInfoSequence(state: inspectState, accent: primaryColor, basePath: basePath) {
+                    if ButtonExit.minimizeInsteadOfExiting(inspectState.config?.button1Action, label: "Preset4View") { return }
+                    presetCleanExit(state: inspectState, triggerFilePath: triggerFilePath,
+                                    label: "Preset4View", message: "Answer closed")
+                }
+            } else {
             switch currentPhase {
             case .intro:
-                compactIntroView
+                ToastIntroBar(state: inspectState, accent: primaryColor, basePath: basePath) {
+                    withAnimation(InspectConstants.stepTransition) {
+                        currentPhase = .main
+                    }
+                }
             case .main:
-                // "report" shows all items at once as a scrollable check-report
-                // (persists until Done); default is the one-item-at-a-time installer.
+                // "report" shows all items as a check list until Done; otherwise one item at a time.
                 if progressMode == "report" {
-                    compactReportView
+                    ToastReportList(state: inspectState, iconCache: iconCache,
+                                    accent: primaryColor, basePath: basePath) {
+                        if ButtonExit.minimizeInsteadOfExiting(inspectState.config?.button1Action, label: "Preset4View") { return }
+                        presetCleanExit(state: inspectState, triggerFilePath: triggerFilePath,
+                                        label: "Preset4View", message: "Report closed")
+                    }
                 } else {
                     mainPhaseView
                 }
             case .summary:
-                compactSummaryView
+                ToastSummaryBar(state: inspectState, accent: primaryColor, basePath: basePath) {
+                    if ButtonExit.minimizeInsteadOfExiting(inspectState.config?.button1Action, label: "Preset4View") { return }
+                    presetCleanExit(state: inspectState, triggerFilePath: triggerFilePath,
+                                    label: "Preset4View", message: "Summary closed")
+                }
+            }
             }
         }
         .ignoresSafeArea()
@@ -111,6 +120,7 @@ struct Preset4View: View, InspectLayoutProtocol {
                 currentPhase = .intro
             }
 
+            applyToastAnchor()
             setupCommandRouter()
             writeReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath,
                                preset: "4", itemCount: inspectState.items.count,
@@ -118,12 +128,14 @@ struct Preset4View: View, InspectLayoutProtocol {
         }
         .onDisappear {
             commandRouter.stopMonitoring()
+            statusPoll?.cancel()
+            statusPoll = nil
         }
         .onChange(of: inspectState.completedItems) { _, _ in
-            // Advance progress (high-water-mark — never decreases)
+            // Only increases.
             let newCount = terminalCount
             if newCount > progressCount { progressCount = newCount }
-            // Delay so the user sees the green/red pill before sliding to next
+            // Let the user see the result pill before moving on.
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
                 advanceToNextItem()
                 checkAutoTransitionToSummary()
@@ -148,21 +160,29 @@ struct Preset4View: View, InspectLayoutProtocol {
                 currentItemIndex = nextDownloadingIndex
             }
         }
-        // Plist polling timer — only active when items have plistKey configured
-        .onReceive(Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()) { _ in
-            if hasPlistMonitoring && currentPhase == .main {
-                checkPlistStatuses()
+        // When rows move under the index (`listitem: order`, added rows), keep showing the same item.
+        .onChange(of: inspectState.items.map(\.id)) { oldIDs, newIDs in
+            if let moved = ListItemCommand.index(following: currentItemIndex, from: oldIDs, to: newIDs) {
+                currentItemIndex = moved
             }
         }
+        // Plist polling only runs in the main phase when items set plistKey. A `Poll` reads at once on entry,
+        // and unlike `onReceive(Timer.publish…)` a body pass does not restart it.
+        .onAppear { startStatusPoll() }
+        .onChange(of: currentPhase) { _, newPhase in
+            if newPhase == .main, hasPlistMonitoring { checkPlistStatuses() }
+        }
+        // Without this, brandPalette/brandPaletteDark/successColor have no effect on this preset (see
+        // `inspectPalette`).
+        .inspectPalette(config: inspectState.config, primaryColor: primaryColor)
     }
 
     // MARK: - Main Phase
 
     private var mainPhaseView: some View {
         VStack(spacing: 6) {
-            // Item row — this content slides on item change
+            // The item row slides on item change.
             HStack(spacing: 8) {
-                // Left chevron — browse to previous item
                 if inspectState.items.count > 1 {
                     Button { navigateItem(-1) } label: {
                         Image(systemName: "chevron.left")
@@ -175,13 +195,16 @@ struct Preset4View: View, InspectLayoutProtocol {
                     .disabled(currentItemIndex <= 0)
                 }
 
-                cachedIcon(
-                    for: currentItem.flatMap { iconCache.getItemIconPath(for: $0, state: inspectState) } ?? "",
-                    fallbackSymbol: "app.fill"
+                ToastCachedIcon(
+                    path: currentItem.flatMap { iconCache.getItemIconPath(for: $0, state: inspectState) } ?? "",
+                    // `app.dashed`: `app.fill` reads as a broken image. Keep in step with the report row's fallback.
+                    fallbackSymbol: "app.dashed",
+                    accent: primaryColor,
+                    basePath: basePath
                 )
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(currentItem?.displayName ?? inspectState.config?.title ?? "Installing...")
+                    Text(currentItem?.displayName ?? inspectState.config?.title ?? ChromeCopy.installing)
                         .font(.system(size: 14, weight: .semibold))
                         .lineLimit(1)
 
@@ -198,7 +221,7 @@ struct Preset4View: View, InspectLayoutProtocol {
                                 .foregroundStyle(.secondary)
                                 .lineLimit(1)
                         } else if progressMode == "shared" {
-                            Text("\(inspectState.completedItems.count) of \(inspectState.items.count) completed")
+                            Text("\(inspectState.trackedCompletedCount) of \(inspectState.trackedItems.count) completed")
                                 .font(.system(size: 11))
                                 .foregroundStyle(.secondary)
                         }
@@ -208,19 +231,17 @@ struct Preset4View: View, InspectLayoutProtocol {
                         if inspectState.items.count > 1 {
                             Text("\(currentItemIndex + 1)/\(inspectState.items.count)")
                                 .font(.system(size: 10, weight: .medium).monospacedDigit())
-                                .foregroundStyle(.tertiary)
+                                .foregroundStyle(palette.textFaint)
                         }
                     }
                 }
 
                 Spacer(minLength: 4)
 
-                // Status pill badge
                 if let item = currentItem {
                     statusPill(for: item)
                 }
 
-                // Right chevron — browse to next item
                 if inspectState.items.count > 1 {
                     Button { navigateItem(1) } label: {
                         Image(systemName: "chevron.right")
@@ -235,333 +256,35 @@ struct Preset4View: View, InspectLayoutProtocol {
             }
             .padding(.horizontal, 16)
 
-            // Progress bar — live `progress:` override (0-100) when driven, else the
-            // high-water-mark item counter. Both never decrease.
+            // Live `progress:` value when driven, else the item counter; neither decreases. `ProgressBar` applies
+            // `progressBarConfig` colours when set.
             if progressMode == "shared" {
                 let fraction = externalProgressPct.map { Double($0) / 100.0 }
-                    ?? Double(progressCount) / Double(max(inspectState.items.count, 1))
-                ProgressView(value: min(1.0, max(0, fraction)), total: 1.0)
-                    .tint(primaryColor)
-                    .padding(.horizontal, 20)
-                    .animation(.easeInOut(duration: 0.4), value: fraction)
-            }
-        }
-    }
-
-    // MARK: - Compact Intro Phase
-
-    private var compactIntroView: some View {
-        HStack(spacing: 14) {
-            let heroPath = inspectState.config?.introScreen?.heroImage
-                ?? inspectState.uiConfiguration.iconPath ?? ""
-            toastIcon(path: heroPath, fallbackSymbol: "info.circle.fill")
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(inspectState.config?.introScreen?.title ?? inspectState.config?.title ?? "Welcome")
-                    .font(.system(size: 14, weight: .semibold))
-                    .lineLimit(1)
-
-                if let subtitle = inspectState.config?.introScreen?.subtitle {
-                    Text(subtitle)
-                        .font(.system(size: 11))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                }
-            }
-
-            Spacer()
-
-            HStack(spacing: 8) {
-                // Defer menu — shared deferral pattern (exit code 10, result file, ignitecli env)
-                if inspectState.buttonConfiguration.button2Visible || isDeferralEnabled(config: inspectState.config) {
-                    DeferralMenuView(
-                        config: inspectState.config,
-                        accentColor: primaryColor,
-                        buttonText: inspectState.buttonConfiguration.button2Text.isEmpty
-                            ? nil : inspectState.buttonConfiguration.button2Text,
-                        style: .compact
-                    )
-                }
-
-                Button(inspectState.config?.introScreen?.buttonText ?? "Continue") {
-                    DialogNotifications.postButtonClick(stepId: "intro", label: "Continue", action: "continue")
-                    withAnimation(InspectConstants.stepTransition) {
-                        currentPhase = .main
-                    }
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(primaryColor)
-                .controlSize(.small)
-            }
-        }
-        .padding(.horizontal, 20)
-    }
-
-    // MARK: - Compact Report View (Plist Monitoring Mode)
-
-    /// Shows all items at once as a compact check report with live-updating colored status
-    private var compactReportView: some View {
-        VStack(spacing: 0) {
-            // Header row
-            HStack(spacing: 12) {
-                let heroPath = inspectState.config?.introScreen?.heroImage
-                    ?? inspectState.uiConfiguration.iconPath ?? ""
-                toastIcon(path: heroPath, fallbackSymbol: "shield.checkered")
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(inspectState.config?.title ?? "System Check")
-                        .font(.system(size: 14, weight: .semibold))
-                        .lineLimit(1)
-
-                    Text(reportProgressText)
-                        .font(.system(size: 11))
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-
-                if allItemsTerminal {
-                    Button(inspectState.config?.summaryScreen?.buttonText ?? "Done") {
-                        writeLog("Preset4View: Report closed", logLevel: .info)
-                        cleanupReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath,
-                                             exitCode: 0,
-                                             completedCount: inspectState.completedItems.count,
-                                             failedCount: inspectState.failedItems.count,
-                                             totalSteps: inspectState.items.count)
-                        exit(0)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(primaryColor)
-                    .controlSize(.small)
-                } else {
-                    ProgressView()
-                        .controlSize(.small)
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 10)
-            .padding(.bottom, 6)
-
-            Divider()
-                .padding(.horizontal, 12)
-
-            // Item list — compact rows with colored status
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 0) {
-                    ForEach(inspectState.items, id: \.id) { item in
-                        reportItemRow(item)
-                    }
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 4)
-        }
-    }
-
-    /// Report progress text — adapts as checks complete
-    private var reportProgressText: String {
-        if allItemsTerminal {
-            let failedCount = inspectState.failedItems.count
-            if failedCount > 0 {
-                return "\(inspectState.completedItems.count) passed, \(failedCount) failed"
-            }
-            return "All \(inspectState.items.count) checks passed"
-        }
-        return "\(terminalCount) of \(inspectState.items.count) checks complete"
-    }
-
-    /// Single row in the check report — icon + name + status badge
-    @ViewBuilder
-    private func reportItemRow(_ item: InspectConfig.ItemConfig) -> some View {
-        HStack(spacing: 8) {
-            // Colored status icon
-            reportItemStatusIcon(for: item)
-
-            // Item icon (small)
-            cachedIcon(
-                for: iconCache.getItemIconPath(for: item, state: inspectState),
-                fallbackSymbol: "app.fill",
-                size: 20
-            )
-
-            Text(item.displayName)
-                .font(.system(size: 12))
-                .lineLimit(1)
-
-            Spacer()
-
-            // Status badge
-            Text(reportItemStatusText(for: item))
-                .font(.system(size: 10, weight: .medium))
-                .foregroundStyle(reportItemStatusColor(for: item))
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(
-                    Capsule()
-                        .fill(reportItemStatusColor(for: item).opacity(0.12))
+                    ?? Double(progressCount) / Double(max(inspectState.trackedItems.count, 1))
+                ProgressBar(
+                    state: inspectState,
+                    width: nil,
+                    height: nil,
+                    showLabel: false,
+                    tint: primaryColor,
+                    progressOverride: fraction
                 )
-        }
-        .padding(.vertical, 3)
-    }
-
-    /// Status icon for report row
-    @ViewBuilder
-    private func reportItemStatusIcon(for item: InspectConfig.ItemConfig) -> some View {
-        if inspectState.failedItems.contains(item.id) {
-            StatusIconView(.failure, size: 14)
-        } else if inspectState.completedItems.contains(item.id) {
-            StatusIconView(.success, size: 14)
-        } else {
-            StatusIconView(.pending, size: 14)
-        }
-    }
-
-    /// Status text for report badge
-    private func reportItemStatusText(for item: InspectConfig.ItemConfig) -> String {
-        if inspectState.failedItems.contains(item.id) {
-            return "Failed"
-        } else if inspectState.completedItems.contains(item.id) {
-            return "Passed"
-        } else {
-            return "Pending"
-        }
-    }
-
-    /// Status color for report badge
-    private func reportItemStatusColor(for item: InspectConfig.ItemConfig) -> Color {
-        if inspectState.failedItems.contains(item.id) {
-            return .red
-        } else if inspectState.completedItems.contains(item.id) {
-            return .green
-        } else {
-            return .orange
-        }
-    }
-
-    // MARK: - Compact Summary Phase
-
-    private var compactSummaryView: some View {
-        VStack(spacing: 6) {
-            HStack(spacing: 14) {
-                // Summary hero — config heroImage, or intro heroImage, or status icon
-                summaryHeroIcon
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(inspectState.config?.summaryScreen?.title ?? "Installation Complete")
-                        .font(.system(size: 14, weight: .semibold))
-                        .lineLimit(1)
-
-                    if let subtitle = inspectState.config?.summaryScreen?.subtitle {
-                        Text(subtitle)
-                            .font(.system(size: 11))
-                            .foregroundStyle(.secondary)
-                            .lineLimit(2)
-                    } else {
-                        summarySubtitleText
-                    }
-                }
-
-                Spacer()
-
-                Button(inspectState.config?.summaryScreen?.buttonText ?? "Close") {
-                    DialogNotifications.postButtonClick(stepId: "summary", label: "Close", action: "close")
-                    writeLog("Preset4View: Summary closed", logLevel: .info)
-                    cleanupReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath,
-                                         exitCode: 0,
-                                         completedCount: inspectState.completedItems.count,
-                                         failedCount: inspectState.failedItems.count,
-                                         totalSteps: inspectState.items.count)
-                    exit(0)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(primaryColor)
-                .controlSize(.small)
-            }
-
-            // Per-item status strip — colored dots showing each item's result
-            if !inspectState.items.isEmpty {
-                HStack(spacing: 6) {
-                    ForEach(inspectState.items, id: \.id) { item in
-                        HStack(spacing: 3) {
-                            itemStatusDot(for: item)
-                            Text(shortName(item.displayName))
-                                .font(.system(size: 9))
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                        }
-                    }
-                    Spacer()
-                }
                 .padding(.horizontal, 20)
-            }
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 4)
-    }
-
-    /// Summary hero icon — uses summaryScreen heroImage, intro heroImage, config icon, or status icon fallback
-    @ViewBuilder
-    private var summaryHeroIcon: some View {
-        let heroPath = inspectState.config?.summaryScreen?.heroImage
-            ?? inspectState.config?.introScreen?.heroImage
-            ?? inspectState.uiConfiguration.iconPath ?? ""
-
-        if !heroPath.isEmpty {
-            toastIcon(path: heroPath, fallbackSymbol: summaryFallbackSymbol)
-        } else {
-            // No hero configured — fall back to colored status icon
-            let failedCount = inspectState.failedItems.count
-            if failedCount == 0 {
-                StatusIconView(.success, size: 36)
-                    .frame(width: 48, height: 48)
-            } else if failedCount < inspectState.items.count {
-                StatusIconView(.warning, size: 36)
-                    .frame(width: 48, height: 48)
-            } else {
-                StatusIconView(.failure, size: 36)
-                    .frame(width: 48, height: 48)
+                .animation(.easeInOut(duration: 0.4), value: fraction)
             }
         }
     }
 
-    /// SF Symbol name for summary fallback based on results
-    private var summaryFallbackSymbol: String {
-        let failedCount = inspectState.failedItems.count
-        if failedCount == 0 { return "checkmark.circle.fill" }
-        if failedCount < inspectState.items.count { return "exclamationmark.triangle.fill" }
-        return "xmark.circle.fill"
-    }
+    // MARK: - Status pill
 
-    /// Summary subtitle text with counts — adapts wording based on context
-    private var summarySubtitleText: some View {
-        let failedCount = inspectState.failedItems.count
-        let passedCount = inspectState.completedItems.count
-        let verb = hasPlistMonitoring ? "passed" : "installed"
-        return Group {
-            if failedCount > 0 {
-                Text("\(passedCount) \(verb), \(failedCount) failed")
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
-            } else {
-                Text("\(passedCount) items \(verb) successfully")
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
-            }
-        }
-    }
-
-    // MARK: - Status Indicators
-
-    /// Colored pill badge — "Pending" (orange), "Passed"/"Installed" (green), "Failed" (red), "Installing" (blue spinner)
+    /// Coloured status pill from the shared row model; a spinner while installing.
     @ViewBuilder
     private func statusPill(for item: InspectConfig.ItemConfig) -> some View {
         let (text, color, showSpinner) = pillState(for: item)
 
         HStack(spacing: 4) {
             if showSpinner {
-                ProgressView()
-                    .controlSize(.mini)
-                    .tint(color)
+                IndeterminateRing(size: 10, color: color, lineWidth: 1.5)
             }
             Text(text)
                 .font(.system(size: 11, weight: .medium))
@@ -573,43 +296,17 @@ struct Preset4View: View, InspectLayoutProtocol {
             Capsule()
                 .fill(color.opacity(0.12))
         )
-        // Use .id so SwiftUI crossfades between states instead of
-        // morphing color/text/layout (which caused wobble).
+        // Keyed so state changes crossfade instead of morphing.
         .id("\(item.id)-\(text)")
         .transition(.opacity)
     }
 
-    /// Resolve pill text, color, and spinner state for an item
+    /// Pill text, colour and spinner from the shared row (`ItemSetModel.row` / `itemStatusColor`).
     private func pillState(for item: InspectConfig.ItemConfig) -> (String, Color, Bool) {
-        if inspectState.failedItems.contains(item.id) {
-            return ("Failed", .red, false)
-        } else if inspectState.completedItems.contains(item.id) {
-            return (hasPlistMonitoring ? "Passed" : "Installed", .green, false)
-        } else if inspectState.downloadingItems.contains(item.id) {
-            return ("Installing", .blue, true)
-        } else {
-            return ("Pending", .orange, false)
-        }
-    }
-
-    /// Small colored dot for summary status strip
-    @ViewBuilder
-    private func itemStatusDot(for item: InspectConfig.ItemConfig) -> some View {
-        if inspectState.failedItems.contains(item.id) {
-            Circle().fill(Color.red).frame(width: 6, height: 6)
-        } else if inspectState.completedItems.contains(item.id) {
-            Circle().fill(Color.green).frame(width: 6, height: 6)
-        } else {
-            Circle().fill(Color.secondary.opacity(0.3)).frame(width: 6, height: 6)
-        }
-    }
-
-    /// Shorten display name for compact summary strip
-    private func shortName(_ name: String) -> String {
-        // Remove common prefixes for compact display
-        let shortened = name
-            .replacingOccurrences(of: "Microsoft ", with: "")
-        return shortened
+        let row = ItemSetModel.row(for: item, state: inspectState)
+        return (row.statusText,
+                ItemSetModel.itemStatusColor(row.status, hasWarning: row.hasWarning, palette: palette),
+                row.status == .active)
     }
 
     // MARK: - Chevron Navigation
@@ -621,153 +318,44 @@ struct Preset4View: View, InspectLayoutProtocol {
         isUserNavigating = true
         currentItemIndex = newIndex
 
-        // Resume auto-advance after 5 seconds of no manual navigation
+        // Resume auto-advance after 5 s without manual navigation.
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             isUserNavigating = false
         }
     }
 
-    // MARK: - Icon helpers
+    // MARK: - Launch window anchor
 
-    /// Synchronous icon from already-cached path — no loading spinner
-    @ViewBuilder
-    private func cachedIcon(for path: String, fallbackSymbol: String, size: CGFloat = 48) -> some View {
-        let cornerRadius = size > 30 ? 10.0 : 5.0
-        let symbolSize = size > 30 ? 28.0 : size * 0.6
-
-        // SF Symbol icons (e.g. "SF=lock.shield.fill")
-        if path.hasPrefix("SF=") {
-            let symbolName = String(path.dropFirst(3))
-            AnyView(
-                Image(systemName: symbolName)
-                    .font(.system(size: symbolSize))
-                    .foregroundStyle(primaryColor)
-                    .frame(width: size, height: size)
-            )
+    /// Anchors the toast window at launch when the config sets `windowPosition` (e.g. "topright"),
+    /// using WindowAnchoring. Without the key the default placement applies.
+    private func applyToastAnchor() {
+        guard let pos = inspectState.config?.windowPosition, !pos.isEmpty else { return }
+        let offset = inspectState.config?.windowPositionOffset
+        DispatchQueue.main.async {
+            applyWindowAnchor(position: pos, offset: offset, didMoveWindow: false,
+                              label: "Preset4View", animated: false)
         }
-        
-        let resolvedPath = resolvePath(path)
-        if let resolvedPath, let nsImage = NSImage(contentsOfFile: resolvedPath) {
-            AnyView(
-                Image(nsImage: nsImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: size, height: size)
-                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-            )
-        }
-        
-        AnyView(
-            Image(systemName: fallbackSymbol)
-                .font(.system(size: symbolSize))
-                .foregroundStyle(primaryColor.opacity(0.6))
-                .frame(width: size, height: size)
-        )
-    }
-
-    /// Async icon for intro (loads once, spinner acceptable)
-    @ViewBuilder
-    private func toastIcon(path: String, fallbackSymbol: String) -> some View {
-        if !path.isEmpty {
-            AsyncImageView(
-                iconPath: path,
-                basePath: basePath,
-                maxWidth: 48,
-                maxHeight: 48,
-                imageFit: .fit
-            ) {
-                Image(systemName: fallbackSymbol)
-                    .font(.system(size: 28))
-                    .foregroundStyle(primaryColor.opacity(0.6))
-                    .frame(width: 48, height: 48)
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-        } else {
-            Image(systemName: fallbackSymbol)
-                .font(.system(size: 28))
-                .foregroundStyle(primaryColor.opacity(0.6))
-                .frame(width: 48, height: 48)
-        }
-    }
-
-    /// Resolve relative path against basePath
-    private func resolvePath(_ path: String) -> String? {
-        guard !path.isEmpty else { return nil }
-        if path.hasPrefix("/") { return path }
-        guard let base = basePath else { return path }
-        return (base as NSString).appendingPathComponent(path)
     }
 
     // MARK: - Plist Status Monitoring
 
-    /// Poll plist files for item statuses (when items have plistKey configured)
+    /// Polls plist files for item status via PlistStatusPoller (PlistHelper.swift); the view owns only the timer.
+    private func startStatusPoll() {
+        guard hasPlistMonitoring, statusPoll == nil else { return }
+        if currentPhase == .main { checkPlistStatuses() }
+        let poll = Poll(every: InspectConstants.plistPollInterval)
+        statusPoll = poll
+        poll.start { if self.currentPhase == .main { self.checkPlistStatuses() } }
+    }
+
     private func checkPlistStatuses() {
-        for item in inspectState.items {
-            guard !inspectState.completedItems.contains(item.id),
-                  !inspectState.failedItems.contains(item.id),
-                  let plistKey = item.plistKey else { continue }
-
-            for path in item.paths {
-                let resolvedPath = resolvePath(path) ?? path
-                if let dict = PlistHelper.readPlistAsDict(at: resolvedPath) {
-                    if let value = readNestedKey(from: dict, keyPath: plistKey) {
-                        let stringValue = "\(value)"
-                        let evaluation = item.evaluation ?? "exists"
-
-                        if evaluatePlistValue(stringValue, expected: item.expectedValue, evaluation: evaluation) {
-                            inspectState.completedItems.insert(item.id)
-                            writeLog("Preset4View: Plist check passed for \(item.id) — \(plistKey)=\(stringValue)", logLevel: .info)
-                        } else if isFailureValue(stringValue) {
-                            inspectState.failedItems.insert(item.id)
-                            writeLog("Preset4View: Plist check failed for \(item.id) — \(plistKey)=\(stringValue)", logLevel: .info)
-                        }
-                    }
-                }
-            }
-        }
+        PlistStatusPoller.pollItemStatuses(state: inspectState, basePath: basePath)
     }
-
-    /// Check if a plist value indicates explicit failure
-    private func isFailureValue(_ value: String) -> Bool {
-        let failureKeywords = ["failed", "error", "disabled", "fail", "false", "no", "blocked", "denied", "outdated", "missing"]
-        return failureKeywords.contains(value.lowercased())
-    }
-
-    /// Read a dot-notation key path from a dictionary (e.g., "Settings.Network.enabled")
-    private func readNestedKey(from dict: [String: Any], keyPath: String) -> Any? {
-        let keys = keyPath.split(separator: ".").map(String.init)
-        var current: Any = dict
-        for key in keys {
-            guard let currentDict = current as? [String: Any],
-                  let next = currentDict[key] else { return nil }
-            current = next
-        }
-        return current
-    }
-
-    /// Evaluate a plist value against expected using the given evaluation type
-    private func evaluatePlistValue(_ actual: String, expected: String?, evaluation: String) -> Bool {
-        switch evaluation {
-        case "exists":
-            return true
-        case "boolean":
-            return ["true", "1", "yes"].contains(actual.lowercased())
-        case "equals":
-            return actual == (expected ?? "")
-        case "contains":
-            return actual.localizedCaseInsensitiveContains(expected ?? "")
-        default:
-            return true
-        }
-    }
-
-    // MARK: - Deferral (uses shared performDeferral() from PresetCommonHelpers)
 
     // MARK: - Auto-Advance Logic
 
     private func advanceToNextItem() {
         guard currentPhase == .main, !inspectState.items.isEmpty else { return }
-        // Don't auto-advance while user is manually navigating
         guard !isUserNavigating else { return }
 
         if let item = currentItem,
@@ -795,9 +383,8 @@ struct Preset4View: View, InspectLayoutProtocol {
 
     private func checkAutoTransitionToSummary() {
         guard currentPhase == .main, !inspectState.items.isEmpty else { return }
-        // Report mode stays put so the user can review all checks — its own Done button exits.
+        // Report mode stays until its Done button.
         guard progressMode != "report" else { return }
-        // Transition when all items are terminal (completed + failed)
         guard allItemsTerminal else { return }
 
         DialogNotifications.postStepChange(stepId: "all", action: "all_complete")
@@ -808,129 +395,54 @@ struct Preset4View: View, InspectLayoutProtocol {
             }
         } else {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                writeLog("Preset4View: All items complete, auto-exiting", logLevel: .info)
-                cleanupReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath,
-                                     exitCode: 0,
-                                     completedCount: inspectState.completedItems.count,
-                                     failedCount: inspectState.failedItems.count,
-                                     totalSteps: inspectState.items.count)
-                exit(0)
+                presetCleanExit(state: inspectState, triggerFilePath: triggerFilePath,
+                                label: "Preset4View", message: "All items complete, auto-exiting")
             }
         }
     }
 
     // MARK: - Command Router Setup
 
-    /// Wire the shared CommandRouter to Preset4's handlers.
-    /// Gives P4 trigger file monitoring, ack logging, and the full unified command protocol.
+    /// Wires the shared CommandRouter to Preset 4: trigger-file monitoring, acks and the command protocol.
     private func setupCommandRouter() {
-        commandRouter.presetLabel = "Preset4"
-        commandRouter.acknowledgmentLogPath = "/var/tmp/dialog-ack.log"
-        commandRouter.itemCount = inspectState.items.count
+        commandRouter.wireItemBase(state: inspectState, presetLabel: "Preset4",
+                                   triggerFilePath: triggerFilePath) { [self] router in
+            // `progress:<id>:<0-100|0-1>` drives the single overall bar (never decreasing); the step id is ignored.
+            router.onProgress = { _, pct in
+                externalProgressPct = max(externalProgressPct ?? 0, pct)
+            }
 
-        // Live progress — `progress:<id>:<0-100|0-1>` drives the shared bar directly
-        // (high-water-mark, never decreases). Until one arrives the bar derives from the
-        // item count as before. stepId is ignored: the toast shows a single overall bar.
-        commandRouter.onProgress = { [self] _, pct in
-            externalProgressPct = max(externalProgressPct ?? 0, pct)
-        }
-
-        // Navigation
-        commandRouter.onNavigateByID = { [self] stepId in
-            if let index = inspectState.items.firstIndex(where: { $0.id == stepId }) {
+            // Navigation moves between items, not phases.
+            router.onNavigateByID = { stepId in
+                if let index = inspectState.items.firstIndex(where: { $0.id == stepId }) {
+                    isUserNavigating = true
+                    currentItemIndex = index
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) { isUserNavigating = false }
+                }
+            }
+            router.onNavigateByIndex = { index in
+                guard index >= 0, index < inspectState.items.count else { return }
                 isUserNavigating = true
                 currentItemIndex = index
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5) { isUserNavigating = false }
             }
-        }
-        commandRouter.onNavigateByIndex = { [self] index in
-            guard index >= 0, index < inspectState.items.count else { return }
-            isUserNavigating = true
-            currentItemIndex = index
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5) { isUserNavigating = false }
-        }
-        commandRouter.onNext = { [self] in navigateItem(1) }
-        commandRouter.onPrev = { [self] in navigateItem(-1) }
-        commandRouter.onReset = { [self] in
-            withAnimation(.spring()) {
-                inspectState.completedItems.removeAll()
-                inspectState.failedItems.removeAll()
-                inspectState.downloadingItems.removeAll()
-                progressCount = 0
-                externalProgressPct = nil
-                currentItemIndex = 0
-            }
-        }
+            router.onNext = { navigateItem(1) }
+            router.onPrev = { navigateItem(-1) }
 
-        // Completion
-        commandRouter.onComplete = { [self] stepId in
-            if inspectState.items.contains(where: { $0.id == stepId }) {
+            // The base reset plus this preset's counters.
+            let baseReset = router.onReset
+            router.onReset = {
+                baseReset?()
                 withAnimation(.spring()) {
-                    inspectState.completedItems.insert(stepId)
-                    return
+                    progressCount = 0
+                    externalProgressPct = nil
+                    currentItemIndex = 0
                 }
             }
-        }
-        commandRouter.onSuccess = { [self] stepId, _ in
-            if inspectState.items.contains(where: { $0.id == stepId }) {
-                withAnimation(.spring()) {
-                    inspectState.completedItems.insert(stepId)
-                    return
-                }
-            }
-        }
-        commandRouter.onFailure = { [self] stepId, _ in
-            if inspectState.items.contains(where: { $0.id == stepId }) {
-                withAnimation(.spring()) {
-                    inspectState.failedItems.insert(stepId)
-                    return
-                }
-            }
-        }
-        commandRouter.onWarning = { [self] stepId, _ in
-            // P4 treats warnings as completions (toast preset has no warning state)
-            if inspectState.items.contains(where: { $0.id == stepId }) {
-                withAnimation(.spring()) {
-                    inspectState.completedItems.insert(stepId)
-                    return
-                }
-            }
-        }
 
-        // Item-level status (maps to P4's simple completion model)
-        commandRouter.onItemStatus = { [self] itemId, status, _ in
-            guard inspectState.items.contains(where: { $0.id == itemId }) else { return }
-            switch status.lowercased() {
-            case "success", "completed":
-                withAnimation(.spring()) {
-                    inspectState.completedItems.insert(itemId)
-                    return
-                }
-            case "failed", "error":
-                withAnimation(.spring()) {
-                    inspectState.failedItems.insert(itemId)
-                    return
-                }
-            case "downloading":
-                withAnimation(.spring()) {
-                    inspectState.downloadingItems.insert(itemId)
-                    return
-                }
-            case "pending":
-                withAnimation(.spring()) {
-                    inspectState.completedItems.remove(itemId)
-                    inspectState.failedItems.remove(itemId)
-                    inspectState.downloadingItems.remove(itemId)
-                }
-            default: break
-            }
+            // The toast has no warning state, so warnings count as completed.
+            router.onWarning = { stepId, _ in inspectState.applyItemStatus(stepId, .completed) }
         }
-
-        // Start trigger file monitoring + DistributedNotifications via CommandRouter
-        if !FileManager.default.fileExists(atPath: triggerFilePath) {
-            FileManager.default.createFile(atPath: triggerFilePath, contents: nil, attributes: nil)
-        }
-        commandRouter.startMonitoring(triggerFilePath: triggerFilePath)
     }
 }
 

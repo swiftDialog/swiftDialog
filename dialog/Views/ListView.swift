@@ -196,14 +196,9 @@ struct StatusView: View {
                     .progressViewStyle(.circular)
                     .scaleEffect(0.8, anchor: .trailing)
                     .frame(height: size)
-            case "success":
-                StatusImage(name: "checkmark.circle.fill", colour: .green, size: size)
-            case "fail":
-                StatusImage(name: "xmark.circle.fill", colour: .red, size: size)
-            case "pending":
-                StatusImage(name: "ellipsis.circle.fill", colour: .gray, size: size)
-            case "error":
-                StatusImage(name: "exclamationmark.circle.fill", colour: .yellow, size: size)
+            case "success", "fail", "pending", "error":
+                let glyph = StatusGlyph(classicListStatus: status) ?? .pending
+                StatusImage(name: glyph.symbol, colour: glyph.color, size: size)
             case "":
                 EmptyView()
             default:

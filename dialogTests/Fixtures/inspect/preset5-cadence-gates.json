@@ -1,0 +1,61 @@
+{
+  "_comment": "The 'gates' cadenceStyle: three markers on fixed /tmp paths, a computer-family sfSymbol and no heroImage (the system Mac-model image). timeout:600 keeps the render at its resting all-pending state.",
+  "preset": "5",
+  "chrome": "card",
+  "width": 820,
+  "height": 600,
+  "title": "Checking prerequisites",
+  "introSteps": [
+    {
+      "id": "gates",
+      "stepType": "cadence",
+      "title": "Checking prerequisites",
+      "completedTitle": "All prerequisites met",
+      "completedMessage": "Three markers found. You're clear to continue.",
+      "autoAdvance": false,
+      "cadenceInterval": 1.0,
+      "cadenceMinDwell": 0.4,
+      "cadence": [
+        {
+          "id": "marker-1",
+          "label": "Marker 1",
+          "message": "Each gate confirms a marker file exists before the next one starts.",
+          "sfSymbol": "desktopcomputer",
+          "attribute": {
+            "source": "native",
+            "type": "file",
+            "path": "/tmp/ax-cadence-gate-1"
+          },
+          "timeout": 600,
+          "timeEstimate": 120
+        },
+        {
+          "id": "marker-2",
+          "label": "Marker 2",
+          "message": "Each gate confirms a marker file exists before the next one starts.",
+          "sfSymbol": "desktopcomputer",
+          "attribute": {
+            "source": "native",
+            "type": "file",
+            "path": "/tmp/ax-cadence-gate-2"
+          },
+          "timeout": 600,
+          "timeEstimate": 90
+        },
+        {
+          "id": "marker-3",
+          "label": "Marker 3",
+          "message": "Each gate confirms a marker file exists before the next one starts.",
+          "sfSymbol": "desktopcomputer",
+          "attribute": {
+            "source": "native",
+            "type": "file",
+            "path": "/tmp/ax-cadence-gate-3"
+          },
+          "timeout": 600,
+          "timeEstimate": 60
+        }
+      ]
+    }
+  ]
+}

@@ -12,7 +12,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-DIALOG_BIN="/Users/henry/Projects/open-source/build/Dialog.app/Contents/MacOS/dialogcli"
+# The newest Debug build unless DIALOG_BIN is already set.
+DIALOG_BIN="${DIALOG_BIN:-$(ls -t "$HOME"/Library/Developer/Xcode/DerivedData/dialog-*/Build/Products/Debug/Dialog.app/Contents/MacOS/dialogcli 2>/dev/null | head -1)}"
 TEMP_DIR=$(mktemp -d)
 TRIGGER_FILE="$TEMP_DIR/trigger"
 TEST_PLIST="$TEMP_DIR/TestPrefs.plist"

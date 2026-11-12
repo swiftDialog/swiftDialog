@@ -2,10 +2,7 @@
 //  InstallationInfoPopoverView.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH
-//
-//  Enhanced installation info popover with system information
-//  Shared component for all Inspect presets
+//  Installation info popover with device, user and progress summary, shared by the inspect presets.
 //
 
 import SwiftUI
@@ -14,37 +11,33 @@ import Foundation
 struct InstallationInfoPopoverView: View {
     @ObservedObject var inspectState: InspectState
 
+    @Environment(\.palette) private var palette
+
     var body: some View {
         VStack(alignment: .center, spacing: 16) {
-            // Computer Model Header with Icon
             VStack(spacing: 8) {
-                // Computer Icon (using actual device-specific icon like dialog --icon computer)
                 Image(nsImage: NSImage(named: NSImage.computerName) ?? NSImage())
                     .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
                     .frame(width: 64, height: 64)
 
                 if inspectState.config?.hideSystemDetails != true {
-                    // Computer Model
                     Text(getSystemInfo("computermodel"))
                         .font(.title2)
                         .fontWeight(.bold)
                         .multilineTextAlignment(.center)
 
-                    // Serial Number
                     Text(getSystemInfo("serialnumber"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .textSelection(.enabled)
                 } else {
-                    // Generic system info when details are hidden
                     Text("System Information Hidden")
                         .font(.title3)
                         .fontWeight(.medium)
                         .foregroundStyle(.secondary)
                 }
 
-                // OS Name + Version with Build Number
                 Text("\(getOSDisplayName()) (\(getBuildNumber()))")
                     .font(.subheadline)
                     .foregroundStyle(.primary)
@@ -53,15 +46,12 @@ struct InstallationInfoPopoverView: View {
 
             Divider()
 
-            // User Information
             VStack(alignment: .center, spacing: 4) {
                 if inspectState.config?.hideSystemDetails != true {
-                    // Full Name
                     Text(getSystemInfo("userfullname"))
                         .font(.headline)
                         .fontWeight(.semibold)
 
-                    // Unix Username with UID
                     HStack(spacing: 4) {
                         Text(getSystemInfo("username"))
                         Text("(UID: \(getUserID()))")
@@ -70,7 +60,6 @@ struct InstallationInfoPopoverView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 } else {
-                    // Generic user info when details are hidden
                     Text("User Details Hidden")
                         .font(.headline)
                         .fontWeight(.medium)
@@ -81,7 +70,6 @@ struct InstallationInfoPopoverView: View {
 
             Divider()
 
-            // Progress Overview
             VStack(alignment: .leading, spacing: 8) {
                 Text("Progress Overview")
                     .font(.subheadline)
@@ -92,32 +80,31 @@ struct InstallationInfoPopoverView: View {
                 VStack(spacing: 6) {
                     EnhancedInfoRow(label: "Total Items", value: "\(inspectState.items.count)")
                     EnhancedInfoRow(label: "Completed", value: "\(inspectState.completedItems.count)",
-                                  valueColor: !inspectState.completedItems.isEmpty ? .green : .primary)
+                                  valueColor: !inspectState.completedItems.isEmpty ? palette.success : palette.text)
                     EnhancedInfoRow(label: "Installing", value: "\(inspectState.downloadingItems.count)",
-                                  valueColor: !inspectState.downloadingItems.isEmpty ? .blue : .primary)
+                                  valueColor: !inspectState.downloadingItems.isEmpty ? palette.info : palette.text)
                     EnhancedInfoRow(label: "Pending", value: "\(inspectState.items.count - inspectState.completedItems.count - inspectState.downloadingItems.count)",
                                   valueColor: .secondary)
 
                     let progress = inspectState.items.isEmpty ? 0.0 : Double(inspectState.completedItems.count) / Double(inspectState.items.count)
                     EnhancedInfoRow(label: "Progress", value: "\(Int(progress * 100))%",
-                                  valueColor: progress == 1.0 ? .green : .blue)
+                                  valueColor: progress == 1.0 ? palette.success : palette.info)
                 }
             }
 
-            // Current Activity (if any items are installing)
             if !inspectState.downloadingItems.isEmpty {
                 Divider()
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Currently Installing")
                         .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(palette.info)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                     ForEach(inspectState.items.filter { inspectState.downloadingItems.contains($0.id) }, id: \.id) { item in
                         HStack(spacing: 8) {
                             Circle()
-                                .fill(Color.blue)
+                                .fill(palette.info)
                                 .frame(width: 6, height: 6)
                             Text(item.displayName)
                                 .font(.caption)
@@ -133,42 +120,31 @@ struct InstallationInfoPopoverView: View {
         .frame(maxHeight: 500)
     }
 
-    /// Get system information using swiftDialog's built-in variables
+    /// A value from swiftDialog's built-in variables.
     private func getSystemInfo(_ key: String) -> String {
         let systemInfo = getEnvironmentVars()
         return systemInfo[key] ?? "Unknown"
     }
 
-    /// Get OS display name with version using native Foundation APIs
     private func getOSDisplayName() -> String {
         let osVersion = ProcessInfo.processInfo.operatingSystemVersion
-        // Use the system-provided OS name from environment variables
         let osName = getSystemInfo("osname")
         return "\(osName) \(osVersion.majorVersion).\(osVersion.minorVersion).\(osVersion.patchVersion)"
     }
 
-    /// Get macOS build number
+    /// kern.osversion, the same value as `sw_vers -buildVersion`.
     private func getBuildNumber() -> String {
-        // Native sysctl (kern.osversion) — same value as `sw_vers -buildVersion`,
-        // without spawning a process.
         return osBuildVersion
     }
 
-    /// Get current user's UID using native Foundation API
     private func getUserID() -> String {
-        // Using POSIX getuid() for the actual Unix UID
         let uid = getuid()
         return String(uid)
     }
 
-    /// Get current user's effective GID
-    private func getUserGID() -> String {
-        let gid = getgid()
-        return String(gid)
-    }
 }
 
-/// Enhanced info row component with better styling and color support
+/// Label and value row with a tinted value.
 struct EnhancedInfoRow: View {
     let label: String
     let value: String

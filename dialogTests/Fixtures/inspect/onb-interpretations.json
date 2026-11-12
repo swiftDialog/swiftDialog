@@ -1,0 +1,203 @@
+{
+  "_comment": "The setup-assistant chrome, one step per arm: sa-intro (full bleed with both doors), sa-approve (framed), sa-wait (progress capsule, moved only by the trigger file) and sa-done (receipt). Static images only; processingMode and autoResult are authored so the config decodes with no advisory.",
+  "preset": "5",
+  "chrome": "setup-assistant",
+  "width": 820,
+  "height": 600,
+  "title": "Fleet \u2014 Onboarding Interpretations",
+  "highlightColor": "#0A6BD6",
+  "triggerFile": "/tmp/ax-setup-assistant.trigger",
+  "readinessFile": "/tmp/ax-setup-assistant.ready",
+  "eventFile": "/tmp/ax-setup-assistant.events",
+  "logoConfig": {
+    "imagePath": "__REPO__/examples/inspect/assets/brand/fleet-logo-dark-rgb.png",
+    "imagePathDark": "__REPO__/examples/inspect/assets/brand/fleet-logo-white-rgb.png",
+    "maxHeight": 18,
+    "position": "footer"
+  },
+  "introSteps": [
+    {
+      "id": "sa-intro",
+      "stepType": "standard",
+      "title": "Your setup. Delivered.",
+      "subtitle": "Let's get your apps and files moved over \u2014 it only takes a few minutes.",
+      "continueButtonText": "Get Started",
+      "secondaryButtonText": "What changes?",
+      "footerNote": "Fixture duration \u00b7 fixture deadline \u00b7 fixture.example",
+      "guidanceContent": [
+        {
+          "type": "image",
+          "content": "__REPO__/examples/inspect/assets/wallpapers/ax-wall-indigo.png",
+          "mediaLayout": "fill"
+        },
+        {
+          "type": "checklist",
+          "checklist": [
+            {
+              "text": "Fixture promise one"
+            },
+            {
+              "text": "Fixture promise two"
+            },
+            {
+              "text": "Fixture promise three"
+            }
+          ]
+        }
+      ],
+      "stepOverlay": {
+        "title": "What changes?",
+        "subtitle": "Fixture overlay body for the quiet door.",
+        "content": [
+          {
+            "type": "checklist",
+            "checklist": [
+              {
+                "text": "Fixture change one",
+                "hint": "Fixture detail one."
+              },
+              {
+                "text": "Fixture change two",
+                "hint": "Fixture detail two."
+              }
+            ]
+          }
+        ],
+        "closeButtonText": "Close"
+      },
+      "heroImage": "square.grid.2x2.fill"
+    },
+    {
+      "id": "sa-approve",
+      "stepType": "standard",
+      "title": "Everything installs itself",
+      "subtitle": "Four packages, one checklist, zero manual steps. Here's what's queued.",
+      "continueButtonText": "Open Fixture",
+      "backButtonText": "Back",
+      "footerNote": "Fixture beta state line \u00b7 fixture.example",
+      "guidanceContent": [
+        {
+          "type": "bullets",
+          "items": [
+            "App Bundle",
+            "Progress Ring",
+            "Verify Step",
+            "Fleet Branding",
+            "Managed Access",
+            "Remote Wipe"
+          ]
+        }
+      ],
+      "eyebrow": "Core features",
+      "layout": "features"
+    },
+    {
+      "id": "sa-wait",
+      "stepType": "processing",
+      "processingMode": "progressive",
+      "autoResult": "success",
+      "title": "Migrating your apps\u2026",
+      "subtitle": "This may take a minute",
+      "continueButtonText": "Continue",
+      "footerNote": "Fixture estimate \u00b7 fixture do-not-sleep warning",
+      "guidanceContent": [
+        {
+          "type": "image",
+          "content": "__REPO__/examples/inspect/assets/wallpapers/ax-wall-indigo.png",
+          "mediaLayout": "fill"
+        },
+        {
+          "type": "progress-bar",
+          "content": "Fixture phase name",
+          "caption": "2 of 4"
+        }
+      ]
+    },
+    {
+      "id": "sa-permissions",
+      "stepType": "standard",
+      "title": "Unlock full access",
+      "subtitle": "These let managed apps install cleanly the first time.",
+      "eyebrow": "Permissions",
+      "layout": "permissions",
+      "continueButtonText": "Continue",
+      "guidanceContent": [
+        {
+          "type": "checklist",
+          "checklist": [
+            {
+              "text": "Accessibility",
+              "hint": "Allows Fleet to resize and configure new apps automatically."
+            },
+            {
+              "text": "Files and Folders",
+              "hint": "Allows Fleet to place default documents and templates."
+            },
+            {
+              "text": "Calendar and Contacts",
+              "hint": "Allows scheduled software windows to show on your calendar.",
+              "marker": "check"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sa-done",
+      "stepType": "standard",
+      "title": "You're all set",
+      "subtitle": "Your Mac is ready \u2014 open Fleet any time from the menu bar.",
+      "continueButtonText": "Open Fleet",
+      "secondaryButtonText": "What the fixture can see",
+      "showBackButton": false,
+      "footerNote": "Fixture completion line \u00b7 fixture.example",
+      "guidanceContent": [
+        {
+          "type": "image",
+          "content": "__REPO__/examples/inspect/assets/wallpapers/ax-wall-indigo.png",
+          "mediaLayout": "fill"
+        },
+        {
+          "type": "checklist",
+          "checklist": [
+            {
+              "text": "Fixture promise one",
+              "marker": "check"
+            },
+            {
+              "text": "Fixture promise two",
+              "marker": "check"
+            },
+            {
+              "text": "Fixture promise three",
+              "marker": "check"
+            }
+          ]
+        }
+      ],
+      "stepOverlay": {
+        "title": "What the fixture can see",
+        "subtitle": "Fixture overlay body for the receipt's quiet door.",
+        "content": [
+          {
+            "type": "checklist",
+            "checklist": [
+              {
+                "text": "Fixture fact one",
+                "marker": "check"
+              },
+              {
+                "text": "Fixture fact two",
+                "marker": "check"
+              }
+            ]
+          }
+        ],
+        "closeButtonText": "Close"
+      }
+    }
+  ],
+  "contentAlign": "center",
+  "stepCounterPlacement": "dots",
+  "supportText": "This takes a few minutes."
+}

@@ -2,26 +2,29 @@
 //  ComplianceComponents.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 17/01/2026
-//
-//  Extracted from PresetCommonHelpers.swift
-//  Compliance dashboard header, circular progress, compliance cards
+//  Compliance dashboard header and category cards, used by guidance content.
 //
 
 import SwiftUI
 
-// MARK: - Compliance Dashboard Components (Migrated from Preset5)
+// MARK: - Compliance Dashboard Components
 
-/// Compliance dashboard header with overall statistics
-/// Migrated from Preset5 header for use in Preset6 guidance content
+/// Compliance dashboard header with overall statistics.
 struct ComplianceDashboardHeader: View {
-    let title: String
+    @Environment(\.palette) private var palette
+    /// nil falls back to the translatable `ui.complianceHeaderTitle` key.
+    let title: String?
     let subtitle: String?
     let icon: String?
     let passed: Int
     let failed: Int
     let scaleFactor: CGFloat
     let colorThresholds: InspectConfig.ColorThresholds
+    @Environment(\.inspectLocalization) private var l10n
+
+    private var resolvedTitle: String {
+        title ?? l10n("ui.complianceHeaderTitle", "Compliance Dashboard")
+    }
 
     private var total: Int {
         passed + failed
@@ -37,33 +40,30 @@ struct ComplianceDashboardHeader: View {
     }
 
     private var statusColor: Color {
-        colorThresholds.getColor(for: score)
+        colorThresholds.getColor(for: score, palette: palette)
     }
 
     var body: some View {
         VStack(spacing: 20 * scaleFactor) {
-            // Icon and Title
             HStack(spacing: 20 * scaleFactor) {
-                // Icon
                 if let iconName = icon {
-                    if iconName.hasPrefix("sf=") {
-                        let sfSymbol = String(iconName.dropFirst(3))
+                    if let sfSymbol = IconRef.symbol(iconName) {
                         Image(systemName: sfSymbol)
                             .resizable()
-                            .aspectRatio(contentMode: .fit)
+                            .scaledToFit()
                             .frame(width: 64 * scaleFactor, height: 64 * scaleFactor)
                             .foregroundStyle(Color.accentColor)
                     } else {
                         Image(systemName: iconName)
                             .resizable()
-                            .aspectRatio(contentMode: .fit)
+                            .scaledToFit()
                             .frame(width: 64 * scaleFactor, height: 64 * scaleFactor)
                             .foregroundStyle(Color.accentColor)
                     }
                 }
 
                 VStack(alignment: .leading, spacing: 4 * scaleFactor) {
-                    Text(title)
+                    Text(resolvedTitle)
                         .font(.system(size: 22 * scaleFactor, weight: .semibold))
                         .foregroundStyle(.primary)
                         .lineLimit(2)
@@ -78,7 +78,6 @@ struct ComplianceDashboardHeader: View {
 
                 Spacer()
 
-                // Status badge
                 Text(statusText)
                     .font(.system(size: 12 * scaleFactor, weight: .semibold))
                     .foregroundStyle(statusColor)
@@ -90,55 +89,47 @@ struct ComplianceDashboardHeader: View {
                     )
             }
 
-            // Progress Bar Section
             VStack(spacing: 12 * scaleFactor) {
-                // Stats row
                 HStack(spacing: 32 * scaleFactor) {
-                    // Passed
                     HStack(spacing: 8 * scaleFactor) {
                         Circle()
-                            .fill(colorThresholds.getPositiveColor())
+                            .fill(colorThresholds.getPositiveColor(palette: palette))
                             .frame(width: 8 * scaleFactor, height: 8 * scaleFactor)
                         Text("Passed")
                             .font(.system(size: 11 * scaleFactor, weight: .medium))
                             .foregroundStyle(.secondary)
                         Text("\(passed)")
                             .font(.system(size: 16 * scaleFactor, weight: .bold, design: .monospaced))
-                            .foregroundStyle(colorThresholds.getPositiveColor())
+                            .foregroundStyle(colorThresholds.getPositiveColor(palette: palette))
                     }
 
                     Spacer()
 
-                    // Overall percentage
                     Text("\(Int(score * 100))%")
                         .font(.system(size: 20 * scaleFactor, weight: .bold, design: .rounded))
                         .foregroundStyle(.primary)
 
                     Spacer()
 
-                    // Failed
                     HStack(spacing: 8 * scaleFactor) {
                         Text("\(failed)")
                             .font(.system(size: 16 * scaleFactor, weight: .bold, design: .monospaced))
-                            .foregroundStyle(colorThresholds.getNegativeColor())
+                            .foregroundStyle(colorThresholds.getNegativeColor(palette: palette))
                         Text("Failed")
                             .font(.system(size: 11 * scaleFactor, weight: .medium))
                             .foregroundStyle(.secondary)
                         Circle()
-                            .fill(colorThresholds.getNegativeColor())
+                            .fill(colorThresholds.getNegativeColor(palette: palette))
                             .frame(width: 8 * scaleFactor, height: 8 * scaleFactor)
                     }
                 }
 
-                // Progress bar
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
-                        // Background bar
                         RoundedRectangle(cornerRadius: 6 * scaleFactor)
-                            .fill(Color.gray.opacity(0.2))
+                            .fill(palette.text.opacity(0.2))
                             .frame(height: 12 * scaleFactor)
 
-                        // Progress bar
                         RoundedRectangle(cornerRadius: 6 * scaleFactor)
                             .fill(
                                 LinearGradient(
@@ -156,7 +147,6 @@ struct ComplianceDashboardHeader: View {
                 }
                 .frame(height: 12 * scaleFactor)
 
-                // Total count
                 Text("Total: \(total) items")
                     .font(.system(size: 10 * scaleFactor, weight: .medium))
                     .foregroundStyle(.secondary)
@@ -169,63 +159,33 @@ struct ComplianceDashboardHeader: View {
                 .fill(Color(NSColor.controlBackgroundColor).opacity(0.5))
                 .overlay(
                     RoundedRectangle(cornerRadius: 12 * scaleFactor)
-                        .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+                        .stroke(palette.text.opacity(0.1), lineWidth: 1)
                 )
         )
-        .id("compliance-header-\(passed)-\(failed)")  // Force re-render on data change
+        .id("compliance-header-\(passed)-\(failed)")
     }
 }
 
-/// Circular progress indicator with percentage display
-/// Used in compliance cards to show category completion percentage
-struct CircularProgressView: View {
-    let progress: Double  // 0.0 to 1.0
-    let color: Color
-    let scaleFactor: CGFloat
-    @State private var animateProgress = false
-
-    var body: some View {
-        ZStack {
-            // Background circle
-            Circle()
-                .stroke(Color.gray.opacity(0.15), lineWidth: 4 * scaleFactor)
-                .frame(width: 60 * scaleFactor, height: 60 * scaleFactor)
-
-            // Progress circle
-            Circle()
-                .trim(from: 0, to: animateProgress ? progress : 0)
-                .stroke(
-                    color,
-                    style: StrokeStyle(lineWidth: 4 * scaleFactor, lineCap: .round)
-                )
-                .frame(width: 60 * scaleFactor, height: 60 * scaleFactor)
-                .rotationEffect(.degrees(-90))
-                .animation(.spring(response: 0.8, dampingFraction: 0.6), value: animateProgress)
-
-            // Percentage text
-            Text("\(Int(progress * 100))%")
-                .font(.system(size: 12 * scaleFactor, weight: .bold, design: .rounded))
-                .foregroundStyle(.primary)
-        }
-        .onAppear {
-            withAnimation(.spring(response: 0.8, dampingFraction: 0.6).delay(0.1)) {
-                animateProgress = true
-            }
-        }
-        .id("circular-progress-\(progress)")  // Force re-render on progress change
-    }
-}
-
-/// Compliance card displaying category metrics with circular progress
-/// Migrated from Preset5 CategoryCardView for use in Preset6 guidance content
+/// Compliance card for one category: check list, ring and counts; taps open a detail sheet.
 struct ComplianceCardView: View {
+    @Environment(\.palette) private var palette
     let categoryName: String
     let passed: Int
     let total: Int
     let icon: String?
-    let checkDetails: String?  // Optional: newline-separated check items to display inside card
+    let checkDetails: String?  // check items, `|` or newline separated
     let scaleFactor: CGFloat
     let colorThresholds: InspectConfig.ColorThresholds
+    /// Tint for the drill-down sheet this card opens.
+    var accentColor: Color = .accentColor
+
+    /// Tappable only when there is something to drill into.
+    private var hasDetails: Bool {
+        guard let checkDetails else { return false }
+        return !checkDetails.isEmpty
+    }
+
+    @State private var showingDetail = false
 
     private var score: Double {
         guard total > 0 else { return 0.0 }
@@ -237,16 +197,14 @@ struct ComplianceCardView: View {
     }
 
     private var statusColor: Color {
-        colorThresholds.getColor(for: score)
+        colorThresholds.getColor(for: score, palette: palette)
     }
 
-    /// Parse a check item to extract symbol, text, and status
-    /// Format: "pass:Description" or "fail:Description"
-    /// Returns: (symbol: String, text: String, isPassed: Bool, isFailed: Bool)
+    /// Parse a check item into symbol, text and status. Scripts author `pass:`/`fail:` prefixes;
+    /// the aggregator emits glyph prefixes, so both are recognised and stripped.
     private func parseCheckItem(_ item: String) -> (symbol: String, text: String, isPassed: Bool, isFailed: Bool) {
         let trimmed = item.trimmingCharacters(in: .whitespaces)
 
-        // Check for keyword prefixes (ASCII-safe, shell-independent)
         if trimmed.lowercased().hasPrefix("pass:") {
             let text = String(trimmed.dropFirst(5)).trimmingCharacters(in: .whitespaces)
             return ("✓", text, true, false)
@@ -257,16 +215,21 @@ struct ComplianceCardView: View {
             return ("✗", text, false, true)
         }
 
-        // No status keyword - use neutral bullet point
+        for glyph in ["✓", "✅"] where trimmed.hasPrefix(glyph) {
+            return ("✓", String(trimmed.dropFirst(glyph.count)).trimmingCharacters(in: .whitespaces), true, false)
+        }
+
+        for glyph in ["✗", "❌"] where trimmed.hasPrefix(glyph) {
+            return ("✗", String(trimmed.dropFirst(glyph.count)).trimmingCharacters(in: .whitespaces), false, true)
+        }
+
         return ("•", trimmed, false, false)
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header with category title and status badge
             HStack {
                 HStack(spacing: 10 * scaleFactor) {
-                    // Category icon (LARGER, more prominent)
                     if let iconName = icon {
                         Image(systemName: iconName)
                             .font(.system(size: 20 * scaleFactor, weight: .semibold))
@@ -281,7 +244,6 @@ struct ComplianceCardView: View {
 
                 Spacer()
 
-                // Status badge
                 Text(statusText)
                     .font(.system(size: 10 * scaleFactor, weight: .semibold))
                     .foregroundStyle(statusColor)
@@ -291,6 +253,12 @@ struct ComplianceCardView: View {
                         Capsule()
                             .fill(statusColor.opacity(0.12))
                     )
+
+                if hasDetails {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 11 * scaleFactor, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                }
             }
             .padding(.horizontal, 16 * scaleFactor)
             .padding(.top, 14 * scaleFactor)
@@ -299,12 +267,9 @@ struct ComplianceCardView: View {
             Divider()
                 .padding(.horizontal, 16 * scaleFactor)
 
-            // Main content: Two-column layout like Preset 5 (CLEAN design)
             HStack(alignment: .top, spacing: 20 * scaleFactor) {
-                // Left: Check details list (scrollable)
                 if let details = checkDetails, !details.isEmpty {
-                    // Split on | separator (pipe-delimited format for external scripts)
-                    // Falls back to \n for backward compatibility with JSON-defined cards
+                    // `|` is the script format; newline-separated JSON cards still parse.
                     let separator = details.contains("|") ? "|" : "\n"
                     let items = details.components(separatedBy: separator)
                         .map { $0.trimmingCharacters(in: .whitespaces) }
@@ -313,7 +278,6 @@ struct ComplianceCardView: View {
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 8 * scaleFactor) {
                             ForEach(Array(items.enumerated()), id: \.offset) { index, item in
-                                // Parse the check item to extract symbol, text, and status
                                 let parsed = parseCheckItem(item)
                                 let symbol = parsed.symbol
                                 let text = parsed.text
@@ -321,11 +285,10 @@ struct ComplianceCardView: View {
                                 let isFailed = parsed.isFailed
 
                                 HStack(alignment: .top, spacing: 8 * scaleFactor) {
-                                    // Color-coded symbol
                                     Text(symbol)
                                         .font(.system(size: 10 * scaleFactor, weight: .semibold))
-                                        .foregroundStyle(isPassed ? colorThresholds.getPositiveColor() :
-                                                       isFailed ? colorThresholds.getNegativeColor() :
+                                        .foregroundStyle(isPassed ? colorThresholds.getPositiveColor(palette: palette) :
+                                                       isFailed ? colorThresholds.getNegativeColor(palette: palette) :
                                                        Color.secondary)
                                         .frame(width: 10 * scaleFactor, alignment: .leading)
 
@@ -347,16 +310,13 @@ struct ComplianceCardView: View {
                     .frame(maxHeight: 180 * scaleFactor)
                 }
 
-                // Right: Progress indicator and metrics
                 VStack(spacing: 10 * scaleFactor) {
-                    // Spacer to push content down (like Preset 5)
                     Spacer()
                         .frame(height: 20 * scaleFactor)
 
-                    // Circular progress with percentage inside
                     ZStack {
                         Circle()
-                            .stroke(Color.gray.opacity(0.15), lineWidth: 3 * scaleFactor)
+                            .stroke(palette.text.opacity(0.15), lineWidth: 3 * scaleFactor)
                             .frame(width: 50 * scaleFactor, height: 50 * scaleFactor)
 
                         Circle()
@@ -368,30 +328,28 @@ struct ComplianceCardView: View {
                             .frame(width: 50 * scaleFactor, height: 50 * scaleFactor)
                             .rotationEffect(.degrees(-90))
 
-                        // Percentage inside ring
                         Text("\(Int(score * 100))%")
                             .font(.system(size: 11 * scaleFactor, weight: .bold, design: .rounded))
                             .foregroundStyle(.primary)
                     }
 
-                    // Compact metrics (just numbers with dots)
                     VStack(spacing: 5 * scaleFactor) {
                         HStack(spacing: 5 * scaleFactor) {
                             Circle()
-                                .fill(colorThresholds.getPositiveColor())
+                                .fill(colorThresholds.getPositiveColor(palette: palette))
                                 .frame(width: 4 * scaleFactor, height: 4 * scaleFactor)
                             Text("\(passed)")
                                 .font(.system(size: 9 * scaleFactor, weight: .medium, design: .monospaced))
-                                .foregroundStyle(colorThresholds.getPositiveColor())
+                                .foregroundStyle(colorThresholds.getPositiveColor(palette: palette))
                         }
 
                         HStack(spacing: 5 * scaleFactor) {
                             Circle()
-                                .fill(colorThresholds.getNegativeColor())
+                                .fill(colorThresholds.getNegativeColor(palette: palette))
                                 .frame(width: 4 * scaleFactor, height: 4 * scaleFactor)
                             Text("\(total - passed)")
                                 .font(.system(size: 9 * scaleFactor, weight: .medium, design: .monospaced))
-                                .foregroundStyle(colorThresholds.getNegativeColor())
+                                .foregroundStyle(colorThresholds.getNegativeColor(palette: palette))
                         }
                     }
 
@@ -404,24 +362,32 @@ struct ComplianceCardView: View {
         }
         .background(
             ZStack(alignment: .leading) {
-                // Main card background
+                // No shadow: fill plus hairline matches the header card above it.
                 RoundedRectangle(cornerRadius: 16 * scaleFactor)
                     .fill(Color(NSColor.controlBackgroundColor))
-                    .shadow(
-                        color: Color.black.opacity(0.06),
-                        radius: 8 * scaleFactor,
-                        x: 0,
-                        y: 2 * scaleFactor
-                    )
                     .overlay(
                         RoundedRectangle(cornerRadius: 16 * scaleFactor)
                             .stroke(
-                                Color.gray.opacity(0.08),
+                                palette.text.opacity(0.08),
                                 lineWidth: 1
                             )
                     )
             }
         )
-        .id("compliance-card-\(categoryName)-\(passed)-\(total)-\(checkDetails ?? "")")  // Force re-render on data change
+        .id("compliance-card-\(categoryName)-\(passed)-\(total)-\(checkDetails ?? "")")
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if hasDetails { showingDetail = true }
+        }
+        .sheet(isPresented: $showingDetail) {
+            ComplianceDetailView(
+                categoryName: categoryName,
+                icon: icon,
+                passed: passed,
+                total: total,
+                checkDetails: checkDetails ?? "",
+                accentColor: accentColor
+            )
+        }
     }
 }
