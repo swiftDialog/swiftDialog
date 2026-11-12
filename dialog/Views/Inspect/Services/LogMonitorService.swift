@@ -175,18 +175,19 @@ struct LogPatternPreset {
         ),
 
         // Jamf: system log lines such as
+        //   Thu Aug 20 06:59:07 HOSTNAME jamf[33329]: Installing Example-1.12.7.pkg...
         //   Thu Aug 20 06:59:07 HOSTNAME jamf[33329]: Successfully installed Example-1.12.7.pkg.
-        // The hostname may contain spaces, so `jamf[<pid>]: ` is the anchor.
+        //   Thu Aug 20 06:59:07 HOSTNAME jamf[33329]: Installation failed. The installer reported: ...
+        // The hostname may contain spaces, so `jamf[<pid>]: ` is the anchor. Packages are .pkg, .dmg or .zip.
         "jamf": LogPatternPreset(
-            // Only verbs seen in real logs; add more when a log shows them.
-            pattern: #"jamf\[\d+\]: (Executing Policy .*)$"#,
+            pattern: #"jamf\[\d+\]: ((?:Executing Policy|Installing) .*)$"#,
             captureGroup: 1,
-            // Not set: the failures jamf logs are device-level (inventory, enrollment), not per item.
-            failurePattern: nil,
-            // "Successfully installed Example-1.12.7.pkg."
-            successPattern: #"jamf\[\d+\]: Successfully installed .+\.pkg"#,
-            // The package name becomes the scope so "Completed" can be routed; other names need `logAliases`.
-            scopePattern: #"Successfully installed (.+?)\.pkg"#
+            // Per-package failures only. Device-level errors ("Could not connect to the JSS", keychain,
+            // recon) are not about an item and stay neutral.
+            failurePattern: #"jamf\[\d+\]: (Installation failed\..*|Error: Package was not successfully downloaded\..*)$"#,
+            successPattern: #"jamf\[\d+\]: Successfully installed .+\.(?:pkg|dmg|zip)\b"#,
+            // "Installing X.pkg..." opens the scope, so a failure line (which names no package) routes to X.
+            scopePattern: #"jamf\[\d+\]: (?:Downloading|Installing|Successfully installed) (.+?)\.(?:pkg|dmg|zip)\b"#
         ),
         // Munki (ManagedSoftwareUpdate.log): "TIMESTAMP message", e.g. "2026-07-06 09:53:12.758+02:00 Installing
         // Example".

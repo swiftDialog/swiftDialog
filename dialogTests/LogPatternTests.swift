@@ -313,12 +313,44 @@ final class JamfEvidenceTests: XCTestCase {
                        ["obsidian"])
     }
 
-    func testInstallFAILUREWordingIsStillUNOBSERVEDAndNotGuessed() {
-        // Observed jamf failures are device-level (inventory, enrollment), not item-level; marking
-        // an app row failed for those would be wrong, so failurePattern stays nil until a failing
-        // package install is captured.
-        XCTAssertNil(preset.failurePattern,
-                     "do not guess jamf's install-failure wording — capture a failing policy first")
+    // Line shapes as jamf writes them; host, user and package names are fictional.
+    private let installing = "Thu Aug 20 07:10:01 MAC-FRUIT-0042 jamf[4242]: Installing Example Helper 2.1.0.pkg..."
+    private let failed = "Thu Aug 20 07:10:05 MAC-FRUIT-0042 jamf[4242]: Installation failed. The installer reported: installer: Package name is Helper Suite"
+    private let download = "Thu Aug 20 07:12:00 MAC-FRUIT-0042 jamf[4242]: Error: Package was not successfully downloaded. -1001"
+    private let zipped = "Thu Aug 20 07:11:00 MAC-FRUIT-0042 jamf[4242]: Successfully installed Example_Agent_4_0_0.zip."
+    private let offline = "Thu Aug 20 07:13:00 MAC-FRUIT-0042 jamf[4242]: Could not connect to the JSS. Looking for cached policies..."
+
+    func testAnInstallLineReadsAsProgressAndOpensTheScope() {
+        XCTAssertEqual(LogPatternPreset.status(for: installing, using: preset), "Installing Example Helper 2.1.0.pkg...")
+        XCTAssertFalse(LogPatternPreset.isTerminal(line: installing, preset: preset))
+        XCTAssertEqual(LogPatternPreset.scopeName(for: installing, using: preset), "Example Helper 2.1.0")
+    }
+
+    func testAFailedInstallIsAFailureRoutedByTheOpenScope() {
+        XCTAssertTrue(LogPatternPreset.isTerminal(line: failed, preset: preset))
+        let status = LogPatternPreset.status(for: failed, using: preset)!
+        XCTAssertTrue(status.hasPrefix("Installation failed."), status)
+        let scope = LogPatternPreset.scopeName(for: installing, using: preset)
+        let items = [LogRouteCandidate(id: "example-helper", displayName: "Example Helper"),
+                     LogRouteCandidate(id: "obsidian", displayName: "Obsidian")]
+        // The installer's package name is not the row's name, so only the open scope can route it.
+        XCTAssertEqual(LogPatternPreset.routeTargets(status: status, scope: nil, items: items), [])
+        XCTAssertEqual(LogPatternPreset.routeTargets(status: status, scope: scope, items: items), ["example-helper"])
+    }
+
+    func testAFailedDownloadIsAFailure() {
+        XCTAssertTrue(LogPatternPreset.isTerminal(line: download, preset: preset))
+        XCTAssertNotNil(preset.failurePattern.flatMap { LogPatternPreset.firstCapture(in: download, pattern: $0, group: 1) })
+    }
+
+    func testAZipPackageCompletes() {
+        XCTAssertEqual(LogPatternPreset.status(for: zipped, using: preset), "Completed")
+        XCTAssertEqual(LogPatternPreset.scopeName(for: zipped, using: preset), "Example_Agent_4_0_0")
+    }
+
+    func testDeviceLevelErrorsAreNotItemFailures() {
+        XCTAssertNil(LogPatternPreset.status(for: offline, using: preset))
+        XCTAssertFalse(LogPatternPreset.isTerminal(line: offline, preset: preset))
     }
 }
 
