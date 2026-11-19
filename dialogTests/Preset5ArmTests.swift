@@ -75,6 +75,27 @@ final class CadenceFailureDisplayTests: XCTestCase {
         XCTAssertEqual(running.pending, 2, "the running entry and the one behind it")
     }
 
+    /// `cadence: []` filled by a log monitor (Fleet's rows): the card counts and names those rows.
+    func testAnEmptyCadenceDrawsTheRowsALogMonitorAdds() {
+        XCTAssertNil(CadenceProgress.fromRows([]), "no rows yet: the step's own cadence (0 of 0)")
+        let run = CadenceProgress.fromRows([
+            ("sw-1", "Zoom", nil, .pending, nil),
+            ("sw-2", "Chrome", "/tmp/chrome.png", .completed, nil),
+            ("sw-3", "Teams", nil, .active, "40%"),
+            ("sw-4", "Okta", nil, .failed, "exit 2"),
+        ])!
+        XCTAssertEqual(run.entries.map(\.id), ["sw-2", "sw-4", "sw-3", "sw-1"], "finished, running, waiting")
+        XCTAssertEqual(run.entries[0].imagePath, "/tmp/chrome.png")
+        XCTAssertEqual(CadenceMinimalMeter.countLine(run), "1 of 4 complete · 1 failed")
+        XCTAssertEqual(run.current?.id, "sw-3")
+        XCTAssertEqual(run.message(at: 2), "40%")
+        XCTAssertEqual(run.entries[2].message, "40%", "the running row draws the entry's own message")
+        XCTAssertEqual(run.message(at: 3), "", "no status yet: no second line repeating the name")
+        XCTAssertFalse(run.isComplete)
+        let done = CadenceProgress.fromRows([("a", "A", nil, .completed, nil), ("b", "B", nil, .failed, nil)])!
+        XCTAssertTrue(done.isComplete, "every row final: Continue goes live")
+    }
+
     func testAFinishedRunWithFailuresIsAWarning() {
         XCTAssertEqual(CadenceCopy.completionResult(message: nil, failed: 0, total: 3), .success(message: nil))
         XCTAssertEqual(CadenceCopy.completionResult(message: nil, failed: 1, total: 3),

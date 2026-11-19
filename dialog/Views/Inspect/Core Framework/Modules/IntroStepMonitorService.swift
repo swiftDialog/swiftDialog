@@ -930,6 +930,30 @@ struct CadenceProgress {
         self.heldByStay = monitor.heldByStay
         self.heldElapsedSeconds = monitor.heldElapsedSeconds
     }
+
+    /// A run read from rows instead of a timeline: what a cadence step with `cadence: []` draws once a
+    /// log monitor adds rows (`listitem: add`, e.g. Fleet's). Finished rows first, then running, then
+    /// waiting, each in row order, so everything before `position` is final. nil without rows.
+    static func fromRows(_ rows: [(id: String, name: String, icon: String?, status: StepStatus, message: String?)])
+        -> CadenceProgress? {
+        guard !rows.isEmpty else { return nil }
+        let rank: (StepStatus) -> Int = { [.completed, .failed, .skipped].contains($0) ? 0 : $0 == .active ? 1 : 2 }
+        let ordered = rows.enumerated().sorted { (rank($0.element.status), $0.offset) < (rank($1.element.status), $1.offset) }
+            .map(\.element)
+        let entries = ordered.map { row in
+            InspectConfig.CadenceEntry(
+                id: row.id, message: row.message ?? "",
+                attribute: .init(source: "ipc", type: nil, bundleId: nil, path: nil, key: nil, expectedValue: nil,
+                                 evaluation: nil, useUserDefaults: nil, domain: nil, scope: nil),
+                minDwell: nil, timeout: nil, sfSymbol: nil, imagePath: row.icon, iconColor: nil, label: row.name,
+                subtitle: nil, timeEstimate: nil, size: nil, stay: nil, stayMaxHold: nil, onTimeout: nil, showWhen: nil)
+        }
+        let position = ordered.filter { rank($0.status) == 0 }.count
+        let failed = Set(ordered.indices.filter { ordered[$0].status == .failed })
+        return CadenceProgress(entries: entries, position: position, satisfied: position - failed.count,
+                               timedOut: failed, failed: failed, isComplete: position == ordered.count,
+                               heldByStay: false, heldElapsedSeconds: 0)
+    }
 }
 
 // MARK: - Measured cadence tokens

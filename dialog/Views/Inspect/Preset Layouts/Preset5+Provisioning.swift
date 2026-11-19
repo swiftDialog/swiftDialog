@@ -150,7 +150,15 @@ extension Preset5View {
     @ViewBuilder
     func provisioningCadenceStepView(step: InspectConfig.IntroStep, stepIndex: Int) -> some View {
         let metrics = provisioningMetrics
-        let run = CadenceProgress(monitor: cadenceMonitor, step: step, entries: derivedCadenceEntries(for: step),
+        // `cadence: []` with rows a log monitor added (Fleet's): the card draws those rows.
+        let rowRun = (step.cadenceEntries ?? []).isEmpty && step.cadenceRef == nil && derivedCadenceEntries(for: step) == nil
+            ? CadenceProgress.fromRows((step.items ?? []).filter { monitoringService.removedItems[$0.id] == nil }.map { item in
+                (item.id, item.displayName,
+                 inspectState.itemIconOverrides[item.id].flatMap { $0.isEmpty ? nil : $0 } ?? item.resolvedArt,
+                 monitoringService.itemStatuses[item.id] ?? .pending, monitoringService.statusMessages[item.id])
+            })
+            : nil
+        let run = rowRun ?? CadenceProgress(monitor: cadenceMonitor, step: step, entries: derivedCadenceEntries(for: step),
                                   include: { cadenceEntryIsShown($0, in: step) },
                                   adjust: { cadenceEntryArtwork($0, in: step) })
         let accent = cadenceBrandColor(step: step) ?? branding.primaryColor
