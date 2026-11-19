@@ -210,7 +210,7 @@ struct CadenceMachineStrip: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            MachineImage()
+            MachineImage(trimmed: true)
                 // Leading, or the wide box opens a gap before the name.
                 .frame(width: imageHeight * CadenceMinimalM.machineImageAspect, height: imageHeight,
                        alignment: .leading)

@@ -3071,3 +3071,10 @@ final class PortalConfigLintTests: XCTestCase {
         XCTAssertFalse(found.contains { $0.contains("portalConfig") }, "\(found)")
     }
 }
+
+final class MachineImageTrimTests: XCTestCase {
+    func testTheTrimmedComputerIsTheMachineNotTheIconSquare() throws {
+        let size = try XCTUnwrap(MachineImage.trimmedComputer).size
+        XCTAssertGreaterThan(size.width / size.height, 1.4, "the laptop, cropped: wide, as the strip's box is")
+    }
+}

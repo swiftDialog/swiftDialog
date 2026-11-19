@@ -74,12 +74,35 @@ struct MachineIdentity: Sendable, Equatable {
 /// This Mac's own artwork via `NSImage.computerName`, at the size the seat gives it. Takes no
 /// frame of its own, so it stays left-aligned with the name beneath it.
 struct MachineImage: View {
+    /// Draw only the machine, not the icon's empty margin, so a wide box is filled edge to edge.
+    var trimmed = false
+
     var body: some View {
-        Image(nsImage: NSImage(named: NSImage.computerName) ?? NSImage())
+        Image(nsImage: (trimmed ? Self.trimmedComputer : nil) ?? NSImage(named: NSImage.computerName) ?? NSImage())
             .resizable()
             .scaledToFit()
             .accessibilityHidden(true)
     }
+
+    /// The computer icon cropped to its opaque pixels: the system draws a laptop in the middle
+    /// half of a square. nil if the icon can't be read.
+    static let trimmedComputer: NSImage? = {
+        var rect = NSRect(x: 0, y: 0, width: 512, height: 512)
+        guard let cg = NSImage(named: NSImage.computerName)?.cgImage(forProposedRect: &rect, context: nil, hints: nil),
+              let ctx = CGContext(data: nil, width: cg.width, height: cg.height, bitsPerComponent: 8, bytesPerRow: 0,
+                                  space: CGColorSpaceCreateDeviceRGB(),
+                                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue),
+              let bytes = ctx.data?.assumingMemoryBound(to: UInt8.self) else { return nil }
+        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: cg.width, height: cg.height))
+        var (minX, minY, maxX, maxY) = (cg.width, cg.height, -1, -1)
+        for y in 0..<cg.height { for x in 0..<cg.width where bytes[y * ctx.bytesPerRow + x * 4 + 3] > 12 {
+            (minX, minY, maxX, maxY) = (min(minX, x), min(minY, y), max(maxX, x), max(maxY, y))
+        } }
+        // Memory rows run top-down, as `cropping(to:)` expects.
+        guard maxX >= minX, let cropped = cg.cropping(to: CGRect(x: minX, y: minY, width: maxX - minX + 1,
+                                                                 height: maxY - minY + 1)) else { return nil }
+        return NSImage(cgImage: cropped, size: .zero)
+    }()
 }
 
 // MARK: - The board's numbers
