@@ -2,11 +2,7 @@
 //  DistributedNotificationsTests.swift
 //  dialogTests
 //
-//  Unit tests for the DistributedNotification IPC layer:
-//    - Command shorthand key expansion
-//    - Ack notification posting
-//    - Select command round-trip
-//    - Ready event enrichment fields
+//  The DistributedNotification IPC layer: shorthand expansion, acks, per-pid channels and nonce dedupe.
 //
 
 import XCTest
@@ -319,7 +315,7 @@ final class DistributedNotificationsTests: XCTestCase {
         let expectation = expectation(description: "handler called")
         var receivedCommand: String?
 
-        DialogNotifications.startObserving { command in
+        DialogNotifications.startObserving { command, _ in
             if command.hasPrefix("success:") {
                 receivedCommand = command
                 expectation.fulfill()
@@ -340,7 +336,7 @@ final class DistributedNotificationsTests: XCTestCase {
         let expectation = expectation(description: "handler called")
         var receivedCommand: String?
 
-        DialogNotifications.startObserving { command in
+        DialogNotifications.startObserving { command, _ in
             if command.hasPrefix("select:") {
                 receivedCommand = command
                 expectation.fulfill()
@@ -361,7 +357,7 @@ final class DistributedNotificationsTests: XCTestCase {
         let expectation = expectation(description: "next received")
         var commands: [String] = []
 
-        DialogNotifications.startObserving { command in
+        DialogNotifications.startObserving { command, _ in
             commands.append(command)
             if command == "reset" { expectation.fulfill() }
         }
@@ -382,7 +378,7 @@ final class DistributedNotificationsTests: XCTestCase {
         let expectation = expectation(description: "handler called")
         var receivedCommand: String?
 
-        DialogNotifications.startObserving { command in
+        DialogNotifications.startObserving { command, _ in
             if command.hasPrefix("update_guidance:") {
                 receivedCommand = command
                 expectation.fulfill()
@@ -401,7 +397,7 @@ final class DistributedNotificationsTests: XCTestCase {
 
     // MARK: - Ack Notification Tests
 
-    /// Verify postAck sends a notification on com.swiftdialog.ack.
+    /// Verify postAck sends a notification on the ack channel (com.swiftdialog.ack.<pid>).
     func testPostAckNotification() {
         let expectation = expectation(description: "ack received")
         var receivedInfo: [String: Any]?
@@ -505,7 +501,6 @@ final class DistributedNotificationsTests: XCTestCase {
         waitForExpectations(timeout: 2.0)
         center.removeObserver(observer)
 
-        // Clean up temp file
         try? FileManager.default.removeItem(atPath: router.acknowledgmentLogPath!)
 
         XCTAssertEqual(ackInfo?["command"] as? String, "navigate")
@@ -585,7 +580,7 @@ final class DistributedNotificationsTests: XCTestCase {
         router.onProgress = { _, _ in called = true }
         // "progress:75" — one-part form, no stepId
         router.processCommand("progress:75")
-        // Currently silently dropped (parts.count == 1, guard requires 2)
+        // Silently dropped: the arm requires stepId:value (parts.count == 2)
         XCTAssertFalse(called, "progress with no stepId should not crash")
     }
 
@@ -604,5 +599,238 @@ final class DistributedNotificationsTests: XCTestCase {
         router.onDisplayData = { _, _, value, _ in receivedValue = value }
         router.processCommand("display_data:step1:key:")
         // Empty value — should not crash
+    }
+
+    // MARK: - Per-PID Channels
+
+    /// Channels carry this process's pid, so another session cannot observe them.
+    func testChannelNamesAreSessionScoped() {
+        let pid = ProcessInfo.processInfo.processIdentifier
+        XCTAssertEqual(DialogNotifications.commandName.rawValue, "com.swiftdialog.command.\(pid)")
+        XCTAssertEqual(DialogNotifications.eventName.rawValue, "com.swiftdialog.event.\(pid)")
+        XCTAssertEqual(DialogNotifications.ackName.rawValue, "com.swiftdialog.ack.\(pid)")
+    }
+
+    /// A notification's nonce reaches the router, so it can be collapsed against its trigger-file twin.
+    func testNotificationCarriesNonceToHandler() {
+        let expectation = expectation(description: "handler called")
+        var receivedNonce: String?
+
+        DialogNotifications.startObserving { command, nonce in
+            if command == "next" {
+                receivedNonce = nonce
+                expectation.fulfill()
+            }
+        }
+
+        DistributedNotificationCenter.default().postNotificationName(
+            DialogNotifications.commandName, object: nil,
+            userInfo: ["command": "next", "nonce": "abc123"], deliverImmediately: true
+        )
+
+        waitForExpectations(timeout: 2.0)
+        DialogNotifications.stopObserving()
+        XCTAssertEqual(receivedNonce, "abc123")
+    }
+
+    /// A non-string value still counts: `{"next": 1}` advances, as in 3.1.1.
+    func testNonStringUserInfoValueIsKept() {
+        let expectation = expectation(description: "next from a numeric value")
+        DialogNotifications.startObserving { command, _ in
+            if command == "next" { expectation.fulfill() }
+        }
+
+        DistributedNotificationCenter.default().postNotificationName(
+            DialogNotifications.commandName, object: nil,
+            userInfo: ["next": 1], deliverImmediately: true
+        )
+
+        waitForExpectations(timeout: 2.0)
+        DialogNotifications.stopObserving()
+    }
+
+    // MARK: - Nonce Dedupe
+
+    /// The same command by notification (nonce param) and by trigger file (`\tnonce=`) runs once.
+    func testNonceCollapsesNotificationAndFileTwins() {
+        let router = CommandRouter()
+        var nextCount = 0
+        router.onNext = { nextCount += 1 }
+
+        router.processCommand("next", nonce: "n1")   // notification transport
+        router.processCommand("next\tnonce=n1")      // trigger-file transport
+
+        XCTAssertEqual(nextCount, 1, "Redundant delivery of one nonce must run once")
+    }
+
+    /// Whichever transport lands first wins.
+    func testNonceDedupeIsOrderIndependent() {
+        let router = CommandRouter()
+        var nextCount = 0
+        router.onNext = { nextCount += 1 }
+
+        router.processCommand("next\tnonce=n2")      // file first this time
+        router.processCommand("next", nonce: "n2")
+
+        XCTAssertEqual(nextCount, 1)
+    }
+
+    /// One transport alone still delivers.
+    func testSingleTransportStillDelivers() {
+        let fileOnly = CommandRouter()
+        var fileCount = 0
+        fileOnly.onNext = { fileCount += 1 }
+        fileOnly.processCommand("next\tnonce=n3")
+        XCTAssertEqual(fileCount, 1, "File-only delivery must still run")
+
+        let notifOnly = CommandRouter()
+        var notifCount = 0
+        notifOnly.onNext = { notifCount += 1 }
+        notifOnly.processCommand("next", nonce: "n4")
+        XCTAssertEqual(notifCount, 1, "Notification-only delivery must still run")
+    }
+
+    /// Untagged lines (`echo "next" >> <trigger>`) are never deduped, even when identical.
+    func testNonceLessCommandsAlwaysRun() {
+        let router = CommandRouter()
+        var nextCount = 0
+        router.onNext = { nextCount += 1 }
+
+        router.processCommand("next")
+        router.processCommand("next")
+        router.processCommand("next")
+
+        XCTAssertEqual(nextCount, 3, "Hand-typed lines have no twin — each must run")
+    }
+
+    /// Distinct nonces are distinct commands, however rapidly they arrive.
+    func testDistinctNoncesAllRun() {
+        let router = CommandRouter()
+        var nextCount = 0
+        router.onNext = { nextCount += 1 }
+
+        for i in 0..<300 {
+            router.processCommand("next\tnonce=n\(i)")
+        }
+
+        XCTAssertEqual(nextCount, 300, "Every distinct nonce must run — nothing dropped")
+    }
+
+    /// The seen-nonce ring holds 256; after 300 more, the first nonce runs again.
+    func testSeenNoncesRingIsBounded() {
+        let router = CommandRouter()
+        var nextCount = 0
+        router.onNext = { nextCount += 1 }
+
+        router.processCommand("next\tnonce=first")
+        router.processCommand("next\tnonce=first")
+        XCTAssertEqual(nextCount, 1, "Immediate replay is still deduped")
+
+        for i in 0..<300 { router.processCommand("next\tnonce=fill\(i)") }
+        router.processCommand("next\tnonce=first")
+
+        XCTAssertEqual(nextCount, 302, "Oldest nonce evicted at the 256 cap")
+    }
+
+    /// Commands expanded from one notification (`badge` emits two) share a nonce and all run.
+    func testSharedNonceAcrossExpandedCommandsAllRun() {
+        let router = CommandRouter()
+        var guidance: [String] = []
+        router.onUpdateGuidance = { guidance.append($0) }
+
+        router.processCommand("update_guidance:_:net:state=success", nonce: "b1")
+        router.processCommand("update_guidance:_:net:actual=1.2.3", nonce: "b1")
+
+        XCTAssertEqual(guidance.count, 2, "Distinct commands under one nonce must all run")
+    }
+
+    // MARK: - Nonce Trailer Parsing
+
+    /// Only a trailing tab-delimited `nonce=` field is a trailer; `:` args are never split.
+    func testTabTrailerPreservesColonArguments() {
+        let router = CommandRouter()
+        var received: (String, String?)?
+        router.onSuccess = { received = ($0, $1) }
+
+        router.processCommand("success:edge:Installed: 1.2.3\tnonce=x9")
+
+        XCTAssertEqual(received?.0, "edge")
+        XCTAssertEqual(received?.1, "Installed: 1.2.3", "Colon args must survive trailer parsing")
+    }
+
+    /// A `nonce=` that is *not* the final tab field is payload, not a trailer.
+    func testNonTrailingNonceFieldIsNotStripped() {
+        let router = CommandRouter()
+        var received: String?
+        router.onUpdateMessage = { _, message in received = message }
+
+        router.processCommand("update_message:step1:nonce=notatrailer\tstill payload")
+
+        XCTAssertEqual(received, "nonce=notatrailer\tstill payload")
+    }
+
+    /// A trailing ` @word` is message content, not a nonce: it is kept, and a repeat still runs.
+    func testTrailingAtWordIsContentNotNonce() {
+        let router = CommandRouter()
+        var received: [String] = []
+        router.onUpdateMessage = { _, message in received.append(message) }
+
+        router.processCommand("update_message:step1:ping @helpdesk")
+        router.processCommand("update_message:step1:ping @helpdesk")
+
+        XCTAssertEqual(received, ["ping @helpdesk", "ping @helpdesk"])
+    }
+
+    /// A bare `@` inside a value (URLs, emails) must not be mistaken for a nonce trailer.
+    func testEmailValueIsNotParsedAsNonce() {
+        let router = CommandRouter()
+        var received: String?
+        router.onUpdateMessage = { _, message in received = message }
+
+        router.processCommand("update_message:step1:Contact admin@example.com now")
+
+        XCTAssertEqual(received, "Contact admin@example.com now")
+    }
+
+    /// Config `appearance` (#669) and the IPC `appearance:` arm share one owner that sets
+    /// NSApp.appearance; preferredColorScheme alone does not flip the inspect window.
+    @MainActor
+    func testInspectAppearanceApplyIsOneOwner() {
+        defer { InspectAppearance.apply(nil) }   // restore follow-system for other tests
+        InspectAppearance.apply("light")
+        XCTAssertEqual(NSApp.appearance?.name, .aqua)
+        InspectAppearance.apply("Dark")          // case-insensitive, like the IPC arm
+        XCTAssertEqual(NSApp.appearance?.name, .darkAqua)
+        InspectAppearance.apply(nil)
+        XCTAssertNil(NSApp.appearance, "nil/auto follows the system")
+    }
+}
+
+// MARK: - Legacy channel names
+
+@MainActor
+final class LegacyNotificationChannelTests: XCTestCase {
+    override func tearDown() {
+        DialogNotifications.stopObserving()
+        super.tearDown()
+    }
+
+    private func post(_ info: [String: String]) {
+        DistributedNotificationCenter.default().postNotificationName(
+            DialogNotifications.legacyCommandNames[0], object: nil, userInfo: info, deliverImmediately: true)
+    }
+
+    /// The legacy `com.swiftdialog.command` channel reaches this session; another session's pid does not.
+    func testTheOldCommandNameIsStillServedForThisSessionOnly() {
+        var received: [String] = []
+        let arrived = expectation(description: "the command for this session")
+        DialogNotifications.startObserving { command, _ in
+            received.append(command)
+            if command == "next" { arrived.fulfill() }
+        }
+        post(["command": "prev", "pid": "1"])
+        post(["command": "next"])
+        wait(for: [arrived], timeout: 5)
+        XCTAssertEqual(received, ["next"])
     }
 }

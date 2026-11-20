@@ -2,15 +2,13 @@
 //  DeferralMenuView.swift
 //  dialog
 //
-//  Shared deferral menu component for user-initiated "remind me later" actions.
-//  Integrates with ignitecli's deferral system (env vars, exit code 10, result file).
-//  Reusable across Preset4, Preset5, and future presets.
+//  The shared "remind me later" menu, used by Preset 4's toast and the Preset 5/6 footers. A
+//  selection writes the result file and exits through the deferral path (exit code 10).
 //
 
 import SwiftUI
 
-/// A dropdown menu presenting deferral duration options.
-/// Reads options from config or ignitecli env vars, writes result file on selection, exits.
+/// A dropdown of deferral durations, from the config or the launching environment.
 struct DeferralMenuView: View {
     let config: InspectConfig?
     let accentColor: Color
@@ -18,13 +16,13 @@ struct DeferralMenuView: View {
     let style: DeferralMenuStyle
 
     enum DeferralMenuStyle {
-        case bordered    // Standard bordered button (Preset5 footer)
-        case compact     // Compact borderless (Preset4 toast)
+        case bordered    // phase and card footers
+        case compact     // Preset 4 toast
     }
 
     init(
         config: InspectConfig?,
-        accentColor: Color = .blue,
+        accentColor: Color = .accentColor,
         buttonText: String? = nil,
         style: DeferralMenuStyle = .bordered
     ) {

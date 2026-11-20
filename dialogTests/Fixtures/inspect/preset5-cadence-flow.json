@@ -1,0 +1,137 @@
+{
+  "_comment": "An intro, two cadence steps (line and carousel) and a recap outro, with contentAnchor: top on every step. Entries gate on /tmp marker files and advance on their timeout; all copy is fixture text.",
+  "preset": "5",
+  "highlightColor": "#2F7CE0",
+  "triggerFile": "/tmp/preset5-cadence.trigger",
+  "readinessFile": "/tmp/preset5-cadence.ready",
+  "eventFile": "/tmp/preset5-cadence.events",
+  "resultFile": "/tmp/preset5-cadence-result.json",
+  "introSteps": [
+    {
+      "id": "welcome",
+      "heroImage": "SF=sparkles",
+      "heroImageSFSymbolColor": "#0A84FF",
+      "title": "Alignment fixture",
+      "subtitle": "Every step in this flow pins its content to the top of the payload band.",
+      "content": [
+        {
+          "type": "text",
+          "content": "Advancing this flow captures a frame per step for the AX diff harness. The icon badge, title, and subtitle hold the exact same position on every screen \u2014 only the payload between header and footer changes."
+        }
+      ],
+      "continueButtonText": "Continue",
+      "stepType": "standard"
+    },
+    {
+      "id": "cadence-line",
+      "stepType": "cadence",
+      "heroImage": "SF=clock",
+      "heroImageSFSymbolColor": "#0A84FF",
+      "title": "Checking prerequisites",
+      "completedTitle": "Prerequisites met",
+      "subtitle": "Each gate confirms a marker file exists before the next one starts.",
+      "completedMessage": "Both gates cleared.",
+      "cadence": [
+        {
+          "id": "gate-1",
+          "message": "Checking for marker file /tmp/ax-cadence-gate-1 \u2026",
+          "sfSymbol": "doc.badge.gearshape",
+          "attribute": {
+            "type": "file",
+            "path": "/tmp/ax-cadence-gate-1",
+            "evaluation": "exists"
+          },
+          "minDwell": 1,
+          "timeout": 4
+        },
+        {
+          "id": "gate-2",
+          "message": "Checking for marker file /tmp/ax-cadence-gate-2 \u2026",
+          "sfSymbol": "folder.badge.gearshape",
+          "attribute": {
+            "type": "file",
+            "path": "/tmp/ax-cadence-gate-2",
+            "evaluation": "exists"
+          },
+          "minDwell": 1,
+          "timeout": 4
+        }
+      ],
+      "continueButtonText": "Continue",
+      "totalTimeEstimate": 240
+    },
+    {
+      "id": "cadence-carousel",
+      "stepType": "cadence",
+      "heroImage": "SF=clock",
+      "heroImageSFSymbolColor": "#0A84FF",
+      "title": "Checking markers",
+      "completedTitle": "All prerequisites met",
+      "subtitle": "Each tile clears when its marker file appears.",
+      "completedMessage": "Three markers found. You're clear to continue.",
+      "cadence": [
+        {
+          "id": "tile-1",
+          "message": "Checking for marker file /tmp/ax-cadence-gate-3 \u2026",
+          "sfSymbol": "doc.badge.gearshape",
+          "label": "Marker 1",
+          "attribute": {
+            "type": "file",
+            "path": "/tmp/ax-cadence-gate-3",
+            "evaluation": "exists"
+          },
+          "minDwell": 1,
+          "timeout": 4
+        },
+        {
+          "id": "tile-2",
+          "message": "Checking for marker file /tmp/ax-cadence-gate-4 \u2026",
+          "sfSymbol": "folder.badge.gearshape",
+          "label": "Marker 2",
+          "attribute": {
+            "type": "file",
+            "path": "/tmp/ax-cadence-gate-4",
+            "evaluation": "exists"
+          },
+          "minDwell": 1,
+          "timeout": 4
+        },
+        {
+          "id": "tile-3",
+          "message": "Checking for marker file /tmp/ax-cadence-gate-5 \u2026",
+          "sfSymbol": "externaldrive.badge.checkmark",
+          "label": "Marker 3",
+          "attribute": {
+            "type": "file",
+            "path": "/tmp/ax-cadence-gate-5",
+            "evaluation": "exists"
+          },
+          "minDwell": 1,
+          "timeout": 4
+        }
+      ],
+      "continueButtonText": "Continue",
+      "totalTimeEstimate": 240
+    },
+    {
+      "id": "done",
+      "stepType": "outro",
+      "showCadenceRecap": true,
+      "heroImage": "SF=checkmark.circle.fill",
+      "heroImageSFSymbolColor": "#34C759",
+      "heroBadge": "check",
+      "title": "Fixture Complete",
+      "subtitle": "The recap tile row above must be present on this step's first frame.",
+      "content": [
+        {
+          "type": "text",
+          "content": "If the hero moved on any step of this flow, the anchor parity is broken."
+        }
+      ],
+      "continueButtonText": "Done",
+      "phase": "outro"
+    }
+  ],
+  "chrome": "provisioning",
+  "successColor": "#34A853"
+}

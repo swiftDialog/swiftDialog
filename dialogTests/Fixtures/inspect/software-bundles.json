@@ -1,0 +1,1017 @@
+{
+  "preset": "5",
+  "width": 800,
+  "height": 600,
+  "title": "Software bundles",
+  "highlightColor": "#22c55e",
+  "triggerFile": "/tmp/sw.trigger",
+  "readinessFile": "/tmp/sw.ready",
+  "eventFile": "/tmp/sw.events.jsonl",
+  "introSteps": [
+    {
+      "id": "catalogue",
+      "stepType": "software",
+      "layout": "bundles",
+      "title": "Software bundles",
+      "subtitle": "Install a whole category at once. Anything already on this Mac is skipped.",
+      "items": [
+        {
+          "id": "safari",
+          "displayName": "Safari",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.apple.Safari"
+            }
+          ]
+        },
+        {
+          "id": "slack",
+          "displayName": "Slack",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.tinyspeck.slackmacgap"
+            }
+          ],
+          "openURL": "slack://open"
+        },
+        {
+          "id": "onepassword",
+          "displayName": "1Password",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.1password.1password"
+            }
+          ]
+        },
+        {
+          "id": "chrome",
+          "displayName": "Google Chrome",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.google.Chrome"
+            }
+          ]
+        },
+        {
+          "id": "figma",
+          "displayName": "Figma",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.figma.Desktop"
+            }
+          ]
+        },
+        {
+          "id": "sketch",
+          "displayName": "Sketch",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.bohemiancoding.sketch3"
+            }
+          ]
+        },
+        {
+          "id": "adobecc",
+          "displayName": "Adobe Creative Cloud",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.adobe.acc.AdobeCreativeCloud"
+            }
+          ]
+        },
+        {
+          "id": "preview",
+          "displayName": "Preview",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.apple.Preview"
+            }
+          ]
+        },
+        {
+          "id": "vscode",
+          "displayName": "Visual Studio Code",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.microsoft.VSCode"
+            }
+          ]
+        },
+        {
+          "id": "xcode",
+          "displayName": "Xcode",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.apple.dt.Xcode"
+            }
+          ]
+        },
+        {
+          "id": "docker",
+          "displayName": "Docker",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.docker.docker"
+            }
+          ]
+        },
+        {
+          "id": "zed",
+          "displayName": "Zed",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "dev.zed.Zed"
+            }
+          ]
+        },
+        {
+          "id": "postman",
+          "displayName": "Postman",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.postmanlabs.mac"
+            }
+          ]
+        },
+        {
+          "id": "tableau",
+          "displayName": "Tableau Desktop",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.tableausoftware.tableaudesktop"
+            }
+          ]
+        },
+        {
+          "id": "dbt",
+          "displayName": "dbt",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.dbtlabs.dbt"
+            }
+          ]
+        },
+        {
+          "id": "pgclient",
+          "displayName": "Postgres client",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.postgresapp.Postgres2"
+            }
+          ]
+        }
+      ],
+      "assistant": {
+        "agentLabel": "agent: fleetctl"
+      },
+      "software": {
+        "bundles": [
+          {
+            "id": "essentials",
+            "title": "Essentials",
+            "summary": "Required by IT · always current",
+            "size": "640 MB",
+            "itemIds": [
+              "safari",
+              "slack",
+              "onepassword",
+              "chrome"
+            ],
+            "command": "fleetctl install --bundle essentials --skip-installed",
+            "commandNote": "No admin password needed · the agent has the rights."
+          },
+          {
+            "id": "design",
+            "title": "Design",
+            "summary": "Figma, Adobe CC, fonts",
+            "size": "6.8 GB",
+            "itemIds": [
+              "figma",
+              "sketch",
+              "adobecc",
+              "preview"
+            ],
+            "command": "fleetctl install --bundle design --skip-installed",
+            "commandNote": "No admin password needed · the agent has the rights."
+          },
+          {
+            "id": "engineering",
+            "title": "Engineering",
+            "summary": "Xcode, Docker, terminal tools",
+            "size": "4.1 GB",
+            "itemIds": [
+              "vscode",
+              "xcode",
+              "docker",
+              "zed"
+            ],
+            "command": "fleetctl install --bundle engineering --skip-installed",
+            "commandNote": "No admin password needed · the agent has the rights."
+          },
+          {
+            "id": "data",
+            "title": "Data",
+            "summary": "Tableau, dbt, Postgres client",
+            "size": "2.2 GB",
+            "itemIds": [
+              "postman",
+              "tableau",
+              "dbt",
+              "pgclient"
+            ],
+            "command": "fleetctl install --bundle data --skip-installed",
+            "commandNote": "No admin password needed · the agent has the rights."
+          }
+        ],
+        "note": "Installs run in the background · you can close this window"
+      }
+    },
+    {
+      "id": "detail-essentials",
+      "stepType": "software",
+      "layout": "detail",
+      "bundleId": "essentials",
+      "backLabel": "‹ All bundles",
+      "title": "Essentials",
+      "subtitle": "Required by IT · always current.",
+      "items": [
+        {
+          "id": "safari",
+          "displayName": "Safari",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.apple.Safari"
+            }
+          ]
+        },
+        {
+          "id": "slack",
+          "displayName": "Slack",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.tinyspeck.slackmacgap"
+            }
+          ],
+          "openURL": "slack://open"
+        },
+        {
+          "id": "onepassword",
+          "displayName": "1Password",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.1password.1password"
+            }
+          ]
+        },
+        {
+          "id": "chrome",
+          "displayName": "Google Chrome",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.google.Chrome"
+            }
+          ]
+        },
+        {
+          "id": "figma",
+          "displayName": "Figma",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.figma.Desktop"
+            }
+          ]
+        },
+        {
+          "id": "sketch",
+          "displayName": "Sketch",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.bohemiancoding.sketch3"
+            }
+          ]
+        },
+        {
+          "id": "adobecc",
+          "displayName": "Adobe Creative Cloud",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.adobe.acc.AdobeCreativeCloud"
+            }
+          ]
+        },
+        {
+          "id": "preview",
+          "displayName": "Preview",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.apple.Preview"
+            }
+          ]
+        },
+        {
+          "id": "vscode",
+          "displayName": "Visual Studio Code",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.microsoft.VSCode"
+            }
+          ]
+        },
+        {
+          "id": "xcode",
+          "displayName": "Xcode",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.apple.dt.Xcode"
+            }
+          ]
+        },
+        {
+          "id": "docker",
+          "displayName": "Docker",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.docker.docker"
+            }
+          ]
+        },
+        {
+          "id": "zed",
+          "displayName": "Zed",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "dev.zed.Zed"
+            }
+          ]
+        },
+        {
+          "id": "postman",
+          "displayName": "Postman",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.postmanlabs.mac"
+            }
+          ]
+        },
+        {
+          "id": "tableau",
+          "displayName": "Tableau Desktop",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.tableausoftware.tableaudesktop"
+            }
+          ]
+        },
+        {
+          "id": "dbt",
+          "displayName": "dbt",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.dbtlabs.dbt"
+            }
+          ]
+        },
+        {
+          "id": "pgclient",
+          "displayName": "Postgres client",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.postgresapp.Postgres2"
+            }
+          ]
+        }
+      ],
+      "software": {
+        "bundles": [
+          {
+            "id": "essentials",
+            "title": "Essentials",
+            "summary": "Required by IT · always current",
+            "size": "640 MB",
+            "itemIds": [
+              "safari",
+              "slack",
+              "onepassword",
+              "chrome"
+            ],
+            "command": "fleetctl install --bundle essentials --skip-installed",
+            "commandNote": "No admin password needed · the agent has the rights."
+          },
+          {
+            "id": "design",
+            "title": "Design",
+            "summary": "Figma, Adobe CC, fonts",
+            "size": "6.8 GB",
+            "itemIds": [
+              "figma",
+              "sketch",
+              "adobecc",
+              "preview"
+            ],
+            "command": "fleetctl install --bundle design --skip-installed",
+            "commandNote": "No admin password needed · the agent has the rights."
+          },
+          {
+            "id": "engineering",
+            "title": "Engineering",
+            "summary": "Xcode, Docker, terminal tools",
+            "size": "4.1 GB",
+            "itemIds": [
+              "vscode",
+              "xcode",
+              "docker",
+              "zed"
+            ],
+            "command": "fleetctl install --bundle engineering --skip-installed",
+            "commandNote": "No admin password needed · the agent has the rights."
+          },
+          {
+            "id": "data",
+            "title": "Data",
+            "summary": "Tableau, dbt, Postgres client",
+            "size": "2.2 GB",
+            "itemIds": [
+              "postman",
+              "tableau",
+              "dbt",
+              "pgclient"
+            ],
+            "command": "fleetctl install --bundle data --skip-installed",
+            "commandNote": "No admin password needed · the agent has the rights."
+          }
+        ]
+      }
+    },
+    {
+      "id": "detail-design",
+      "stepType": "software",
+      "layout": "detail",
+      "bundleId": "design",
+      "backLabel": "‹ All bundles",
+      "title": "Design",
+      "subtitle": "Four apps. Anything already here is skipped.",
+      "items": [
+        {
+          "id": "safari",
+          "displayName": "Safari",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.apple.Safari"
+            }
+          ]
+        },
+        {
+          "id": "slack",
+          "displayName": "Slack",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.tinyspeck.slackmacgap"
+            }
+          ],
+          "openURL": "slack://open"
+        },
+        {
+          "id": "onepassword",
+          "displayName": "1Password",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.1password.1password"
+            }
+          ]
+        },
+        {
+          "id": "chrome",
+          "displayName": "Google Chrome",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.google.Chrome"
+            }
+          ]
+        },
+        {
+          "id": "figma",
+          "displayName": "Figma",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.figma.Desktop"
+            }
+          ]
+        },
+        {
+          "id": "sketch",
+          "displayName": "Sketch",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.bohemiancoding.sketch3"
+            }
+          ]
+        },
+        {
+          "id": "adobecc",
+          "displayName": "Adobe Creative Cloud",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.adobe.acc.AdobeCreativeCloud"
+            }
+          ]
+        },
+        {
+          "id": "preview",
+          "displayName": "Preview",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.apple.Preview"
+            }
+          ]
+        },
+        {
+          "id": "vscode",
+          "displayName": "Visual Studio Code",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.microsoft.VSCode"
+            }
+          ]
+        },
+        {
+          "id": "xcode",
+          "displayName": "Xcode",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.apple.dt.Xcode"
+            }
+          ]
+        },
+        {
+          "id": "docker",
+          "displayName": "Docker",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.docker.docker"
+            }
+          ]
+        },
+        {
+          "id": "zed",
+          "displayName": "Zed",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "dev.zed.Zed"
+            }
+          ]
+        },
+        {
+          "id": "postman",
+          "displayName": "Postman",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.postmanlabs.mac"
+            }
+          ]
+        },
+        {
+          "id": "tableau",
+          "displayName": "Tableau Desktop",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.tableausoftware.tableaudesktop"
+            }
+          ]
+        },
+        {
+          "id": "dbt",
+          "displayName": "dbt",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.dbtlabs.dbt"
+            }
+          ]
+        },
+        {
+          "id": "pgclient",
+          "displayName": "Postgres client",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.postgresapp.Postgres2"
+            }
+          ]
+        }
+      ],
+      "software": {
+        "bundles": [
+          {
+            "id": "essentials",
+            "title": "Essentials",
+            "summary": "Required by IT · always current",
+            "size": "640 MB",
+            "itemIds": [
+              "safari",
+              "slack",
+              "onepassword",
+              "chrome"
+            ],
+            "command": "fleetctl install --bundle essentials --skip-installed",
+            "commandNote": "No admin password needed · the agent has the rights.",
+            "action": {
+              "label": "Install {missing} missing",
+              "action": "request",
+              "requestId": "install-essentials"
+            }
+          },
+          {
+            "id": "design",
+            "title": "Design",
+            "summary": "Figma, Adobe CC, fonts",
+            "size": "6.8 GB",
+            "itemIds": [
+              "figma",
+              "sketch",
+              "adobecc",
+              "preview"
+            ],
+            "command": "fleetctl install --bundle design --skip-installed",
+            "commandNote": "No admin password needed · the agent has the rights.",
+            "action": {
+              "label": "Install {missing} missing",
+              "action": "request",
+              "requestId": "install-design"
+            }
+          },
+          {
+            "id": "engineering",
+            "title": "Engineering",
+            "summary": "Xcode, Docker, terminal tools",
+            "size": "4.1 GB",
+            "itemIds": [
+              "vscode",
+              "xcode",
+              "docker",
+              "zed"
+            ],
+            "command": "fleetctl install --bundle engineering --skip-installed",
+            "commandNote": "No admin password needed · the agent has the rights.",
+            "action": {
+              "label": "Install {missing} missing",
+              "action": "request",
+              "requestId": "install-engineering"
+            }
+          },
+          {
+            "id": "data",
+            "title": "Data",
+            "summary": "Tableau, dbt, Postgres client",
+            "size": "2.2 GB",
+            "itemIds": [
+              "postman",
+              "tableau",
+              "dbt",
+              "pgclient"
+            ],
+            "command": "fleetctl install --bundle data --skip-installed",
+            "commandNote": "No admin password needed · the agent has the rights.",
+            "action": {
+              "label": "Install {missing} missing",
+              "action": "request",
+              "requestId": "install-data"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "handoff",
+      "stepType": "software",
+      "layout": "handoff",
+      "title": "Anything else you need",
+      "subtitle": "Optional software lives in Self Service. Nothing here is required, and nothing installs without you asking.",
+      "items": [
+        {
+          "id": "safari",
+          "displayName": "Safari",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.apple.Safari"
+            }
+          ]
+        },
+        {
+          "id": "slack",
+          "displayName": "Slack",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.tinyspeck.slackmacgap"
+            }
+          ],
+          "openURL": "slack://open"
+        },
+        {
+          "id": "onepassword",
+          "displayName": "1Password",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.1password.1password"
+            }
+          ]
+        },
+        {
+          "id": "chrome",
+          "displayName": "Google Chrome",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.google.Chrome"
+            }
+          ]
+        },
+        {
+          "id": "figma",
+          "displayName": "Figma",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.figma.Desktop"
+            }
+          ]
+        },
+        {
+          "id": "sketch",
+          "displayName": "Sketch",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.bohemiancoding.sketch3"
+            }
+          ]
+        },
+        {
+          "id": "adobecc",
+          "displayName": "Adobe Creative Cloud",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.adobe.acc.AdobeCreativeCloud"
+            }
+          ]
+        },
+        {
+          "id": "preview",
+          "displayName": "Preview",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.apple.Preview"
+            }
+          ]
+        },
+        {
+          "id": "vscode",
+          "displayName": "Visual Studio Code",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.microsoft.VSCode"
+            }
+          ]
+        },
+        {
+          "id": "xcode",
+          "displayName": "Xcode",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.apple.dt.Xcode"
+            }
+          ]
+        },
+        {
+          "id": "docker",
+          "displayName": "Docker",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.docker.docker"
+            }
+          ]
+        },
+        {
+          "id": "zed",
+          "displayName": "Zed",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "dev.zed.Zed"
+            }
+          ]
+        },
+        {
+          "id": "postman",
+          "displayName": "Postman",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.postmanlabs.mac"
+            }
+          ]
+        },
+        {
+          "id": "tableau",
+          "displayName": "Tableau Desktop",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.tableausoftware.tableaudesktop"
+            }
+          ]
+        },
+        {
+          "id": "dbt",
+          "displayName": "dbt",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.dbtlabs.dbt"
+            }
+          ]
+        },
+        {
+          "id": "pgclient",
+          "displayName": "Postgres client",
+          "paths": [],
+          "requirements": [
+            {
+              "type": "app",
+              "bundleId": "com.postgresapp.Postgres2"
+            }
+          ]
+        }
+      ],
+      "handoffs": [
+        {
+          "id": "selfservice",
+          "title": "Self Service",
+          "subtitle": "62 apps · updated daily",
+          "detail": "Browse everything your team has licensed and install on demand.",
+          "icon": "SF=square.grid.2x2",
+          "buttonLabel": "Open Self Service",
+          "action": "request",
+          "requestId": "open-self-service"
+        },
+        {
+          "id": "askit",
+          "title": "Ask IT",
+          "subtitle": "#it-help · replies in ~20 min",
+          "detail": "Something missing from the catalogue, or an install that keeps failing.",
+          "icon": "SF=bubble.left.and.bubble.right",
+          "buttonLabel": "Open Slack",
+          "action": "app",
+          "url": "com.tinyspeck.slackmacgap"
+        },
+        {
+          "id": "launch-tailscale",
+          "title": "Tailscale",
+          "target": "io.tailscale.ipn.macos",
+          "targetNote": "opens the desktop app",
+          "buttonLabel": "Launch",
+          "action": "app",
+          "url": "io.tailscale.ipn.macos"
+        },
+        {
+          "id": "launch-zed",
+          "title": "Zed",
+          "target": "dev.zed.Zed",
+          "targetNote": "your editor",
+          "buttonLabel": "Launch",
+          "action": "app",
+          "url": "dev.zed.Zed"
+        },
+        {
+          "id": "launch-figma",
+          "title": "Figma",
+          "target": "figma://",
+          "targetNote": "available when the install finishes",
+          "buttonLabel": "Launch",
+          "action": "url",
+          "url": "figma://",
+          "itemId": "figma"
+        }
+      ],
+      "software": {
+        "note": "URL schemes are declared per app in the bundle config"
+      }
+    }
+  ]
+}

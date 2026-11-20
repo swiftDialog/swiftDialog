@@ -45,6 +45,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
     func applicationDidFinishLaunching(_ notification: Notification) {
 
+        // XCTest host: never active, so never key. A key window with OK as its default button
+        // turned any keystroke during a run into "OK" → exit 0, and XCTest restarted the host.
+        // The window stays ordered in — ordering it out ends the host before XCTest connects.
+        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
+            NSApp.setActivationPolicy(.prohibited)
+            return
+        }
+
         // Pseudo notification mode: hide main window, suppress dock icon, keep app alive.
         if appvars.isPseudoNotificationMode {
             NSApp.setActivationPolicy(.accessory)

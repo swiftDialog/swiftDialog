@@ -2,9 +2,8 @@
 //  OverrideDialogView.swift
 //  dialog
 //
-//  Shared override dialog for processing step overrides.
-//  Used by Preset6 and Preset5 when a processing step has been waiting
-//  for an extended period and the user wants to manually override the result.
+//  The override dialog Preset 6 shows for a step that has waited too long: mark it succeeded,
+//  failed or skipped by hand.
 //
 
 import SwiftUI
@@ -22,6 +21,8 @@ struct OverrideDialogView: View {
     let skipText: String
     let onAction: (OverrideAction) -> Void
 
+    @Environment(\.palette) private var palette
+
     enum OverrideAction {
         case success
         case failure
@@ -35,7 +36,7 @@ struct OverrideDialogView: View {
             VStack(spacing: 8) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.system(size: 48))
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(palette.warning)
 
                 Text(titleText)
                     .font(.system(size: 24, weight: .bold))
@@ -61,8 +62,8 @@ struct OverrideDialogView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.green.opacity(0.1))
-                    .foregroundStyle(.green)
+                    .background(palette.success.opacity(0.1))
+                    .foregroundStyle(palette.success)
                     .clipShape(.rect(cornerRadius: 10))
                 }
                 .buttonStyle(.plain)
@@ -78,8 +79,8 @@ struct OverrideDialogView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.red.opacity(0.1))
-                    .foregroundStyle(.red)
+                    .background(palette.error.opacity(0.1))
+                    .foregroundStyle(palette.error)
                     .clipShape(.rect(cornerRadius: 10))
                 }
                 .buttonStyle(.plain)
@@ -95,8 +96,8 @@ struct OverrideDialogView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.blue.opacity(0.1))
-                    .foregroundStyle(.blue)
+                    .background(palette.info.opacity(0.1))
+                    .foregroundStyle(palette.info)
                     .clipShape(.rect(cornerRadius: 10))
                 }
                 .buttonStyle(.plain)

@@ -1,0 +1,187 @@
+{
+  "preset": "6",
+  "chrome": "card",
+  "stepCounterPlacement": "footer",
+  "logoConfig": {
+    "imagePath": "__REPO__/examples/inspect/assets/brand/fleet-logo-dark-rgb.png",
+    "imagePathDark": "__REPO__/examples/inspect/assets/brand/fleet-logo-white-rgb.png",
+    "maxHeight": 22,
+    "position": "footer"
+  },
+  "title": "Device Migration",
+  "highlightColor": "#0A84FF",
+  "dateStyle": "long",
+  "debugMode": true,
+  "triggerFile": "/tmp/ignitecli-migration.trigger",
+  "readinessFile": "/tmp/ignitecli-migration.ready",
+  "resultFile": "/tmp/ignitecli-migration-result.json",
+  "eventFile": "/tmp/ignitecli-migration.events",
+  "localization": {
+    "languages": {
+      "English": "lang/en.json",
+      "Deutsch": "lang/de.json",
+      "Français": "lang/fr.json",
+      "Español": "lang/es.json"
+    },
+    "selectionKey": "preferredLanguage",
+    "defaultLanguage": "English"
+  },
+  "deferralConfig": {
+    "enabled": true,
+    "buttonText": "Later",
+    "options": [
+      {
+        "duration": "15m",
+        "label": "15 Minutes"
+      },
+      {
+        "duration": "1h",
+        "label": "1 Hour"
+      },
+      {
+        "duration": "4h",
+        "label": "4 Hours"
+      }
+    ]
+  },
+  "steps": [
+    {
+      "id": "detected",
+      "displayName": "Migration",
+      "stepType": "intro",
+      "icon": "computer",
+      "guidanceTitle": "Device Migration",
+      "guidanceContent": [
+        {
+          "type": "text",
+          "content": "Your organization requires this device to be migrated to a new management platform. This process will update your device configuration."
+        },
+        {
+          "type": "dropdown",
+          "id": "preferredLanguage",
+          "content": "Language",
+          "options": [
+            "English",
+            "Deutsch",
+            "Français",
+            "Español"
+          ],
+          "value": "English",
+          "helpText": "Choose the language for this migration assistant"
+        },
+        {
+          "type": "info",
+          "content": "You will be guided through the enrollment process. This may take a few minutes."
+        }
+      ],
+      "continueButtonText": "Next",
+      "phase": "intro"
+    },
+    {
+      "id": "status",
+      "displayName": "Status",
+      "icon": "SF=clock.badge.checkmark",
+      "guidanceTitle": "Migration Status",
+      "guidanceContent": [
+        {
+          "type": "text",
+          "content": "Review the migration details below. Your IT team has scheduled this migration and set a deadline for completion."
+        },
+        {
+          "type": "bullets",
+          "icon": "checkmark.circle.fill",
+          "items": [
+            "Your files and applications will **not** be affected",
+            "The process takes approximately **2 minutes**",
+            "Your device will **not restart** during migration"
+          ]
+        },
+        {
+          "type": "label-value",
+          "label": "Deadline",
+          "value": "Mar 15, 2026 at 11:30 PM"
+        }
+      ],
+      "continueButtonText": "Next",
+      "stepType": "standard"
+    },
+    {
+      "id": "instruction",
+      "displayName": "Enroll",
+      "icon": "SF=person.badge.shield.checkmark.fill",
+      "guidanceTitle": "Next Steps",
+      "guidanceContent": [
+        {
+          "type": "text",
+          "content": "Follow these steps to complete the migration to your new management platform."
+        },
+        {
+          "type": "bullets",
+          "numbered": true,
+          "items": [
+            "Click **Migrate Now** below to open System Settings",
+            "Approve the **device management profile** when prompted",
+            "Enter your **device password** to authorize enrollment"
+          ]
+        },
+        {
+          "type": "image",
+          "content": "__REPO__/examples/inspect/assets/brand/enrol-gif.gif",
+          "imageWidth": 480,
+          "imageBorder": false
+        }
+      ],
+      "continueButtonText": "Migrate Now",
+      "stepType": "standard"
+    },
+    {
+      "id": "migrating",
+      "displayName": "Migrating",
+      "icon": "SF=arrow.triangle.2.circlepath",
+      "stepType": "processing",
+      "autoAdvance": true,
+      "waitForExternalTrigger": true,
+      "processingDuration": 3,
+      "processingMessage": "Waiting for enrollment to complete",
+      "guidanceTitle": "Migrating Your Device",
+      "guidanceContent": [
+        {
+          "type": "text",
+          "content": "System Settings has been opened. Complete the enrollment there, then this screen will update automatically."
+        }
+      ],
+      "autoAdvanceOnComplete": true,
+      "autoResult": "success",
+      "processingMode": "simple"
+    },
+    {
+      "id": "complete",
+      "displayName": "Complete",
+      "stepType": "outro",
+      "icon": "SF=checkmark.circle.fill",
+      "guidanceTitle": "Migration Complete",
+      "guidanceContent": [
+        {
+          "type": "text",
+          "content": "**Your device has been successfully migrated.** You are now managed by your new IT platform."
+        },
+        {
+          "type": "bullets",
+          "icon": "checkmark.circle.fill",
+          "items": [
+            "Device management profile installed",
+            "Security policies applied",
+            "All files and applications are intact",
+            "No restart required"
+          ]
+        },
+        {
+          "type": "info",
+          "content": "If you experience any issues, contact your IT support team. You can close this window."
+        }
+      ],
+      "continueButtonText": "Done",
+      "phase": "outro"
+    }
+  ]
+}

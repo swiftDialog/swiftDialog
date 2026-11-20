@@ -1,0 +1,21 @@
+{
+  "_comment": "The profile's everydayInstalls flow: the window orbit opens, as the user, while Fleet installs software outside Setup Experience. Each install becomes a row from orbit's install events; orbit closes the window once Fleet has been quiet for 90 s.",
+  "preset": "5",
+  "width": 820,
+  "height": 600,
+  "title": "Installing from your IT team",
+  "showProfilesRow": false,
+  "introSteps": [
+    {
+      "id": "installs",
+      "stepType": "installation",
+      "installationMode": "progress",
+      "installationLayout": "list",
+      "title": "Installing from your IT team",
+      "subtitle": "Fleet is installing software on this Mac. This takes a few minutes.",
+      "progressFormat": "{completed} of {total} done",
+      "heroImage": "SF=arrow.down.app",
+      "items": []
+    }
+  ]
+}

@@ -2,26 +2,22 @@
 //  MediaComponents.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH
-//
-//  Extracted from PresetCommonHelpers.swift
-//
-//  Async image loading, image carousels, and gallery presentation
+//  Async image loading, the image carousel, and the gallery sheet.
 //
 
 import SwiftUI
 
 // MARK: - Shared Image Cache
 
-/// Thread-safe NSCache for decoded images, keyed by "path@WxH" so the same file
-/// at different display sizes gets its own appropriately-sized entry.
+/// Thread-safe NSCache for decoded images, keyed by "path@WxH" so each display size gets its own
+/// downsampled entry.
 private final class AsyncImageCache: @unchecked Sendable {
     static let shared = AsyncImageCache()
     private let cache = NSCache<NSString, NSImage>()
 
     private init() {
-        cache.countLimit = 30          // keep up to 30 decoded images
-        cache.totalCostLimit = 200_000_000  // ~200 MB budget
+        cache.countLimit = 30
+        cache.totalCostLimit = 200_000_000  // ~200 MB
     }
 
     func image(forKey key: String) -> NSImage? {
@@ -34,28 +30,26 @@ private final class AsyncImageCache: @unchecked Sendable {
     }
 }
 
-// MARK: - AsyncImageView (Shared Component)
+// MARK: - AsyncImageView
 
-/// Asynchronous image loader with loading states and fallback support
-/// Extracted for reuse across all presets
+/// Asynchronous image loader (file path or URL) with a skeleton, downsampled decode and fallback.
 struct AsyncImageView<Fallback: View>: View {
     let iconPath: String
     let basePath: String?
     let maxWidth: CGFloat
     let maxHeight: CGFloat
-    let imageFit: ContentMode  // .fill (crop to fill) or .fit (show entire image)
+    let imageFit: ContentMode
     let showLoadingState: Bool
     let fallback: () -> Fallback
 
     @State private var imageState: ImageLoadState = .loading
     @State private var loadedImage: NSImage?
 
-    /// Detect GIF files by extension for animated rendering
     private var isGIF: Bool {
         iconPath.lowercased().hasSuffix(".gif")
     }
 
-    /// Resolve the icon path to a file URL for GIF playback
+    /// The icon path as a URL, for GIF playback.
     private var resolvedFileURL: URL? {
         if iconPath.hasPrefix("http://") || iconPath.hasPrefix("https://") {
             return URL(string: iconPath)
@@ -102,37 +96,19 @@ struct AsyncImageView<Fallback: View>: View {
         Group {
             switch imageState {
             case .loading:
-                if showLoadingState {
-                    // Loading state - gradient background with spinner
-                    ZStack {
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                Color.gray.opacity(0.3),
-                                Color.gray.opacity(0.1)
-                            ]),
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-
-                        VStack(spacing: 16) {
-                            ProgressView()
-                                .scaleEffect(1.5)
-                                .tint(.white)
-
-                            Text("Loading...")
-                                .font(.system(size: 18, weight: .medium))
-                                .foregroundStyle(.white.opacity(0.8))
-                        }
-                    }
-                    .frame(width: maxWidth, height: maxHeight)
-                    .clipped()
+                if MediaLoading.drawsSkeleton(showLoadingState: showLoadingState) {
+                    MediaSkeletonView()
+                        .frame(width: maxWidth, height: maxHeight)
+                        .clipped()
                 } else {
+                    // The loading marker is emitted even when the skeleton is declined.
                     Color.clear
                         .frame(width: maxWidth, height: maxHeight)
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(MediaLoading.marker)
                 }
 
             case .loaded(let nsImage):
-                // Use AnimatedGIFViewBlocked for GIFs (WKWebView-based), static Image for everything else
                 if isGIF, let gifURL = resolvedFileURL {
                     AnimatedGIFViewBlocked(url: gifURL)
                         .frame(width: maxWidth, height: maxHeight)
@@ -148,7 +124,6 @@ struct AsyncImageView<Fallback: View>: View {
                 }
 
             case .failed:
-                // Failed to load, show fallback
                 fallback()
             }
         }
@@ -168,21 +143,17 @@ struct AsyncImageView<Fallback: View>: View {
         }
     }
 
-    /// Cache key incorporates path + display dimensions so differently-sized
-    /// usages of the same file each get an appropriately downsampled entry.
     private var cacheKey: String {
         "\(iconPath)@\(Int(maxWidth))x\(Int(maxHeight))"
     }
 
     @MainActor
     private func loadImage() async {
-        // Check memory cache first (instant hit for back-navigation)
         if let cached = AsyncImageCache.shared.image(forKey: cacheKey) {
             withAnimation(.easeInOut(duration: 0.3)) { imageState = .loaded(cached) }
             return
         }
 
-        // URL loading — fetch remote image over HTTP(S)
         if iconPath.hasPrefix("http://") || iconPath.hasPrefix("https://") {
             guard let url = URL(string: iconPath) else {
                 withAnimation(.easeInOut(duration: 0.3)) { imageState = .failed }
@@ -204,7 +175,6 @@ struct AsyncImageView<Fallback: View>: View {
             return
         }
 
-        // Resolve local file path
         let fullPath: String
         if iconPath.hasPrefix("/") {
             fullPath = iconPath
@@ -214,20 +184,19 @@ struct AsyncImageView<Fallback: View>: View {
             fullPath = iconPath
         }
 
-        // Downsample on a background thread — decode at display size, not full resolution
+        // Decode at display size off the main actor, not at full resolution.
         let targetW = maxWidth
         let targetH = maxHeight
         let key = cacheKey
 
         let result: NSImage? = await Task.detached(priority: .userInitiated) {
-            // Use CGImageSource to downsample during decode (WWDC recommended approach)
             let url = URL(fileURLWithPath: fullPath)
             let sourceOpts: [CFString: Any] = [kCGImageSourceShouldCache: false]
             guard let source = CGImageSourceCreateWithURL(url as CFURL, sourceOpts as CFDictionary) else {
                 return nil as NSImage?
             }
 
-            // Target pixel size = max of display dimensions × 2 for Retina
+            // Twice the display size, for Retina.
             let maxPixelSize = max(targetW, targetH) * 2.0
             let downsampleOpts: [CFString: Any] = [
                 kCGImageSourceCreateThumbnailFromImageAlways: true,
@@ -255,35 +224,30 @@ struct AsyncImageView<Fallback: View>: View {
     }
 }
 
-// MARK: - ImageCarouselView (Shared Component)
+// MARK: - ImageCarouselView
 
-/// Interactive image carousel component with navigation controls
-/// Supports arrow buttons, dot indicators, captions, and auto-advance
+/// Image carousel with arrows, dots, captions and auto-advance.
 struct ImageCarouselView: View {
-    // Required properties
+    @Environment(\.palette) private var palette
     let images: [String]
     let iconBasePath: String?
     let scaleFactor: CGFloat
 
-    // Layout properties
     let imageWidth: CGFloat
     let imageHeight: CGFloat
     let imageShape: String
-    let imageFit: String  // "fill" (crop to fill) or "fit" (show entire image)
+    let imageFit: String  // "fill" | "fit"
 
-    // Navigation properties
     let showDots: Bool
     let showArrows: Bool
     let captions: [String]?
 
-    // Behavior properties
     let autoAdvance: Bool
     let autoAdvanceDelay: Double
     let transitionStyle: String
 
-    // State
     @State private var currentIndex: Int
-    @State private var autoAdvanceTimer: Timer?
+    @State private var autoAdvanceClock: Poll?
     @StateObject private var iconCache = PresetIconCache()
 
     init(
@@ -318,25 +282,47 @@ struct ImageCarouselView: View {
         self._currentIndex = State(initialValue: min(max(0, currentIndex), images.count - 1))
     }
 
+    // MARK: - Geometry
+
+    /// One arrow's footprint in authored points: the 32pt glyph plus its 16pt edge inset.
+    static let arrowFootprint: CGFloat = 32 + 16
+
+    /// Whether a frame this wide can carry the arrows: the picture keeps a clear middle at least
+    /// as wide as the chrome flanking it. Authored width, so the answer is scale-free.
+    static func arrowsFit(inWidth width: CGFloat) -> Bool {
+        width >= arrowFootprint * 4
+    }
+
+    /// `showArrows` is the author's intent; geometry wins when the frame cannot honour it.
+    var arrowsVisible: Bool {
+        showArrows && images.count > 1 && Self.arrowsFit(inWidth: imageWidth)
+    }
+
+    /// Dots are the fallback navigation whenever geometry suppresses the arrows.
+    var dotsVisible: Bool {
+        images.count > 1 && (showDots || !arrowsVisible)
+    }
+
+    /// Only the word `fit` shows the whole picture; anything else crops.
+    private var imageContentMode: ContentMode {
+        imageFit.lowercased() == "fit" ? .fit : .fill
+    }
+
     var body: some View {
         VStack(spacing: 12 * scaleFactor) {
-            // Main carousel container
             ZStack {
-                // Background with rounded corners
                 RoundedRectangle(cornerRadius: 12 * scaleFactor)
-                    .fill(Color.gray.opacity(0.1))
+                    .fill(palette.text.opacity(0.1))
 
-                // Current image
                 carouselImageView()
 
-                // Navigation arrows (overlays)
-                if showArrows && images.count > 1 {
+                if arrowsVisible {
                     HStack {
-                        // Previous button
                         Button(action: previousImage) {
                             Image(systemName: "chevron.left.circle.fill")
                                 .font(.system(size: 32 * scaleFactor))
                                 .foregroundStyle(.white)
+                                // The shadow is the disc's only contrast against a light photo.
                                 .shadow(color: .black.opacity(0.3), radius: 4)
                         }
                         .buttonStyle(.plain)
@@ -346,7 +332,6 @@ struct ImageCarouselView: View {
 
                         Spacer()
 
-                        // Next button
                         Button(action: nextImage) {
                             Image(systemName: "chevron.right.circle.fill")
                                 .font(.system(size: 32 * scaleFactor))
@@ -363,12 +348,10 @@ struct ImageCarouselView: View {
             .frame(width: imageWidth * scaleFactor, height: imageHeight * scaleFactor)
             .clipShape(applyImageShape())
 
-            // Dot indicators
-            if showDots && images.count > 1 {
+            if dotsVisible {
                 dotIndicators()
             }
 
-            // Caption
             if let captions = captions,
                let caption = captions[safe: currentIndex],
                !caption.isEmpty {
@@ -397,15 +380,24 @@ struct ImageCarouselView: View {
         if images.indices.contains(currentIndex) {
             let imagePath = images[currentIndex]
 
+            // `sf=name` draws a symbol; AsyncImageView knows only URLs and file paths.
+            if let symbolName = IconRef.symbol(imagePath) {
+                Image(systemName: symbolName)
+                    .font(.system(size: imageHeight * scaleFactor * 0.4))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .transition(getTransition())
+                    .id("carousel-image-\(currentIndex)-\(imagePath)")
+            } else {
             AsyncImageView(
                 iconPath: imagePath,
                 basePath: iconBasePath,
                 maxWidth: imageWidth * scaleFactor,
                 maxHeight: imageHeight * scaleFactor,
+                imageFit: imageContentMode,
                 fallback: {
-                    // Fallback view for failed image load
                     ZStack {
-                        Color.gray.opacity(0.2)
+                        palette.text.opacity(0.2)
 
                         VStack(spacing: 8 * scaleFactor) {
                             Image(systemName: "photo")
@@ -421,6 +413,7 @@ struct ImageCarouselView: View {
             )
             .transition(getTransition())
             .id("carousel-image-\(currentIndex)-\(imagePath)")
+            }
         }
     }
 
@@ -474,13 +467,15 @@ struct ImageCarouselView: View {
     // MARK: - Auto-Advance
 
     private func startAutoAdvance() {
-        autoAdvanceTimer = Timer.scheduledTimer(withTimeInterval: autoAdvanceDelay, repeats: true) { _ in
+        // `Poll` runs its body on the main actor, so the `@State` write needs no hop.
+        let clock = Poll(every: autoAdvanceDelay)
+        autoAdvanceClock = clock
+        clock.start {
             if currentIndex < images.count - 1 {
                 withAnimation(getAnimationType()) {
                     currentIndex += 1
                 }
             } else {
-                // Loop back to start
                 withAnimation(getAnimationType()) {
                     currentIndex = 0
                 }
@@ -489,8 +484,8 @@ struct ImageCarouselView: View {
     }
 
     private func stopAutoAdvance() {
-        autoAdvanceTimer?.invalidate()
-        autoAdvanceTimer = nil
+        autoAdvanceClock?.cancel()
+        autoAdvanceClock = nil
     }
 
     private func resetAutoAdvanceTimer() {
@@ -539,27 +534,8 @@ struct ImageCarouselView: View {
     }
 }
 
-/*
-// Helper for type-erased shapes
-private struct AnyShape: Shape {
-    private let _path: @Sendable (CGRect) -> Path
-
-    init<S: Shape>(_ shape: S) where S: Sendable {
-        _path = { rect in
-            shape.path(in: rect)
-        }
-    }
-
-    func path(in rect: CGRect) -> Path {
-        _path(rect)
-    }
-}
- */
-
-/// Extension to provide safe array subscripting that returns nil instead of crashing on out-of-bounds access
 extension Array {
-    /// Safe subscript that returns nil instead of crashing on out-of-bounds access
-    /// Usage: if let item = array[safe: index] { ... }
+    /// nil instead of a crash on an out-of-bounds index.
     subscript(safe index: Int) -> Element? {
         return indices.contains(index) ? self[index] : nil
     }
@@ -568,25 +544,24 @@ extension Array {
 
 // MARK: - Gallery Presentation Components
 
-/// Individual image slide in gallery carousel
-/// Cache for preloading gallery images
+/// Preloaded gallery images.
 @MainActor
 class GalleryImageCache: ObservableObject {
     @Published var images: [String: NSImage] = [:]
     @Published var loadingComplete: Bool = false
 
     func preloadImages(paths: [String]) {
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            var loadedImages: [String: NSImage] = [:]
-            for path in paths {
-                if let image = NSImage(contentsOfFile: path) {
-                    loadedImages[path] = image
+        // Reads run off the main actor; the published state is written back on it.
+        Task { [weak self] in
+            let loaded = await Task.detached(priority: .userInitiated) {
+                var images: [String: NSImage] = [:]
+                for path in paths {
+                    if let image = InspectImageCache.shared.image(atPath: path) { images[path] = image }
                 }
-            }
-            DispatchQueue.main.async {
-                self?.images = loadedImages
-                self?.loadingComplete = true
-            }
+                return images
+            }.value
+            self?.images = loaded
+            self?.loadingComplete = true
         }
     }
 
@@ -595,7 +570,7 @@ class GalleryImageCache: ObservableObject {
     }
 }
 
-/// Individual image slide in gallery carousel - uses cached images
+/// One gallery slide, from the cache.
 struct GalleryImageSlide: View {
     let imagePath: String
     let caption: String?
@@ -603,16 +578,15 @@ struct GalleryImageSlide: View {
     let allowZoom: Bool
     let onImageTap: () -> Void
     let cachedImage: NSImage?
-    var maxWidth: CGFloat?  // Optional max width constraint
+    var maxWidth: CGFloat?
 
     var body: some View {
         VStack(spacing: 12) {
-            // Main image area
             ZStack {
                 if let image = cachedImage {
                     Image(nsImage: image)
                         .resizable()
-                        .aspectRatio(contentMode: .fit)
+                        .scaledToFit()
                         .frame(maxWidth: maxWidth, maxHeight: imageHeight)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
@@ -623,7 +597,6 @@ struct GalleryImageSlide: View {
                         }
                         .help(allowZoom ? "Click to view fullscreen" : "")
                 } else {
-                    // Loading or error state
                     VStack(spacing: 8) {
                         Image(systemName: "photo.fill")
                             .font(.system(size: 48))
@@ -636,7 +609,6 @@ struct GalleryImageSlide: View {
                 }
             }
 
-            // Caption (if provided)
             if let caption = caption, !caption.isEmpty {
                 Text(caption)
                     .font(.system(size: 14, weight: .medium))
@@ -648,8 +620,9 @@ struct GalleryImageSlide: View {
     }
 }
 
-/// Thumbnail view for gallery navigation - uses cached images
+/// Gallery navigation thumbnail, from the cache.
 struct GalleryThumbnail: View {
+    @Environment(\.palette) private var palette
     let imagePath: String
     let thumbnailSize: Double
     let isSelected: Bool
@@ -662,12 +635,12 @@ struct GalleryThumbnail: View {
                 if let thumbnail = cachedImage {
                     Image(nsImage: thumbnail)
                         .resizable()
-                        .aspectRatio(contentMode: .fill)
+                        .scaledToFill()
                         .frame(width: thumbnailSize, height: thumbnailSize)
                         .clipShape(RoundedRectangle(cornerRadius: 6))
                 } else {
                     Rectangle()
-                        .fill(Color.gray.opacity(0.2))
+                        .fill(palette.text.opacity(0.2))
                         .frame(width: thumbnailSize, height: thumbnailSize)
                         .clipShape(RoundedRectangle(cornerRadius: 6))
                         .overlay(
@@ -686,8 +659,11 @@ struct GalleryThumbnail: View {
     }
 }
 
-/// Gallery presentation view (carousel mode) with preloaded image cache
+/// The gallery sheet: carousel or side-by-side layout, with a preloaded image cache.
 struct GalleryCarouselView: View {
+    @Environment(\.palette) private var palette
+    /// Drawn inside a `.sheet` with no preset state, so the counters localise through the environment.
+    @Environment(\.inspectLocalization) private var l10n
     let config: InspectConfig.DetailOverlayConfig
     let onClose: () -> Void
 
@@ -733,7 +709,6 @@ struct GalleryCarouselView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(config.title ?? "Instructions")
@@ -749,16 +724,17 @@ struct GalleryCarouselView: View {
 
                 Spacer()
 
-                // Step counter
                 if showStepCounter && images.count > 1 {
-                    Text("Step \(currentIndex + 1) of \(images.count)")
+                    Text(StepCounterLabel.text(current: currentIndex + 1,
+                                              total: images.count,
+                                              localizer: l10n))
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
                         .background(
                             Capsule()
-                                .fill(Color.gray.opacity(0.1))
+                                .fill(palette.text.opacity(0.1))
                         )
                 }
 
@@ -772,9 +748,7 @@ struct GalleryCarouselView: View {
 
             Divider()
 
-            // Main content area
             if !imageCache.loadingComplete {
-                // Loading state
                 VStack {
                     Spacer()
                     ProgressView("Loading images...")
@@ -782,17 +756,14 @@ struct GalleryCarouselView: View {
                     Spacer()
                 }
             } else if isSideBySide && hasSideContent {
-                // Side-by-side layout: image on left, content on right
                 sideBySideContent
             } else {
-                // Standard carousel layout
                 standardCarouselContent
             }
         }
         .frame(width: getSizeWidth(), height: getSizeHeight())
         .background(Color(NSColor.windowBackgroundColor))
         .onAppear {
-            // Preload all images when view appears
             imageCache.preloadImages(paths: images)
         }
     }
@@ -802,21 +773,18 @@ struct GalleryCarouselView: View {
     private var standardCarouselContent: some View {
         ScrollView {
             VStack(spacing: 20) {
-                // Carousel with navigation
                 HStack(spacing: 16) {
-                    // Previous button
                     if showNavigationArrows && images.count > 1 {
                         Button(action: previousImage) {
                             Image(systemName: "chevron.left.circle.fill")
                                 .font(.system(size: 32))
-                                .foregroundStyle(currentIndex > 0 ? Color.accentColor : Color.gray.opacity(0.3))
+                                .foregroundStyle(currentIndex > 0 ? Color.accentColor : palette.text.opacity(0.3))
                         }
                         .buttonStyle(.plain)
                         .disabled(currentIndex == 0)
                         .help("Previous")
                     }
 
-                    // Current image - use cached image with smooth transition
                     if currentIndex < images.count {
                         GalleryImageSlide(
                             imagePath: images[currentIndex],
@@ -830,16 +798,15 @@ struct GalleryCarouselView: View {
                             },
                             cachedImage: imageCache.image(for: images[currentIndex])
                         )
-                        .id(currentIndex) // Force view identity for smooth transitions
+                        .id(currentIndex)
                         .transition(.opacity.combined(with: .scale(scale: 0.98)))
                     }
 
-                    // Next button
                     if showNavigationArrows && images.count > 1 {
                         Button(action: nextImage) {
                             Image(systemName: "chevron.right.circle.fill")
                                 .font(.system(size: 32))
-                                .foregroundStyle(currentIndex < images.count - 1 ? Color.accentColor : Color.gray.opacity(0.3))
+                                .foregroundStyle(currentIndex < images.count - 1 ? Color.accentColor : palette.text.opacity(0.3))
                         }
                         .buttonStyle(.plain)
                         .disabled(currentIndex >= images.count - 1)
@@ -850,7 +817,6 @@ struct GalleryCarouselView: View {
                 .padding(.vertical, 20)
                 .animation(.easeInOut(duration: 0.25), value: currentIndex)
 
-                // Thumbnail strip
                 if showThumbnails && images.count > 1 {
                     Divider()
                         .padding(.horizontal)
@@ -883,23 +849,20 @@ struct GalleryCarouselView: View {
 
     private var sideBySideContent: some View {
         HStack(alignment: .top, spacing: 0) {
-            // Left side: Image carousel (60% width)
+            // Image carousel, 60% of the width.
             VStack(spacing: 16) {
-                // Navigation arrows + image
                 HStack(spacing: 12) {
-                    // Previous button
                     if showNavigationArrows && images.count > 1 {
                         Button(action: previousImage) {
                             Image(systemName: "chevron.left.circle.fill")
                                 .font(.system(size: 28))
-                                .foregroundStyle(currentIndex > 0 ? Color.accentColor : Color.gray.opacity(0.3))
+                                .foregroundStyle(currentIndex > 0 ? Color.accentColor : palette.text.opacity(0.3))
                         }
                         .buttonStyle(.plain)
                         .disabled(currentIndex == 0)
                         .help("Previous")
                     }
 
-                    // Current image
                     if currentIndex < images.count {
                         GalleryImageSlide(
                             imagePath: images[currentIndex],
@@ -918,12 +881,11 @@ struct GalleryCarouselView: View {
                         .transition(.opacity.combined(with: .scale(scale: 0.98)))
                     }
 
-                    // Next button
                     if showNavigationArrows && images.count > 1 {
                         Button(action: nextImage) {
                             Image(systemName: "chevron.right.circle.fill")
                                 .font(.system(size: 28))
-                                .foregroundStyle(currentIndex < images.count - 1 ? Color.accentColor : Color.gray.opacity(0.3))
+                                .foregroundStyle(currentIndex < images.count - 1 ? Color.accentColor : palette.text.opacity(0.3))
                         }
                         .buttonStyle(.plain)
                         .disabled(currentIndex >= images.count - 1)
@@ -932,20 +894,20 @@ struct GalleryCarouselView: View {
                 }
                 .animation(.easeInOut(duration: 0.25), value: currentIndex)
 
-                // Step counter below image
                 if showStepCounter && images.count > 1 {
-                    Text("Step \(currentIndex + 1) of \(images.count)")
+                    Text(StepCounterLabel.text(current: currentIndex + 1,
+                                              total: images.count,
+                                              localizer: l10n))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 4)
                         .background(
                             Capsule()
-                                .fill(Color.gray.opacity(0.1))
+                                .fill(palette.text.opacity(0.1))
                         )
                 }
 
-                // Thumbnail strip
                 if showThumbnails && images.count > 1 {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
@@ -972,10 +934,9 @@ struct GalleryCarouselView: View {
             .padding()
             .frame(width: getSizeWidth() * 0.6)
 
-            // Divider
             Divider()
 
-            // Right side: Content blocks (40% width)
+            // Content blocks, 40% of the width.
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     if let sideContent = config.gallerySideContent {
@@ -1027,10 +988,12 @@ struct GalleryCarouselView: View {
 
 // MARK: - Gallery Side Content Block
 
-/// Renders a single content block for the side panel in sideBySide gallery layout
+/// One content block in the side-by-side gallery's side panel.
 struct GallerySideContentBlock: View {
     let block: InspectConfig.GuidanceContent
     let scaleFactor: CGFloat
+
+    @Environment(\.palette) private var palette
 
     var body: some View {
         switch block.type {
@@ -1054,10 +1017,10 @@ struct GallerySideContentBlock: View {
         case "bullets":
             if let items = block.items {
                 VStack(alignment: .leading, spacing: 6 * scaleFactor) {
-                    ForEach(items, id: \.self) { item in
+                    ForEach(Array(items.enumerated()), id: \.offset) { index, item in
                         if !item.isEmpty {
                             HStack(alignment: .top, spacing: 8 * scaleFactor) {
-                                Text("•")
+                                Text(block.numbered == true ? "\(index + 1)." : "•")
                                     .font(.system(size: 13 * scaleFactor))
                                     .foregroundStyle(.secondary)
                                 Text(item)
@@ -1074,7 +1037,7 @@ struct GallerySideContentBlock: View {
             HStack(alignment: .top, spacing: 8 * scaleFactor) {
                 Image(systemName: "info.circle.fill")
                     .font(.system(size: 13 * scaleFactor))
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(palette.info)
                 Text(block.content ?? "")
                     .font(.system(size: 13 * scaleFactor))
                     .foregroundStyle(.secondary)
@@ -1083,14 +1046,14 @@ struct GallerySideContentBlock: View {
             .padding(10 * scaleFactor)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.blue.opacity(0.1))
+                    .fill(palette.info.opacity(0.1))
             )
 
         case "warning":
             HStack(alignment: .top, spacing: 8 * scaleFactor) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.system(size: 13 * scaleFactor))
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(palette.warning)
                 Text(block.content ?? "")
                     .font(.system(size: 13 * scaleFactor))
                     .foregroundStyle(.secondary)
@@ -1099,14 +1062,14 @@ struct GallerySideContentBlock: View {
             .padding(10 * scaleFactor)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.orange.opacity(0.1))
+                    .fill(palette.warning.opacity(0.1))
             )
 
         case "success":
             HStack(alignment: .top, spacing: 8 * scaleFactor) {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 13 * scaleFactor))
-                    .foregroundStyle(.green)
+                    .foregroundStyle(palette.success)
                 Text(block.content ?? "")
                     .font(.system(size: 13 * scaleFactor))
                     .foregroundStyle(.secondary)
@@ -1115,7 +1078,7 @@ struct GallerySideContentBlock: View {
             .padding(10 * scaleFactor)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.green.opacity(0.1))
+                    .fill(palette.success.opacity(0.1))
             )
 
         case "arrow":
@@ -1126,7 +1089,6 @@ struct GallerySideContentBlock: View {
             }
 
         default:
-            // Fallback for unsupported types
             if let content = block.content {
                 Text(content)
                     .font(.system(size: 13 * scaleFactor))
@@ -1136,5 +1098,31 @@ struct GallerySideContentBlock: View {
     }
 }
 
-// NOTE: DetailOverlayView is defined in dialog/Views/Inspect/Utilities/DetailOverlayView.swift
-// with proper system info styling including device icon
+// MARK: - Media readiness
+
+/// How a still-loading image says so. The visual skeleton can be declined with
+/// `showLoadingState: false`; the accessibility marker is emitted either way.
+enum MediaLoading {
+    /// The accessibility label a loading image carries; capture tooling waits on this string.
+    static let marker = "Loading media"
+
+    /// Whether to draw the visible skeleton. The marker does not depend on this.
+    static func drawsSkeleton(showLoadingState: Bool) -> Bool { showLoadingState }
+}
+
+/// A still image's placeholder: the shape of the picture, not a spinner, and not animated.
+struct MediaSkeletonView: View {
+    var scaleFactor: CGFloat = 1.0
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        ZStack {
+            Rectangle().fill(palette.text.opacity(0.06))
+            Image(systemName: "photo")
+                .font(.system(size: 22 * scaleFactor, weight: .regular))
+                .foregroundStyle(palette.text.opacity(0.22))
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(MediaLoading.marker)
+    }
+}

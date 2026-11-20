@@ -1,0 +1,90 @@
+{
+  "_comment": "The 'manifest' cadenceStyle: five entries, leading align, 820x600, no gate satisfied, so the render rests on the first card. timeout:600 on every entry keeps it from advancing.",
+  "preset": "5",
+  "chrome": "card",
+  "width": 820,
+  "height": 600,
+  "title": "Setting up your apps",
+  "highlightColor": "#007AFF",
+  "logoConfig": {
+    "imagePath": "__REPO__/examples/inspect/assets/brand/fleet-logo-dark-rgb.png",
+    "imagePathDark": "__REPO__/examples/inspect/assets/brand/fleet-logo-white-rgb.png",
+    "maxWidth": 120,
+    "maxHeight": 22,
+    "opacity": 1.0,
+    "verticalOffset": 0,
+    "position": "footer"
+  },
+  "introSteps": [
+    {
+      "id": "deploy",
+      "stepType": "cadence",
+      "title": "Setting up your apps",
+      "cadenceStyle": "manifest",
+      "cadenceInterval": 1.0,
+      "cadenceMinDwell": 0.4,
+      "cadence": [
+        {
+          "id": "item-1",
+          "label": "Lorem",
+          "message": "Lorem ipsum dolor sit amet",
+          "sfSymbol": "shippingbox",
+          "attribute": {
+            "source": "native",
+            "type": "file",
+            "path": "/tmp/ax-cadence-minimal-gate-1"
+          },
+          "timeout": 600
+        },
+        {
+          "id": "item-2",
+          "label": "Ipsum",
+          "message": "Consectetur adipiscing elit",
+          "sfSymbol": "network",
+          "attribute": {
+            "source": "native",
+            "type": "file",
+            "path": "/tmp/ax-cadence-minimal-gate-2"
+          },
+          "timeout": 600
+        },
+        {
+          "id": "item-3",
+          "label": "Dolor",
+          "message": "Sed do eiusmod tempor",
+          "sfSymbol": "checklist",
+          "attribute": {
+            "source": "native",
+            "type": "file",
+            "path": "/tmp/ax-cadence-minimal-gate-3"
+          },
+          "timeout": 600
+        },
+        {
+          "id": "item-4",
+          "label": "Sit Amet",
+          "message": "Ut enim ad minim veniam",
+          "sfSymbol": "wind",
+          "attribute": {
+            "source": "native",
+            "type": "file",
+            "path": "/tmp/ax-cadence-minimal-gate-4"
+          },
+          "timeout": 600
+        },
+        {
+          "id": "item-5",
+          "label": "Consectetur",
+          "message": "Quis nostrud exercitation",
+          "sfSymbol": "cone",
+          "attribute": {
+            "source": "native",
+            "type": "file",
+            "path": "/tmp/ax-cadence-minimal-gate-5"
+          },
+          "timeout": 600
+        }
+      ]
+    }
+  ]
+}

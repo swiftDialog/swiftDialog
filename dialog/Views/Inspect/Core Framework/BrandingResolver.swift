@@ -2,18 +2,12 @@
 //  BrandingResolver.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 11/02/2026
-//
-//  Unified MDM-aware branding resolver shared across presets.
-//  Delegates to AppConfigService for MDM override resolution (MDM > JSON).
+//  Branding resolver shared across presets. MDM overrides arrive as `MDMBrandingOverrides`.
 //
 
 import SwiftUI
 
-/// Resolves branding values with MDM override support and optional brand selection.
-/// Usage: `BrandingResolver(config: inspectConfig, mdmOverrides: overrides, selectedBrand: brand)`
-///
-/// Priority: MDM managed preference → selected brand → JSON config value → nil
+/// Resolves branding values. Priority: MDM managed preference → selected brand → JSON config → nil.
 struct BrandingResolver {
     let config: InspectConfig?
     let mdmOverrides: MDMBrandingOverrides?
@@ -57,8 +51,7 @@ struct BrandingResolver {
         return .accentColor
     }
 
-    /// Primary color auto-adapted for the current color scheme.
-    /// Dark brand colors (e.g. Lufthansa #05164D) are auto-lightened in dark mode.
+    /// Primary color adapted for the color scheme: dark brand colors are lightened in dark mode.
     var primaryColor: Color {
         let color = rawPrimaryColor
         return colorScheme == .dark ? color.darkModeAdapted : color

@@ -1,0 +1,278 @@
+{
+  "preset": "7",
+  "highlightColor": "#007AFF",
+  "footerText": "Guided Setup — example",
+  "triggerFile": "/tmp/ignitecli-p7.trigger",
+  "readinessFile": "/tmp/ignitecli-p7.ready",
+  "resultFile": "/tmp/ignitecli-p7-result.json",
+  "brandSelectionKey": "selectedBrand",
+  "brands": [
+    {
+      "id": "acme",
+      "displayName": "Acme Corp",
+      "sfSymbol": "building.2.fill",
+      "highlightColor": "#0A84FF",
+      "footerText": "Acme Corp — IT"
+    },
+    {
+      "id": "globex",
+      "displayName": "Globex",
+      "sfSymbol": "globe.americas.fill",
+      "highlightColor": "#30D158",
+      "footerText": "Globex — Onboarding"
+    }
+  ],
+  "summaryScreen": {
+    "title": "You're all set",
+    "subtitle": "Your Mac is ready to go.",
+    "buttonText": "Done",
+    "autoTransition": false
+  },
+  "introSteps": [
+    {
+      "id": "welcome",
+      "stepType": "intro",
+      "title": "Welcome to your new Mac",
+      "subtitle": "Let's get you set up in a few steps.",
+      "heroImage": "SF=sparkles",
+      "heroImageSize": 80,
+      "continueButtonText": "Get Started",
+      "showBackButton": false,
+      "phase": "intro"
+    },
+    {
+      "id": "brand",
+      "stepType": "brandPicker",
+      "title": "Choose your brand",
+      "subtitle": "Colors and logo adapt to your selection.",
+      "continueButtonText": "Continue",
+      "showBackButton": true
+    },
+    {
+      "id": "wallpaper",
+      "stepType": "intro",
+      "title": "Choose your wallpaper",
+      "subtitle": "Pick a background for your desktop.",
+      "heroImage": "SF=photo.on.rectangle.angled",
+      "heroImageSize": 56,
+      "continueButtonText": "Continue",
+      "showBackButton": true,
+      "phase": "intro",
+      "wallpaper": {
+        "categories": [
+          {
+            "title": "macOS",
+            "images": [
+              {
+                "path": "/System/Library/Desktop Pictures/Sonoma.heic",
+                "title": "Sonoma"
+              },
+              {
+                "path": "/System/Library/Desktop Pictures/Mac Blue.heic",
+                "title": "Blue"
+              },
+              {
+                "path": "/System/Library/Desktop Pictures/Mac Purple.heic",
+                "title": "Purple"
+              },
+              {
+                "path": "/System/Library/Desktop Pictures/Radial Sky Blue.heic",
+                "title": "Sky"
+              }
+            ]
+          }
+        ],
+        "layout": "grid",
+        "selectionKey": "wallpaper",
+        "thumbnailHeight": 88
+      }
+    },
+    {
+      "id": "dock",
+      "stepType": "dock",
+      "title": "Choose your Dock",
+      "subtitle": "Pick a starting layout — added to your existing Dock.",
+      "heroImage": "SF=dock.rectangle",
+      "heroImageSize": 56,
+      "continueButtonText": "Continue",
+      "showBackButton": true,
+      "dock": {
+        "applyMode": "additive",
+        "flavors": [
+          {
+            "id": "essentials",
+            "name": "Essentials",
+            "summary": "Everyday basics",
+            "sfSymbol": "star.fill",
+            "items": [
+              {
+                "label": "Safari",
+                "path": "/Applications/Safari.app",
+                "sfSymbol": "safari"
+              },
+              {
+                "label": "Mail",
+                "path": "/System/Applications/Mail.app",
+                "sfSymbol": "envelope"
+              },
+              {
+                "label": "Notes",
+                "path": "/System/Applications/Notes.app",
+                "sfSymbol": "note.text"
+              },
+              {
+                "label": "Reminders",
+                "path": "/System/Applications/Reminders.app",
+                "sfSymbol": "checklist"
+              }
+            ]
+          },
+          {
+            "id": "creative",
+            "name": "Creative",
+            "summary": "Make & plan",
+            "sfSymbol": "paintbrush.fill",
+            "items": [
+              {
+                "label": "Safari",
+                "path": "/Applications/Safari.app",
+                "sfSymbol": "safari"
+              },
+              {
+                "label": "Photos",
+                "path": "/System/Applications/Photos.app",
+                "sfSymbol": "photo"
+              },
+              {
+                "label": "Freeform",
+                "path": "/System/Applications/Freeform.app",
+                "sfSymbol": "square.on.square"
+              },
+              {
+                "label": "Music",
+                "path": "/System/Applications/Music.app",
+                "sfSymbol": "music.note"
+              }
+            ]
+          }
+        ],
+        "mode": "flavors",
+        "selectionKey": "dock"
+      }
+    },
+    {
+      "id": "browser",
+      "stepType": "options",
+      "title": "Choose your browser",
+      "subtitle": "Which browser should open links by default?",
+      "heroImage": "SF=globe",
+      "heroImageSize": 56,
+      "continueButtonText": "Continue",
+      "showBackButton": true,
+      "option": {
+        "cards": [
+          {
+            "id": "safari",
+            "label": "Safari",
+            "subtitle": "Built in",
+            "iconPath": "/Applications/Safari.app",
+            "value": "com.apple.Safari"
+          },
+          {
+            "id": "chrome",
+            "label": "Chrome",
+            "subtitle": "If installed",
+            "iconPath": "/Applications/Google Chrome.app",
+            "sfSymbol": "globe",
+            "value": "com.google.Chrome"
+          },
+          {
+            "id": "edge",
+            "label": "Edge",
+            "subtitle": "If installed",
+            "iconPath": "/Applications/Microsoft Edge.app",
+            "sfSymbol": "globe",
+            "value": "com.microsoft.edgemac"
+          }
+        ],
+        "key": "browser"
+      }
+    },
+    {
+      "id": "appearance",
+      "stepType": "options",
+      "title": "Light or Dark?",
+      "subtitle": "Choose how macOS looks.",
+      "heroImage": "SF=circle.lefthalf.filled",
+      "heroImageSize": 56,
+      "continueButtonText": "Continue",
+      "showBackButton": true,
+      "option": {
+        "cards": [
+          {
+            "id": "light",
+            "label": "Light",
+            "sfSymbol": "sun.max.fill",
+            "value": "light"
+          },
+          {
+            "id": "dark",
+            "label": "Dark",
+            "sfSymbol": "moon.fill",
+            "value": "dark"
+          },
+          {
+            "id": "auto",
+            "label": "Auto",
+            "subtitle": "Follow the time of day",
+            "sfSymbol": "clock.fill",
+            "value": "auto"
+          }
+        ],
+        "key": "appearance"
+      }
+    },
+    {
+      "id": "settings",
+      "stepType": "intro",
+      "title": "Enable Privacy & Security",
+      "subtitle": "The window slides aside so you can reach System Settings.",
+      "heroImage": "SF=lock.shield",
+      "heroImageSize": 56,
+      "windowPosition": "right",
+      "content": [
+        {
+          "type": "text",
+          "content": "Open System Settings and follow along. This window has moved aside, and returns to center when you continue."
+        },
+        {
+          "type": "image",
+          "content": "SF=hand.point.up.left.and.text",
+          "imageHeight": 120,
+          "caption": "(swap in your screenshot / GIF / .mp4 walkthrough)"
+        },
+        {
+          "type": "button",
+          "content": "Open Privacy & Security",
+          "icon": "lock.shield",
+          "action": "url",
+          "url": "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension"
+        }
+      ],
+      "continueButtonText": "Continue",
+      "showBackButton": true,
+      "phase": "intro"
+    },
+    {
+      "id": "finish",
+      "stepType": "outro",
+      "title": "All set",
+      "subtitle": "Your choices are ready to apply.",
+      "heroImage": "SF=checkmark.seal.fill",
+      "heroImageSize": 80,
+      "continueButtonText": "Finish",
+      "showBackButton": true,
+      "phase": "outro"
+    }
+  ]
+}

@@ -2,9 +2,8 @@
 //  StarterTemplateService.swift
 //  dialog
 //
-//  Starter config templates for all 6 presets.
-//  Each template is a self-contained JSON config that newcomers can
-//  drop onto the Desktop and run immediately.
+//  Starter config templates for presets 1-6, written to ~/Desktop by the `generate` button
+//  action; each is a self-contained JSON config plus a run.sh.
 //
 
 import Foundation
@@ -135,7 +134,7 @@ struct StarterTemplateService {
             "highlightColor": "#FF9500",
             "introScreen": {
                 "title": "Software Check",
-                "subtitle": "Checking 3 applications...",
+                "subtitle": "Checking 3 apps…",
                 "buttonText": "Begin"
             },
             "summaryScreen": {
@@ -281,31 +280,25 @@ struct StarterTemplateService {
             .appendingPathComponent(dirName)
 
         do {
-            // Create directory
             try FileManager.default.createDirectory(at: desktopURL, withIntermediateDirectories: true)
 
-            // Write config.json (pretty-printed by re-serializing)
             let configURL = desktopURL.appendingPathComponent("config.json")
             if let jsonData = template.data(using: .utf8),
                let jsonObject = try? JSONSerialization.jsonObject(with: jsonData),
                let prettyData = try? JSONSerialization.data(withJSONObject: jsonObject, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]) {
                 try prettyData.write(to: configURL)
             } else {
-                // Fallback: write the raw template string
                 try template.write(to: configURL, atomically: true, encoding: .utf8)
             }
 
-            // Write run.sh
             let runURL = desktopURL.appendingPathComponent("run.sh")
             try generateRunScript().write(to: runURL, atomically: true, encoding: .utf8)
 
-            // chmod +x run.sh
             try FileManager.default.setAttributes(
                 [.posixPermissions: 0o755],
                 ofItemAtPath: runURL.path
             )
 
-            // Terminal output
             let divider = String(repeating: "━", count: 66)
             let path = "~/Desktop/\(dirName)/"
             print("""

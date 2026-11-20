@@ -1,0 +1,360 @@
+{
+  "_comment": "The profile's firstLogin flow, opened by orbit as the user at their first login after Setup Experience: team pick, that team's Dock, Screen Sharing, summary. Remind me later (exit 10) offers it again at the next login.",
+  "preset": "5",
+  "title": "Welcome to your Mac",
+  "width": 820,
+  "height": 600,
+  "resumable": true,
+  "deferralConfig": {
+    "enabled": true,
+    "buttonText": "Remind me later",
+    "options": [
+      {
+        "duration": "1d",
+        "label": "Next time I log in"
+      }
+    ]
+  },
+  "introSteps": [
+    {
+      "id": "team",
+      "showBackButton": false,
+      "environments": [
+        {
+          "id": "workstations",
+          "subtitle": "Most employees",
+          "title": "Workstations"
+        },
+        {
+          "id": "engineering",
+          "subtitle": "Developer tooling and admin rights",
+          "title": "Engineering"
+        },
+        {
+          "id": "design",
+          "subtitle": "Creative apps and colour-managed displays",
+          "title": "Design"
+        }
+      ],
+      "subtitle": "Pick your team — we set up your Dock and extras to match.",
+      "footerNote": "Takes about 2 minutes",
+      "continueButtonText": "Continue",
+      "title": "Welcome to your Mac",
+      "stepType": "splash",
+      "environmentKey": "team",
+      "environmentLabel": "Team"
+    },
+    {
+      "optionLayout": "cards",
+      "showWhen": {
+        "anyOf": [
+          "workstations"
+        ],
+        "key": "team"
+      },
+      "id": "dock-workstations",
+      "stepType": "dock",
+      "subtitle": "Pick a starting layout. It's added to your Dock — nothing you have is removed.",
+      "title": "Set up your Dock",
+      "continueButtonText": "Continue",
+      "dock": {
+        "flavors": [
+          {
+            "recommended": true,
+            "id": "essentials",
+            "items": [
+              {
+                "label": "Safari",
+                "path": "/Applications/Safari.app"
+              },
+              {
+                "label": "Mail",
+                "path": "/System/Applications/Mail.app"
+              },
+              {
+                "label": "Calendar",
+                "path": "/System/Applications/Calendar.app"
+              },
+              {
+                "label": "Notes",
+                "path": "/System/Applications/Notes.app"
+              }
+            ],
+            "name": "Essentials",
+            "sfSymbol": "square.grid.2x2",
+            "summary": "Everyday basics"
+          },
+          {
+            "recommended": false,
+            "id": "communication",
+            "items": [
+              {
+                "label": "Mail",
+                "path": "/System/Applications/Mail.app"
+              },
+              {
+                "label": "Calendar",
+                "path": "/System/Applications/Calendar.app"
+              },
+              {
+                "label": "Messages",
+                "path": "/System/Applications/Messages.app"
+              },
+              {
+                "label": "FaceTime",
+                "path": "/System/Applications/FaceTime.app"
+              }
+            ],
+            "name": "Communication",
+            "sfSymbol": "bubble.left.and.bubble.right",
+            "summary": "Talk & meet"
+          }
+        ],
+        "decline": {
+          "label": "Keep my Dock as it is",
+          "subtitle": "Nothing added. You can pick a layout later in Fleet Desktop.",
+          "value": "keep"
+        },
+        "selectionKey": "dock-workstations",
+        "mode": "flavors"
+      },
+      "dockApplyMode": "additive"
+    },
+    {
+      "optionLayout": "cards",
+      "showWhen": {
+        "anyOf": [
+          "engineering"
+        ],
+        "key": "team"
+      },
+      "id": "dock-engineering",
+      "stepType": "dock",
+      "subtitle": "Pick a starting layout. It's added to your Dock — nothing you have is removed.",
+      "title": "Set up your Dock",
+      "continueButtonText": "Continue",
+      "dock": {
+        "flavors": [
+          {
+            "recommended": true,
+            "id": "developer",
+            "items": [
+              {
+                "label": "Safari",
+                "path": "/Applications/Safari.app"
+              },
+              {
+                "label": "Terminal",
+                "path": "/System/Applications/Utilities/Terminal.app"
+              },
+              {
+                "label": "Activity Monitor",
+                "path": "/System/Applications/Utilities/Activity Monitor.app"
+              },
+              {
+                "label": "Notes",
+                "path": "/System/Applications/Notes.app"
+              }
+            ],
+            "name": "Developer",
+            "sfSymbol": "chevron.left.forwardslash.chevron.right",
+            "summary": "Build & ship"
+          },
+          {
+            "recommended": false,
+            "id": "essentials",
+            "items": [
+              {
+                "label": "Safari",
+                "path": "/Applications/Safari.app"
+              },
+              {
+                "label": "Mail",
+                "path": "/System/Applications/Mail.app"
+              },
+              {
+                "label": "Calendar",
+                "path": "/System/Applications/Calendar.app"
+              },
+              {
+                "label": "Notes",
+                "path": "/System/Applications/Notes.app"
+              }
+            ],
+            "name": "Essentials",
+            "sfSymbol": "square.grid.2x2",
+            "summary": "Everyday basics"
+          }
+        ],
+        "decline": {
+          "label": "Keep my Dock as it is",
+          "subtitle": "Nothing added. You can pick a layout later in Fleet Desktop.",
+          "value": "keep"
+        },
+        "selectionKey": "dock-engineering",
+        "mode": "flavors"
+      },
+      "dockApplyMode": "additive"
+    },
+    {
+      "optionLayout": "cards",
+      "showWhen": {
+        "anyOf": [
+          "design"
+        ],
+        "key": "team"
+      },
+      "id": "dock-design",
+      "stepType": "dock",
+      "subtitle": "Pick a starting layout. It's added to your Dock — nothing you have is removed.",
+      "title": "Set up your Dock",
+      "continueButtonText": "Continue",
+      "dock": {
+        "flavors": [
+          {
+            "recommended": true,
+            "id": "creative",
+            "items": [
+              {
+                "label": "Safari",
+                "path": "/Applications/Safari.app"
+              },
+              {
+                "label": "Photos",
+                "path": "/System/Applications/Photos.app"
+              },
+              {
+                "label": "Freeform",
+                "path": "/System/Applications/Freeform.app"
+              },
+              {
+                "label": "Preview",
+                "path": "/System/Applications/Preview.app"
+              }
+            ],
+            "name": "Creative",
+            "sfSymbol": "paintbrush",
+            "summary": "Make & plan"
+          },
+          {
+            "recommended": false,
+            "id": "essentials",
+            "items": [
+              {
+                "label": "Safari",
+                "path": "/Applications/Safari.app"
+              },
+              {
+                "label": "Mail",
+                "path": "/System/Applications/Mail.app"
+              },
+              {
+                "label": "Calendar",
+                "path": "/System/Applications/Calendar.app"
+              },
+              {
+                "label": "Notes",
+                "path": "/System/Applications/Notes.app"
+              }
+            ],
+            "name": "Essentials",
+            "sfSymbol": "square.grid.2x2",
+            "summary": "Everyday basics"
+          }
+        ],
+        "decline": {
+          "label": "Keep my Dock as it is",
+          "subtitle": "Nothing added. You can pick a layout later in Fleet Desktop.",
+          "value": "keep"
+        },
+        "selectionKey": "dock-design",
+        "mode": "flavors"
+      },
+      "dockApplyMode": "additive"
+    },
+    {
+      "content": [
+        {
+          "checklist": [
+            {
+              "text": "Open Sharing settings",
+              "hint": "the button below takes you there"
+            },
+            {
+              "text": "Find Screen Sharing",
+              "hint": "under General › Sharing"
+            },
+            {
+              "paths": [
+                "/private/var/db/com.apple.xpc.launchd/disabled.plist"
+              ],
+              "text": "Switch Screen Sharing on",
+              "hint": "this line ticks when it's on",
+              "evaluation": "equals",
+              "expectedValue": "false",
+              "plistKey": "com.apple.screensharing"
+            }
+          ],
+          "type": "checklist"
+        },
+        {
+          "buttonStyle": "borderedProminent",
+          "content": "Open Sharing settings",
+          "icon": "gearshape",
+          "type": "button",
+          "url": "x-apple.systempreferences:com.apple.Sharing-Settings.extension?Services_ScreenSharing",
+          "action": "url"
+        },
+        {
+          "content": "This window moved aside · it re-centres when you continue",
+          "style": "chip",
+          "type": "info"
+        }
+      ],
+      "subtitle": "So IT can help when you ask. Nobody can connect without you knowing.",
+      "id": "screen-sharing",
+      "stepType": "media",
+      "media": {
+        "fit": "fit",
+        "ratio": 0.4,
+        "side": "right"
+      },
+      "title": "Turn on Screen Sharing",
+      "continueButtonText": "Continue",
+      "windowPosition": "left",
+      "heroImage": "SF=rectangle.inset.filled.and.person.filled"
+    },
+    {
+      "phase": "outro",
+      "receipt": [
+        {
+          "label": "Team",
+          "stepId": "team",
+          "selectionKey": "team"
+        },
+        {
+          "label": "Dock",
+          "stepId": "dock-workstations",
+          "selectionKey": "dock-workstations"
+        },
+        {
+          "label": "Dock",
+          "stepId": "dock-engineering",
+          "selectionKey": "dock-engineering"
+        },
+        {
+          "label": "Dock",
+          "stepId": "dock-design",
+          "selectionKey": "dock-design"
+        }
+      ],
+      "id": "finish",
+      "stepType": "outro",
+      "heroImageSize": 44,
+      "subtitle": "Change any of these later in Fleet Desktop.",
+      "continueButtonText": "Start using my Mac",
+      "title": "You're all set",
+      "heroImage": "SF=checkmark.seal.fill"
+    }
+  ]
+}

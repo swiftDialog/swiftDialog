@@ -2,18 +2,8 @@
 //  MonitoringModule.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 22/01/2026
-//
-//  Unified monitoring module for Inspect presets
-//
-//  This module provides a clean interface for monitoring:
-//  - Plist file changes with validation
-//  - JSON file monitoring
-//  - Log file monitoring (via LogMonitorService)
-//  - Installation status tracking
-//
-//  Builds on existing services: LogMonitorService, FileMonitor, Monitoring
-//  Used by: Preset6, Preset5 (and future presets)
+//  `UnifiedMonitoringService`: install detection, plist/JSON monitoring, log monitor status and
+//  receipt census for Preset 5 (one @StateObject per preset).
 //
 
 import Foundation
@@ -22,40 +12,13 @@ import Combine
 
 // MARK: - Item Status Enum
 
-/// Unified status for monitoring items
-enum MonitoringItemStatus: Equatable {
-    case pending
-    case downloading(progress: Double?)
-    case installing(progress: Double?, message: String?)
-    case completed
-    case failed(reason: String?)
+/// Lifecycle predicates on the shared `StepStatus` vocabulary.
+extension StepStatus {
+    /// Work is happening right now.
+    var isActive: Bool { self == .active }
 
-    /// Simple status for basic comparisons
-    var simpleStatus: String {
-        switch self {
-        case .pending: return "pending"
-        case .downloading: return "downloading"
-        case .installing: return "installing"
-        case .completed: return "completed"
-        case .failed: return "failed"
-        }
-    }
-
-    /// Whether this status indicates an active operation
-    var isActive: Bool {
-        switch self {
-        case .downloading, .installing: return true
-        default: return false
-        }
-    }
-
-    /// Whether this status indicates completion (success or failure)
-    var isTerminal: Bool {
-        switch self {
-        case .completed, .failed: return true
-        default: return false
-        }
-    }
+    /// The state is decided and will not change on its own.
+    var isTerminal: Bool { self == .completed || self == .failed || self == .skipped }
 }
 
 // MARK: - Validation Result
@@ -85,71 +48,75 @@ struct MonitoringValidationResult: Equatable {
     static let unknown = MonitoringValidationResult(isValid: false, message: "Not validated")
 }
 
-// MARK: - Monitoring Service Protocol
-
-/// Protocol for monitoring services to implement
-protocol MonitoringServiceProtocol: ObservableObject {
-    var itemStatuses: [String: MonitoringItemStatus] { get }
-    var validationResults: [String: MonitoringValidationResult] { get }
-
-    func startMonitoring(items: [InspectConfig.ItemConfig])
-    func stopMonitoring()
-    func validateItem(_ item: InspectConfig.ItemConfig) -> MonitoringValidationResult
-    func forceStatusCheck()
-}
-
 // MARK: - Unified Monitoring Service
 
-/// Unified monitoring service that coordinates multiple monitoring sources
-///
-/// This service provides a single point of contact for all monitoring needs:
-/// - File/App installation detection
-/// - Plist monitoring and validation
-/// - Log monitoring integration
-/// - Status aggregation
-///
-/// ## Usage Example
-/// ```swift
-/// @StateObject private var monitoringService = UnifiedMonitoringService()
-///
-/// var body: some View {
-///     ForEach(items) { item in
-///         ItemRow(
-///             item: item,
-///             status: monitoringService.itemStatuses[item.id] ?? .pending
-///         )
-///     }
-///     .onAppear {
-///         monitoringService.startMonitoring(items: items)
-///     }
-/// }
-/// ```
-class UnifiedMonitoringService: ObservableObject {
+/// What a detection pass may do to a status it did not produce. Pure, so tests can check it.
+/// A completed item may fall back only in catalogue mode (`reflectsCurrentState`); install runs latch.
+/// Absence never overwrites a reported `.failed` (or `.skipped`): only progress (`satisfied > 0`) or
+/// the app itself (`done`) can, so an orchestrator's `failure:` stays visible. Used by the requirement
+/// branch only.
+enum CatalogueStatusRule {
+
+    /// The status to publish, or nil to leave the item unchanged.
+    static func resolve(previous: StepStatus?,
+                        done: Bool,
+                        satisfied: Int,
+                        reflectsCurrentState: Bool) -> StepStatus? {
+        if done { return previous == .completed ? nil : .completed }
+
+        // The one-way completion latch, released only for a catalogue.
+        if previous == .completed && !reflectsCurrentState { return nil }
+
+        // Detection sees only presence, so it cannot refute a failure or a skip decision.
+        if (previous == .failed || previous == .skipped) && satisfied == 0 { return nil }
+
+        let candidate: StepStatus = satisfied > 0 ? .active : .pending
+        return previous == candidate ? nil : candidate
+    }
+}
+
+/// Coordinates install detection, plist and JSON monitoring, and log monitor statuses for a set of items.
+/// `@MainActor`: it is UI state on one `@StateObject` in `Preset5View`, its polls are main-actor `Poll`s
+/// and its Combine feed receives on main, so `Task { @MainActor … }` only defers, never changes thread.
+@MainActor
+final class UnifiedMonitoringService: ObservableObject {
 
     // MARK: - Published Properties
 
-    @Published public private(set) var itemStatuses: [String: MonitoringItemStatus] = [:]
+    @Published public private(set) var itemStatuses: [String: StepStatus] = [:]
+    /// When an installed item disappeared (`[id: Date]`), for the removal notice. Separate from
+    /// `InspectState.removedItems`, which tracks the config-level `items[]`; this tracks the step-authored
+    /// items a Preset 5 flow passes in, and Preset 5 screens read removals here.
+    @Published public private(set) var removedItems: [String: Date] = [:]
     @Published public private(set) var validationResults: [String: MonitoringValidationResult] = [:]
     @Published public private(set) var progressValues: [String: Double] = [:]
     @Published public private(set) var statusMessages: [String: String] = [:]
 
     // MARK: - Private Properties
 
-    private var items: [InspectConfig.ItemConfig] = []
+    private var items: [any MonitoredItem] = []
     private var plistMonitorTasks: [String: PlistMonitorTask] = [:]
     private var jsonMonitorTasks: [String: JsonMonitorTask] = [:]
     private var cancellables = Set<AnyCancellable>()
     private let fileSystemCache = FileSystemCache()
-    private var statusCheckTimer: Timer?
+    private var statusCheck: Poll?
     private var cachePaths: [String] = []
     private var cacheExtensions: [String] = [".download", ".pkg", ".dmg"]
+    private var receiptsBasePath: String = "/var/db/receipts"
+    /// Status poll interval, from the config's `scanInterval`.
+    private(set) var statusInterval: TimeInterval = InspectConstants.robustUpdateInterval
+    /// `receiptCensus`: the receipts present at start; nil when the census is off.
+    private var receiptBaseline: Set<String>?
+    /// Rows the census completed. A one-way latch the other engines respect, so a row does not flap.
+    private var censusCompleted: Set<String> = []
+    private var lastCensusFiles = -1
     private var plistBaselines: [String: String?] = [:]  // Change detection baselines
     private var plistBaselinesInitialized: Set<String> = []
 
     // MARK: - Plist Monitor Task
 
     private struct PlistMonitorTask {
-        let timer: Timer
+        let poll: Poll
         let itemId: String
         let plistPath: String
         let plistKey: String
@@ -161,7 +128,7 @@ class UnifiedMonitoringService: ObservableObject {
     // MARK: - JSON Monitor Task
 
     private struct JsonMonitorTask {
-        let timer: Timer
+        let poll: Poll
         let itemId: String
         let jsonPath: String
         let jsonKey: String
@@ -172,85 +139,111 @@ class UnifiedMonitoringService: ObservableObject {
     // MARK: - Initialization
 
     init() {
-        // Subscribe to LogMonitorService status updates
         LogMonitorService.shared.$latestStatuses
             .receive(on: DispatchQueue.main)
             .sink { [weak self] statuses in
-                self?.handleLogMonitorStatuses(statuses)
+                // `.receive(on: .main)` guarantees isolation; the closure's type cannot express it.
+                MainActor.assumeIsolated { self?.handleLogMonitorStatuses(statuses) }
             }
             .store(in: &cancellables)
     }
 
     // MARK: - Public API
 
-    /// Start monitoring the given items
+    /// Catalogue mode: report current state instead of latching completion, so a removed app reads as missing.
+    private var reflectsCurrentState = false
+
+    /// The step id that owns the current session. SwiftUI runs the next view's `onAppear` before the
+    /// previous view's `onDisappear`, so stops are checked against this owner. nil means unowned:
+    /// `stopMonitoring()` still stops it, `stopMonitoring(owner:)` never does.
+    private(set) var monitoringOwner: String?
+
+    /// Starts monitoring the given items.
     /// - Parameters:
     ///   - items: Items to monitor
     ///   - cachePaths: Optional cache paths for download detection
-    func startMonitoring(items: [InspectConfig.ItemConfig], cachePaths: [String] = [], cacheExtensions: [String]? = nil) {
+    ///   - receiptsBasePath: Base directory for `receipt` requirements (overridable for tests)
+    func startMonitoring(items: [any MonitoredItem], cachePaths: [String] = [], cacheExtensions: [String]? = nil,
+                         receiptsBasePath: String? = nil, reflectsCurrentState: Bool = false,
+                         receiptCensus: Bool = false, scanInterval: Int? = nil,
+                         owner: String? = nil) {
+        self.statusInterval = InspectConstants.scanInterval(scanInterval)
+        self.monitoringOwner = owner
         self.items = items
         self.cachePaths = cachePaths
         self.cacheExtensions = cacheExtensions ?? [".download", ".pkg", ".dmg"]
+        self.receiptsBasePath = receiptsBasePath ?? "/var/db/receipts"
+        self.reflectsCurrentState = reflectsCurrentState
+        // The receipt baseline is taken once here; only receipts that appear later count.
+        self.receiptBaseline = receiptCensus ? ReceiptCensus.identifiers(in: self.receiptsBasePath) : nil
+        self.censusCompleted = []
+        if let baseline = receiptBaseline {
+            DetectionLog.trace("receipt census ON: \(baseline.count) receipts at baseline in \(self.receiptsBasePath)")
+        }
 
         writeLog("UnifiedMonitoringService: Starting monitoring for \(items.count) items", logLevel: .info)
 
-        // Initialize all items as pending
         for item in items where itemStatuses[item.id] == nil {
             itemStatuses[item.id] = .pending
         }
 
-        // Set items for LogMonitorService
         LogMonitorService.shared.setItems(items)
 
-        // Start plist monitoring for items with plist config
         for item in items {
             startPlistMonitoringIfNeeded(for: item)
             startJsonMonitoringIfNeeded(for: item)
         }
 
-        // Start periodic status check timer
         startStatusCheckTimer()
 
-        // Initial status check
         performStatusCheck()
     }
 
-    /// Stop all monitoring
+    /// Ownership-checked stop, for screens: a no-op unless `owner` still holds the session. Returns whether it
+    /// stopped, so the caller gates its own teardown (the shared log monitor) on the same answer.
+    @discardableResult
+    func stopMonitoring(owner: String) -> Bool {
+        guard monitoringOwner == owner else {
+            writeLog("UnifiedMonitoringService: Ignoring stop from '\(owner)' — the session belongs to '\(monitoringOwner ?? "no one")'",
+                     logLevel: .debug)
+            return false
+        }
+        stopMonitoring()
+        return true
+    }
+
+    /// Stops all monitoring unconditionally, for shutdown and tests. Screens use `stopMonitoring(owner:)`.
     func stopMonitoring() {
         writeLog("UnifiedMonitoringService: Stopping all monitoring", logLevel: .info)
+        monitoringOwner = nil
 
-        // Stop status check timer
-        statusCheckTimer?.invalidate()
-        statusCheckTimer = nil
+        statusCheck?.cancel()
+        statusCheck = nil
 
-        // Stop all plist monitors
         for (_, task) in plistMonitorTasks {
-            task.timer.invalidate()
+            task.poll.cancel()
         }
         plistMonitorTasks.removeAll()
 
-        // Stop all JSON monitors
         for (_, task) in jsonMonitorTasks {
-            task.timer.invalidate()
+            task.poll.cancel()
         }
         jsonMonitorTasks.removeAll()
 
-        // Cancel subscriptions
         cancellables.removeAll()
     }
 
-    /// Force an immediate status check
+    /// Runs a status check now.
     func forceStatusCheck() {
         performStatusCheck()
     }
 
-    /// Validate a specific item
-    func validateItem(_ item: InspectConfig.ItemConfig) -> MonitoringValidationResult {
+    /// Validates one item.
+    func validateItem(_ item: any MonitoredItem) -> MonitoringValidationResult {
         guard let plistKey = item.plistKey else {
             return .unknown
         }
 
-        // Find plist path from item paths
         let plistPath = item.paths.first { $0.hasSuffix(".plist") } ?? item.paths.first ?? ""
         guard !plistPath.isEmpty else {
             return MonitoringValidationResult(isValid: false, message: "No plist path configured")
@@ -264,76 +257,132 @@ class UnifiedMonitoringService: ObservableObject {
         )
     }
 
-    /// Mark an item as completed (external trigger)
+    /// Marks an item completed (external trigger).
     func markCompleted(_ itemId: String) {
-        DispatchQueue.main.async { [weak self] in
+        Task { @MainActor [weak self] in
             self?.itemStatuses[itemId] = .completed
             writeLog("UnifiedMonitoringService: Item '\(itemId)' marked completed (external)", logLevel: .info)
         }
     }
 
-    /// Mark an item as failed (external trigger)
+    /// Marks an item failed (external trigger).
     func markFailed(_ itemId: String, reason: String?) {
-        DispatchQueue.main.async { [weak self] in
-            self?.itemStatuses[itemId] = .failed(reason: reason)
+        Task { @MainActor [weak self] in
+            self?.statusMessages[itemId] = reason
+            self?.itemStatuses[itemId] = .failed
             writeLog("UnifiedMonitoringService: Item '\(itemId)' marked failed (external): \(reason ?? "unknown")", logLevel: .info)
         }
     }
 
-    /// Set item status from external trigger command (generic version of markCompleted/markFailed)
-    func setItemStatus(_ itemId: String, status: MonitoringItemStatus) {
-        DispatchQueue.main.async { [weak self] in
+    /// Sets an item's status from an external command.
+    func setItemStatus(_ itemId: String, status: StepStatus) {
+        Task { @MainActor [weak self] in
             self?.itemStatuses[itemId] = status
-            writeLog("UnifiedMonitoringService: Item '\(itemId)' set to \(status.simpleStatus) (trigger)", logLevel: .info)
+            writeLog("UnifiedMonitoringService: Item '\(itemId)' set to \(status.rawValue) (trigger)", logLevel: .info)
         }
     }
 
-    /// Set a custom status message for an item
+    /// Sets a custom status message for an item.
     func setStatusMessage(_ itemId: String, message: String) {
-        DispatchQueue.main.async { [weak self] in
+        Task { @MainActor [weak self] in
             self?.statusMessages[itemId] = message
         }
     }
 
-    /// Update progress for an item
+    /// Sets only the percent (0–100) for `progress:<id>`; the status stays as the last status command set it.
+    func setProgress(_ itemId: String, percent: Double) {
+        Task { @MainActor [weak self] in
+            self?.progressValues[itemId] = min(100, max(0, percent))
+        }
+    }
+
+    /// Updates an item's progress.
     func updateProgress(_ itemId: String, progress: Double, message: String? = nil) {
-        DispatchQueue.main.async { [weak self] in
+        Task { @MainActor [weak self] in
             self?.progressValues[itemId] = progress
             if let message = message {
                 self?.statusMessages[itemId] = message
             }
-            self?.itemStatuses[itemId] = .installing(progress: progress, message: message)
+            self?.itemStatuses[itemId] = .active
         }
     }
 
     // MARK: - Private Methods
 
+    /// Status, plist and JSON polls are `Poll`s (Clocks.swift), main-actor by type.
     private func startStatusCheckTimer() {
-        statusCheckTimer?.invalidate()
-        statusCheckTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
-            self?.performStatusCheck()
-        }
+        statusCheck?.cancel()
+        let poll = Poll(every: statusInterval)
+        statusCheck = poll
+        poll.start { [weak self] in self?.performStatusCheck() }
     }
 
     private func performStatusCheck() {
+        pruneRemovalNotices()
+        // Completions decided this pass but not yet published; the census must count them.
+        var completedThisPass = Set<String>()
         for item in items {
-            // Skip items with empty paths (managed externally)
+            // A census completion is final for this run.
+            if censusCompleted.contains(item.id) { continue }
+            // Requirement-based card: the group verdict replaces the path/plist checks, and partial satisfaction
+            // shows as installing.
+            if let group = RequirementEvaluator.evaluate(item, receiptsBasePath: receiptsBasePath) {
+                let previous = itemStatuses[item.id]
+                // `CatalogueStatusRule` decides what this pass may publish.
+                let verdict = CatalogueStatusRule.resolve(previous: previous,
+                                                          done: group.done,
+                                                          satisfied: group.satisfied,
+                                                          reflectsCurrentState: reflectsCurrentState)
+                if group.done {
+                    if verdict == .completed {
+                        // Log the transition with its evidence (`resolve` returns nil for a row already completed).
+                        DetectionLog.note(itemId: item.id,
+                                          from: previous == .active ? "installing" : "pending",
+                                          to: "completed", by: .requirements)
+                        let satisfied = (item.requirements ?? [])
+                            .filter { RequirementEvaluator.isSatisfied($0, receiptsBasePath: receiptsBasePath) }
+                            .map(DetectionLog.evidence)
+                        DetectionLog.trace("  \(item.id) satisfied by: " + satisfied.joined(separator: ", "))
+                        completedThisPass.insert(item.id)
+                        Task { @MainActor [weak self] in
+                            self?.itemStatuses[item.id] = .completed
+                            writeLog("UnifiedMonitoringService: Item '\(item.displayName)' requirements satisfied (\(group.satisfied)/\(group.total))", logLevel: .info)
+                        }
+                    }
+                } else {
+                    if verdict == .active {
+                        DetectionLog.note(itemId: item.id, from: "pending", to: "installing", by: .requirements)
+                        DetectionLog.trace("  \(item.id) partial \(group.satisfied)/\(group.total)")
+                    }
+                    // Requirement progress goes to the progress and message stores; the state is active.
+                    if group.satisfied > 0 {
+                        // Progress is in percent here (CircularProgressIndicator trims at progress/100).
+                        progressValues[item.id] = Double(group.satisfied) / Double(group.total) * 100
+                        statusMessages[item.id] = "\(group.satisfied) of \(group.total)"
+                    }
+                    if let status = verdict {
+                        Task { @MainActor [weak self] in
+                            self?.itemStatuses[item.id] = status
+                        }
+                    }
+                }
+                continue
+            }
+
+            // Items without paths are managed externally.
             guard !item.paths.isEmpty else { continue }
 
             let wasCompleted = itemStatuses[item.id] == .completed
 
-            // Check if file exists at path
             let fileExists = item.paths.first { path in
                 FileManager.default.fileExists(atPath: path)
             } != nil
 
-            // If item has plist validation (plistKey + evaluation), require it to pass
-            // before marking as completed. This prevents items that monitor plist VALUES
-            // (e.g., Dark Mode detection) from completing just because the plist file exists.
+            // With plist validation (plistKey + evaluation), the value must pass, not just the file exist.
             let isInstalled: Bool
             if fileExists, let plistKey = item.plistKey, !plistKey.isEmpty, item.evaluation != nil {
                 if item.evaluation == "changed" {
-                    // Change detection: read current value and compare to baseline
+                    // Change detection: compare the current value to the baseline.
                     let plistPath = item.paths.first { $0.hasSuffix(".plist") } ?? item.paths.first ?? ""
                     let currentValue: String?
                     if item.useUserDefaults == true {
@@ -372,7 +421,7 @@ class UnifiedMonitoringService: ObservableObject {
                         evaluation: item.evaluation
                     )
                     isInstalled = result.isValid
-                    DispatchQueue.main.async { [weak self] in
+                    Task { @MainActor [weak self] in
                         self?.validationResults[item.id] = result
                     }
                 }
@@ -380,30 +429,80 @@ class UnifiedMonitoringService: ObservableObject {
                 isInstalled = fileExists
             }
 
+            // A reinstall clears the removal notice, whether or not this pass also changes the status.
+            if isInstalled, removedItems[item.id] != nil {
+                Task { @MainActor [weak self] in
+                    self?.removedItems.removeValue(forKey: item.id)
+                }
+            }
+
             if isInstalled && !wasCompleted {
-                DispatchQueue.main.async { [weak self] in
+                completedThisPass.insert(item.id)
+                Task { @MainActor [weak self] in
                     self?.itemStatuses[item.id] = .completed
                     writeLog("UnifiedMonitoringService: Item '\(item.displayName)' detected as installed", logLevel: .info)
                 }
             } else if !isInstalled && wasCompleted {
-                // Item was removed
-                DispatchQueue.main.async { [weak self] in
+                Task { @MainActor [weak self] in
+                    // The state stays pending; the date records that it was removed rather than never installed.
                     self?.itemStatuses[item.id] = .pending
-                    writeLog("UnifiedMonitoringService: Item '\(item.displayName)' no longer installed", logLevel: .info)
+                    self?.removedItems[item.id] = Date()
+                    writeLog("UnifiedMonitoringService: Item '\(item.displayName)' no longer installed — recorded a removal notice", logLevel: .info)
                 }
             } else if !isInstalled {
-                // Check if downloading (in cache)
                 let isDownloading = checkIfDownloading(item)
                 if isDownloading {
-                    DispatchQueue.main.async { [weak self] in
-                        self?.itemStatuses[item.id] = .downloading(progress: nil)
+                    Task { @MainActor [weak self] in
+                        self?.itemStatuses[item.id] = .active
                     }
                 }
             }
         }
+        // The receipt census runs after every row; rows already completed by other means are counted first
+        // so a receipt is never counted twice.
+        if let baseline = receiptBaseline {
+            let isDone = { (id: String) in
+                self.itemStatuses[id] == .completed || self.censusCompleted.contains(id) || completedThisPass.contains(id)
+            }
+            let now = ReceiptCensus.receipts(in: receiptsBasePath)
+            let done = ReceiptCensus.newInstalls(now: now, baseline: baseline, total: items.count)
+            let already = items.filter { isDone($0.id) }.count
+            // Log the counts whenever they change, so a field log can be read without the receipts directory.
+            let files = now.filter { !baseline.contains($0.id) }.count
+            if files != lastCensusFiles {
+                lastCensusFiles = files
+                let owned = items.filter { isDone($0.id) }
+                    .map { "\($0.id)=\(itemStatuses[$0.id]?.rawValue ?? "nil")\(censusCompleted.contains($0.id) ? "(census)" : "")" }
+                DetectionLog.trace("  census sees \(files) new receipt file(s) = \(done) install(s); \(already) row(s) already done by other engines: \(owned.joined(separator: " "))")
+            }
+            var toMark = done - already
+            if toMark > 0 {
+                for item in items where toMark > 0 && !isDone(item.id)
+                        && itemStatuses[item.id] != .failed && itemStatuses[item.id] != .skipped {
+                    let previous = itemStatuses[item.id]
+                    censusCompleted.insert(item.id)
+                    Task { @MainActor [weak self] in self?.itemStatuses[item.id] = .completed }
+                    DetectionLog.note(itemId: item.id, from: previous == .active ? "installing" : "pending",
+                                      to: "completed", by: .census)
+                    toMark -= 1
+                }
+                DetectionLog.trace("  census: \(files) new receipt file(s) in \(done) install(s) since baseline → \(done) of \(items.count) rows")
+            }
+        }
+
     }
 
-    private func checkIfDownloading(_ item: InspectConfig.ItemConfig) -> Bool {
+    /// Removes expired removal notices using `AppInspector.expiredNotices` and the shared
+    /// `removalNoticeDwell`. `now` is for tests.
+    func pruneRemovalNotices(now: Date = Date()) {
+        let expired = AppInspector.expiredNotices(removedItems, now: now)
+        guard !expired.isEmpty else { return }
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            for id in expired { self.removedItems.removeValue(forKey: id) }
+        }    }
+
+    private func checkIfDownloading(_ item: any MonitoredItem) -> Bool {
         for cachePath in cachePaths {
             guard let contents = try? FileManager.default.contentsOfDirectory(atPath: cachePath) else {
                 continue
@@ -419,24 +518,18 @@ class UnifiedMonitoringService: ObservableObject {
     }
 
     private func isDownloadFile(_ filename: String) -> Bool {
-        let lowercased = filename.lowercased()
-        return cacheExtensions.contains { lowercased.hasSuffix($0) } ||
-               lowercased.contains(".partial") ||
-               lowercased.contains(".tmp")
+        FilenameMatching.isDownloadFile(filename, cacheExtensions: cacheExtensions,
+                                        includeInstallerMarkers: false)
     }
 
-    private func fileMatchesItem(_ filename: String, item: InspectConfig.ItemConfig) -> Bool {
-        let cleanFilename = filename.lowercased()
-        let cleanItemId = item.id.lowercased()
-        let cleanDisplayName = item.displayName.lowercased().replacingOccurrences(of: " ", with: "")
-
-        return cleanFilename.contains(cleanItemId) ||
-               cleanFilename.contains(cleanDisplayName)
+    private func fileMatchesItem(_ filename: String, item: any MonitoredItem) -> Bool {
+        FilenameMatching.directMatch(itemId: item.id, displayName: item.displayName,
+                                     filename: filename)
     }
 
     // MARK: - Plist Monitoring
 
-    private func startPlistMonitoringIfNeeded(for item: InspectConfig.ItemConfig) {
+    private func startPlistMonitoringIfNeeded(for item: any MonitoredItem) {
         guard let recheckInterval = item.plistRecheckInterval, recheckInterval > 0,
               let plistKey = item.plistKey else {
             return
@@ -445,15 +538,13 @@ class UnifiedMonitoringService: ObservableObject {
         let plistPath = item.paths.first { $0.hasSuffix(".plist") } ?? item.paths.first ?? ""
         guard !plistPath.isEmpty else { return }
 
-        // Stop existing monitor if any
-        plistMonitorTasks[item.id]?.timer.invalidate()
+        plistMonitorTasks[item.id]?.poll.cancel()
 
-        let timer = Timer.scheduledTimer(withTimeInterval: Double(recheckInterval), repeats: true) { [weak self] _ in
-            self?.checkPlistValue(for: item, at: plistPath, key: plistKey)
-        }
+        let poll = Poll(every: Double(recheckInterval))
+        poll.start { [weak self] in self?.checkPlistValue(for: item, at: plistPath, key: plistKey) }
 
         plistMonitorTasks[item.id] = PlistMonitorTask(
-            timer: timer,
+            poll: poll,
             itemId: item.id,
             plistPath: plistPath,
             plistKey: plistKey,
@@ -465,8 +556,8 @@ class UnifiedMonitoringService: ObservableObject {
         writeLog("UnifiedMonitoringService: Started plist monitoring for \(item.id)", logLevel: .info)
     }
 
-    private func checkPlistValue(for item: InspectConfig.ItemConfig, at plistPath: String, key plistKey: String) {
-        // Support useUserDefaults for cached/instant reads (e.g., global preferences)
+    private func checkPlistValue(for item: any MonitoredItem, at plistPath: String, key plistKey: String) {
+        // useUserDefaults gives cached reads (e.g. global preferences).
         let result: MonitoringValidationResult
         if item.useUserDefaults == true {
             result = validatePlistValueViaUserDefaults(for: item, at: plistPath, key: plistKey)
@@ -479,14 +570,13 @@ class UnifiedMonitoringService: ObservableObject {
             )
         }
 
-        DispatchQueue.main.async { [weak self] in
+        Task { @MainActor [weak self] in
             let oldResult = self?.validationResults[item.id]
             self?.validationResults[item.id] = result
 
             if oldResult?.isValid != result.isValid {
                 writeLog("UnifiedMonitoringService: Validation changed for \(item.id): \(result.isValid)", logLevel: .info)
 
-                // Drive item completion/reset based on plist validation
                 if result.isValid {
                     self?.itemStatuses[item.id] = .completed
                     writeLog("UnifiedMonitoringService: Item '\(item.displayName)' completed via plist validation", logLevel: .info)
@@ -498,32 +588,39 @@ class UnifiedMonitoringService: ObservableObject {
         }
     }
 
-    /// Read plist value via UserDefaults for faster/cached reads (especially global preferences)
-    private func validatePlistValueViaUserDefaults(for item: InspectConfig.ItemConfig, at plistPath: String, key plistKey: String) -> MonitoringValidationResult {
+    /// Reads a plist value through UserDefaults for cached reads (especially global preferences).
+    private func validatePlistValueViaUserDefaults(for item: any MonitoredItem, at plistPath: String, key plistKey: String) -> MonitoringValidationResult {
         let expandedPath = (plistPath as NSString).expandingTildeInPath
 
-        // Derive domain from path: ~/Library/Preferences/com.example.plist → com.example
+        // Domain from path: ~/Library/Preferences/com.example.plist → com.example
         let filename = (expandedPath as NSString).lastPathComponent
         let domain = (filename as NSString).deletingPathExtension
 
         let actualValue: String?
         if domain == ".GlobalPreferences" {
-            // Global preferences: use UserDefaults.standard which includes the global domain
+            // Global preferences: UserDefaults.standard includes the global domain.
             actualValue = UserDefaults.standard.string(forKey: plistKey)
         } else {
             actualValue = UserDefaults(suiteName: domain)?.string(forKey: plistKey)
         }
 
-        let evaluationType = item.evaluation ?? "equals"
+        // The shared default operator, as on the poller paths.
+        guard let op = EvaluationOperator.resolve(evaluation: item.evaluation,
+                                                  expectedValue: item.expectedValue) else {
+            return MonitoringValidationResult(isValid: false, actualValue: actualValue,
+                                              message: "Unknown evaluation '\(item.evaluation ?? "")'")
+        }
         let isValid: Bool
-        switch evaluationType {
-        case "exists":
+        switch op {
+        case .exists:
             isValid = actualValue != nil && !(actualValue?.isEmpty ?? true)
-        case "boolean":
+        case .boolean:
             isValid = actualValue == "1" || actualValue?.lowercased() == "true"
-        case "contains":
-            isValid = actualValue?.contains(item.expectedValue ?? "") ?? false
-        case "range":
+        case .contains:
+            // Stringified upstream; see EvaluationOperator.containsMatch.
+            isValid = EvaluationOperator.containsMatch(value: actualValue as Any,
+                                                       expected: item.expectedValue)
+        case .range:
             if let actual = Int(actualValue ?? ""),
                let parts = item.expectedValue?.split(separator: "-"),
                parts.count == 2,
@@ -532,8 +629,11 @@ class UnifiedMonitoringService: ObservableObject {
             } else {
                 isValid = false
             }
-        default: // "equals"
+        case .equals:
             isValid = actualValue == item.expectedValue
+        case .changed, .withinSeconds:
+            // `changed` and recency are not supported here; fail closed.
+            isValid = false
         }
 
         return MonitoringValidationResult(isValid: isValid, actualValue: actualValue, message: isValid ? "Validated" : "Not yet valid")
@@ -555,20 +655,27 @@ class UnifiedMonitoringService: ObservableObject {
             actualValue = nil
         }
 
-        let evaluationType = evaluation ?? "equals"
+        // The shared default operator; unknown operators fail closed.
+        guard let op = EvaluationOperator.resolve(evaluation: evaluation,
+                                                  expectedValue: expectedValue) else {
+            return MonitoringValidationResult(isValid: false, actualValue: actualValue,
+                                              message: "Unknown evaluation '\(evaluation ?? "")'")
+        }
         let isValid: Bool
 
-        switch evaluationType {
-        case "exists":
+        switch op {
+        case .exists:
             isValid = actualValue != nil
-        case "boolean":
+        case .boolean:
             isValid = actualValue == "1" || actualValue?.lowercased() == "true"
-        case "contains":
-            isValid = actualValue?.contains(expectedValue ?? "") ?? false
-        case "equals":
+        case .contains:
+            // Stringified upstream; see EvaluationOperator.containsMatch.
+            isValid = EvaluationOperator.containsMatch(value: actualValue as Any,
+                                                       expected: expectedValue)
+        case .equals:
             isValid = actualValue == expectedValue
-        case "range":
-            // Parse range like "1-10"
+        case .range:
+            // Range such as "1-10".
             if let actual = Int(actualValue ?? ""),
                let range = expectedValue?.split(separator: "-"),
                range.count == 2,
@@ -578,34 +685,36 @@ class UnifiedMonitoringService: ObservableObject {
             } else {
                 isValid = false
             }
-        default:
-            isValid = actualValue == expectedValue
+        case .changed, .withinSeconds:
+            isValid = false
         }
 
         return MonitoringValidationResult(
             isValid: isValid,
             actualValue: actualValue,
             expectedValue: expectedValue,
-            evaluationType: evaluationType
+            evaluationType: op.rawValue
         )
     }
 
     // MARK: - JSON Monitoring
 
-    private func startJsonMonitoringIfNeeded(for item: InspectConfig.ItemConfig) {
+    private func startJsonMonitoringIfNeeded(for item: any MonitoredItem) {
         guard let monitors = item.jsonMonitors else { return }
 
         for monitor in monitors {
             let expandedPath = (monitor.path as NSString).expandingTildeInPath
             let interval = Double(monitor.recheckInterval)
 
-            let timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
-                self?.checkJsonValue(for: item.id, at: expandedPath, config: monitor)
-            }
-
             let taskId = "\(item.id)_\(monitor.path.hashValue)"
+            // Cancel the poll being replaced so it does not keep firing.
+            jsonMonitorTasks[taskId]?.poll.cancel()
+
+            let poll = Poll(every: interval)
+            poll.start { [weak self] in self?.checkJsonValue(for: item.id, at: expandedPath, config: monitor) }
+
             jsonMonitorTasks[taskId] = JsonMonitorTask(
-                timer: timer,
+                poll: poll,
                 itemId: item.id,
                 jsonPath: expandedPath,
                 jsonKey: monitor.key,
@@ -615,7 +724,8 @@ class UnifiedMonitoringService: ObservableObject {
         }
     }
 
-    private func checkJsonValue(for itemId: String, at path: String, config: InspectConfig.JsonMonitor) {
+    // Internal for JsonMonitorTests.
+    func checkJsonValue(for itemId: String, at path: String, config: InspectConfig.JsonMonitor) {
         guard FileManager.default.fileExists(atPath: path),
               let data = FileManager.default.contents(atPath: path),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
@@ -627,20 +737,24 @@ class UnifiedMonitoringService: ObservableObject {
 
         let stringValue = String(describing: value)
 
-        DispatchQueue.main.async { [weak self] in
+        Task { @MainActor [weak self] in
             self?.statusMessages[itemId] = stringValue
 
-            // Use evaluation type if specified
             if let evaluation = config.evaluation {
-                switch evaluation {
-                case "boolean":
+                // Case-insensitive via the shared vocabulary.
+                switch EvaluationOperator(authored: evaluation) {
+                case .boolean:
                     let isTrue = stringValue == "true" || stringValue == "1"
                     if isTrue {
                         self?.itemStatuses[itemId] = .completed
                     }
-                case "exists":
+                case .exists:
                     self?.itemStatuses[itemId] = .completed
+                case nil:
+                    writeLog("UnifiedMonitoringService: unknown evaluation '\(evaluation)' on "
+                             + "json monitor for \(itemId) — leaving pending", logLevel: .error)
                 default:
+                    // Other operators are not supported for JSON monitors; the item stays pending.
                     break
                 }
             }
@@ -654,13 +768,14 @@ class UnifiedMonitoringService: ObservableObject {
             let lowerStatus = status.lowercased()
 
             if lowerStatus.contains("fail") || lowerStatus.contains("error") {
-                itemStatuses[itemId] = .failed(reason: status)
+                statusMessages[itemId] = status
+                itemStatuses[itemId] = .failed
             } else if lowerStatus.contains("complet") || lowerStatus.contains("success") || lowerStatus == "completed" {
                 itemStatuses[itemId] = .completed
             } else if lowerStatus.contains("install") {
-                itemStatuses[itemId] = .installing(progress: nil, message: status)
+                itemStatuses[itemId] = .active
             } else if lowerStatus.contains("download") {
-                itemStatuses[itemId] = .downloading(progress: nil)
+                itemStatuses[itemId] = .active
             }
 
             statusMessages[itemId] = status
@@ -670,150 +785,9 @@ class UnifiedMonitoringService: ObservableObject {
     // MARK: - Cleanup
 
     deinit {
-        stopMonitoring()
+        // `deinit` is nonisolated; SwiftUI and the tests release this object on the main actor, and
+        // `assumeIsolated` traps otherwise. The normal path is `stopMonitoring(owner:)` from `onDisappear`.
+        MainActor.assumeIsolated { stopMonitoring() }
     }
 }
 
-// MARK: - Validation Service
-
-/// Standalone validation service for checking plist/JSON values
-///
-/// Use this service for one-off validations without continuous monitoring.
-struct ValidationService {
-
-    /// Validate a plist value against expected criteria
-    static func validatePlist(
-        at path: String,
-        key: String,
-        expectedValue: String? = nil,
-        evaluation: String? = nil
-    ) -> MonitoringValidationResult {
-        let expandedPath = (path as NSString).expandingTildeInPath
-
-        guard PlistHelper.plistExists(at: path) else {
-            return MonitoringValidationResult(isValid: false, message: "File not found: \(expandedPath)")
-        }
-
-        guard let plist = PlistHelper.readPlist(at: path) else {
-            return MonitoringValidationResult(isValid: false, message: "Unable to read plist")
-        }
-
-        let actualValue: String?
-        if let value = plist.value(forKeyPath: key) {
-            actualValue = String(describing: value)
-        } else {
-            actualValue = nil
-        }
-
-        let evaluationType = evaluation ?? "equals"
-        var isValid = false
-        var message: String?
-
-        switch evaluationType {
-        case "exists":
-            isValid = actualValue != nil
-            message = isValid ? "Key exists" : "Key not found"
-
-        case "boolean":
-            isValid = actualValue == "1" || actualValue?.lowercased() == "true"
-            message = isValid ? "Value is true" : "Value is false or missing"
-
-        case "contains":
-            if let actual = actualValue, let expected = expectedValue {
-                isValid = actual.contains(expected)
-                message = isValid ? "Contains '\(expected)'" : "Does not contain '\(expected)'"
-            } else {
-                isValid = false
-                message = "Missing value or expected"
-            }
-
-        case "equals":
-            isValid = actualValue == expectedValue
-            message = isValid ? "Values match" : "Values differ: '\(actualValue ?? "nil")' vs '\(expectedValue ?? "nil")'"
-
-        case "range":
-            if let actual = Int(actualValue ?? ""),
-               let range = expectedValue?.split(separator: "-"),
-               range.count == 2,
-               let lower = Int(range[0]),
-               let upper = Int(range[1]) {
-                isValid = actual >= lower && actual <= upper
-                message = isValid ? "Value \(actual) in range \(lower)-\(upper)" : "Value \(actual) outside range \(lower)-\(upper)"
-            } else {
-                isValid = false
-                message = "Invalid range format"
-            }
-
-        case "version":
-            // Version comparison (semantic versioning)
-            if let actual = actualValue, let expected = expectedValue {
-                isValid = compareVersions(actual, expected) >= 0
-                message = isValid ? "Version \(actual) >= \(expected)" : "Version \(actual) < \(expected)"
-            } else {
-                isValid = false
-                message = "Missing version values"
-            }
-
-        default:
-            isValid = actualValue == expectedValue
-            message = isValid ? "Values match" : "Unknown evaluation type"
-        }
-
-        return MonitoringValidationResult(
-            isValid: isValid,
-            actualValue: actualValue,
-            expectedValue: expectedValue,
-            evaluationType: evaluationType,
-            message: message
-        )
-    }
-
-    /// Compare semantic version strings
-    private static func compareVersions(_ v1: String, _ v2: String) -> Int {
-        let parts1 = v1.split(separator: ".").compactMap { Int($0) }
-        let parts2 = v2.split(separator: ".").compactMap { Int($0) }
-
-        let maxLength = max(parts1.count, parts2.count)
-        for i in 0..<maxLength {
-            let p1 = i < parts1.count ? parts1[i] : 0
-            let p2 = i < parts2.count ? parts2[i] : 0
-            if p1 < p2 { return -1 }
-            if p1 > p2 { return 1 }
-        }
-        return 0
-    }
-
-    /// Validate a JSON value
-    static func validateJSON(
-        at path: String,
-        key: String,
-        expectedValue: String? = nil
-    ) -> MonitoringValidationResult {
-        let expandedPath = (path as NSString).expandingTildeInPath
-
-        guard PlistHelper.plistExists(at: path) else {
-            return MonitoringValidationResult(isValid: false, message: "File not found: \(expandedPath)")
-        }
-
-        guard let data = FileManager.default.contents(atPath: expandedPath),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            return MonitoringValidationResult(isValid: false, message: "Unable to read JSON")
-        }
-
-        let actualValue: String?
-        if let value = json[key] {
-            actualValue = String(describing: value)
-        } else {
-            actualValue = nil
-        }
-
-        let isValid = actualValue == expectedValue
-
-        return MonitoringValidationResult(
-            isValid: isValid,
-            actualValue: actualValue,
-            expectedValue: expectedValue,
-            message: isValid ? "Values match" : "Values differ"
-        )
-    }
-}

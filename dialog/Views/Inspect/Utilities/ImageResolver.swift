@@ -2,16 +2,17 @@
 //  ImageResolver.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 19/09/2025
-//
-//  Unified image resolver system for inspect mode
-//  Supports both absolute and relative paths with intelligent fallback
+//  Resolves image paths for inspect mode: absolute, relative to a base path, the standard icon
+//  folders, or an SF Symbol name.
 //
 
 import Foundation
+import Synchronization
 import SwiftUI
 
-class ImageResolver {
+/// Thread-safe resolver; the path cache and `configBasePath` sit behind one `Mutex` because
+/// they are read from any thread that draws an image.
+final class ImageResolver: Sendable {
 
     static let shared = ImageResolver()
 
@@ -21,11 +22,18 @@ class ImageResolver {
         "/Users/Shared/dialog/icons/"
     ]
 
-    /// Set once from config's iconBasePath — used as fallback when callers don't pass basePath
-    var configBasePath: String?
+    private struct State: Sendable {
+        var configBasePath: String?
+        var imageCache: [String: String] = [:]
+    }
 
-    private var imageCache: [String: String] = [:]
-    private let cacheQueue = DispatchQueue(label: "dialog.inspect.imagecache", attributes: .concurrent)
+    private let state = Mutex(State())
+
+    /// Set once from the config's `iconBasePath`; the fallback when callers pass no `basePath`.
+    var configBasePath: String? {
+        get { state.withLock { $0.configBasePath } }
+        set { state.withLock { $0.configBasePath = newValue } }
+    }
 
     private init() {
         validateSearchPaths()
@@ -52,16 +60,18 @@ class ImageResolver {
 
         writeLog("ImageResolver: Resolving path='\(path)' with basePath='\(basePath ?? "nil")'", logLevel: .info)
 
-        // Check cache first
-        if let cached = getCachedPath(for: path) {
+        // Relative paths are cached per base path; the same name under two bases is two answers.
+        let effectiveBasePath = basePath ?? configBasePath
+        let cacheKey = path.hasPrefix("/") ? path : "\(effectiveBasePath ?? "")|\(path)"
+
+        if let cached = getCachedPath(for: cacheKey) {
             writeLog("ImageResolver: Using cached path: \(cached)", logLevel: .debug)
             return cached
         }
 
-        // Try to resolve the path
         var resolvedPath: String?
 
-        // 1. If it's an absolute path and exists, use it
+        // 1. Absolute path that exists
         if path.hasPrefix("/") {
             writeLog("ImageResolver: Checking absolute path: \(path)", logLevel: .debug)
             if FileManager.default.fileExists(atPath: path) {
@@ -72,8 +82,7 @@ class ImageResolver {
             }
         }
 
-        // 2. If we have a basePath and path is relative, try combining them
-        let effectiveBasePath = basePath ?? configBasePath
+        // 2. Relative path under the base path
         if resolvedPath == nil, let basePath = effectiveBasePath, !path.hasPrefix("/") {
             let combined = (basePath as NSString).appendingPathComponent(path)
             writeLog("ImageResolver: Checking combined path: \(combined)", logLevel: .debug)
@@ -85,32 +94,29 @@ class ImageResolver {
             }
         }
 
-        // 3. Search standard locations for the filename
+        // 3. The filename in the standard icon folders
         if resolvedPath == nil {
             let filename = (path as NSString).lastPathComponent
             resolvedPath = searchForIcon(filename: filename)
         }
 
-        // 4. Try SF Symbols if it looks like one
+        // 4. A dotted name without slashes is taken as an SF Symbol
         if resolvedPath == nil && (path.contains(".") && !path.contains("/")) {
-            // This might be an SF Symbol
             resolvedPath = path
             writeLog("ImageResolver: Treating as SF Symbol: \(path)", logLevel: .debug)
         }
 
-        // Cache the result
         if let resolved = resolvedPath {
-            setCachedPath(resolved, for: path)
+            setCachedPath(resolved, for: cacheKey)
         }
 
-        // Return resolved path or fallback
         let finalPath = resolvedPath ?? fallbackIcon
         writeLog("ImageResolver: Final resolved path for '\(path)': '\(finalPath ?? "nil")'", logLevel: .info)
         return finalPath
     }
 
+    /// An icon named after the app id in the standard folders, else one extracted from an app bundle in `paths`.
     func resolveAppIcon(for appId: String, paths: [String]? = nil) -> String? {
-        // Try to find app icon in standard locations
         let possibleNames = [
             "\(appId).png",
             "\(appId).icns",
@@ -125,7 +131,6 @@ class ImageResolver {
             }
         }
 
-        // Try to extract icon from app bundle if paths provided
         if let paths = paths {
             for appPath in paths {
                 if let icon = extractAppBundleIcon(from: appPath) {
@@ -142,16 +147,12 @@ class ImageResolver {
         for searchPath in searchPaths {
             let fullPath = (searchPath as NSString).appendingPathComponent(filename)
 
-            // Check if we can access the directory first
             guard FileManager.default.isReadableFile(atPath: searchPath) else {
-                // Skip directories we can't read
                 continue
             }
 
-            // Use proper file existence check with error handling
             var isDirectory: ObjCBool = false
             if FileManager.default.fileExists(atPath: fullPath, isDirectory: &isDirectory) && !isDirectory.boolValue {
-                // Tedious but necessary - caveman style: verify we can actually read the file
                 if FileManager.default.isReadableFile(atPath: fullPath) {
                     writeLog("ImageResolver: Found in search path: \(fullPath)", logLevel: .debug)
                     return fullPath
@@ -185,88 +186,16 @@ class ImageResolver {
     // MARK: - Cache Management
 
     private func getCachedPath(for key: String) -> String? {
-        cacheQueue.sync {
-            return imageCache[key]
-        }
+        state.withLock { $0.imageCache[key] }
     }
 
     private func setCachedPath(_ path: String, for key: String) {
-        cacheQueue.async(flags: .barrier) {
-            self.imageCache[key] = path
-        }
+        state.withLock { $0.imageCache[key] = path }
     }
 
     func clearCache() {
-        cacheQueue.async(flags: .barrier) {
-            self.imageCache.removeAll()
-            writeLog("ImageResolver: Cache cleared", logLevel: .debug)
-        }
+        state.withLock { $0.imageCache.removeAll() }
+        writeLog("ImageResolver: Cache cleared", logLevel: .debug)
     }
 
-    // MARK: - SwiftUI Integration
-
-    func loadImage(from path: String?) -> Image? {
-        guard let resolvedPath = resolveImagePath(path) else {
-            return nil
-        }
-
-        // Check if it's an SF Symbol - this should work but you never know
-        if !resolvedPath.contains("/") && resolvedPath.contains(".") {
-            return Image(systemName: resolvedPath)
-        }
-
-        // Load from file
-        if let nsImage = NSImage(contentsOfFile: resolvedPath) {
-            return Image(nsImage: nsImage)
-        }
-
-        return nil
-    }
-
-    func loadImageWithFallback(from path: String?, fallback: String = "questionmark.circle") -> Image {
-        if let image = loadImage(from: path) {
-            return image
-        }
-
-        // Try fallback as SF Symbol first
-        if !fallback.contains("/") {
-            return Image(systemName: fallback)
-        }
-
-        // Try fallback as file path
-        if let nsImage = NSImage(contentsOfFile: fallback) {
-            return Image(nsImage: nsImage)
-        }
-
-        // Ultimate fallback
-        return Image(systemName: "questionmark.circle")
-    }
-}
-
-// MARK: - Preset Integration Helper
-
-extension ImageResolver {
-
-    func resolveItemIcon(_ item: InspectConfig.ItemConfig, basePath: String? = nil) -> String? {
-        // First try the item's icon field
-        if let icon = item.icon {
-            return resolveImagePath(icon, basePath: basePath)
-        }
-
-        // Then try to find based on app ID and paths
-        return resolveAppIcon(for: item.id, paths: item.paths)
-    }
-
-    func resolveAllIcons(for items: [InspectConfig.ItemConfig], basePath: String? = nil) -> [String: String] {
-        var resolved: [String: String] = [:]
-
-        for item in items {
-            if let iconPath = resolveItemIcon(item, basePath: basePath) {
-                resolved[item.id] = iconPath
-            }
-        }
-
-        writeLog("ImageResolver: Resolved \(resolved.count) icons for \(items.count) items", logLevel: .info)
-        return resolved
-    }
 }

@@ -2,19 +2,8 @@
 //  PreferencesModule.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 22/01/2026
-//
-//  User preferences collection and persistence module for Inspect presets
-//
-//  This module provides:
-//  - Preference collection from intro steps (pickers, forms)
-//  - Plist output for MDM/osquery integration
-//  - UserDefaults integration for state persistence
-//
-//  Use Case Flow:
-//  Intro Step (picker/form) → PreferencesModule → Plist file → osquery reads → Device labeled
-//
-//  Used by: Preset5 (and future presets with preference collection)
+//  Collects preferences from intro steps (pickers, forms), keeps them in UserDefaults across
+//  runs and writes them to a plist that MDM or osquery can read. Used by preset 5.
 //
 
 import Foundation
@@ -22,22 +11,22 @@ import Combine
 
 // MARK: - Preferences Output Configuration
 
-/// Configuration for preferences output destination
+/// Where and when collected preferences are written.
+/// The three flags default to true when absent, as the schema documents; only an explicit false turns one off.
 struct PreferencesOutputConfig: Codable {
-    /// Path to write the preferences plist file
-    /// Example: "/Library/Preferences/com.company.enrollment.plist"
+    /// Plist path, e.g. "/Library/Preferences/com.example.enrollment.plist".
     let plistPath: String
 
-    /// Whether to write preferences when each step completes
+    /// Write after every `setValue` (default true).
     let writeOnStepComplete: Bool?
 
-    /// Whether to write preferences when dialog exits
+    /// Write on exit if anything changed (default true).
     let writeOnDialogExit: Bool?
 
-    /// Whether to merge with existing plist (true) or overwrite (false)
+    /// Merge into an existing plist (true) or overwrite it (false).
     let mergeWithExisting: Bool?
 
-    /// Custom keys to always include (with hardcoded values)
+    /// Keys always written with fixed values.
     let staticValues: [String: AnyCodable]?
 
     init(
@@ -57,7 +46,7 @@ struct PreferencesOutputConfig: Codable {
 
 // MARK: - AnyCodable Helper
 
-/// Type-erased codable wrapper for heterogeneous dictionary values
+/// Type-erased Codable wrapper for heterogeneous dictionary values.
 struct AnyCodable: Codable {
     let value: Any
 
@@ -106,47 +95,19 @@ struct AnyCodable: Codable {
 
 // MARK: - Preferences Service
 
-/// Service for collecting and persisting user preferences
-///
-/// This service manages preference collection during onboarding flows,
-/// writing to plist files that can be read by osquery for device labeling
-/// and MDM profile assignment.
-///
-/// ## Usage Example
-/// ```swift
-/// let preferencesService = PreferencesService(config: preferencesOutputConfig)
-///
-/// // In intro step picker handler
-/// preferencesService.setValue("developer", forKey: "UserRole")
-///
-/// // In form input handler
-/// preferencesService.setValue(300, forKey: "LockScreenInterval")
-/// preferencesService.setValue(true, forKey: "RequirePasswordOnWake")
-///
-/// // Write to plist (automatic or manual)
-/// preferencesService.writeToPlist()
-/// ```
-///
-/// ## osquery Integration
-/// ```sql
-/// SELECT key, value FROM plist
-/// WHERE path = '/Library/Preferences/com.company.enrollment.plist'
-/// AND key = 'UserRole';
-/// ```
+/// Collects user preferences and writes them to the configured plist; the plist also gets an
+/// `EnrollmentTimestamp` key on every write.
 class PreferencesService: ObservableObject {
 
     // MARK: - Published Properties
 
-    /// All collected preferences
     @Published public private(set) var collectedPreferences: [String: Any] = [:]
 
-    /// Whether preferences have been modified since last write
+    /// Modified since the last write.
     @Published public private(set) var isDirty: Bool = false
 
-    /// Last write timestamp
     @Published public private(set) var lastWriteDate: Date?
 
-    /// Last error message (if any)
     @Published public private(set) var lastError: String?
 
     // MARK: - Private Properties
@@ -157,10 +118,7 @@ class PreferencesService: ObservableObject {
 
     // MARK: - Initialization
 
-    /// Initialize with optional output configuration
-    /// - Parameters:
-    ///   - config: Plist output configuration
-    ///   - userDefaultsSuite: Optional UserDefaults suite name for state persistence
+    /// Restores previously saved preferences from `userDefaultsSuite` when one is given.
     init(config: PreferencesOutputConfig? = nil, userDefaultsSuite: String? = nil) {
         self.config = config
         self.userDefaultsSuite = userDefaultsSuite
@@ -169,65 +127,41 @@ class PreferencesService: ObservableObject {
             self.userDefaults = UserDefaults(suiteName: suite)
         }
 
-        // Load any previously saved preferences
         loadFromUserDefaults()
     }
 
     // MARK: - Public API
 
-    /// Set a preference value
-    /// - Parameters:
-    ///   - value: The value to store (String, Int, Double, Bool, Array, Dictionary)
-    ///   - key: The preference key
+    /// Stores a plist-compatible value (String, Int, Double, Bool, Array, Dictionary) and
+    /// writes the plist unless `writeOnStepComplete` is false.
     func setValue(_ value: Any, forKey key: String) {
         collectedPreferences[key] = value
         isDirty = true
 
-        // Save to UserDefaults immediately for state persistence
         saveToUserDefaults()
 
         writeLog("PreferencesService: Set '\(key)' = '\(value)'", logLevel: .debug)
 
-        // Auto-write if configured
-        if config?.writeOnStepComplete == true {
+        if config?.writeOnStepComplete != false {
             writeToPlist()
         }
     }
 
-    /// Get a preference value
-    /// - Parameter key: The preference key
-    /// - Returns: The stored value, or nil if not found
     func getValue(forKey key: String) -> Any? {
         return collectedPreferences[key]
     }
 
-    /// Get a typed preference value
-    /// - Parameters:
-    ///   - key: The preference key
-    ///   - type: The expected type
-    /// - Returns: The stored value cast to the specified type, or nil
     func getValue<T>(forKey key: String, as type: T.Type) -> T? {
         return collectedPreferences[key] as? T
     }
 
-    /// Remove a preference
-    /// - Parameter key: The preference key to remove
     func removeValue(forKey key: String) {
         collectedPreferences.removeValue(forKey: key)
         isDirty = true
         saveToUserDefaults()
     }
 
-    /// Clear all preferences
-    func clearAll() {
-        collectedPreferences.removeAll()
-        isDirty = true
-        saveToUserDefaults()
-        writeLog("PreferencesService: Cleared all preferences", logLevel: .info)
-    }
-
-    /// Write collected preferences to plist file
-    /// - Returns: True if write succeeded
+    /// Writes collected preferences, static values and `EnrollmentTimestamp` to the configured plist.
     @discardableResult
     func writeToPlist() -> Bool {
         guard let config = config else {
@@ -237,41 +171,33 @@ class PreferencesService: ObservableObject {
 
         let path = (config.plistPath as NSString).expandingTildeInPath
 
-        // Prepare output dictionary
         var outputDict: [String: Any] = [:]
 
-        // Merge with existing if configured
-        if config.mergeWithExisting == true,
+        if config.mergeWithExisting != false,
            let existingDict = NSDictionary(contentsOfFile: path) as? [String: Any] {
             outputDict = existingDict
         }
 
-        // Add collected preferences
         for (key, value) in collectedPreferences {
             outputDict[key] = value
         }
 
-        // Add static values
         if let staticValues = config.staticValues {
             for (key, codable) in staticValues {
                 outputDict[key] = codable.value
             }
         }
 
-        // Add timestamp
         outputDict["EnrollmentTimestamp"] = Date()
 
-        // Write to file
         let dict = outputDict as NSDictionary
 
         do {
-            // Create parent directory if needed
             let parentDir = (path as NSString).deletingLastPathComponent
             if !FileManager.default.fileExists(atPath: parentDir) {
                 try FileManager.default.createDirectory(atPath: parentDir, withIntermediateDirectories: true)
             }
 
-            // Write plist
             let success = dict.write(toFile: path, atomically: true)
 
             if success {
@@ -292,52 +218,11 @@ class PreferencesService: ObservableObject {
         }
     }
 
-    /// Read preferences from plist file
-    /// - Returns: Dictionary of preferences, or nil if file doesn't exist
-    func readFromPlist() -> [String: Any]? {
-        guard let config = config else { return nil }
-
-        let path = (config.plistPath as NSString).expandingTildeInPath
-
-        guard FileManager.default.fileExists(atPath: path),
-              let dict = NSDictionary(contentsOfFile: path) as? [String: Any] else {
-            return nil
-        }
-
-        return dict
-    }
-
-    /// Write preferences to plist if dirty and configured for exit write
+    /// Writes the plist if dirty, unless `writeOnDialogExit` is false.
     func writeOnExitIfNeeded() {
-        if isDirty && config?.writeOnDialogExit == true {
+        if isDirty && config?.writeOnDialogExit != false {
             writeToPlist()
         }
-    }
-
-    // MARK: - Picker/Form Integration
-
-    /// Handle grid picker selection
-    /// - Parameters:
-    ///   - selectionKey: The selection key (for storing in local state)
-    ///   - preferenceKey: The preference key (for plist output)
-    ///   - selectedValue: The selected value
-    func handleGridSelection(selectionKey: String, preferenceKey: String?, selectedValue: String) {
-        if let prefKey = preferenceKey {
-            setValue(selectedValue, forKey: prefKey)
-        }
-        writeLog("PreferencesService: Grid selection '\(selectionKey)' = '\(selectedValue)', preferenceKey: \(preferenceKey ?? "none")", logLevel: .debug)
-    }
-
-    /// Handle form input change
-    /// - Parameters:
-    ///   - inputKey: The form input key
-    ///   - preferenceKey: The preference key (for plist output)
-    ///   - value: The input value
-    func handleFormInput(inputKey: String, preferenceKey: String?, value: Any) {
-        if let prefKey = preferenceKey {
-            setValue(value, forKey: prefKey)
-        }
-        writeLog("PreferencesService: Form input '\(inputKey)' = '\(value)', preferenceKey: \(preferenceKey ?? "none")", logLevel: .debug)
     }
 
     // MARK: - UserDefaults Persistence
@@ -345,7 +230,7 @@ class PreferencesService: ObservableObject {
     private func saveToUserDefaults() {
         guard let defaults = userDefaults else { return }
 
-        // Convert preferences to a format that can be stored in UserDefaults
+        // Values are stored as binary plist Data so any plist type survives UserDefaults.
         var storable: [String: Any] = [:]
         for (key, value) in collectedPreferences {
             if let data = try? PropertyListSerialization.data(fromPropertyList: value, format: .binary, options: 0) {
@@ -372,131 +257,9 @@ class PreferencesService: ObservableObject {
     // MARK: - Deinitialization
 
     deinit {
-        // Final write on exit if configured
         writeOnExitIfNeeded()
     }
 }
 
-// MARK: - Preference Input Types
-
-/// Types of preference inputs supported in forms
-enum PreferenceInputType: String, Codable {
-    case dropdown
-    case toggle
-    case radio
-    case checkbox
-    case slider
-    case textfield
-}
-
-// MARK: - Preference Input Configuration
-
-/// Configuration for a form input that writes to preferences
-struct PreferenceInputConfig: Codable, Identifiable {
-    var id: String { key }
-
-    /// Form input key (for local state)
-    let key: String
-
-    /// Preference key (for plist output) - if nil, won't write to preferences
-    let preferenceKey: String?
-
-    /// Input type
-    let type: PreferenceInputType
-
-    /// Display label
-    let label: String
-
-    /// Default value
-    let defaultValue: AnyCodable?
-
-    /// Options for dropdown/radio (display labels)
-    let options: [String]?
-
-    /// Values for dropdown/radio (actual values to store)
-    let values: [AnyCodable]?
-
-    /// Minimum value for slider
-    let minValue: Double?
-
-    /// Maximum value for slider
-    let maxValue: Double?
-
-    /// Step value for slider
-    let step: Double?
-
-    /// Placeholder text for textfield
-    let placeholder: String?
-
-    /// Whether this input is required
-    let required: Bool?
-
-    init(
-        key: String,
-        preferenceKey: String? = nil,
-        type: PreferenceInputType,
-        label: String,
-        defaultValue: AnyCodable? = nil,
-        options: [String]? = nil,
-        values: [AnyCodable]? = nil,
-        minValue: Double? = nil,
-        maxValue: Double? = nil,
-        step: Double? = nil,
-        placeholder: String? = nil,
-        required: Bool? = nil
-    ) {
-        self.key = key
-        self.preferenceKey = preferenceKey
-        self.type = type
-        self.label = label
-        self.defaultValue = defaultValue
-        self.options = options
-        self.values = values
-        self.minValue = minValue
-        self.maxValue = maxValue
-        self.step = step
-        self.placeholder = placeholder
-        self.required = required
-    }
-}
-
-// MARK: - Preference Grid Item Configuration
-
-/// Configuration for a grid item that writes to preferences
-struct PreferenceGridItemConfig: Codable, Identifiable {
-    var id: String { value }
-
-    /// Value to store when selected
-    let value: String
-
-    /// Display title
-    let title: String
-
-    /// Optional subtitle
-    let subtitle: String?
-
-    /// SF Symbol name
-    let sfSymbol: String?
-
-    /// Image path
-    let imagePath: String?
-
-    init(
-        value: String,
-        title: String,
-        subtitle: String? = nil,
-        sfSymbol: String? = nil,
-        imagePath: String? = nil
-    ) {
-        self.value = value
-        self.title = title
-        self.subtitle = subtitle
-        self.sfSymbol = sfSymbol
-        self.imagePath = imagePath
-    }
-}
-
-// MARK: - Preferences Helper Extensions
-
-// Note: gridPreferenceKey and preferenceKey are now defined directly
-// in InspectConfig.IntroStep and InspectConfig.GuidanceContent respectively
+// Preference keys live on the config types: `gridPreferenceKey` on InspectConfig.IntroStep,
+// `preferenceKey` on its wallpaper, option and dock payloads.

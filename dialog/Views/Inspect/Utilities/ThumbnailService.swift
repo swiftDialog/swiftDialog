@@ -2,10 +2,8 @@
 //  ThumbnailService.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 14/03/2026
-//
-//  Generates downsampled thumbnails for wallpaper picker images
-//  Uses CGImageSource to downsample during decode — full image never loaded into memory
+//  Downsampled thumbnails for the wallpaper picker, decoded via CGImageSource so the full image
+//  is never loaded, and cached on disk and in memory while the picker is on screen.
 //
 
 import AppKit
@@ -15,6 +13,7 @@ class ThumbnailService: ObservableObject {
     static let shared = ThumbnailService()
 
     @Published var thumbnails: [String: NSImage] = [:]
+    private var preloadTask: Task<Void, Never>?
 
     private let cacheDir = "/var/tmp/dialog-thumbnails"
     private let maxPixelSize: Int = 384
@@ -26,33 +25,29 @@ class ThumbnailService: ObservableObject {
 
     // MARK: - Sync Lookup
 
-    /// Returns cached thumbnail (memory or disk), nil if not yet generated
+    /// Cached thumbnail (memory, then disk); nil if not yet generated.
     func thumbnail(for path: String) -> NSImage? {
         if let cached = thumbnails[path] {
             return cached
         }
-        // Check disk cache
         let diskPath = diskCachePath(for: path)
         guard FileManager.default.fileExists(atPath: diskPath),
               !isStale(source: path, cache: diskPath),
               let image = NSImage(contentsOfFile: diskPath) else {
             return nil
         }
-        // Promote to memory cache
         thumbnails[path] = image
         return image
     }
 
     // MARK: - Async Generation
 
-    /// Generate a single thumbnail if not already cached
+    /// Generates one thumbnail unless it is already cached.
     func loadThumbnail(for path: String) async {
-        // Already in memory cache
         if thumbnails[path] != nil { return }
 
         let diskPath = diskCachePath(for: path)
 
-        // Try disk cache first
         if FileManager.default.fileExists(atPath: diskPath),
            !isStale(source: path, cache: diskPath),
            let diskImage = NSImage(contentsOfFile: diskPath) {
@@ -60,29 +55,37 @@ class ThumbnailService: ObservableObject {
             return
         }
 
-        // Generate via CGImageSource downsample on background thread
         let thumb = await Task.detached(priority: .userInitiated) { [maxPixelSize, jpegQuality] in
             guard let image = Self.downsample(path: path, maxPixelSize: maxPixelSize) else { return nil as NSImage? }
             Self.saveToDisk(image: image, at: diskPath, quality: jpegQuality)
             return image
         }.value
 
-        if let thumb {
+        if let thumb, !Task.isCancelled {
             thumbnails[path] = thumb
         }
     }
 
-    /// Batch preload thumbnails for all provided paths
+    /// Drops the in-memory thumbnails when the picker goes away; the disk cache makes a return quick.
+    func releaseThumbnails() {
+        preloadTask?.cancel()
+        preloadTask = nil
+        thumbnails.removeAll()
+    }
+
+    /// Preloads thumbnails for all paths, in order. A new preload replaces one still running.
     func preloadThumbnails(for paths: [String]) {
-        Task {
+        preloadTask?.cancel()
+        preloadTask = Task {
             for path in paths {
+                if Task.isCancelled { return }
                 if thumbnails[path] != nil { continue }
                 await loadThumbnail(for: path)
             }
         }
     }
 
-    // MARK: - Core Downsample (static, thread-safe)
+    // MARK: - Core Downsample
 
     private nonisolated static func downsample(path: String, maxPixelSize: Int) -> NSImage? {
         let url = URL(fileURLWithPath: path)

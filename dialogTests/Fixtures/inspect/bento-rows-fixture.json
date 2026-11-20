@@ -1,0 +1,98 @@
+{
+  "preset": "preset6",
+  "title": "Bento rows",
+  "highlightColor": "#2F7CE0",
+  "_comment": "A bento tile's middle zone: rows with their own action button and hairlines between, heading and rows only, no artwork.",
+  "steps": [
+    {
+      "id": "rows",
+      "displayName": "Rows",
+      "icon": "SF=square.grid.2x2",
+      "guidanceTitle": "Add what you need",
+      "subtitle": "Everything here is licensed and installs without a password.",
+      "guidanceContent": [
+        {
+          "type": "bento-grid",
+          "bentoColumns": 1,
+          "bentoRowHeight": 118,
+          "bentoGap": 12,
+          "bentoCells": [
+            {
+              "id": "m365",
+              "column": 0,
+              "row": 0,
+              "columnSpan": 1,
+              "rowSpan": 1,
+              "contentType": "text",
+              "label": "Microsoft 365",
+              "title": "Already licensed",
+              "subtitle": "Signed in with your ACME account.",
+              "textSize": "small",
+              "surface": "neutral",
+              "cornerRadius": 12,
+              "rows": [
+                {
+                  "title": "Excel",
+                  "itemId": "excel",
+                  "icon": "tablecells",
+                  "actionLabel": "Install"
+                },
+                {
+                  "title": "Word",
+                  "itemId": "word",
+                  "icon": "doc.richtext",
+                  "actionLabel": "Install"
+                },
+                {
+                  "title": "Outlook",
+                  "itemId": "outlook",
+                  "icon": "envelope",
+                  "subtitle": "mail migrated",
+                  "actionLabel": "Install"
+                }
+              ]
+            },
+            {
+              "id": "dev",
+              "column": 0,
+              "row": 1,
+              "columnSpan": 1,
+              "rowSpan": 1,
+              "contentType": "text",
+              "label": "Developer tools",
+              "title": "No restart needed",
+              "subtitle": "None of these ask for an admin password.",
+              "textSize": "small",
+              "surface": "neutral",
+              "cornerRadius": 12,
+              "rows": [
+                {
+                  "title": "Docker",
+                  "itemId": "docker",
+                  "icon": "shippingbox",
+                  "badge": "1.2 GB",
+                  "actionLabel": "Install"
+                },
+                {
+                  "title": "Command line tools",
+                  "itemId": "clt",
+                  "icon": "terminal",
+                  "state": "installed"
+                }
+              ]
+            }
+          ],
+          "_comment": "One column: a row with icon, name, badge and button needs about 250pt. bentoRowHeight is a floor, so each tile grows to its own row count."
+        }
+      ]
+    },
+    {
+      "id": "done",
+      "displayName": "Done",
+      "icon": "SF=checkmark.circle",
+      "stepType": "outro",
+      "guidanceTitle": "Fixture complete",
+      "subtitle": "Each row above carries its own button; the last row of a tile draws no hairline."
+    }
+  ]
+}

@@ -2,282 +2,623 @@
 //  Preset1.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 19/07/2025
 //
-//  Classic sidebar layout with FSevents based progress tracking
-//  
+//  Preset 1: sidebar item list with FSEvents progress tracking, plus the three `plain-*`
+//  constructions (plain-simple, plain-centered, plain-branded) that branch its main phase.
 //
 
 import SwiftUI
 
 struct Preset1View: View, InspectLayoutProtocol {
     @ObservedObject var inspectState: InspectState
-    @State private var showingAboutPopover = false
     @State private var showDetailOverlay = false
+    /// True while the action footer seats the help control; the corner fallback stands down then.
+    @State private var helpSeatedInFooter = false
     @State private var showItemDetailOverlay = false
-    @Environment(\.colorScheme) private var colorScheme
     @State private var selectedItemForDetail: InspectConfig.ItemConfig?
     @StateObject private var iconCache = PresetIconCache()
+    @StateObject private var commandRouter = CommandRouter()
+    /// Held and injected as `\.complianceAggregator`; compliance blocks render empty without it.
+    @StateObject private var complianceService = ComplianceAggregatorService()
     @State private var localizationService = LocalizationService()
-    @State private var currentPhase: PresetPhase = .main
-    // When the .main list first appeared — used to keep an already-complete list on screen
-    // briefly before auto-advancing, so it isn't flashed past in under a second.
-    @State private var mainAppearedAt: Date?
+    /// Selects the dark wordmark variant for the plain footers.
+    @Environment(\.colorScheme) private var colorScheme
 
-    let systemImage: String = isLaptop ? "laptopcomputer.and.arrow.down" : "desktopcomputer.and.arrow.down"
-
-    /// Highlight color derived from config (matches Preset2 pattern)
+    /// Unauthored falls through to the system accent, never to a grey.
     private var primaryColor: Color {
-        Color(hex: inspectState.uiConfiguration.highlightColor)
+        inspectState.uiConfiguration.highlightColor.nilIfEmpty
+            .map { Color(hex: $0) } ?? .accentColor
     }
 
-    /// Trigger file path for readiness signalling (mirrors Preset4/6). Additive only —
-    /// presets 1/2/3 keep their FSEvents command path; this just lets `wait-ready` succeed.
+    /// Readiness trigger file; lets `wait-ready` succeed alongside the FSEvents command path.
     private var triggerFilePath: String {
-        if let customPath = inspectState.config?.triggerFile { return customPath }
-        if appArguments.inspectMode.present { return "/tmp/swiftdialog_dev_preset1.trigger" }
-        return "/tmp/swiftdialog_\(ProcessInfo.processInfo.processIdentifier)_preset1.trigger"
+        presetTriggerFilePath(config: inspectState.config)
     }
+
+    private var loc: PresetLocalization {
+        PresetLocalization(state: inspectState, service: localizationService)
+    }
+
+    /// Opt-in via `chrome`. This construction ignores `sideMessages`, `helpButton`, `detailOverlay`,
+    /// per-item info, the button2 keys, `button1symbol` and `popupButtonText` by design.
+    var isPlainSimple: Bool { inspectState.config?.construction == .plainSimple }
+
+    /// Opt-in via `chrome`. Main phase switches list → progress; intro/summary are hero overrides.
+    var isPlainCentered: Bool { inspectState.config?.construction == .plainCentered }
+
+    /// Opt-in via `chrome`. Only the main phase is branched; no hero screens, no back chevron.
+    var isPlainBranded: Bool { inspectState.config?.construction == .plainBranded }
 
     init(inspectState: InspectState) {
         self.inspectState = inspectState
     }
 
     var body: some View {
-        Group {
-            switch currentPhase {
-            case .intro:
-                if let introConfig = inspectState.config?.introScreen {
-                    PresetIntroScreenView(
-                        config: introConfig,
-                        highlightColor: primaryColor,
-                        scaleFactor: scaleFactor,
-                        basePath: inspectState.uiConfiguration.iconBasePath,
-                        inspectState: inspectState,
-                        onContinue: {
-                            currentPhase = .main
-                        }
-                    )
-                    .frame(width: windowSize.width, height: windowSize.height)
-                    .background(Color(NSColor.windowBackgroundColor))
-                }
-            case .main:
-                mainPhaseView
-                    .onAppear { if mainAppearedAt == nil { mainAppearedAt = Date() } }
-            case .summary:
-                if let summaryConfig = inspectState.config?.summaryScreen {
-                    PresetSummaryScreenView(
-                        config: summaryConfig,
-                        highlightColor: primaryColor,
-                        scaleFactor: scaleFactor,
-                        basePath: inspectState.uiConfiguration.iconBasePath,
-                        inspectState: inspectState,
-                        onClose: {
-                            writeLog("Preset1View: Summary screen closed", logLevel: .info)
-                            cleanupReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath, exitCode: 0)
-                            exit(0)
-                        }
-                    )
-                    .frame(width: windowSize.width, height: windowSize.height)
-                    .background(Color(NSColor.windowBackgroundColor))
-                }
-            }
-        }
-        .overlay(alignment: .bottom) {
-            // Persistent brand logo — rendered once, stays across phase transitions
-            if let logoConfig = inspectState.config?.logoConfig {
-                let showForPhase: Bool = {
-                    switch currentPhase {
-                    case .intro: return logoConfig.showOnIntro ?? true
-                    case .main: return logoConfig.showOnMain ?? true
-                    case .summary: return logoConfig.showOnSummary ?? true
-                    }
-                }()
-                if showForPhase {
-                    AsyncImageView(
-                        iconPath: (colorScheme == .dark ? (logoConfig.imagePathDark ?? logoConfig.imagePath) : logoConfig.imagePath),
-                        basePath: inspectState.uiConfiguration.iconBasePath,
-                        maxWidth: CGFloat(logoConfig.maxWidth ?? 120) * CGFloat(logoConfig.scale ?? 1.0),
-                        maxHeight: CGFloat(logoConfig.maxHeight ?? 40) * CGFloat(logoConfig.scale ?? 1.0),
-                        imageFit: .fit,
-                        showLoadingState: false,
-                        fallback: { EmptyView() }
-                    )
-                    .opacity(logoConfig.opacity ?? 0.6)
-                    .allowsHitTesting(false)
-                    .padding(.bottom, 60 * scaleFactor)
-                }
+        PhaseContainer(
+            state: inspectState,
+            accent: primaryColor,
+            scaleFactor: scaleFactor,
+            windowSize: windowSize,
+            triggerFilePath: triggerFilePath,
+            presetLabel: "Preset1View",
+            presetNumber: "1",
+            localize: { loc.string($0, fallback: nil) },
+            // Closures, not method references: a main-actor method reference through a ternary
+            // into an optional closure defeats the strict-concurrency type-checker.
+            introOverride: isPlainCentered ? { plainCenteredIntroOverride(onContinue: $0) } : nil,
+            summaryOverride: isPlainCentered ? { plainCenteredSummaryOverride(onClose: $0) }
+                : (isPlainSimple ? { plainSimpleSummaryOverride(onClose: $0) } : nil)
+        ) { proxy in
+            // Only the main phase branches, so phases and the onAppear/palette wiring stay shared.
+            if isPlainSimple {
+                plainSimpleMainPhaseView(summaryAction: proxy.summaryAction)
+                    .sourceTag()
+            } else if isPlainCentered {
+                plainCenteredMainPhaseView(summaryAction: proxy.summaryAction, backAction: proxy.backAction)
+                    .sourceTag()
+            } else if isPlainBranded {
+                plainBrandedMainPhaseView(summaryAction: proxy.summaryAction)
+                    .sourceTag()
+            } else {
+                mainPhaseView(summaryAction: proxy.summaryAction)
+                    .sourceTag()
             }
         }
         .onAppear {
-            // Start on intro phase if configured
-            if inspectState.config?.introScreen != nil {
-                currentPhase = .intro
+            if let locConfig = inspectState.config?.localization {
+                localizationService.loadLanguages(from: locConfig, iconBasePath: inspectState.uiConfiguration.iconBasePath,
+                                                   configPath: inspectState.configPath)
             }
-        }
-        .onChange(of: inspectState.completedItems.count) { _, _ in
-            checkAutoTransitionToSummary()
-        }
-        .onChange(of: currentPhase) { _, newPhase in
-            // Emit phase event so IPC consumers (scripts) can react
-            writePhaseEvent(newPhase)
-
-            // When entering main, check if items already completed during intro
-            if newPhase == .main {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    checkAutoTransitionToSummary()
-                }
+            commandRouter.wireItemBase(
+                state: inspectState,
+                presetLabel: "Preset1",
+                triggerFilePath: triggerFilePath
+            )
+            // The aggregator stays empty until monitoring starts; no `plistSources` is ordinary.
+            if let plistSources = inspectState.config?.plistSources, !plistSources.isEmpty {
+                writeLog("Preset1: Starting ComplianceAggregatorService with \(plistSources.count) sources",
+                         logLevel: .info)
+                complianceService.startMonitoring(sources: plistSources, refreshInterval: 5.0)
+            } else {
+                writeLog("Preset1: No plistSources configured, compliance service not started",
+                         logLevel: .info)
             }
+            writeLog("Preset1View: Using assembly composition", logLevel: .info)
         }
+        .onDisappear {
+            commandRouter.stopMonitoring()
+        }
+        // Help lives at phase level so the intro footer can seat the control and open the overlay.
+        .environment(\.cardHeaderHelp, inspectState.config?.helpButton.flatMap { help in
+            help.isShown
+                ? CardHeaderHelp(icon: help.icon ?? "questionmark.circle",
+                                 tooltip: help.tooltip ?? ChromeCopy.getHelp,
+                                 action: { handleHelpButtonAction(config: help, showOverlay: $showDetailOverlay) })
+                : nil
+        })
+        .detailOverlay(
+            inspectState: inspectState,
+            isPresented: $showDetailOverlay,
+            config: inspectState.config?.detailOverlay
+        )
+        // Without `inspectPalette` every child reads the default palette.
+        .environment(\.complianceAggregator, complianceService)
+        .inspectPalette(config: inspectState.config, primaryColor: primaryColor)
     }
 
-    /// Check if all items are complete and auto-transition to summary
-    private func checkAutoTransitionToSummary() {
-        guard currentPhase == .main,
-              let summaryConfig = inspectState.config?.summaryScreen,
-              summaryConfig.autoTransition != false,
-              !inspectState.items.isEmpty,
-              inspectState.completedItems.count == inspectState.items.count else { return }
-        // Keep an already-complete list on screen for a minimum time before advancing, so it
-        // isn't flashed past in under a second when everything was already installed. This only
-        // delays the transition — it can never strand an item, so live installs are unaffected.
-        let minimumDisplay: TimeInterval = 2.5
-        let elapsed = mainAppearedAt.map { Date().timeIntervalSince($0) } ?? minimumDisplay
-        if elapsed < minimumDisplay {
-            DispatchQueue.main.asyncAfter(deadline: .now() + (minimumDisplay - elapsed)) {
-                if currentPhase == .main,
-                   inspectState.completedItems.count == inspectState.items.count {
-                    currentPhase = .summary
-                }
-            }
+    // MARK: - Main Phase (plain-simple)
+
+    /// Same label chain as `PresetCommonViews.buttonArea`: autoEnable → finalButtonText →
+    /// button1Text → resolved button1Text → "Continue".
+    private var plainSimpleButtonText: String {
+        let allItemsCompleted = inspectState.allRequiredItemsFinished
+        let shouldUseAutoEnableText = allItemsCompleted
+            && inspectState.buttonConfiguration.autoEnableButton
+            && inspectState.config?.autoEnableButtonText != nil
+        if shouldUseAutoEnableText {
+            return inspectState.config?.autoEnableButtonText ?? "OK"
+        }
+        return inspectState.config?.finalButtonText
+            ?? inspectState.config?.button1Text
+            ?? (inspectState.buttonConfiguration.button1Text.isEmpty
+                ? ChromeCopy.continue : inspectState.buttonConfiguration.button1Text)
+    }
+
+    /// Primary action as `PresetCommonViews.buttonArea` does it. A nil `summaryAction` means no
+    /// summary screen: write the result file, clean up readiness and exit (or minimise).
+    private func plainSimplePrimaryAction(summaryAction: (() -> Void)?) {
+        if let summaryAction {
+            writeLog("Preset: User clicked button1 (\(plainSimpleButtonText)) - custom action", logLevel: .info)
+            summaryAction()
+        } else if ButtonExit.minimizeInsteadOfExiting(inspectState.config?.button1Action, label: "Preset1") {
+            return
         } else {
-            currentPhase = .summary
+            writeLog("Preset: User clicked button1 (\(plainSimpleButtonText)) - exiting with code 0", logLevel: .info)
+            writeItemPresetResultFile(state: inspectState, exitCode: 0)
+            cleanupReadinessFile(state: inspectState, triggerFilePath: triggerFilePath, exitCode: 0)
+            exit(0)
         }
     }
 
-    /// When summaryScreen is configured, button1 transitions to summary instead of exit(0).
-    /// Returns nil when no summary → default exit(0) behavior.
-    private var summaryScreenButtonAction: (() -> Void)? {
-        guard inspectState.config?.summaryScreen != nil else { return nil }
-        return {
-            withAnimation(InspectConstants.stepTransition) {
-                currentPhase = .summary
-            }
-        }
-    }
+    /// The plain-simple confirmation screen on the summary phase. Summary keys map as: title →
+    /// screen title; caption → card headline; subtitle → card headline when caption is absent,
+    /// else the instruction line; footnote → card detail.
+    private func plainSimpleSummaryOverride(onClose: @escaping () -> Void) -> AnyView {
+        guard let summaryConfig = inspectState.config?.summaryScreen else { return AnyView(EmptyView()) }
+        let title = loc.string("summaryScreen.title", fallback: summaryConfig.title) ?? ""
+        let subtitle = loc.string("summaryScreen.subtitle", fallback: summaryConfig.subtitle) ?? ""
+        let caption = loc.string("summaryScreen.caption", fallback: summaryConfig.caption)
+        let footnote = loc.string("summaryScreen.footnote", fallback: summaryConfig.footnote) ?? ""
 
-    // MARK: - Main Phase (Original Preset1 Layout)
+        let cardTitle = (caption?.isEmpty == false) ? caption! : subtitle
+        let instruction = (caption?.isEmpty == false) ? subtitle : ""
 
-    private var mainPhaseView: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 0) {
-            // Left sidebar with icon/image
-            VStack {
-                Spacer()
-                    .frame(height: 20)  // Top-align icon with title area
-
-                IconView(
-                    image: iconCache.getMainIconPath(for: inspectState),
-                    overlay: iconCache.getOverlayIconPath(for: inspectState),
-                    defaultImage: "apps.iphone.badge.plus",
-                    defaultColour: "accent"
+        return AnyView(
+            PlainSimpleShell(
+                showsBack: false,
+                buttonTitle: summaryConfig.buttonText ?? "Close",
+                onPrimaryAction: onClose,
+                accent: primaryColor,
+                wordmarkPath: BrandArtwork.resolve(inspectState.config?.logoConfig, isDark: colorScheme == .dark, gate: .footer),
+                logoHeight: resolvedLogoHeight(fallback: PlainSimpleM.wordmarkHeight),
+                logoMaxWidth: resolvedLogoMaxWidth,
+                logoClearSpace: resolvedLogoClearSpace
+                // No footer stepper: the outer step sits in the eyebrow on this screen.
+            ) {
+                PlainSimpleConfirmScreen(
+                    eyebrow: plainSummaryStepText,
+                    title: title,
+                    instruction: instruction,
+                    confirmationTitle: cardTitle,
+                    confirmationDetail: footnote,
+                    accent: primaryColor
                 )
-                .frame(width: 220 * scaleFactor, height: 220 * scaleFactor)
-                .onAppear { iconCache.cacheMainIcon(for: inspectState) }
-
-                // Progress bar
-                if !inspectState.items.isEmpty {
-                    PresetCommonViews.progressBar(
-                        state: inspectState,
-                        width: 200 * scaleFactor,
-                        labelSize: 13,
-                        tintColor: primaryColor
-                    )
-                    .padding(.top, 20 * scaleFactor)
-
-                    // Single motion source for the whole list — one spinner here in the
-                    // sidebar, not one per active row. Rows report state with static dots.
-                    if !inspectState.downloadingItems.isEmpty {
-                        HStack(spacing: 8) {
-                            ProgressView().controlSize(.small)
-                            Text("Installing…")
-                                .font(.system(size: 12))
-                                .foregroundStyle(.secondary)
-                        }
-                        .padding(.top, 10 * scaleFactor)
-                    }
-                }
-
-                Spacer()
             }
-            .frame(width: 280 * scaleFactor)
-            .padding(.vertical)
-            .padding(.leading, 12)
-            .padding(.trailing, 8)
-            .background(Color(NSColor.controlBackgroundColor))
+            .frame(width: windowSize.width, height: windowSize.height)
+            .background(PhaseBackdrop(config: inspectState.config))
+        )
+    }
 
-            // Right content area
-            VStack(alignment: .leading, spacing: 0) {
-                // Header
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(localized("title", fallback: inspectState.uiConfiguration.windowTitle) ?? "")
-                        .font(.system(size: 26, weight: .bold))
+    /// The plain-simple main phase: the install list, then the tour (if authored) while install
+    /// keeps running underneath.
+    private func plainSimpleMainPhaseView(summaryAction: (() -> Void)?) -> some View {
+        let onTour = plainSimpleShowsTour && plainSimpleHasTour
+        let position = plainStepPosition(phase: onTour ? .tour : .main)
+        // One indicator per screen: with a pager the outer step is the eyebrow, not the footer.
+        let pagerOwnsTheIndicator = onTour && plainSimpleTourIsPaged
 
-                    if let currentMessage = localizedSideMessage() {
-                        Text(currentMessage)
-                            .font(.system(size: 13))
-                            .foregroundStyle(.secondary)
-                            .lineLimit(2)
-                            .multilineTextAlignment(.leading)
-                            .id(inspectState.uiConfiguration.currentSideMessageIndex)
-                            .transition(.opacity)
-                            .animation(.easeInOut(duration: 0.5), value: inspectState.uiConfiguration.currentSideMessageIndex)
-                    }
+        return PlainSimpleShell(
+            showsBack: false,
+            buttonTitle: onTour ? plainSimpleTourContinueText : plainSimpleButtonText,
+            // On a paged walkthrough the primary stays inert until the last page.
+            buttonDisabled: onTour
+                ? (plainSimpleTourIsPaged && plainSimpleTourPage < plainSimpleTourPages.count)
+                : inspectState.buttonConfiguration.button1Disabled,
+            // On the list the primary opens the tour instead of leaving.
+            onPrimaryAction: {
+                if plainSimpleHasTour && !plainSimpleShowsTour {
+                    plainSimpleShowsTour = true
+                } else {
+                    plainSimplePrimaryAction(summaryAction: summaryAction)
                 }
-                .frame(height: 60, alignment: .topLeading)
-                .padding(.horizontal)
-                .padding(.top, InspectConstants.spacingInner)
-                .padding(.bottom, 4)
-
-                // Item list
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 0) {
-                        let sortedItems = PresetCommonViews.getSortedItemsByStatus(inspectState)
-                        ForEach(sortedItems, id: \.id) { item in
-                            // Add group separator if needed
-                            if shouldShowGroupSeparator(for: item, in: sortedItems) {
-                                HStack {
-                                    Text(getStatusHeaderText(for: getItemStatusType(for: item)))
-                                        .font(.caption)
-                                        .fontWeight(.semibold)
-                                        .foregroundStyle(.secondary)
-                                    Spacer()
-                                }
-                                .padding(.horizontal)
-                                // Tiered group break: large gap above the status header
-                                // separates it from the previous group, small gap below
-                                // hugs it to the rows it labels (2u : 0.5u).
-                                .padding(.top, InspectConstants.spacingSection * scaleFactor)
-                                .padding(.bottom, InspectConstants.spacingIntra * scaleFactor)
-                            }
-
-                            itemRow(for: item)
-                        }
-                    }
-                    .padding(.vertical, InspectConstants.spacingInner * scaleFactor)
-                }
-
+            },
+            accent: primaryColor,
+            // `gate: .footer` gates on a bottom position and resolves the dark variant, so this
+            // footer and `PhaseContainer`'s own logo overlay never both draw the mark.
+            wordmarkPath: BrandArtwork.resolve(inspectState.config?.logoConfig, isDark: colorScheme == .dark, gate: .footer),
+            logoHeight: resolvedLogoHeight(fallback: PlainSimpleM.wordmarkHeight),
+            logoMaxWidth: resolvedLogoMaxWidth,
+            logoClearSpace: resolvedLogoClearSpace,
+            // Skip is text, only on the single-movie tour; a paged walkthrough is gated by its pager.
+            secondaryTitle: (onTour && !plainSimpleTourIsPaged) ? plainSimpleSkipTourText : nil,
+            onSecondaryAction: (onTour && !plainSimpleTourIsPaged) ? { plainSimplePrimaryAction(summaryAction: summaryAction) } : nil,
+            stepIndicatorText: pagerOwnsTheIndicator ? nil : position.map {
+                StepCounterLabel.format(
+                    StepCounterLabel.template { key in loc.string(key, fallback: nil) },
+                    current: $0.current, total: $0.total)
+            },
+            stepDots: pagerOwnsTheIndicator ? nil : position
+        ) {
+            if onTour {
+                plainSimpleTourScreen
+            } else {
+                // Migration bodies are passed as a kind, not a screen swap; nil draws the plain list.
+                PlainSimpleListScreen(
+                    inspectState: inspectState,
+                    iconCache: iconCache,
+                    model: ItemSetModel.build(from: inspectState),
+                    title: loc.string("title", fallback: inspectState.uiConfiguration.windowTitle) ?? "",
+                    subtitle: loc.string("subtitle", fallback: inspectState.uiConfiguration.subtitleMessage) ?? "",
+                    accent: primaryColor,
+                    loc: loc,
+                    // Gated on `usesMigrationBodies` like every other host; reads the flow's blocks.
+                    migrationKind: inspectState.config?.usesMigrationBodies == true
+                        ? MigrationBodyKind.resolve(blocks: inspectState.config?.guidanceContent)
+                        : nil
+                )
             }
-            }
-            footerBar
         }
         .frame(width: windowSize.width, height: windowSize.height)
-        .background(Color(NSColor.windowBackgroundColor))
+        .background(PhaseBackdrop(config: inspectState.config))
+    }
+
+    /// The tour: a single step when there is one movie, a paged walkthrough when there are pages.
+    @ViewBuilder
+    private var plainSimpleTourScreen: some View {
+        if plainSimpleTourIsPaged {
+            plainSimpleWalkthroughScreen
+        } else {
+            plainSimpleMediaStepScreen
+        }
+    }
+
+    /// A walkthrough page; the pager gates Continue until the last page.
+    private var plainSimpleWalkthroughScreen: some View {
+        let pages = plainSimpleTourPages
+        let index = min(max(plainSimpleTourPage, 1), pages.count)
+        let page = pages[index - 1]
+
+        return PlainSimpleWalkthroughScreen(
+            eyebrow: plainStepPosition(phase: .tour).map {
+                StepCounterLabel.format(
+                    StepCounterLabel.template { key in loc.string(key, fallback: nil) },
+                    current: $0.current, total: $0.total)
+            },
+            title: loc.string("tour.title", fallback: page.title) ?? plainSimpleTourFallbackTitle,
+            instruction: loc.string("tour.instruction", fallback: page.text) ?? "",
+            mediaPath: page.content,
+            durationLabel: page.caption,
+            current: index,
+            total: pages.count,
+            gateText: "Finish all \(pages.count) pages to continue",
+            centred: plainSimpleIsCentred,
+            accent: primaryColor,
+            onBack: { plainSimpleTourPage = max(index - 1, 1) },
+            onForward: { plainSimpleTourPage = min(index + 1, pages.count) }
+        )
+    }
+
+    /// The single-movie tour; its strip reads the same `ItemSetModel` the list renders.
+    private var plainSimpleMediaStepScreen: some View {
+        let block = plainSimpleTourBlock
+        let model = ItemSetModel.build(from: inspectState)
+        let running = model.rows.first { $0.status == .active }
+        let done = model.rows.filter { $0.status == .completed }.count
+
+        return PlainSimpleMediaScreen(
+            title: loc.string("tour.title", fallback: block?.title) ?? plainSimpleTourFallbackTitle,
+            subtitle: loc.string("tour.subtitle", fallback: block?.text) ?? "",
+            mediaPath: block?.content,
+            // Absent caption, no chip; the screen never invents a duration.
+            durationLabel: block?.caption,
+            runningItemText: running.map { row in
+                let name = loc.string("\(row.item.id).displayName", fallback: row.item.displayName) ?? row.item.displayName
+                return "\(loc.itemStatus(for: row.item, baseStatus: row.statusText)) \(name)"
+            },
+            progressText: model.rows.isEmpty ? nil : "\(done) of \(model.rows.count)",
+            centred: plainSimpleIsCentred,
+            accent: primaryColor
+        )
+    }
+
+    /// Tour copy fallbacks; authored labels win.
+    private var plainSimpleTourFallbackTitle: String { "While you wait" }
+    private var plainSimpleTourContinueText: String {
+        loc.string("tour.continue", fallback: nil) ?? ChromeCopy.continue
+    }
+    private var plainSimpleSkipTourText: String {
+        loc.string("tour.skip", fallback: nil) ?? "Skip tour"
+    }
+
+    /// Main-phase step numbers; nil for a single-phase flow.
+    private var plainStepDots: (current: Int, total: Int)? { plainStepPosition(phase: .main) }
+
+    /// Centred is the default; root `contentAlign` "leading" opts into the leading rail.
+    /// Resolved once per flow, never per step, so the axis cannot shift between screens.
+    private var plainSimpleIsCentred: Bool {
+        PlainSimpleM.isCentred(authored: inspectState.config?.contentAlign)
+    }
+
+    /// The tour is a view of the running main phase, not a fourth `PresetPhase`.
+    @State private var plainSimpleShowsTour = false
+
+    /// Tour media: root `guidanceContent` video/image blocks that carry a `content` path.
+    private var plainSimpleTourPages: [InspectConfig.GuidanceContent] {
+        inspectState.config?.guidanceContent?.filter {
+            ($0.type == "video" || $0.type == "image") && !($0.content ?? "").isEmpty
+        } ?? []
+    }
+
+    private var plainSimpleTourBlock: InspectConfig.GuidanceContent? { plainSimpleTourPages.first }
+    private var plainSimpleHasTour: Bool { !plainSimpleTourPages.isEmpty }
+
+    /// One media block is a step; several are the pages of one task and take a pager.
+    private var plainSimpleTourIsPaged: Bool { plainSimpleTourPages.count > 1 }
+
+    /// Current walkthrough page, 1-based.
+    @State private var plainSimpleTourPage: Int = 1
+
+    /// The outer step a phase is; arithmetic lives in `PlainStepPosition`.
+    private func plainStepPosition(phase: PlainStepPosition.Phase) -> (current: Int, total: Int)? {
+        PlainStepPosition.position(phase: phase,
+                                   hasIntro: inspectState.config?.introScreen != nil,
+                                   hasTour: plainSimpleHasTour,
+                                   hasSummary: inspectState.config?.summaryScreen != nil)
+    }
+
+    /// The summary phase's own label, for the confirmation screen's eyebrow.
+    private var plainSummaryStepText: String? {
+        plainStepPosition(phase: .summary).map {
+            StepCounterLabel.format(
+                StepCounterLabel.template { key in loc.string(key, fallback: nil) },
+                current: $0.current, total: $0.total
+            )
+        }
+    }
+
+    /// The words beside the dots; `StepCounterLabel` owns the key list and the English fallback.
+    private var plainStepIndicatorText: String? {
+        plainStepDots.map {
+            StepCounterLabel.format(
+                StepCounterLabel.template { key in loc.string(key, fallback: nil) },
+                current: $0.current, total: $0.total
+            )
+        }
+    }
+
+    /// `logoConfig.maxWidth`; nil keeps height-only sizing.
+    private var resolvedLogoMaxWidth: CGFloat? {
+        inspectState.config?.logoConfig?.maxWidth.map { CGFloat($0) }
+    }
+
+    /// `logoConfig.maxHeight`, else the calling construction's own constant.
+    private func resolvedLogoHeight(fallback: CGFloat) -> CGFloat {
+        CGFloat(inspectState.config?.logoConfig?.maxHeight ?? fallback)
+    }
+
+    /// `logoConfig.clearSpace`, shared by all three plain shells; `BrandMark` clamps it.
+    private var resolvedLogoClearSpace: CGFloat {
+        inspectState.config?.logoConfig?.clearSpace ?? 0
+    }
+
+    // MARK: - Main Phase (plain-branded)
+
+    /// The plain-branded main phase: `PlainBrandedShell` wrapping `PlainBrandedScreen`.
+    /// The logo is not footer-gated: this shell has one seat, which `footer` and `header` both
+    /// resolve to; only `none` suppresses. Step dots count configured phases (intro/main/summary),
+    /// not item progress, and hide when fewer than two.
+    private func plainBrandedMainPhaseView(summaryAction: (() -> Void)?) -> some View {
+        let logoConfig = inspectState.config?.logoConfig
+        let resolvedPosition = logoConfig?.resolvedPosition ?? .footer
+        let logoPath = resolvedPosition == .none
+            ? nil
+            : BrandArtwork.resolve(logoConfig, isDark: colorScheme == .dark)
+        let logoHeight = CGFloat(logoConfig?.maxHeight ?? PlainBrandedM.logoHeight)
+        let logoMaxWidth = logoConfig?.maxWidth.map { CGFloat($0) }
+        // `footerText` is opt-in; an authored empty string is an explicit opt-out.
+        let footerText = inspectState.config?.footerText
+        let claimText = (footerText?.isEmpty ?? true) ? nil : footerText
+
+        let introConfigured = inspectState.config?.introScreen != nil
+        let summaryConfigured = inspectState.config?.summaryScreen != nil
+        let totalPhases = 1 + (introConfigured ? 1 : 0) + (summaryConfigured ? 1 : 0)
+        let currentPhaseNumber = introConfigured ? 2 : 1
+        let stepDots: (current: Int, total: Int)? = totalPhases >= 2
+            ? (current: currentPhaseNumber, total: totalPhases)
+            : nil
+        let stepIndicatorText = stepDots.map {
+            StepCounterLabel.format(
+                StepCounterLabel.template { key in loc.string(key, fallback: nil) },
+                current: $0.current, total: $0.total
+            )
+        }
+
+        return PlainBrandedShell(
+            buttonTitle: plainSimpleButtonText,
+            buttonDisabled: inspectState.buttonConfiguration.button1Disabled,
+            onPrimaryAction: { plainSimplePrimaryAction(summaryAction: summaryAction) },
+            accent: primaryColor,
+            logoPath: logoPath,
+            logoHeight: logoHeight,
+            logoMaxWidth: logoMaxWidth,
+            logoClearSpace: resolvedLogoClearSpace,
+            stepIndicatorText: stepIndicatorText,
+            stepDots: stepDots,
+            claimText: claimText
+        ) {
+            PlainBrandedScreen(
+                inspectState: inspectState,
+                iconCache: iconCache,
+                model: ItemSetModel.build(from: inspectState),
+                title: loc.string("title", fallback: inspectState.uiConfiguration.windowTitle) ?? "",
+                subtitle: loc.string("subtitle", fallback: inspectState.uiConfiguration.subtitleMessage) ?? "",
+                accent: primaryColor,
+                loc: loc
+            )
+        }
+        .frame(width: windowSize.width, height: windowSize.height)
+        .background(PhaseBackdrop(config: inspectState.config))
+    }
+
+    // MARK: - Intro/Summary hero screens (plain-centered)
+
+    /// The plain-centered intro hero in `PlainCenteredShell`. The button must call `onContinue`,
+    /// never touch phase state, so the phase machine advances identically to the default arm.
+    private func plainCenteredIntroOverride(onContinue: @escaping () -> Void) -> AnyView {
+        guard let introConfig = inspectState.config?.introScreen else { return AnyView(EmptyView()) }
+        let systemImage = PlainCenteredIcon.heroGlyph(
+            mainIconPath: introConfig.heroImage ?? iconCache.getMainIconPath(for: inspectState)
+        )
+        let title = loc.string("introScreen.title", fallback: introConfig.title) ?? ""
+        let bodyText = loc.string("introScreen.subtitle", fallback: introConfig.subtitle) ?? ""
+        let buttonTitle = introConfig.buttonText ?? "Get Started"
+
+        return AnyView(
+            PlainCenteredShell(
+                showsBack: false,
+                buttonTitle: buttonTitle,
+                onPrimaryAction: onContinue,
+                accent: primaryColor,
+                logoPath: BrandArtwork.resolve(inspectState.config?.logoConfig, isDark: colorScheme == .dark, gate: .footer),
+                logoHeight: resolvedLogoHeight(fallback: PlainCenteredM.footerWordmarkHeight),
+                logoMaxWidth: resolvedLogoMaxWidth,
+                logoClearSpace: resolvedLogoClearSpace
+            ) {
+                PlainCenteredHeroScreen(
+                    systemImage: systemImage,
+                    title: title,
+                    bodyText: bodyText,
+                    accent: primaryColor
+                )
+            }
+        )
+    }
+
+    /// The summary hero with its success badge lit. `onClose` carries the readiness cleanup and
+    /// exit; this must call it rather than perform that itself.
+    private func plainCenteredSummaryOverride(onClose: @escaping () -> Void) -> AnyView {
+        guard let summaryConfig = inspectState.config?.summaryScreen else { return AnyView(EmptyView()) }
+        let systemImage = PlainCenteredIcon.heroGlyph(
+            mainIconPath: summaryConfig.heroImage ?? iconCache.getMainIconPath(for: inspectState)
+        )
+        let title = loc.string("summaryScreen.title", fallback: summaryConfig.title) ?? ""
+        let bodyText = loc.string("summaryScreen.subtitle", fallback: summaryConfig.subtitle) ?? ""
+        let buttonTitle = summaryConfig.buttonText ?? "Close"
+
+        return AnyView(
+            PlainCenteredShell(
+                showsBack: false,
+                buttonTitle: buttonTitle,
+                onPrimaryAction: onClose,
+                accent: primaryColor,
+                logoPath: BrandArtwork.resolve(inspectState.config?.logoConfig, isDark: colorScheme == .dark, gate: .footer),
+                logoHeight: resolvedLogoHeight(fallback: PlainCenteredM.footerWordmarkHeight),
+                logoMaxWidth: resolvedLogoMaxWidth,
+                logoClearSpace: resolvedLogoClearSpace
+            ) {
+                PlainCenteredHeroScreen(
+                    systemImage: systemImage,
+                    title: title,
+                    bodyText: bodyText,
+                    accent: primaryColor,
+                    showsSuccessBadge: true
+                )
+            }
+        )
+    }
+
+    // MARK: - Main Phase (plain-centered)
+
+    /// The plain-centered main phase: the list while every item is pending, the progress screen
+    /// once one runs. The back chevron needs an authored `introScreen` (`backAction` non-nil)
+    /// and nothing running: a running item cannot be abandoned cleanly.
+    private func plainCenteredMainPhaseView(summaryAction: (() -> Void)?, backAction: (() -> Void)?) -> some View {
+        let model = ItemSetModel.build(from: inspectState)
+        let isRunning = model.rows.contains { $0.status == .active }
+        let canGoBack = backAction != nil && !isRunning
+        let systemImage = PlainCenteredIcon.heroGlyph(mainIconPath: iconCache.getMainIconPath(for: inspectState))
+        let title = loc.string("title", fallback: inspectState.uiConfiguration.windowTitle) ?? ""
+        let bodyText = loc.string("subtitle", fallback: inspectState.uiConfiguration.subtitleMessage) ?? ""
+
+        return PlainCenteredShell(
+            showsBack: canGoBack,
+            // Phase-level view, no step in scope: the label chain has localized and branding rungs only.
+            backLabel: BackDoor.label(localized: loc.string("backButtonText", fallback: nil),
+                                      step: nil,
+                                      branding: inspectState.buttonConfiguration.button2Text),
+            onBack: canGoBack ? backAction : nil,
+            buttonTitle: plainSimpleButtonText,
+            buttonDisabled: inspectState.buttonConfiguration.button1Disabled,
+            onPrimaryAction: { plainSimplePrimaryAction(summaryAction: summaryAction) },
+            accent: primaryColor,
+            logoPath: BrandArtwork.resolve(inspectState.config?.logoConfig, isDark: colorScheme == .dark, gate: .footer),
+            logoHeight: resolvedLogoHeight(fallback: PlainCenteredM.footerWordmarkHeight),
+            logoMaxWidth: resolvedLogoMaxWidth,
+            logoClearSpace: resolvedLogoClearSpace,
+            bodyPadding: isRunning ? PlainCenteredM.bodyPadding : PlainCenteredM.bodyPaddingList
+        ) {
+            if isRunning {
+                PlainCenteredProgressScreen(
+                    systemImage: systemImage,
+                    title: title,
+                    bodyText: bodyText,
+                    accent: primaryColor,
+                    completed: inspectState.trackedCompletedCount,
+                    total: inspectState.trackedItems.count,
+                    activeItemName: plainCenteredActiveItemName(model: model)
+                )
+            } else {
+                PlainCenteredListScreen(
+                    systemImage: systemImage,
+                    model: model,
+                    title: title,
+                    bodyText: bodyText,
+                    accent: primaryColor,
+                    loc: loc
+                )
+            }
+        }
+        .frame(width: windowSize.width, height: windowSize.height)
+        .background(PhaseBackdrop(config: inspectState.config))
+    }
+
+    /// The running item's localized display name for the progress caption; nil if none is running.
+    private func plainCenteredActiveItemName(model: ItemSetModel) -> String? {
+        guard let row = model.rows.first(where: { $0.status == .active }) else { return nil }
+        return loc.string("\(row.item.id).displayName", fallback: row.item.displayName) ?? row.item.displayName
+    }
+
+    // MARK: - Main Phase (assembled)
+
+    private func mainPhaseView(summaryAction: (() -> Void)?) -> some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 0) {
+                DeploymentSidebarPanel(
+                    inspectState: inspectState,
+                    iconCache: iconCache,
+                    accent: primaryColor
+                )
+
+                rightColumn
+            }
+
+            ActionFooterRow(
+                state: inspectState,
+                tint: primaryColor,
+                scaleFactor: scaleFactor,
+                onShowDetailOverlay: { showDetailOverlay = true },
+                onButton1Action: summaryAction,
+                config: inspectState.config,
+                triggerFilePath: triggerFilePath
+            )
+        }
+        .frame(width: windowSize.width, height: windowSize.height)
+        .background(PhaseBackdrop(config: inspectState.config))
+        .onPreferenceChange(CardHeaderHelpSeatedKey.self) { helpSeatedInFooter = $0 }
         .overlay {
-            // Help button (positioned according to config)
-            // Supports action types: overlay (default), url, custom
+            // Corner help button, only when no footer seated it.
             if let helpButtonConfig = inspectState.config?.helpButton,
-               helpButtonConfig.enabled ?? true {
+               helpButtonConfig.isShown, !helpSeatedInFooter {
                 PositionedHelpButton(
                     config: helpButtonConfig,
                     action: {
@@ -290,337 +631,53 @@ struct Preset1View: View, InspectLayoutProtocol {
                 )
             }
         }
-        .detailOverlay(
-            inspectState: inspectState,
-            isPresented: $showDetailOverlay,
-            config: inspectState.config?.detailOverlay
-        )
         .itemDetailOverlay(
             inspectState: inspectState,
             isPresented: $showItemDetailOverlay,
             item: selectedItemForDetail
         )
-        .onAppear {
-            if let locConfig = inspectState.config?.localization {
-                let basePath = inspectState.uiConfiguration.iconBasePath ?? ""
-                localizationService.loadLanguages(from: locConfig, basePath: basePath)
-            }
-            writeLog("Preset1View: Using refactored InspectState", logLevel: .info)
-            // Announce readiness so `ignitecli ipc wait-ready` returns (FSEvents path unchanged).
-            writeReadinessFile(config: inspectState.config, triggerFilePath: triggerFilePath,
-                               preset: "1", itemCount: inspectState.items.count,
-                               itemIDs: inspectState.items.map { $0.id })
-        }
     }
 
-    // MARK: - Footer (Zone 5)
+    private var rightColumn: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(loc.string("title", fallback: inspectState.uiConfiguration.windowTitle) ?? "")
+                    .font(.system(size: 26, weight: .bold))
 
-    private var footerBar: some View {
-        HStack {
-            // Left: Info link
-            Button(inspectState.uiConfiguration.popupButtonText) {
-                if inspectState.config?.detailOverlay != nil {
-                    showDetailOverlay = true
-                } else {
-                    showingAboutPopover.toggle()
-                }
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(primaryColor)
-            .font(.system(size: 13))
-            .popover(isPresented: $showingAboutPopover, arrowEdge: .top) {
-                InstallationInfoPopoverView(inspectState: inspectState)
-            }
-
-            Spacer()
-
-            // Right: Action buttons
-            PresetCommonViews.buttonArea(
-                state: inspectState,
-                tintColor: primaryColor,
-                onButton1Action: summaryScreenButtonAction
-            )
-        }
-        .padding(.horizontal, 40 * scaleFactor)
-        .padding(.top, 8)
-        .padding(.bottom, InspectConstants.spacingSection * scaleFactor)
-    }
-
-    // MARK: - Localization
-
-    /// The auto-detected or hardcoded default language (no picker in Preset1)
-    private var effectiveLanguage: String? {
-        guard let locConfig = inspectState.config?.localization else { return nil }
-        return localizationService.resolveDefaultLanguage(from: locConfig)
-    }
-
-    /// Resolve a localized string, falling back to the provided default
-    private func localized(_ key: String, fallback: String?) -> String? {
-        guard let lang = effectiveLanguage else { return fallback }
-        return localizationService.string(forLanguage: lang, key: key) ?? fallback
-    }
-
-    /// Resolve a localized string array, falling back to the provided default
-    private func localizedArray(_ key: String, fallback: [String]?) -> [String]? {
-        guard let lang = effectiveLanguage else { return fallback }
-        return localizationService.stringArray(forLanguage: lang, key: key) ?? fallback
-    }
-
-    /// Get localized item status text (completed/downloading/pending/failed)
-    private func localizedItemStatus(for item: InspectConfig.ItemConfig) -> String {
-        let baseStatus = getItemStatusWithValidation(for: item)
-        guard effectiveLanguage != nil else { return baseStatus }
-
-        // Try item-specific status key first, then global status keys
-        if inspectState.completedItems.contains(item.id) {
-            return localized("\(item.id).completedStatus", fallback: nil)
-                ?? localized("completedStatus", fallback: nil)
-                ?? baseStatus
-        } else if inspectState.downloadingItems.contains(item.id) {
-            return localized("\(item.id).downloadingStatus", fallback: nil)
-                ?? localized("downloadingStatus", fallback: nil)
-                ?? baseStatus
-        } else if inspectState.failedItems.contains(item.id) {
-            return localized("\(item.id).failedStatus", fallback: nil)
-                ?? localized("failedStatus", fallback: nil)
-                ?? baseStatus
-        } else {
-            return localized("\(item.id).pendingStatus", fallback: nil)
-                ?? localized("pendingStatus", fallback: nil)
-                ?? baseStatus
-        }
-    }
-
-    /// Get the current side message with localization applied
-    private func localizedSideMessage() -> String? {
-        let messages = localizedArray("sideMessages", fallback: inspectState.uiConfiguration.sideMessages) ?? inspectState.uiConfiguration.sideMessages
-        guard !messages.isEmpty else { return nil }
-        let index = min(inspectState.uiConfiguration.currentSideMessageIndex, messages.count - 1)
-        return messages[index]
-    }
-
-    // MARK: - Helper Methods
-
-    @ViewBuilder
-    private func itemRow(for item: InspectConfig.ItemConfig) -> some View {
-        HStack(spacing: 12 * scaleFactor) {
-            // Icon
-            IconView(image: iconCache.getItemIconPath(for: item, state: inspectState))
-                .frame(width: 48 * scaleFactor, height: 48 * scaleFactor)
-                .aspectRatio(1, contentMode: .fit)
-                .clipped()
-
-            // Item info
-            VStack(alignment: .leading, spacing: 2 * scaleFactor) {
-                HStack(spacing: 4) {
-                    Text(localized("\(item.id).displayName", fallback: item.displayName) ?? item.displayName)
-                        .font(.system(size: 16 * scaleFactor, weight: .medium))
-                        .foregroundStyle(.primary)
-
-                    // Info button - only show if item has itemOverlay configured
-                    if item.itemOverlay != nil {
-                        ItemInfoButton(item: item, action: {
-                            selectedItemForDetail = item
-                            showItemDetailOverlay = true
-                        }, size: 18 * scaleFactor, tint: primaryColor)
-                    }
-                }
-
-                // Per-item description text (issue #663): optional detail under the
-                // name so titles stay short while users can read what each step is for.
-                if let description = localized("\(item.id).subtitle", fallback: item.subtitle),
-                   !description.isEmpty {
-                    Text(description)
-                        .font(.system(size: 13 * scaleFactor))
+                // Fixed `message` line, distinct from the rotating side message below.
+                if let subtitle = loc.string("subtitle", fallback: inspectState.uiConfiguration.subtitleMessage),
+                   !subtitle.isEmpty {
+                    Text(subtitle)
+                        .font(.system(size: 15))
                         .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
                 }
 
-                Text(localizedItemStatus(for: item))
-                    .font(.system(size: 13 * scaleFactor))
-                    .foregroundStyle(getItemStatusColor(for: item))
-
-                // Bundle info subtitle (version, identifier, etc.)
-                if let bundleInfo = inspectState.getBundleInfoForItem(item) {
-                    Text(bundleInfo)
-                        .font(.system(size: 11 * scaleFactor))
-                        .foregroundStyle(.tertiary)
+                if let currentMessage = loc.sideMessage() {
+                    // The same size as `message` above, so the two read as one block.
+                    RotatingMessageLine(messages: loc.sideMessages(), current: currentMessage,
+                                        index: inspectState.uiConfiguration.currentSideMessageIndex,
+                                        font: .system(size: 15))
                 }
             }
+            // 60 is the header without a `message`; with one it grows by that line.
+            .frame(minHeight: 60, alignment: .topLeading)
+            .padding(.horizontal)
+            .padding(.top, InspectConstants.spacingInner)
+            // The list scrolls under this edge as it follows the install; 12 keeps a scrolled row clear of the text.
+            .padding(.bottom, 12)
 
-            Spacer()
-
-            // Status indicator with validation support
-            statusIndicatorWithValidation(for: item)
-        }
-        .padding(.leading)
-        .padding(.trailing, 24)
-        .padding(.vertical, 8)
-        .background(
-            // Subtle tint marks the actively-installing row without any motion.
-            PresetCommonViews.resolveInstallStatus(for: item, state: inspectState) == .active
-                ? primaryColor.opacity(0.06)
-                : Color.clear
-        )
-    }
-
-    // MARK: - Sorting & Status
-
-    private func getItemStatusType(for item: InspectConfig.ItemConfig) -> InspectItemStatus {
-        if inspectState.failedItems.contains(item.id) { return .failed("") }
-        if inspectState.completedItems.contains(item.id) { return .completed }
-        if inspectState.downloadingItems.contains(item.id) { return .downloading }
-        return .pending
-    }
-
-    private func shouldShowGroupSeparator(for item: InspectConfig.ItemConfig, in sortedItems: [InspectConfig.ItemConfig]) -> Bool {
-        guard let index = sortedItems.firstIndex(where: { $0.id == item.id }), index > 0 else { return false }
-
-        let previousItem = sortedItems[index - 1]
-        let currentStatus = getItemStatusType(for: item)
-        let previousStatus = getItemStatusType(for: previousItem)
-
-        return currentStatus != previousStatus
-    }
-
-    private func getStatusHeaderText(for statusType: InspectItemStatus) -> String {
-        let baseText: String
-        switch statusType {
-        case .completed:
-            baseText = inspectState.config?.uiLabels?.sectionHeaderCompleted
-                ?? inspectState.config?.uiLabels?.completedStatus
-                ?? "Completed"
-            return localized("sectionHeaderCompleted", fallback: baseText) ?? baseText
-        case .downloading:
-            if let header = inspectState.config?.uiLabels?.sectionHeaderPending {
-                baseText = header
-            } else {
-                let downloadingText = inspectState.config?.uiLabels?.downloadingStatus ?? "Installing..."
-                let cleanText = downloadingText.replacingOccurrences(of: "...", with: "")
-                baseText = "Currently \(cleanText)"
-            }
-            return localized("sectionHeaderDownloading", fallback: baseText) ?? baseText
-        case .pending:
-            baseText = inspectState.config?.uiLabels?.sectionHeaderPending ?? "Pending Installation"
-            return localized("sectionHeaderPending", fallback: baseText) ?? baseText
-        case .failed:
-            baseText = inspectState.config?.uiLabels?.sectionHeaderFailed ?? "Installation Failed"
-            return localized("sectionHeaderFailed", fallback: baseText) ?? baseText
-        }
-    }
-
-    // MARK: - IPC Event Emission
-
-    /// Write a phase-change event to the JSONL event file for IPC consumers.
-    /// Event file path: explicit `eventFile`, or derived from `readinessFile` (.ready → .events).
-    private func writePhaseEvent(_ phase: PresetPhase) {
-        let eventPath: String? = inspectState.config?.eventFile ?? inspectState.config?.readinessFile.map {
-            (($0 as NSString).deletingPathExtension) + ".events"
-        }
-        guard let path = eventPath else { return }
-
-        let entry: [String: Any] = [
-            "event": "phase_changed",
-            "phase": "\(phase)",
-            "timestamp": ISO8601DateFormatter().string(from: Date())
-        ]
-        guard let data = try? JSONSerialization.data(withJSONObject: entry),
-              let line = String(data: data, encoding: .utf8) else { return }
-
-        let expandedPath = (path as NSString).expandingTildeInPath
-        let lineData = (line + "\n").data(using: .utf8)!
-        if let handle = FileHandle(forWritingAtPath: expandedPath) {
-            handle.seekToEndOfFile()
-            handle.write(lineData)
-            handle.closeFile()
-        } else {
-            FileManager.default.createFile(atPath: expandedPath, contents: lineData)
-        }
-        writeLog("Preset1View: Phase event emitted — \(phase)", logLevel: .info)
-    }
-
-    // MARK: - Validation Support
-
-    private func hasValidationWarning(for item: InspectConfig.ItemConfig) -> Bool {
-        // Delegates to the shared single source of truth (PresetCommonViews).
-        PresetCommonViews.hasValidationWarning(for: item, state: inspectState)
-    }
-
-    private func getItemStatusWithValidation(for item: InspectConfig.ItemConfig) -> String {
-        if inspectState.completedItems.contains(item.id) {
-            if hasValidationWarning(for: item) {
-                return inspectState.config?.uiLabels?.failedStatus ?? "Failed"
-            } else {
-                return getItemStatus(for: item)
-            }
-        } else {
-            return getItemStatus(for: item)
-        }
-    }
-
-    private func getItemStatusColor(for item: InspectConfig.ItemConfig) -> Color {
-        if inspectState.failedItems.contains(item.id) {
-            return .red
-        } else if inspectState.completedItems.contains(item.id) {
-            return hasValidationWarning(for: item) ? .orange : .green
-        } else if inspectState.downloadingItems.contains(item.id) {
-            return .blue
-        } else {
-            return .secondary
-        }
-    }
-
-    @ViewBuilder
-    private func statusIndicatorWithValidation(for item: InspectConfig.ItemConfig) -> some View {
-        let size: CGFloat = 20 * scaleFactor
-
-        switch PresetCommonViews.resolveInstallStatus(for: item, state: inspectState) {
-        case .failed:
-            Circle()
-                .fill(Color.red)
-                .frame(width: size, height: size)
-                .overlay(
-                    Image(systemName: "xmark")
-                        .font(.system(size: size * 0.6, weight: .bold))
-                        .foregroundStyle(.white)
-                )
-                .help("Installation failed")
-        case .completed:
-            Circle()
-                .fill(Color.green)
-                .frame(width: size, height: size)
-                .overlay(
-                    Image(systemName: "checkmark")
-                        .font(.system(size: size * 0.6, weight: .bold))
-                        .foregroundStyle(.white)
-                )
-                .help("Installed and validated")
-        case .completedWithWarning:
-            Circle()
-                .fill(Color.orange)
-                .frame(width: size, height: size)
-                .overlay(
-                    Image(systemName: "exclamationmark")
-                        .font(.system(size: size * 0.6, weight: .bold))
-                        .foregroundStyle(.white)
-                )
-                .help("Configuration validation failed - check plist settings")
-        case .active:
-            // Static filled accent dot with a soft halo — the header spinner owns the
-            // motion, so N concurrent installs no longer spawn N spinning rows.
-            Circle()
-                .fill(primaryColor.opacity(0.18))
-                .frame(width: size, height: size)
-                .overlay(
-                    Circle()
-                        .fill(primaryColor)
-                        .frame(width: size * 0.5, height: size * 0.5)
-                )
-                .help("Installing…")
-        case .pending:
-            Circle()
-                .stroke(Color.gray.opacity(0.3), lineWidth: 2)
-                .frame(width: size, height: size)
+            DeploymentItemList(
+                inspectState: inspectState,
+                iconCache: iconCache,
+                accent: primaryColor,
+                loc: loc,
+                onItemInfo: { item in
+                    selectedItemForDetail = item
+                    showItemDetailOverlay = true
+                }
+            )
         }
     }
 }

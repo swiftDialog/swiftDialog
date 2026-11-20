@@ -2,10 +2,8 @@
 //  PresetPhaseViews.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH
-//
-//  Shared intro/summary screen views for Preset1/2 multi-screen flow.
-//  Reuses GuidanceContentView, BentoGridView, and IntroHeroImage.
+//  Intro and summary screens for the Preset1/2 phase flow: each resolves its strings through the
+//  sidecar and token pipeline, then hands them to `BookendScreenView`.
 //
 
 import SwiftUI
@@ -22,181 +20,101 @@ enum PresetPhase: Equatable {
 // MARK: - Intro Screen View
 
 /// Full-screen intro view shown before the items view in Preset1/2.
-/// Renders hero image, title, subtitle, and rich content blocks via GuidanceContentView.
-struct PresetIntroScreenView: View {
+struct PresetIntroScreenView<Context: UserInputContext & ProgressContext & ObservableObject>: View {
     let config: InspectConfig.PresetIntroScreen
     let highlightColor: Color
     let scaleFactor: CGFloat
     let basePath: String?
-    @ObservedObject var inspectState: InspectState
+    @ObservedObject var inspectState: Context
+    var userName: String?  // nil = no {userName} substitution
+    var localize: ((String) -> String?)?  // sidecar lookup; nil = config strings as written
+    // Pre-scale; P3 passes 28 so the action button holds one position across intro, main and outro.
+    var footerHorizontalPadding: CGFloat?
     let onContinue: () -> Void
 
+    private func locText(_ key: String, _ configValue: String?, default defaultText: String? = nil) -> String? {
+        resolveLocalizedPhaseText(key: key, config: configValue, default: defaultText,
+                                  localize: localize, userName: userName,
+                                  itemCount: inspectState.items.count)
+    }
+
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer()
-                .frame(height: 40 * scaleFactor)
-
-            // Hero image
-            if let heroPath = config.heroImage, !heroPath.isEmpty {
-                IntroHeroImage(
-                    path: heroPath,
-                    shape: config.heroImageShape ?? "none",
-                    size: config.heroImageSize ?? 200,
-                    accentColor: highlightColor,
-                    basePath: basePath
-                )
-                .padding(.bottom, 20 * scaleFactor)
-            }
-
-            // Title
-            if let title = config.title, !title.isEmpty {
-                Text(title)
-                    .font(.system(size: 28 * scaleFactor, weight: .bold))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40 * scaleFactor)
-            }
-
-            // Subtitle
-            if let subtitle = config.subtitle, !subtitle.isEmpty {
-                Text(subtitle)
-                    .font(.system(size: 15 * scaleFactor))
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40 * scaleFactor)
-                    .padding(.top, 6 * scaleFactor)
-            }
-
-            // Rich content blocks
-            if let contentBlocks = config.content, !contentBlocks.isEmpty {
-                ScrollView {
-                    GuidanceContentView(
-                        contentBlocks: contentBlocks,
-                        scaleFactor: scaleFactor,
-                        iconBasePath: basePath,
-                        inspectState: inspectState,
-                        itemId: "preset-intro-screen",
-                        accentColor: highlightColor,
-                        contentAlignment: .center
-                    )
-                    .padding(.horizontal, 40 * scaleFactor)
-                }
-                .padding(.top, 20 * scaleFactor)
-            }
-
-            Spacer()
-
-            // Continue button — bottom-right, matching summary composition
-            HStack {
-                Spacer()
-                Button(action: onContinue) {
-                    Text(config.buttonText ?? "Get Started")
-                }
-                .keyboardShortcut(.defaultAction)
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .tint(highlightColor)
-            }
-            .padding(.horizontal, 40 * scaleFactor)
-            .padding(.bottom, 24 * scaleFactor)
-        }
+        BookendScreenView(
+            role: .intro,
+            layout: config.layout ?? "centered",
+            heroPath: config.heroImage,
+            heroShape: config.heroImageShape ?? "none",
+            heroSize: config.heroImageSize,
+            title: locText("introScreen.title", config.title),
+            subtitle: locText("introScreen.subtitle", config.subtitle),
+            contentBlocks: config.content ?? [],
+            accentColor: highlightColor,
+            scaleFactor: scaleFactor,
+            iconBasePath: basePath,
+            itemId: "preset-intro-screen",
+            inspectState: inspectState,
+            intro: config,
+            userName: userName,
+            localize: localize,
+            footerHorizontalPadding: footerHorizontalPadding,
+            primaryButtonText: localizedPhaseValue("introScreen.buttonText", localize: localize,
+                                                   config: config.buttonText, default: "Get Started") ?? "Get Started",
+            onAction: onContinue
+        )
     }
 }
 
 // MARK: - Summary Screen View
 
 /// Full-screen summary/bento view shown after items complete in Preset1/2.
-/// Supports both GuidanceContentView content blocks and BentoGridView layouts.
-struct PresetSummaryScreenView: View {
+struct PresetSummaryScreenView<Context: UserInputContext & ProgressContext & ObservableObject>: View {
     let config: InspectConfig.PresetSummaryScreen
     let highlightColor: Color
     let scaleFactor: CGFloat
     let basePath: String?
-    @ObservedObject var inspectState: InspectState
+    @ObservedObject var inspectState: Context
+    var userName: String?  // nil = no {userName} substitution
+    var localize: ((String) -> String?)?  // sidecar lookup; nil = config strings as written
+    var footerHorizontalPadding: CGFloat?  // pre-scale
     let onClose: () -> Void
 
+    private func locText(_ key: String, _ configValue: String?, default defaultText: String? = nil) -> String? {
+        resolveLocalizedPhaseText(key: key, config: configValue, default: defaultText,
+                                  localize: localize, userName: userName,
+                                  itemCount: inspectState.items.count)
+    }
+
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer()
-                .frame(height: 40 * scaleFactor)
-
-            // Hero image
-            if let heroPath = config.heroImage, !heroPath.isEmpty {
-                IntroHeroImage(
-                    path: heroPath,
-                    shape: config.heroImageShape ?? "none",
-                    size: config.heroImageSize ?? 120,
-                    accentColor: highlightColor,
-                    basePath: basePath
-                )
-                .padding(.bottom, 16 * scaleFactor)
-            }
-
-            // Title
-            if let title = config.title, !title.isEmpty {
-                Text(title)
-                    .font(.system(size: 28 * scaleFactor, weight: .bold))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40 * scaleFactor)
-            }
-
-            // Subtitle
-            if let subtitle = config.subtitle, !subtitle.isEmpty {
-                Text(subtitle)
-                    .font(.system(size: 15 * scaleFactor))
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40 * scaleFactor)
-                    .padding(.top, 6 * scaleFactor)
-            }
-
-            // Content area: bento grid or rich content
-            if let cells = config.bentoCells, !cells.isEmpty {
-                // Bento grid layout
-                BentoGridView(
-                    cells: cells,
+        BookendScreenView(
+            role: .outro,
+            layout: config.layout ?? "centered",
+            heroPath: config.heroImage,
+            heroShape: config.heroImageShape ?? "none",
+            heroSize: config.heroImageSize,
+            title: locText("summaryScreen.title", config.title),
+            subtitle: locText("summaryScreen.subtitle", config.subtitle),
+            contentBlocks: config.content ?? [],
+            // Same grid defaults as the step and block arms, so one grid has one geometry.
+            bento: config.bentoCells.map {
+                BookendScreenView<Context>.BentoBody(
+                    cells: $0,
                     columns: config.bentoColumns ?? 2,
-                    rowHeight: CGFloat(config.bentoRowHeight ?? 120),
-                    gap: CGFloat(config.bentoGap ?? 12),
-                    scaleFactor: scaleFactor,
-                    accentColor: highlightColor,
-                    iconBasePath: basePath,
-                    tintColor: nil,
-                    inspectState: inspectState
+                    rowHeight: CGFloat(config.bentoRowHeight ?? 140),
+                    gap: CGFloat(config.bentoGap ?? 12)
                 )
-                .padding(.horizontal, 40 * scaleFactor)
-                .padding(.top, 20 * scaleFactor)
-            } else if let contentBlocks = config.content, !contentBlocks.isEmpty {
-                // Rich content blocks
-                ScrollView {
-                    GuidanceContentView(
-                        contentBlocks: contentBlocks,
-                        scaleFactor: scaleFactor,
-                        iconBasePath: basePath,
-                        inspectState: inspectState,
-                        itemId: "preset-summary-screen",
-                        accentColor: highlightColor,
-                        contentAlignment: .center
-                    )
-                    .padding(.horizontal, 40 * scaleFactor)
-                }
-                .padding(.top, 20 * scaleFactor)
-            }
-
-            Spacer()
-
-            // Close button with brand logo overlay (absolute center, matches main phase)
-            HStack {
-                Spacer()
-                Button(action: onClose) {
-                    Text(config.buttonText ?? "Close")
-                }
-                .keyboardShortcut(.defaultAction)
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .tint(highlightColor)
-            }
-            .padding(.horizontal, 40 * scaleFactor)
-            .padding(.bottom, 24 * scaleFactor)
-        }
+            },
+            accentColor: highlightColor,
+            scaleFactor: scaleFactor,
+            iconBasePath: basePath,
+            itemId: "preset-summary-screen",
+            inspectState: inspectState,
+            summary: config,
+            userName: userName,
+            localize: localize,
+            footerHorizontalPadding: footerHorizontalPadding,
+            primaryButtonText: localizedPhaseValue("summaryScreen.buttonText", localize: localize,
+                                                   config: config.buttonText, default: "Close") ?? "Close",
+            onAction: onClose
+        )
     }
 }

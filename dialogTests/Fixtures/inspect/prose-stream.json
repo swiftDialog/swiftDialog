@@ -1,0 +1,22 @@
+{
+  "_comment": "One empty `prose` block on card chrome, fed over the trigger file while the window is open: the placeholder shows until the first `append=`, and the newest line stays in view.",
+  "preset": "5",
+  "chrome": "card",
+  "title": "Prose stream",
+  "highlightColor": "#05164D",
+  "triggerFile": "/private/tmp/prose-stream.trigger",
+  "readinessFile": "/private/tmp/prose-stream.ready",
+  "eventFile": "/private/tmp/prose-stream.events",
+  "introSteps": [
+    {
+      "id": "answer",
+      "stepType": "standard",
+      "title": "Streaming answer",
+      "subtitle": "One prose block, written to line by line over update_guidance.",
+      "continueButtonText": "Done",
+      "content": [
+        { "type": "prose", "id": "body", "content": "", "placeholder": "Thinking…" }
+      ]
+    }
+  ]
+}

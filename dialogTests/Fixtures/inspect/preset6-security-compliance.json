@@ -1,0 +1,305 @@
+{
+  "preset": "6",
+  "chrome": "card",
+  "stepCounterPlacement": "footer",
+  "logoConfig": {
+    "imagePath": "__REPO__/examples/inspect/assets/brand/fleet-logo-dark-rgb.png",
+    "imagePathDark": "__REPO__/examples/inspect/assets/brand/fleet-logo-white-rgb.png",
+    "maxHeight": 22,
+    "position": "footer"
+  },
+  "title": "Security & Compliance",
+  "highlightColor": "#34C759",
+  "brandPalette": {
+    "primary": "#34C759",
+    "secondary": "#007AFF",
+    "accent": "#FF9500"
+  },
+  "steps": [
+    {
+      "id": "dashboard",
+      "displayName": "Dashboard",
+      "icon": "SF=shield.checkered",
+      "guidanceTitle": "Compliance Dashboard",
+      "guidanceContent": [
+        {
+          "type": "text",
+          "content": "Your Mac's security posture at a glance. Each category is evaluated against your organization's compliance baseline. Select a category from the sidebar for detailed results."
+        },
+        {
+          "type": "bento-grid",
+          "bentoColumns": 2,
+          "bentoRowHeight": 140,
+          "bentoGap": 12,
+          "bentoCells": [
+            {
+              "id": "dash-encryption",
+              "column": 0,
+              "row": 0,
+              "columnSpan": 1,
+              "rowSpan": 1,
+              "contentType": "icon",
+              "sfSymbol": "lock.fill",
+              "iconSize": 28,
+              "iconColor": "#FFFFFF",
+              "title": "Encryption",
+              "subtitle": "PASSED",
+              "textColor": "#FFFFFF",
+              "cornerRadius": 16,
+              "backgroundStyle": "gradient",
+              "gradientStyle": "vivid",
+              "gradientPalette": [
+                "#34C759",
+                "#30D158"
+              ]
+            },
+            {
+              "id": "dash-firewall",
+              "column": 1,
+              "row": 0,
+              "columnSpan": 1,
+              "rowSpan": 1,
+              "contentType": "icon",
+              "sfSymbol": "flame.fill",
+              "iconSize": 28,
+              "iconColor": "#FFFFFF",
+              "title": "Firewall",
+              "subtitle": "PASSED",
+              "textColor": "#FFFFFF",
+              "cornerRadius": 16,
+              "backgroundStyle": "gradient",
+              "gradientStyle": "ethereal",
+              "gradientPalette": [
+                "#007AFF",
+                "#5AC8FA"
+              ]
+            },
+            {
+              "id": "dash-updates",
+              "column": 0,
+              "row": 1,
+              "columnSpan": 1,
+              "rowSpan": 1,
+              "contentType": "icon",
+              "sfSymbol": "arrow.triangle.2.circlepath",
+              "iconSize": 28,
+              "iconColor": "#FFFFFF",
+              "title": "Updates",
+              "subtitle": "ACTION NEEDED",
+              "textColor": "#FFFFFF",
+              "cornerRadius": 16,
+              "backgroundStyle": "gradient",
+              "gradientStyle": "subtle",
+              "gradientPalette": [
+                "#FF9500",
+                "#FF3B30"
+              ]
+            },
+            {
+              "id": "dash-password",
+              "column": 1,
+              "row": 1,
+              "columnSpan": 1,
+              "rowSpan": 1,
+              "contentType": "icon",
+              "sfSymbol": "key.fill",
+              "iconSize": 28,
+              "iconColor": "#FFFFFF",
+              "title": "Password",
+              "subtitle": "PASSED",
+              "textColor": "#FFFFFF",
+              "cornerRadius": 16,
+              "backgroundStyle": "gradient",
+              "gradientStyle": "vivid",
+              "gradientPalette": [
+                "#34C759",
+                "#5AC8FA"
+              ]
+            }
+          ]
+        }
+      ],
+      "stepType": "standard"
+    },
+    {
+      "id": "encryption",
+      "displayName": "Encryption",
+      "icon": "SF=lock.fill",
+      "guidanceTitle": "Disk Encryption",
+      "guidanceContent": [
+        {
+          "type": "comparison-table",
+          "label": "FileVault 2",
+          "expected": "Enabled",
+          "actual": "Enabled",
+          "state": "success",
+          "expectedLabel": "Required",
+          "actualLabel": "Current",
+          "category": "Encryption Checks"
+        },
+        {
+          "type": "comparison-table",
+          "label": "Recovery Key",
+          "expected": "Escrowed",
+          "actual": "Escrowed",
+          "state": "success",
+          "expectedLabel": "Required",
+          "actualLabel": "Current",
+          "category": "Encryption Checks"
+        },
+        {
+          "type": "comparison-table",
+          "label": "Encryption Type",
+          "expected": "AES-XTS 256-bit",
+          "actual": "AES-XTS 256-bit",
+          "state": "success",
+          "expectedLabel": "Required",
+          "actualLabel": "Current",
+          "category": "Encryption Checks"
+        },
+        {
+          "type": "success",
+          "content": "Full disk encryption is active and recovery key has been escrowed to your organization."
+        }
+      ],
+      "stepType": "standard"
+    },
+    {
+      "id": "firewall",
+      "displayName": "Firewall",
+      "icon": "SF=flame.fill",
+      "guidanceTitle": "Firewall Configuration",
+      "guidanceContent": [
+        {
+          "type": "comparison-table",
+          "label": "Application Firewall",
+          "expected": "Enabled",
+          "actual": "Enabled",
+          "state": "success",
+          "expectedLabel": "Required",
+          "actualLabel": "Current",
+          "category": "Firewall Checks"
+        },
+        {
+          "type": "comparison-table",
+          "label": "Stealth Mode",
+          "expected": "Enabled",
+          "actual": "Enabled",
+          "state": "success",
+          "expectedLabel": "Required",
+          "actualLabel": "Current",
+          "category": "Firewall Checks"
+        },
+        {
+          "type": "comparison-table",
+          "label": "Block All Incoming",
+          "expected": "Disabled",
+          "actual": "Disabled",
+          "state": "success",
+          "expectedLabel": "Required",
+          "actualLabel": "Current",
+          "category": "Firewall Checks"
+        },
+        {
+          "type": "info",
+          "content": "The firewall allows signed applications while blocking unauthorized incoming connections. Stealth mode hides your Mac from network discovery."
+        }
+      ],
+      "stepType": "standard"
+    },
+    {
+      "id": "updates",
+      "displayName": "Updates",
+      "icon": "SF=arrow.triangle.2.circlepath",
+      "guidanceTitle": "Software Updates",
+      "guidanceContent": [
+        {
+          "type": "warning",
+          "content": "Your macOS version is behind the organization's required baseline. Please install the pending update within 7 days to maintain compliance."
+        },
+        {
+          "type": "comparison-table",
+          "label": "macOS Version",
+          "expected": "15.3.2",
+          "actual": "15.3.1",
+          "state": "fail",
+          "expectedLabel": "Required",
+          "actualLabel": "Installed"
+        },
+        {
+          "type": "phase-tracker",
+          "label": "Update Timeline",
+          "phases": [
+            "Available",
+            "Downloaded",
+            "Scheduled",
+            "Installing",
+            "Done"
+          ],
+          "currentPhase": 2,
+          "style": "checklist"
+        },
+        {
+          "type": "bullets",
+          "icon": "\u2022",
+          "items": [
+            "macOS 15.3.2 patches 3 critical CVEs identified by Apple",
+            "Update can be installed overnight \u2014 plug in your Mac and leave it on",
+            "If not updated within 7 days, your Mac will be flagged as non-compliant",
+            "Contact IT if you need an extension or have issues updating"
+          ]
+        }
+      ],
+      "stepType": "standard"
+    },
+    {
+      "id": "report",
+      "displayName": "Report",
+      "icon": "SF=doc.text.magnifyingglass",
+      "guidanceTitle": "Compliance Report",
+      "guidanceContent": [
+        {
+          "type": "text",
+          "content": "Summary of your Mac's compliance status across all security categories. This report is generated in real-time from your device configuration."
+        },
+        {
+          "type": "compliance-card",
+          "categoryName": "Encryption",
+          "cardIcon": "lock.fill",
+          "passed": 3,
+          "total": 3,
+          "checkDetails": "\u2713 FileVault enabled\n\u2713 Recovery key escrowed\n\u2713 AES-XTS 256-bit encryption"
+        },
+        {
+          "type": "compliance-card",
+          "categoryName": "Firewall",
+          "cardIcon": "flame.fill",
+          "passed": 3,
+          "total": 3,
+          "checkDetails": "\u2713 Application Firewall on\n\u2713 Stealth Mode enabled\n\u2713 Signed apps policy configured"
+        },
+        {
+          "type": "compliance-card",
+          "categoryName": "Software Updates",
+          "cardIcon": "arrow.triangle.2.circlepath",
+          "passed": 0,
+          "total": 1,
+          "checkDetails": "\u2717 macOS 15.3.2 required (15.3.1 installed)"
+        },
+        {
+          "type": "compliance-card",
+          "categoryName": "Password Policy",
+          "cardIcon": "key.fill",
+          "passed": 4,
+          "total": 4,
+          "checkDetails": "\u2713 Minimum 12 characters\n\u2713 Complexity requirements met\n\u2713 Auto-lock after 5 minutes\n\u2713 Password history enforced"
+        },
+        {
+          "type": "info",
+          "content": "Overall compliance: **10 of 11 checks passed**. Address the software update to achieve full compliance."
+        }
+      ],
+      "stepType": "standard"
+    }
+  ]
+}

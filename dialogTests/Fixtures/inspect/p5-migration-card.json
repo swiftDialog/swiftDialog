@@ -1,0 +1,160 @@
+{
+  "preset": "5",
+  "chrome": "card",
+  "triggerFile": "/tmp/p5-migration-card.trigger",
+  "title": "Device Migration",
+  "icon": "SF=laptopcomputer",
+  "highlightColor": "#05164D",
+  "introSteps": [
+    {
+      "id": "welcome",
+      "stepType": "intro",
+      "title": "Your Mac moves to Example MDM",
+      "subtitle": "Your organization is changing management platforms. Nothing on this Mac is removed or reset.",
+      "content": [
+        {
+          "type": "bullets",
+          "items": [
+            "Your files and applications are untouched",
+            "Your Mac does not restart",
+            "You can keep working the whole time"
+          ]
+        },
+        {
+          "type": "dropdown",
+          "id": "preferredLanguage",
+          "content": "Language",
+          "style": "option-rows",
+          "options": [
+            "English",
+            "Deutsch",
+            "Français",
+            "Español"
+          ],
+          "value": "English"
+        }
+      ],
+      "cardPanel": {
+        "caption": "TAKES ABOUT",
+        "stat": "2 minutes",
+        "pairs": [
+          {
+            "label": "Deadline set by IT",
+            "value": "Demo deadline"
+          },
+          {
+            "label": "Target platform",
+            "value": "Example MDM"
+          }
+        ]
+      },
+      "continueButtonText": "Begin Migration",
+      "showBackButton": false,
+      "phase": "intro"
+    },
+    {
+      "id": "approve",
+      "stepType": "guide",
+      "title": "Approve the profile in System Settings",
+      "subtitle": "Three actions. macOS asks for your password once, then we take it from there.",
+      "content": [
+        {
+          "type": "bullets",
+          "numbered": true,
+          "items": [
+            "Click **Open Settings** below",
+            "Approve the **device management profile**",
+            "Enter your **device password** to authorize"
+          ]
+        },
+        {
+          "type": "warning",
+          "content": "Leave System Settings open until this screen says it is done."
+        }
+      ],
+      "cardPanel": {
+        "imageTitle": "Privacy & Security"
+      },
+      "continueAction": "x-apple.systempreferences:com.apple.preference.security",
+      "continueButtonText": "Open Settings"
+    },
+    {
+      "id": "migrating",
+      "stepType": "processing",
+      "title": "Migrating your Mac",
+      "subtitle": "Nothing left to do. This screen advances on its own when the last step finishes.",
+      "cardPanel": {
+        "caption": "SAFE TO DO RIGHT NOW",
+        "paragraphs": [
+          "Keep using your Mac normally. Open apps stay open and no work is interrupted.",
+          "Only one thing to avoid: shutting down or sleeping the Mac before this finishes."
+        ]
+      },
+      "allowOverride": true,
+      "waitForExternalTrigger": true,
+      "processingDuration": 3,
+      "processingMessage": "Waiting for enrollment to complete",
+      "items": [
+        {
+          "id": "profile-downloaded",
+          "displayName": "Profile downloaded"
+        },
+        {
+          "id": "profile-approved",
+          "displayName": "Profile approved"
+        },
+        {
+          "id": "policies-applied",
+          "displayName": "Applying security policies"
+        },
+        {
+          "id": "device-registered",
+          "displayName": "Registering device with Example MDM"
+        },
+        {
+          "id": "config-verified",
+          "displayName": "Verifying configuration"
+        }
+      ],
+      "processingMode": "progressive",
+      "autoResult": "success"
+    },
+    {
+      "id": "complete",
+      "stepType": "outro",
+      "title": "Migration complete",
+      "subtitle": "This Mac is now managed by Example MDM. You can close this window and carry on.",
+      "content": [
+        {
+          "type": "bullets",
+          "items": [
+            "Management profile installed",
+            "Security policies applied",
+            "All files and applications intact",
+            "No restart needed"
+          ]
+        }
+      ],
+      "cardPanel": {
+        "caption": "FINISHED IN",
+        "stat": "Demo run",
+        "pairs": [
+          {
+            "label": "Managed by",
+            "value": "Example MDM"
+          },
+          {
+            "label": "Enrolled",
+            "value": "Demo timestamp"
+          }
+        ]
+      },
+      "footerNote": "Something looks wrong? [Contact IT support](https://support.example.com)",
+      "continueButtonText": "Done",
+      "phase": "outro"
+    }
+  ],
+  "_comment": "The card chrome's processing screen: eyebrow and step counter, a fixed header band, the progress rail driven by items, a live checklist from step.items and cardPanel's safe-to-do panel. processingMode and autoResult are authored so the config decodes with no advisory.",
+  "resultFile": "/tmp/p5-migration-card.result.json",
+  "stepCounterPlacement": "footer"
+}

@@ -2,14 +2,14 @@
 //  FileMonitor.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 19/07/2025
-//  Centralized file system monitoring service using FSEvents
-//  Handles all file monitoring, caching, and change detection
+//  FSEvents-based monitoring of item paths and download caches for presets 1–4; reports
+//  installs, removals and downloads to a delegate.
 //
 
 import Foundation
+import Synchronization
 
-/// Protocol for file system monitoring callbacks
+/// Callbacks are delivered on `FileMonitor.callbackQueue` (main in the app).
 protocol FileMonitorDelegate: AnyObject {
     func fileMonitor(_ monitor: FileMonitor, didDetectInstallation itemId: String, at path: String)
     func fileMonitor(_ monitor: FileMonitor, didDetectRemoval itemId: String, at path: String)
@@ -18,7 +18,6 @@ protocol FileMonitorDelegate: AnyObject {
     func fileMonitorDidDetectChanges(_ monitor: FileMonitor)
 }
 
-// Optional methods with default implementation
 extension FileMonitorDelegate {
     func fileMonitor(_ monitor: FileMonitor, didDetectCacheChange path: String) {}
 }
@@ -36,17 +35,36 @@ class FileMonitor {
     private var cachePaths: [String] = []
     private var cacheExtensions: [String] = [".download", ".pkg", ".dmg"]
     private var eventDebouncer = EventDebouncer()
-    private var pathToItemMap: [String: String] = [:] // path -> itemId mapping
+    private var pathToItemMap: [String: String] = [:] // canonical path -> itemId
+    /// The canonical directories the FSEvents stream was created with; `isMonitoredPath` filters
+    /// against this same list so the two cannot disagree.
+    private var watchedRoots: [String] = []
 
-    // File system cache for performance
+    /// True only while a stream is running; set false first when stopping. Guarded by
+    /// `lifecycleLock` because it is read on the debouncer's queue and written on the caller's.
+    private var isMonitoring = false
+    private let lifecycleLock = NSLock()
+
+    private var live: Bool {
+        lifecycleLock.lock(); defer { lifecycleLock.unlock() }
+        return isMonitoring
+    }
+
     private let fileSystemCache = InspectFileCache()
 
-    // Tracking states
     private var installedItems: Set<String> = []
     private var downloadingItems: Set<String> = []
 
-    // Plist monitoring
-    private var plistCallbacks: [String: (String) -> Void] = [:] // path -> callback
+    /// One spelling for a path, by text alone: `/tmp`, `/var` and `/etc` become their `/private`
+    /// form, which FSEvents reports. Must not touch the filesystem, so a path canonicalises the
+    /// same way before and after the file it names is deleted.
+    static func canonicalPath(_ path: String) -> String {
+        let expanded = (path as NSString).expandingTildeInPath
+        for short in ["/tmp", "/var", "/etc"] where expanded == short || expanded.hasPrefix(short + "/") {
+            return "/private" + expanded
+        }
+        return expanded
+    }
 
     // MARK: - Public Interface
 
@@ -59,23 +77,28 @@ class FileMonitor {
         setupFSEvents()
         performInitialScan()
 
+        lifecycleLock.lock(); isMonitoring = true; lifecycleLock.unlock()
         writeLog("FileMonitor: Started monitoring \(items.count) items and \(cachePaths.count) cache paths", logLevel: .info)
     }
     
     func stopMonitoring() {
+        // Goes false first so a late debounced work item finds the monitor already stopped.
+        lifecycleLock.lock(); isMonitoring = false; lifecycleLock.unlock()
+        // Outside the stream guard: a monitor with no stream can still hold scheduled work.
+        eventDebouncer.cleanupDebouncer()
+        watchedRoots.removeAll()
         if let stream = fsEventStream {
             FSEventStreamStop(stream)
             FSEventStreamInvalidate(stream)
             FSEventStreamRelease(stream)
             fsEventStream = nil
             
-            eventDebouncer.cleanupDebouncer()
-            
             writeLog("FileMonitor: Stopped monitoring and cleaned up resources", logLevel: .info)
         }
     }
+
     
-    /// Check if an item is installed
+    /// Whether any of the item's paths exists.
     func isInstalled(_ item: InspectConfig.ItemConfig) -> Bool {
         for path in item.paths {
             let expandedPath = (path as NSString).expandingTildeInPath
@@ -86,10 +109,9 @@ class FileMonitor {
         return false
     }
 
-    /// Check if an item is downloading
+    /// Whether a cache path holds a download file matching the item.
     func isDownloading(_ item: InspectConfig.ItemConfig) -> Bool {
         for cachePath in cachePaths {
-            // Always invalidate cache for fresh data
             fileSystemCache.invalidateCache(for: cachePath)
             let cacheContents = fileSystemCache.cacheDirectoryContents(cachePath)
 
@@ -105,12 +127,13 @@ class FileMonitor {
         return false
     }
 
-    /// Force a status check for all monitored items
+    /// Re-checks every monitored item and reports state changes to the delegate.
     func performStatusCheck() {
+        guard live else { return }
         var changesDetected = false
 
         for item in monitoredItems {
-            // Skip items with empty paths - they should be managed by presets
+            // Items without paths are the presets' business.
             guard !item.paths.isEmpty else {
                 writeLog("FileMonitor: Skipping status check for item \(item.id) - empty paths array", logLevel: .debug)
                 continue
@@ -122,7 +145,6 @@ class FileMonitor {
             let isInstalled = self.isInstalled(item)
             let isDownloading = !isInstalled && self.isDownloading(item)
 
-            // Update states and notify delegate
             if isInstalled && !wasInstalled {
                 installedItems.insert(item.id)
                 downloadingItems.remove(item.id)
@@ -157,9 +179,7 @@ class FileMonitor {
     // MARK: - Private Implementation
 
     private func performInitialScan() {
-        // Perform initial scan to set up current state
         for item in monitoredItems {
-            // Skip items with empty paths - they should be managed by presets
             guard !item.paths.isEmpty else {
                 writeLog("FileMonitor: Skipping initial scan for item \(item.id) - empty paths array", logLevel: .debug)
                 continue
@@ -177,9 +197,7 @@ class FileMonitor {
     private func buildPathMappings() {
         pathToItemMap.removeAll()
 
-        // Build mappings for quick lookups
         for item in monitoredItems {
-            // Skip items with empty paths - they should be managed by presets
             guard !item.paths.isEmpty else {
                 writeLog("FileMonitor: Skipping path mappings for item \(item.id) - empty paths array", logLevel: .debug)
                 continue
@@ -187,7 +205,8 @@ class FileMonitor {
             
             for path in item.paths {
                 let expandedPath = (path as NSString).expandingTildeInPath
-                pathToItemMap[expandedPath] = item.id
+                // Canonical on both sides, or an item authored as /tmp/x never matches its own event.
+                pathToItemMap[Self.canonicalPath(expandedPath)] = item.id
             }
         }
 
@@ -196,10 +215,8 @@ class FileMonitor {
     
     private func setupFSEvents() {
         var pathsToWatch = Set<String>()
-        
-        // Watch both app paths and cache paths
+
         for item in monitoredItems {
-            // Skip items with empty paths - they should be managed by presets
             guard !item.paths.isEmpty else {
                 writeLog("FileMonitor: Skipping FSEvents setup for item \(item.id) - empty paths array", logLevel: .debug)
                 continue
@@ -207,7 +224,6 @@ class FileMonitor {
             
             for path in item.paths {
                 let expandedPath = (path as NSString).expandingTildeInPath
-                // Add parent directory to watch list
                 let parentDir = (expandedPath as NSString).deletingLastPathComponent
                 if FileManager.default.fileExists(atPath: parentDir) {
                     pathsToWatch.insert(parentDir)
@@ -222,9 +238,11 @@ class FileMonitor {
             }
         }
         
-        let pathsArray = Array(pathsToWatch)
+        // Canonical before watching and filtering: FSEvents reports /private/tmp for /tmp.
+        let pathsArray = pathsToWatch.map { Self.canonicalPath($0) }
+        watchedRoots = pathsArray
         guard !pathsArray.isEmpty else {
-            writeLog("FileMonitor: No cache paths to monitor", logLevel: .info)
+            writeLog("FileMonitor: No paths to monitor", logLevel: .info)
             return
         }
         
@@ -259,10 +277,7 @@ class FileMonitor {
                 monitor.eventDebouncer.debounce(key: path, delay: 0.1) {
                     monitor.handleOptimizedFSEvent(path: path, flags: flags)
                 }
-                
-                if i % 1000 == 0 {
-                    monitor.eventDebouncer.cleanupDebouncer()
-                }
+                // No debouncer sweep in this loop: it would cancel work just scheduled.
             }
         }
         
@@ -280,10 +295,7 @@ class FileMonitor {
             writeLog("FileMonitor: Failed to create FSEventStream", logLevel: .error)
             return
         }
-        // TODO: remove following comments once behaviour is verified
-        // following generates a warning
-        // 'FSEventStreamScheduleWithRunLoop' was deprecated in macOS 13.0: Use FSEventStreamSetDispatchQueue instead.
-        // FSEventStreamScheduleWithRunLoop(stream, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
+        // FSEventStreamScheduleWithRunLoop is deprecated since macOS 13.
         let queue = DispatchQueue(label: bundleID + ".fsEventStream")
         FSEventStreamSetDispatchQueue(stream, queue)
         FSEventStreamStart(stream)
@@ -292,23 +304,31 @@ class FileMonitor {
     }
     
     private func isMonitoredPath(_ path: String) -> Bool {
-        for cachePath in cachePaths {
-            let expandedPath = (cachePath as NSString).expandingTildeInPath
-            if path.hasPrefix(expandedPath) {
-                return true
-            }
+        let resolved = Self.canonicalPath(path)
+        for root in watchedRoots where resolved.hasPrefix(root) {
+            return true
         }
-        
+
+        // For a caller that set cachePaths without going through setupFSEvents.
+        for cachePath in cachePaths where resolved.hasPrefix(Self.canonicalPath(cachePath)) {
+            return true
+        }
+
         return false
     }
     
+    /// Queue for `processEvent` and delegate callbacks. Main in the app, since downstream code
+    /// touches UI state; tests may substitute their own queue.
+    var callbackQueue: DispatchQueue = .main
+
     private func handleOptimizedFSEvent(path: String, flags: FSEventStreamEventFlags) {
-        DispatchQueue.main.async { [weak self] in
+        callbackQueue.async { [weak self] in
             self?.processEvent(path: path, flags: flags)
         }
     }
     
     private func processEvent(path: String, flags: FSEventStreamEventFlags) {
+        guard live else { return }
         let isCreated = flags & FSEventStreamEventFlags(kFSEventStreamEventFlagItemCreated) != 0
         let isRemoved = flags & FSEventStreamEventFlags(kFSEventStreamEventFlagItemRemoved) != 0
         let isModified = flags & FSEventStreamEventFlags(kFSEventStreamEventFlagItemModified) != 0
@@ -326,67 +346,63 @@ class FileMonitor {
             writeLog("FileMonitor: MODIFY event for '\(filename)' at \(path)", logLevel: .debug)
         } else if isRenamed {
             writeLog("FileMonitor: RENAME event for '\(filename)' at \(path)", logLevel: .info)
+            // An installer's atomic move arrives as a rename; the disk says whether it came or went.
+            if FileManager.default.fileExists(atPath: path) {
+                handleFileCreated(at: path)
+            } else {
+                handleFileRemoved(at: path)
+            }
         }
     }
     
+    // Status checks are debounced onto `callbackQueue`, where the monitor's sets and delegate live.
     private func handleFileCreated(at path: String) {
-        // Invalidate cache for this path
         for cachePath in cachePaths where path.hasPrefix(cachePath) {
             fileSystemCache.invalidateCache(for: cachePath)
         }
 
-        // Check if this is an app installation
         if let itemId = findItemIdForPath(path) {
-            eventDebouncer.debounce(key: "install-\(itemId)", delay: 0.5) { [weak self] in
-                guard let self = self else { return }
-                self.performStatusCheck()
+            eventDebouncer.debounce(key: "install-\(itemId)", delay: 0.5, on: callbackQueue) { [weak self] in
+                self?.performStatusCheck()
             }
         } else if isCacheFile(path) {
-            // Cache file created - might be a download
             delegate?.fileMonitor(self, didDetectCacheChange: path)
-            eventDebouncer.debounce(key: "cache-change", delay: 0.5) { [weak self] in
-                guard let self = self else { return }
-                self.performStatusCheck()
+            eventDebouncer.debounce(key: "cache-change", delay: 0.5, on: callbackQueue) { [weak self] in
+                self?.performStatusCheck()
             }
         }
     }
 
     private func handleFileRemoved(at path: String) {
-        // Invalidate cache for this path
         for cachePath in cachePaths where path.hasPrefix(cachePath) {
             fileSystemCache.invalidateCache(for: cachePath)
         }
 
-        // Check if this is an app removal
         if let itemId = findItemIdForPath(path) {
-            eventDebouncer.debounce(key: "remove-\(itemId)", delay: 0.5) { [weak self] in
-                guard let self = self else { return }
-                self.performStatusCheck()
+            eventDebouncer.debounce(key: "remove-\(itemId)", delay: 0.5, on: callbackQueue) { [weak self] in
+                self?.performStatusCheck()
             }
         } else if isCacheFile(path) {
             delegate?.fileMonitor(self, didDetectCacheChange: path)
-            eventDebouncer.debounce(key: "cache-change", delay: 0.5) { [weak self] in
-                guard let self = self else { return }
-                self.performStatusCheck()
+            eventDebouncer.debounce(key: "cache-change", delay: 0.5, on: callbackQueue) { [weak self] in
+                self?.performStatusCheck()
             }
         }
     }
     
+    /// Exact path, then a child of a monitored path, then filename matching.
     private func findItemIdForPath(_ path: String) -> String? {
-        // Direct match
+        let path = Self.canonicalPath(path)
         if let itemId = pathToItemMap[path] {
             return itemId
         }
 
-        // Check if path is a child of a monitored path
         for (monitoredPath, itemId) in pathToItemMap where path.hasPrefix(monitoredPath) {
             return itemId
         }
 
-        // Check by filename matching
         let filename = (path as NSString).lastPathComponent
         for item in monitoredItems {
-            // Skip items with empty paths - they should be managed by presets
             guard !item.paths.isEmpty else {
                 continue
             }
@@ -407,164 +423,89 @@ class FileMonitor {
     }
 
     private func isDownloadFile(_ filename: String) -> Bool {
-        let lowercased = filename.lowercased()
-        return cacheExtensions.contains { lowercased.hasSuffix($0) } ||
-               lowercased.contains("installer") ||
-               lowercased.contains("setup") ||
-               lowercased.contains(".partial") ||
-               lowercased.contains(".tmp")
+        FilenameMatching.isDownloadFile(filename, cacheExtensions: cacheExtensions)
     }
 
     private func fileMatchesItem(_ filename: String, item: InspectConfig.ItemConfig) -> Bool {
         return smartFilenameMatch(itemId: item.id, displayName: item.displayName, filename: filename)
     }
 
-    /// Smart filename matching algorithm
     private func smartFilenameMatch(itemId: String, displayName: String, filename: String) -> Bool {
-        let cleanFilename = filename.lowercased()
-        let cleanItemId = itemId.lowercased()
-        let cleanDisplayName = displayName.lowercased().replacingOccurrences(of: " ", with: "")
-        let cleanDisplayNameNoUnderscore = cleanDisplayName.replacingOccurrences(of: "_", with: "")
-
-        // Strategy 1: Direct substring match
-        if cleanFilename.contains(cleanItemId) ||
-           cleanFilename.contains(cleanDisplayName) ||
-           cleanFilename.contains(cleanDisplayNameNoUnderscore) {
-            return true
-        }
-
-        // Strategy 2: Component matching
-        let itemComponents = cleanItemId.components(separatedBy: CharacterSet(charactersIn: "_- "))
-            .filter { !$0.isEmpty && $0.count > 2 }
-        let displayComponents = cleanDisplayName.components(separatedBy: CharacterSet(charactersIn: "_- "))
-            .filter { !$0.isEmpty && $0.count > 2 }
-
-        let allItemComponentsMatch = !itemComponents.isEmpty && itemComponents.allSatisfy { cleanFilename.contains($0) }
-        let allDisplayComponentsMatch = !displayComponents.isEmpty && displayComponents.allSatisfy { cleanFilename.contains($0) }
-
-        if allItemComponentsMatch || allDisplayComponentsMatch {
-            return true
-        }
-
-        // Strategy 3: Condensed matching
-        let condensedItemId = cleanItemId.replacingOccurrences(of: "_", with: "")
-        let condensedDisplayName = cleanDisplayName.replacingOccurrences(of: "_", with: "")
-
-        return cleanFilename.contains(condensedItemId) || cleanFilename.contains(condensedDisplayName)
+        FilenameMatching.matches(itemId: itemId, displayName: displayName, filename: filename,
+                                 brandFuzzy: false, log: nil)
     }
 
-    // MARK: - Plist Monitoring
-
-    /// Add a plist file to FSEvents monitoring with callback
-    /// - Parameters:
-    ///   - path: Plist file path (should be expanded)
-    ///   - key: Plist key to monitor
-    ///   - callback: Called when file changes (receives new value as String)
-    func addPlistMonitor(path: String, key: String, callback: @escaping (String) -> Void) {
-        let expandedPath = (path as NSString).expandingTildeInPath
-
-        // Store callback
-        plistCallbacks[expandedPath] = callback
-
-        // Note: FSEvents monitors parent directories, so we don't need to restart the stream
-        // The existing setupFSEvents() will catch changes to any files in monitored directories
-
-        writeLog("FileMonitor: Added plist monitor for \(expandedPath) key=\(key)", logLevel: .info)
-    }
-
-    /// Remove plist monitor for a path
-    /// - Parameter path: Plist file path
-    func removePlistMonitor(path: String) {
-        let expandedPath = (path as NSString).expandingTildeInPath
-        plistCallbacks.removeValue(forKey: expandedPath)
-        writeLog("FileMonitor: Removed plist monitor for \(expandedPath)", logLevel: .debug)
-    }
-
-    /// Handle plist file change event
-    /// - Parameter path: Path to changed plist file
-    private func handlePlistChange(path: String) {
-        guard let callback = plistCallbacks[path] else { return }
-
-        // Read new value - this is a simplified version, real implementation would need to know the key
-        // For now, just trigger the callback with a placeholder
-        // The actual plist reading happens in the callback via Validation.shared
-        callback("changed")
-
-        writeLog("FileMonitor: Plist changed, triggered callback for \(path)", logLevel: .info)
-    }
 }
 
 // MARK: - File System Cache
 
-/// High-performance file system cache to avoid repeated directory scans
-private class InspectFileCache {
-    private var cache: [String: [String]] = [:]
-    private let queue = DispatchQueue(label: "fs.cache", attributes: .concurrent)
+/// Directory listing cache behind one `Mutex`. The disk read does not hold the lock; two
+/// threads that miss on the same directory both read and both write the same value.
+private final class InspectFileCache: Sendable {
+    private let cache = Mutex<[String: [String]]>([:])
 
     func cacheDirectoryContents(_ path: String) -> [String] {
         let expandedPath = (path as NSString).expandingTildeInPath
+        if let cached = cache.withLock({ $0[expandedPath] }) { return cached }
 
-        return queue.sync {
-            // Return cached contents if available
-            if let cached = cache[expandedPath] {
-                return cached
-            }
-
-            // Otherwise, read from disk
-            do {
-                let contents = try FileManager.default.contentsOfDirectory(atPath: expandedPath)
-                // Update cache
-                queue.async(flags: .barrier) {
-                    self.cache[expandedPath] = contents
-                }
-                return contents
-            } catch {
-                writeLog("InspectFileCache: Failed to read directory \(expandedPath): \(error)", logLevel: .debug)
-                return []
-            }
+        do {
+            let contents = try FileManager.default.contentsOfDirectory(atPath: expandedPath)
+            cache.withLock { $0[expandedPath] = contents }
+            return contents
+        } catch {
+            writeLog("InspectFileCache: Failed to read directory \(expandedPath): \(error)", logLevel: .debug)
+            return []
         }
     }
 
     func invalidateCache(for path: String) {
         let expandedPath = (path as NSString).expandingTildeInPath
-        queue.async(flags: .barrier) {
-            self.cache.removeValue(forKey: expandedPath)
-        }
+        cache.withLock { _ = $0.removeValue(forKey: expandedPath) }
     }
 
     func clearCache() {
-        queue.async(flags: .barrier) {
-            self.cache.removeAll()
-        }
+        cache.withLock { $0.removeAll() }
     }
 }
 
 // MARK: - Event Debouncer
 
-/// This should debounce potential rapid FSEvents to prevent excessive UI updates
-private class EventDebouncer {
-    private var pendingEvents: [String: DispatchWorkItem] = [:]
+/// Coalesces rapid FSEvents per key. Thread-safe: `debounce` is called from several queues.
+final class EventDebouncer {
+    /// Guarded by `lock`; touched from the FSEvents queue, `callbackQueue` and the caller's thread.
+    private var pendingEvents: [String: (id: UUID, item: DispatchWorkItem)] = [:]
+    private let lock = NSLock()
     private let queue = DispatchQueue(label: "fs.events.debouncer", qos: .userInitiated)
-    
-    func debounce(key: String, delay: TimeInterval, action: @escaping () -> Void) {
 
-        pendingEvents[key]?.cancel()
-        
+    /// Entries not yet run or cancelled; at most one per key.
+    var pendingCount: Int { lock.withLock { pendingEvents.count } }
+
+    /// Runs `action` on `target` (default: the debouncer's own queue) after `delay`, replacing
+    /// any pending action for the same key.
+    func debounce(key: String, delay: TimeInterval, on target: DispatchQueue? = nil,
+                  action: @escaping () -> Void) {
+        let id = UUID()
         let workItem = DispatchWorkItem { [weak self] in
             action()
-            DispatchQueue.main.async {
-                self?.pendingEvents.removeValue(forKey: key)
+            // Remove only this item's entry; a newer event on the key may have replaced it.
+            guard let self else { return }
+            self.lock.withLock {
+                if self.pendingEvents[key]?.id == id { self.pendingEvents.removeValue(forKey: key) }
             }
         }
-        
-        pendingEvents[key] = workItem
-        queue.asyncAfter(deadline: .now() + delay, execute: workItem)
-    }
-    
-    func cleanupDebouncer() {
-        for workItem in pendingEvents.values {
-            workItem.cancel()
+
+        lock.withLock {
+            pendingEvents[key]?.item.cancel()
+            pendingEvents[key] = (id, workItem)
         }
-        pendingEvents.removeAll()
+
+        (target ?? queue).asyncAfter(deadline: .now() + delay, execute: workItem)
+    }
+
+    func cleanupDebouncer() {
+        lock.withLock {
+            pendingEvents.values.forEach { $0.item.cancel() }
+            pendingEvents.removeAll()
+        }
     }
 }

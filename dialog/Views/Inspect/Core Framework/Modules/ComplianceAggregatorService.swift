@@ -2,14 +2,8 @@
 //  ComplianceAggregatorService.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 23/01/2026
-//
-//  Observable service for loading and aggregating compliance plist data.
-//  Wraps PlistAggregator static methods with reactive state and refresh capabilities.
-//
-//  Usage:
-//    @StateObject private var complianceService = ComplianceAggregatorService()
-//    complianceService.startMonitoring(sources: config.plistSources, refreshInterval: 5.0)
+//  Observable wrapper around `PlistAggregator`: loads compliance plists, publishes the
+//  aggregated results and re-reads them on a poll. Used by the compliance presets' views.
 //
 
 import SwiftUI
@@ -17,8 +11,10 @@ import Combine
 
 // MARK: - Compliance Aggregator Service
 
-/// Observable service for compliance plist aggregation with automatic refresh
-class ComplianceAggregatorService: ObservableObject {
+/// Main-actor compliance aggregation with automatic refresh. Only a source's `rescanCommand`
+/// runs off the main actor, on a detached task that returns nothing.
+@MainActor
+final class ComplianceAggregatorService: ObservableObject {
 
     // MARK: - Published State
 
@@ -48,39 +44,36 @@ class ComplianceAggregatorService: ObservableObject {
 
     // MARK: - Display Labels
 
-    /// User-facing label for a passing check. Takes the first configured source's
-    /// `healthyLabel` if set, otherwise "Healthy". Views (bento, findings-list, summary)
-    /// read this instead of hardcoding the string.
+    /// User-facing label for a passing check: the first source's `healthyLabel`, else "Healthy".
     var healthyLabel: String {
         sources.first?.healthyLabel ?? "Healthy"
     }
 
-    /// User-facing label for a failing check. Takes the first configured source's
-    /// `attentionLabel` if set, otherwise "Needs Attention".
+    /// User-facing label for a failing check: the first source's `attentionLabel`, else "Needs Attention".
     var attentionLabel: String {
         sources.first?.attentionLabel ?? "Needs Attention"
+    }
+
+    /// The configured baseline's name for the detail sheet's subject line; nil when no source is configured.
+    var sourceDisplayName: String? {
+        sources.first?.displayName
     }
 
     // MARK: - Private State
 
     private var sources: [InspectConfig.PlistSourceConfig] = []
-    private var refreshTimer: Timer?
+    private var refreshPoll: Poll?
     private var refreshInterval: Double = 5.0
 
     // MARK: - Initialization
 
     init() {}
 
-    deinit {
-        stopMonitoring()
-    }
+    // No deinit: the poll's task holds this service weakly and ends once the service is released.
 
     // MARK: - Public Interface
 
-    /// Start monitoring plist sources with automatic refresh
-    /// - Parameters:
-    ///   - sources: Array of plist source configurations
-    ///   - refreshInterval: Refresh interval in seconds (default: 5.0, min: 1.0)
+    /// Loads the sources now and re-reads them every `refreshInterval` seconds (minimum 1.0).
     func startMonitoring(sources: [InspectConfig.PlistSourceConfig]?, refreshInterval: Double = 5.0) {
         stopMonitoring()
 
@@ -94,28 +87,70 @@ class ComplianceAggregatorService: ObservableObject {
 
         writeLog("ComplianceAggregatorService: Starting monitoring of \(sources.count) sources, refresh: \(self.refreshInterval)s", logLevel: .info)
 
-        // Initial load
         loadAllSources()
 
-        // Start refresh timer
-        refreshTimer = Timer.scheduledTimer(withTimeInterval: self.refreshInterval, repeats: true) { [weak self] _ in
+        let poll = Poll(every: self.refreshInterval)
+        poll.start { [weak self] in
             self?.loadAllSources()
         }
+        refreshPoll = poll
     }
 
-    /// Stop monitoring and clear state
+    /// Stop the refresh poll. Loaded results stay published.
     func stopMonitoring() {
-        refreshTimer?.invalidate()
-        refreshTimer = nil
+        refreshPoll?.cancel()
+        refreshPoll = nil
         writeLog("ComplianceAggregatorService: Stopped monitoring", logLevel: .debug)
     }
 
-    /// Force immediate refresh
+    /// Re-reads the sources now.
     func refresh() {
         loadAllSources()
     }
 
-    /// Get category by name
+    // MARK: - Re-running the checks
+
+    /// Whether any source declares a `rescanCommand`; views label the button "Re-run checks" only then.
+    var canRescan: Bool {
+        sources.contains { !($0.rescanCommand ?? "").isEmpty }
+    }
+
+    /// Re-runs the checks, then reloads the results. Always writes `rescan:requested` to the
+    /// interaction log so an attached orchestrator can run the scan; runs each `rescanCommand` if set.
+    func rescan() {
+        appendToInteractionLog("rescan:requested")
+
+        let commands = sources.compactMap { $0.rescanCommand }.filter { !$0.isEmpty }
+        guard !commands.isEmpty else {
+            refresh()
+            return
+        }
+
+        isLoading = true
+        Task { [weak self] in
+            // `waitUntilExit` blocks, so the commands run detached; the reload happens back on the main actor.
+            await Task.detached(priority: .userInitiated) {
+                for command in commands {
+                    let task = Process()
+                    task.executableURL = URL(fileURLWithPath: "/bin/sh")
+                    task.arguments = ["-c", command]
+                    do {
+                        try task.run()
+                        task.waitUntilExit()
+                        writeLog("ComplianceAggregatorService: rescan exited \(task.terminationStatus)",
+                                 logLevel: task.terminationStatus == 0 ? .info : .error)
+                    } catch {
+                        writeLog("ComplianceAggregatorService: rescan failed to launch — \(error.localizedDescription)",
+                                 logLevel: .error)
+                    }
+                }
+            }.value
+            self?.isLoading = false
+            self?.refresh()
+        }
+    }
+
+    /// The category with this name, if loaded.
     func category(named name: String) -> PlistAggregator.ComplianceCategory? {
         let result = categories.first { $0.name == name }
         if result == nil && !categories.isEmpty {
@@ -124,7 +159,7 @@ class ComplianceAggregatorService: ObservableObject {
         return result
     }
 
-    /// Get check details for a category (formatted string for compliance cards)
+    /// Formatted check list for a category's compliance card.
     func checkDetails(for categoryName: String, maxItems: Int = 15, sortFailedFirst: Bool = true) -> String {
         guard let category = category(named: categoryName) else { return "" }
         return PlistAggregator.generateCheckDetails(
@@ -161,11 +196,9 @@ class ComplianceAggregatorService: ObservableObject {
             return
         }
 
-        // Update state
         allItems = loadedItems
         categories = PlistAggregator.categorizeItems(loadedItems)
 
-        // Calculate totals
         totalPassed = loadedItems.filter { $0.finding }.count
         totalChecks = loadedItems.count
         overallScore = totalChecks > 0 ? Double(totalPassed) / Double(totalChecks) : 0.0
@@ -173,7 +206,6 @@ class ComplianceAggregatorService: ObservableObject {
         lastRefresh = Date()
         isLoading = false
 
-        // Log results at INFO level for visibility
         writeLog("ComplianceAggregatorService: Loaded \(totalChecks) items, \(totalPassed) passed (\(Int(overallScore * 100))%)", logLevel: .info)
         writeLog("ComplianceAggregatorService: Created \(categories.count) categories: \(categories.map { $0.name }.joined(separator: ", "))", logLevel: .info)
     }
@@ -183,7 +215,7 @@ class ComplianceAggregatorService: ObservableObject {
 
 extension ComplianceAggregatorService {
 
-    /// Formatted overall score as percentage string
+    /// Overall score as a percentage string.
     var scorePercentage: String {
         "\(Int(overallScore * 100))%"
     }
@@ -198,7 +230,7 @@ extension ComplianceAggregatorService {
         totalChecks > 0 && totalPassed == totalChecks
     }
 
-    /// Critical failures (items marked as critical that are failing)
+    /// Failing items marked critical.
     var criticalFailures: [PlistAggregator.ComplianceItem] {
         allItems.filter { $0.isCritical && !$0.finding }
     }

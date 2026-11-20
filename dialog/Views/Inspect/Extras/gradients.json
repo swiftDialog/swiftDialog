@@ -1,0 +1,187 @@
+{
+  "version": 1,
+  "gradients": [
+    {
+      "id": "g01",
+      "kind": "linear",
+      "angle": 146,
+      "colors": [
+        "#D71818",
+        "#060C56"
+      ],
+      "darkColors": [
+        "#8C1010",
+        "#040838"
+      ]
+    },
+    {
+      "id": "g02",
+      "kind": "conic",
+      "angle": 45,
+      "colors": [
+        "#DC540C",
+        "#AC3D00"
+      ],
+      "darkColors": [
+        "#FED4BE",
+        "#FFEDE5"
+      ]
+    },
+    {
+      "id": "g03",
+      "kind": "conic",
+      "angle": 45,
+      "colors": [
+        "#663F18",
+        "#0C5340"
+      ],
+      "darkColors": [
+        "#E3CEB5",
+        "#E3FFF3"
+      ]
+    },
+    {
+      "id": "g04",
+      "kind": "conic",
+      "angle": 45,
+      "colors": [
+        "#784C1F",
+        "#8B6800"
+      ],
+      "darkColors": [
+        "#E3CEB5",
+        "#FFFAE0"
+      ]
+    },
+    {
+      "id": "g05",
+      "kind": "conic",
+      "angle": 45,
+      "colors": [
+        "#608813",
+        "#663F18"
+      ],
+      "darkColors": [
+        "#D2EB8C",
+        "#F4EDE4"
+      ]
+    },
+    {
+      "id": "g06",
+      "kind": "conic",
+      "angle": 45,
+      "colors": [
+        "#178F65",
+        "#0E674D"
+      ],
+      "darkColors": [
+        "#A5EDCE",
+        "#E3FFF3"
+      ]
+    },
+    {
+      "id": "g07",
+      "kind": "conic",
+      "angle": 45,
+      "colors": [
+        "#007A5A",
+        "#085867"
+      ],
+      "darkColors": [
+        "#A5EDCE",
+        "#E3FFFF"
+      ]
+    },
+    {
+      "id": "g08",
+      "kind": "conic",
+      "angle": 45,
+      "colors": [
+        "#0B527B",
+        "#1C405F"
+      ],
+      "darkColors": [
+        "#9FE8FD",
+        "#E3F8FF"
+      ]
+    },
+    {
+      "id": "g09",
+      "kind": "conic",
+      "angle": 45,
+      "colors": [
+        "#1264A3",
+        "#093A73"
+      ],
+      "darkColors": [
+        "#9ED6FA",
+        "#E6F5FE"
+      ]
+    },
+    {
+      "id": "g10",
+      "kind": "conic",
+      "angle": 45,
+      "colors": [
+        "#1C405F",
+        "#4D3900"
+      ],
+      "darkColors": [
+        "#9FE8FD",
+        "#FFFAE0"
+      ]
+    },
+    {
+      "id": "g11",
+      "kind": "conic",
+      "angle": 45,
+      "colors": [
+        "#112377",
+        "#091861"
+      ],
+      "darkColors": [
+        "#C8D4F8",
+        "#F0F3FC"
+      ]
+    },
+    {
+      "id": "g12",
+      "kind": "conic",
+      "angle": 45,
+      "colors": [
+        "#454447",
+        "#1E328F"
+      ],
+      "darkColors": [
+        "#D7D7DA",
+        "#F0F3FC"
+      ]
+    },
+    {
+      "id": "g13",
+      "kind": "linear",
+      "angle": 146,
+      "colors": [
+        "#4F1655",
+        "#1E011F"
+      ],
+      "darkColors": [
+        "#330E37",
+        "#140114"
+      ]
+    },
+    {
+      "id": "g14",
+      "kind": "conic",
+      "angle": 45,
+      "colors": [
+        "#4A154B",
+        "#39063A"
+      ],
+      "darkColors": [
+        "#F4DAFF",
+        "#F9EDFF"
+      ]
+    }
+  ]
+}

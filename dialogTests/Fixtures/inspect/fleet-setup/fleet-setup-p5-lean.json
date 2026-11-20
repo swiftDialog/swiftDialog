@@ -1,0 +1,29 @@
+{
+  "_comment": "The lean Setup Experience look for a profile: the brand, Preset 5 and one installation step with no rows, which orbit's snapshot fills with Fleet's titles, order and icons.",
+  "preset": "5",
+  "appearance": "dark",
+  "width": 820,
+  "height": 600,
+  "title": "Setting up your Mac",
+  "highlightColor": "#6A67FE",
+  "phaseBackground": "splash",
+  "logoConfig": {
+    "imagePath": "__REPO__/examples/inspect/assets/brand/fleet-logo-dark-rgb.png",
+    "imagePathDark": "__REPO__/examples/inspect/assets/brand/fleet-logo-white-rgb.png",
+    "maxHeight": 20,
+    "position": "footer"
+  },
+  "introSteps": [
+    {
+      "id": "install",
+      "stepType": "installation",
+      "installationMode": "progress",
+      "installationLayout": "list",
+      "title": "Setting up your Mac",
+      "subtitle": "Your IT team is installing your apps and settings. This takes a few minutes.",
+      "progressFormat": "{completed} of {total} done",
+      "heroImage": "SF=arrow.down.app",
+      "items": []
+    }
+  ]
+}

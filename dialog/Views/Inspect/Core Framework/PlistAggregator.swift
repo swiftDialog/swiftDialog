@@ -2,58 +2,65 @@
 //  PlistAggregator.swift
 //  dialog
 //
-//  Created by Henry Stamerjohann, Declarative IT GmbH, 10/11/2025
-//  Shared utility for loading and aggregating plist data into compliance categories
+//  Loads plist sources into compliance items and categories.
 //
 
 import Foundation
 
-/// Shared utility for loading and aggregating plist data
-/// Extracts and generalizes plist processing logic originally in Preset5View
-/// Used by both Preset5 (visual compliance dashboard) and Preset6 (step-by-step inspect mode)
+/// Loads and aggregates plist data; used by the compliance aggregator, compliance sheets, findings
+/// blocks and bento cells.
 class PlistAggregator {
 
     // MARK: - Data Models
 
-    /// User-visible severity for a compliance check.
-    /// Derived from `finding` when no explicit severity is configured:
-    ///   `finding=true`  → `.healthy`
-    ///   `finding=false` → `.failure`
-    /// An explicit `severity: "warning"` in the keyMapping config opts a failing check
-    /// into a softer state used by the detail sheet (FR #667).
+    /// User-visible severity, derived from the evaluated pass/fail (see `evaluateValue`), not the raw
+    /// `finding` literal. `severity: "warning"` in keyMapping softens a failing check in the detail sheet.
     enum CellSeverity: String {
         case healthy
         case warning
         case failure
     }
 
-    /// Represents a single compliance check item from a plist
+    /// One compliance check from a plist.
     struct ComplianceItem {
         let id: String              // Original plist key
         let category: String        // Category (from prefix or explicit mapping)
-        let finding: Bool           // true = passed, false = failed
+        /// The evaluated result: true means the check passed. Source polarity is already applied, so a
+        /// `finding: true` (rule failed) arrives as `false`.
+        let finding: Bool
         let isCritical: Bool       // Whether this is a critical check
         let displayName: String    // Human-readable name for UI display
-        // FR #667: rich remediation content. Plist values override keyMapping defaults.
+        // Remediation fields; plist values override keyMapping defaults.
         let severity: CellSeverity
         let explanation: String?
         let remediation: String?
         let actionButtonText: String?
         let actionURL: String?
+        /// The value the baseline requires, e.g. `expire_after ≥ 90`.
+        let expected: String?
+        /// The value actually found, e.g. `expire_after = 30`.
+        let found: String?
+        /// When this check last passed; nil if it never has, and the UI must not show a placeholder date.
+        let lastPassed: Date?
+        /// Baseline reference, e.g. `CIS 3.4`.
+        let reference: String?
     }
 
-    /// Result of parsing a single plist value. `finding` carries the pass/fail bit
-    /// the existing UI relies on; the optional sibling-key strings are only populated
-    /// when the plist value is a nested dict (e.g. `{ finding: false, explanation: ... }`).
+    /// Result of parsing one plist value: the pass/fail bit, plus sibling-key strings when the value is
+    /// a nested dictionary (e.g. `{ finding: false, explanation: ... }`).
     struct EvaluatedValue {
         let finding: Bool
         let explanation: String?
         let remediation: String?
         let actionButtonText: String?
         let actionURL: String?
+        var expected: String?
+        var found: String?
+        var lastPassed: Date?
+        var reference: String?
     }
 
-    /// Represents an aggregated category with compliance statistics
+    /// A category with compliance statistics.
     struct ComplianceCategory {
         let name: String            // Category display name
         let passed: Int            // Number of passed checks
@@ -65,26 +72,23 @@ class PlistAggregator {
 
     // MARK: - Core Methods
 
-    /// Load and parse a plist source into compliance items
-    /// - Parameter source: Plist source configuration
-    /// - Returns: Tuple of compliance items and last check timestamp (if available)
+    /// Loads a plist source into compliance items and the last check timestamp, if any.
     static func loadPlistSource(source: InspectConfig.PlistSourceConfig) -> (items: [ComplianceItem], lastCheck: String)? {
 
-        // Memory safety: Check file size first to avoid loading huge plists
+        // Check the file size first to avoid loading huge plists.
         guard let fileAttributes = try? FileManager.default.attributesOfItem(atPath: source.path),
               let fileSize = fileAttributes[.size] as? Int64 else {
             writeLog("PlistAggregator: Unable to get file attributes for \(source.path)", logLevel: .error)
             return nil
         }
 
-        // Prevent loading files larger than 10MB
-        let maxFileSize: Int64 = 10 * 1024 * 1024 // 10MB
+        // Skip files over 10 MB.
+        let maxFileSize: Int64 = 10 * 1024 * 1024
         if fileSize > maxFileSize {
             writeLog("PlistAggregator: Plist file too large (\(fileSize) bytes) at \(source.path)", logLevel: .error)
             return nil
         }
 
-        // Use autorelease pool for memory management
         return autoreleasepool { () -> (items: [ComplianceItem], lastCheck: String)? in
             guard let fileData = FileManager.default.contents(atPath: source.path) else {
                 writeLog("PlistAggregator: Unable to read plist at \(source.path)", logLevel: .error)
@@ -92,7 +96,6 @@ class PlistAggregator {
             }
 
             do {
-                // Use PropertyListSerialization with explicit cleanup
                 let plistObject = try PropertyListSerialization.propertyList(from: fileData, format: nil)
 
                 guard let plistContents = plistObject as? [String: Any] else {
@@ -101,13 +104,11 @@ class PlistAggregator {
                 }
 
                 var items: [ComplianceItem] = []
-                // Parse and format last check timestamp using DateDisplayService
-                // Use configured timestampKey, or try common fallback keys
+                // Last check timestamp: the configured timestampKey, else common key names.
                 let lastCheckValue: Any? = {
                     if let configuredKey = source.timestampKey {
                         return plistContents[configuredKey]
                     }
-                    // Fallback: try common timestamp key names
                     let fallbackKeys = ["lastComplianceCheck", "LastUpdateCheck", "lastCheck", "timestamp", "lastModified", "updatedAt"]
                     for key in fallbackKeys {
                         if let value = plistContents[key] {
@@ -118,7 +119,6 @@ class PlistAggregator {
                 }()
                 let lastCheck = DateDisplayService.shared.parseAndFormat(lastCheckValue, fallback: getCurrentTimestamp())
 
-                // Process items with memory-conscious approach
                 let maxItems = 1000 // Prevent processing too many items
                 var processedCount = 0
 
@@ -130,7 +130,7 @@ class PlistAggregator {
 
                     if shouldProcessKey(key, source: source) {
                         if let evaluated = evaluateValue(value, source: source) {
-                            // Plist sibling values override keyMapping config defaults (FR #667).
+                            // Plist sibling values override keyMapping defaults.
                             let mapping = source.keyMappings?.first(where: { $0.key == key })
                             let severity: CellSeverity = {
                                 if let raw = mapping?.severity, let parsed = CellSeverity(rawValue: raw) {
@@ -139,7 +139,7 @@ class PlistAggregator {
                                 return evaluated.finding ? .healthy : .failure
                             }()
                             let item = ComplianceItem(
-                                id: String(key), // Ensure string copy, not reference
+                                id: String(key),
                                 category: getCategoryForKey(key, source: source),
                                 finding: evaluated.finding,
                                 isCritical: isCriticalKey(key, source: source),
@@ -148,7 +148,11 @@ class PlistAggregator {
                                 explanation: evaluated.explanation ?? mapping?.explanation,
                                 remediation: evaluated.remediation ?? mapping?.remediation,
                                 actionButtonText: evaluated.actionButtonText ?? mapping?.actionButtonText,
-                                actionURL: evaluated.actionURL ?? mapping?.actionURL
+                                actionURL: evaluated.actionURL ?? mapping?.actionURL,
+                                expected: evaluated.expected ?? mapping?.expected,
+                                found: evaluated.found,
+                                lastPassed: evaluated.lastPassed,
+                                reference: evaluated.reference ?? mapping?.reference
                             )
                             items.append(item)
                             processedCount += 1
@@ -166,9 +170,7 @@ class PlistAggregator {
         }
     }
 
-    /// Group compliance items by category with aggregated statistics
-    /// - Parameter items: Array of compliance items to categorize
-    /// - Returns: Array of compliance categories with pass/fail statistics
+    /// Groups items by category with pass/fail statistics.
     static func categorizeItems(_ items: [ComplianceItem]) -> [ComplianceCategory] {
         let grouped = Dictionary(grouping: items) { $0.category }
 
@@ -185,26 +187,19 @@ class PlistAggregator {
                 icon: getIconForCategory(category),
                 items: items
             )
-        }.sorted { $0.name < $1.name } // Sort alphabetically for consistent UI
+        }.sorted { $0.name < $1.name }  // alphabetical for a stable UI
     }
 
-    /// Generate compact checkDetails string for compliance cards
-    /// Formats compliance items as newline-separated bullet list with Unicode symbols
-    /// - Parameters:
-    ///   - items: Compliance items to format
-    ///   - maxItems: Maximum number of items to include (default: 15)
-    ///   - sortFailedFirst: Whether to show failed checks first for visibility (default: true)
-    /// - Returns: Formatted checkDetails string with ✓/✗ symbols
+    /// Compact ✓/✗ bullet list for compliance cards, at most `maxItems` lines, failed first by default.
     static func generateCheckDetails(
         items: [ComplianceItem],
         maxItems: Int = 15,
         sortFailedFirst: Bool = true
     ) -> String {
 
-        // Sort: failed first (for visibility), then by display name
+        // Failed first, then by display name.
         let sorted = sortFailedFirst
             ? items.sorted { lhs, rhs in
-                // Failed items (finding=false) come first
                 if lhs.finding != rhs.finding {
                     return !lhs.finding // false < true (failed before passed)
                 }
@@ -218,7 +213,7 @@ class PlistAggregator {
             lines.append("\(symbol) \(item.displayName)")
         }
 
-        // Add ellipsis if truncated
+        // Ellipsis when truncated.
         if items.count > maxItems {
             let remaining = items.count - maxItems
             lines.append("... and \(remaining) more")
@@ -227,59 +222,71 @@ class PlistAggregator {
         return lines.joined(separator: "\n")
     }
 
-    // MARK: - Helper Methods (Ported from Preset5)
+    // MARK: - Helper Methods
 
-    /// Determine if a plist key should be processed based on source configuration
+    /// Whether a plist key should be processed for this source.
     private static func shouldProcessKey(_ key: String, source: InspectConfig.PlistSourceConfig) -> Bool {
-        // Skip timestamp and metadata keys
-        let skipKeys = ["lastComplianceCheck", "LastUpdateCheck", "CFBundleVersion", "_"]
+        // Skip conventional timestamp and metadata keys; configured keys are checked below.
+        let skipKeys = ["lastComplianceCheck", "LastUpdateCheck", "lastCheck", "timestamp",
+                        "CFBundleVersion", "_"]
         if skipKeys.contains(key) || key.hasPrefix("_") { return false }
 
-        // If key mappings exist, only process mapped keys
+        // The configured timestamp key is never read as a check.
+        if let timestampKey = source.timestampKey, key == timestampKey { return false }
+
+        // Honour `excludeKeys` and `includePattern`, as the auto-discovery path in `Config+Helpers.swift` does.
+        if let excluded = source.excludeKeys, excluded.contains(key) { return false }
+
+        if let pattern = source.includePattern, !pattern.isEmpty,
+           key.range(of: pattern, options: .regularExpression) == nil {
+            return false
+        }
+
+        // With key mappings, only mapped keys are processed.
         if let keyMappings = source.keyMappings {
             return keyMappings.contains { $0.key == key }
         }
 
-        // For compliance type, process all non-metadata keys
+        // Compliance sources process all non-metadata keys.
         if source.type == "compliance" {
             return true
         }
 
-        // For other types, process all keys
         return true
     }
 
-    /// Evaluate a plist value to determine pass/fail status, plus any sibling-key
-    /// remediation strings if the value is a nested dict (FR #667).
+    /// Evaluates a plist value to pass/fail, plus remediation strings for a nested dictionary.
     private static func evaluateValue(_ value: Any, source: InspectConfig.PlistSourceConfig) -> EvaluatedValue? {
         let successValues = source.successValues ?? ["true", "1", "YES"]
 
-        // Handle boolean values
         if let boolValue = value as? Bool {
             return EvaluatedValue(finding: successValues.contains(String(boolValue)),
                                   explanation: nil, remediation: nil,
                                   actionButtonText: nil, actionURL: nil)
         }
 
-        // Handle string values
         if let stringValue = value as? String {
             return EvaluatedValue(finding: successValues.contains(stringValue),
                                   explanation: nil, remediation: nil,
                                   actionButtonText: nil, actionURL: nil)
         }
 
-        // Handle number values
         if let numberValue = value as? NSNumber {
             return EvaluatedValue(finding: successValues.contains(numberValue.stringValue),
                                   explanation: nil, remediation: nil,
                                   actionButtonText: nil, actionURL: nil)
         }
 
-        // Handle nested dictionary (e.g., CIS audit format: { "finding": false, "explanation": "...", ... })
+        // Nested dictionary (e.g. `{ "finding": false, "explanation": "..." }`). `finding: true` means the
+        // rule failed, the opposite of a bare scalar, so the default success value is `expectedValue ?? "false"`,
+        // matching `Config+Helpers.swift`. An explicit `successValues` still wins.
         if let dictValue = value as? [String: Any] {
+            let findingKey = source.findingKey ?? "finding"
+            let expectedValue = source.expectedValue ?? "false"
             let finding: Bool? = {
-                if let finding = dictValue["finding"] as? Bool {
-                    return successValues.contains(String(finding))
+                if let finding = dictValue[findingKey] as? Bool {
+                    if let explicit = source.successValues { return explicit.contains(String(finding)) }
+                    return String(finding) == expectedValue
                 }
                 if let status = dictValue["status"] as? String {
                     return successValues.contains(status)
@@ -292,16 +299,23 @@ class PlistAggregator {
                 explanation: dictValue["explanation"] as? String,
                 remediation: dictValue["remediation"] as? String,
                 actionButtonText: dictValue["actionButtonText"] as? String,
-                actionURL: dictValue["actionURL"] as? String
+                actionURL: dictValue["actionURL"] as? String,
+                expected: dictValue["expected"] as? String,
+                found: dictValue["found"] as? String,
+                // Accept a plist <date> or an ISO-8601 string; anything else stays nil rather than guessed.
+                lastPassed: (dictValue["lastPassed"] as? Date)
+                    ?? (dictValue["lastPassed"] as? String).flatMap {
+                        ISO8601DateFormatter().date(from: $0)
+                    },
+                reference: dictValue["reference"] as? String
             )
         }
 
         return nil
     }
 
-    /// Get category name for a plist key based on source configuration
+    /// Category for a key: explicit key mapping, then category prefix, then the source display name.
     private static func getCategoryForKey(_ key: String, source: InspectConfig.PlistSourceConfig) -> String {
-        // Priority 1: Check explicit key mappings
         if let keyMappings = source.keyMappings {
             if let mapping = keyMappings.first(where: { $0.key == key }),
                let category = mapping.category {
@@ -309,20 +323,18 @@ class PlistAggregator {
             }
         }
 
-        // Priority 2: Check category prefixes (e.g., "os_*" -> "Operating System")
+        // Category prefixes, e.g. "os_*" → "Operating System".
         if let categoryPrefix = source.categoryPrefix {
             for (prefix, category) in categoryPrefix where key.hasPrefix(prefix) {
                 return category
             }
         }
 
-        // Fallback: Use source display name
         return source.displayName
     }
 
-    /// Determine if a plist key represents a critical check
+    /// Whether a key is critical: the key mapping's isCritical flag, then the criticalKeys list.
     private static func isCriticalKey(_ key: String, source: InspectConfig.PlistSourceConfig) -> Bool {
-        // Priority 1: Check key mappings for explicit isCritical flag
         if let keyMappings = source.keyMappings {
             if let mapping = keyMappings.first(where: { $0.key == key }),
                let isCritical = mapping.isCritical {
@@ -330,7 +342,6 @@ class PlistAggregator {
             }
         }
 
-        // Priority 2: Check critical keys list
         if let criticalKeys = source.criticalKeys {
             return criticalKeys.contains(key)
         }
@@ -338,16 +349,14 @@ class PlistAggregator {
         return false
     }
 
-    /// Generate human-readable display name from plist key
+    /// Display name for a key: the keyMapping displayName, else the key without its prefix, title-cased.
     private static func getDisplayName(_ key: String, source: InspectConfig.PlistSourceConfig) -> String {
-        // Priority 1: Use explicit keyMapping displayName
         if let keyMappings = source.keyMappings,
            let mapping = keyMappings.first(where: { $0.key == key }),
            let displayName = mapping.displayName {
             return displayName
         }
 
-        // Priority 2: Format key by removing category prefix and title-casing
         var cleanedKey = key
         if let categoryPrefix = source.categoryPrefix {
             for (prefix, _) in categoryPrefix where key.hasPrefix(prefix) {
@@ -356,7 +365,6 @@ class PlistAggregator {
             }
         }
 
-        // Convert underscores to spaces and title case
         return cleanedKey
             .replacingOccurrences(of: "_", with: " ")
             .split(separator: " ")
@@ -364,7 +372,7 @@ class PlistAggregator {
             .joined(separator: " ")
     }
 
-    /// Get default SF Symbol icon for category
+    /// Default SF Symbol for a category.
     private static func getIconForCategory(_ category: String) -> String {
         let iconMap: [String: String] = [
             "Audit and Accountability": "doc.text.magnifyingglass",
@@ -381,7 +389,7 @@ class PlistAggregator {
         return iconMap[category] ?? "circle.fill"
     }
 
-    /// Get current timestamp as formatted string
+    /// Current timestamp as a formatted string.
     private static func getCurrentTimestamp() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"

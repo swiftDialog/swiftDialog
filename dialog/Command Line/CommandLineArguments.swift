@@ -174,6 +174,7 @@ struct CommandLineArguments {
     // Inspect Mode Arguments
     var inspectMode               = CommandlineArgument(long: "inspect-mode", isbool: true)
     var inspectConfig             = CommandlineArgument(long: "inspect-config")
+    var inspectLint               = CommandlineArgument(long: "inspect-lint")
 
     // IPC: directory where each running Dialog publishes a <pid>.json
     // session-discovery file. Pass an empty value or "none" to disable.
@@ -271,7 +272,7 @@ extension CommandLineArguments {
         \.jamfHelperMode, \.miniMode, \.eulaMode, \.presentationMode, \.windowButtonsEnabled,
         \.windowResizable, \.showOnAllScreens, \.notificationGoPing, \.loginWindow, \.hideDefaultKeyboardAction,
         \.alwaysReturnUserInput, \.removeNotification, \.showSoundControls, \.hideOtherApps, \.notificationStyle,
-        \.inspectMode, \.inspectConfig, \.publishedSessionsDir,
+        \.inspectMode, \.inspectConfig, \.inspectLint, \.publishedSessionsDir,
     ]
 
     /// Session/meta-level arguments that must persist across a `resetToDefaults`
